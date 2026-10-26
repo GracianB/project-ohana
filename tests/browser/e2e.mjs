@@ -36,8 +36,9 @@ async function auditPage(page, label) {
   assert.equal(heldOpening.cast, 10, label + ': bienvenida no contiene los 10 héroes');
   assert.equal(heldOpening.ready, true, label + ': CTA de entrada no se activa');
   // Real-browser opening audit: silhouettes must use measured art, all ten
-  // must remain on-screen, and compact viewports use two readable rows.
+  // must remain on-screen on the shared foreground promenade.
   const castAudit=await page.evaluate(()=>({
+    width:innerWidth,
     fit:document.querySelector('#ohana-intro')?.dataset.openingFit,
     measured:Number(document.querySelector('#ohana-intro')?.dataset.openingMeasured||0),
     cast:window.__OHANA_WELCOME_CAST_AUDIT||[]
@@ -46,13 +47,13 @@ async function auditPage(page, label) {
   assert.equal(castAudit.cast.length,10,label+': opening cast audit missing heroes');
   assert.equal(new Set(castAudit.cast.map(hero=>hero.id)).size,10);
   assert.ok(castAudit.measured>=8,label+': visual calibration could not inspect most characters');
-  assert.ok(castAudit.cast.every(hero=>hero.x>0&&hero.x<hero.slotWidth*(label==='desktop'?10:5)+2),
+  assert.ok(castAudit.cast.every(hero=>hero.x-hero.paintedWidth/2>=-2&&hero.x+hero.paintedWidth/2<=castAudit.width+2),
     label+': character off the welcome stage');
   assert.ok(castAudit.cast.every(hero=>Number.isFinite(hero.paintedHeight)&&
     hero.paintedHeight>=hero.targetHeight*.33&&hero.paintedHeight<=hero.targetHeight*1.02),
     label+': visual character size remains disproportionate '+JSON.stringify(castAudit.cast));
-  if(label==='desktop')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,3);
-  if(label==='mobile')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,3);
+  assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,label==='mobile'?3:1,'the grounded cast uses compact depth rows on phones');
+  assert.ok(castAudit.cast.every(hero=>hero.foot>0),'every actor has a grounded stage anchor');
   // V344 real browser: the Dragon micro-film must be a deterministic,
   // independently importable performance, not a frozen painted baby sprite.
   const dragonFilm=await page.evaluate(async()=>{
@@ -425,7 +426,7 @@ async function auditPage(page, label) {
   assert.ok(titleLayout.title.left >= -2 && titleLayout.title.right <= titleLayout.viewport.width + 2, label + ': cabecera fuera del viewport');
   assert.ok(titleLayout.title.top < titleLayout.hero.top + titleLayout.hero.height * 0.35, label + ': título cae dentro del carrusel');
   assert.ok(titleLayout.controls.top > titleLayout.title.bottom, label + ': controles invaden la cabecera');
-  if (titleLayout.camp) assert.ok(titleLayout.camp.bottom <= titleLayout.hero.top + 2, label + ': campamento invade la elección directa');
+  if (titleLayout.camp) assert.ok(titleLayout.hero.top >= titleLayout.camp.top && titleLayout.hero.bottom <= titleLayout.camp.bottom+2,label+': casting rails must sit inside the new stage');
   assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, label + ': dossier invade los controles');
   assert.ok(titleLayout.scrollWidth <= titleLayout.viewport.width + 2, label + ': portada desborda horizontalmente');
   // V100 Especial: all ten portraits are visible whether Atrium exists or not.

@@ -1,3 +1,15 @@
+# V602 · ohana-602 · revisión en validación
+
+Portada y selección del Observatorio, nueve paisajes ilustrados, anatomías de
+fauna diferenciadas y diez guardianes evolucionados con recuerdos físicos antes
+de Quimera. Relevo por el héroe propietario, recogida por contacto y persistencia.
+Las nuevas escenas esperan a las cinematográficas de poder existentes.
+1.574 pruebas Node y Release Gate aprobados. Auditoría de navegador, selección
+de cincuenta formas, nueve paisajes y recarga de diez recuerdos aprobadas.
+Campaña Normal limpia completa: diez capítulos, treinta descubrimientos, diez
+guardianes y cuatro fases de Quimera; relato, resultados y vuelta al menú.
+Pendiente verificación de publicación. Evidencia: docs/V602-VALIDATION.json.
+
 # V600.1 · ohana-601 · Quimera publicada
 
 https://gracianb.github.io/project-ohana/?release=601

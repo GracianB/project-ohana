@@ -1,3 +1,4 @@
+import {readKeepsakes,drawKeepsake} from './keepsakes.js';
 import {rememberFamilyVictory} from "./family-memory.js";
 import {drawChispaCeremony} from './chispa-stagecraft.js';
 // PROJECT OHANA V44 · TRUE ENDING
@@ -109,17 +110,17 @@ function showEnding(detail={}){
   layer.dataset.duration=String(Math.round(duration*1000));
   layer.dataset.resultsAt=String(Math.round(duration*1000));
   layer.setAttribute("aria-hidden","false");
-  // V468: el final del Mundo 1 cierra la historia del Eco y abre el Mundo 2.
+  // The family and its rescued belongings close this campaign.
   const w1=Number(detail.world)===1;
   if(w1){const memory=rememberFamilyVictory(detail);dispatchEvent(new CustomEvent("ohana-family-memory",{detail:memory}));}
   layer.querySelector("[data-open-constellation]").hidden=!w1;
   const copy=w1?WORLD1_ENDING:{kicker:"Mundo 2 completado · Isla Hoku",act:"LA FAMILIA VUELVE A CASA",title:"NADIE SE QUEDA ATRÁS",jun:"HOKU VUELVE A RESPIRAR",sub:"La Reina cae. El Nido se abre. La familia regresa junta al Claro."};
   for(const [sel,key] of [[".win-kicker","kicker"],[".win-act","act"],["#win-title","title"],[".win-jun","jun"],[".win-sub","sub"]]){const n=layer.querySelector(sel);if(n)n.textContent=copy[key];}
-  // V470: el Mundo 2 está en construcción — en lugar de viajar, una tarjeta lo anuncia.
+  // Keep the closing reward about what the player actually rescued.
   const cont=layer.querySelector("#win-continue");if(cont){cont.textContent=w1?"Volver al inicio":"Continuar en este mundo";cont.dataset.action=w1?"home":"continue";}
   let soon=layer.querySelector(".win-soon");
   if(w1&&!soon){soon=document.createElement("p");soon.className="win-soon";soon.setAttribute("role","note");layer.querySelector(".win-actions")?.before(soon);}
-  if(soon){soon.textContent="Mundo 2 — en construcción";soon.hidden=!w1;}
+  if(soon){soon.textContent="Diez recuerdos a salvo. Cada uno vuelve con su dueño.";soon.hidden=!w1;}
   const rep=layer.querySelector("#win-repeat");if(rep)rep.textContent=w1?"Repetir la Quimera":"Repetir el nido";
   layer.dataset.world=w1?"1":"2";
   const score=layer.querySelector(".win-score");
@@ -127,12 +128,13 @@ function showEnding(detail={}){
   score.textContent=(detail.rank?"Claro "+detail.rank+" · ":"")+(detail.time?detail.time+" · ":"")+(Number(detail.kills)||0)+" bajas"+(detail.best&&detail.best!==detail.time?" · mejor "+detail.best:"");
   duckMusic(true);try{sfx("victory");}catch(_){}
 
+  const earnedKeepsakes=new Set(readKeepsakes());
   function actor(p,x,footY,h,tf,opts={}){
     p.facing=opts.facing||1;p.grounded=opts.grounded!==false;p.vx=opts.vx||0;p.vy=opts.vy||0;p.melee=opts.melee||0;p._poseOverride=opts.pose||"idle";
     if(p.id==='kilo'&&!reduce)p._kiloPerformance={kind:"dance",time:tf/60};
     ctx.save();if(opts.alpha!==undefined)ctx.globalAlpha*=opts.alpha;
     if(p.id==='chispin')drawChispaCeremony(ctx,x,footY,h,tf/60,reduce,'ending');
-    drawDummy(ctx,p,x,footY,h/baseHeight(p.id,p.evo||0),tf);ctx.restore();
+    drawDummy(ctx,p,x,footY,h/baseHeight(p.id,p.evo||0),tf);if(earnedKeepsakes.has(p.id))drawKeepsake(ctx,p.id,x+h*.45,footY,Math.min(64,h*.45));ctx.restore();
   }
   function revealResults(){
     if(complete)return;complete=true;

@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';import fs from 'node:fs/promises';
 import {chromium} from 'playwright';import {startServer} from './server.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
+import {playGauntlet} from './gauntlet-controls.mjs';
 const server=await startServer(0);let browser;
 try{
  browser=await chromium.launch(process.env.CHROMIUM_BIN?{executablePath:process.env.CHROMIUM_BIN}:{});
@@ -109,6 +110,7 @@ try{
   await fs.writeFile('test-results/v600/campaign-progress.json',JSON.stringify({journal,current:s.roomId},null,2));
  }
  assert.equal(s.roomId,'w1-final');assert.equal(s.hero,'kilo');assert.equal(s.evo,4);
+ const gauntlet=await playGauntlet(page);s=await state();assert.equal(s.gauntlet.found.length,10);journal.push({gauntlet});
  let deaths=0;const phases=new Set(),filmsSeen=new Set(),hudPhases=new Set();
  await fs.mkdir('test-results/v494',{recursive:true});
  for(let i=0;i<11000&&!s.world1Won;i++){

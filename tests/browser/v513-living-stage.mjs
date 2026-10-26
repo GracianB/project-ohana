@@ -19,7 +19,7 @@ try{
   });
   for(const i of [1,2,3,4,5,6,7,8,9,0]){
    const r=nodes[i];assert.ok(r.x>=0&&r.x+r.w<=box.width&&r.y>=0&&r.y+r.h<=box.height);
-   await canvas.click({position:{x:r.x+r.w/2,y:r.y+r.h/2}});
+   await page.mouse.click(box.x+r.x+r.w/2,box.y+r.y+r.h/2);
    assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),r.hero,'pointer chooses actual actor');
   }
   await canvas.focus();await page.keyboard.press('ArrowRight');

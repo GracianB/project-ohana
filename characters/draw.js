@@ -1129,7 +1129,7 @@ const U = 280;
 const matrix=ctx.getTransform?.();
 const demand=matrix?Math.max(Math.hypot(matrix.a,matrix.b),Math.hypot(matrix.c,matrix.d)):1;
 const cinematic=ctx.canvas?.closest?.('#evo-stage')||globalThis.document?.body?.classList.contains('relic-cinema');
-const ps=cinematic&&demand>1.5?3:1.5;
+const ps=cinematic&&demand>1.5?3:pose.theatreHQ&&demand>1.5?2:1.5;
 const W = Math.round(U * ps);
 const faBucket = Math.round((flashA || 0) * 20);
 const key = (charId || art.id || "?") + "#" + (pose.form | 0) + "#" + poseFingerprint(pose) + "#" + (flashCol || "") + "#" + faBucket + "#" + (art.cacheKey?.(pose)||"");
@@ -1253,7 +1253,7 @@ const air = !p.grounded;
 const duetProtected=isDuetProtected(p,t)||(p.id==='chispin'&&Number(p._chispaEvadeUntil)>t);
 // Propagate accessibility preference to the *local* render pose only.
 const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p),
-  reduceMotion: options.reduceMotion===true};
+  reduceMotion: options.reduceMotion===true,theatreHQ:!!p._theatreHQ};
 articulateStride(pose,p.id);
 if(p.id==="yomi")pose.yomiKnowledge=p._yomiKnowledge||0;
 if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;

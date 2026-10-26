@@ -1,7 +1,7 @@
 import {chapterBossMind} from './chapter-boss-v2.js';
 const TAU=Math.PI*2,INK='#192a40';
 const PALETTES={kilo:['#987059','#f0d3a0','#4a7766'],stitcho:['#466d93','#b5ebeb','#977ae3'],chispin:['#8178ac','#fff0a1','#8bc4dc'],cat:['#967db0','#f0d6ec','#b8c5ee'],cuerno:['#668f88','#e4e9bc','#c2ace6'],dragon:['#92545e','#ffd092','#d78363'],dino:['#718971','#ebe0b7','#b7ce97'],frita:['#c19765','#fff0ba','#d28a7c'],pizza:['#bf805e','#f7deb0','#c6534f'],yomi:['#7a9daa','#ecedc9','#9edbd2']};
-function shape(c,col,fn,lw=2.6){c.fillStyle=col;c.strokeStyle=INK;c.lineWidth=lw;c.beginPath();fn();c.closePath();c.fill();c.stroke();}
+function shape(c,col,fn,lw=2.6){if(typeof col==='string'&&/^#[0-9a-f]{6}$/i.test(col)&&col!==INK){const g=c.createLinearGradient(-60,-210,70,5);g.addColorStop(0,'#fff0cc');g.addColorStop(.20,col);g.addColorStop(1,'#26374e');c.fillStyle=g;}else c.fillStyle=col;c.strokeStyle=INK;c.lineWidth=lw;c.beginPath();fn();c.closePath();c.fill();c.stroke();}
 function oval(c,x,y,rx,ry,col,rot=0){const g=c.createLinearGradient(x-rx,y-ry,x+rx,y+ry);g.addColorStop(0,'#fff2d0');g.addColorStop(.22,col);g.addColorStop(1,col===INK?INK:'#384252');shape(c,g,()=>c.ellipse(x,y,rx,ry,rot,0,TAU));}
 function line(c,col,w,fn){c.strokeStyle=col;c.lineWidth=w;c.beginPath();fn();c.stroke();}
 function limb(c,x,y,ex,ey,hx,hy,col,w){line(c,INK,w+5,()=>{c.moveTo(x,y);c.quadraticCurveTo(ex,ey,hx,hy);});line(c,col,w,()=>{c.moveTo(x,y);c.quadraticCurveTo(ex,ey,hx,hy);});oval(c,ex,ey,w*.56,w*.52,col);}
@@ -10,11 +10,12 @@ function face(c,x,y,w,aim,warn){eye(c,x-w*.22,y,Math.max(4,w*.105),aim,warn);eye
 function wing(c,x,y,side,span,lift,col){shape(c,col,()=>{c.moveTo(x,y);c.bezierCurveTo(x+side*span*.3,y-35-lift*30,x+side*span*.9,y-95-lift*35,x+side*span,y-85-lift*20);c.quadraticCurveTo(x+side*span*.86,y-25,x+side*span*.56,y+14);c.quadraticCurveTo(x+side*span*.22,y-15,x,y);});for(let k=1;k<=3;k++)line(c,'#fff2cc',1.5,()=>{c.moveTo(x,y);c.quadraticCurveTo(x+side*span*.4,y-15-k*13,x+side*span*(.45+k*.15),y-15-k*18-lift*20);});}
 export function drawChapterBossV2(c,e,cam,t,reduced=false){
  if(!e.miniBoss||!e.roomId?.startsWith('w1-'))return false;
- const id=e.roomId.slice(3),P=PALETTES[id],b=chapterBossMind(e);if(!P||!b)return false;
+ const id=e.gauntletBoss||e.roomId.slice(3),P=PALETTES[id],b=chapterBossMind(e);if(!P||!b)return false;
  const time=reduced?0:t,warn=b.phase==='warn',attack=['attack','strike'].includes(b.phase),rest=b.phase==='rest',aim=b.aim||1,
   age=b.clock??b.timer??0,lift=warn?Math.min(1,1-age/60):attack?1:0,flap=reduced?0:Math.sin(time*.07),step=reduced?0:Math.sin(time*.15),scale=e.h/180;
  c.save();c.translate(e.x+e.w/2-cam.x,e.y+e.h-cam.y);c.scale(scale,scale);c.lineCap='round';c.lineJoin='round';
- if(e.flash>0)c.globalAlpha=.82;
+ if(e.flash>0){c.globalAlpha=.9;c.translate(5,3);c.rotate(-.045);}
+ if(e.evolved)drawEvolvedRear(c,id,P,time,reduced,warn);
  // Feet, real elbow joints, torso and face share the same state, not a
  // generic screen shake. A threatening silhouette remains readable at rest.
  const feet=id==='frita'?[-56,-28,28,56]:id==='stitcho'?[-65,-35,35,65]:[-32,32];
@@ -161,5 +162,49 @@ export function drawChapterBossV2(c,e,cam,t,reduced=false){
  // Small highlights follow muscles/plates; the rim never hides the eyes.
  line(c,P[1],2,()=>{c.moveTo(-25,-115);c.quadraticCurveTo(-48,-105,-39,-83);});
  if(rest){c.fillStyle='#cbefcf';c.beginPath();c.arc(0,-52,4,0,TAU);c.fill();}
+ if(e.evolved)drawEvolvedFront(c,id,P,time,reduced,warn);
  c.restore();return true;
+}
+
+function drawEvolvedRear(c,id,P,t,reduce,warn){
+ const beat=reduce?0:Math.sin(t*.045);
+ if(id==='kilo'){
+  for(const side of [-1,1]){line(c,INK,16,()=>{c.moveTo(side*41,-88);c.bezierCurveTo(side*110,-122,side*66,-199,side*103,-235);});line(c,P[2],10,()=>{c.moveTo(side*41,-88);c.bezierCurveTo(side*110,-122,side*66,-199,side*103,-235);});for(let k=0;k<5;k++){oval(c,side*(81+k%2*12),-144-k*17,17,6,P[1],side*(.3+k*.16));}}
+ }else if(id==='stitcho'){
+  for(const side of [-1,1])for(let k=0;k<3;k++){const x=side*(72+k*13),y=-35-k*39;limb(c,side*39,-79,x,-108-k*21,x+side*18,y,P[0],8);oval(c,x+side*18,y,13,7,P[1]);}
+  oval(c,0,-140,72,71,P[2]);oval(c,0,-142,58,58,P[0]);for(let k=0;k<10;k++){const a=k*TAU/10;oval(c,Math.cos(a)*65,-142+Math.sin(a)*65,7,7,P[1]);}
+ }else if(id==='chispin'){
+  for(const side of [-1,1])for(let k=0;k<2;k++){wing(c,side*34,-100+k*36,side,128-k*18,beat*.12,P[k?0:2]);for(let j=0;j<4;j++)oval(c,side*(71+j*12),-164+k*48+j*14,5,9,P[1],side*.5);}
+ }else if(id==='cat'){
+  for(let k=0;k<9;k++){const side=k%2?-1:1,x=side*(51+k*4),y=-28-k*7;line(c,INK,12,()=>{c.moveTo(side*22,-40);c.bezierCurveTo(x*1.7,-19,x*1.5,-132-k*6,x+beat*4,-152-k*3);});line(c,P[k%2],7,()=>{c.moveTo(side*22,-40);c.bezierCurveTo(x*1.7,-19,x*1.5,-132-k*6,x+beat*4,-152-k*3);});}
+ }else if(id==='cuerno'){
+  for(const side of [-1,1])for(let k=0;k<3;k++){line(c,INK,9-k,()=>{c.moveTo(18+side*12,-151);c.bezierCurveTo(side*75,-188,side*(64+k*16),-237-k*9,side*(99+k*15),-247-k*9);});line(c,P[1],5-k,()=>{c.moveTo(18+side*12,-151);c.bezierCurveTo(side*75,-188,side*(64+k*16),-237-k*9,side*(99+k*15),-247-k*9);});}
+ }else if(id==='dragon'){
+  for(const side of [-1,1]){wing(c,side*32,-120,side,147,beat*.1,P[0]);for(let k=0;k<4;k++)shape(c,P[1],()=>{const x=side*(72+k*20);c.moveTo(x,-151+k*12);c.lineTo(x+side*12,-174+k*13);c.lineTo(x+side*19,-141+k*12);});}
+ }else if(id==='dino'){
+  for(let k=-3;k<=3;k++)shape(c,P[k%2?1:2],()=>{const x=k*24;c.moveTo(x-19,-103);c.bezierCurveTo(x-26,-166,x-12,-226-Math.abs(k)*4,x,-240+Math.abs(k)*7);c.bezierCurveTo(x+24,-217,x+24,-167,x+16,-104);});
+ }else if(id==='frita'){
+  oval(c,0,-93,95,91,P[0]);for(let k=-3;k<=3;k++){oval(c,k*22,-166+Math.abs(k)*13,19,27,P[1],k*.12);line(c,P[2],2,()=>{c.moveTo(k*22-6,-170+Math.abs(k)*13);c.lineTo(k*22+6,-161+Math.abs(k)*13);});}
+ }else if(id==='pizza'){
+  oval(c,0,-91,81,83,P[0]);for(const side of [-1,1]){line(c,INK,10,()=>{c.moveTo(side*60,-116);c.lineTo(side*91,-155);c.lineTo(side*91,-209);});line(c,P[1],6,()=>{c.moveTo(side*60,-116);c.lineTo(side*91,-155);c.lineTo(side*91,-209);});oval(c,side*91,-210,14,8,P[2]);}
+ }else if(id==='yomi'){
+  for(const side of [-1,1])for(let k=0;k<6;k++){shape(c,k%2?P[1]:P[2],()=>{c.moveTo(side*24,-81);c.lineTo(side*(125-k*7),-211+k*25+beat*3);c.quadraticCurveTo(side*(137-k*7),-154+k*20,side*(59-k*4),-39);});line(c,P[0],1,()=>{c.moveTo(side*28,-83);c.lineTo(side*(114-k*7),-188+k*25);});}
+ }
+}
+function drawEvolvedFront(c,id,P,t,reduce,warn){
+ // Riveted/engraved collar joins the upgraded body to its original anatomy.
+ for(const side of [-1,1])for(let k=0;k<3;k++){
+  const x=side*(30+k*13),y=-105-k*9;
+  shape(c,P[k%2?0:1],()=>{c.moveTo(x-10,y-11);c.quadraticCurveTo(x+17,y-16,x+15,y+7);c.quadraticCurveTo(x-1,y+15,x-10,y+5);});oval(c,x+2,y,2.5,2.5,P[2]);
+ }
+ if(id==='kilo'){for(let k=-3;k<=3;k++){line(c,P[2],3,()=>{c.moveTo(k*14,-126);c.bezierCurveTo(k*17,-103,k*12,-69,k*15,-38);});}oval(c,0,-139,37,10,P[1]);}
+ if(id==='stitcho'){for(const side of [-1,1]){oval(c,side*66,-62,27,29,P[2]);for(let k=0;k<4;k++)line(c,P[1],2,()=>{c.moveTo(side*66-17,-79+k*9);c.lineTo(side*66+17,-79+k*9);});}}
+ if(id==='chispin'){for(const side of [-1,1])for(let k=0;k<4;k++){c.strokeStyle=P[1];c.lineWidth=2;c.beginPath();c.ellipse(side*56,-101-k*8,21,7,-side*.3,0,TAU);c.stroke();}}
+ if(id==='cat'){shape(c,P[1],()=>{c.moveTo(-43,-148);c.quadraticCurveTo(0,-177,43,-148);c.lineTo(37,-133);c.quadraticCurveTo(0,-153,-37,-133);});for(const side of [-1,1])shape(c,P[2],()=>{c.moveTo(side*30,-125);c.lineTo(side*47,-145);c.lineTo(side*50,-101);});}
+ if(id==='cuerno'){for(const side of [-1,1])for(let k=0;k<4;k++){oval(c,side*(44+k*8),-88+k*12,12,21,P[1],side*.6);}}
+ if(id==='dragon'){for(let k=0;k<5;k++)shape(c,P[k%2?1:2],()=>{c.moveTo(-27,-94+k*14);c.quadraticCurveTo(4,-79+k*14,33,-94+k*14);c.lineTo(27,-81+k*14);c.quadraticCurveTo(0,-68+k*14,-26,-81+k*14);});}
+ if(id==='dino'){shape(c,P[1],()=>{c.moveTo(-20,-147);c.quadraticCurveTo(13,-180,52,-151);c.lineTo(57,-132);c.quadraticCurveTo(18,-146,-14,-127);});for(const side of [-1,1]){oval(c,side*69,-58,28,23,P[0]);for(let k=0;k<3;k++)line(c,P[1],3,()=>{c.moveTo(side*69-15+k*14,-70);c.lineTo(side*69-15+k*14,-51);});}}
+ if(id==='frita'){for(const side of [-1,1]){oval(c,side*88,-98,25,34,P[0],side*.5);line(c,P[1],3,()=>{c.moveTo(side*88,-121);c.quadraticCurveTo(side*114,-103,side*94,-77);});}}
+ if(id==='pizza'){shape(c,P[2],()=>{c.moveTo(-28,-101);c.quadraticCurveTo(0,-122,28,-101);c.lineTo(31,-61);c.quadraticCurveTo(0,-44,-31,-61);});for(let k=0;k<5;k++){line(c,INK,3,()=>{c.moveTo(-21+k*10,-99);c.lineTo(-21+k*10,-64);});}for(let k=0;k<3;k++)oval(c,-15+k*14,-75,5,7,P[1]);}
+ if(id==='yomi'){for(let k=-2;k<=2;k++)shape(c,P[k%2?1:2],()=>{const x=k*17;c.moveTo(x-12,-68);c.lineTo(x+12,-70);c.lineTo(x+17,-14);c.lineTo(x,-3);c.lineTo(x-15,-17);});}
 }

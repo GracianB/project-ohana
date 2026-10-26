@@ -1,3 +1,4 @@
+import {drawFaunaMorph} from './fauna-morphs.js';
 // Ten locally authored fauna families. Role equipment is drawn separately;
 // silhouettes, limbs and anticipation come from the actual combat state.
 const TAU=Math.PI*2,INK='#243044';
@@ -31,12 +32,14 @@ export function drawCampaignCreature(c,e,cam,t,reduced=false){
  const a=e._campaign||{},time=reduced?0:t,phase=time*.19+(e.spawnIndex||0),run=Math.abs(e.vx||0)>.4,
   wind=(a.wind||0)>0,active=(a.active||0)>0,hurt=e.invuln>0||e.stun>5,
   step=run?Math.sin(phase):0,face=Math.sign(e.vx)||a.aim||1;
- const height=Math.max(62,Math.min(126,(e.h||42)*1.65)),scale=height/64;
+ const height=Math.max(58,Math.min(108,e.h||58)),scale=height/64;
  c.save();c.translate(e.x+e.w/2-cam.x,e.y+e.h-cam.y);c.scale(scale*face,scale);
- c.globalAlpha=e.dying?Math.max(0,1-e.dying/32):1;c.lineJoin='round';c.lineCap='round';c.lineWidth=1.8;c.strokeStyle=INK;
+ c.globalAlpha=e.dying?Math.max(0,Math.min(1,e.dying/28)):1;c.lineJoin='round';c.lineCap='round';c.lineWidth=1.8;c.strokeStyle=INK;
  if(e.campaignRole==='flyer')c.translate(0,reduced?0:Math.sin(time*.08)*2);
  else if(run)c.translate(0,-Math.abs(step)*2);
  if(wind){c.translate(-2,2);c.scale(1.06,.94);}else if(active)c.rotate(.1);else if(hurt)c.rotate(-.12);
+ const morphed=drawFaunaMorph(c,e.campaignRole,P,{wind,hurt,time,step,hero,reduced});
+ if(!morphed){
  // Grounded creatures articulate contact, knee and foot independently.
  if(!['cat','yomi'].includes(hero)&&e.campaignRole!=='flyer')for(const side of [-1,1])for(let back=0;back<2;back++){
   const root=side*(12+back*5),swing=step*(back?-1:1)*4;
@@ -107,6 +110,7 @@ export function drawCampaignCreature(c,e,cam,t,reduced=false){
  if(hero==='stitcho'){c.strokeStyle=P.light;c.lineWidth=2;c.beginPath();c.moveTo(-18,-40);c.quadraticCurveTo(-11,-50,0,-46);c.stroke();c.fillStyle='#f1be91';c.fillRect(-16,-22,4,3);c.fillRect(10,-22,4,3);}
  if(['frita','pizza'].includes(hero)){c.strokeStyle=P.dark;c.beginPath();c.moveTo(2,-29);c.quadraticCurveTo(10,-22,18,-29);c.stroke();}
  if(hero==='cat'){c.strokeStyle=P.light;for(let side of [-1,1]){c.beginPath();c.moveTo(side*15,-28);c.quadraticCurveTo(side*38,-23,side*39,-32);c.stroke();}}
+ }
  if(wind){c.strokeStyle=P.light;c.lineWidth=2;c.beginPath();c.arc(18,-35,7+(Math.sin(time*.3)+1),-.8,.8);c.stroke();}
  c.restore();
  if(e.hp<e.max&&e.hp>0){const x=e.x-cam.x,y=e.y-cam.y-10;c.save();c.fillStyle='#1b2b40';c.fillRect(x,y,e.w,4);c.fillStyle=P.light;c.fillRect(x,y,e.w*Math.max(0,e.hp/e.max),4);c.restore();}

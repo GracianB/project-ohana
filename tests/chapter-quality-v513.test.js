@@ -26,10 +26,10 @@ test('all 1000 memories are outside solids and within an earned-form jump or fli
 test('ten encounter plans replace patrols with finite, complementary chapter groups',()=>{
  const signatures=new Set();
  for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero],plan=CHAPTER_ENCOUNTERS[hero];
-  signatures.add(JSON.stringify(plan.groups));assert.equal(plan.groups.length,3);assert.ok(r.foes.length<=34);
+  signatures.add(JSON.stringify(plan.groups));assert.equal(plan.groups.length,3);assert.ok(r.foes.length<=34);assert.ok(new Set(r.foes.map(f=>f[4]?.role).filter(Boolean).map(role=>({pursuer:'native',captain:'native',shield:'carapace',shooter:'spitter',gunner:'spitter',jumper:'leaper',flyer:'winged',burrower:'burrower'})[role])).size>=5,'each room needs five distinct visible anatomies');
   for(let group=0;group<3;group++){
    const foes=r.foes.filter(f=>f[4]?.authoredEncounter===group);
-   assert.ok(foes.length>=2&&foes.length<=3);
+   assert.ok(foes.length>=3&&foes.length<=4);
    assert.ok(new Set(foes.map(f=>f[4].role)).size>=2,'coordination needs complementary roles');
    for(const foe of foes)assert.ok(foe[0]>900&&foe[0]<8100,'safe entrance and boss floor stay clear');
   }

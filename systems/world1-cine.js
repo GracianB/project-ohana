@@ -1,13 +1,14 @@
+import {KEEPSAKES,drawKeepsake} from './keepsakes.js';
+import {drawChapterBossV2} from './chapter-boss-art-v2.js';
 import {drawQuimeraCreature} from './quimera-art.js';
 import {drawCraftedScene} from '../worlds/ohana-crafted-scenes.js';
 import {drawHarborWelcome} from '../worlds/ohana-environments.js';
 // OHANA V467 · MUNDO 1 · Cinemáticas con UNA sola historia.
 // Intro → (por sala) llegada + despertar del héroe → aparición de la Quimera →
-// caída de la Quimera → final que reúne a los diez y abre el Mundo 2.
+// diez recuerdos → caída de la Quimera → reencuentro de la familia.
 // Historia: el Eco robó la canción de cada héroe y los dispersó por diez salas.
 // Cada sala restaura a uno; la Quimera es la unión corrupta de todos. Al vencerla
-// las diez luces vuelven a casa y, más allá del Corazón, esperan las salas
-// antiguas: el Mundo 2.
+// las diez luces y sus objetos personales vuelven a casa.
 //
 // CÓMO ENGANCHARLO:
 //   import * as W1Cine from "./world1-cine.js";   (o window.OhanaWorld1Cine)
@@ -19,7 +20,7 @@ import {drawHarborWelcome} from '../worlds/ohana-environments.js';
 //   cada tick: if (W1Cine.updateWorld1Cine(g)) return;   // true = cinemática activa (pausa el juego)
 //   tecla saltar: W1Cine.skipWorld1Cine(g)
 //   dibujo final: W1Cine.drawWorld1Cine(ctx, g, W, H, t, { drawActor })
-//   g.onWorld1CineEnd?.(id) se llama al terminar cada escena (p.ej. ending → abrir Mundo 2).
+//   g.onWorld1CineEnd?.(id) se llama al terminar cada escena (p.ej. ending → reencuentro).
 // Sin degradados por fotograma, sin Math.random, geometría finita, textos en español.
 import { WORLD1_ORDER, WORLD1_THEMES, WORLD1_SEALS } from "./world1-rooms.js";
 import { WORLD1_ROOM_STORY, FUSION_STORY, WORLD1_ENDING, WORLD1_TITLE, WORLD1_PREMISE } from "./world1-story.js";
@@ -35,6 +36,8 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
   const th = hero ? WORLD1_THEMES[hero] : null, name = hero ? heroDisplayName(hero) : "", seals = new Set(ctx.seals || []);
   const restored = ALL.filter((h) => seals.has(h));
   switch (id) {
+    case "keepsakeIntro": return [{dur:230,bg:'#132239',color:th.color,layout:'keeper',heroes:[hero],lit:[hero],kicker:'EL ECO GUARDÓ ALGO TUYO',title:KEEPSAKES[hero].guardian,line:KEEPSAKES[hero].name+'. El guardián ha evolucionado. Espera su apertura y recupéralo.'}];
+    case "keepsakeRescue": return [{dur:250,bg:'#183448',color:th.color,layout:'keepsake',heroes:[hero],lit:[hero],dance:true,kicker:'ESTO NO ERA UN TESORO CUALQUIERA',title:KEEPSAKES[hero].name,line:KEEPSAKES[hero].memory}];
     case "intro": return [
       { dur: 200, bg: "#1a1030", color: "#ffd6f2", layout: "circle", heroes: ALL, kicker: "Ohana · la familia", title: "Diez héroes, una canción", line: "En Ohana cada héroe guardaba una nota. Juntas sonaban a hogar." },
       { dur: 190, bg: "#12081f", color: "#ff7ad0", layout: "fused", heroes: ALL, kicker: "Una noche…", title: "EL ECO", line: "Una sombra que solo sabe copiar robó las diez notas para hacerse un cuerpo." },
@@ -62,14 +65,19 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
     case "ending": return [
       { dur: 220, bg: "#1e1838", color: "#ffe9a8", layout: "circle", heroes: ALL, lit: ALL, dance: true, kicker: WORLD1_ENDING.kicker, title: WORLD1_ENDING.act, line: "Kilo rasguea, Chispín ríe en truenos, Dragón calienta el banquete de Frita y Pizza." },
       { dur: 200, bg: "#1a1030", color: "#ffacc2", layout: "line", heroes: ALL, lit: ALL, kicker: "Juntos", title: WORLD1_ENDING.title, line: "Michi sueña, Cuerno pinta la aurora, Dino pisa fuerte, Stitcho cose la nave y Yomi vigila las estrellas." },
-      { dur: 240, bg: "#0e0a1c", color: "#8fe9ff", layout: "portal", heroes: ALL, lit: ALL, kicker: "Pero…", title: "Más allá del Corazón", line: "Yomi: «Detecto un eco más antiguo. Viene de las islas de siempre… el MUNDO 2»." },
-      { dur: 200, bg: "#000000", color: "#ffd6f2", layout: "none", heroes: [], kicker: "Fin del Mundo 1", title: "MUNDO 2 — en construcción", line: WORLD1_ENDING.sub }
+      { dur: 240, bg: "#0e0a1c", color: "#8fe9ff", layout: "circle", heroes: ALL, lit: ALL, kicker: "De vuelta a casa", title: "Lo que hace un hogar", line: "Una tabla, un peluche, un huevo todavía dormido. Quimera no pudo quedarse con lo que los une." },
+      { dur: 200, bg: "#000000", color: "#ffd6f2", layout: "none", heroes: [], kicker: "Fin del Mundo 1", title: "LA FAMILIA ESTÁ COMPLETA", line: "Cada voz ha vuelto. Cada recuerdo tiene de nuevo un hogar." }
     ];
     default: return [];
   }
 }
 
 export function playWorld1Cine(g, id, hero = null) {
+  if(g.canWorld1CineStart&&!g.canWorld1CineStart()){
+    if(g._pendingWorld1Cine&&(g._pendingWorld1Cine.id!==id||g._pendingWorld1Cine.hero!==hero))return false;
+    g._pendingWorld1Cine={id,hero};g.resetInput?.();return true;
+  }
+  g._pendingWorld1Cine=null;
   const shots = buildWorld1Scene(id, hero, { seals: g?.world1Seals });
   if (!shots.length) return false;
   if (g.reduceMotion) for (const s of shots) s.dur = Math.round(s.dur * 0.7);
@@ -77,7 +85,11 @@ export function playWorld1Cine(g, id, hero = null) {
   g.onWorld1Beat?.("cine", id, hero); g.resetInput?.();
   return true;
 }
-export function world1CineActive(g) { return !!g?.world1Cine; }
+export function world1CineActive(g) { return !!(g?.world1Cine||g?._pendingWorld1Cine); }
+export function flushWorld1CineQueue(g){
+ const pending=g?._pendingWorld1Cine;if(!pending||g.world1Cine||(g.canWorld1CineStart&&!g.canWorld1CineStart()))return false;
+ g._pendingWorld1Cine=null;return playWorld1Cine(g,pending.id,pending.hero);
+}
 export function world1CinePresentation(g) {
   const c = g?.world1Cine, s = c?.shots[c.i];
   if (!s) return null;
@@ -186,7 +198,7 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   if (s.layout === "portal") { ctx.globalAlpha = fadeIn; ctx.strokeStyle = "#8fe9ff"; ctx.lineWidth = 8; const r = Math.min(W, H) * 0.2; ctx.beginPath(); ctx.ellipse(W * 0.82, H * 0.5, r * 0.7, r * (0.9 + 0.05 * Math.sin(t * 0.06)), 0, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "#2a1f4a"; ctx.fill(); ctx.fillStyle = "#8fe9ff"; ctx.font = `bold ${Math.round(H * 0.035)}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("MUNDO 2", W * 0.82, H * 0.48); ctx.font = `bold ${Math.round(H * 0.022)}px sans-serif`; ctx.fillText("en construcción", W * 0.82, H * 0.54); }
   // Héroes.
   const lit = new Set(s.lit || (["one","arrival"].includes(s.layout) ? s.heroes : [])), n = s.heroes.length;
-  (s.layout=== "fused"?[]:s.heroes).forEach((h, i) => {
+  (["fused","keeper","keepsake"].includes(s.layout)?[]:s.heroes).forEach((h, i) => {
     const [x, y, sc] = heroPos(s.layout, i, n, W, H, k, reduce ? 0 : t), on = lit.has(h) && !s.dim;
     const col = s.layout === "fused" ? "#ff3a8a" : on ? WORLD1_THEMES[h].color : "#4a3f72";
     const size = Math.min(W, H) * 0.12 * num(sc, 1);
@@ -199,6 +211,14 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   if(s.layout==='fused'){
     ctx.save();ctx.globalAlpha=fadeIn;ctx.translate(W/2,H*.74);const scale=Math.min(W/680,H/660);ctx.scale(scale,scale);
     drawQuimeraCreature(ctx,{x:-115,y:-290,w:230,h:290,phase:c.id==='bossDefeat'?4:1,hp:c.id==='bossDefeat'?0:1,_fusion:{mode:'rest'}},{x:0,y:0},t,reduce);ctx.restore();
+  }
+  if(['keeper','keepsake'].includes(s.layout)){
+   const hero=c.hero,data=KEEPSAKES[hero],height=Math.min(H*.37,W*.34),foot=H*.65;
+   if(drawActor)drawActor(ctx,hero,W*.34,foot,height/60,{form:4,pose:s.layout==='keepsake'?'victory':'idle'});
+   if(s.layout==='keeper'){
+    const e=g.finalGauntlet?.guardian;if(e){ctx.save();const k=Math.min(H*.4,W*.36)/e.h;ctx.translate(W*.67,foot);ctx.scale(k,k);drawChapterBossV2(ctx,{...e,x:-e.w/2,y:-e.h},{x:0,y:0},t,reduce);ctx.restore();}
+    drawKeepsake(ctx,hero,W*.54,foot+14,Math.min(70,H*.12),{ghost:true});
+   }else drawKeepsake(ctx,hero,W*.64,foot+12,Math.min(145,H*.28));
   }
   // Bandas de cine.
   const bh = H * 0.1; ctx.globalAlpha = 1; ctx.fillStyle = "#000"; ctx.fillRect(-10, 0, W + 20, bh); ctx.fillRect(-10, H - bh, W + 20, bh);
@@ -215,7 +235,7 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
 }
 
 export function world1CineSnapshot(g) { const c = g?.world1Cine; return c ? { id: c.id, hero: c.hero, shot: c.i, shots: c.shots.length, t: c.t } : null; }
-export const WORLD1_SCENES = Object.freeze(["intro", "roomEnter", "awaken", "bossIntro", "bossDefeat", "ending"]);
+export const WORLD1_SCENES = Object.freeze(["intro", "roomEnter", "awaken", "keepsakeIntro", "keepsakeRescue", "bossIntro", "bossDefeat", "ending"]);
 
 export const OhanaWorld1Cine = Object.freeze({ scenes: WORLD1_SCENES, build: buildWorld1Scene, play: playWorld1Cine, update: updateWorld1Cine, skip: skipWorld1Cine, draw: drawWorld1Cine, active: world1CineActive, snapshot: world1CineSnapshot });
 if (typeof globalThis !== "undefined") globalThis.OhanaWorld1Cine = OhanaWorld1Cine;

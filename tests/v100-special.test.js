@@ -17,7 +17,7 @@ test("V100 Especial: roster íntegro, accesible, sin carrusel activo",()=>{
   assert.doesNotMatch(html,/id="roster-next"/);
   const atrium=fs.readFileSync(new URL("../systems/atrium-interact.js",import.meta.url),"utf8");
   assert.match(atrium,/!\["family-grid", "family-camp"\]\.includes\(stage.dataset.selectorMode\)/);
-  assert.match(css,/#ohana-intro \.oi-welcome/);
+  assert.match(css,/#ohana-intro:not\(\.theatre-welcome\) \.oi-welcome/);
 });
 test("V100 Especial: boss no desaparece antes del estallido",()=>{
   const sample=(k)=>bossFallStage({t:Math.round(210*(1-k)),max:210});

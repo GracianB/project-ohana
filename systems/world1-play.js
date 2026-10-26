@@ -1,3 +1,4 @@
+import {updateFinalGauntlet} from './final-gauntlet.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
 import {fritaVentState,noteFritaLaunch,yomiNodeState,drawFritaVent,drawYomiTerminal} from './frita-yomi-chapters.js';
 import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaChapter,drawPizzaOven,drawPizzaCustomer} from './pizza-chapter.js';
@@ -277,7 +278,7 @@ function updateFinalRoom(g, w, p, r) {
   // Las estatuas se encienden al pasar; la arena despierta a la Quimera.
   r.statues.forEach((s, i) => { if (!w.statuesLit[i] && Math.abs(cx(p) - s.x) < 120 && g.world1Seals.includes(s.hero)) { w.statuesLit[i] = true; g.fx?.emit?.(s.x, s.y - 200, { color: WORLD1_THEMES[s.hero].color, count: g.reduceMotion ? 4 : 14, size: 4, up: 2, star: true, life: 28 }); } });
   const won = !!g.world1Won;
-  if (!won && !g.boss && cx(p) > WORLD1_ARENA.start) g.spawnFusionBoss?.();
+  if (!won && !g.boss && cx(p) > WORLD1_ARENA.start && updateFinalGauntlet(g)) g.spawnFusionBoss?.();
   if (g.boss?._fusionBoss && !won && !g.finale) {
     // Una vez dentro, la arena se cierra por detrás (como el Nido).
     if (p.x < WORLD1_ARENA.left - 120) { p.x = WORLD1_ARENA.left - 120; p.vx = Math.max(0, p.vx || 0); }

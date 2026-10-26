@@ -1,3 +1,7 @@
+import {cleanKeepsakes,drawKeepsake,KEEPSAKES} from './keepsakes.js';
+import {drawTheatreStage} from './theatre-stage.js';
+import {drawQuimeraCreature} from './quimera-art.js';
+import {heroHeightTarget} from '../characters/visual-size.js';
 import {cachedGradient} from './canvas-gradient-cache.js';
 
 // OHANA V467 · MUNDO 1 · Selección de héroe personalizada.
@@ -39,7 +43,7 @@ export function heroDisplayName(hero) {
 }
 
 // Datos de cada carta (puros, sin DOM): para HUD, menú HTML o lienzo.
-export function world1SelectCards({ seals = [], counts = {} } = {}) {
+export function world1SelectCards({ seals = [], counts = {},keepsakes=[] } = {}) {
   const done = new Set(cleanWorld1Seals(seals));
   const cards = WORLD1_ORDER.map((hero, i) => {
     const th = WORLD1_THEMES[hero];
@@ -48,18 +52,18 @@ export function world1SelectCards({ seals = [], counts = {} } = {}) {
       hero, index: i, room: "w1-" + hero, name: heroDisplayName(hero), roomName: th.name,
       color: th.color, tint: th.tint, tagline: WORLD1_TAGLINES[hero], relic: th.relic,
       seal: WORLD1_SEALS[th.seal]?.title || "", sealed: done.has(hero), unlocked,
-      found: clamp(Math.floor(num(counts[hero])), 0, 100)
+      found: clamp(Math.floor(num(counts[hero])), 0, 100),keepsakeRecovered:cleanKeepsakes(keepsakes).includes(hero)
     };
   });
   const all = WORLD1_ORDER.every((h) => done.has(h));
   cards.push({ hero: null, index: WORLD1_ORDER.length, room: "w1-final", name: "Corazón de Ohana", roomName: "La Quimera Ohana",
-    color: "#ffd6f2", tint: "#ff7ad0", tagline: all ? "Los diez juntos. Es la hora." : "Despierta los diez sellos para abrirlo.",
-    relic: "", seal: "Jefe final", sealed: false, unlocked: all, found: 0, final: true });
+    color: "#ffd6f2", tint: "#ff7ad0", tagline: all ? (cleanKeepsakes(keepsakes).length===10?"Los recuerdos están a salvo. Ahora, Quimera.":"Diez guardianes evolucionados custodian lo que perdiste. Recupéralo antes de Quimera.") : "Despierta los diez sellos para abrirlo.",
+    relic: "", seal: "Jefe final", sealed: false, unlocked: all, found: 0, final: true,keepsakes:cleanKeepsakes(keepsakes).length });
   return cards;
 }
 
-export function createWorld1Select({ seals = [], counts = {}, start = null } = {}) {
-  const cards = world1SelectCards({ seals, counts });
+export function createWorld1Select({ seals = [], counts = {}, start = null,keepsakes=[] } = {}) {
+  const cards = world1SelectCards({ seals, counts,keepsakes });
   let index = start ? cards.findIndex((c) => c.hero === start || c.room === start) : -1;
   if (index < 0) { index = cards.findIndex((c) => c.unlocked && !c.sealed && !c.final); if (index < 0) index = 0; }
   return { cards, index, hover: -1, t: 0, pulse: 0, deny: 0, rects: [] };
@@ -71,14 +75,9 @@ const COLS = 6;
 // A portal's geometry must not be guessed from an obsolete grid layout.
 export function world1SelectCardRects(sel,W,H){return layout(sel,W,H);}
 function layout(sel,W,H){
- const compact=W<600,cx=W/2,cy=H*.47,rx=W*(compact?.39:.40),ry=H*.24;
- sel.columns=5;
- sel.rects=sel.cards.map((card,i)=>{
-  const final=!!card.final,a=-Math.PI/2+(i+.5)*Math.PI*2/10;
-  const x=final?cx:cx+Math.cos(a)*rx,y=final?H*.78:cy+Math.sin(a)*ry;
-  const w=compact?(final?44:48):Math.min(100,W*.12),h=compact?(final?60:71):89;
-  return {x:x-w/2,y:y-h*.72,w,h};
- });return sel.rects;
+ const compact=W<600,cols=5,gap=compact?5:9,margin=compact?9:22;
+ const w=(W-margin*2-gap*4)/5,h=Math.min(76,H*.115);sel.columns=5;
+ sel.rects=sel.cards.map((card,i)=>card.final?{x:W-(compact?100:146)-margin,y:18,w:compact?100:146,h:44}:{x:margin+(i%cols)*(w+gap),y:H*.73+Math.floor(i/5)*(h+9),w,h});return sel.rects;
 }
 
 function choose(sel) {
@@ -135,67 +134,28 @@ function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); 
 const STARS = Array.from({ length: 60 }, (_, i) => [((i * 7919) % 997) / 997, ((i * 104729) % 991) / 991, 1 + (i % 3)]);
 
 export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=false,previewForm=0}={}){
- W=Math.max(1,num(W,1280));H=Math.max(1,num(H,720));t=num(t);sel.t++;
+ W=Math.max(1,num(W,1280));H=Math.max(1,num(H,720));const compact=W<600,cur=sel.cards[sel.index]||sel.cards[0],rects=layout(sel,W,H),time=reduceMotion?0:t;
  if(sel.pulse>0)sel.pulse--;if(sel.deny>0)sel.deny--;
- const cur=sel.cards[sel.index]||sel.cards[0],compact=W<600,cx=W/2,cy=H*.47;
- const rects=layout(sel,W,H),time=reduceMotion?0:t;
- ctx.save();
- ctx.fillStyle=cachedGradient(ctx,`family-garden:${W}:${H}`,()=>{const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#182945');g.addColorStop(.55,'#355b68');g.addColorStop(1,'#162e3c');return g;});ctx.fillRect(0,0,W,H);
- // The family inhabits one garden, with paths, terraces and a shared hearth.
- for(let layer=0;layer<3;layer++){
-  ctx.fillStyle=['#385e69','#294f58','#214149'][layer];ctx.beginPath();ctx.moveTo(0,H);
-  ctx.bezierCurveTo(W*.08,H*(.44+layer*.08),W*.36,H*(.52+layer*.08),W*.5,H*(.59+layer*.07));
-  ctx.bezierCurveTo(W*.68,H*(.43+layer*.09),W*.87,H*(.48+layer*.1),W,H*(.59+layer*.1));ctx.lineTo(W,H);ctx.fill();
- }
- for(let i=0;i<32;i++){
-  const x=((i*7919)%997)/997*W,y=H*.18+((i*317)%991)/991*H*.55;
-  ctx.globalAlpha=reduceMotion?.45:.28+Math.sin(time*.025+i)*.2;ctx.fillStyle='#ffe6ad';ctx.beginPath();ctx.arc(x,y,1.2+(i%2)*.6,0,Math.PI*2);ctx.fill();
- }
- ctx.globalAlpha=1;
- ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff0ca';ctx.font=`600 ${Math.min(28,W*.055)}px sans-serif`;
- ctx.fillText('El jardín de los diez',cx,H*.055,W*.9);
- ctx.fillStyle='#cfe1df';ctx.font=`${compact?11:13}px sans-serif`;
- ctx.fillText(`${sel.cards.filter(c=>c.sealed).length}/10 canciones recuperadas · cada puerta tiene su héroe`,cx,H*.105,W*.94);
- // Winding route joins the actual chapter choices in order.
- ctx.lineWidth=compact?3:5;ctx.strokeStyle='#8ca08a';ctx.beginPath();
- for(let i=0;i<10;i++){const r=rects[i],x=r.x+r.w/2,y=r.y+r.h*.8;if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);}ctx.stroke();
- ctx.strokeStyle='#ead6a0';ctx.lineWidth=1.2;ctx.setLineDash([2,7]);ctx.stroke();ctx.setLineDash([]);
- // A lit stage grows from roots and stone, rather than a giant avatar tile.
- ctx.fillStyle='#122c39';ctx.beginPath();ctx.ellipse(cx,cy+H*.14,W*(compact?.22:.17),H*.055,0,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#b2bc9e';ctx.beginPath();ctx.ellipse(cx,cy+H*.12,W*(compact?.21:.16),H*.037,0,0,Math.PI*2);ctx.fill();
- ctx.strokeStyle='#f5e4ae';ctx.lineWidth=2;ctx.stroke();
- const actorHeight=Math.min(H*.27,W*(compact?.26:.18)),foot=cy+H*.12;
- // Changing heroes changes the portal's silhouette and stage props.
- const vista=cur.hero;
- ctx.save();ctx.translate(cx,foot);ctx.globalAlpha=.4;ctx.strokeStyle=cur.color;ctx.fillStyle=cur.tint;ctx.lineWidth=3;
- if(vista==='dragon'){ctx.beginPath();ctx.moveTo(-110,0);ctx.bezierCurveTo(-125,-140,-38,-175,-20,-95);ctx.bezierCurveTo(15,-180,115,-160,112,0);ctx.closePath();ctx.fill();}
- else if(vista==='dino'){for(let i=-2;i<=2;i++){ctx.beginPath();ctx.ellipse(i*36,3,22,80-Math.abs(i)*12,-i*.1,Math.PI,Math.PI*2);ctx.stroke();}}
- else if(vista==='yomi'||vista==='stitcho'){ctx.beginPath();ctx.arc(0,-44,actorHeight*.76,Math.PI,Math.PI*2);ctx.stroke();for(let i=-1;i<=1;i++)ctx.strokeRect(i*52-14,-100,28,54);}
- else {for(let side of [-1,1]){ctx.beginPath();ctx.moveTo(side*88,4);ctx.bezierCurveTo(side*75,-50,side*110,-92,side*68,-134);ctx.stroke();for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse(side*(70+i*9),-70-i*18,20,8,side*.5,0,Math.PI*2);ctx.fill();}}}
- ctx.restore();
- const poses={kilo:'idle',stitcho:'wall',chispin:'jump',cat:'idle',cuerno:'victory',dragon:'glide',dino:'victory',frita:'run',pizza:'victory',yomi:'cast'};
- if(drawActor&&cur.hero)drawActor(ctx,cur.hero,cx,foot,actorHeight/64,{form:previewForm,pose:reduceMotion?'idle':poses[cur.hero],performance:cur.hero==='kilo'?'dance':null});
- else drawHeroEmblem(ctx,null,cx,foot-actorHeight*.5,actorHeight*.7,'#ffe2b7',time);
- ctx.fillStyle='#fff0ca';ctx.font=`600 ${compact?16:21}px sans-serif`;ctx.fillText(cur.name,cx,foot+H*.065,W*.44);
- // Small living companions occupy the path. All hit regions stay explicit.
- sel.cards.forEach((card,i)=>{
-  const r=rects[i],x=r.x+r.w/2,y=r.y+r.h*.76,focus=i===sel.index,form=card.sealed?2:0;
-  ctx.save();ctx.globalAlpha=card.unlocked?1:.63;
-  ctx.fillStyle=focus?'#f2dba7':'#608b87';ctx.strokeStyle=focus?'#fff4d7':'#b4c7b1';ctx.lineWidth=focus?2.5:1;
-  ctx.beginPath();ctx.ellipse(x,y,r.w*.43,r.h*.12,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-  if(card.hero&&drawActor){const phase=(time+i*23)%240,pose=reduceMotion?'idle':phase<40&&i%3===0?'victory':phase>190&&i%3===1?'run':'idle';
-   drawActor(ctx,card.hero,x,y-2,Math.min(r.w*.64,r.h*.64)/64,{form,pose,performance:card.hero==='kilo'?'dance':null});
-  }else drawHeroEmblem(ctx,null,x,y-r.h*.33,r.h*.4,card.color,time);
-  ctx.fillStyle=focus?'#fff4ca':'#d8e8df';ctx.font=`600 ${compact?9:11}px sans-serif`;ctx.fillText(card.final?'Corazón':card.name,x,y+r.h*.22,r.w*1.25);
-  if(!card.unlocked){ctx.strokeStyle='#ecdab6';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x+r.w*.3,y-r.h*.6,3.5,Math.PI,Math.PI*2);ctx.stroke();ctx.fillStyle='#ecdab6';ctx.fillRect(x+r.w*.3-4,y-r.h*.6,8,6);}
-  else if(card.sealed){ctx.fillStyle='#fff3b9';ctx.font='bold 12px sans-serif';ctx.fillText('✓',x+r.w*.35,y-r.h*.6);}
-  ctx.restore();
+ ctx.save();drawTheatreStage(ctx,W,H,cur.hero||'yomi',time,{reduceMotion});
+ // Featured hero is the scene's subject; evolution changes its visible scale.
+ const foot=H*.645,base=Math.min(H*.52,W*(compact?.49:.39));
+ const ratio=cur.hero?Math.min(1.1,heroHeightTarget(cur.hero,previewForm)/180):1;
+ const height=base*(.48+ratio*.52),cx=W*.50;
+ if(cur.hero&&drawActor)drawActor(ctx,cur.hero,cx,foot,height/64,{form:previewForm,pose:reduceMotion?'idle':({kilo:'idle',stitcho:'wall',chispin:'jump',cat:'idle',cuerno:'victory',dragon:'glide',dino:'victory',frita:'run',pizza:'victory',yomi:'cast'}[cur.hero]),performance:cur.hero==='kilo'?'dance':null});
+ if(cur.hero&&cur.keepsakeRecovered){drawKeepsake(ctx,cur.hero,cx+Math.min(W*.17,160),foot,Math.min(100,base*.30));ctx.textAlign='center';ctx.fillStyle='#fff0c8';ctx.font='11px Outfit,sans-serif';ctx.fillText(KEEPSAKES[cur.hero].name,cx+Math.min(W*.17,160),foot+17,Math.min(150,W*.3));}
+ if(!cur.hero) {ctx.save();ctx.translate(cx,foot);const k=base/460;ctx.scale(k,k);drawQuimeraCreature(ctx,{x:-115,y:-290,w:230,h:290,hp:100,phase:4,_fusion:{mode:'rest'}},{x:0,y:0},time,reduceMotion);ctx.restore();}
+ ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#fff1ca';ctx.font=`600 ${compact?12:16}px Outfit,sans-serif`;ctx.fillText(`${String(cur.index+1).padStart(2,'0')} / ${cur.final?'EL CORAZÓN':'DIEZ HISTORIAS'}`,compact?16:28,compact?H*.135:112,W*.52);
+ ctx.fillStyle='#e2ead8';ctx.font=`${compact?10:12}px Outfit,sans-serif`;ctx.fillText(cur.roomName,compact?16:28,compact?H*.185:140,W*.65);
+ const frame=rects[10];ctx.fillStyle=cur.final?'#d9bb87':'#132737dd';roundRect(ctx,frame.x,frame.y,frame.w,frame.h,12);ctx.fill();ctx.strokeStyle='#c5be9b77';ctx.lineWidth=1;ctx.stroke();ctx.textAlign='center';ctx.fillStyle=cur.final?'#172b3c':'#eedab4';ctx.font=`700 ${compact?10:12}px Outfit,sans-serif`;ctx.fillText('✦ CORAZÓN '+sel.cards.filter(c=>c.sealed).length+'/10',frame.x+frame.w/2,frame.y+frame.h/2);
+ // Two low casting rails: large hit areas, names and real animated silhouettes.
+ sel.cards.slice(0,10).forEach((card,i)=>{
+  const r=rects[i],focus=i===sel.index,hover=i===sel.hover,x=r.x+r.w/2,y=r.y+r.h*.72;
+  ctx.save();ctx.fillStyle=focus?'#e8d5a7':hover?'#324d60f2':'#102433e8';roundRect(ctx,r.x,r.y,r.w,r.h,compact?9:12);ctx.fill();ctx.strokeStyle=focus?'#fff0c7':hover?card.color:'#a7c4bb44';ctx.lineWidth=focus?2:1;ctx.stroke();
+  ctx.globalAlpha=card.unlocked?1:.55;
+  if(drawActor)drawActor(ctx,card.hero,x,y-4,Math.min(r.h*.62,r.w*.7)/64,{miniature:true,animationOffset:i*2,form:card.sealed?1:0,pose:reduceMotion?'idle':((time+i*19)%300>250?'victory':'idle'),performance:card.hero==='kilo'?'dance':null});
+  ctx.fillStyle=focus?'#233c49':'#f4e6c7';ctx.font=`600 ${compact?9:12}px Outfit,sans-serif`;ctx.fillText(card.name,x,r.y+r.h-10,r.w-8);
+  ctx.font=`700 ${compact?9:11}px sans-serif`;ctx.fillStyle=focus?'#345657':'#d2c59f';ctx.textAlign='right';ctx.fillText(card.sealed?'✓':card.unlocked?'':'◇',r.x+r.w-7,r.y+12);ctx.textAlign='center';ctx.restore();
  });
- // Footer is one legible instruction area; the dossier retains stats/forms.
- ctx.fillStyle='#142c3fe8';roundRect(ctx,8,H*.83,W-16,H*.155,14);ctx.fill();
- ctx.fillStyle='#ffe8b6';ctx.font=`600 ${compact?12:16}px sans-serif`;ctx.fillText(cur.tagline,cx,H*.865,W*.92);
- ctx.fillStyle='#c7dcd9';ctx.font=`${compact?10:12}px sans-serif`;ctx.fillText(cur.roomName,cx,H*.91,W*.92);
- ctx.fillText(cur.final?'Los diez sellos abren el Corazón':`${cur.sealed?'✓ Canción recuperada · ':''}${cur.found}/100 recuerdos · ${cur.unlocked?'Entrar con Intro o tocar otra vez':'Capítulo por despertar'}`,cx,H*.95,W*.92);
  ctx.restore();
 }
 

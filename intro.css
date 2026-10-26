@@ -87,3 +87,19 @@ body.intro-complete #start-intro,body.intro-complete #ohana-intro,body.playing #
 #ohana-intro.family-welcome .oi-enter{background:#285c51;color:#fff3d5;border-color:#b7cc9f;backdrop-filter:none;}
 #ohana-intro.family-welcome .oi-story-controls button{background:#f4ebd6;color:#2a584d;border-color:#9fb69a;}
 @media(max-width:640px){#ohana-intro.family-welcome .oi-welcome{top:18px;left:16px;right:16px;max-width:none;padding:12px 16px;}#ohana-intro.family-welcome .oi-welcome strong{font-size:40px;}#ohana-intro.family-welcome .oi-welcome small{font-size:11px;}}
+/* V602 · A theatrical key-art opening, with room to read and a clear action. */
+#ohana-intro.family-welcome{background:#203d55!important;cursor:default!important;}
+#ohana-intro.family-welcome .oi-welcome{top:12vh;left:5.5vw;right:auto;bottom:auto;max-width:40vw;padding:0;background:none;border:0;border-radius:0;box-shadow:none;gap:15px;}
+#ohana-intro.family-welcome .oi-welcome span{font-size:10px;letter-spacing:.32em;color:#e2d0a7;}
+#ohana-intro.family-welcome .oi-welcome strong{font:600 clamp(80px,11vw,178px)/.9 Fredoka,sans-serif;color:#fff0ca;letter-spacing:-.035em;text-shadow:0 4px 0 #304658,0 18px 55px #13263b55;}
+#ohana-intro.family-welcome .oi-welcome small{max-width:27ch;font:400 clamp(14px,1.5vw,20px)/1.6 Outfit,sans-serif;color:#e4ead7;}
+#ohana-intro.family-welcome .oi-story-dialogue{left:5.5vw!important;top:auto!important;bottom:23vh!important;transform:none;width:min(360px,32vw);border:0;border-left:2px solid #e3ce9f;border-radius:0;background:#10283ad9;padding:17px 20px;box-shadow:none;}
+#ohana-intro .oi-story-dialogue::after{display:none;}
+#ohana-intro .oi-story-chapter{color:#b5cdc6;font-size:9px;}
+#ohana-intro .oi-story-speaker{color:#f5dca6;font-size:20px;}
+#ohana-intro .oi-story-line{color:#eceddb;font-size:16px;line-height:1.6;}
+#ohana-intro.family-welcome .oi-enter{left:5.5vw!important;right:auto!important;bottom:10vh!important;min-height:56px!important;padding:0 28px;border:1px solid #ffe7b0;border-radius:10px;background:linear-gradient(110deg,#f6e6b9,#dcb580);color:#243a49;font-size:12px;letter-spacing:.08em;box-shadow:0 10px 40px #0b1d3255;}
+#ohana-intro .oi-story-controls{left:5.5vw;bottom:3vh;gap:10px;}
+#ohana-intro.family-welcome .oi-story-controls button{background:#142b3bcc;color:#d4dfd0;border-color:#b9c2a933;min-height:38px;border-radius:8px;font-size:10px;}
+@media(max-width:760px){#ohana-intro.family-welcome .oi-welcome{top:6vh;left:7vw;right:7vw;max-width:none;gap:9px}#ohana-intro.family-welcome .oi-welcome strong{font-size:76px}#ohana-intro.family-welcome .oi-welcome small{font-size:13px;max-width:30ch}#ohana-intro.family-welcome .oi-welcome span{font-size:8px;letter-spacing:.20em}#ohana-intro.family-welcome .oi-story-dialogue{left:7vw!important;right:7vw;bottom:21vh!important;width:auto;padding:12px 16px}.oi-story-line{font-size:14px!important;line-height:1.5!important}#ohana-intro.family-welcome .oi-enter{left:7vw!important;right:7vw!important;width:86vw!important;bottom:10vh!important;min-height:48px!important;text-align:center;font-size:11px}#ohana-intro .oi-story-controls{left:7vw;right:7vw;bottom:3vh;justify-content:center;}#ohana-intro .oi-story-speaker{font-size:17px}}
+@media(max-height:550px) and (min-width:761px){#ohana-intro.family-welcome .oi-welcome{top:6vh}#ohana-intro.family-welcome .oi-welcome strong{font-size:72px}#ohana-intro.family-welcome .oi-story-dialogue{bottom:28vh!important;padding:8px 15px}#ohana-intro.family-welcome .oi-story-line{font-size:13px}#ohana-intro.family-welcome .oi-enter{bottom:10vh!important;min-height:42px!important}}

@@ -117,6 +117,7 @@ if (!menuPaintAllowedInDocument(document)) {
 portraitClock.advance(now, () => {
   tick += 2;
   for (const cv of portraitCanvases) {
+    if(!cv.getClientRects().length)continue;
     const card = cv.closest(".char-card");
     if (!card || card.getAttribute("aria-hidden") === "true") continue;
     const entry = ROSTER_BY_ID.get(cv.dataset.id);

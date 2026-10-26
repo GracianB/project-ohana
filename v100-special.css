@@ -216,7 +216,7 @@
 
 /* V100 Especial: in the opening, OHANA is a centered family title,
    never a caption parked in the lower-left corner. */
-#ohana-intro.family-welcome .oi-welcome{
+#ohana-intro:not(.theatre-welcome).family-welcome .oi-welcome{
   left:50%!important;right:auto!important;
   top:clamp(54px,10vh,126px)!important;bottom:auto!important;
   width:min(660px,92vw)!important;max-width:none!important;
@@ -224,58 +224,58 @@
   text-align:center!important;
   transform:translate(-50%,10px)!important;
 }
-#ohana-intro.family-welcome.ready .oi-welcome{
+#ohana-intro:not(.theatre-welcome).family-welcome.ready .oi-welcome{
   transform:translate(-50%,0)!important;
 }
-#ohana-intro.family-welcome .oi-welcome strong{
+#ohana-intro:not(.theatre-welcome).family-welcome .oi-welcome strong{
   font-size:clamp(58px,10vw,118px)!important;
   line-height:.94!important;
   letter-spacing:.025em!important;
   text-shadow:none!important;
 }
-#ohana-intro.family-welcome .oi-welcome small{
+#ohana-intro:not(.theatre-welcome).family-welcome .oi-welcome small{
   font-size:clamp(11px,1.1vw,16px)!important;
   line-height:1.4!important;color:#345e53!important;
   text-shadow:none!important;
 }
-#ohana-intro.family-welcome .oi-enter{
+#ohana-intro:not(.theatre-welcome).family-welcome .oi-enter{
   left:50%!important;right:auto!important;bottom:clamp(20px,4vh,52px)!important;
   transform:translate(-50%,8px)!important;
   white-space:nowrap!important;
 }
-#ohana-intro.family-welcome.ready .oi-enter{transform:translate(-50%,0)!important;}
+#ohana-intro:not(.theatre-welcome).family-welcome.ready .oi-enter{transform:translate(-50%,0)!important;}
 @media(max-width:620px){
-  #ohana-intro.family-welcome .oi-welcome{
+  #ohana-intro:not(.theatre-welcome).family-welcome .oi-welcome{
     top:clamp(48px,9vh,84px)!important;
   }
-  #ohana-intro.family-welcome .oi-welcome strong{font-size:clamp(54px,15vw,80px)!important;}
+  #ohana-intro:not(.theatre-welcome).family-welcome .oi-welcome strong{font-size:clamp(54px,15vw,80px)!important;}
 }
 
 /* V100 Especial: the opening OHANA is the centered headline, not a corner bug. */
-#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome{
+#char-select[data-selector-mode="family-grid"] #ohana-intro:not(.theatre-welcome) .oi-welcome{
   left:50%!important;right:auto!important;top:clamp(70px,11vh,130px)!important;bottom:auto!important;
   translate:-50% 0!important;max-width:min(650px,90vw)!important;width:min(650px,90vw)!important;
   text-align:center!important;justify-items:center!important;gap:8px!important;
 }
-#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome strong{
+#char-select[data-selector-mode="family-grid"] #ohana-intro:not(.theatre-welcome) .oi-welcome strong{
   font-size:clamp(70px,8.5vw,122px)!important;line-height:.94!important;
   letter-spacing:.05em!important;text-shadow:none!important;
 }
-#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome small{
+#char-select[data-selector-mode="family-grid"] #ohana-intro:not(.theatre-welcome) .oi-welcome small{
   color:#345e53!important;font-size:clamp(11px,1.2vw,15px)!important;
 }
-#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-enter{
+#char-select[data-selector-mode="family-grid"] #ohana-intro:not(.theatre-welcome) .oi-enter{
   left:50%!important;right:auto!important;bottom:max(36px,6vh)!important;
   translate:-50% 0!important;white-space:nowrap!important;
 }
 @media(max-width:620px){
-  #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome{
+  #char-select[data-selector-mode="family-grid"] #ohana-intro:not(.theatre-welcome) .oi-welcome{
     top:max(52px,9vh)!important;max-width:94vw!important;width:94vw!important;
   }
-  #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome strong{
+  #char-select[data-selector-mode="family-grid"] #ohana-intro:not(.theatre-welcome) .oi-welcome strong{
     font-size:clamp(53px,15vw,85px)!important;
   }
-  #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-enter{
+  #char-select[data-selector-mode="family-grid"] #ohana-intro:not(.theatre-welcome) .oi-enter{
     bottom:max(28px,5vh)!important;
   }
 }

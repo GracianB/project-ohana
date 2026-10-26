@@ -1,3 +1,6 @@
+import {drawIllustratedChapter} from './systems/illustrated-chapters.js';
+import {updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawFinalGauntlet,drawGauntletProjectile} from './systems/final-gauntlet.js';
+import {KEEPSAKES,readKeepsakes} from './systems/keepsakes.js';
 import {chapterAtlasHTML,chapterMapDetail,drawAdventureGuide} from './systems/adventure-guide-v2.js';
 import {drawMemoryAura} from './systems/memory-rewards-v2.js';
 import {drawChapterBossV2} from './systems/chapter-boss-art-v2.js';
@@ -112,7 +115,7 @@ import { FUSION_STORY } from "./systems/world1-story.js";
 import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, syncWorld1Album, toggleWorld1Album, world1AlbumKey, world1AlbumFor } from "./systems/world1-collect.js";
 import { readWorld1Seals, storeWorld1Seals, world1StartRoom, world1ChapterEntry } from "./systems/world1-progress.js";
 import { createWorld1BossDirector, world1BossFilterDamage, updateWorld1BossDirector, drawWorld1BossBackdrop, drawWorld1BossTelegraphs, drawWorld1BossOverlay, world1BossAccessibleText } from "./systems/world1-boss.js";
-import { playWorld1Cine, updateWorld1Cine, skipWorld1Cine, drawWorld1Cine, world1CineActive, syncWorld1CineControls } from "./systems/world1-cine.js";
+import { playWorld1Cine, flushWorld1CineQueue, updateWorld1Cine, skipWorld1Cine, drawWorld1Cine, world1CineActive, syncWorld1CineControls } from "./systems/world1-cine.js";
 import { makeDummy as w1MakeDummy, drawDummy as w1DrawDummy, baseHeight as w1BaseHeight } from "./systems/cinema-kit.js";
 // V468: Mundo 1 (diez salas de héroe + Corazón de Ohana) convive con el Mundo 2 (salas clásicas).
 const ROOMS = Object.freeze({ ...WORLD2_ROOMS, ...WORLD1_ROOMS });
@@ -480,7 +483,7 @@ game.doorHold = 0;
 game.finale = null;
 // A World 1 cutscene must never survive a new run, menu return, or room change.
 // Otherwise step() keeps advancing the old cinematic and freezes gameplay.
-game.world1Cine = null;
+game.world1Cine = null;game._pendingWorld1Cine=null;
 game.summonDelay = 0;
 game.roomId = "hub";
 game.won = false;
@@ -596,6 +599,7 @@ if(id==="hub"&&game.player?.id==="pizza"&&game.personalAdventureSolo)r=createPiz
 if(id==="hub"&&game.player?.id==="yomi"&&game.personalAdventureSolo)r=createYomiRoom(r);
 if(id==="hub"&&game.player?.id==="cuerno"&&game.personalAdventureSolo)r=createCuernoRoom(r);
 if (!r) return false;
+if(id==="w1-final"&&readKeepsakes().length<10){game.world1Won=false;game._w1WinSent=false;}
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
 beep("locked");
@@ -619,7 +623,7 @@ if(game.personalAdventureSolo&&!game._e2eLegacyStart){
 const first = !game.visited[id];
 // Clear only the cinematic of the previous room. Do this BEFORE enterWorld1()
 // and playWorld1Cine() create the new room's introduction.
-game.world1Cine = null;
+game.world1Cine = null;game._pendingWorld1Cine=null;
 game.roomId = id;
 resetKiloCombo(game);resetPlayerLocomotion(game.player);stopKiloFlight(game.player);
 game.islandSprings=null;game.nestArena=null;
@@ -637,6 +641,7 @@ if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();
 game.renderDirty = true;
 game.roomDef = r;
+game.finalGauntlet=null;
 game._defeatedThisVisit=new Set();
 game.finale = null;
 game.visited[id] = true;
@@ -668,7 +673,7 @@ game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
 const e = makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng});
 e.spawnIndex = i;e._campaignOriginal=true;
-if(r.world1&&f[4]?.role){const foot=e.y+e.h;e.w=Math.max(38,e.w);e.h=Math.max(42,e.h);e.y=foot-e.h;}
+if(r.world1&&f[4]?.role){const foot=e.y+e.h;e.w=Math.max(46,e.w);e.h=Math.max(58,e.h);e.y=foot-e.h;}
 if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=Number.isFinite(f[4].anchorFloor)?f[4].anchorFloor-e.h:f[4].anchorY;}}
 if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
@@ -719,7 +724,7 @@ for (const e of game.enemies) {
 }
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
-if (isAirFoe(e)) continue;
+if (isAirFoe(e)||e.campaignRole==="flyer") continue;
 const floor = supportBelow(e,game.platforms,280);
 if (floor) e.y = floor.y - e.h;
 }
@@ -904,7 +909,7 @@ game.doorHold = 0;
 game.finale = null;
 // A World 1 cutscene must never survive a new run, menu return, or room change.
 // Otherwise step() keeps advancing the old cinematic and freezes gameplay.
-game.world1Cine = null;
+game.world1Cine = null;game._pendingWorld1Cine=null;
 game.summonDelay = 0;
 game.roomId = "hub";
 game.won = false;
@@ -934,7 +939,16 @@ game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = {
 game.world1Stations = {};
 game.world1Seals = readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
 game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='album-ceremony'){setMusicOverride(themeForRoom('w1-'+hero));}else if(kind==='album-page'||kind==='album-unlock'){beep('win');}else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
-game.onWorld1CineEnd=(id)=>{if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine="";syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
+game.canWorld1CineStart=()=>!game.relicScene&&!document.querySelector('#evo-stage.show,#supreme-cinema[aria-hidden="false"],#win-cinema.show');
+game.playWorld1Cine=(id,hero)=>playWorld1Cine(game,id,hero);
+game.onGauntletHero=(hero)=>{
+ if(!world1SealsComplete(game.world1Seals))return;const def=ROSTER.find(r=>r.id===hero);if(!def)return;
+ game.player=makePlayer(def);const p=game.player;p.evo=4;p.xp=420;applyForm(p,{silent:true});paintFit(p);p.x=8600;p.y=1134-p.h;p.grounded=true;p.invuln=90;
+ p.uPartner=loadUPartnerChoice(localStorage,hero);p.uBonds=readStoredUBonds(localStorage,hero);p.uExp=bondXP(p);p.uSurprise=!e2eEnabled;
+ game._signatureLink=null;game._combatFlow=null;game._assist=null;game._supremeFlow=null;game._evolutionAttacks=null;game.ult=null;game.bolts=[];game.slashes=[];game.projectiles=[];game.resetInput?.();renderAbilityBar();playMusic("w1-"+hero);game.renderDirty=true;
+};
+game.onGauntletAward=(hero)=>{addScore(1000);healPlayer(game.player,game.player.maxHealth*.2);game.nums.add(game.player.x,game.player.y-30,KEEPSAKES[hero].name.toUpperCase(),KEEPSAKES[hero].color,true);beep("win");};
+game.onWorld1CineEnd=(id)=>{gauntletCineEnded(game,id);if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine="";syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
 game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
 try { loadWorld1Collect(game); toggleWorld1Album(game,false); } catch (err) { console.warn("[ohana] world1 collect", err); }
 game.clearTicks = 0;
@@ -1067,7 +1081,7 @@ showSystemMessage("CHEAT", "Evolución de prueba: Ctrl+Z");
 }
 
 function respawn() {
-const p = game.player; if (!p) return;
+let p = game.player; if (!p) return;
 if (DeathFx.isPlaying()) DeathFx.cancel();
 p.x = 180; p.y = 500; p.vx = 0; p.vy = 0; p.health = p.maxHealth; p.dead = false; p.invuln = 50; game.combo = 0;
 p._combatChain = [];
@@ -1081,6 +1095,7 @@ const checkpoint=checkpointFor(r,game.checkpoints?.[r.id]);
 // per-room state. Carried items and transient timers are deliberately excluded.
 const puzzleCheckpoint=world1DeathCheckpoint(game);
 if(loadRoom(r.id)) restoreWorld1DeathCheckpoint(game,puzzleCheckpoint);
+p=game.player;
 if(checkpoint){p.x=checkpoint.x-p.w/2;p.y=checkpoint.y-p.h;p.grounded=true;p.jumps=0;}
 game.cam.x=Math.max(0,p.x-camW()/2);game.cam.y=Math.max(0,p.y-camH()/2);
 }
@@ -2154,7 +2169,7 @@ updateChampions(game);
 if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
 for (const e of game.enemies) {
 prepareChapterBossV2(e,game);
-const molts = e.kind === "cucaracho" && !e.baby && (e.evo || 0) < 2;
+const molts = !(e.roomId?.startsWith("w1-")&&e.campaignRole) && e.kind === "cucaracho" && !e.baby && (e.evo || 0) < 2;
 const posed = e.kind === "cucaracho" || e.kind === "mosquito" || e.kind === "cangrejo";
 if (!e.boss && e.hp <= 0 && posed && !molts) {
   if (e.dying == null) {
@@ -2220,6 +2235,7 @@ if (e.boss) {
   continue;
 }
 
+if(updateGauntletGuardian(e,game,hurtPlayer))continue;
 if(updateStitchoBoss(e,game,hurtPlayer))continue;
 if(updateChispinBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
 if(updateMichiBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
@@ -2804,7 +2820,7 @@ if (e.boss && e.hp <= 0) {
 }
 if (e.hp > 0) return true;
 if (e.deathHold && e.dying > 0) return true;
-if (e.kind === "cucaracho" && !e.baby && e.evo < 2) {
+if (!(e.roomId?.startsWith("w1-")&&e.campaignRole) && e.kind === "cucaracho" && !e.baby && e.evo < 2) {
   e.evo += 1;
   e.hp = Math.round(e.max * 0.9);
   e.max = Math.max(e.max, e.hp);
@@ -2848,7 +2864,7 @@ if (e.kind === "cucaracho") {
 }
 if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
-if(e.miniBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":e._chispinBoss?"¡TITÁN DE TRUENO VENCIDO!":e._growthChapter?NEXT_CHAPTERS[e._growthChapter].name.toUpperCase()+" VENCIDO":"¡EL CLARO VUELVE A CANTAR!",e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
+if(e.miniBoss&&!e.gauntletBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":e._chispinBoss?"¡TITÁN DE TRUENO VENCIDO!":e._growthChapter?NEXT_CHAPTERS[e._growthChapter].name.toUpperCase()+" VENCIDO":"¡EL CLARO VUELVE A CANTAR!",e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
   game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
@@ -2991,6 +3007,7 @@ ctx.restore();
 // V468: cada sala del Mundo 1 usa el decorado de su héroe y su silueta gigante.
 function drawWorld1Backdrop(world,W,H){
  const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
+ if(drawIllustratedChapter(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H)){drawChapterLandmarks(ctx,game,game.cam,t,W,H);return;}
  if(h==="stitcho"||h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
  else if(h==="cat")drawMichiGardens(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
 
@@ -3143,7 +3160,7 @@ for (const e of game.enemies) {
     if(!bespoke)drawEnemy(ctx,e,game.cam,t,{reduceMotion:game.reduceMotion||reduceMotion});
     if(game.stitchoTrail)drawStitchoEnemyAccent(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   }
-  drawChapterBossHud(ctx,e,game.cam);
+  if(!e.gauntletBoss)drawChapterBossHud(ctx,e,game.cam);
   if(e._fusionBoss){}
   else if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
@@ -3154,6 +3171,7 @@ for (const e of game.enemies) {
   else if(e._pizzaBoss){}
   else if(e._yomiBoss){}
   else if(e._cuernoBoss){}
+  else if(e.gauntletBoss){}
   else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
@@ -3170,7 +3188,7 @@ Passives.draw(ctx, game, t);
 // Network freshness is stable for this paint; asking it for each bolt also
 // touches performance.now() repeatedly, without changing synchronization.
 const peerCombatFresh=onlineCoop.hasFreshCombat(game);
-for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) drawProjectile(ctx, pr, game.cam, t);
+for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t))drawProjectile(ctx, pr, game.cam, t);}
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
@@ -3327,6 +3345,7 @@ drawAdventureGuide(ctx,game,viewW,viewH,Magic.status());
 if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH,{badge:false});}
 if(game.boss?._fusionBoss&&!game.world1Boss&&!world1CineActive(game))drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
 if(game.world1Boss)drawWorld1BossOverlay(ctx,game,viewW,viewH,t);
+drawFinalGauntlet(ctx,game,game.cam,viewW,viewH,t);
 if(world1CineActive(game))drawWorld1Cine(ctx,game,viewW,viewH,t,{drawActor:w1CineActor});
 drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
 }
@@ -3512,7 +3531,7 @@ for (let i = 0; i < pips.length; i++) {
 setText(DOM.combo, "Combo " + game.combo + " · Score " + game.score);
 const chip = DOM.comboChip;
 if (chip) {
-const show = game.combo >= 1 && game.comboT > 0;
+const show = game.combo >= 1 && game.comboT > 0 && !(game.finalGauntlet&&game.finalGauntlet.phase!=="complete");
 const text = show ? String(game.combo) : "";
 if (DOM.comboValue && DOM.comboValue.textContent !== text) {
   DOM.comboValue.textContent = text;
@@ -3591,8 +3610,9 @@ for(const btn of touchPowers){
 }
 }
 function step() {
-if(world1CineActive(game)){if(!paused&&!document.hidden)updateWorld1Cine(game);return;}
 if(game.relicScene){if(!paused&&!DOM.pause?.classList.contains("open")&&!document.hidden)tickRelicScene(game);return;}
+if(game._pendingWorld1Cine){flushWorld1CineQueue(game);if(game._pendingWorld1Cine)return;}
+if(world1CineActive(game)){if(!paused&&!document.hidden)updateWorld1Cine(game);return;}
 if (!canAct()) return;
 t++;
 game.t = t;
@@ -4047,6 +4067,7 @@ state() {
     running: !!game.running,
     paused,
     runtimeFaults: game.runtimeFaults || 0,
+    lastRuntimeFault: game.lastRuntimeFault || "",
     camera: { x: game.cam.x, y: game.cam.y },
     platformDrop: p ? {held:!!p._dropWasHeld,target:p._dropPlatform||null,vy:p.vy,t:game.t,hitstop:game.hitstop,doorHold:game.doorHold} : null,
     bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
@@ -4057,6 +4078,8 @@ state() {
     combatReport:{...(game.combatReport||{hits:0,damage:0})},
     world1Seals: [...(game.world1Seals || [])],
     world1Cine: game.world1Cine?.id || null,
+    gauntlet:gauntletSnapshot(game),
+    pendingWorld1Cine:game._pendingWorld1Cine?.id||null,
     worldW:game.worldW,worldH:game.worldH,kiloCombo:kiloComboStatus(game),sprinting:!!p?._sprinting,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
     hero: p?.id || null,
     evo: p ? p.evo : -1,

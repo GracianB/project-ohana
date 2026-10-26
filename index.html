@@ -8,26 +8,26 @@
   <link rel="manifest" href="manifest.json">
   <link rel="preload" href="assets/fonts/fredoka-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="fonts.css?v=ohana-601">
-  <link rel="stylesheet" href="style.css?v=ohana-601">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-601">
-  <link rel="stylesheet" href="atrium-interact.css?v=ohana-601">
-  <link rel="stylesheet" href="hud.css?v=ohana-601">
-  <link rel="stylesheet" href="evo.css?v=ohana-601">
-  <link rel="stylesheet" href="ending.css?v=ohana-601">
-  <link rel="stylesheet" href="intro.css?v=ohana-601">
-  <link rel="stylesheet" href="demo.css?v=ohana-601">
-  <link rel="stylesheet" href="experience.css?v=ohana-601">
-  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-601">
-  <link rel="stylesheet" href="supreme.css?v=ohana-601">
-  <link rel="stylesheet" href="world-map.css?v=ohana-601">
-  <link rel="stylesheet" href="mobile-v96.css?v=ohana-601">
-  <link rel="stylesheet" href="v100-special.css?v=ohana-601">
-  <link rel="stylesheet" href="v100-2.css?v=ohana-601">
-  <link rel="stylesheet" href="v101-milestones.css?v=ohana-601">
-  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-601">
-  <link rel="stylesheet" href="family-camp.css?v=ohana-601">
-  <link rel="stylesheet" href="play-interface.css?v=ohana-601">
+  <link rel="stylesheet" href="fonts.css?v=ohana-602">
+  <link rel="stylesheet" href="style.css?v=ohana-602">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-602">
+  <link rel="stylesheet" href="atrium-interact.css?v=ohana-602">
+  <link rel="stylesheet" href="hud.css?v=ohana-602">
+  <link rel="stylesheet" href="evo.css?v=ohana-602">
+  <link rel="stylesheet" href="ending.css?v=ohana-602">
+  <link rel="stylesheet" href="intro.css?v=ohana-602">
+  <link rel="stylesheet" href="demo.css?v=ohana-602">
+  <link rel="stylesheet" href="experience.css?v=ohana-602">
+  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-602">
+  <link rel="stylesheet" href="supreme.css?v=ohana-602">
+  <link rel="stylesheet" href="world-map.css?v=ohana-602">
+  <link rel="stylesheet" href="mobile-v96.css?v=ohana-602">
+  <link rel="stylesheet" href="v100-special.css?v=ohana-602">
+  <link rel="stylesheet" href="v100-2.css?v=ohana-602">
+  <link rel="stylesheet" href="v101-milestones.css?v=ohana-602">
+  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-602">
+  <link rel="stylesheet" href="family-camp.css?v=ohana-602">
+  <link rel="stylesheet" href="play-interface.css?v=ohana-602">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -126,10 +126,10 @@
     <span><kbd>S</kbd> bajar</span>
     <span><kbd>Shift</kbd> dash</span>
     <span><kbd>H</kbd> atacar</span>
-    <span><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> poderes · <kbd>U</kbd> suprema</span>
+    <span><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> poderes · <kbd>U</kbd> compañero</span>
   </div>
   <div id="ability-bar" role="group" aria-label="Habilidades"></div>
-  <canvas id="game" width="1280" height="720" tabindex="0" aria-label="Área de juego. WASD o flechas para moverse; W, flecha arriba o espacio para saltar. Puedes mantener dirección mientras saltas. H ataca, J K L I P usan poderes, U activa la suprema y E interactúa."></canvas>
+  <canvas id="game" width="1280" height="720" tabindex="0" aria-label="Área de juego. WASD o flechas para moverse; W, flecha arriba o espacio para saltar. Puedes mantener dirección mientras saltas. H ataca, J K L I P usan poderes, U llama al compañero y E interactúa."></canvas>
   <div id="touch" role="group" aria-label="Controles táctiles">
     <div class="col move">
       <button class="touch-btn" data-k="a" aria-label="Izquierda">◀</button>
@@ -195,8 +195,8 @@
           <button id="btn-continue" type="button" class="cta ghost hidden" disabled>Continuar</button>
           <button id="btn-play" type="button" class="cta primary">Jugar solo</button>
           <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
-          <button id="btn-coop" class="cta ghost" type="button" disabled aria-label="Cooperativo temporalmente en pausa: GitHub Pages no dispone del servidor de salas y señalización" title="En pausa: falta el servidor de salas y señalización WebRTC. Sin Netlify ni TURN de pago.">2 jugadores · en pausa</button>
-          <button id="btn-family-memory" class="cta ghost" type="button" data-open-constellation hidden>✦ Un lugar para ti · V500</button>
+          <button id="btn-coop" hidden class="cta ghost" type="button" disabled aria-label="Cooperativo en preparación">2 jugadores · en pausa</button>
+          <button id="btn-family-memory" class="cta ghost" type="button" data-open-constellation hidden>✦ Constelación de la familia</button>
           <button id="btn-festival-title" class="cta ghost" type="button">✦ Álbum <span id="festival-title-count">0 / 100</span></button>
         </div>
       </div>
@@ -267,7 +267,7 @@
   <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <section id="family-constellation" data-dialog="open" role="dialog" aria-modal="true" aria-labelledby="constellation-title" aria-hidden="true">
     <div class="constellation-shell">
-      <header class="constellation-header"><div><p>OHANA · V500 · LA CONSTELACIÓN DE LA FAMILIA</p><h2 id="constellation-title">Un lugar para ti.</h2><span>Diez voces. Una historia que ahora también te pertenece.</span></div><button class="constellation-close" type="button" aria-label="Cerrar constelación">Volver ↗</button></header>
+      <header class="constellation-header"><div><p>OHANA · LA CONSTELACIÓN DE LA FAMILIA</p><h2 id="constellation-title">Un lugar para ti.</h2><span>Diez voces. Una historia que ahora también te pertenece.</span></div><button class="constellation-close" type="button" aria-label="Cerrar constelación">Volver ↗</button></header>
       <div class="constellation-body"><nav class="constellation-stars" aria-label="Las diez voces de la familia"><div class="constellation-orbit" aria-hidden="true"></div><canvas width="420" height="420" aria-hidden="true"></canvas></nav>
       <article class="constellation-letter"><p class="constellation-gift"></p><h3 class="constellation-name"></h3><p class="constellation-voice" aria-live="polite" aria-atomic="true"></p><p class="constellation-progress" role="status"></p><div class="constellation-last"><span aria-hidden="true">✦</span><h3 class="constellation-last-title"></h3><p class="constellation-last-copy"></p></div></article></div>
       <footer>El Eco podía copiar sus voces. No podía hacer que volvieran a casa. Tú sí.<br><small>Creado por Gracián Baena · Gracias por jugar a OHANA.</small></footer>
@@ -288,16 +288,16 @@
     </div>
   </section>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script type="module" src="systems/cinema-loader.js?v=ohana-601"></script>
-  <script type="module" src="game.js?v=ohana-601"></script>
-  <script type="module" src="systems/title.js?v=ohana-601"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-601"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-601"></script>
-  <script type="module" src="systems/demo.js?v=ohana-601"></script>
+  <script type="module" src="systems/cinema-loader.js?v=ohana-602"></script>
+  <script type="module" src="game.js?v=ohana-602"></script>
+  <script type="module" src="systems/title.js?v=ohana-602"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-602"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-602"></script>
+  <script type="module" src="systems/demo.js?v=ohana-602"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js?v=ohana-601", { scope: "./" }).catch(function (error) {
+        navigator.serviceWorker.register("./sw.js?v=ohana-602", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
         });
       });

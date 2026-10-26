@@ -1,3 +1,4 @@
+import {drawTheatreStage,openingCastSpot,openingHeroHeight} from './theatre-stage.js';
 import {drawFamilyWelcomeBackdrop} from "../worlds/ohana-environments.js";
 import {shouldSkipCoopWelcome} from './coop-welcome.js';
 import {drawEnemyIslet} from './ohana-panorama.js';
@@ -79,15 +80,15 @@ export function playTitleIntro(options = {}) {
   el._played = true;
   el.innerHTML =
     '<canvas aria-hidden="true"></canvas>' +
-    '<div class="oi-welcome" aria-hidden="true"><span>PROJECT OHANA · ISLA HOKU</span><strong>OHANA</strong><small>La familia ya está aquí. Y tiene ganas de jugar.</small></div>' +
+    '<div class="oi-welcome" aria-hidden="true"><span>DIEZ VOCES. UNA FAMILIA.</span><strong>OHANA</strong><small>Un mundo que despierta cuando jugamos juntos.</small></div>' +
     '<div class="oi-story-dialogue" aria-live="polite" aria-atomic="true"><span class="oi-story-chapter"></span><strong class="oi-story-speaker"></strong><p class="oi-story-line"></p></div>' +
     '<div class="oi-story-controls"><button type="button" class="oi-previous" aria-label="Frase anterior">←</button><button type="button" class="oi-pause" aria-pressed="false">Pausar</button><button type="button" class="oi-next">Siguiente frase →</button></div>' +
-    '<button class="oi-enter" type="button">EXPLORAR EL CAMPAMENTO ↗</button>';
+    '<button class="oi-enter" type="button">EMPEZAR LA AVENTURA →</button>';
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
   el.setAttribute("aria-label", "Escena de bienvenida de Isla Hoku");
   el.setAttribute("aria-hidden", "false");
-  el.classList.add("show", "family-welcome");
+  el.classList.add("show", "family-welcome", "theatre-welcome");
   document.body.classList.remove("intro-complete");
   document.body.classList.add("intro-playing");
 
@@ -164,11 +165,11 @@ export function playTitleIntro(options = {}) {
   if (isE2E) {
     const welcomeL = layout();
     window.__OHANA_WELCOME_CAST_AUDIT = CAST.map(id => {
-      const slot = welcomeCastSpot(id,welcomeL.W,welcomeL.floor,welcomeL.heroH);
-      const fit = welcomeActorFit(opticalBounds[id],welcomeL.heroH,slot.slotWidth);
+      const slot = openingCastSpot(id,welcomeL.W,welcomeL.H);
+      const fit = welcomeActorFit(opticalBounds[id],openingHeroHeight(id,welcomeL.heroH),slot.slotWidth);
       return {id,x:slot.x,foot:slot.foot,row:slot.row,slotWidth:slot.slotWidth,
         measured:!!opticalBounds[id],paintedHeight:fit.paintedHeight,
-        paintedWidth:fit.paintedWidth,targetHeight:welcomeL.heroH};
+        paintedWidth:fit.paintedWidth,targetHeight:openingHeroHeight(id,welcomeL.heroH)};
     });
   }
   let raf = 0, t0 = 0, last = 0, lastPaint = 0, ready = false, done = false;
@@ -190,10 +191,10 @@ export function playTitleIntro(options = {}) {
     const W = fc.W, H = fc.H;
     return {
       W, H,
-      floor: H * (frozenSceneTime === null ? (W < 760 ? .67 : .75) : .80),
+      floor: H * (W<760?.60:.80),
       heroH: W < 760
-        ? clamp(Math.min(W * .16, H * .10), 30, 76)
-        : clamp(Math.min(W * .105, H * .145), 44, 112),
+        ? clamp(Math.min(W * .20, H * .14), 42, 90)
+        : clamp(Math.min(W * .12, H * .17), 70, 150),
     };
   }
 
@@ -206,6 +207,7 @@ export function playTitleIntro(options = {}) {
     p.vy = Number(opts.vy || 0);
     p.melee = Number(opts.melee || 0);
     p._poseOverride = opts.pose || "idle";
+    p._theatreHQ=h>150;
     if (activeDirection?.lineIndex === 2 && id === activeDirection.partner) p._poseOverride = "victory";
     // Stage-only gesture data. Never touches save state, combat or physics.
     p._introDragon = id === "dragon" ? (opts.dragonWelcome || null) : null;
@@ -218,17 +220,20 @@ export function playTitleIntro(options = {}) {
     p._introStitcho = id === "stitcho" ? (opts.stitchoWelcome || null) : null;
     p._introChispin = id === "chispin" ? (opts.chispinWelcome || null) : null;
     p._introMichi = id === "cat" ? (opts.michiWelcome || null) : null;
-    const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
+    const slotWidth = openingCastSpot(id,fc.W,fc.H,activeDirection).slotWidth;
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
+    if(isE2E){const audit=window.__OHANA_WELCOME_CAST_AUDIT?.find(row=>row.id===id);if(audit)Object.assign(audit,{x,foot:footY,slotWidth,paintedHeight:fit.paintedHeight,paintedWidth:fit.paintedWidth,targetHeight:h,row:openingCastSpot(id,fc.W,fc.H,activeDirection).row});}
     ctx.save();
     if (activeDirection?.hero && id !== activeDirection.hero && id !== activeDirection.partner) ctx.globalAlpha *= .82;
     ctx.translate(x - fit.centerOffsetX * fit.scale, footY);
     if (opts.alpha !== undefined) ctx.globalAlpha *= clamp(opts.alpha, 0, 1);
     if (opts.rotate) ctx.rotate(opts.rotate);
-    drawDummy(ctx, p, 0, 0, fit.scale, tf);
+    const background=id!==activeDirection?.hero&&id!==activeDirection?.partner;
+    const actorTick=background?Math.floor((tf+ROSTER.findIndex(r=>r.id===id)*2)/12)*12:tf;
+    drawDummy(ctx, p, 0, 0, fit.scale, actorTick);
     ctx.restore();
     // Labels travel with the character during comic beats.
-    if (opts.noLabel) return;
+    if (opts.noLabel || id!==(activeDirection?.hero||"kilo")) return;
     const def = ROSTER.find(r => r.id === id);
     ctx.save();
     ctx.globalAlpha = opts.alpha === undefined ? .82 : clamp(opts.alpha,0,1)*.82;
@@ -351,7 +356,7 @@ export function playTitleIntro(options = {}) {
   function scene(t,L,direction=null) {
     activeDirection = direction;
     const {W,floor,heroH}=L;
-    const spots = Object.fromEntries(CAST.map(id => [id, welcomeCastSpot(id,W,floor,heroH)]));
+    const spots = Object.fromEntries(CAST.map(id => [id, openingCastSpot(id,W,L.H,direction)]));
     const {dino,dragon,kilo,stitcho,chispin,cat,frita,pizza,yomi,cuerno}=spots;
     const tf=t*60;
     const loop=direction ? direction.sceneTime : t%14;
@@ -373,15 +378,10 @@ export function playTitleIntro(options = {}) {
     if(wonder&&wonder.beat.kind!=="cameraThief")drawWelcomeFantasy(ctx,W,L.H,wonder,spots,{reduce,
       actorAt:(id,x,foot,h,alpha)=>actor(id,x,foot,h,tf,{alpha,noLabel:true,pose:"idle"})});
 
-    // The vignettes occupy connected garden terraces, not a floating lineup.
-    for(const spot of Object.values(spots)){
-      ctx.save();ctx.globalAlpha=.62;ctx.fillStyle='#416f64';ctx.beginPath();ctx.ellipse(spot.x,spot.foot+4,spot.slotWidth*.40,8,0,0,Math.PI*2);ctx.fill();
-      ctx.strokeStyle='#c5d3a2';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(spot.x,spot.foot+1,spot.slotWidth*.39,5,0,0,Math.PI*2);ctx.stroke();ctx.restore();
-    }
     // V350: Kilo plays an actual connected five-form body/ukulele rig.
     // Pollination, laughter and surprise are its own fully timed story.
     const kiloBeat=kiloWelcomeBeat(loop,reduce);
-    const kiloHeight=heroH*1.08;
+    const kiloHeight=openingHeroHeight("kilo",heroH,direction)*1.08;
     drawKiloWelcomeFX(ctx,kilo.x,kilo.foot,kiloHeight,t,kiloBeat,"back");
     actor("kilo",kilo.x,kilo.foot,kiloHeight,tf,{
       facing:1,pose:"idle",kiloWelcome:kiloBeat
@@ -417,7 +417,7 @@ export function playTitleIntro(options = {}) {
     const zap=Math.sin(clamp(seg(loop,1.72,2.28),0,1)*Math.PI);
     const sx=stitcho.x-W*.007*duel,cxp=chispin.x+W*.007*duel;
     const stitchoBeat=stitchoWelcomeBeat(loop,reduce);
-    const stitchoHeight=heroH;
+    const stitchoHeight=openingHeroHeight("stitcho",heroH,direction);
     drawStitchoWelcomeFX(ctx,sx,stitcho.foot+2,stitchoHeight,t,stitchoBeat,"back");
     actor("stitcho",sx,stitcho.foot+2,stitchoHeight,tf,{
       facing:1,pose:"idle",stitchoWelcome:stitchoBeat,rotate:-stitchoBeat.shock*.045
@@ -433,7 +433,7 @@ export function playTitleIntro(options = {}) {
     // V352 Chispin reacts THROUGH its living spring-tail and gill rig,
     // complementing Stitcho's independent comedy rather than attacking.
     const chispinBeat=chispinWelcomeBeat(loop,reduce);
-    const chispinHeight=heroH*.96;
+    const chispinHeight=openingHeroHeight("chispin",heroH,direction)*.96;
     drawChispinWelcomeFX(ctx,cxp,chispin.foot+1,chispinHeight,t,chispinBeat,"back");
     drawChispaCeremony(ctx,cxp,chispin.foot+1,chispinHeight,t,reduce,"intro");
     actor("chispin",cxp,chispin.foot+1,chispinHeight,tf,{
@@ -476,7 +476,7 @@ export function playTitleIntro(options = {}) {
     // five connected acts in her real kitten/cloud/moon/guardian anatomy.
     const catFace=loop>3.0&&loop<4.2?-1:1;
     const michiBeat=michiWelcomeBeat(loop,reduce);
-    const michiHeight=heroH*.96;
+    const michiHeight=openingHeroHeight("cat",heroH,direction)*.96;
     drawMichiWelcomeFX(ctx,cat.x,cat.foot+3,michiHeight,t,michiBeat,"back");
     actor("cat",cat.x,cat.foot+3,michiHeight,tf,{
       facing:catFace,pose:"idle",michiWelcome:michiBeat
@@ -505,7 +505,7 @@ export function playTitleIntro(options = {}) {
     // quiet living silhouette → proud inhale → tiny sneeze → recoil → grin.
     // Never hijack global abilities, movement or the other nine actors.
     const dragonBeat=dragonWelcomeBeat(loop,reduce);
-    const dragonHeight=heroH*1.10;
+    const dragonHeight=openingHeroHeight("dragon",heroH,direction)*1.10;
     drawDragonWelcomeFX(ctx,dragon.x,dragon.foot+1,dragonHeight,t,dragonBeat,"back");
     actor("dragon",dragon.x,dragon.foot+1,dragonHeight,tf,{
       facing:1,pose:"idle",dragonWelcome:dragonBeat
@@ -533,11 +533,11 @@ export function playTitleIntro(options = {}) {
     // running/jumping choreography remains intact for the next art pass.
     const chase=seg(loop,4.25,7.15);
     const fritaBeat=fritaWelcomeBeat(loop,reduce);
-    const fritaHeight=heroH*1.06;
+    const fritaHeight=openingHeroHeight("frita",heroH,direction)*1.06;
     let fritaX=frita.x,fritaY=frita.foot+3;
     let fritaPose="idle",fritaVelocity=0,fritaFacing=-1;
     const pizzaBeat=pizzaWelcomeBeat(loop,reduce);
-    const pizzaHeight=heroH*1.02;
+    const pizzaHeight=openingHeroHeight("pizza",heroH,direction)*1.02;
     let pizzaX=pizza.x,pizzaY=pizza.foot+2,pizzaPose="idle";
     let pizzaFacing=-1,pizzaVelocity=0,pizzaGrounded=true;
     if(chase>0&&chase<1){
@@ -612,7 +612,7 @@ export function playTitleIntro(options = {}) {
     // V348: Yomi remains fully readable THROUGH the entire 14-second loop.
     // The shadow is a local theatrical curtain, never eight seconds of absence.
     const yomiBeat=yomiWelcomeBeat(loop,reduce);
-    const yomiHeight=heroH*1.03;
+    const yomiHeight=openingHeroHeight("yomi",heroH,direction)*1.03;
     drawYomiWelcomeFX(ctx,yomi.x,yomi.foot,yomiHeight,t,yomiBeat,"back");
     actor("yomi",yomi.x,yomi.foot,yomiHeight,tf,{
       facing:-1,alpha:1,pose:"idle",yomiWelcome:yomiBeat
@@ -643,7 +643,7 @@ export function playTitleIntro(options = {}) {
     // Subsequent forms keep their canonical orb/foal/wings. Stage magic
     // echoes the horn without triggering the actual dream U.
     const cuernoBeat=cuernoWelcomeBeat(loop,reduce);
-    const cuernoHeight=heroH*1.06;
+    const cuernoHeight=openingHeroHeight("cuerno",heroH,direction)*1.06;
     drawCuernoWelcomeFX(ctx,cuerno.x,cuerno.foot+1,cuernoHeight,t,cuernoBeat,"back");
     actor("cuerno",cuerno.x,cuerno.foot+1,cuernoHeight,tf,{
       facing:-1,alpha:1,pose:"idle",cuernoWelcome:cuernoBeat
@@ -673,7 +673,7 @@ export function playTitleIntro(options = {}) {
     // anticipation, gentle two-foot stomp, surprise and contagious delight.
     // Only Dino receives this stage direction. Dragón V344 is unchanged.
     const dinoBeat=dinoWelcomeBeat(loop,reduce);
-    const dinoHeight=heroH*1.08;
+    const dinoHeight=openingHeroHeight("dino",heroH,direction)*1.08;
     drawDinoWelcomeFX(ctx,dino.x,dino.foot+2,dinoHeight,t,dinoBeat,"back");
     actor("dino",dino.x,dino.foot+2,dinoHeight,tf,{
       facing:1,pose:"idle",dinoWelcome:dinoBeat
@@ -746,17 +746,17 @@ export function playTitleIntro(options = {}) {
     }
     el.querySelector(".oi-story-dialogue").hidden=!direction;
     const dialogue=el.querySelector(".oi-story-dialogue");
-    const spot=line&&CAST.includes(line.speaker)?welcomeCastSpot(line.speaker,L.W,L.floor,L.heroH):null;
+    const spot=line&&CAST.includes(line.speaker)?openingCastSpot(line.speaker,L.W,L.H,direction):null;
     const bubbleWidth=Math.min(300,L.W-28),bubbleHeight=dialogue.offsetHeight||140;
     const bx=clamp(spot?.x??L.W*.78,bubbleWidth/2+14,L.W-bubbleWidth/2-14);
     const by=clamp((spot?.foot??L.H*.48)-L.heroH*1.08,bubbleHeight+18,L.H-170);
-    dialogue.style.left=bx+"px";dialogue.style.top=by+"px";
+    dialogue.style.left="";dialogue.style.top="";
     ctx.save();ctx.clearRect(0,0,L.W,L.H);
-    island(direction?storyTime:t,L);
+    drawTheatreStage(ctx,L.W,L.H,direction?.hero||"kilo",reduce?0:storyTime*60,{opening:true,reduceMotion:reduce});
     // Their own tiny island: real enemy renderers, no AI, collision or campaign state.
     if(direction){
-      const ex=L.W*.81,ey=L.H*.36,r=Math.min(125,Math.max(60,L.W*.11));
-      drawEnemyIslet(ctx,ex,ey,r,storyTime,reduce);
+      const ex=L.W*.18,ey=L.H*(L.W<760?.54:.78)+24,r=Math.min(90,Math.max(40,L.W*.07));
+      // The visitors stand on the promenade, never on a floating islet.
       for(let i=0;i<stageEnemies.length;i++){ctx.save();ctx.translate(ex+(i-1)*r*.54,ey-24);ctx.scale(.9,.9);drawEnemy(ctx,stageEnemies[i],{x:0,y:0},reduce?0:storyTime*60);ctx.restore();}
     }
     scene(reduce?0.7:(frozenSceneTime ?? direction.sceneTime),L,direction);

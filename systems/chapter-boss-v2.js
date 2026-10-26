@@ -2,7 +2,7 @@ import {readCombatDifficulty,scaleCombatHealth} from './combat-difficulty.js';
 const states=['_drummer','_glitch','_titan','_astralCat','_prismBeast','_igneousDragon','_stoneColossus','_crispyKing','_magmaChef','_spiritGuide'];
 export function chapterBossMind(e){return states.map(k=>e?.[k]).find(Boolean);}
 export function prepareChapterBossV2(e,g){
- if(!e?.miniBoss||!e.roomId?.startsWith('w1-')||e.hp<=0)return;
+ if(e?.gauntletBoss||!e?.miniBoss||!e.roomId?.startsWith('w1-')||e.hp<=0)return;
  const b=chapterBossMind(e),p=g.player;if(!b||!p)return;
  const d=readCombatDifficulty();
  if(!e._v2Boss){
