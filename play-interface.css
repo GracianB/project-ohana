@@ -151,3 +151,6 @@ body.playing.world1-story :is(#ability-bar,#combo-chip,#prompt){display:none!imp
 
 /* A reward is a playable character's scene, without stale combat widgets. */
 body.playing.relic-cinema :is(#ability-bar,#combo-chip,#prompt,#hud,#top-actions,#controls-hint,#touch,#notification-container,#boss-wrap,#experience-ribbon){display:none!important;visibility:hidden!important;pointer-events:none!important}
+
+/* The guardian instruction card owns its space; relevant new toasts remain visible below. */
+body.playing.guardian-fight #notification-container{top:var(--guardian-notice-top,310px);}

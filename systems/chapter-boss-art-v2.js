@@ -12,7 +12,7 @@ export function drawChapterBossV2(c,e,cam,t,reduced=false){
  if(!e.miniBoss||!e.roomId?.startsWith('w1-'))return false;
  const id=e.gauntletBoss||e.roomId.slice(3),P=PALETTES[id],b=chapterBossMind(e);if(!P||!b)return false;
  const time=reduced?0:t,warn=b.phase==='warn',attack=['attack','strike'].includes(b.phase),rest=b.phase==='rest',aim=b.aim||1,
-  age=b.clock??b.timer??0,lift=warn?Math.min(1,1-age/60):attack?1:0,flap=reduced?0:Math.sin(time*.07),step=reduced?0:Math.sin(time*.15),scale=e.h/180;
+  age=b.clock??b.timer??0,lift=warn?Math.max(0,Math.min(1,1-age/(b.rhythm?.warn||60))):attack?1:0,flap=reduced?0:Math.sin(time*.07),step=reduced?0:Math.sin(time*.15),scale=e.h/180;
  c.save();c.translate(e.x+e.w/2-cam.x,e.y+e.h-cam.y);c.scale(scale,scale);c.lineCap='round';c.lineJoin='round';
  if(e.flash>0){c.globalAlpha=.9;c.translate(5,3);c.rotate(-.045);}
  if(e.evolved)drawEvolvedRear(c,id,P,time,reduced,warn);

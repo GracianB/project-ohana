@@ -1,0 +1,856 @@
+{
+  "version": "ohana-603",
+  "status": "locally_validated_pending_publication",
+  "node": {
+    "passed": 1591,
+    "failed": 0
+  },
+  "offline": {
+    "runtime_modules": 341,
+    "resources": 401
+  },
+  "campaign": {
+    "difficulty": "normal",
+    "journal": [
+      {
+        "hero": "kilo",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 71.68,
+        "iterations": 255,
+        "sealCount": 1,
+        "discoveries": 3
+      },
+      {
+        "hero": "stitcho",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 72.3,
+        "iterations": 359,
+        "sealCount": 2,
+        "discoveries": 3
+      },
+      {
+        "hero": "chispin",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 47.74,
+        "iterations": 166,
+        "sealCount": 3,
+        "discoveries": 3
+      },
+      {
+        "hero": "cat",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 50.2,
+        "iterations": 215,
+        "sealCount": 4,
+        "discoveries": 3
+      },
+      {
+        "hero": "cuerno",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 66.5,
+        "iterations": 283,
+        "sealCount": 5,
+        "discoveries": 3
+      },
+      {
+        "hero": "dragon",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 104,
+        "iterations": 209,
+        "sealCount": 6,
+        "discoveries": 3
+      },
+      {
+        "hero": "dino",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 130.56,
+        "iterations": 255,
+        "sealCount": 7,
+        "discoveries": 3
+      },
+      {
+        "hero": "frita",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 55.84,
+        "iterations": 210,
+        "sealCount": 8,
+        "discoveries": 3
+      },
+      {
+        "hero": "pizza",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 110,
+        "iterations": 262,
+        "sealCount": 9,
+        "discoveries": 3
+      },
+      {
+        "hero": "yomi",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 49.68000000000001,
+        "iterations": 240,
+        "sealCount": 10,
+        "discoveries": 3
+      },
+      {
+        "gauntlet": {
+          "deaths": 0,
+          "rescued": [
+            "kilo",
+            "stitcho",
+            "chispin",
+            "cat",
+            "cuerno",
+            "dragon",
+            "dino",
+            "frita",
+            "pizza",
+            "yomi"
+          ],
+          "cinematics": [
+            "keepsakeIntro",
+            "keepsakeRescue",
+            "bossIntro"
+          ]
+        }
+      }
+    ],
+    "finalDeaths": 0,
+    "phases": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "films": [
+      "bossDefeat",
+      "ending"
+    ],
+    "won": true,
+    "combatReport": {
+      "hits": 139,
+      "damage": 2131.0799999999986
+    },
+    "errors": []
+  },
+  "hard_gauntlet": {
+    "deaths": 0,
+    "rescued": [
+      "kilo",
+      "stitcho",
+      "chispin",
+      "cat",
+      "cuerno",
+      "dragon",
+      "dino",
+      "frita",
+      "pizza",
+      "yomi"
+    ],
+    "cinematics": [
+      "keepsakeIntro",
+      "keepsakeRescue",
+      "bossIntro"
+    ]
+  },
+  "presentation": {
+    "guardian_viewports": [
+      {
+        "name": "desktop",
+        "state": {
+          "faults": 0,
+          "phase": "fight",
+          "hero": "kilo"
+        },
+        "paint": {
+          "world": {
+            "a": 1.0199999809265137,
+            "d": 1.0199999809265137,
+            "e": -14.399986267089844,
+            "f": -8.999960899353027,
+            "rect": [
+              1475.744188526145,
+              655.3529411764706,
+              92,
+              16
+            ]
+          },
+          "hud": {
+            "a": 1,
+            "d": 1,
+            "e": 0,
+            "f": 0,
+            "rect": [
+              345.59999999999997,
+              92,
+              748.8000000000001,
+              99,
+              14
+            ]
+          }
+        },
+        "layout": {
+          "x": 345.59999999999997,
+          "y": 92,
+          "w": 748.8000000000001,
+          "h": 114,
+          "title": [
+            "TAMBOR DE LA MAREA"
+          ],
+          "move": [
+            "Redoble de orilla"
+          ],
+          "cue": [
+            "Salta la onda y cambia de altura para evitar la nota."
+          ],
+          "titleSize": 16,
+          "bodySize": 12,
+          "titleY": 106,
+          "titleHeight": 19,
+          "moveY": 130,
+          "cueY": 148,
+          "cueHeight": 16,
+          "barY": 170,
+          "statusY": 188
+        },
+        "accessible": "Tambor de la marea. 0 de 10 recuerdos a salvo. APERTURA · ATACA AHORA. Su defensa está abierta. Acércate y ataca antes de que se recupere. Vida del guardián: 100 por ciento.",
+        "actualLinesFit": true
+      },
+      {
+        "name": "phone",
+        "state": {
+          "faults": 0,
+          "phase": "fight",
+          "hero": "kilo"
+        },
+        "paint": {
+          "world": {
+            "a": 1.0199999809265137,
+            "d": 1.0199999809265137,
+            "e": -3.899996280670166,
+            "f": -8.43999195098877,
+            "rect": [
+              887.1764705882397,
+              600.4509803921568,
+              92,
+              16
+            ]
+          },
+          "hud": {
+            "a": 1,
+            "d": 1,
+            "e": 0,
+            "f": 0,
+            "rect": [
+              12,
+              190,
+              366,
+              115,
+              14
+            ]
+          }
+        },
+        "layout": {
+          "x": 12,
+          "y": 190,
+          "w": 366,
+          "h": 99,
+          "title": [
+            "TAMBOR DE LA MAREA"
+          ],
+          "move": [],
+          "cue": [
+            "Salta la onda y cambia de altura para evitar la nota."
+          ],
+          "titleSize": 16,
+          "bodySize": 12,
+          "titleY": 204,
+          "titleHeight": 19,
+          "moveY": 228,
+          "cueY": 231,
+          "cueHeight": 16,
+          "barY": 253,
+          "statusY": 271
+        },
+        "accessible": "Tambor de la marea. 0 de 10 recuerdos a salvo. OBSERVA AL GUARDIÁN. Acércate al guardián, a tu derecha. El combate empieza cuando entra en pantalla. Vida del guardián: 100 por ciento.",
+        "actualLinesFit": true
+      },
+      {
+        "name": "landscape",
+        "state": {
+          "faults": 0,
+          "phase": "fight",
+          "hero": "kilo"
+        },
+        "paint": {
+          "world": {
+            "a": 1.0199999809265137,
+            "d": 1.0199999809265137,
+            "e": -8.43999195098877,
+            "f": -3.899996280670166,
+            "rect": [
+              1109.7254901960823,
+              219.11764705882354,
+              92,
+              16
+            ]
+          },
+          "hud": {
+            "a": 1,
+            "d": 1,
+            "e": 0,
+            "f": 0,
+            "rect": [
+              236.32000000000002,
+              12,
+              371.35999999999996,
+              110,
+              14
+            ]
+          }
+        },
+        "layout": {
+          "x": 236.32000000000002,
+          "y": 12,
+          "w": 371.35999999999996,
+          "h": 95,
+          "title": [
+            "TAMBOR DE LA MAREA"
+          ],
+          "move": [],
+          "cue": [
+            "Salta la onda y cambia de altura para evitar la nota."
+          ],
+          "titleSize": 13,
+          "bodySize": 11,
+          "titleY": 26,
+          "titleHeight": 16,
+          "moveY": 47,
+          "cueY": 50,
+          "cueHeight": 15,
+          "barY": 71,
+          "statusY": 89
+        },
+        "accessible": "Tambor de la marea. 0 de 10 recuerdos a salvo. OBSERVA AL GUARDIÁN. Acércate al guardián, a tu derecha. El combate empieza cuando entra en pantalla. Vida del guardián: 100 por ciento.",
+        "actualLinesFit": true
+      }
+    ],
+    "projectile_identities": 7,
+    "projectile_states": 3
+  },
+  "performance": [
+    {
+      "label": "desktop",
+      "hero": "kilo",
+      "scene": "route",
+      "median": 33.30000000000018,
+      "p95": 33.400000000000546,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 26
+    },
+    {
+      "label": "desktop",
+      "hero": "kilo",
+      "scene": "guardian",
+      "median": 33.29999999999927,
+      "p95": 33.399999999999636,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 26
+    },
+    {
+      "label": "desktop",
+      "hero": "stitcho",
+      "scene": "route",
+      "median": 16.69999999999891,
+      "p95": 16.80000000000109,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "desktop",
+      "hero": "stitcho",
+      "scene": "guardian",
+      "median": 16.69999999999891,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "desktop",
+      "hero": "chispin",
+      "scene": "route",
+      "median": 16.69999999999891,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "desktop",
+      "hero": "chispin",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "desktop",
+      "hero": "cat",
+      "scene": "route",
+      "median": 16.700000000000728,
+      "p95": 33.29999999999927,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "desktop",
+      "hero": "cat",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "desktop",
+      "hero": "cuerno",
+      "scene": "route",
+      "median": 16.700000000000728,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 19
+    },
+    {
+      "label": "desktop",
+      "hero": "cuerno",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 19
+    },
+    {
+      "label": "desktop",
+      "hero": "dragon",
+      "scene": "route",
+      "median": 16.700000000000728,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 23
+    },
+    {
+      "label": "desktop",
+      "hero": "dragon",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 33.29999999999927,
+      "over50": 1,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 23
+    },
+    {
+      "label": "desktop",
+      "hero": "dino",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.799999999995634,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 22
+    },
+    {
+      "label": "desktop",
+      "hero": "dino",
+      "scene": "guardian",
+      "median": 16.700000000004366,
+      "p95": 50,
+      "over50": 2,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 22
+    },
+    {
+      "label": "desktop",
+      "hero": "frita",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.80000000000291,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 21
+    },
+    {
+      "label": "desktop",
+      "hero": "frita",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.700000000004366,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 21
+    },
+    {
+      "label": "desktop",
+      "hero": "pizza",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.80000000000291,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 21
+    },
+    {
+      "label": "desktop",
+      "hero": "pizza",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.700000000004366,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 21
+    },
+    {
+      "label": "desktop",
+      "hero": "yomi",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 33.400000000001455,
+      "over50": 1,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 22
+    },
+    {
+      "label": "desktop",
+      "hero": "yomi",
+      "scene": "guardian",
+      "median": 33.19999999999709,
+      "p95": 50,
+      "over50": 4,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 22
+    },
+    {
+      "label": "mobile",
+      "hero": "kilo",
+      "scene": "route",
+      "median": 16.700000000000728,
+      "p95": 50,
+      "over50": 3,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 26
+    },
+    {
+      "label": "mobile",
+      "hero": "kilo",
+      "scene": "guardian",
+      "median": 16.69999999999891,
+      "p95": 33.399999999999636,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 26
+    },
+    {
+      "label": "mobile",
+      "hero": "stitcho",
+      "scene": "route",
+      "median": 16.69999999999891,
+      "p95": 33.30000000000109,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "mobile",
+      "hero": "stitcho",
+      "scene": "guardian",
+      "median": 16.700000000000728,
+      "p95": 16.80000000000109,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "mobile",
+      "hero": "chispin",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "mobile",
+      "hero": "chispin",
+      "scene": "guardian",
+      "median": 16.700000000000728,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "mobile",
+      "hero": "cat",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "mobile",
+      "hero": "cat",
+      "scene": "guardian",
+      "median": 16.700000000000728,
+      "p95": 33.29999999999927,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 25
+    },
+    {
+      "label": "mobile",
+      "hero": "cuerno",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 19
+    },
+    {
+      "label": "mobile",
+      "hero": "cuerno",
+      "scene": "guardian",
+      "median": 16.700000000000728,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 19
+    },
+    {
+      "label": "mobile",
+      "hero": "dragon",
+      "scene": "route",
+      "median": 16.700000000000728,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 23
+    },
+    {
+      "label": "mobile",
+      "hero": "dragon",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.700000000004366,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 23
+    },
+    {
+      "label": "mobile",
+      "hero": "dino",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.700000000004366,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 22
+    },
+    {
+      "label": "mobile",
+      "hero": "dino",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.700000000004366,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 22
+    },
+    {
+      "label": "mobile",
+      "hero": "frita",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.799999999995634,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 21
+    },
+    {
+      "label": "mobile",
+      "hero": "frita",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.799999999995634,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 21
+    },
+    {
+      "label": "mobile",
+      "hero": "pizza",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.700000000004366,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 21
+    },
+    {
+      "label": "mobile",
+      "hero": "pizza",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.700000000004366,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 21
+    },
+    {
+      "label": "mobile",
+      "hero": "yomi",
+      "scene": "route",
+      "median": 16.69999999999709,
+      "p95": 16.799999999995634,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 22
+    },
+    {
+      "label": "mobile",
+      "hero": "yomi",
+      "scene": "guardian",
+      "median": 16.69999999999709,
+      "p95": 16.799999999995634,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 3,
+      "enemies": 22
+    }
+  ],
+  "standard_browser_audit": "passed",
+  "human_difficulty_acceptance": "pending_user_play",
+  "github_quality": "Not run for V603; previous Quality runs are historical evidence only"
+}

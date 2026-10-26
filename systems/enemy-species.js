@@ -74,8 +74,8 @@ function relationFor(a, b, roleOf) {
   const pa = speciesProfile(a.kind);
   const pb = speciesProfile(b.kind);
   if (pa.family === pb.family && pa.family !== "wild") return SPECIES_RELATIONS.PACK;
-  const ra = roleOf(a.kind);
-  const rb = roleOf(b.kind);
+  const ra = roleOf(a.kind, a);
+  const rb = roleOf(b.kind, b);
   const key = [ra, rb].sort().join("|");
   return ROLE_PAIR[key] || SPECIES_RELATIONS.NONE;
 }

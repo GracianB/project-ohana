@@ -22,7 +22,7 @@ export async function playGauntlet(page,{onBeat=()=>{}}={}){
   else{
    const side=p.x+p.w/2<b.x+b.w/2?-1:1;
    target=b.x+b.w/2+side*(b.phase==='rest'?95:310);
-   if(b.phase==='warn'&&b.marks?.length){const x=p.x+p.w/2;const near=b.marks.find(xx=>Math.abs(xx-x)<90);if(near!=null)target=near+(x<=near?-120:120);}
+   if(b.phase==='warn'&&['lightning','geysers'].includes(b.pattern)&&b.marks?.length){const x=p.x+p.w/2;const near=b.marks.find(xx=>Math.abs(xx-x)<(b.columnWidth||38)/2+55);if(near!=null)target=near+(x<=near?-1:1)*((b.columnWidth||38)/2+85);}
    const gap=Math.abs(p.x+p.w/2-b.x-b.w/2);
    if(gap<650){await press('j');if(i%20===0)await press('u');}
    if(b.phase==='rest'&&gap<270){await press('h');if(i%9===0)await press('l');if(s.hero!=='kilo'||s.kiloCombo?.ready)await press('i');if(s.finisherCharge>=100)await press('p');}

@@ -2448,7 +2448,12 @@ function yomiScanStep(g, f, p) {
   // Cortafuegos: hostile shots touched by the ring are deleted.
   for (const pr of g.projectiles || []) {
     if (!pr || pr.owner === "player" || !(pr.life > 0)) continue;
-    if (Math.hypot((pr.x || 0) - f.x, (pr.y || 0) - f.y) > f.r) continue;
+    // Arena beams/columns have a remote origin and a real persistent volume.
+    // Touch that volume with the existing scan circle; its size never enlarges
+    // the scanner. Ordinary shots retain their original point-based behaviour.
+    const volume = ['prism','lightning','geysers','ember'].includes(pr.gauntlet);
+    if (volume ? !circleHit(f.x, f.y, f.r, pr)
+      : Math.hypot((pr.x || 0) - f.x, (pr.y || 0) - f.y) > f.r) continue;
     pr.life = 0; f.erased++;
     boom(g, pr.x, pr.y, "#4ff0c8", 4);
   }

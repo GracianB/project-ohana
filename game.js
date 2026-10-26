@@ -1,5 +1,5 @@
 import {drawIllustratedChapter} from './systems/illustrated-chapters.js';
-import {updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawFinalGauntlet,drawGauntletProjectile} from './systems/final-gauntlet.js';
+import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
 import {KEEPSAKES,readKeepsakes} from './systems/keepsakes.js';
 import {chapterAtlasHTML,chapterMapDetail,drawAdventureGuide} from './systems/adventure-guide-v2.js';
 import {drawMemoryAura} from './systems/memory-rewards-v2.js';
@@ -942,6 +942,7 @@ game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){storeWorld1Seals(game
 game.canWorld1CineStart=()=>!game.relicScene&&!document.querySelector('#evo-stage.show,#supreme-cinema[aria-hidden="false"],#win-cinema.show');
 game.playWorld1Cine=(id,hero)=>playWorld1Cine(game,id,hero);
 game.onGauntletHero=(hero)=>{
+ clearPersistentObjective();dismissNotifications();
  if(!world1SealsComplete(game.world1Seals))return;const def=ROSTER.find(r=>r.id===hero);if(!def)return;
  game.player=makePlayer(def);const p=game.player;p.evo=4;p.xp=420;applyForm(p,{silent:true});paintFit(p);p.x=8600;p.y=1134-p.h;p.grounded=true;p.invuln=90;
  p.uPartner=loadUPartnerChoice(localStorage,hero);p.uBonds=readStoredUBonds(localStorage,hero);p.uExp=bondXP(p);p.uSurprise=!e2eEnabled;
@@ -2910,8 +2911,10 @@ if (pr.owner === "player") {
     }
   }
 } else if (game.player && !game.player.dead && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, game.player)) {
-  if (game.player.invuln <= 0) hurtPlayer(pr.dmg, "-" + Math.round(pr.dmg));
-  pr.life = 0;
+  if(!resolveGuardianProjectileContact(pr,game.player,hurtPlayer)){
+    if (game.player.invuln <= 0) hurtPlayer(pr.dmg, "-" + Math.round(pr.dmg));
+    pr.life = 0;
+  }
 }
 }
 compactLiveList(game.projectiles);
@@ -3236,6 +3239,7 @@ if (game.won && game.player.id === "cuerno" && !game.player.dead && game._cuerno
   const cp = game.player;
   try { drawCuernoVictory(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, (t - game._cuernoWonT) / 60, (Number(cp.evo) || 0) + 1); } catch (_) {}
 }
+drawGauntletWorld(ctx,game,game.cam,t);
 ctx.restore();
 if (game.storyLine && game.bossIntro && !game.finale && !document.querySelector("#notification-container .game-notification")) {
 ctx.save();
@@ -3345,7 +3349,7 @@ drawAdventureGuide(ctx,game,viewW,viewH,Magic.status());
 if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH,{badge:false});}
 if(game.boss?._fusionBoss&&!game.world1Boss&&!world1CineActive(game))drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
 if(game.world1Boss)drawWorld1BossOverlay(ctx,game,viewW,viewH,t);
-drawFinalGauntlet(ctx,game,game.cam,viewW,viewH,t);
+drawGauntletHud(ctx,game,viewW,viewH);
 if(world1CineActive(game))drawWorld1Cine(ctx,game,viewW,viewH,t,{drawActor:w1CineActor});
 drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
 }
@@ -3573,6 +3577,14 @@ if (bossA11y) {
   const accessibleBoss = world1BossAccessibleText(boss);
   if (bossA11y.textContent !== accessibleBoss) bossA11y.textContent = accessibleBoss;
 }
+// The rematches use a Canvas HUD too. Announce phase changes and coarse health
+// bands without flooding assistive technology for every hit or animation frame.
+let guardianA11y=document.getElementById("world1-guardian-a11y");
+const guardianText=gauntletAccessibleText(game),guardianView=gauntletPresentation(game);
+document.body.classList.toggle("guardian-fight",!!guardianView&&game.running);
+if(guardianView&&game.running){ctx.save();const layout=gauntletHudLayout(ctx,guardianView,viewW,viewH);ctx.restore();document.body.style.setProperty("--guardian-notice-top",(layout.y+layout.h+10)+"px");}else document.body.style.removeProperty("--guardian-notice-top");
+if(!guardianA11y&&guardianText){guardianA11y=document.createElement("span");guardianA11y.id="world1-guardian-a11y";guardianA11y.setAttribute("role","status");guardianA11y.setAttribute("aria-live","polite");guardianA11y.setAttribute("aria-atomic","true");guardianA11y.style.cssText="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0";document.body.appendChild(guardianA11y);}
+if(guardianA11y&&guardianA11y.textContent!==guardianText)guardianA11y.textContent=guardianText;
 document.body.classList.toggle("boss-fight", !!boss);
 if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
 if (boss) {

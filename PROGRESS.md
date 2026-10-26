@@ -1,3 +1,13 @@
+# V603 · ohana-603 · validación en curso
+
+Guardianes con tres técnicas, ritmo distinto por dificultad, avisos que coinciden
+con el daño y HUD legible. Corregida coordinación de roles de la fauna.
+1.591 pruebas Node y Release Gate aprobados. Auditoría general de navegador
+aprobada. Campaña limpia Normal completa y diez rescates en Difícil aprobados.
+Matrices Canvas y HUD en escritorio, teléfono y horizontal comprobados.
+Diseño: docs/V603.md. Evidencia: docs/V603-VALIDATION.json.
+Pendiente verificación de publicación.
+
 # V602 · ohana-602 · publicada y verificada
 
 Portada y selección del Observatorio, nueve paisajes ilustrados, anatomías de

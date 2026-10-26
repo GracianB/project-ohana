@@ -77,6 +77,24 @@ export function enemyRole(kind = "") {
   return ROLE_BY_KIND[kind] || ENEMY_ROLES.SKIRMISHER;
 }
 
+// Authored campaign anatomy/attacks are independent of the legacy kind used
+// to construct the foe. Coordinate the controller it actually runs: captains
+// support the group from the back line, jumpers flank, and flyers dive.
+const CAMPAIGN_ROLE = Object.freeze({
+  pursuer: ENEMY_ROLES.BRUISER,
+  shield: ENEMY_ROLES.BRUISER,
+  shooter: ENEMY_ROLES.ARTILLERY,
+  gunner: ENEMY_ROLES.ARTILLERY,
+  captain: ENEMY_ROLES.ARTILLERY,
+  jumper: ENEMY_ROLES.SKIRMISHER,
+  flyer: ENEMY_ROLES.DIVER,
+  burrower: ENEMY_ROLES.AMBUSHER,
+});
+export function enemyCombatRole(e = {}) {
+  return Object.hasOwn(CAMPAIGN_ROLE, e.campaignRole)
+    ? CAMPAIGN_ROLE[e.campaignRole] : enemyRole(e.kind);
+}
+
 export function enemyIsCommitted(e = {}) {
   if (e.telegraph || e._campaign?.active>0) return true;
   return ACTIVE_FLAGS.some((key) => Number(e[key]) > 0);
@@ -94,7 +112,7 @@ function hpRatio(e = {}) {
 }
 
 function scoreCandidate(e, player, hard, tick, roomId) {
-  const role = enemyRole(e.kind);
+  const role = enemyCombatRole(e);
   const profile = PROFILE[role];
   const dx = centerX(player) - centerX(e);
   const dy = centerY(player) - centerY(e);
@@ -120,7 +138,8 @@ function attackBudget(alive, hard, roomId) {
 }
 
 function lowHealthRetreat(e, role) {
-  if (e.elite || e.kind === "escoria" || e.kind === "cucaracho") return false;
+  if (e.elite || (!Object.hasOwn(CAMPAIGN_ROLE, e.campaignRole) &&
+    (e.kind === "escoria" || e.kind === "cucaracho"))) return false;
   const threshold = PROFILE[role]?.retreat || 0;
   return threshold > 0 && hpRatio(e) <= threshold;
 }
@@ -153,7 +172,7 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
   const memory=roomId.startsWith("w1-")?encounterMemory(player,tick):{air:0,ranged:0};
   // Small groups are cheaper to scan directly; crowded arenas use a spatial index.
   const spatial = alive.length>12 ? buildEncounterSpatialIndex(alive) : null;
-  prepareSpeciesEvolution(alive, roomId, tick, enemyRole);
+  prepareSpeciesEvolution(alive, roomId, tick, (kind, e) => enemyCombatRole(e || {kind}));
   const budget = roomId.startsWith("w1-") ? Math.min(alive.length,readCombatDifficulty().budget) : viewport&&alive.some(e=>e.elite&&Math.abs(centerX(e)-centerX(player))<500) ? 4 : attackBudget(alive.length, hard, roomId);
   const sorted = alive.slice().sort((a, b) =>
     scoreCandidate(b, player, hard, tick, roomId) - scoreCandidate(a, player, hard, tick, roomId)
@@ -168,7 +187,7 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
   }
 
   for (const e of alive) {
-    const role = enemyRole(e.kind);
+    const role = enemyCombatRole(e);
     const profile = PROFILE[role];
     const ecologyRange = ecologyPreferredRange(roomId, role, profile.preferred);
     const preferred = speciesPreferredRange(e, ecologyRange);
@@ -242,7 +261,7 @@ export function enemySteering(e = {}, player = null) {
   if (!player || player.dead) return Object.freeze({ x: 0, scale: 1, intent: "PATROL" });
   const dx = centerX(player) - centerX(e);
   const dir = Math.sign(dx) || 1;
-  const role = enemyRole(e.kind);
+  const role = enemyCombatRole(e);
   const intent = e.aiIntent || "PRESS";
 
   if (intent === "RETREAT") return Object.freeze({ x: -dir, scale: role === ENEMY_ROLES.ARTILLERY ? 0.16 : 0.11, intent });
@@ -261,7 +280,7 @@ export function enemySteering(e = {}, player = null) {
 export function enemyDirectorSnapshot(enemies = []) {
   return Object.freeze((Array.isArray(enemies) ? enemies : []).filter((e) => e && !e.boss).map((e) => Object.freeze({
     kind: e.kind,
-    role: e.aiRole || enemyRole(e.kind),
+    role: e.aiRole || enemyCombatRole(e),
     intent: e.aiIntent || "PATROL",
     permit: e.aiAttackPermit !== false,
     threat: Math.round(clamp(e.aiThreat, 0, 1) * 100),
