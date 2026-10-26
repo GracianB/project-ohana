@@ -103,3 +103,14 @@ body.intro-complete #start-intro,body.intro-complete #ohana-intro,body.playing #
 #ohana-intro.family-welcome .oi-story-controls button{background:#142b3bcc;color:#d4dfd0;border-color:#b9c2a933;min-height:38px;border-radius:8px;font-size:10px;}
 @media(max-width:760px){#ohana-intro.family-welcome .oi-welcome{top:6vh;left:7vw;right:7vw;max-width:none;gap:9px}#ohana-intro.family-welcome .oi-welcome strong{font-size:76px}#ohana-intro.family-welcome .oi-welcome small{font-size:13px;max-width:30ch}#ohana-intro.family-welcome .oi-welcome span{font-size:8px;letter-spacing:.20em}#ohana-intro.family-welcome .oi-story-dialogue{left:7vw!important;right:7vw;bottom:21vh!important;width:auto;padding:12px 16px}.oi-story-line{font-size:14px!important;line-height:1.5!important}#ohana-intro.family-welcome .oi-enter{left:7vw!important;right:7vw!important;width:86vw!important;bottom:10vh!important;min-height:48px!important;text-align:center;font-size:11px}#ohana-intro .oi-story-controls{left:7vw;right:7vw;bottom:3vh;justify-content:center;}#ohana-intro .oi-story-speaker{font-size:17px}}
 @media(max-height:550px) and (min-width:761px){#ohana-intro.family-welcome .oi-welcome{top:6vh}#ohana-intro.family-welcome .oi-welcome strong{font-size:72px}#ohana-intro.family-welcome .oi-story-dialogue{bottom:28vh!important;padding:8px 15px}#ohana-intro.family-welcome .oi-story-line{font-size:13px}#ohana-intro.family-welcome .oi-enter{bottom:10vh!important;min-height:42px!important}}
+
+/* V604 · Keep the story controls above the CTA on portrait phones.
+   The cinematic art remains unobstructed and all buttons stay reachable. */
+@media (max-width:760px) {
+  #ohana-intro.family-welcome .oi-story-controls {
+    bottom:calc(10vh + 64px)!important;
+  }
+  #ohana-intro.family-welcome .oi-story-dialogue {
+    bottom:calc(10vh + 130px)!important;
+  }
+}

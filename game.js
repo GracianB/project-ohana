@@ -3582,6 +3582,7 @@ if (!bossA11y && boss?._fusionBoss) {
 if (bossA11y) {
   const accessibleBoss = world1BossAccessibleText(boss);
   if (bossA11y.textContent !== accessibleBoss) bossA11y.textContent = accessibleBoss;
+  lastAnnouncedQuimeraPhase = boss?._fusionBoss ? Number(boss.phase) : null;
 }
 // The rematches use a Canvas HUD too. Announce phase changes and coarse health
 // bands without flooding assistive technology for every hit or animation frame.
@@ -3627,6 +3628,9 @@ for(const btn of touchPowers){
  btn.setAttribute("aria-label",key+" · "+status.def.name+" · "+status.label);
 }
 }
+// HUD refreshes at 10 Hz normally, but boss phase transitions are immediate:
+ // never let assistive technology announce the previous Quimera phase.
+let lastAnnouncedQuimeraPhase = null;
 function step() {
 if(game.relicScene){if(!paused&&!DOM.pause?.classList.contains("open")&&!document.hidden)tickRelicScene(game);return;}
 if(game._pendingWorld1Cine){flushWorld1CineQueue(game);if(game._pendingWorld1Cine)return;}
@@ -3661,7 +3665,7 @@ if (game.finale) {
   game.combatFx?.update();
   updateCam();
   onlineCoop.tick(game);
-  if (t % 6 === 0) updateHUD();
+  if (t % 6 === 0 || (game.boss?._fusionBoss && Number(game.boss.phase) !== lastAnnouncedQuimeraPhase)) updateHUD();
   return;
 }
 tickWorldSummon();
@@ -3690,7 +3694,7 @@ updateCuernoFx(game.cuernoFx, game.player?.id === "cuerno" ? game.player : null,
 updateCam();
 game.coopRemote = onlineCoop.remote;
 onlineCoop.tick(game);
-if (t % 6 === 0) updateHUD();
+if (t % 6 === 0 || (game.boss?._fusionBoss && Number(game.boss.phase) !== lastAnnouncedQuimeraPhase)) updateHUD();
 if (t % 300 === 0) save();
 }
 function containRuntimeFault(scope, error) {
