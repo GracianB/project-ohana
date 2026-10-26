@@ -3,12 +3,12 @@ import {KEEPSAKE_ORDER,KEEPSAKES} from '../systems/keepsakes.js';
 const scenes=new Set(['keepsakeIntro','keepsakeRescue','bossIntro','bossDefeat','ending']);
 const phases=new Set(['dormant','intro','fight','released','rescue','complete']);
 const finite=(n,lo,hi)=>typeof n==='number'&&Number.isFinite(n)&&n>=lo&&n<=hi;
-function bounded(value,depth=0){
+function bounded(value,depth=0,key=''){
  if(depth>9)return false;if(value===null||typeof value==='boolean')return true;
- if(typeof value==='number')return Number.isFinite(value)&&Math.abs(value)<=1e9;
+ if(typeof value==='number')return Number.isFinite(value)&&Math.abs(value)<=(key==='seed'?0xffffffff:1e9);
  if(typeof value==='string')return value.length<=512;
  if(Array.isArray(value))return value.length<=128&&value.every(v=>bounded(v,depth+1));
- if(value&&typeof value==='object')return Object.keys(value).length<=96&&Object.entries(value).every(([k,v])=>!['__proto__','constructor','prototype'].includes(k)&&k.length<=96&&bounded(v,depth+1));return false;
+ if(value&&typeof value==='object')return Object.keys(value).length<=96&&Object.entries(value).every(([k,v])=>!['__proto__','constructor','prototype'].includes(k)&&k.length<=96&&bounded(v,depth+1,k));return false;
 }
 const clean=value=>{try{const text=JSON.stringify(value);if(text.length>40000)return null;const parsed=JSON.parse(text);return bounded(parsed)?parsed:null;}catch{return null;}};
 export function finaleEnemy(enemy){

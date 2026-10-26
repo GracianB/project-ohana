@@ -75,3 +75,15 @@ test('Quimera keeps its full native ninety-shot budget in a bounded final snapsh
  const boss={x:9300,y:844,w:230,h:290,hp:2800,max:2800,kind:'boss',_fusionBoss:true,_fusion:{mode:'attack',shots:Array.from({length:90},(_,id)=>({id,x:9000+id,y:1000,r:20,vx:5,vy:0,life:120,dmg:18,k:'orb',source:'QUIMERA · LA FAMILIA RECUERDA SU HOGAR'}))}};
  const old={found:[...KEEPSAKE_ORDER],phase:'complete',hero:'yomi',guardian:null,boss:null,cue:null,seen:[],won:false,revision:1};const s=mergeAdventureFinale(old,{state:{...old,boss}},auth);assert.equal(s.boss._fusion.shots.length,90);assert.ok(JSON.stringify(s).length<60000);
 });
+
+test('native unsigned Quimera seed survives relay through all phases and the shared ending',()=>{
+ const boss={x:9300,y:844,w:230,h:290,hp:2800,max:2800,kind:'boss',_fusionBoss:true,_fusion:{seed:4099588279,mode:'attack',shots:[]}};
+ const g={onlineAdventure:true,roomId:'w1-final',coopAuthority:true,boss,finalGauntlet:{found:[...KEEPSAKE_ORDER],phase:'complete',hero:'yomi',guardian:null}};
+ let s=mergeAdventureFinale(null,adventureFinalePayload(g),auth);
+ // Hydration begins after the already earned ten rescue receipts.
+ const previous={found:[...KEEPSAKE_ORDER],phase:'complete',hero:'yomi',guardian:null,boss:null,cue:null,seen:[],won:false,revision:1};
+ s=mergeAdventureFinale(previous,adventureFinalePayload(g),auth);assert.equal(s.boss._fusion.seed,4099588279);
+ boss.hp=0;g.world1Won=true;g.world1Cine={id:'ending'};const p=adventureFinalePayload(g);s=mergeAdventureFinale(s,p,auth);assert.equal(s.won,true);assert.equal(s.complete,false);
+ s=ready(ready(s,p.state.cue.id,'host'),p.state.cue.id,'guest');assert.equal(s.complete,true);
+ const remote={onlineAdventure:true,roomId:'w1-final',enemies:[]};applyAdventureFinale(remote,s);assert.equal(remote.coopFinalWon,true);
+});

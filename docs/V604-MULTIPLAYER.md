@@ -74,6 +74,7 @@ npm run test:browser:adventure-network
 npm run test:browser:versus-network
 npm run test:browser:finale-network
 npm run test:browser:coop-campaign
+npm run test:browser:coop-complete
 ```
 
 Si se usa Chromium del sistema: `CHROMIUM_BIN=/usr/bin/chromium npm run test:browser:versus-network` (igual para aventura). Capturas y registros estructurados en `test-results/v604/`.
@@ -83,7 +84,7 @@ Si se usa Chromium del sistema: `CHROMIUM_BIN=/usr/bin/chromium npm run test:bro
 - Pruebas del servidor: controles ordinarios derrotan fauna, evolucionan y alcanzan tres eliminaciones; repetición de solicitudes no duplica premios. No se atribuye esa partida completa al piloto de navegador.
 - Aventura escritorio/móvil: héroes distintos, aislamiento del perfil individual, relevo voluntario y regreso, objetivo completado por el invitado y recibido por el anfitrión, rechazo y viaje aceptado por ambos. Las esperas de estado del arnés son síncronas; no se aceptan promesas sin verificar la condición.
 
-Antes de publicar: completar físicamente los diez duelos finales y Quimera en cooperativo y ampliar derrota/reintento a las diez salas y las cuatro fases de Quimera, evaluar dificultad y equilibrio PvP con personas, latencia/pérdida de conexión, accesibilidad y dispositivos físicos. La infraestructura pública seguirá apagada hasta una decisión expresa del usuario.
+Antes de publicar: ampliar derrota/reintento a las diez salas y las cuatro fases de Quimera, evaluar dificultad y equilibrio PvP con personas, latencia/pérdida de conexión, accesibilidad y dispositivos físicos. La infraestructura pública seguirá apagada hasta una decisión expresa del usuario.
 
 ## Recorrido cooperativo con controles de juego
 
@@ -93,4 +94,18 @@ El arnés separa el reloj de renderizado y los ticks de física mediante una int
 
 Correcciones detectadas al recorrer: la aventura comienza como bebé y sin XP del combate antiguo; tras un viaje aceptado, ambos aparecen en la entrada canónica y se descartan mensajes pendientes de la sala anterior. Las posiciones usan la altura de la forma actual y se limpia el movimiento antes del relevo.
 
-Resultado local del 26 de octubre: diez capítulos consecutivos desde perfiles limpios, treinta descubrimientos y entrada conjunta al acto final, sin errores JavaScript. Dos derrotas naturales (Stitcho y Michi) se recuperaron con el reintento conjunto. Cada héroe ganó sus cinco formas; el invitado recorrió cada sala y registró golpes. Diario conservado en `docs/V604-VALIDATION.json`. Los diez duelos finales y Quimera siguen pendientes de esta comprobación continua.
+Resultado local del 26 de octubre: diez capítulos consecutivos desde perfiles limpios, treinta descubrimientos y entrada conjunta al acto final, sin errores JavaScript. Dos derrotas naturales (Stitcho y Michi) se recuperaron con el reintento conjunto. Cada héroe ganó sus cinco formas; el invitado recorrió cada sala y registró golpes. Diario conservado en `docs/V604-VALIDATION.json`. La comprobación posterior del acto final se detalla abajo.
+
+## Entrada al acto final y comprobación de combate
+
+La entrada de Corazón de Ohana permite recuperar al héroe elegido en el vestíbulo después de haber usado al propietario de la última sala. Solo aparece esa opción; no se abre el repertorio ni se permite cambiar dentro de la arena. El servidor recupera sus estadísticas anteriores y no cura con el relevo.
+
+`test:browser:coop-complete` prolonga el recorrido desde Kilo con los diez guardianes y Quimera, mediante ataques ordinarios y reintento del equipo. Usa los mismos dos navegadores y el mismo servidor. El comando de diez capítulos sigue terminando en la entrada final. `OHANA_COOP_FINAL_PROBE=1 OHANA_COOP_FINALE=1 npm run test:browser:coop-campaign` es una sonda separada: prepara los diez sellos y las formas finales para comprobar el combate sin repetir las salas. Conserva la vida nativa de los once jefes; no acredita una campaña ganada desde cero. El resultado distingue explícitamente ese estado preparado.
+
+La sincronización de Quimera admite su semilla nativa de 32 bits sin ampliar los límites de posiciones, proyectiles o estructuras. El límite genérico anterior descartaba el jefe cuando esa semilla superaba mil millones; el anfitrión podía terminar mientras el invitado no recibía la victoria. La prueba de reglas reproduce la semilla `4099588279` y exige el recibo de derrota y las dos confirmaciones del final.
+
+Para cargar una corrección durante un recorrido largo, el arnés admite `OHANA_COOP_RESUME_FILE` con un punto de control **realmente ganado** del servidor local. No prepara sellos ni cambia estadísticas. Ese archivo contiene credenciales de la sala de prueba: se conserva solo en almacenamiento temporal local, no se incluye en el repositorio ni en el informe público. El resultado distingue una campaña reanudada de una ejecución sin recargas y de la sonda de combate preparada.
+
+Para guardar esos puntos al aceptar cada viaje: `OHANA_COOP_CHECKPOINT_FILE=/tmp/ohana-coop-earned.json npm run test:browser:coop-complete`. Para continuar: `OHANA_COOP_RESUME_FILE=/tmp/ohana-coop-earned.json npm run test:browser:coop-complete`. Ambos archivos y comandos son locales; el informe no contiene credenciales.
+
+Resultado del recorrido completo: diez salas y treinta descubrimientos ganados; punto del servidor reanudado tras Cuerno para cargar la corrección; cinco salas restantes, diez guardianes, las cuatro fases de Quimera y resultado compartido superados con controles ordinarios. No se prepararon sellos, XP, vida ni derrotas de jefes. Hubo dos reintentos naturales en las salas y ninguno en el acto final. Kilo y Dino recuperaron su estado ganado mediante el relevo de la entrada. Ambos obtuvieron exactamente un resultado con los diez recuerdos, sin errores JavaScript. Se acredita una campaña ganada con reanudación, no una ejecución ininterrumpida de navegador. El reloj sigue siendo el arnés local de simulación descrito arriba, sin promesas de latencia o rendimiento entre dispositivos.

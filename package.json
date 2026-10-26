@@ -54,7 +54,8 @@
     "test:browser:coop-campaign": "node tests/browser/v604-coop-campaign.mjs",
     "test:browser:finale-network": "node tests/browser/v604-finale-network.mjs",
     "test:browser:versus-network": "node tests/browser/v604-versus-network.mjs",
-    "test:browser:adventure-network": "node tests/browser/v604-adventure-network.mjs"
+    "test:browser:adventure-network": "node tests/browser/v604-adventure-network.mjs",
+    "test:browser:coop-complete": "OHANA_COOP_FINALE=1 node tests/browser/v604-coop-campaign.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

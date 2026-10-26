@@ -4,7 +4,7 @@
   "date": "2026-10-26",
   "integrated_pr": 441,
   "node": {
-    "passed": 1663,
+    "passed": 1666,
     "failed": 0
   },
   "release_gate": "passed",
@@ -227,7 +227,7 @@
       "distinct_heroes": true,
       "travel_reject_then_accept": true,
       "solo_checkpoint_preserved": true,
-      "full_shared_campaign": false,
+      "full_shared_campaign": true,
       "shared_station_completion": true,
       "solo_seals_and_discoveries_isolated": true,
       "voluntary_role_swap_mobile": true,
@@ -504,14 +504,315 @@
         "next_room": "w1-final",
         "errors": [],
         "final_duels_completed": false
+      },
+      "final_entry_restores_chosen_hero_without_healing": true,
+      "quimera_uint32_seed_relay_regression": "passed; seed 4099588279 reaches guest and permits shared victory",
+      "earned_campaign_completion": {
+        "status": "passed",
+        "difficulty": "normal",
+        "transport": "local HTTP",
+        "resume": "earned server checkpoint after five rooms, restored to load the Quimera serialization fix; not an uninterrupted browser run",
+        "prepared_progress_or_boss_health": false,
+        "pairing": "chapter owners borrowed voluntarily; Kilo and Dino restored at final entry",
+        "journal": [
+          {
+            "hero": "kilo",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 71.74,
+            "iterations": 318,
+            "discoveries": 3,
+            "guest": {
+              "hero": "kilo",
+              "x": 12382.965694849116,
+              "hp": 79.94000000000003,
+              "report": {
+                "hits": 13,
+                "damage": 178.17999999999998
+              }
+            }
+          },
+          {
+            "hero": "stitcho",
+            "deaths": 1,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 7.259999999999993,
+            "iterations": 367,
+            "discoveries": 3,
+            "guest": {
+              "hero": "stitcho",
+              "x": 12733.99267477052,
+              "hp": 178.48000000000002,
+              "report": {
+                "hits": 32,
+                "damage": 398.8399999999999
+              }
+            }
+          },
+          {
+            "hero": "chispin",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 32.46,
+            "iterations": 213,
+            "discoveries": 3,
+            "guest": {
+              "hero": "chispin",
+              "x": 12717.087654772775,
+              "hp": 15.280000000000017,
+              "report": {
+                "hits": 49,
+                "damage": 568.7599999999999
+              }
+            }
+          },
+          {
+            "hero": "cat",
+            "deaths": 1,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 45.419999999999995,
+            "iterations": 315,
+            "discoveries": 3,
+            "guest": {
+              "hero": "cat",
+              "x": 13012.639903274689,
+              "hp": 131.39999999999998,
+              "report": {
+                "hits": 69,
+                "damage": 813.26
+              }
+            }
+          },
+          {
+            "hero": "cuerno",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 80.82599999999996,
+            "iterations": 304,
+            "discoveries": 3,
+            "guest": {
+              "hero": "cuerno",
+              "x": 13036.823435024076,
+              "hp": 61.120000000000005,
+              "report": {
+                "hits": 81,
+                "damage": 973.74
+              }
+            }
+          },
+          {
+            "hero": "dragon",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 104,
+            "iterations": 303,
+            "discoveries": 3,
+            "guest": {
+              "hero": "dragon",
+              "x": 12554.11231475107,
+              "hp": 64.95999999999998,
+              "report": {
+                "hits": 20,
+                "damage": 259.6
+              }
+            }
+          },
+          {
+            "hero": "dino",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 140,
+            "iterations": 275,
+            "discoveries": 3,
+            "guest": {
+              "hero": "dino",
+              "x": 12871.10961132699,
+              "hp": 195.98000000000008,
+              "report": {
+                "hits": 35,
+                "damage": 460.19999999999993
+              }
+            }
+          },
+          {
+            "hero": "frita",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 23.61999999999998,
+            "iterations": 303,
+            "discoveries": 3,
+            "guest": {
+              "hero": "frita",
+              "x": 12787.97392810313,
+              "hp": 6.180000000000009,
+              "report": {
+                "hits": 58,
+                "damage": 732.7800000000002
+              }
+            }
+          },
+          {
+            "hero": "pizza",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 101.74,
+            "iterations": 279,
+            "discoveries": 3,
+            "guest": {
+              "hero": "pizza",
+              "x": 12565.240100092258,
+              "hp": 97.99999999999999,
+              "report": {
+                "hits": 73,
+                "damage": 927.4800000000005
+              }
+            }
+          },
+          {
+            "hero": "yomi",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 74,
+            "iterations": 293,
+            "discoveries": 3,
+            "guest": {
+              "hero": "yomi",
+              "x": 13150.532124968819,
+              "hp": 139.72000000000003,
+              "report": {
+                "hits": 79,
+                "damage": 1001.8200000000004
+              }
+            }
+          }
+        ],
+        "guardian_deaths": 0,
+        "rescued": [
+          "kilo",
+          "stitcho",
+          "chispin",
+          "cat",
+          "cuerno",
+          "dragon",
+          "dino",
+          "frita",
+          "pizza",
+          "yomi"
+        ],
+        "quimera_deaths": 0,
+        "quimera_phases": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "results": [
+          {
+            "hero": "kilo",
+            "keepsakes": [
+              "kilo",
+              "stitcho",
+              "chispin",
+              "cat",
+              "cuerno",
+              "dragon",
+              "dino",
+              "frita",
+              "pizza",
+              "yomi"
+            ],
+            "wins": 1
+          },
+          {
+            "hero": "dino",
+            "keepsakes": [
+              "kilo",
+              "stitcho",
+              "chispin",
+              "cat",
+              "cuerno",
+              "dragon",
+              "dino",
+              "frita",
+              "pizza",
+              "yomi"
+            ],
+            "wins": 1
+          }
+        ],
+        "shared_scenes_finished_before_results": true,
+        "full_scene_trace_recorded": false,
+        "separate_scene_sequence_fixture": "passed",
+        "errors": [],
+        "javascript_error_scope": "resumed browser contexts; pre-checkpoint simulation asserted zero runtime faults after each control step"
       }
     },
     "webrtc_datachannel": "not_validated",
     "remaining": [
-      "physically complete ten final cooperative duels and Quimera in the same campaign",
       "retry coverage in all chapters and four Quimera phases",
       "cross-device and cross-network latency and WebRTC",
-      "human PvP balancing"
+      "human PvP balancing",
+      "complete Versus browser match; previous full-match proof uses server controls"
     ]
   },
   "offline": {

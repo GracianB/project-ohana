@@ -20,3 +20,20 @@ test('relevo preserves both heroes health and progress; stale movement cannot ov
 test('relevo rejects another roster hero, a mid-route swap, dead heroes and invalid credentials',async()=>{
  const {service,h}=await team();await assert.rejects(service.role(h.roomId,h.identity,'pizza'),e=>e.code==='ROLE_INVALID');await service.move(h.roomId,h.identity,pose(1,{positionX:7000}));await assert.rejects(service.role(h.roomId,h.identity,'kilo'),e=>e.code==='CAMP_REQUIRED');await service.move(h.roomId,h.identity,pose(2,{health:0}));await assert.rejects(service.role(h.roomId,h.identity,'kilo'),e=>e.code==='ROLE_UNAVAILABLE');await assert.rejects(service.role(h.roomId,{...h.identity,token:'wrong'},'kilo'),e=>e.code==='INVALID_SESSION');
 });
+
+test('final entry restores only the chosen hero; no role swap inside the arena',()=>{
+ const p={characterId:'yomi',homeCharacterId:'dino'};
+ assert.equal(adventureCamp('w1-final',550,1094),true);
+ assert.equal(adventureCamp('w1-final',8600,1094),false);
+ assert.equal(adventureRoleAllowed(p,'w1-final','dino'),true);
+ assert.equal(adventureRoleAllowed(p,'w1-final','kilo'),false);
+ assert.equal(adventureRoleAllowed(p,'hub','dino'),false);
+});
+
+test('authenticated final-entry return restores the saved lobby hero without healing',async()=>{
+ const t=await team(),{service,h,g}=t;await service.move(h.roomId,h.identity,pose(1,{health:43,experience:12}));await service.role(h.roomId,h.identity,'kilo');
+ const {WORLD1_ORDER}=await import('../systems/world1-rooms.js');
+ for(const destination of [...WORLD1_ORDER.slice(1).map(id=>'w1-'+id),'w1-final']){const vote=await service.travel(h.roomId,h.identity,{decision:'propose',destination});await service.travel(h.roomId,g.identity,{decision:'accept',voteId:vote.travel.id});}
+ t.advance(1300);const restored=await service.role(h.roomId,h.identity,'dino',1),p=restored.players.find(p=>p.isYou);
+ assert.equal(p.worldRoomId,'w1-final');assert.equal(p.characterId,'dino');assert.equal(p.health,43);assert.equal(p.experience,12);assert.equal(p.evolution,0);
+});
