@@ -28,16 +28,16 @@ export const WORLD1_HERO_ROOMS = Object.freeze(WORLD1_ORDER.map((h) => "w1-" + h
 
 // world = índice de WORLDS (cielo base) · seal = interacción única de la sala.
 export const WORLD1_THEMES = Object.freeze({
-  kilo:    { name: "Claro de Kilo",            short: "Kilo",      world: 6, color: "#ffacc2", tint: "#ff8fb1", relic: "Canción del hogar",     seal: "serenata",   cast: ["cucaracho","phosquito","planta","rana"],        sectors: ["Puerta aloha","Campo de hibiscos","Escenario del ukelele","Lago de las guirnaldas","Senda de los cocos","Escenario del Tambor"] },
-  stitcho: { name: "Astillero de Stitcho",     short: "Stitcho",   world: 4, color: "#67ddff", tint: "#3f8cff", relic: "Corazón galáctico",     seal: "reparar",    cast: ["ufo","phosquito","cucaracho","arana"],          sectors: ["Muelle cosido","Chatarrería azul","Grúas de plasma","Taller del caos","Hangar estrellado","Altar del experimento"] },
-  chispin: { name: "Santuario del Trueno",     short: "Chispín",   world: 9, color: "#fff29a", tint: "#ffd84a", relic: "Relámpago dorado",      seal: "cadena",     cast: ["gaviota","murcielago","phosquito","rana"],      sectors: ["Puerta de nubes","Campo de pararrayos","Puente del chispazo","Pico tormenta","Valle del arcoíris","Altar del trueno"] },
-  cat:     { name: "Jardín Lunar de Michi",    short: "Michi",     world: 3, color: "#ceb2ff", tint: "#b98cff", relic: "Luna soñadora",         seal: "medusas",    cast: ["medusa","phosquito","ufo","murcielago"],        sectors: ["Umbral del sueño","Estanque de lunas","Bosque de medusas","Observatorio gatuno","Mar de estrellas","Altar del sueño"] },
-  cuerno:  { name: "Bosque Prisma de Cuerno",  short: "Cuerno",    world: 8, color: "#eccbff", tint: "#d6a8ff", relic: "Aurora viva",           seal: "prismas",    cast: ["arana","murcielago","planta","phosquito"],      sectors: ["Claro de cristal","Arboleda aurora","Espejos del alba","Cueva del eco","Sendero arcoíris","Altar del prisma"] },
-  dragon:  { name: "Caldera del Dragón",       short: "Dragón",    world: 2, color: "#ff905d", tint: "#ff5a3c", relic: "Brasa del hogar",       seal: "braseros",   cast: ["escoria","brasita","planta","rana"],            sectors: ["Camino de ceniza","Río de lava","Forja ancestral","Nido de wyverns","Cráter rojo","Altar del fuego"] },
-  dino:    { name: "Valle Fósil de Dino",      short: "Dino",      world: 1, color: "#b8ef6b", tint: "#6fd38b", relic: "Fósil de la familia",   seal: "pisotones",  cast: ["rana","abeja","libelula","arana"],              sectors: ["Helechos gigantes","Cascada de jade","Huesos del T-rex","Nidos de saurópodo","Barro dormido","Altar del fósil"] },
-  frita:   { name: "Mercado Dorado de Frita",  short: "Frita",     world: 0, color: "#ffe9a8", tint: "#ffc23a", relic: "Banquete dorado",       seal: "geiseres",   cast: ["cangrejo","gaviota","brasita","rana"],          sectors: ["Paseo de la bahía","Puestos crujientes","Fuentes de aceite","Bazar de especias","Cúpula del banquete","Altar dorado"] },
-  pizza:   { name: "Puerto del Horno de Pizza", short: "Pizza",    world: 5, color: "#ffd36a", tint: "#ff9d4a", relic: "Horno estelar",         seal: "reparto",    cast: ["pez","cangrejo","anguila","medusa"],            sectors: ["Horno del puerto","Muelle de la masa","Calle del queso","Plaza hambrienta","Faro de la albahaca","Altar del horno"] },
-  yomi:    { name: "Observatorio de Yomi",     short: "Yomi",      world: 3, color: "#8fe9ff", tint: "#5fd0ff", relic: "Constelación eterna",   seal: "sincronia",  cast: ["ufo","phosquito","brasita","medusa"],           sectors: ["Antena de bienvenida","Bosque de datos","Sala de servidores","Jardín de constelaciones","Red neuronal","Altar de la IA"] }
+  kilo:    { name: "Claro de Kilo",            short: "Kilo",      world: 6, color: "#ffacc2", tint: "#ff8fb1", relic: "Canción del hogar",     seal: "serenata",   cast: ["cucaracho","phosquito","planta","rana","avispa"],        sectors: ["Puerta aloha","Campo de hibiscos","Escenario del ukelele","Lago de las guirnaldas","Senda de los cocos","Escenario del Tambor"] },
+  stitcho: { name: "Astillero de Stitcho",     short: "Stitcho",   world: 4, color: "#67ddff", tint: "#3f8cff", relic: "Corazón galáctico",     seal: "reparar",    cast: ["ufo","phosquito","cucaracho","arana","murcielago"],          sectors: ["Muelle cosido","Chatarrería azul","Grúas de plasma","Taller del caos","Hangar estrellado","Altar del experimento"] },
+  chispin: { name: "Santuario del Trueno",     short: "Chispín",   world: 9, color: "#fff29a", tint: "#ffd84a", relic: "Relámpago dorado",      seal: "cadena",     cast: ["gaviota","murcielago","phosquito","rana","avispa"],      sectors: ["Puerta de nubes","Campo de pararrayos","Puente del chispazo","Pico tormenta","Valle del arcoíris","Altar del trueno"] },
+  cat:     { name: "Jardín Lunar de Michi",    short: "Michi",     world: 3, color: "#ceb2ff", tint: "#b98cff", relic: "Luna soñadora",         seal: "medusas",    cast: ["medusa","phosquito","ufo","murcielago","arana"],        sectors: ["Umbral del sueño","Estanque de lunas","Bosque de medusas","Observatorio gatuno","Mar de estrellas","Altar del sueño"] },
+  cuerno:  { name: "Bosque Prisma de Cuerno",  short: "Cuerno",    world: 8, color: "#eccbff", tint: "#d6a8ff", relic: "Aurora viva",           seal: "prismas",    cast: ["arana","murcielago","planta","phosquito","libelula"],      sectors: ["Claro de cristal","Arboleda aurora","Espejos del alba","Cueva del eco","Sendero arcoíris","Altar del prisma"] },
+  dragon:  { name: "Caldera del Dragón",       short: "Dragón",    world: 2, color: "#ff905d", tint: "#ff5a3c", relic: "Brasa del hogar",       seal: "braseros",   cast: ["escoria","brasita","planta","rana","murcielago"],            sectors: ["Camino de ceniza","Río de lava","Forja ancestral","Nido de wyverns","Cráter rojo","Altar del fuego"] },
+  dino:    { name: "Valle Fósil de Dino",      short: "Dino",      world: 1, color: "#b8ef6b", tint: "#6fd38b", relic: "Fósil de la familia",   seal: "pisotones",  cast: ["rana","abeja","libelula","arana","cucaracho"],              sectors: ["Helechos gigantes","Cascada de jade","Huesos del T-rex","Nidos de saurópodo","Barro dormido","Altar del fósil"] },
+  frita:   { name: "Mercado Dorado de Frita",  short: "Frita",     world: 0, color: "#ffe9a8", tint: "#ffc23a", relic: "Banquete dorado",       seal: "geiseres",   cast: ["cangrejo","gaviota","brasita","rana","cucaracho"],          sectors: ["Paseo de la bahía","Puestos crujientes","Fuentes de aceite","Bazar de especias","Cúpula del banquete","Altar dorado"] },
+  pizza:   { name: "Puerto del Horno de Pizza", short: "Pizza",    world: 5, color: "#ffd36a", tint: "#ff9d4a", relic: "Horno estelar",         seal: "reparto",    cast: ["pez","cangrejo","anguila","medusa","gaviota"],            sectors: ["Horno del puerto","Muelle de la masa","Calle del queso","Plaza hambrienta","Faro de la albahaca","Altar del horno"] },
+  yomi:    { name: "Observatorio de Yomi",     short: "Yomi",      world: 3, color: "#8fe9ff", tint: "#5fd0ff", relic: "Constelación eterna",   seal: "sincronia",  cast: ["ufo","phosquito","brasita","medusa","murcielago"],           sectors: ["Antena de bienvenida","Bosque de datos","Sala de servidores","Jardín de constelaciones","Red neuronal","Altar de la IA"] }
 });
 
 // Explicación jugable de cada sello (se muestra al entrar y en el HUD de sala).
@@ -184,6 +184,20 @@ export function buildWorld1HeroRoom(hero) {
   }
   const prev = idx > 0 ? "w1-" + WORLD1_ORDER[idx - 1] : null;
   const next = idx < WORLD1_ORDER.length - 1 ? "w1-" + WORLD1_ORDER[idx + 1] : "w1-final";
+  // V604: specialty rooms replace the stock foes; restore every authored
+  // species with one light, physical encounter away from the puzzle stations.
+  const present = new Set(foes.map(f => f[2]));
+  for (const [speciesIndex, kind] of theme.cast.entries()) {
+    if (present.has(kind)) continue;
+    const sector = sectors[1 + speciesIndex % 4];
+    const flying = ['phosquito','avispa','murcielago','libelula','gaviota','abeja','medusa','ufo'].includes(kind);
+    const x = Math.round(sector.x + (speciesIndex % 2 ? 1120 : 300));
+    const y = flying ? WORLD1_FLOOR - 210 : WORLD1_FLOOR - 40;
+    foes.push([x,y,kind,false,{role:flying?'flyer':speciesIndex%2?'jumper':'pursuer',
+      name:theme.short+' · '+kind,chapterHP:62+speciesIndex*9,
+      anchorFloor:WORLD1_FLOOR,anchorY:y}]);
+    present.add(kind);
+  }
   return authorExpedition(hero,composeChapterRoom(hero,{
     id, name: theme.name, short: theme.short, world: theme.world, color: theme.color,
     chapterPlan: WORLD1_CHAPTER_PLANS[hero], strategy: OHANA_PLACES[hero]?.strategy, explorationStyle: OHANA_PLACES[hero],
