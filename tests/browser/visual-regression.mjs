@@ -586,7 +586,17 @@ try {
   await capture(page, '01-character-select-1680x900');
 
   await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = 4; });
-  await page.waitForTimeout(220);
+  // CI may delay requestAnimationFrame while capturing hundreds of PNGs.
+  // Wait for the actual selected Canvas AND card to paint form 5 instead
+  // of assuming it happened within 220ms on a saturated runner.
+  await page.waitForFunction(() => {
+    const card = document.querySelector('#chars-grid .char-card.selected');
+    const canvas = card?.querySelector('canvas');
+    return window.__OHANA_TITLE_EVO_OVERRIDE === 4 &&
+      canvas?.dataset.evo === '4' && card?.dataset.evo === '4' &&
+      Number(canvas?.dataset.fitScale) >= .34 &&
+      Number(canvas?.dataset.fitEnvelope) >= 1.3;
+  }, null, {timeout: 10_000});
   const finalFormFit = await page.evaluate(() => {
     const card=document.querySelector('#chars-grid .char-card.selected');
     const canvas=card?.querySelector('canvas');

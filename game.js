@@ -451,7 +451,7 @@ el.classList.add("show");
 function room() { return game.roomDef || ROOMS[game.roomId] || ROOMS.hub; }
 let saveWarning = false;
 function save() {
-if (!game.player || game.player.dead) return;
+if (!game.player || game.player.dead || game.onlineAdventure) return;
 const saved = saveStore.write(game, Magic);
 if(saved)game.keepsakeSavePending=false;
 if (!saved && !saveWarning) showSystemMessage("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
@@ -600,6 +600,12 @@ if(id==="hub"&&game.player?.id==="pizza"&&game.personalAdventureSolo)r=createPiz
 if(id==="hub"&&game.player?.id==="yomi"&&game.personalAdventureSolo)r=createYomiRoom(r);
 if(id==="hub"&&game.player?.id==="cuerno"&&game.personalAdventureSolo)r=createCuernoRoom(r);
 if (!r) return false;
+// V604: doors and portals are proposals in shared adventure. Only a server
+// accepted vote will load the next level in both browsers.
+if(onlineCoop.isConsentMode?.()&&game.roomId&&id!==game.roomId&&
+ ['right','left','up','down','portal'].includes(fromDir)){
+  return onlineCoop.requestTravel(game,id);
+}
 if(id==="w1-final"&&readKeepsakes().length<10){game.world1Won=false;game._w1WinSent=false;}
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
@@ -886,6 +892,7 @@ game.lastAbilitySlot = null;game._signatureLink=null;
 if (!def) return;
 const onlineSession = onlineCoop.readSession?.();
 const onlineMode = !!onlineSession?.originalEngine;
+game.onlineAdventure = onlineMode;
 game.personalAdventureSolo = !onlineMode;
 const resume = !onlineMode && (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
 // A campaign save follows the active chapter, regardless of the highlighted
@@ -3580,6 +3587,7 @@ if (!bossA11y && boss?._fusionBoss) {
 if (bossA11y) {
   const accessibleBoss = world1BossAccessibleText(boss);
   if (bossA11y.textContent !== accessibleBoss) bossA11y.textContent = accessibleBoss;
+  lastAnnouncedQuimeraPhase = boss?._fusionBoss ? Number(boss.phase) : null;
 }
 // The rematches use a Canvas HUD too. Announce phase changes and coarse health
 // bands without flooding assistive technology for every hit or animation frame.
@@ -3625,6 +3633,9 @@ for(const btn of touchPowers){
  btn.setAttribute("aria-label",key+" · "+status.def.name+" · "+status.label);
 }
 }
+// HUD refreshes at 10 Hz normally, but boss phase transitions are immediate:
+ // never let assistive technology announce the previous Quimera phase.
+let lastAnnouncedQuimeraPhase = null;
 function step() {
 if(game.relicScene){if(!paused&&!DOM.pause?.classList.contains("open")&&!document.hidden)tickRelicScene(game);return;}
 if(game._pendingWorld1Cine){flushWorld1CineQueue(game);if(game._pendingWorld1Cine)return;}
@@ -3659,7 +3670,7 @@ if (game.finale) {
   game.combatFx?.update();
   updateCam();
   onlineCoop.tick(game);
-  if (t % 6 === 0) updateHUD();
+  if (t % 6 === 0 || (game.boss?._fusionBoss && Number(game.boss.phase) !== lastAnnouncedQuimeraPhase)) updateHUD();
   return;
 }
 tickWorldSummon();
@@ -3688,7 +3699,7 @@ updateCuernoFx(game.cuernoFx, game.player?.id === "cuerno" ? game.player : null,
 updateCam();
 game.coopRemote = onlineCoop.remote;
 onlineCoop.tick(game);
-if (t % 6 === 0) updateHUD();
+if (t % 6 === 0 || (game.boss?._fusionBoss && Number(game.boss.phase) !== lastAnnouncedQuimeraPhase)) updateHUD();
 if (t % 300 === 0) save();
 }
 function containRuntimeFault(scope, error) {

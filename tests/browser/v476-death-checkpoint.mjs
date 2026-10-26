@@ -25,6 +25,10 @@ try{
  const earned=await page.evaluate(({x,floor})=>{
    const e=window.__OHANA_E2E;
    for(let i=0;i<7&&e.state().world1Cine;i++)e.step(600);
+   // V604 has authored flower defenders. The test audits respawn persistence,
+   // not the separate combat challenge: isolate the production flower mechanic
+   // with a distant, stationary E2E training dummy.
+   e.combatTarget();
    e.setPlayer(x-17,floor-28); // isolate respawn; physical traversal is V475
    e.step(100);
    return e.state();

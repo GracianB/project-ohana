@@ -103,10 +103,10 @@ export function updateGauntletGuardian(e,g,hurt){
 export function gauntletSnapshot(g){const v=g.finalGauntlet;if(!v)return null;const e=v.guardian,b=e?e[KEEPSAKES[v.hero]?.key]:null;return {phase:v.phase,hero:v.hero,found:[...v.found],object:v.object?{...v.object}:null,savePending:!!g.keepsakeSavePending,guardian:e?{x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,phase:b?.phase,clock:b?.clock,target:b?.target?{...b.target}:null,marks:b?.marks?[...b.marks]:[],pattern:KEEPSAKES[v.hero].pattern,technique:b?.technique?{...b.technique}:null,beamYs:b?.beamYs?[...b.beamYs]:[],chargePath:b?.chargePath?{...b.chargePath}:null,columnWidth:b?.columnWidth,windowRemaining:e.damageWindowRemaining}:null};}
 // World geometry follows the exact camera transform used by bodies and shots.
 export function drawGauntletWorld(c,g,cam,t=0){
- const v=g.finalGauntlet;if(!v||v.phase==='complete'||g.world1Cine||g._pendingWorld1Cine)return;const d=KEEPSAKES[v.hero];if(!d||!v.object)return;
- const x=v.object.x-cam.x,y=v.object.y-cam.y;c.save();
+ const v=g.finalGauntlet;if(!v||v.phase==='complete'||g.world1Cine||g._pendingWorld1Cine)return;const d=KEEPSAKES[v.hero];if(!d)return;
+ if(v.object){const x=v.object.x-cam.x,y=v.object.y-cam.y;c.save();
  c.fillStyle='#1c3044';c.fillRect(x-46,y-6,92,16);c.strokeStyle=d.color;c.lineWidth=2;c.strokeRect(x-46,y-6,92,16);drawKeepsake(c,v.hero,x,y-8,65,{ghost:v.phase!=='released'});
- if(v.phase!=='released'){c.strokeStyle=d.color+'99';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y-48,50,65,0,Math.PI,TAU);c.stroke();}
+ if(v.phase!=='released'){c.strokeStyle=d.color+'99';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y-48,50,65,0,Math.PI,TAU);c.stroke();}}
  const b=v.guardian?.[d.key];if(b?.phase==='warn'){
   c.strokeStyle=d.color;c.fillStyle=d.color+'33';c.lineWidth=2;
   if(b.marks&&['lightning','geysers'].includes(d.pattern)){const width=b.columnWidth||34,height=d.pattern==='lightning'?500:300,reach=d.pattern==='lightning'?470:260;for(const xx of b.marks)c.fillRect(xx-cam.x-width/2,F-cam.y-height,width,reach);}

@@ -1,3 +1,4 @@
+import {worldBounds} from './world-bounds.js';
 // V290–V294: atomic host snapshots, stable identities and bounded prediction.
 export const COMBAT_PROTOCOL=2;
 export const COMBAT_LIMITS=Object.freeze({enemies:24,bullets:16,bytes:11200,predictionTicks:12,staleMs:750});
@@ -9,7 +10,7 @@ const word=x=>typeof x==="string"&&/^[a-zA-Z0-9_-]{1,30}$/.test(x);
 const color=x=>typeof x==="string"&&/^#(?:[a-f0-9]{3}|[a-f0-9]{4}|[a-f0-9]{6}|[a-f0-9]{8})$/i.test(x)?x:"#ffd36a";
 const numbers=["wind","hopWind","clawWind","phase","flash","stun","dying","attackT","charge","invuln","contactDmg","evo","_hitT","_hitMax","alertPing","poseT","teleT","teleMax","teleRange","aimDx","aimDy"];
 const bools=["telegraph","fell","elite","baby","up","airborne","diving","charging","darting","lunging"];
-const strings=["mode","teleKind","aiRole","aiIntent","aiFormation"];
+const strings=["mode","teleKind","aiRole","aiIntent","aiFormation","campaignRole"];
 const flags=[...numbers,...bools,...strings];
 function stateFor(game){
  if(!captures.has(game))captures.set(game,{ids:new WeakMap(),next:0,bullets:new WeakMap(),nextBullet:0});
@@ -23,12 +24,18 @@ function projectile(p,id=0){
 export function captureCombatFrame(game,frameNo,scope="local"){
  const state=stateFor(game),source=(game.enemies||[]).filter(e=>e&&coordinate(e.x)&&coordinate(e.y));
  const bullets=(game.projectiles||[]).filter(p=>p&&p.owner==="enemy"&&p.life>0&&coordinate(p.x)&&coordinate(p.y));
+ // Long authored chapters exceed the packet budget. Keep guardians and enemies
+ // nearest either teammate, preserving their original spawn identity.
+ const originalIndex=new Map(source.map((e,i)=>[e,i]));
+ const peers=[game.player,game.coopRemote].filter(p=>p&&coordinate(p.x)&&coordinate(p.y));
+ const priority=e=>(e.boss||e.miniBoss)?-1:peers.length?Math.min(...peers.map(p=>Math.hypot(e.x-p.x,e.y-p.y))):originalIndex.get(e);
+ if(source.length>24)source.sort((a,b)=>priority(a)-priority(b));
  const frame={protocol:2,scope,visit:Math.floor(finite(game.coopRoomVisit)),roomId:String(game.roomId||""),
  frameNo:Math.floor(num(frameNo,0,1e9)),full:source.length<=24,
  enemies:source.slice(0,24).map((e,i)=>{
   if(!state.ids.has(e))state.ids.set(e,++state.next);
   e._coopSyncId=state.ids.get(e);e._coopVisit=Math.floor(finite(game.coopRoomVisit));
-  return {id:e._coopSyncId,index:Number.isInteger(e.spawnIndex)?e.spawnIndex:e.boss?-2:i,kind:String(e.kind||"").slice(0,30),boss:!!e.boss,
+  return {id:e._coopSyncId,index:Number.isInteger(e.spawnIndex)?e.spawnIndex:e.boss?-2:originalIndex.get(e),kind:String(e.kind||"").slice(0,30),boss:!!e.boss,
    x:num(e.x,-4096,20000),y:num(e.y,-4096,20000),w:num(e.w,1,1024),h:num(e.h,1,1024),vx:num(e.vx,-40,40),vy:num(e.vy,-40,40),
    hp:num(e.hp,0,100000),max:num(e.max??e.hp,1,100000),color:color(e.color),
    flags:Object.fromEntries(flags.filter(k=>Object.hasOwn(e,k)).map(k=>[k,numbers.includes(k)?num(e[k],-1000,1000):bools.includes(k)?!!e[k]:word(e[k])?e[k]:"idle"]))};
@@ -52,7 +59,7 @@ export function validCombatFrame(frame){
  if(modern&&(!Number.isSafeInteger(frame.frameNo)||frame.frameNo<1||frame.frameNo>1e9||
   typeof frame.scope!=="string"||! /^[a-zA-Z0-9_.:-]{1,96}$/.test(frame.scope)||
   !Number.isSafeInteger(frame.visit)||frame.visit<0||typeof frame.full!=="boolean"))return false;
- if(typeof frame.roomId!=="string"||! /^(hub|beach|jungle|cave|lab|ridge|space|reef|volcano|boss)$/.test(frame.roomId))return false;
+ if(typeof frame.roomId!=="string"||!worldBounds(frame.roomId))return false;
  const ids=new Set();
  for(const e of frame.enemies){
   if(!e||!word(e.kind)||!coordinate(e.x)||!coordinate(e.y)||!Number.isFinite(e.hp)||e.hp<0||e.hp>100000)return false;

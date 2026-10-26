@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OHANA V604 · Bestiario animado</title>
+<style>
+:root{font-family:system-ui,Arial,sans-serif;color:#f6eacf;background:#101f2c;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#285164,#132a39 42%,#091927)}
+header{max-width:1380px;margin:auto;padding:40px clamp(16px,4vw,58px) 18px}header .eyebrow{font-size:11px;font-weight:800;letter-spacing:.22em;color:#e9c88d}
+h1{font-size:clamp(33px,5vw,62px);letter-spacing:-.055em;line-height:1.03;margin:10px 0 8px}
+h1 em{font-style:normal;color:#ffd799}.intro{color:#c4d5ce;line-height:1.65;max-width:700px;font-size:15px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}.toolbar button{border:1px solid #a8c7bb66;border-radius:12px;padding:11px 17px;background:#183744;color:#e9f4e9;font-weight:700;cursor:pointer;min-height:44px}
+.toolbar button[aria-pressed=true]{background:#f9d58c;color:#173440;border-color:#fff1af}
+button:focus-visible{outline:3px solid #8fe9e7;outline-offset:3px}
+main{max-width:1380px;margin:0 auto;padding:14px clamp(16px,4vw,58px) 72px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:18px}
+.creature{background:linear-gradient(160deg,#214754,#173240);border:1px solid #7299a144;border-radius:20px;overflow:hidden;box-shadow:0 14px 36px #06152277;contain:content}
+.cardtop{display:flex;justify-content:space-between;padding:16px 18px 0;align-items:center}
+.cardtop strong{font-size:17px;text-transform:capitalize}.cardtop span{font:700 10px system-ui;letter-spacing:.1em;color:#d6d6bc}
+.creature canvas{display:block;width:100%;height:210px}
+.info{border-top:1px solid #9dbeb63b;padding:12px 18px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.info small{color:#c5d8d4}.info b{color:#ffe0ab;font-size:12px}
+.back{color:#a9d9d3;text-decoration:underline;text-underline-offset:4px}
+footer{text-align:center;padding:30px 10px;color:#adbfba;font-size:12px}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style></head><body>
+<header><div class="eyebrow">PROJECT OHANA · BESTIARIO DEL MUNDO 1 · V604</div>
+<h1>18 criaturas. <em>18 identidades.</em></h1>
+<p class="intro">No son el mismo enemigo con otra pintura: cada especie conserva su anatomía. Cambia entre reposo, alerta, ataque y herida. El rol modifica el equipo, no la silueta. Vista de control artística, sin modificar el combate.</p>
+<div class="toolbar" role="group" aria-label="Estado de las criaturas">
+<button type="button" data-state="idle" aria-pressed="true">Reposo</button>
+<button type="button" data-state="wind" aria-pressed="false">Preparación</button>
+<button type="button" data-state="attack" aria-pressed="false">Ataque</button>
+<button type="button" data-state="hurt" aria-pressed="false">Impacto</button>
+</div><a class="back" href="../index.html">Volver al juego</a></header>
+<main><div class="grid" id="creature-grid" aria-label="Bestiario completo"></div></main>
+<footer>OHANA V604 · Ilustración Canvas en tiempo real · Pruebas de calidad y accesibilidad</footer>
+<script type="module">
+import {CHAPTER_SPECIES,drawChapterSpecies,drawChapterSpeciesCue} from '../systems/chapter-species-v604.js';
+const grid=document.getElementById('creature-grid');
+let state='idle';const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const roles=['pursuer','shield','flyer','gunner','jumper','shooter','captain'],paint=[];
+for(const [i,kind] of CHAPTER_SPECIES.entries()){
+ const card=document.createElement('article');card.className='creature';card.dataset.kind=kind;
+ const top=document.createElement('div');top.className='cardtop';
+ const name=document.createElement('strong');name.textContent=kind==='phosquito'?'Fosquito':kind;
+ const idx=document.createElement('span');idx.textContent=String(i+1).padStart(2,'0')+' / 18';top.append(name,idx);
+ const canvas=document.createElement('canvas');canvas.width=384;canvas.height=320;canvas.setAttribute('aria-label',kind+' animado');
+ const info=document.createElement('div');info.className='info';
+ const species=document.createElement('small');species.textContent='Especie · '+kind;
+ const role=document.createElement('b');role.textContent=roles[i%roles.length].toUpperCase();info.append(species,role);
+ card.append(top,canvas,info);grid.append(card);
+ paint.push({canvas,kind,role:roles[i%roles.length],index:i});
+}
+function render(t=0){
+ for(const row of paint){
+  const c=row.canvas.getContext('2d');c.clearRect(0,0,384,320);
+  c.save();c.translate(192,258);c.scale(3.0,3.0);
+  const wind=state==='wind',hurt=state==='hurt',attack=state==='attack';
+  if(!reduced&&attack)c.translate(Math.sin(t*.03+row.index)*4,-2);
+  const e={kind:row.kind,campaignRole:row.role,spawnIndex:row.index,
+   _campaign:{wind:wind?28:0,active:attack?12:0},telegraph:wind,sleep:0,stun:0,
+   elite:row.index%6===0};
+  drawChapterSpecies(c,e,{time:reduced?0:t,step:attack?.72:0,wind, hurt,reduced},{light:'#ffe5b0',dark:'#364d58'});
+  if(wind)drawChapterSpeciesCue(c,e,t,reduced);
+  c.restore();
+ }
+}
+let tick=0;function animate(){if(!document.hidden){render(tick);tick+=1;}if(!reduced)requestAnimationFrame(animate);}
+for(const btn of document.querySelectorAll('[data-state]'))btn.addEventListener('click',()=>{
+ state=btn.dataset.state;
+ for(const b of document.querySelectorAll('[data-state]'))b.setAttribute('aria-pressed',String(b===btn));
+ render(tick);
+});
+render();if(!reduced)requestAnimationFrame(animate);
+window.__OHANA_V604_GALLERY__={ready:true,species:[...CHAPTER_SPECIES],setState(next){state=next;render(tick);},get state(){return state;}};
+</script></body></html>

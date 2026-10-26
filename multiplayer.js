@@ -1,3 +1,4 @@
+import {DUEL_ARENAS} from './multiplayer/match-rules-v604.js';
 import { ROSTER } from "./characters/roster.js";
 import { drawCharacter } from "./characters/draw.js";
 import { drawEnemy } from "./engine/enemies.js";
@@ -137,7 +138,8 @@ function persistSession() {
       identity: state.identity,
       characterId: you?.characterId || state.selectedCharacterId || "",
       selectedCharacterId: you?.characterId || state.selectedCharacterId || "",
-      originalEngine: true,
+      originalEngine: state.snapshot?.mode!=="versus",
+      mode:state.snapshot?.mode,
     }));
   } catch {}
 }
@@ -327,7 +329,7 @@ function enterGame() {
   if (state.redirectingToEngine) return;
   state.redirectingToEngine = true;
   persistSession();
-  window.location.href = "./index.html?online=1";
+  window.location.href = state.snapshot?.mode==='versus'?"./versus.html":"./index.html?online=1";
 }
 
 function stageFloor(ctx, world, t) {
@@ -1150,7 +1152,7 @@ $("create-room").addEventListener("click", async () => {
   $("create-room").disabled = true;
   $("join-room").disabled = true;
   showError("entry-error");
-  try { enterLobby(await api("create")); }
+  try { enterLobby(await api("create",{mode:$("room-mode")?.value||"adventure",arenaId:$("room-arena")?.value||"w1-kilo"})); }
   catch (error) { showError("entry-error", error.message); }
   finally { state.entrySubmitting = false; $("create-room").disabled = false; $("join-room").disabled = false; }
 });
@@ -1247,3 +1249,5 @@ if (LIVE_COOP_PAUSED) {
   note.style.cssText='margin:1rem auto;padding:1rem;border:1px solid #9daac0;border-radius:10px;max-width:42rem;text-align:center';
   document.querySelector('#entry')?.prepend(note);
 }
+
+if($("room-arena")){for(const id of DUEL_ARENAS){const option=document.createElement('option');option.value=id;option.textContent=ROSTER.find(r=>r.id===id.slice(3)).name;$("room-arena").append(option);}$("room-mode").addEventListener('change',()=>{$('arena-choice').hidden=$('room-mode').value!=='versus';});}

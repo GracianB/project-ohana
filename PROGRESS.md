@@ -1,3 +1,11 @@
+# V604 · ohana-604 · candidato en PR #441 (no publicado)
+
+Integrados Director’s Cut y correcciones de continuidad de recuerdos, respuestas de habilidades y objetivos del acto final. Cinco especies por capítulo, apertura con protagonistas, ojo de perfil del guardián Dino, bola de fuego J de Dragón y orden de su evolución.
+
+Servidor local sin Netlify: Versus con daño/XP/evolución/victoria autoritativos, diez escenarios, cinco especies y guardián. Dos navegadores reales comprueban combate, controles táctiles y reconexión. Aventura comprueba personajes distintos, guardado individual aislado y voto de viaje; objetivos cooperativos y campaña completa compartida siguen pendientes. WebRTC no validado en este entorno; HTTP local probado. Detalles y comandos: docs/V604-MULTIPLAYER.md.
+
+Validación local: 1.631 pruebas Node, Release Gate, auditoría general de navegador, galería de 18 especies y campaña individual Normal limpia hasta Quimera y cierre aprobados. No se declara publicación ni CI verde para este candidato. Evidencia: docs/V604-VALIDATION.json.
+
 # V603 · ohana-603 · publicada y verificada
 
 Guardianes con tres técnicas, ritmo distinto por dificultad, avisos que coinciden

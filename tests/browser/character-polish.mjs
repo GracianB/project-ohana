@@ -14,7 +14,9 @@ try{
   await page.setViewportSize({width,height:900});await page.waitForTimeout(120);
   const box=await page.locator('.oi-story-dialogue').boundingBox();
   assert.ok(box.x>=0&&box.x+box.width<=width+1&&box.y>=0,'speech stays visible');
-  assert.equal(await page.locator('.oi-story-line').evaluate(el=>getComputedStyle(el).color),'rgb(38, 63, 64)');
+  // V602+ cinematic stage has light dialogue text on a dark panel.
+  const speech=await page.locator('.oi-story-line').evaluate(el=>getComputedStyle(el).color);
+  assert.equal(speech,'rgb(236, 237, 219)','cinematic dialogue remains legible');
   await page.screenshot({path:`test-results/polish/intro-${width}.png`});
  }
  await page.locator('.oi-enter').click();

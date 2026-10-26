@@ -3318,6 +3318,16 @@ for (let i = n; i >= 0; i--) {
   ctx.arc(px, py, r * jitter, 0, TAU);
   ctx.fill();
 }
+ // The J attack has a visible little fireball at the cone's advancing tip.
+ // It is presentation only: existing cone damage and cooldown are unchanged.
+ const reach = Math.min(1, Math.max(.05, (f.age - 1) / 10));
+ const bx = x + f.f * f.len * (.22 + .75 * reach);
+ const by = y + Math.sin(t * .25) * 4;
+ ctx.globalAlpha = .92 * k;
+ ctx.fillStyle = "#ff6526";
+ ctx.beginPath(); ctx.arc(bx, by, 11 + Math.min(5, f.len * .015), 0, TAU); ctx.fill();
+ ctx.fillStyle = "#fff3ae";
+ ctx.beginPath(); ctx.arc(bx - f.f * 3, by - 2, 6.5, 0, TAU); ctx.fill();
 ctx.globalCompositeOperation = "source-over";
 },
 gust(ctx, f, cam, t) {

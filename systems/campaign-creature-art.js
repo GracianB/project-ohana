@@ -1,4 +1,5 @@
 import {drawFaunaMorph} from './fauna-morphs.js';
+import {drawChapterSpecies,drawChapterSpeciesCue} from './chapter-species-v604.js';
 // Ten locally authored fauna families. Role equipment is drawn separately;
 // silhouettes, limbs and anticipation come from the actual combat state.
 const TAU=Math.PI*2,INK='#243044';
@@ -38,7 +39,7 @@ export function drawCampaignCreature(c,e,cam,t,reduced=false){
  if(e.campaignRole==='flyer')c.translate(0,reduced?0:Math.sin(time*.08)*2);
  else if(run)c.translate(0,-Math.abs(step)*2);
  if(wind){c.translate(-2,2);c.scale(1.06,.94);}else if(active)c.rotate(.1);else if(hurt)c.rotate(-.12);
- const morphed=drawFaunaMorph(c,e.campaignRole,P,{wind,hurt,time,step,hero,reduced});
+ const morphed=drawChapterSpecies(c,e,{time,step,wind,hurt,reduced},P)||drawFaunaMorph(c,e.campaignRole,P,{wind,hurt,time,step,hero,reduced});
  if(!morphed){
  // Grounded creatures articulate contact, knee and foot independently.
  if(!['cat','yomi'].includes(hero)&&e.campaignRole!=='flyer')for(const side of [-1,1])for(let back=0;back<2;back++){
@@ -111,7 +112,7 @@ export function drawCampaignCreature(c,e,cam,t,reduced=false){
  if(['frita','pizza'].includes(hero)){c.strokeStyle=P.dark;c.beginPath();c.moveTo(2,-29);c.quadraticCurveTo(10,-22,18,-29);c.stroke();}
  if(hero==='cat'){c.strokeStyle=P.light;for(let side of [-1,1]){c.beginPath();c.moveTo(side*15,-28);c.quadraticCurveTo(side*38,-23,side*39,-32);c.stroke();}}
  }
- if(wind){c.strokeStyle=P.light;c.lineWidth=2;c.beginPath();c.arc(18,-35,7+(Math.sin(time*.3)+1),-.8,.8);c.stroke();}
+ if(wind)drawChapterSpeciesCue(c,e,time,reduced);
  c.restore();
  if(e.hp<e.max&&e.hp>0){const x=e.x-cam.x,y=e.y-cam.y-10;c.save();c.fillStyle='#1b2b40';c.fillRect(x,y,e.w,4);c.fillStyle=P.light;c.fillRect(x,y,e.w*Math.max(0,e.hp/e.max),4);c.restore();}
  return true;

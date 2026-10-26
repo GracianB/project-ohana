@@ -637,6 +637,9 @@ function playCharacterCine(st, detail, mod) {
   el.querySelector(".evo-skip").addEventListener("click", onSkip);
   running = { stop: finish };
   failSafe = setTimeout(() => finish(), (dur + 2) * 1000);
-  raf = requestAnimationFrame(frame);
+  // Dragón's first cinematic frame must paint synchronously, before the
+  // gameplay renderer can reveal its newly applied form behind the overlay.
+  if (id === "dragon") frame(t0);
+  else raf = requestAnimationFrame(frame);
   return true;
 }

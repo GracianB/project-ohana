@@ -20,6 +20,7 @@ import { ROSTER } from "../characters/roster.js";
 import { canonId, saveStore } from "./save.js";
 import { sfx } from "../engine/audio.js";
 import { WELCOME_CAST_ORDER, welcomeCastSpot, welcomeActorFit } from "./intro-cast-fit.js";
+import {welcomeSpotlightAllows,welcomeSpotlightSpot} from "./welcome-spotlight.js";
 import { dragonWelcomeBeat, drawDragonWelcomeFX } from "./intro-dragon-stage.js";
 import { dinoWelcomeBeat, drawDinoWelcomeFX } from "./intro-dino-stage.js";
 import { fritaWelcomeBeat, drawFritaWelcomeFX } from "./intro-frita-stage.js";
@@ -117,6 +118,7 @@ export function playTitleIntro(options = {}) {
   }));
   el.dataset.v45Cast = String(CAST.length);
   el.dataset.openingMode = "family-welcome";
+  el.dataset.openingStaging = "storybook-spotlight";
   el.dataset.openingFit = "measured-silhouettes";
 
   // The real active Canvas renderer supplies optical bounds once per opening.
@@ -200,7 +202,7 @@ export function playTitleIntro(options = {}) {
 
   function actor(id, x, footY, h, tf, opts = {}) {
     const p = actors[id];
-    if (!p) return;
+    if (!p || !welcomeSpotlightAllows(id,activeDirection)) return;
     p.facing = opts.facing || 1;
     p.grounded = opts.grounded !== false;
     p.vx = Number(opts.vx || 0);
@@ -220,9 +222,9 @@ export function playTitleIntro(options = {}) {
     p._introStitcho = id === "stitcho" ? (opts.stitchoWelcome || null) : null;
     p._introChispin = id === "chispin" ? (opts.chispinWelcome || null) : null;
     p._introMichi = id === "cat" ? (opts.michiWelcome || null) : null;
-    const slotWidth = openingCastSpot(id,fc.W,fc.H,activeDirection).slotWidth;
+    const slotWidth = activeDirection?.hero ? fc.W*(fc.W<760?.29:.23) : openingCastSpot(id,fc.W,fc.H,activeDirection).slotWidth;
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
-    if(isE2E){const audit=window.__OHANA_WELCOME_CAST_AUDIT?.find(row=>row.id===id);if(audit)Object.assign(audit,{x,foot:footY,slotWidth,paintedHeight:fit.paintedHeight,paintedWidth:fit.paintedWidth,targetHeight:h,row:openingCastSpot(id,fc.W,fc.H,activeDirection).row});}
+    if(isE2E){const audit=window.__OHANA_WELCOME_CAST_AUDIT?.find(row=>row.id===id);if(audit)Object.assign(audit,{visible:true,x,foot:footY,slotWidth,paintedHeight:fit.paintedHeight,paintedWidth:fit.paintedWidth,targetHeight:h,row:openingCastSpot(id,fc.W,fc.H,activeDirection).row});}
     ctx.save();
     if (activeDirection?.hero && id !== activeDirection.hero && id !== activeDirection.partner) ctx.globalAlpha *= .82;
     ctx.translate(x - fit.centerOffsetX * fit.scale, footY);
@@ -356,7 +358,9 @@ export function playTitleIntro(options = {}) {
   function scene(t,L,direction=null) {
     activeDirection = direction;
     const {W,floor,heroH}=L;
-    const spots = Object.fromEntries(CAST.map(id => [id, openingCastSpot(id,W,L.H,direction)]));
+    // Stage the two speaking characters, not the entire fixed group portrait.
+    const spots = Object.fromEntries(CAST.map(id => [id,
+      welcomeSpotlightSpot(id,openingCastSpot(id,W,L.H,direction),W,floor,heroH,direction)]));
     const {dino,dragon,kilo,stitcho,chispin,cat,frita,pizza,yomi,cuerno}=spots;
     const tf=t*60;
     const loop=direction ? direction.sceneTime : t%14;
@@ -382,11 +386,11 @@ export function playTitleIntro(options = {}) {
     // Pollination, laughter and surprise are its own fully timed story.
     const kiloBeat=kiloWelcomeBeat(loop,reduce);
     const kiloHeight=openingHeroHeight("kilo",heroH,direction)*1.08;
-    drawKiloWelcomeFX(ctx,kilo.x,kilo.foot,kiloHeight,t,kiloBeat,"back");
+    if(welcomeSpotlightAllows("kilo",direction)) drawKiloWelcomeFX(ctx,kilo.x,kilo.foot,kiloHeight,t,kiloBeat,"back");
     actor("kilo",kilo.x,kilo.foot,kiloHeight,tf,{
       facing:1,pose:"idle",kiloWelcome:kiloBeat
     });
-    drawKiloWelcomeFX(ctx,kilo.x,kilo.foot,kiloHeight,t,kiloBeat,"front");
+    if(welcomeSpotlightAllows("kilo",direction)) drawKiloWelcomeFX(ctx,kilo.x,kilo.foot,kiloHeight,t,kiloBeat,"front");
     if(isE2E){
       el.dataset.kiloWelcomePhase=kiloBeat.phase;
       el.dataset.kiloWelcomeMotion=reduce?"reduced":"full";
@@ -418,11 +422,11 @@ export function playTitleIntro(options = {}) {
     const sx=stitcho.x-W*.007*duel,cxp=chispin.x+W*.007*duel;
     const stitchoBeat=stitchoWelcomeBeat(loop,reduce);
     const stitchoHeight=openingHeroHeight("stitcho",heroH,direction);
-    drawStitchoWelcomeFX(ctx,sx,stitcho.foot+2,stitchoHeight,t,stitchoBeat,"back");
+    if(welcomeSpotlightAllows("stitcho",direction)) drawStitchoWelcomeFX(ctx,sx,stitcho.foot+2,stitchoHeight,t,stitchoBeat,"back");
     actor("stitcho",sx,stitcho.foot+2,stitchoHeight,tf,{
       facing:1,pose:"idle",stitchoWelcome:stitchoBeat,rotate:-stitchoBeat.shock*.045
     });
-    drawStitchoWelcomeFX(ctx,sx,stitcho.foot+2,stitchoHeight,t,stitchoBeat,"front");
+    if(welcomeSpotlightAllows("stitcho",direction)) drawStitchoWelcomeFX(ctx,sx,stitcho.foot+2,stitchoHeight,t,stitchoBeat,"front");
     if(isE2E){
       el.dataset.stitchoWelcomePhase=stitchoBeat.phase;
       el.dataset.stitchoWelcomeMotion=reduce?"reduced":"full";
@@ -434,12 +438,12 @@ export function playTitleIntro(options = {}) {
     // complementing Stitcho's independent comedy rather than attacking.
     const chispinBeat=chispinWelcomeBeat(loop,reduce);
     const chispinHeight=openingHeroHeight("chispin",heroH,direction)*.96;
-    drawChispinWelcomeFX(ctx,cxp,chispin.foot+1,chispinHeight,t,chispinBeat,"back");
-    drawChispaCeremony(ctx,cxp,chispin.foot+1,chispinHeight,t,reduce,"intro");
+    if(welcomeSpotlightAllows("chispin",direction)) drawChispinWelcomeFX(ctx,cxp,chispin.foot+1,chispinHeight,t,chispinBeat,"back");
+    if(welcomeSpotlightAllows("chispin",direction)) drawChispaCeremony(ctx,cxp,chispin.foot+1,chispinHeight,t,reduce,"intro");
     actor("chispin",cxp,chispin.foot+1,chispinHeight,tf,{
       facing:-1,pose:"idle",chispinWelcome:chispinBeat
     });
-    drawChispinWelcomeFX(ctx,cxp,chispin.foot+1,chispinHeight,t,chispinBeat,"front");
+    if(welcomeSpotlightAllows("chispin",direction)) drawChispinWelcomeFX(ctx,cxp,chispin.foot+1,chispinHeight,t,chispinBeat,"front");
     if(isE2E){
       el.dataset.chispinWelcomePhase=chispinBeat.phase;
       el.dataset.chispinWelcomeMotion=reduce?"reduced":"full";
@@ -477,11 +481,11 @@ export function playTitleIntro(options = {}) {
     const catFace=loop>3.0&&loop<4.2?-1:1;
     const michiBeat=michiWelcomeBeat(loop,reduce);
     const michiHeight=openingHeroHeight("cat",heroH,direction)*.96;
-    drawMichiWelcomeFX(ctx,cat.x,cat.foot+3,michiHeight,t,michiBeat,"back");
+    if(welcomeSpotlightAllows("cat",direction)) drawMichiWelcomeFX(ctx,cat.x,cat.foot+3,michiHeight,t,michiBeat,"back");
     actor("cat",cat.x,cat.foot+3,michiHeight,tf,{
       facing:catFace,pose:"idle",michiWelcome:michiBeat
     });
-    drawMichiWelcomeFX(ctx,cat.x,cat.foot+3,michiHeight,t,michiBeat,"front");
+    if(welcomeSpotlightAllows("cat",direction)) drawMichiWelcomeFX(ctx,cat.x,cat.foot+3,michiHeight,t,michiBeat,"front");
     if(isE2E){
       el.dataset.michiWelcomePhase=michiBeat.phase;
       el.dataset.michiWelcomeMotion=reduce?"reduced":"full";
@@ -506,11 +510,11 @@ export function playTitleIntro(options = {}) {
     // Never hijack global abilities, movement or the other nine actors.
     const dragonBeat=dragonWelcomeBeat(loop,reduce);
     const dragonHeight=openingHeroHeight("dragon",heroH,direction)*1.10;
-    drawDragonWelcomeFX(ctx,dragon.x,dragon.foot+1,dragonHeight,t,dragonBeat,"back");
+    if(welcomeSpotlightAllows("dragon",direction)) drawDragonWelcomeFX(ctx,dragon.x,dragon.foot+1,dragonHeight,t,dragonBeat,"back");
     actor("dragon",dragon.x,dragon.foot+1,dragonHeight,tf,{
       facing:1,pose:"idle",dragonWelcome:dragonBeat
     });
-    drawDragonWelcomeFX(ctx,dragon.x,dragon.foot+1,dragonHeight,t,dragonBeat,"front");
+    if(welcomeSpotlightAllows("dragon",direction)) drawDragonWelcomeFX(ctx,dragon.x,dragon.foot+1,dragonHeight,t,dragonBeat,"front");
     if(isE2E){
       el.dataset.dragonWelcomePhase=dragonBeat.phase;
       el.dataset.dragonWelcomeMotion=reduce?"reduced":"full";
@@ -559,12 +563,12 @@ export function playTitleIntro(options = {}) {
     }
     // Pizza keeps the shared chase and now has a complete independent
     // elastic-performance director, using the canonical dough/crust rig.
-    drawPizzaWelcomeFX(ctx,pizzaX,pizzaY,pizzaHeight,t,pizzaBeat,"back");
+    if(welcomeSpotlightAllows("pizza",direction)) drawPizzaWelcomeFX(ctx,pizzaX,pizzaY,pizzaHeight,t,pizzaBeat,"back");
     actor("pizza",pizzaX,pizzaY,pizzaHeight,tf,{
       facing:pizzaFacing,vx:pizzaVelocity,grounded:pizzaGrounded,
       vy:pizzaGrounded?0:-2,pose:pizzaPose,pizzaWelcome:pizzaBeat
     });
-    drawPizzaWelcomeFX(ctx,pizzaX,pizzaY,pizzaHeight,t,pizzaBeat,"front");
+    if(welcomeSpotlightAllows("pizza",direction)) drawPizzaWelcomeFX(ctx,pizzaX,pizzaY,pizzaHeight,t,pizzaBeat,"front");
     if(isE2E){
       el.dataset.pizzaWelcomePhase=pizzaBeat.phase;
       el.dataset.pizzaWelcomeMotion=reduce?"reduced":"full";
@@ -584,11 +588,11 @@ export function playTitleIntro(options = {}) {
       comicBubble("¡SOY DELICIOSO!",pizzaX-heroH*.09,pizzaY-heroH*1.0,
         pizzaBeat.flourish,"#ffda9e","left");
     }
-    drawFritaWelcomeFX(ctx,fritaX,fritaY,fritaHeight,t,fritaBeat,"back");
+    if(welcomeSpotlightAllows("frita",direction)) drawFritaWelcomeFX(ctx,fritaX,fritaY,fritaHeight,t,fritaBeat,"back");
     actor("frita",fritaX,fritaY,fritaHeight,tf,{
       facing:fritaFacing,vx:fritaVelocity,pose:fritaPose,fritaWelcome:fritaBeat
     });
-    drawFritaWelcomeFX(ctx,fritaX,fritaY,fritaHeight,t,fritaBeat,"front");
+    if(welcomeSpotlightAllows("frita",direction)) drawFritaWelcomeFX(ctx,fritaX,fritaY,fritaHeight,t,fritaBeat,"front");
     if(isE2E){
       el.dataset.fritaWelcomePhase=fritaBeat.phase;
       el.dataset.fritaWelcomeMotion=reduce?"reduced":"full";
@@ -613,11 +617,11 @@ export function playTitleIntro(options = {}) {
     // The shadow is a local theatrical curtain, never eight seconds of absence.
     const yomiBeat=yomiWelcomeBeat(loop,reduce);
     const yomiHeight=openingHeroHeight("yomi",heroH,direction)*1.03;
-    drawYomiWelcomeFX(ctx,yomi.x,yomi.foot,yomiHeight,t,yomiBeat,"back");
+    if(welcomeSpotlightAllows("yomi",direction)) drawYomiWelcomeFX(ctx,yomi.x,yomi.foot,yomiHeight,t,yomiBeat,"back");
     actor("yomi",yomi.x,yomi.foot,yomiHeight,tf,{
       facing:-1,alpha:1,pose:"idle",yomiWelcome:yomiBeat
     });
-    drawYomiWelcomeFX(ctx,yomi.x,yomi.foot,yomiHeight,t,yomiBeat,"front");
+    if(welcomeSpotlightAllows("yomi",direction)) drawYomiWelcomeFX(ctx,yomi.x,yomi.foot,yomiHeight,t,yomiBeat,"front");
     if(isE2E){
       el.dataset.yomiWelcomePhase=yomiBeat.phase;
       el.dataset.yomiWelcomeMotion=reduce?"reduced":"full";
@@ -644,11 +648,11 @@ export function playTitleIntro(options = {}) {
     // echoes the horn without triggering the actual dream U.
     const cuernoBeat=cuernoWelcomeBeat(loop,reduce);
     const cuernoHeight=openingHeroHeight("cuerno",heroH,direction)*1.06;
-    drawCuernoWelcomeFX(ctx,cuerno.x,cuerno.foot+1,cuernoHeight,t,cuernoBeat,"back");
+    if(welcomeSpotlightAllows("cuerno",direction)) drawCuernoWelcomeFX(ctx,cuerno.x,cuerno.foot+1,cuernoHeight,t,cuernoBeat,"back");
     actor("cuerno",cuerno.x,cuerno.foot+1,cuernoHeight,tf,{
       facing:-1,alpha:1,pose:"idle",cuernoWelcome:cuernoBeat
     });
-    drawCuernoWelcomeFX(ctx,cuerno.x,cuerno.foot+1,cuernoHeight,t,cuernoBeat,"front");
+    if(welcomeSpotlightAllows("cuerno",direction)) drawCuernoWelcomeFX(ctx,cuerno.x,cuerno.foot+1,cuernoHeight,t,cuernoBeat,"front");
     if(isE2E){
       el.dataset.cuernoWelcomePhase=cuernoBeat.phase;
       el.dataset.cuernoWelcomeMotion=reduce?"reduced":"full";
@@ -674,11 +678,11 @@ export function playTitleIntro(options = {}) {
     // Only Dino receives this stage direction. Dragón V344 is unchanged.
     const dinoBeat=dinoWelcomeBeat(loop,reduce);
     const dinoHeight=openingHeroHeight("dino",heroH,direction)*1.08;
-    drawDinoWelcomeFX(ctx,dino.x,dino.foot+2,dinoHeight,t,dinoBeat,"back");
+    if(welcomeSpotlightAllows("dino",direction)) drawDinoWelcomeFX(ctx,dino.x,dino.foot+2,dinoHeight,t,dinoBeat,"back");
     actor("dino",dino.x,dino.foot+2,dinoHeight,tf,{
       facing:1,pose:"idle",dinoWelcome:dinoBeat
     });
-    drawDinoWelcomeFX(ctx,dino.x,dino.foot+2,dinoHeight,t,dinoBeat,"front");
+    if(welcomeSpotlightAllows("dino",direction)) drawDinoWelcomeFX(ctx,dino.x,dino.foot+2,dinoHeight,t,dinoBeat,"front");
     if(isE2E){
       el.dataset.dinoWelcomePhase=dinoBeat.phase;
       el.dataset.dinoWelcomeMotion=reduce?"reduced":"full";
@@ -751,13 +755,18 @@ export function playTitleIntro(options = {}) {
     const bx=clamp(spot?.x??L.W*.78,bubbleWidth/2+14,L.W-bubbleWidth/2-14);
     const by=clamp((spot?.foot??L.H*.48)-L.heroH*1.08,bubbleHeight+18,L.H-170);
     dialogue.style.left="";dialogue.style.top="";
+    if(isE2E)for(const row of window.__OHANA_WELCOME_CAST_AUDIT||[])row.visible=false;
     ctx.save();ctx.clearRect(0,0,L.W,L.H);
     drawTheatreStage(ctx,L.W,L.H,direction?.hero||"kilo",reduce?0:storyTime*60,{opening:true,reduceMotion:reduce});
     // Their own tiny island: real enemy renderers, no AI, collision or campaign state.
     if(direction){
       const ex=L.W*.18,ey=L.H*(L.W<760?.54:.78)+24,r=Math.min(90,Math.max(40,L.W*.07));
       // The visitors stand on the promenade, never on a floating islet.
-      for(let i=0;i<stageEnemies.length;i++){ctx.save();ctx.translate(ex+(i-1)*r*.54,ey-24);ctx.scale(.9,.9);drawEnemy(ctx,stageEnemies[i],{x:0,y:0},reduce?0:storyTime*60);ctx.restore();}
+      // Enemies appear for their dialogue instead of forming another static row.
+      if(['avispa','cangrejo'].includes(direction.line?.speaker)) {
+        const foe=stageEnemies.find(e=>e.kind===direction.line.speaker);
+        if(foe){ctx.save();ctx.translate(ex,ey-24);ctx.scale(.9,.9);drawEnemy(ctx,foe,{x:0,y:0},reduce?0:storyTime*60);ctx.restore();}
+      }
     }
     scene(reduce?0.7:(frozenSceneTime ?? direction.sceneTime),L,direction);
     const vign=cachedGradient(ctx,"welcome-vignette:"+L.W+"x"+L.H,()=>{

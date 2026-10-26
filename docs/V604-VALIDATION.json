@@ -1,0 +1,240 @@
+{
+  "version": "ohana-604",
+  "status": "local_candidate_not_published",
+  "date": "2026-10-26",
+  "integrated_pr": 441,
+  "node": {
+    "passed": 1631,
+    "failed": 0
+  },
+  "release_gate": "passed",
+  "browser_audit": "passed",
+  "creature_gallery": {
+    "species": 18,
+    "viewports": [
+      "desktop",
+      "mobile"
+    ],
+    "status": "passed"
+  },
+  "single_player_campaign": {
+    "difficulty": "normal",
+    "journal": [
+      {
+        "hero": "kilo",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 80,
+        "iterations": 244,
+        "sealCount": 1,
+        "discoveries": 3
+      },
+      {
+        "hero": "stitcho",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 72.3,
+        "iterations": 288,
+        "sealCount": 2,
+        "discoveries": 3
+      },
+      {
+        "hero": "chispin",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 47.339999999999996,
+        "iterations": 150,
+        "sealCount": 3,
+        "discoveries": 3
+      },
+      {
+        "hero": "cat",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 50.2,
+        "iterations": 228,
+        "sealCount": 4,
+        "discoveries": 3
+      },
+      {
+        "hero": "cuerno",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 72.46000000000001,
+        "iterations": 198,
+        "sealCount": 5,
+        "discoveries": 3
+      },
+      {
+        "hero": "dragon",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 104,
+        "iterations": 216,
+        "sealCount": 6,
+        "discoveries": 3
+      },
+      {
+        "hero": "dino",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 130.56,
+        "iterations": 250,
+        "sealCount": 7,
+        "discoveries": 3
+      },
+      {
+        "hero": "frita",
+        "deaths": 1,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 5.619999999999983,
+        "iterations": 293,
+        "sealCount": 8,
+        "discoveries": 3
+      },
+      {
+        "hero": "pizza",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 110,
+        "iterations": 219,
+        "sealCount": 9,
+        "discoveries": 3
+      },
+      {
+        "hero": "yomi",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 74,
+        "iterations": 264,
+        "sealCount": 10,
+        "discoveries": 3
+      },
+      {
+        "gauntlet": {
+          "deaths": 0,
+          "rescued": [
+            "kilo",
+            "stitcho",
+            "chispin",
+            "cat",
+            "cuerno",
+            "dragon",
+            "dino",
+            "frita",
+            "pizza",
+            "yomi"
+          ],
+          "cinematics": [
+            "keepsakeIntro",
+            "keepsakeRescue",
+            "bossIntro"
+          ]
+        }
+      }
+    ],
+    "finalDeaths": 0,
+    "phases": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "films": [
+      "bossDefeat",
+      "ending"
+    ],
+    "won": true,
+    "combatReport": {
+      "hits": 154,
+      "damage": 2378.619999999999
+    },
+    "errors": []
+  },
+  "multiplayer": {
+    "public": "paused_user_request",
+    "paid_services_used": false,
+    "local_http_versus": {
+      "two_browsers": true,
+      "mobile_viewport": true,
+      "canonical_movement_and_actions": true,
+      "reconnect_rotates_credentials": true,
+      "server_control_pilot_finishes_three_kills": true,
+      "browser_full_match": false
+    },
+    "local_http_adventure": {
+      "two_browsers": true,
+      "distinct_heroes": true,
+      "travel_reject_then_accept": true,
+      "solo_checkpoint_preserved": true,
+      "full_shared_campaign": false
+    },
+    "webrtc_datachannel": "not_validated",
+    "remaining": [
+      "shared chapter objectives and puzzles",
+      "shared campaign rewards and finale",
+      "cross-device and cross-network latency",
+      "human PvP balancing"
+    ]
+  }
+}

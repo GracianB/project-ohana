@@ -80,6 +80,6 @@ test("V101: browser UI, reduced-motion, storage compatibility and original-world
   assert.match(sw,/const VERSION = "ohana-\d+"/);
   assert.match(coop,/const START_ROOM = "hub"/);
   assert.match(coop,/1: \{ x: 550, y: 1070 \}/);
-  assert.match(server,/worldRoomId: "hub"/);
+  assert.match(server,/worldRoomId: mode===\x27adventure\x27\?"w1-kilo":"hub"/);
   assert.match(lobby,/DOS JUGADORES · LA MISMA AVENTURA/);
 });

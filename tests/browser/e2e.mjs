@@ -47,12 +47,14 @@ async function auditPage(page, label) {
   assert.equal(castAudit.cast.length,10,label+': opening cast audit missing heroes');
   assert.equal(new Set(castAudit.cast.map(hero=>hero.id)).size,10);
   assert.ok(castAudit.measured>=8,label+': visual calibration could not inspect most characters');
-  assert.ok(castAudit.cast.every(hero=>hero.x-hero.paintedWidth/2>=-2&&hero.x+hero.paintedWidth/2<=castAudit.width+2),
+  const featuredCast=castAudit.cast.filter(hero=>hero.visible);
+  assert.ok(featuredCast.length>=1&&featuredCast.length<=2,'only the featured story pair may appear');
+  assert.ok(featuredCast.every(hero=>hero.x-hero.paintedWidth/2>=-2&&hero.x+hero.paintedWidth/2<=castAudit.width+2),
     label+': character off the welcome stage');
-  assert.ok(castAudit.cast.every(hero=>Number.isFinite(hero.paintedHeight)&&
+  assert.ok(featuredCast.every(hero=>Number.isFinite(hero.paintedHeight)&&
     hero.paintedHeight>=hero.targetHeight*.33&&hero.paintedHeight<=hero.targetHeight*1.02),
     label+': visual character size remains disproportionate '+JSON.stringify(castAudit.cast));
-  assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,label==='mobile'?3:1,'the grounded cast uses compact depth rows on phones');
+  assert.equal(await page.locator('#ohana-intro').getAttribute('data-opening-staging'),'storybook-spotlight');
   assert.ok(castAudit.cast.every(hero=>hero.foot>0),'every actor has a grounded stage anchor');
   // V344 real browser: the Dragon micro-film must be a deterministic,
   // independently importable performance, not a frozen painted baby sprite.

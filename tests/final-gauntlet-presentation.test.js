@@ -5,7 +5,7 @@ const measure={font:'12px sans-serif',measureText(text){return {width:text.lengt
 test('the guardian cannot advertise an opening after its damage budget closes',()=>{
  const g=fixture();assert.equal(gauntletPresentation(g).open,true);assert.match(gauntletAccessibleText(g),/APERTURA/);g.finalGauntlet.guardian.damageWindowRemaining=0;assert.equal(gauntletPresentation(g).open,false);assert.doesNotMatch(gauntletAccessibleText(g),/ATACA AHORA/);
  g.finalGauntlet.guardian._prismBeast={phase:'warn',technique:{name:'Galope del alba',cue:'Sal de todo el corredor antes de que empiece la carga.'}};const text=gauntletAccessibleText(g);assert.match(text,/Galope del alba/);assert.match(text,/corredor/);assert.match(text,/AVISO/);
- g.finalGauntlet.phase='released';assert.match(gauntletAccessibleText(g),/recoge Primer pincel/);g._pendingWorld1Cine={id:'keepsakeRescue'};assert.equal(gauntletAccessibleText(g),'');
+ g.finalGauntlet.phase='released';assert.match(gauntletAccessibleText(g),/recuperar Primer pincel/);g._pendingWorld1Cine={id:'keepsakeRescue'};assert.equal(gauntletAccessibleText(g),'');
 });
 test('guardian instructions wrap at real font sizes across phone, desktop and landscape',()=>{
  const g=fixture();g.finalGauntlet.guardian._prismBeast={phase:'warn',technique:{name:'Galope del alba',cue:'La franja muestra todo el recorrido de una carga larga y rápida: sal de su corredor antes de que comience.'}};const p=gauntletPresentation(g);

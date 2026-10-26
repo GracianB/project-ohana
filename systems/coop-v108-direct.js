@@ -51,7 +51,7 @@ export function safeDirectPose(message,prevSeq=0){
  if(!message||message.t!=="pose"||!Number.isSafeInteger(message.seq)||message.seq<=prevSeq)return null;
  const bounds=worldBounds(message.room);
  if(!bounds||!finite(message.x)||!finite(message.y)||message.x<0||message.y<0||message.x>bounds.width||message.y>bounds.height)return null;
- if(typeof message.room!=="string"||!/^(hub|beach|jungle|cave|lab|ridge|space|reef|volcano|boss)$/.test(message.room))return null;
+ if(typeof message.room!=="string")return null;
  return {
   seq:message.seq,x:message.x,y:message.y,room:message.room,
   vx:finite(message.vx)?clamp(message.vx,-45,45):0,
