@@ -9,6 +9,7 @@ import { coopRetryDelay,remoteMotionSample } from "./coop-resilience.js";
 import { networkPacing, shouldSendPosition, roundtripEWMA } from "./coop-v103-pacing.js";
 import { shouldUseSnapshot, peerNetworkHealth } from "./coop-v104-sync.js";
 import { shouldFollowPeerRoom } from "./coop-v107-room-follow.js";
+import {renderTravelDialog} from "./coop-travel-dialog-v604.js";
 import { DirectPeerLink } from "./coop-v108-direct.js";
 import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./coop-v109-recovery.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
@@ -97,6 +98,10 @@ class OnlineCoop {
     this.lastRoomId = "";
     this.lastLocalWorld = "";
     this.localRoomGraceUntil = 0;
+    this._travelRequestKey = "";
+    this._travelApplied = "";
+    this._travelBusy = false;
+    this._travelGame = null;
     this.error = "";
     this.seenSignals = new Set();
     this.seenHitEvents = new Set();
@@ -143,6 +148,49 @@ class OnlineCoop {
 
   clearSession() {
     try { sessionStorage.removeItem("ohana-coop-session"); } catch (_) {}
+    renderTravelDialog(null,null);
+  }
+  isConsentMode(){return this.enabled&&this.snapshot?.mode==='adventure';}
+  requestTravel(game,destination){
+    if(!this.isConsentMode()||!game?.roomId)return false;
+    const key=game.roomId+'>'+destination;
+    if(this._travelRequestKey===key||this._travelBusy||this.snapshot?.travel?.status==='pending')return false;
+    this._travelRequestKey=key;this._travelGame=game;
+    void post({action:'travel',roomId:this.roomId,identity:this.identity,
+      decision:'propose',destination}).then(snapshot=>{
+      if(snapshot&&(!this.snapshot||snapshot.revision>=this.snapshot.revision))this.snapshot=snapshot;
+      this.syncTravel(game);
+    }).catch(error=>{
+      this._travelRequestKey='';
+      game.nums?.add?.(game.player?.x||0,game.player?.y||0,error.message,'#f7ac9c');
+    });
+    return false;
+  }
+  async respondTravel(accept,voteId){
+    if(this._travelBusy||!this.isConsentMode()||this.snapshot?.travel?.id!==voteId)return;
+    this._travelBusy=true;
+    try{
+      const snapshot=await post({action:'travel',roomId:this.roomId,identity:this.identity,
+        decision:accept?'accept':'reject',voteId});
+      if(!this.snapshot||snapshot.revision>=this.snapshot.revision)this.snapshot=snapshot;
+      this.syncTravel(this._travelGame);
+    }catch(error){this.error=error.message;}
+    finally{this._travelBusy=false;}
+  }
+  syncTravel(game){
+    if(!this.isConsentMode()){renderTravelDialog(null,null);return;}
+    this._travelGame=game||this._travelGame;
+    const confirmed=this.snapshot?.lastTravel;
+    if(confirmed?.id&&confirmed.id!==this._travelApplied){
+      this._travelApplied=confirmed.id;
+      this._travelRequestKey='';
+      if(this._travelGame?.roomId===confirmed.from){
+        try{this._travelGame.loadRoom?.(confirmed.to,'online-peer');}catch(_){}
+      }
+    }
+    if(!this.snapshot?.travel)this._travelRequestKey='';
+    renderTravelDialog(this.snapshot,this.identity?.playerId,
+      id=>void this.respondTravel(true,id),id=>void this.respondTravel(false,id));
   }
 
   async start(game, definition) {
@@ -414,6 +462,7 @@ class OnlineCoop {
   receiveDirectEvent(game,event){
     if(!this.enabled||!this.remote)return;
     if(event.kind==="room"){
+      if(this.isConsentMode())return;
       const destination=String(event.payload?.roomId||"");
       if(!/^(hub|beach|jungle|cave|lab|ridge|space|reef|volcano|boss)$/.test(destination))return;
       this.remoteWorld=destination;
@@ -560,6 +609,7 @@ class OnlineCoop {
       const previousPeerRoom=this.remoteWorld;
       this.snapshot = snapshot;
       this.updateRemote(snapshot, game);
+      this.syncTravel(game);
       this.sequence = Math.max(
         this.sequence,
         this.currentPlayer(snapshot)?.lastSequence || 0
@@ -578,7 +628,7 @@ class OnlineCoop {
       }
 
       const remoteWorld = this.remote?.playerId ? this.remoteWorld : "";
-      if (shouldFollowPeerRoom(previousPeerRoom,remoteWorld,game.roomId,now,this.localRoomGraceUntil)) {
+      if ((!this.isConsentMode()||this.snapshot?.lastTravel?.to===remoteWorld)&&shouldFollowPeerRoom(previousPeerRoom,remoteWorld,game.roomId,now,this.localRoomGraceUntil)) {
         this.lastRoomId = remoteWorld;
         this.lastLocalWorld=remoteWorld;
         try {
@@ -602,6 +652,7 @@ class OnlineCoop {
     this.error=error?.message||"Sesión caducada";
     clearInterval(this.heartbeatTimer);this.heartbeatTimer=null;
     this.enabled=false;
+    renderTravelDialog(null,null);
     this.pendingMutations.length=0;
     this.direct?.close();this.direct=null;this.directAttempted=false;
     this.directConnectedAt=0;this.lastDirectPoseAt=0;
@@ -914,6 +965,7 @@ class OnlineCoop {
       }
 
       if (event.signalKind === "room") {
+        if(this.isConsentMode())continue;
         const nextRoom = String(event.payload?.roomId || "");
         if (nextRoom && nextRoom !== game.roomId) {
           try { game.loadRoom(nextRoom, "online-peer"); } catch (_) {}

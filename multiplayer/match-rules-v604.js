@@ -54,9 +54,9 @@ export function createTravelVote({id,from,to,by,players,now=0}={}){
 export function castTravelVote(vote,by,accept,now=0){
  if(!vote||vote.status!=='pending'||!vote.players.includes(by))return vote;
  if(!Number.isFinite(now)||now<vote.createdAt||now>=vote.createdAt+TRAVEL_VOTE_TTL_MS)return {...vote,status:'expired'};
- if(vote.accepted.includes(by)||vote.rejected.includes(by))return vote;
+ if(vote.rejected.includes(by)||(accept===true&&vote.accepted.includes(by)))return vote;
  if(accept!==true&&accept!==false)return vote;
- const accepted=accept?[...vote.accepted,by]:vote.accepted;
+ const accepted=accept?[...vote.accepted,by]:vote.accepted.filter(id=>id!==by);
  const rejected=accept?vote.rejected:[...vote.rejected,by];
  return {...vote,accepted,rejected,status:rejected.length?'rejected':accepted.length===vote.players.length?'approved':'pending'};
 }

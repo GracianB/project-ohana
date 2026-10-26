@@ -599,6 +599,12 @@ if(id==="hub"&&game.player?.id==="pizza"&&game.personalAdventureSolo)r=createPiz
 if(id==="hub"&&game.player?.id==="yomi"&&game.personalAdventureSolo)r=createYomiRoom(r);
 if(id==="hub"&&game.player?.id==="cuerno"&&game.personalAdventureSolo)r=createCuernoRoom(r);
 if (!r) return false;
+// V604: doors and portals are proposals in shared adventure. Only a server
+// accepted vote will load the next level in both browsers.
+if(onlineCoop.isConsentMode?.()&&game.roomId&&id!==game.roomId&&
+ ['right','left','up','down','portal'].includes(fromDir)){
+  return onlineCoop.requestTravel(game,id);
+}
 if(id==="w1-final"&&readKeepsakes().length<10){game.world1Won=false;game._w1WinSent=false;}
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));

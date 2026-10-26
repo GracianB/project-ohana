@@ -34,5 +34,6 @@ test('V604 co-op: adjacent rooms only; both approvals, rejection and expiry',()=
  assert.equal(travelApproved(ok,'w1-kilo',['a1','b1']),true);
  assert.equal(travelApproved(ok,'w1-stitcho',['a1','b1']),false);
  assert.equal(castTravelVote(initial,'b1',false,150).status,'rejected');
+ assert.equal(castTravelVote(initial,'a1',false,150).status,'rejected');
  assert.equal(castTravelVote(initial,'b1',true,100+TRAVEL_VOTE_TTL_MS).status,'expired');
 });
