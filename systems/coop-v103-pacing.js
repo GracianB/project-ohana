@@ -29,6 +29,9 @@ export function shouldSendPosition(previous, current, elapsedMs, pacing=networkP
   for(const key of ["positionX","positionY"]){
     if(Math.abs(finite(current[key],0)-finite(previous[key],0))>=COOP_BUDGET.minDistance)return true;
   }
+  // Puzzle changes must reach a stationary teammate without waiting for the
+  // idle heartbeat. They still respect the movement request budget above.
+  if(JSON.stringify(current.adventureProgress)!==JSON.stringify(previous.adventureProgress))return true;
   // XP matters for shared progression. Ordinary velocity changes alone can wait.
   return current.experience!==previous.experience;
 }

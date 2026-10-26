@@ -1,3 +1,6 @@
+import {findRoster} from '../../characters/roster.js';
+import {adventureCamp,adventureRoleAllowed} from '../../multiplayer/adventure-roles.js';
+import {mergeAdventureProgress} from '../../multiplayer/adventure-progress.js';
 import {createVersus,advanceVersus,versusAction,setVersusInput,versusSnapshot} from './versus.mjs';
 import {worldBounds} from "../../systems/world-bounds.js";
 import {adjacentRoom,createTravelVote,castTravelVote,travelApproved,validDuelArena} from "../../multiplayer/match-rules-v604.js";
@@ -44,6 +47,8 @@ function snapshot(room, viewerId) {
       playerId: player.id,
       slot: player.slot,
       characterId: player.characterId,
+      homeCharacterId:player.homeCharacterId||player.characterId,
+      roleEpoch:player.roleEpoch||0,
       x: player.x,
       y: player.y,
       facing: player.facing,
@@ -66,6 +71,7 @@ function snapshot(room, viewerId) {
     mode: room.mode || 'classic',
     arenaId:room.arenaId||null,
     versus:versusSnapshot(room),
+    adventureProgress:room.mode==='adventure'?structuredClone(room.adventureProgress||null):null,
     travel: room.mode==='adventure'?structuredClone(room.travel||null):null,
     lastTravel: room.mode==='adventure'?structuredClone(room.lastTravel||null):null,
     travelClosed: room.mode==='adventure'?structuredClone(room.travelClosed||null):null,
@@ -275,10 +281,31 @@ export function createRoomService(store, options = {}) {
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de elegir.", 409);
         if (state.phase !== "lobby") throw new RoomError("MATCH_STARTED", "No se puede cambiar de personaje una vez iniciada la misión.", 409);
         player.characterId = characterId;
+        if(state.mode==='adventure')player.homeCharacterId=characterId;
         player.ready = false;
         player.lastSeenAt = now();
       });
       return snapshot(room, identity.playerId);
+    },
+
+    async role(roomCode,identity,characterId,roleEpoch=0){
+      validateCharacter(characterId);
+      const {room}=await mutate(roomCode,state=>{
+        const player=playerFrom(state,identity),time=now();
+        if(state.mode!=='adventure')throw new RoomError('MODE_REQUIRED','El relevo es exclusivo de Aventura.',409);
+        if(state.phase!=='playing'||state.players.some(p=>!p.connected))throw new RoomError('TEAM_NOT_READY','Los dos compañeros deben estar conectados.',409);
+        if(!adventureRoleAllowed(player,player.worldRoomId,characterId))throw new RoomError('ROLE_INVALID','Elige al héroe de la sala o vuelve a tu personaje.',400);
+        if(player.characterId===characterId)return;
+        if(!Number.isSafeInteger(roleEpoch)||roleEpoch!==(player.roleEpoch||0))throw new RoomError('ROLE_CHANGED','El relevo ya cambió; actualiza la sala.',409);
+        if(player.health!=null&&player.health<=0)throw new RoomError('ROLE_UNAVAILABLE','Espera a recuperarte antes del relevo.',409);
+        if(player.pose?.grounded===false||!adventureCamp(player.worldRoomId,player.x,player.y,state.adventureProgress))throw new RoomError('CAMP_REQUIRED','Vuelve a la entrada o a un objetivo completado para cambiar.',409);
+        if(time-(player.lastRoleAt||0)<1200)throw new RoomError('ROLE_COOLDOWN','Espera un momento antes de otro relevo.',409);
+        const previous=findRoster(player.characterId).forms[Math.max(0,Math.min(4,player.evolution||0))];
+        player.roleStates||={};player.roleStates[player.characterId]={evolution:player.evolution||0,experience:player.experience||0,health:player.health??previous.hp};
+        const saved=player.roleStates[characterId]||{evolution:0,experience:0,health:findRoster(characterId).forms[0].hp};
+        const form=findRoster(characterId).forms[saved.evolution];
+        Object.assign(player,saved,{characterId,maxHealth:form.hp,health:Math.min(form.hp,saved.health),roleEpoch:(player.roleEpoch||0)+1,lastRoleAt:time,lastSeenAt:time});
+      });return snapshot(room,identity.playerId);
     },
 
     async ready(roomCode, identity, requestedReady = true) {
@@ -337,6 +364,7 @@ export function createRoomService(store, options = {}) {
           // forged position packet cannot teleport one player to another world.
           if(state.mode==='adventure'&&selectedRoom!==player.worldRoomId)
             throw new RoomError('TRAVEL_CONSENT_REQUIRED','Los dos jugadores deben aceptar el cambio de sala.',409);
+          if(state.mode==='adventure'&&(player.roleEpoch||0)>0&&(payload.characterId!==player.characterId||payload.roleEpoch!==player.roleEpoch))throw new RoomError('ROLE_CHANGED','El personaje ha cambiado; actualiza los controles.',409);
           const bounds=worldBounds(selectedRoom)||worldBounds("beach");
           player.x = finitePayloadNumber(payload?.positionX,player.x,0,bounds.width);
           player.y = finitePayloadNumber(payload?.positionY,player.y,0,bounds.height);
@@ -346,6 +374,7 @@ export function createRoomService(store, options = {}) {
           player.health = finitePayloadNumber(payload?.health,player.health??0,0,100000);
           player.maxHealth = finitePayloadNumber(payload?.maxHealth,player.maxHealth??1,1,100000);
           player.worldRoomId = String(payload?.worldRoomId || player.worldRoomId || "beach");
+          if(state.mode==='adventure'&&payload.adventureProgress)state.adventureProgress=mergeAdventureProgress(state.adventureProgress,payload.adventureProgress,{roomId:selectedRoom,host:player.slot===0});
           player.pose = {
             vx: Math.max(-40, Math.min(40, Number(payload?.velocityX) || 0)),
             vy: Math.max(-60, Math.min(60, Number(payload?.velocityY) || 0)),

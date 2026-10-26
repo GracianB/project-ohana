@@ -1,3 +1,5 @@
+import {renderCoopRole} from './coop-role-v604.js';
+import {adventureRoomProgress,applyAdventureProgress} from '../multiplayer/adventure-progress.js';
 import {drawFamilyDuet} from './family-duets.js';
 import {drawMichiDuet} from './michi-duet.js';
 import {drawChispinDuet} from './chispin-duet.js';
@@ -166,6 +168,13 @@ class OnlineCoop {
     });
     return false;
   }
+  async requestRole(characterId){
+    if(!this.isConsentMode())return;
+    const snapshot=await post({action:'role',roomId:this.roomId,identity:this.identity,characterId,roleEpoch:this.currentPlayer(this.snapshot)?.roleEpoch||0});
+    if(shouldUseSnapshot(this.snapshot,snapshot)){this.snapshot=snapshot;this.updateRemote(snapshot,this._travelGame);this.syncTravel(this._travelGame);}
+    // Pending old-character positions must never overwrite the new role.
+    this.pendingMutations=this.pendingMutations.filter(item=>item.action==='signal'&&item.signalKind==='action'&&item.payload?.action==='rtc');this.lastSentPose=null;this.lastSend=0;
+  }
   async respondTravel(accept,voteId){
     if(this._travelBusy||!this.isConsentMode()||this.snapshot?.travel?.id!==voteId)return;
     this._travelBusy=true;
@@ -178,8 +187,13 @@ class OnlineCoop {
     finally{this._travelBusy=false;}
   }
   syncTravel(game){
-    if(!this.isConsentMode()){renderTravelDialog(null,null);return;}
+    if(!this.isConsentMode()){renderTravelDialog(null,null);renderCoopRole(null,null);return;}
     this._travelGame=game||this._travelGame;
+    if(this._travelGame)this._travelGame.coopAuthority=this.currentPlayer(this.snapshot)?.slot===0;
+    const me=this.currentPlayer(this.snapshot),g=this._travelGame;
+    if(g?.player&&me?.characterId&&g.player.id!==me.characterId)g.changeCoopHero?.(me.characterId,me);
+    applyAdventureProgress(g,this.snapshot?.adventureProgress);
+    renderCoopRole(g,this.snapshot,id=>this.requestRole(id));
     const confirmed=this.snapshot?.lastTravel;
     if(confirmed?.id&&confirmed.id!==this._travelApplied){
       this._travelApplied=confirmed.id;
@@ -331,7 +345,9 @@ class OnlineCoop {
       backdropFilter: "none",
       boxShadow: "0 8px 28px rgba(0,0,0,.22)",
     });
-    document.body.appendChild(badge);
+    const hud=document.querySelector('#hud .hud-block.world');
+    if(hud)Object.assign(badge.style,{position:'static',top:'auto',left:'auto',transform:'none',padding:'4px 0 0',border:'0',borderRadius:'0',background:'transparent',boxShadow:'none',fontSize:'9px',letterSpacing:'.02em'});
+    (hud||document.body).appendChild(badge);
   }
 
   // Network status is informational: keep it independent of FPS and physics.
@@ -370,7 +386,10 @@ class OnlineCoop {
       if(!direct&&(quality.quality==="late"||quality.quality==="lost"))text+=" · SEÑAL RETRASADA";
       else if(!direct&&quality.quality==="slow")text+=" · RED LENTA";
     }
-    if(badge.textContent!==text)badge.textContent=text;
+    badge.title=text;
+    const label=state==='connected'?'2 jugadores · '+(guest&&!synced?'Esperando combate':/SEÑAL RETRASADA|RED LENTA/.test(text)?'Conexión lenta':'Conectados'):
+      state==='waiting-peer'?'Esperando al compañero':state==='reconnecting'?'Recuperando conexión':state==='error'?'Conexión no disponible':'Conectando';
+    if(badge.textContent!==label)badge.textContent=label;
   }
 
   currentPlayer(snapshot) {
@@ -676,6 +695,7 @@ class OnlineCoop {
       this.identity=snapshot.identity;
       this.snapshot=snapshot;
       this.updateRemote(snapshot);
+      this.syncTravel(this._combatGame);
       // A reconnect increments connectionEpoch; future requests need new credentials.
       try{
         sessionStorage.setItem("ohana-coop-session",JSON.stringify({
@@ -783,6 +803,7 @@ class OnlineCoop {
       melee: finite(game.player.melee, 0),
       dash: finite(game.player.dash, 0),
       worldRoomId: game.roomId || START_ROOM,
+      ...(this.isConsentMode()?{adventureProgress:adventureRoomProgress(game),characterId:game.player.id,roleEpoch:this.currentPlayer(this.snapshot)?.roleEpoch||0}:{}),
     };
     if(!shouldSendPosition(this.lastSentPose,pose,now-this.lastSend,pacing,force))return;
     const sequence=++this.sequence;
@@ -797,7 +818,7 @@ class OnlineCoop {
   classifyMutationError(error){
     const code=String(error?.code||"SERVER_UNAVAILABLE");
     if(typeof document!=="undefined")document.body.dataset.coopLastErrorCode=code.slice(0,48);
-    if(code==="DUPLICATE_ACTION")return "drop";
+    if(code==="DUPLICATE_ACTION"||code==="ROLE_CHANGED")return "drop";
     if(code==="NOT_READY"||code==="MATCH_STARTED")return "refresh";
     return "retry";
   }
