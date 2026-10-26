@@ -1,7 +1,7 @@
 {
   "version": "ohana-601",
   "name": "V600.1",
-  "status": "validated_pending_publication",
+  "status": "published_and_verified",
   "scope": "Final boss art and exclusive cinematic handoff; combat rules unchanged",
   "node": {
     "passed": 1570,
@@ -234,6 +234,74 @@
     "Artistic acceptance remains user review."
   ],
   "publication": {
-    "verified": false
-  }
+    "version": "ohana-601",
+    "runtime_commit": "8744d496f5f66d50284707d41198cde93a2dcb82",
+    "url": "https://gracianb.github.io/project-ohana/?release=601",
+    "preview": "https://gracianb.github.io/project-ohana/previews/quimera-design.html?release=601",
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40258653408",
+    "ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40258653431",
+    "verified": true,
+    "live_assets_verified_sha256": 8,
+    "public_startup": {
+      "preview": true,
+      "playing": true,
+      "cache": {
+        "keys": [
+          "ohana-static-ohana-601"
+        ],
+        "active": true
+      },
+      "errors": []
+    }
+  },
+  "live_assets": [
+    {
+      "path": "game.js",
+      "matched": true,
+      "sha256": "96bf66ee833433cbb564da84ebd90ec8498c2b91941518c7176170aa16aadab7",
+      "live_sha256": "96bf66ee833433cbb564da84ebd90ec8498c2b91941518c7176170aa16aadab7"
+    },
+    {
+      "path": "index.html",
+      "matched": true,
+      "sha256": "e1b05dc2e2b757615e97235bb5e2a76e60d087b3f78b400ea5b868a16703e37b",
+      "live_sha256": "e1b05dc2e2b757615e97235bb5e2a76e60d087b3f78b400ea5b868a16703e37b"
+    },
+    {
+      "path": "previews/quimera-design.html",
+      "matched": true,
+      "sha256": "8b17c2a9625fb76b1322f4a202e35f6260b0766b4ed17d9ff5bf1c52e3d5cd64",
+      "live_sha256": "8b17c2a9625fb76b1322f4a202e35f6260b0766b4ed17d9ff5bf1c52e3d5cd64"
+    },
+    {
+      "path": "sw.js",
+      "matched": true,
+      "sha256": "8ce397fbef5431211d77d416bdd8dbdf8d050a52cd9691c2692eedac0bc51002",
+      "live_sha256": "8ce397fbef5431211d77d416bdd8dbdf8d050a52cd9691c2692eedac0bc51002"
+    },
+    {
+      "path": "systems/fusion-boss.js",
+      "matched": true,
+      "sha256": "2903bca4c53d8c69fef247eb49acd031138cffac8886c56d79666d8d3050cc66",
+      "live_sha256": "2903bca4c53d8c69fef247eb49acd031138cffac8886c56d79666d8d3050cc66"
+    },
+    {
+      "path": "systems/quimera-art.js",
+      "matched": true,
+      "sha256": "39bf5985a5bd03b56169343859fd84b7658d60c3377231d0c49c0244766a9903",
+      "live_sha256": "39bf5985a5bd03b56169343859fd84b7658d60c3377231d0c49c0244766a9903"
+    },
+    {
+      "path": "systems/world1-boss.js",
+      "matched": true,
+      "sha256": "9cc6fc73ab7af2c3c4488b0d1ace7e5b8ce5bd82e298939eb96fd0374cd15bba",
+      "live_sha256": "9cc6fc73ab7af2c3c4488b0d1ace7e5b8ce5bd82e298939eb96fd0374cd15bba"
+    },
+    {
+      "path": "systems/world1-cine.js",
+      "matched": true,
+      "sha256": "a76a50fd79d09305b56d9105cd384355c8047a8b73a63f353bff594e925301c2",
+      "live_sha256": "a76a50fd79d09305b56d9105cd384355c8047a8b73a63f353bff594e925301c2"
+    }
+  ]
 }

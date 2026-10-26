@@ -8,17 +8,18 @@
   "published": true,
   "campaign_complete_verified": true,
   "v1_ready": false,
-  "next_task": "v2.user_play_review",
+  "next_task": "v602.opening_and_character_selection",
   "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
   "validation_baseline": {
-    "node_passed": 1567,
-    "runtime_modules": 334,
-    "precache_resources": 384,
-    "source": "docs/V600-VALIDATION.json",
-    "local_browser_audit": "passed_V600",
-    "github_quality": "passed_6ecdb76"
+    "node_passed": 1570,
+    "runtime_modules": 335,
+    "precache_resources": 385,
+    "source": "docs/V601-VALIDATION.json",
+    "local_browser_audit": "passed_V601",
+    "github_node_ci": "passed_8744d49",
+    "github_quality": "V600 baseline only; no V601 Quality run"
   },
   "chapters": [
     {
@@ -247,6 +248,31 @@
   ],
   "evidence_storage": "Versioned drivers and docs/V600-VALIDATION.json; generated evidence in test-results/v600 and /workspace/.cloud-setup/logs/ohana-v600-*.",
   "published_release": {
+    "version": "ohana-601",
+    "runtime_commit": "8744d496f5f66d50284707d41198cde93a2dcb82",
+    "url": "https://gracianb.github.io/project-ohana/?release=601",
+    "preview": "https://gracianb.github.io/project-ohana/previews/quimera-design.html?release=601",
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40258653408",
+    "ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40258653431",
+    "verified": true,
+    "live_assets_verified_sha256": 8,
+    "public_startup": {
+      "preview": true,
+      "playing": true,
+      "cache": {
+        "keys": [
+          "ohana-static-ohana-601"
+        ],
+        "active": true
+      },
+      "errors": []
+    }
+  },
+  "published_commit": "8744d496f5f66d50284707d41198cde93a2dcb82",
+  "published_url": "https://gracianb.github.io/project-ohana/?release=601",
+  "candidate_version": "ohana-601",
+  "review": "docs/V600.1-QUIMERA.md",
+  "previous_verified_publication": {
     "version": "ohana-600",
     "runtime_commit": "6ecdb76a6559f6137ebab260f205b50663a7763b",
     "url": "https://gracianb.github.io/project-ohana/?release=600",
@@ -269,20 +295,7 @@
       "errors": []
     }
   },
-  "published_commit": "6ecdb76a6559f6137ebab260f205b50663a7763b",
-  "published_url": "https://gracianb.github.io/project-ohana/?release=600",
-  "candidate_version": "ohana-600",
-  "review": "docs/V2-ADVENTURE.md",
-  "previous_verified_publication": {
-    "version": "ohana-513",
-    "commit": "30cd122f5f934e930c35ce3c332f1fc54d295c4c",
-    "url": "https://gracianb.github.io/project-ohana/?release=513",
-    "verified": true,
-    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40210771516",
-    "ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40210771546",
-    "live_assets_verified_sha256": 26
-  },
   "candidate_review": "docs/V2-ADVENTURE.md",
-  "candidate_validation": "docs/V600-VALIDATION.json",
+  "candidate_validation": "docs/V601-VALIDATION.json",
   "candidate_published": true
 }

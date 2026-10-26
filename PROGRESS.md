@@ -1,7 +1,13 @@
-# V600.1 · ohana-601 · Quimera en revisión
+# V600.1 · ohana-601 · Quimera publicada
 
-Cuerpo Canvas propio, cuatro metamorfosis y un único propietario del cierre.
-Pendiente de validación y publicación; V600 sigue siendo la versión pública.
+https://gracianb.github.io/project-ohana/?release=601
+
+Anatomía Canvas propia, materiales, cuatro metamorfosis y cierre sin capas
+superpuestas. Visor: previews/quimera-design.html. 1.570 pruebas Node,
+auditoría de navegador, veinte estados y cuatro fases en arena aprobados.
+Campaña Normal completa y exclusión entre relato, evolución y reencuentro
+comprobadas. Pages y CI aprobados; ocho archivos publicados comparados por SHA256,
+arranque público y caché ohana-601 activa comprobados. Ver docs/V601-VALIDATION.json.
 
 # V600 · ohana-600 · V2 publicada y verificada
 
