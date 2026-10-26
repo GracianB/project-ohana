@@ -1,6 +1,8 @@
 const VERSION = "ohana-604";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/coop-travel-dialog-v604.js?v=" + VERSION,
+  "./coop-travel-v604.css?v=" + VERSION,
   "./systems/chapter-species-v604.js?v=" + VERSION,
   "./systems/guardian-techniques.js?v=" + VERSION,
   "./systems/illustrated-chapters.js?v=" + VERSION,
@@ -520,7 +522,7 @@ const PRECACHE_REVISIONS = {
   "systems/kilo-grove.js": "6e734822e55541f2b646d9ed59f694358fbe5266",
   "systems/moving-platforms.js": "eaa75c99c844cb3ff2bf598bbbc93990306fb085",
   "characters/hula-depth.js": "d8d727af693c5b0e406f40d69c163126087c8e0d",
-  "systems/world-bounds.js": "bb28e553ed1c07a0dfc0b62b3924fe0525f359c2",
+  "systems/world-bounds.js": "37e23d900d42b95fa9e9aa6273ace97d1f614fad",
   "systems/platform-layout.js": "3d5b15bbf71dda8749f63adcec11c44aedce3464",
   "characters/michi-motion.js": "354be1f07643966e91515952784d4fe414ec1dc9",
   "characters/michi-jelly.js": "fe7f29dfe0c277b4287a111ad6b118e8221facf5",
@@ -571,10 +573,10 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "e7057590c3c00ff0266feb03802114a325720952",
+  "index.html": "230808f501978ebefb555e908f74b4a26df674f5",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
-  "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
+  "multiplayer.js": "18d97f616ca3d977155afb5a2cfcb654dbe79834",
   "multiplayer/mission.js": "e94f85833c4c66f3ac8e2e51d1162d7e6db1cdd1",
   "multiplayer/duo-altars.js": "29aafd8ca96cd1320d75cbd2b7be6bd107a569b0",
   "manifest.json": "3e910803d5c4ea7d158370d0b5becb462c23d77b",
@@ -596,7 +598,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "a74bf66af9f5cfa62e123a4bdb95a6969c99254d",
+  "game.js": "0061bb90addffd4f65fce5f2e9c037636ef44c1c",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "df85d6cff3ebc2ca66193fd895ad0a2976f68e3f",
   "characters/ten-action-acting.js": "8c56db05f0625ebce31e10abbba5305be881d0ff",
@@ -792,7 +794,7 @@ const PRECACHE_REVISIONS = {
   "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
   "systems/title.js": "e14b7a233972654ca7b2408add240e40bc420c3e",
   "systems/experience.js": "6ae2198d35393ab39584f42f974584a9c9a5d547",
-  "systems/online-coop.js": "d4ec36b514a6b597562d61777bbf2b68e3f34dc9",
+  "systems/online-coop.js": "da2b0c9830c1921a4e7ec0c6224089304ceee618",
   "systems/duo-altar-art.js": "2563f6d83f5428ff00af011fff13a542ba6dfae4",
   "systems/xp.js": "df3fba7395dfacd5fe3dc37826c6cb10c244856a",
   "worlds/index.js": "5e6b0b03d15a30822948aa372a0f8eaf577a4ebf",
@@ -816,7 +818,9 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
   "systems/welcome-spotlight.js": "76ab5c1894dedacd695aa353658d853960a2048b",
-  "systems/chapter-species-v604.js": "67f46c28d4645ad0267181556701734fc9c5c3e4"
+  "systems/chapter-species-v604.js": "67f46c28d4645ad0267181556701734fc9c5c3e4",
+  "systems/coop-travel-dialog-v604.js": "829d191bcb1998389429c972681de083d9b10d8e",
+  "coop-travel-v604.css": "20948f037f2586d16bbae84065a76662bc15382a"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";

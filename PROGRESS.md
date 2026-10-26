@@ -1,6 +1,6 @@
 # V604 · ohana-604 · candidato en PR #441 (no publicado)
 
-Cinco especies diferenciadas por cada sala de héroe, ahora con anatomía de especie real, equipo según función y avisos propios de ataque. Introducción centrada en protagonistas, ojo de perfil del mini jefe Dino, J de Dragón y orden de apertura cinematográfica. Validación CI y visual requerida antes de publicar.
+Cinco especies diferenciadas por cada sala de héroe, ahora con anatomía de especie real, equipo según función y avisos propios de ataque. Introducción centrada en protagonistas, ojo de perfil del mini jefe Dino, J de Dragón y orden de apertura cinematográfica. Votación autenticada de viaje y panel de estadísticas de 2 jugadores preparados en rama; modo VS todavía no conectado a red. Validación CI, integridad offline y prueba visual en dos navegadores requeridas antes de publicar.
 
 # V603 · ohana-603 · publicada y verificada
 

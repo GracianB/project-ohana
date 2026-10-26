@@ -18,3 +18,6 @@ La infraestructura pública de señales/Netlify está pausada por el límite de 
 
 ## Gate 1 de noviembre
 Mantener el modo individual publicable aunque el multijugador siga en beta. Ningún cambio en este archivo autoriza a declarar los dos modos online completos.
+
+## Integración V604 en PR #441
+El servidor Netlify almacena la propuesta de cambio en una mutación autenticada y coherente; bloquea movimientos y señales de sala que intenten saltarse la votación. Ambos jugadores aceptan o rechazan con el panel de estado y personaje; la aceptación completa mueve a los dos. El cliente aún requiere prueba en dos navegadores reales, recuperación ante desconexiones y verificación de servidor desplegado. VS sigue como contrato de combate, no jugable en línea.
