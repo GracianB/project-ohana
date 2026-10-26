@@ -394,6 +394,9 @@ export function createRoomService(store, options = {}) {
         if(state.travel?.status==='pending'&&now()>=state.travel.createdAt+25000){
           state.travelClosed={id:state.travel.id,reason:'expired',at:now()};
           state.travel=null;
+          // Persist the expired vote even if a delayed acceptance arrives.
+          // Throwing here would abort the CAS transaction and restore it.
+          if(decision!=='propose'){player.lastSeenAt=now();return;}
         }
         if(decision==='propose'){
           const from=String(player.worldRoomId||'');

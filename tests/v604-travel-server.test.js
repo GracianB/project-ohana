@@ -53,8 +53,9 @@ test('V604 server: rejection, unauthorized votes, invalid routes and expiry do n
  const second=await h.service.travel(t.code,t.host.identity,proposal('w1-kilo','w1-stitcho'));
  // Keep both sessions alive while the 25-second vote timeout elapses.
  for(let i=0;i<3;i++){h.advance(9000);await h.service.poll(t.code,t.host.identity);await h.service.poll(t.code,t.guest.identity);}
- const expired=await h.service.travel(t.code,t.guest.identity,{decision:'accept',voteId:second.travel.id}).catch(e=>e);
- assert.equal(expired.code,'TRAVEL_STALE');
+ const expired=await h.service.travel(t.code,t.guest.identity,{decision:'accept',voteId:second.travel.id});
+ assert.equal(expired.travel,null);
+ assert.equal(expired.travelClosed.reason,'expired');
  const post=await h.service.poll(t.code,t.guest.identity);
  assert.equal(post.travel,null);assert.equal(post.travelClosed.reason,'expired');
  assert.deepEqual(post.players.map(p=>p.worldRoomId),['w1-kilo','w1-kilo']);
