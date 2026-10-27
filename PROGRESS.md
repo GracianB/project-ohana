@@ -6,6 +6,8 @@ Servidor local sin Netlify: Versus con daño/XP/evolución/victoria autoritativo
 
 Versus completo en dos navegadores aprobado: Dino y Chispín en Claro, teclado y controles táctiles, XP ganado por fauna, cinco formas de Dino, tres eliminaciones, reapariciones y resultado coincidente. Corregida la salida de resultados para borrar la sesión terminada y permitir elegir de nuevo. La prueba automatizada no acredita equilibrio PvP humano ni todas las parejas/arenas.
 
+Paisajes por código: retiradas las nueve láminas WebP y el PNG del observatorio, incluida su sustitución de portada/selección. Nueve salas y acto final con tres capas de profundidad, detalles propios y ambiente animado; Kilo conserva su jardín, compartido ahora también por Versus en Claro. Galería de diez paisajes, integración de once escenarios, vistas móviles, movimiento reducido y ausencia de peticiones de esas imágenes comprobados. Caché limitada a dos entradas; 405 recursos offline. Detalles: docs/CANVAS-LANDSCAPES.md.
+
 Validación local: 1.666 pruebas Node, Release Gate, auditoría general de navegador, galería de 18 especies y campaña individual Normal limpia hasta Quimera y cierre aprobados. No se declara publicación ni CI verde para este candidato. Evidencia: docs/V604-VALIDATION.json.
 
 # V603 · ohana-603 · publicada y verificada

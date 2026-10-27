@@ -863,6 +863,192 @@
   },
   "offline": {
     "runtime_modules": 345,
-    "resources": 415
+    "resources": 405
+  },
+  "code_painted_landscapes": {
+    "status": "passed",
+    "date": "2026-10-27",
+    "scenes": [
+      {
+        "hero": "stitcho",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 1,
+          "bytes": 19440000
+        },
+        "timing": {
+          "medianMs": 0.30000000447034836,
+          "p95Ms": 2.7999999970197678,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      },
+      {
+        "hero": "chispin",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 2,
+          "bytes": 38880000
+        },
+        "timing": {
+          "medianMs": 0.29999999701976776,
+          "p95Ms": 0.5999999940395355,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      },
+      {
+        "hero": "cat",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 2,
+          "bytes": 38880000
+        },
+        "timing": {
+          "medianMs": 0.5,
+          "p95Ms": 11.799999997019768,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      },
+      {
+        "hero": "cuerno",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 2,
+          "bytes": 38880000
+        },
+        "timing": {
+          "medianMs": 0.30000000447034836,
+          "p95Ms": 3,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      },
+      {
+        "hero": "dragon",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 2,
+          "bytes": 38880000
+        },
+        "timing": {
+          "medianMs": 0.20000000298023224,
+          "p95Ms": 0.6000000014901161,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      },
+      {
+        "hero": "dino",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 2,
+          "bytes": 38880000
+        },
+        "timing": {
+          "medianMs": 0.19999999552965164,
+          "p95Ms": 0.30000000447034836,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      },
+      {
+        "hero": "frita",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 2,
+          "bytes": 38880000
+        },
+        "timing": {
+          "medianMs": 0.20000000298023224,
+          "p95Ms": 0.5999999940395355,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      },
+      {
+        "hero": "pizza",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 2,
+          "bytes": 38880000
+        },
+        "timing": {
+          "medianMs": 0.30000000447034836,
+          "p95Ms": 0.9000000059604645,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      },
+      {
+        "hero": "yomi",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 2,
+          "bytes": 38880000
+        },
+        "timing": {
+          "medianMs": 0.3999999985098839,
+          "p95Ms": 1.3999999985098839,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      },
+      {
+        "hero": "final",
+        "parallax": true,
+        "animation": true,
+        "reducedMotion": true,
+        "cache": {
+          "entries": 2,
+          "bytes": 38880000
+        },
+        "timing": {
+          "medianMs": 0.29999999701976776,
+          "p95Ms": 0.5,
+          "scope": "CPU Canvas submission; not whole-game FPS"
+        }
+      }
+    ],
+    "integration_rooms": [
+      "kilo",
+      "stitcho",
+      "chispin",
+      "cat",
+      "cuerno",
+      "dragon",
+      "dino",
+      "frita",
+      "pizza",
+      "yomi",
+      "final"
+    ],
+    "mobile_views": [
+      "stitcho",
+      "chispin",
+      "cuerno",
+      "pizza",
+      "yomi",
+      "final"
+    ],
+    "opening_and_selection": "image override removed; existing procedural theatre restored",
+    "landscape_raster_requests": [],
+    "removed_raster_files": 10,
+    "max_retained_layer_rgba_bytes": 38880000,
+    "performance_scope": "warm Canvas submission timings, not whole-game FPS or browser/GPU memory",
+    "visual_fixtures_change_positions_and_evolution": true,
+    "campaign_replayed_for_visual_change": false,
+    "errors": [],
+    "interactive_preview": "passed: eleven scene selections and reduced-motion control in previews/living-realms.html"
   }
 }

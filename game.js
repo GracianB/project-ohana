@@ -1,5 +1,5 @@
 import {createAdventureStorage} from './multiplayer/adventure-progress.js';
-import {drawIllustratedChapter} from './systems/illustrated-chapters.js';
+import {drawLivingRealm} from './worlds/living-realms.js';
 import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
 import {KEEPSAKES,readKeepsakes,mergeKeepsakes,persistKeepsakes} from './systems/keepsakes.js';
 import {chapterAtlasHTML,chapterMapDetail,drawAdventureGuide} from './systems/adventure-guide-v2.js';
@@ -3072,7 +3072,7 @@ ctx.restore();
 // V468: cada sala del Mundo 1 usa el decorado de su héroe y su silueta gigante.
 function drawWorld1Backdrop(world,W,H){
  const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
- if(drawIllustratedChapter(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H)){drawChapterLandmarks(ctx,game,game.cam,t,W,H);return;}
+ if(h!=="kilo"&&drawLivingRealm(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H,t,{reduceMotion:rd})){drawChapterLandmarks(ctx,game,game.cam,t,W,H);return;}
  if(h==="stitcho"||h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
  else if(h==="cat")drawMichiGardens(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
 
