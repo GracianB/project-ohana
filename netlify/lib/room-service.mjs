@@ -1,4 +1,11 @@
+import {retryEpoch,startAdventureRetry,finishAdventureRetry} from '../../multiplayer/adventure-retry.js';
+import {mergeAdventureFinale} from '../../multiplayer/adventure-finale.js';
+import {findRoster} from '../../characters/roster.js';
+import {adventureCamp,adventureRoleAllowed} from '../../multiplayer/adventure-roles.js';
+import {mergeAdventureProgress} from '../../multiplayer/adventure-progress.js';
+import {createVersus,advanceVersus,versusAction,setVersusInput,versusSnapshot} from './versus.mjs';
 import {worldBounds} from "../../systems/world-bounds.js";
+import {adjacentRoom,createTravelVote,castTravelVote,travelApproved,validDuelArena} from "../../multiplayer/match-rules-v604.js";
 import { advanceCombat, createCombat, moveCombatPlayer, resolveCombatAction } from "./combat.mjs";
 import { progressDuoRitual, duoPlateState, DUO_HOLD_MS } from "../../multiplayer/duo-altars.js";
 import { isRtcCandidateSignal } from "../../systems/coop-v108-direct.js";
@@ -32,6 +39,13 @@ export function makeCredential(randomBytes = (size) => crypto.getRandomValues(ne
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+function initializeAdventure(room,at){
+ if(room.combat)return;
+ room.engineMode=true;
+ room.combat={startedAt:at,scene:null,enemies:[],boss:null,events:[],eventSequence:0,lastEvent:null,pausedAt:null};
+ for(const player of room.players){const f=findRoster(player.characterId).forms[0];Object.assign(player,{evolution:0,experience:0,maxHealth:f.hp,health:f.hp,x:420+player.slot*130,y:1134-f.h,facing:1,pose:{vx:0,vy:0,grounded:true,melee:0,dash:0}});}
+}
+
 function snapshot(room, viewerId) {
   return {
     roomId: room.code,
@@ -42,6 +56,8 @@ function snapshot(room, viewerId) {
       playerId: player.id,
       slot: player.slot,
       characterId: player.characterId,
+      homeCharacterId:player.homeCharacterId||player.characterId,
+      roleEpoch:player.roleEpoch||0,
       x: player.x,
       y: player.y,
       facing: player.facing,
@@ -61,6 +77,15 @@ function snapshot(room, viewerId) {
     })),
     combat: room.combat ? structuredClone(room.combat) : null,
     engineMode: !!room.engineMode,
+    mode: room.mode || 'classic',
+    arenaId:room.arenaId||null,
+    versus:versusSnapshot(room),
+    adventureRetry:room.mode==='adventure'?structuredClone(room.adventureRetry||null):null,
+    adventureFinale:room.mode==='adventure'?structuredClone(room.adventureFinale||null):null,
+    adventureProgress:room.mode==='adventure'?structuredClone(room.adventureProgress||null):null,
+    travel: room.mode==='adventure'?structuredClone(room.travel||null):null,
+    lastTravel: room.mode==='adventure'?structuredClone(room.lastTravel||null):null,
+    travelClosed: room.mode==='adventure'?structuredClone(room.travelClosed||null):null,
     duoAltars: structuredClone(room.duoAltars || {}),
     duoCharge: room.duoChannel ? { roomId:room.duoChannel.roomId, startedAt:room.duoChannel.startedAt, durationMs:DUO_HOLD_MS } : null,
     updatedAt: room.updatedAt,
@@ -83,6 +108,15 @@ function hasAction(player, actionId) {
   return player.actions.some((entry) => typeof entry === "string" ? entry === actionId : entry?.id === actionId);
 }
 
+// A vote belongs to two live connection epochs. If either peer goes away,
+ // a stale approval must never carry over to their resumed session.
+function closePendingTravel(room, reason, at) {
+  if (room.mode !== 'adventure' || room.travel?.status !== 'pending') return false;
+  room.travelClosed = { id: room.travel.id, reason, at };
+  room.travel = null;
+  return true;
+}
+
 function expireStalePlayers(room, now) {
   let changed = false;
   for (const player of room.players) {
@@ -92,6 +126,8 @@ function expireStalePlayers(room, now) {
       changed = true;
     }
   }
+  if (changed) closePendingTravel(room, 'disconnected', now);
+  if(changed&&room.adventureRetry?.status==='down')room.adventureRetry.ready=[];
   if (changed && room.phase === "playing") {
     room.phase = "lobby";
     if (room.combat && room.combat.pausedAt == null) room.combat.pausedAt = now;
@@ -144,7 +180,8 @@ export function createRoomService(store, options = {}) {
       const before = JSON.stringify(next);
       const timestamp = now();
       expireStalePlayers(next, timestamp);
-      if (!next.engineMode) advanceCombat(next, timestamp);
+      if(next.mode==='versus')advanceVersus(next,timestamp);
+      else if (!next.engineMode) advanceCombat(next, timestamp);
       const result = transform(next);
       if (JSON.stringify(next) === before) return { room: current.room, result };
       next.revision += 1;
@@ -165,24 +202,32 @@ export function createRoomService(store, options = {}) {
     if (!player || !identity?.token || player.token !== identity.token) {
       throw new RoomError("INVALID_SESSION", "La sesión no es válida. Vuelve a entrar en la sala.", 401);
     }
-    if (identity.connectionEpoch !== undefined && Number(identity.connectionEpoch) !== Number(player.connectionEpoch)) {
+    // A co-op connection epoch is mandatory, not merely advisory: old tabs
+    // must not impersonate a player after their session was resumed.
+    if ((['adventure','versus'].includes(room.mode) && (!Number.isSafeInteger(identity?.connectionEpoch) ||
+        identity.connectionEpoch !== player.connectionEpoch)) ||
+        (identity.connectionEpoch !== undefined && Number(identity.connectionEpoch) !== Number(player.connectionEpoch))) {
       throw new RoomError("STALE_SESSION", "Esta sesión se reanudó en otra pestaña o dispositivo.", 409);
     }
     return player;
   }
 
   return {
-    async create() {
+    async create(mode = 'classic', arenaId='w1-kilo') {
+      if(!['classic','adventure','versus'].includes(mode))throw new RoomError('MODE_NOT_READY','Ese modo todavía no está disponible.',409);
+      if(mode==='versus'&&!validDuelArena(arenaId))throw new RoomError('DUEL_ARENA_INVALID','Elige una de las diez salas.',400);
       for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
         const roomCode = code();
         const room = {
           code: roomCode,
           phase: "lobby",
+          mode,
+          arenaId:mode==='versus'?arenaId:null,
           revision: 0,
           tick: 0,
           createdAt: now(),
           updatedAt: now(),
-          players: [{ id: crypto.randomUUID(), token: credential(), connectionEpoch: 1, slot: 0, characterId: "", ready: false, x: 420, y: 1070, facing: 1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, pose: { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 }, worldRoomId: "hub", actions: [] }],
+          players: [{ id: crypto.randomUUID(), token: credential(), connectionEpoch: 1, slot: 0, characterId: "", ready: false, x: 420, y: 1070, facing: 1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, pose: { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 }, worldRoomId: mode==='adventure'?"w1-kilo":"hub", actions: [] }],
         };
         const write = await store.setJSON(`room:${roomCode}`, room, { onlyIfNew: true });
         if (write.modified) return { ...snapshot(room, room.players[0].id), identity: { playerId: room.players[0].id, token: room.players[0].token, connectionEpoch: 1 } };
@@ -197,6 +242,11 @@ export function createRoomService(store, options = {}) {
       const { room } = await mutate(roomCode, (state) => {
         const resume = state.players.find((player) => player.id === identity.playerId && player.token === identity.token);
         if (resume) {
+          // Rejoining supersedes a previous tab's travel approval.
+          closePendingTravel(state, 'reconnected', now());
+          // The resumed browser receives a fresh bearer token. The previous
+          // tab's credentials cannot simply omit connectionEpoch to return.
+          if (['adventure','versus'].includes(state.mode)) resume.token = credential();
           resume.connectionEpoch = (resume.connectionEpoch || 0) + 1;
           resume.connected = true;
           resume.lastMoveAt = now();
@@ -206,13 +256,13 @@ export function createRoomService(store, options = {}) {
           if (state.players.length >= 2) throw new RoomError("ROOM_FULL", "La sala ya tiene dos jugadores.", 409);
           identity.playerId = crypto.randomUUID();
           identity.token = credential();
-          state.players.push({ id: identity.playerId, token: identity.token, connectionEpoch: 1, slot: 1, characterId: "", ready: false, x: 880, y: 572, facing: -1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, worldRoomId: "hub", actions: [] });
+          state.players.push({ id: identity.playerId, token: identity.token, connectionEpoch: 1, slot: 1, characterId: "", ready: false, x: 880, y: 572, facing: -1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, worldRoomId: state.mode==='adventure'?"w1-kilo":"hub", actions: [] });
         }
         if (state.players.length === 2 && state.players.every((player) => player.connected && player.characterId && player.ready)) {
           // V102: reconnecting must never reset both avatars back to the start.
           // Spawn only before the very first combat initialization. In engine mode
           // the original OHANA ten-room world retains its real world positions.
-          const firstStart = !state.combat && !state.engineMode;
+          const firstStart = !state.combat && !state.versus && !state.engineMode;
           resumeCombat(state, now());
           state.phase = "playing";
           if (firstStart) for (const entry of state.players) {
@@ -222,7 +272,9 @@ export function createRoomService(store, options = {}) {
             entry.facing = entry.slot === 0 ? 1 : -1;
             entry.pose = { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 };
           }
-          state.combat ||= createCombat(state.players, now());
+          if(state.mode==='versus'){if(!state.versus)createVersus(state,state.arenaId,now());if(state.versus.phase==='complete')state.phase='complete';}
+          else if(state.mode==='adventure')initializeAdventure(state,now());
+          else state.combat ||= createCombat(state.players, now());
         }
       });
       const joined = room.players.find((player) => player.id === identity.playerId);
@@ -230,6 +282,7 @@ export function createRoomService(store, options = {}) {
         // mutate persists only successful transforms; throw before a room is claimed by a third participant.
         throw new RoomError("ROOM_FULL", "La sala ya tiene dos jugadores.", 409);
       }
+      identity.token = joined.token;
       identity.connectionEpoch = joined.connectionEpoch;
       return { ...snapshot(room, joined.id), identity };
     },
@@ -241,10 +294,63 @@ export function createRoomService(store, options = {}) {
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de elegir.", 409);
         if (state.phase !== "lobby") throw new RoomError("MATCH_STARTED", "No se puede cambiar de personaje una vez iniciada la misión.", 409);
         player.characterId = characterId;
+        if(state.mode==='adventure')player.homeCharacterId=characterId;
         player.ready = false;
         player.lastSeenAt = now();
       });
       return snapshot(room, identity.playerId);
+    },
+
+    async retry(roomCode,identity,payload){
+      const {room}=await mutate(roomCode,state=>{
+        const p=playerFrom(state,identity),decision=payload?.decision,epoch=payload?.epoch;
+        if(state.mode!=='adventure')throw new RoomError('MODE_REQUIRED','El reintento conjunto es exclusivo de Aventura.',409);
+        if(!p.connected)throw new RoomError('DISCONNECTED','Reconecta antes de reintentar.',409);
+        if(state.adventureFinale?.complete)throw new RoomError('MATCH_FINISHED','La aventura ya ha terminado.',409);
+        const current=retryEpoch(state);
+        const retainStats=()=>{
+          if(payload.characterId!=null&&payload.characterId!==p.characterId||payload.roleEpoch!=null&&payload.roleEpoch!==(p.roleEpoch||0))throw new RoomError('ROLE_CHANGED','El personaje ya cambió.',409);
+          p.evolution=Math.floor(finitePayloadNumber(payload.evolution,p.evolution||0,0,4));p.experience=finitePayloadNumber(payload.experience,p.experience||0,0,1000000);
+        };
+        if(decision==='down'){
+          if(state.adventureRetry?.status==='down'&&epoch===current-1)return;
+          if(epoch!==current)throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+          if(state.adventureRetry?.status==='down')return;
+          retainStats();
+          if(payload.progress)state.adventureProgress=mergeAdventureProgress(state.adventureProgress,payload.progress,{roomId:p.worldRoomId,host:p.slot===0});
+          if(p.worldRoomId==='w1-final'&&payload.finale)state.adventureFinale=mergeAdventureFinale(state.adventureFinale,payload.finale,{host:p.slot===0,playerId:p.id,players:state.players.map(p=>p.id)});
+          startAdventureRetry(state,p);
+        }else if(decision==='ready'){
+          if(epoch!==current)throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+          if(state.adventureRetry?.status!=='down')return;
+          retainStats();
+          if(!state.adventureRetry.ready.includes(p.id))state.adventureRetry.ready.push(p.id);
+          finishAdventureRetry(state);
+        }else throw new RoomError('RETRY_INVALID','Reintento no válido.',400);
+        p.lastSeenAt=now();
+      });return snapshot(room,identity.playerId);
+    },
+
+    async role(roomCode,identity,characterId,roleEpoch=0,attemptEpoch=0){
+      validateCharacter(characterId);
+      const {room}=await mutate(roomCode,state=>{
+        const player=playerFrom(state,identity),time=now();
+        if(state.mode!=='adventure')throw new RoomError('MODE_REQUIRED','El relevo es exclusivo de Aventura.',409);
+        if(attemptEpoch!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
+        if(state.phase!=='playing'||state.players.some(p=>!p.connected))throw new RoomError('TEAM_NOT_READY','Los dos compañeros deben estar conectados.',409);
+        if(!adventureRoleAllowed(player,player.worldRoomId,characterId))throw new RoomError('ROLE_INVALID','Elige al héroe de la sala o vuelve a tu personaje.',400);
+        if(player.characterId===characterId)return;
+        if(!Number.isSafeInteger(roleEpoch)||roleEpoch!==(player.roleEpoch||0))throw new RoomError('ROLE_CHANGED','El relevo ya cambió; actualiza la sala.',409);
+        if(player.health!=null&&player.health<=0)throw new RoomError('ROLE_UNAVAILABLE','Espera a recuperarte antes del relevo.',409);
+        if(player.pose?.grounded===false||!adventureCamp(player.worldRoomId,player.x,player.y,state.adventureProgress))throw new RoomError('CAMP_REQUIRED','Vuelve a la entrada o a un objetivo completado para cambiar.',409);
+        if(time-(player.lastRoleAt||0)<1200)throw new RoomError('ROLE_COOLDOWN','Espera un momento antes de otro relevo.',409);
+        const previous=findRoster(player.characterId).forms[Math.max(0,Math.min(4,player.evolution||0))];
+        player.roleStates||={};player.roleStates[player.characterId]={evolution:player.evolution||0,experience:player.experience||0,health:player.health??previous.hp};
+        const saved=player.roleStates[characterId]||{evolution:0,experience:0,health:findRoster(characterId).forms[0].hp};
+        const form=findRoster(characterId).forms[saved.evolution];
+        Object.assign(player,saved,{characterId,maxHealth:form.hp,health:Math.min(form.hp,saved.health),roleEpoch:(player.roleEpoch||0)+1,lastRoleAt:time,lastSeenAt:time});
+      });return snapshot(room,identity.playerId);
     },
 
     async ready(roomCode, identity, requestedReady = true) {
@@ -259,7 +365,9 @@ export function createRoomService(store, options = {}) {
         if (state.players.length === 2 && state.players.every((entry) => entry.connected && entry.characterId && entry.ready)) {
           state.phase = "playing";
           for (const entry of state.players) entry.worldRoomId = entry.worldRoomId || "hub";
-          state.combat ||= createCombat(state.players, now());
+          if(state.mode==='versus'){if(!state.versus)createVersus(state,state.arenaId,now());if(state.versus.phase==='complete')state.phase='complete';}
+          else if(state.mode==='adventure')initializeAdventure(state,now());
+          else state.combat ||= createCombat(state.players, now());
         }
       });
       return snapshot(room, identity.playerId);
@@ -273,6 +381,8 @@ export function createRoomService(store, options = {}) {
       const engineMode = payload?.mode === "engine";
       const { room, result } = await mutate(roomCode, (state) => {
         const player = playerFrom(state, identity);
+        if(state.mode==='adventure'&&(payload.attemptEpoch||0)!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.mode==='adventure'&&state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de moverte.", 409);
         const previous = player.actions.find((entry) => typeof entry === "object" && entry?.id === actionId);
         if (previous) {
@@ -281,9 +391,15 @@ export function createRoomService(store, options = {}) {
         }
         if (hasAction(player, actionId)) return { accepted: true, cinematic: false, replayed: true };
         if (seq <= player.lastSequence) throw new RoomError("DUPLICATE_ACTION", "Esta acción ya se recibió.", 409);
+        if(state.mode==='versus'&&state.versus?.phase==='complete')return {accepted:false,cinematic:false,finished:true};
         if (state.phase !== "playing") throw new RoomError("NOT_READY", "La misión ya no está en curso.", 409);
         const currentTime = now();
 
+        if(state.mode==='versus'){
+          if(engineMode)throw new RoomError('AUTHORITATIVE_CONTROLS_REQUIRED','Esta arena recibe controles, no posiciones ni estadísticas.',409);
+          setVersusInput(state,player,payload,currentTime);player.lastSequence=seq;player.lastSeenAt=currentTime;
+          const moveResult={accepted:true,cinematic:false};player.actions=[...player.actions.slice(-(ACTION_HISTORY_LIMIT-1)),{id:actionId,sequence:seq,result:moveResult}];return{...moveResult,replayed:false};
+        }
         if (engineMode) {
           state.engineMode = true;
           if (state.combat) {
@@ -291,7 +407,13 @@ export function createRoomService(store, options = {}) {
             state.combat.enemies = [];
             state.combat.boss = null;
           }
-          const bounds=worldBounds(String(payload?.worldRoomId||player.worldRoomId||"beach"))||worldBounds("beach");
+          const selectedRoom=String(payload?.worldRoomId||player.worldRoomId||'beach');
+          // The authenticated travel vote owns rooms in V604 adventure. A
+          // forged position packet cannot teleport one player to another world.
+          if(state.mode==='adventure'&&selectedRoom!==player.worldRoomId)
+            throw new RoomError('TRAVEL_CONSENT_REQUIRED','Los dos jugadores deben aceptar el cambio de sala.',409);
+          if(state.mode==='adventure'&&(player.roleEpoch||0)>0&&(payload.characterId!==player.characterId||payload.roleEpoch!==player.roleEpoch))throw new RoomError('ROLE_CHANGED','El personaje ha cambiado; actualiza los controles.',409);
+          const bounds=worldBounds(selectedRoom)||worldBounds("beach");
           player.x = finitePayloadNumber(payload?.positionX,player.x,0,bounds.width);
           player.y = finitePayloadNumber(payload?.positionY,player.y,0,bounds.height);
           player.facing = Number(payload?.facing) < 0 ? -1 : 1;
@@ -300,6 +422,8 @@ export function createRoomService(store, options = {}) {
           player.health = finitePayloadNumber(payload?.health,player.health??0,0,100000);
           player.maxHealth = finitePayloadNumber(payload?.maxHealth,player.maxHealth??1,1,100000);
           player.worldRoomId = String(payload?.worldRoomId || player.worldRoomId || "beach");
+          if(state.mode==='adventure'&&selectedRoom==='w1-final'&&payload.adventureFinale)state.adventureFinale=mergeAdventureFinale(state.adventureFinale,payload.adventureFinale,{host:player.slot===0,playerId:player.id,players:state.players.map(p=>p.id)});
+          if(state.mode==='adventure'&&payload.adventureProgress)state.adventureProgress=mergeAdventureProgress(state.adventureProgress,payload.adventureProgress,{roomId:selectedRoom,host:player.slot===0});
           player.pose = {
             vx: Math.max(-40, Math.min(40, Number(payload?.velocityX) || 0)),
             vy: Math.max(-60, Math.min(60, Number(payload?.velocityY) || 0)),
@@ -340,6 +464,8 @@ export function createRoomService(store, options = {}) {
       if (!actionId || actionId.length > 96) throw new RoomError("INVALID_ACTION_ID", "La acción no es válida.");
       const { room, result } = await mutate(roomCode, (state) => {
         const player = playerFrom(state, identity);
+        if(state.mode==='adventure'&&(payload.attemptEpoch||0)!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.mode==='adventure'&&state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de actuar.", 409);
         const previous = player.actions.find((entry) => typeof entry === "object" && entry?.id === actionId);
         if (previous) {
@@ -347,9 +473,11 @@ export function createRoomService(store, options = {}) {
           return { result: previous.result, replayed: true };
         }
         if (seq <= player.lastSequence || hasAction(player, actionId)) throw new RoomError("DUPLICATE_ACTION", "Esta acción ya se recibió.", 409);
+        if(state.mode==='versus'&&state.versus?.phase==='complete')return {result:{accepted:false,finished:true},replayed:false};
         if (state.phase !== "playing") throw new RoomError("NOT_READY", "La misión ya no está en curso.", 409);
         player.lastSequence = seq;
-        const result = resolveCombatAction(state, player, { kind, slot: payload.slot }, now());
+        if(state.mode==='versus')setVersusInput(state,player,payload,now());
+        const result = state.mode==='versus'?versusAction(state,player,kind,payload.slot):resolveCombatAction(state, player, { kind, slot: payload.slot }, now());
         player.lastSeenAt = now();
         if (result.accepted && state.combat?.events) {
           const actionEvent = state.combat.events.find((event) => event.id === result.eventId);
@@ -368,6 +496,57 @@ export function createRoomService(store, options = {}) {
         return { result, replayed: false };
       });
       return { ...snapshot(room, identity.playerId), actionResult: result.result, replayed: result.replayed };
+    },
+
+    async travel(roomCode,identity,payload){
+      const decision=String(payload?.decision||'');
+      const destination=String(payload?.destination||'');
+      const requestedId=String(payload?.voteId||'');
+      const {room}=await mutate(roomCode,state=>{
+        const player=playerFrom(state,identity);
+        if((payload.attemptEpoch||0)!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
+        if(state.mode!=='adventure')throw new RoomError('MODE_REQUIRED','La votación es exclusiva de la aventura conjunta.',409);
+        if(state.phase!=='playing'||state.players.length!==2||state.players.some(p=>!p.connected))
+          throw new RoomError('TEAM_NOT_READY','Los dos compañeros deben estar conectados.',409);
+        if(state.travel?.status==='pending'&&now()>=state.travel.createdAt+25000){
+          state.travelClosed={id:state.travel.id,reason:'expired',at:now()};
+          state.travel=null;
+          // Persist the expired vote even if a delayed acceptance arrives.
+          // Throwing here would abort the CAS transaction and restore it.
+          if(decision!=='propose'){player.lastSeenAt=now();return;}
+        }
+        if(decision==='propose'){
+          const from=String(player.worldRoomId||'');
+          if(!adjacentRoom(from,destination))throw new RoomError('TRAVEL_DESTINATION_INVALID','Solo puedes avanzar a una sala adyacente.',400);
+          if(state.players.some(p=>p.worldRoomId!==from))
+            throw new RoomError('TEAM_ROOM_MISMATCH','Los compañeros deben estar en la misma sala.',409);
+          if(state.travel?.status==='pending'){
+            if(state.travel.from===from&&state.travel.to===destination)return;
+            throw new RoomError('TRAVEL_ALREADY_PENDING','Hay una propuesta pendiente de respuesta.',409);
+          }
+          state.travel=createTravelVote({id:'travel:'+crypto.randomUUID(),from,to:destination,
+            by:player.id,players:state.players.map(p=>p.id),now:now()});
+        }else if(decision==='accept'||decision==='reject'){
+          if(!state.travel||state.travel.id!==requestedId)throw new RoomError('TRAVEL_STALE','Esta propuesta ya no está disponible.',409);
+          const voted=castTravelVote(state.travel,player.id,decision==='accept',now());
+          if(voted.status==='approved'){
+            if(!travelApproved(voted,voted.from,state.players.map(p=>p.id)))
+              throw new RoomError('TRAVEL_INVALID','Falta la confirmación de un compañero.',409);
+            if(state.players.some(p=>p.worldRoomId!==voted.from))
+              throw new RoomError('TEAM_ROOM_MISMATCH','La partida cambió antes de confirmar.',409);
+            for(const member of state.players){const f=findRoster(member.characterId).forms[member.evolution||0];member.worldRoomId=voted.to;member.x=member.slot===0?420:550;member.y=1134-f.h;member.facing=1;member.pose={vx:0,vy:0,grounded:true,melee:0,dash:0};}
+            state.lastTravel={id:voted.id,from:voted.from,to:voted.to,at:now()};
+            state.travel=null;
+            state.travelClosed=null;
+          }else if(['rejected','expired'].includes(voted.status)){
+            state.travelClosed={id:voted.id,reason:voted.status,at:now()};
+            state.travel=null;
+          }else state.travel=voted;
+        }else throw new RoomError('TRAVEL_DECISION_INVALID','Acción de desplazamiento inválida.',400);
+        player.lastSeenAt=now();
+      });
+      return snapshot(room,identity.playerId);
     },
 
     async signal(roomCode, identity, payload) {
@@ -397,8 +576,13 @@ export function createRoomService(store, options = {}) {
       }
       const { room } = await mutate(roomCode, (state) => {
         const player = playerFrom(state, identity);
+        if(state.mode==='adventure'&&(payload.attemptEpoch||0)!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.mode==='adventure'&&state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
+        if(state.mode==='versus')throw new RoomError('AUTHORITATIVE_CONTROLS_REQUIRED','La arena resuelve el combate en el servidor.',409);
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de enviar señales.", 409);
         if(signalKind==="combat"&&player.slot!==0)throw new RoomError("HOST_ONLY","Solo el anfitrión publica enemigos.",403);
+        if(state.mode==='adventure'&&signalKind==='room'&&String(relayPayload?.roomId||'')!==player.worldRoomId)
+          throw new RoomError('TRAVEL_CONSENT_REQUIRED','El cambio de sala necesita dos confirmaciones.',409);
         const previous = player.actions.find((entry) => typeof entry === "object" && entry?.id === actionId);
         if (previous) return;
         if (seq <= player.lastSequence || hasAction(player, actionId)) {
@@ -475,6 +659,8 @@ export function createRoomService(store, options = {}) {
         if (!player) throw new RoomError("INVALID_SESSION", "La sesión no es válida. Vuelve a entrar en la sala.", 401);
         if (identity.connectionEpoch !== player.connectionEpoch) return;
         player.connected = false;
+        if(state.adventureRetry?.status==='down')state.adventureRetry.ready=[];
+        closePendingTravel(state, 'disconnected', now());
         // A disconnected partner breaks the ritual. Resuming cannot reuse a prior hold.
         state.duoChannel = null;
         if (state.phase === "playing") {

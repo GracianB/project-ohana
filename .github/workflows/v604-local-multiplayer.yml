@@ -1,0 +1,42 @@
+name: V604 local multiplayer
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'netlify/**'
+      - 'multiplayer/**'
+      - 'multiplayer.js'
+      - 'multiplayer.html'
+      - 'versus.*'
+      - 'systems/online-coop.js'
+      - 'systems/coop-*.js'
+      - 'tools/local-multiplayer-server.mjs'
+      - 'tests/browser/v604-*-network.mjs'
+      - 'tests/browser/v604-versus-match.mjs'
+      - '.github/workflows/v604-local-multiplayer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  two-browsers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Local HTTP adventure and Versus (no external services)
+        run: |
+          npm run test:browser:adventure-network
+          npm run test:browser:versus-network
+          npm run test:browser:versus-match
+          npm run test:browser:finale-network
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ohana-v604-local-multiplayer
+          path: test-results/v604/
+          if-no-files-found: ignore

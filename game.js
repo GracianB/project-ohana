@@ -1,6 +1,7 @@
-import {drawIllustratedChapter} from './systems/illustrated-chapters.js';
+import {createAdventureStorage} from './multiplayer/adventure-progress.js';
+import {drawLivingRealm} from './worlds/living-realms.js';
 import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
-import {KEEPSAKES,readKeepsakes} from './systems/keepsakes.js';
+import {KEEPSAKES,readKeepsakes,mergeKeepsakes,persistKeepsakes} from './systems/keepsakes.js';
 import {chapterAtlasHTML,chapterMapDetail,drawAdventureGuide} from './systems/adventure-guide-v2.js';
 import {drawMemoryAura} from './systems/memory-rewards-v2.js';
 import {drawChapterBossV2} from './systems/chapter-boss-art-v2.js';
@@ -110,7 +111,7 @@ import { setMusicOverride, playMusic, themeForRoom, duckMusic, currentMusic, mus
 import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { WORLD1_ROOMS, WORLD1_ORDER, world1SealsComplete, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
 import { enterWorld1, updateWorld1, world1Snapshot, world1NextObjective, world1ObjectiveDirection, world1DeathCheckpoint, restoreWorld1DeathCheckpoint, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
-import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
+import { updateFusionProjectilesOnly, fusionShotHitsPlayer, createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
 import { FUSION_STORY } from "./systems/world1-story.js";
 import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, syncWorld1Album, toggleWorld1Album, world1AlbumKey, world1AlbumFor } from "./systems/world1-collect.js";
 import { readWorld1Seals, storeWorld1Seals, world1StartRoom, world1ChapterEntry } from "./systems/world1-progress.js";
@@ -181,6 +182,7 @@ import { installKiloFritaInteractions, updateKiloFritaInteractions, drawKiloFrit
 
 const e2eParams = new URLSearchParams(location.search);
 const e2eEnabled = location.hostname === "127.0.0.1" && e2eParams.has("e2e");
+let e2eManualClock=false;
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -451,8 +453,9 @@ el.classList.add("show");
 function room() { return game.roomDef || ROOMS[game.roomId] || ROOMS.hub; }
 let saveWarning = false;
 function save() {
-if (!game.player || game.player.dead) return;
+if (!game.player || game.player.dead || game.onlineAdventure) return;
 const saved = saveStore.write(game, Magic);
+if(saved)game.keepsakeSavePending=false;
 if (!saved && !saveWarning) showSystemMessage("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
 saveWarning = !saved;
 return saved;
@@ -599,7 +602,13 @@ if(id==="hub"&&game.player?.id==="pizza"&&game.personalAdventureSolo)r=createPiz
 if(id==="hub"&&game.player?.id==="yomi"&&game.personalAdventureSolo)r=createYomiRoom(r);
 if(id==="hub"&&game.player?.id==="cuerno"&&game.personalAdventureSolo)r=createCuernoRoom(r);
 if (!r) return false;
-if(id==="w1-final"&&readKeepsakes().length<10){game.world1Won=false;game._w1WinSent=false;}
+// V604: doors and portals are proposals in shared adventure. Only a server
+// accepted vote will load the next level in both browsers.
+if(onlineCoop.isConsentMode?.()&&game.roomId&&id!==game.roomId&&
+ ['right','left','up','down','portal'].includes(fromDir)){
+  return onlineCoop.requestTravel(game,id);
+}
+if(id==="w1-final"&&readKeepsakes(game.keepsakeStorage).length<10){game.world1Won=false;game._w1WinSent=false;}
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
 beep("locked");
@@ -885,6 +894,10 @@ game.lastAbilitySlot = null;game._signatureLink=null;
 if (!def) return;
 const onlineSession = onlineCoop.readSession?.();
 const onlineMode = !!onlineSession?.originalEngine;
+game.onlineAdventure = onlineMode;game.coopAuthority=undefined;game.coopAbilityStates={};game.coopAttemptEpoch=0;game.coopRetryWaiting=false;game.coopPeerWaiting=false;game.coopRetryAnimationDone=false;
+const adventureStorage=onlineMode?createAdventureStorage():undefined;
+game.expeditionStorage=adventureStorage;game.keepsakeStorage=adventureStorage;
+game.personalCollectionStorage=adventureStorage;
 game.personalAdventureSolo = !onlineMode;
 const resume = !onlineMode && (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
 // A campaign save follows the active chapter, regardless of the highlighted
@@ -937,20 +950,55 @@ game.player.uExp=bondXP(game.player);
 game.combatReport={hits:0,damage:0};
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.world1Stations = {};
-game.world1Seals = readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
-game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='album-ceremony'){setMusicOverride(themeForRoom('w1-'+hero));}else if(kind==='album-page'||kind==='album-unlock'){beep('win');}else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
+game.keepsakes=readKeepsakes(game.keepsakeStorage);game.keepsakeSavePending=false;
+game.world1Seals = onlineMode?[]:readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
+game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){if(!game.onlineAdventure)storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='album-ceremony'){setMusicOverride(themeForRoom('w1-'+hero));}else if(kind==='album-page'||kind==='album-unlock'){beep('win');}else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
 game.canWorld1CineStart=()=>!game.relicScene&&!document.querySelector('#evo-stage.show,#supreme-cinema[aria-hidden="false"],#win-cinema.show');
 game.playWorld1Cine=(id,hero)=>playWorld1Cine(game,id,hero);
 game.onGauntletHero=(hero)=>{
  clearPersistentObjective();dismissNotifications();
- if(!world1SealsComplete(game.world1Seals))return;const def=ROSTER.find(r=>r.id===hero);if(!def)return;
+ if(game.onlineAdventure||!world1SealsComplete(game.world1Seals))return;const def=ROSTER.find(r=>r.id===hero);if(!def)return;
  game.player=makePlayer(def);const p=game.player;p.evo=4;p.xp=420;applyForm(p,{silent:true});paintFit(p);p.x=8600;p.y=1134-p.h;p.grounded=true;p.invuln=90;
  p.uPartner=loadUPartnerChoice(localStorage,hero);p.uBonds=readStoredUBonds(localStorage,hero);p.uExp=bondXP(p);p.uSurprise=!e2eEnabled;
  game._signatureLink=null;game._combatFlow=null;game._assist=null;game._supremeFlow=null;game._evolutionAttacks=null;game.ult=null;game.bolts=[];game.slashes=[];game.projectiles=[];game.resetInput?.();renderAbilityBar();playMusic("w1-"+hero);game.renderDirty=true;
 };
+game.placeCoopEntry=me=>{
+ if(!game.onlineAdventure||!game.player||!me||me.worldRoomId!==game.roomId)return;
+ const p=game.player;p.x=me.x;p.y=me.y;p.vx=0;p.vy=0;p.grounded=true;p.jumps=0;p.facing=me.facing||1;
+ game.resetInput?.();game.cam.x=Math.max(0,Math.min(game.worldW-camW(),p.x-camW()/2));game.cam.y=Math.max(0,Math.min(game.worldH-camH(),p.y-camH()/2));game.renderDirty=true;
+};
+game.changeCoopHero=(hero,stats)=>{
+ const def=ROSTER.find(r=>r.id===hero);if(!game.onlineAdventure||!def||!game.player)return false;
+ const old=game.player,feet=old.y+old.h;
+ game.coopAbilityStates[old.id]={cds:{...old.cds},cdDur:{...old.cdDur},finisherCharge:old.finisherCharge||0,uPartner:old.uPartner,uBonds:old.uBonds,uExp:old.uExp};
+ game.player=makePlayer(def);const p=game.player;Object.assign(p,game.coopAbilityStates[hero]||{});
+ p.evo=stats.evolution||0;p.xp=stats.experience||0;applyForm(p,{silent:true});paintFit(p);
+ p.x=old.x;p.y=feet-p.h;p.health=Math.max(0,Math.min(p.maxHealth,stats.health??p.maxHealth));
+ p.vx=0;p.vy=0;p.grounded=old.grounded;p.invuln=0;
+ game._signatureLink=null;game._combatFlow=null;game._assist=null;game._supremeFlow=null;game._evolutionAttacks=null;game.ult=null;
+ game.bolts=[];game.slashes=[];game.projectiles=(game.projectiles||[]).filter(p=>p.owner!=='player');game.resetInput?.();renderAbilityBar();game.renderDirty=true;
+ return true;
+};
 game.onGauntletAward=(hero)=>{addScore(1000);healPlayer(game.player,game.player.maxHealth*.2);game.nums.add(game.player.x,game.player.y-30,KEEPSAKES[hero].name.toUpperCase(),KEEPSAKES[hero].color,true);beep("win");};
-game.onWorld1CineEnd=(id)=>{gauntletCineEnded(game,id);if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine="";syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
+game.onWorld1CineEnd=(id)=>{gauntletCineEnded(game,id);
+ if(id==='ending'&&game.onlineAdventure&&game.coopFinalWon&&!game._coopFinalResultSent){game._coopFinalResultSent=true;game._w1WinSent=true;game.world1Won=true;const detail=game._w1WinDetail||{world:1,room:game.roomId,id:game.player.id,hero:game.player.name,evo:game.player.evo,score:game.score,kills:game.kills,rank:'JUNTOS'};detail.keepsakes=[...game.keepsakes];detail.coop=true;detail.uPartner=onlineCoop.remote?.characterId||null;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine='';syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent('ohana-win',{detail}));}
+if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine="";syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
 game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
+game._coopFinalCue=null;game._coopFinalReady=null;game._coopFinalRevision=-1;game.coopFinaleState=null;game.coopFinalWon=false;game._coopFinalResultSent=false;game._coopFinalConsumed=new Set();game.coopFinalShots=[];
+game.createCoopBossDirector=createWorld1BossDirector;
+game.onCoopRetryDown=()=>{
+ game.coopRetryWaiting=true;game.coopRetryAnimationDone=false;dispatchEvent(new Event('ohana-coop-down'));if(game.relicScene)game.onRelicEnd?.();dismissNotifications();game.relicScene=null;game.ult=null;game.player.dead=true;game.player.health=0;game.world1Cine=null;game._pendingWorld1Cine=null;game.projectiles=[];game.coopFinalShots=[];game.resetInput?.();
+ showErrorMessage('REINTENTO CONJUNTO','Conserváis lo conseguido. Preparando a los dos jugadores…');
+ if(!DeathFx.isPlaying())DeathFx.start(game.player,()=>{game.coopRetryAnimationDone=true;void onlineCoop.requestRetry(game);},{reason:'hurt'});
+};
+game.onCoopRetryRestore=me=>{
+ if(!me||!game.player)return;
+ DeathFx.cancel();game.coopRetryWaiting=false;game.coopFinalWon=false;game.world1Cine=null;game._pendingWorld1Cine=null;game.finale=null;game.world1Won=false;game._w1WinSent=false;game._w1WinDetail=null;
+ game._coopFinalRevision=-1;game._coopFinalCue=null;game._coopFinalReady=null;game._coopFinalWaiting=false;game.coopFinaleState=null;game._coopFinalConsumed=new Set();game.coopFinalShots=[];
+ game.player.dead=false;game.player.evo=me.evolution||0;game.player.xp=me.experience||0;applyForm(game.player,{silent:true});loadRoom(me.worldRoomId,'online-retry');
+ const p=game.player;p.x=me.x;p.y=me.y;p.vx=0;p.vy=0;p.grounded=true;p.health=me.health;p.dead=false;p.invuln=90;
+ game._combatFlow=null;game._assist=null;game._supremeFlow=null;game.combo=0;game._coopFinalResultSent=false;Magic.reset(game);game.resetInput?.();
+};
 try { loadWorld1Collect(game); toggleWorld1Album(game,false); } catch (err) { console.warn("[ohana] world1 collect", err); }
 game.clearTicks = 0;
 game.dragonTrial = null;
@@ -984,6 +1032,7 @@ try {
     game.kills = u.kills;
     game.won = u.won;
     game.world1Seals = storeWorld1Seals([...game.world1Seals, ...(Array.isArray(u.world1Seals) ? u.world1Seals : [])]);
+    game.keepsakes=mergeKeepsakes(game.keepsakes,u.keepsakes);persistKeepsakes(game.keepsakes);
     game.world1Won = !!u.world1Won;
     game.world1Visited = u.world1Visited || {};
     game.world1Stations = u.world1Stations || {};
@@ -1082,6 +1131,7 @@ showSystemMessage("CHEAT", "Evolución de prueba: Ctrl+Z");
 }
 
 function respawn() {
+if(game.onlineAdventure){game.coopRetryAnimationDone=true;void onlineCoop.requestRetry(game);return;}
 let p = game.player; if (!p) return;
 if (DeathFx.isPlaying()) DeathFx.cancel();
 p.x = 180; p.y = 500; p.vx = 0; p.vy = 0; p.health = p.maxHealth; p.dead = false; p.invuln = 50; game.combo = 0;
@@ -1610,6 +1660,7 @@ game.slashes = [];
 playMusic("victoria");
 }
 function tickFinale() {
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')return;
 const f = game.finale;
 if (!f || f.t <= 0) return;
 f.t--;
@@ -1642,7 +1693,7 @@ game._cuernoWonT = t;
 const p = game.player;
 const ticks = game.clearTicks || 0;
 const rank = clearRank(ticks);
-game.best = rememberBest(game.best, {
+if(!game.onlineAdventure)game.best = rememberBest(game.best, {
   ticks, kills: game.kills, score: game.score, evo: p ? p.evo : 0, rank, id: p ? p.id : ""
 });
 save();
@@ -1655,6 +1706,7 @@ const winDetail = {
   hero: p ? p.name : "Ohana",
   form: p && p.evoNames ? p.evoNames[p.evo] || p.evoNames[4] : "forma final",
   rank,
+  keepsakes: mergeKeepsakes(game.keepsakes,game.finalGauntlet?.found),
   world: w1Final ? 1 : 2,
   room: game.roomId,
   time: formatClear(ticks),
@@ -2141,6 +2193,16 @@ if (p && !p.dead && e.hp>0 && !e.dying && solid && aabb(p, e)) {
 }
 function updateEnemies() {
 if (!game.player) return;
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final'){
+ const p=game.player,consumed=game._coopFinalConsumed||=new Set();
+ if(performance.now()-(game._coopFinalPacketAt||0)<750){
+  for(const shot of game.coopFinalShots||[]){if(shot.life<=0)continue;shot.x+=shot.vx;shot.y+=shot.vy;shot.life--;if(p.invuln<=0&&aabb(p,shot)){hurtPlayer(shot.dmg,'GUARDIÁN');if(!['prism','lightning','geysers','ember'].includes(shot.gauntlet)){shot.life=0;consumed.add('g:'+shot.id);}}}
+  const shots=[...(game.boss?._fusion?.shots||[])];updateFusionProjectilesOnly(game.boss,game,damage=>hurtPlayer(damage,'ECO'));for(const shot of shots)if(shot.hit||shot.life<=1)consumed.add('q:'+(game.boss?._coopSyncId||0)+':'+shot.id);
+  const e=game.finalGauntlet?.guardian;if(e?.hp>0&&e.contactDmg>0&&p.invuln<=0&&aabb(p,e))hurtPlayer(e.contactDmg,'GUARDIÁN');
+ }
+ while(consumed.size>2048)consumed.delete(consumed.values().next().value);
+ return;
+}
 // WebRTC host is the single source of enemy decisions during fresh frames.
 // Guest only extrapolates that state instead of independently picking targets.
 if (onlineCoop.advanceGuestCombat(game)) {
@@ -3010,7 +3072,7 @@ ctx.restore();
 // V468: cada sala del Mundo 1 usa el decorado de su héroe y su silueta gigante.
 function drawWorld1Backdrop(world,W,H){
  const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
- if(drawIllustratedChapter(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H)){drawChapterLandmarks(ctx,game,game.cam,t,W,H);return;}
+ if(h!=="kilo"&&drawLivingRealm(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H,t,{reduceMotion:rd})){drawChapterLandmarks(ctx,game,game.cam,t,W,H);return;}
  if(h==="stitcho"||h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
  else if(h==="cat")drawMichiGardens(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
 
@@ -3191,6 +3253,7 @@ Passives.draw(ctx, game, t);
 // Network freshness is stable for this paint; asking it for each bolt also
 // touches performance.now() repeatedly, without changing synchronization.
 const peerCombatFresh=onlineCoop.hasFreshCombat(game);
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')for(const shot of game.coopFinalShots||[])if(shot.life>0)drawGauntletProjectile(ctx,shot,game.cam,t);
 for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t))drawProjectile(ctx, pr, game.cam, t);}
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
@@ -3576,6 +3639,7 @@ if (!bossA11y && boss?._fusionBoss) {
 if (bossA11y) {
   const accessibleBoss = world1BossAccessibleText(boss);
   if (bossA11y.textContent !== accessibleBoss) bossA11y.textContent = accessibleBoss;
+  lastAnnouncedQuimeraPhase = boss?._fusionBoss ? Number(boss.phase) : null;
 }
 // The rematches use a Canvas HUD too. Announce phase changes and coarse health
 // bands without flooding assistive technology for every hit or animation frame.
@@ -3621,9 +3685,14 @@ for(const btn of touchPowers){
  btn.setAttribute("aria-label",key+" · "+status.def.name+" · "+status.label);
 }
 }
+// HUD refreshes at 10 Hz normally, but boss phase transitions are immediate:
+ // never let assistive technology announce the previous Quimera phase.
+let lastAnnouncedQuimeraPhase = null;
 function step() {
+if(game.onlineAdventure&&game.coopPeerWaiting){void onlineCoop.poll(game);return;}
+if(game.coopRetryWaiting){if(!paused&&!document.hidden&&DeathFx.isPlaying())DeathFx.update(game);void onlineCoop.poll(game);return;}
 if(game.relicScene){if(!paused&&!DOM.pause?.classList.contains("open")&&!document.hidden)tickRelicScene(game);return;}
-if(game._pendingWorld1Cine){flushWorld1CineQueue(game);if(game._pendingWorld1Cine)return;}
+if(game._pendingWorld1Cine&&!game.world1Cine){flushWorld1CineQueue(game);if(game._pendingWorld1Cine)return;}
 if(world1CineActive(game)){if(!paused&&!document.hidden)updateWorld1Cine(game);return;}
 if (!canAct()) return;
 t++;
@@ -3655,7 +3724,7 @@ if (game.finale) {
   game.combatFx?.update();
   updateCam();
   onlineCoop.tick(game);
-  if (t % 6 === 0) updateHUD();
+  if (t % 6 === 0 || (game.boss?._fusionBoss && Number(game.boss.phase) !== lastAnnouncedQuimeraPhase)) updateHUD();
   return;
 }
 tickWorldSummon();
@@ -3684,7 +3753,7 @@ updateCuernoFx(game.cuernoFx, game.player?.id === "cuerno" ? game.player : null,
 updateCam();
 game.coopRemote = onlineCoop.remote;
 onlineCoop.tick(game);
-if (t % 6 === 0) updateHUD();
+if (t % 6 === 0 || (game.boss?._fusionBoss && Number(game.boss.phase) !== lastAnnouncedQuimeraPhase)) updateHUD();
 if (t % 300 === 0) save();
 }
 function containRuntimeFault(scope, error) {
@@ -3717,7 +3786,7 @@ if(!paused){
   }
 } else resolutionRecovery.pause();
 try {
-  clock.advance(now, step);
+  if(!e2eManualClock)clock.advance(now, step);
 } catch (error) {
   containRuntimeFault("simulation", error);
 }
@@ -3816,8 +3885,9 @@ if (resume) resume.onclick = () => setPaused(false);
 if (quit) quit.onclick = returnToMenu;
 $("btn-close-help")?.addEventListener("click", () => DOM.help.classList.remove("open"));
 $("btn-close-map")?.addEventListener("click", () => DOM.map.classList.remove("open"));
+addEventListener('ohana-death',()=>{if(game.onlineAdventure)void onlineCoop.reportDeath(game);});
 addEventListener("ohana-online-state", (event) => {
-if (!onlineCoop.enabled || !game.player) return;
+if (!onlineCoop.enabled || !game.player || game.onlineAdventure) return;
 const state = event.detail?.state;
 if (state === "won" && game.boss && !game.finale && !game.won) {
   game.boss.hp = 0;
@@ -3834,6 +3904,10 @@ if (state === "won" && game.boss && !game.finale && !game.won) {
 
 addEventListener("ohana-after", (e) => {
 const act = e.detail && e.detail.action;
+if(act==='lobby'){
+ navigator.sendBeacon('/.netlify/functions/game',new Blob([JSON.stringify({action:'disconnect',roomId:onlineCoop.roomId,identity:onlineCoop.identity})],{type:'application/json'}));
+ onlineCoop.enabled=false;clearInterval(onlineCoop.heartbeatTimer);onlineCoop.direct?.close();onlineCoop.clearSession();location.href='./multiplayer.html';return;
+}
 if (act === "continue") {
   game.running = true;
   // V470: el juego termina en el Mundo 1 (Mundo 2 en construcción): seguir = quedarse en el Corazón.
@@ -4171,6 +4245,9 @@ state() {
     } : null,
   };
 },
+// Local harness scheduling only: timers/network can advance separately
+// while every physics tick still uses the production step and held inputs.
+manualClock(enabled=true){e2eManualClock=enabled===true;clock.reset();return e2eManualClock;},
 step(frames = 1) {
   const n = Math.max(0, Math.min(600, Math.floor(Number(frames) || 0)));
   for (let i = 0; i < n; i++) step();

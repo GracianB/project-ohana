@@ -1,3 +1,4 @@
+import {holdAdventureFinalScene} from '../multiplayer/adventure-finale.js';
 import {KEEPSAKES,drawKeepsake} from './keepsakes.js';
 import {drawChapterBossV2} from './chapter-boss-art-v2.js';
 import {drawQuimeraCreature} from './quimera-art.js';
@@ -73,6 +74,7 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
 }
 
 export function playWorld1Cine(g, id, hero = null) {
+  if(g.onlineAdventure&&g.world1Cine&&(g.world1Cine.id!==id||g.world1Cine.hero!==hero)){g._pendingWorld1Cine={id,hero};return true;}
   if(g.canWorld1CineStart&&!g.canWorld1CineStart()){
     if(g._pendingWorld1Cine&&(g._pendingWorld1Cine.id!==id||g._pendingWorld1Cine.hero!==hero))return false;
     g._pendingWorld1Cine={id,hero};g.resetInput?.();return true;
@@ -96,8 +98,8 @@ export function world1CinePresentation(g) {
   const reading = !g.reduceMotion && !c.revealed && c.t * 1.6 < String(s.line || "").length;
   const last = c.i === c.shots.length - 1;
   return {key: c.id + ":" + c.i, title: s.title, line: s.line,
-    canAdvance: c.t >= 20,
-    button: reading ? "Mostrar texto" : last && c.id !== "bossDefeat" ? "Volver al juego" : "Continuar"};
+    canAdvance: c.t >= 20&&!(last&&g._coopFinalWaiting),
+    button: last&&g._coopFinalWaiting?'Esperando al compañero':reading ? "Mostrar texto" : last && c.id !== "bossDefeat" ? "Volver al juego" : "Continuar"};
 }
 export function skipWorld1Cine(g) {
   const c = g?.world1Cine, view = world1CinePresentation(g);
@@ -131,7 +133,7 @@ export function syncWorld1CineControls(g, doc = globalThis.document, visible = t
   button.setAttribute("aria-disabled", String(!view.canAdvance));
   if (wasHidden) button.focus({preventScroll:true});
 }
-function endScene(g) { const c = g.world1Cine; g.world1Cine = null; g.resetInput?.(); g.onWorld1CineEnd?.(c.id, c.hero); if (c.id === "bossDefeat") playWorld1Cine(g, "ending"); }
+function endScene(g) { const c = g.world1Cine;if(!c)return;if(holdAdventureFinalScene(g,c))return; g.world1Cine = null; g.resetInput?.(); g.onWorld1CineEnd?.(c.id, c.hero); if (c.id === "bossDefeat"&&(!g.onlineAdventure||g.coopAuthority)) playWorld1Cine(g, "ending"); }
 
 export function updateWorld1Cine(g) {
   const c = g?.world1Cine; if (!c) return false;

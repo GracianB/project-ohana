@@ -55,7 +55,10 @@ export function drawChapterBossV2(c,e,cam,t,reduced=false){
   oval(c,0,-73,id==='dino'?65:53,id==='dino'?54:44,P[0]);oval(c,5,-72,id==='dino'?41:30,35,P[1]);
   const headX=id==='dino'?17:13,headY=id==='dino'?-127:-142;
   oval(c,headX-5,-108,24,40,P[0]);oval(c,headX+9,headY,38,29,P[0]);oval(c,headX+33,headY+13,27,16,P[1]);
-  eye(c,headX+7,headY-3,10,aim,warn);eye(c,headX+30,headY-5,7,aim,warn);
+  // Dino is shown in profile: a single visible eye and a dark nostril.
+  eye(c,headX+7,headY-3,10,aim,warn);
+  if(id==='dino'){c.fillStyle=INK;c.beginPath();c.ellipse(headX+43,headY+12,3.2,2.1,-.2,0,TAU);c.fill();}
+  else eye(c,headX+30,headY-5,7,aim,warn);
   for(let k=0;k<5;k++)shape(c,P[2],()=>{c.moveTo(-44+k*17,-93-Math.sin(k/4*Math.PI)*28);c.quadraticCurveTo(-45+k*17,-128-Math.sin(k/4*Math.PI)*22,-31+k*17,-103-Math.sin(k/4*Math.PI)*23);});
   for(const side of [-1,1]){limb(c,side*37,-93,side*61,-96-lift*15,side*(62+attack*13),-63-lift*38,P[0],id==='dino'?20:12);oval(c,side*(62+attack*13),-63-lift*38,19,12,P[1]);}
   if(id==='cuerno')for(let side of [-1,1]){line(c,P[1],6,()=>{c.moveTo(13+side*14,-162);c.bezierCurveTo(side*30,-187,side*25,-204,side*42,-210);});for(let k=0;k<3;k++)line(c,P[2],3,()=>{c.moveTo(side*(29+k*4),-181-k*8);c.lineTo(side*(46+k*7),-191-k*8);});}

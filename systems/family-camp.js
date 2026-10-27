@@ -54,7 +54,7 @@ export function mountFamilyCamp({select,onBegin,document:doc=globalThis.document
  host.innerHTML=`<div class="camp-scene"><div class="camp-scene-heading"><span>ANTES DE SALVAR EL MUNDO…</span><strong>Un ratito con la familia.</strong></div><canvas id="camp-canvas" tabindex="0" role="img" aria-label="Cinco islas de la familia. Flechas o WASD mueven la luciérnaga; acércate a un personaje o elígelo en los botones inferiores."></canvas><p class="camp-instructions">Mueve la luciérnaga · toca un personaje · descubre sus travesuras</p><div class="camp-mystery" aria-label="La U revela un compañero sorpresa"><span aria-hidden="true">?</span><p>Una ayuda inesperada.<small>Tu compañero se revela al pulsar U.</small></p></div></div><aside class="camp-dossier"><p class="camp-eyebrow">TU COMPAÑERO DE AVENTURA</p><h2 id="camp-name"></h2><p id="camp-role"></p><div class="camp-album-art"><canvas id="camp-portrait" width="300" height="240" role="img"></canvas><span id="camp-form-name"></span></div><div class="camp-forms" role="group" aria-label="Explorar las cinco formas">${[0,1,2,3,4].map(n=>`<button type="button" data-camp-form="${n}" aria-label="Ver forma ${n+1}">${n+1}</button>`).join('')}</div><p id="camp-route"></p><dl id="camp-stats"></dl><div class="camp-talk" aria-live="polite"><p id="camp-line"></p></div><div class="camp-film-controls"><button type="button" id="camp-film">Ver su travesura</button><button type="button" id="camp-film-stop" hidden>Terminar escena</button></div><button type="button" id="camp-start">¡Vámonos de aventura! ↗</button></aside>`;
  menu.querySelector('.hero-stage').before(host);
  host.querySelector('.camp-scene').append(menu.querySelector('.hero-stage'));
- let railSize='';
+ let railSize='',featuredPaintKey='';
 const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('#camp-route').after(powers);const keepsake=doc.createElement('p');keepsake.id='camp-keepsake';powers.after(keepsake);
  let portraitKey="";
  let selected=menu.dataset.hero||'kilo',form=0,film=null,last=0,time=0,raf=0,view={scale:1,x:0};
@@ -121,6 +121,10 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
   if(keys.size){walkSelectionLatched=true;target={...cursor};}
  }
  if(w1sel){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);drawWorld1Select(ctx,width,height,reduce?0:time*60,w1sel,{reduceMotion:reduce,previewForm:form,drawActor:(c,hero,x,y,sc,acting={})=>{const actorTime=acting.miniature?Math.floor((time*60+(acting.animationOffset||0))/18)*18:Math.floor(time*60);const d=ROSTER.find(r=>r.id===hero);if(!d)throw Error('hero');c.save();c.translate(x,y);const pose=!acting.miniature&&film?.id===hero?campPresentation(hero,time-film.start).pose:acting.pose||'idle';const actor=campActor(d,acting.form??0,pose,Math.max(28,sc*64));actor._theatreHQ=sc*64>150;if(acting.performance)actor._kiloPerformance={kind:acting.performance,time:actorTime/60};drawCharacter(c,actor,{x:0,y:0},reduce?0:actorTime,{reduceMotion:reduce});c.restore();}});
+ // Publish the form only after the visible Canvas has actually painted it.
+ // Update attributes on selection/form changes, never on every animation tick.
+ const featured=w1sel.cards[w1sel.index],paintKey=(featured?.hero||'final')+':'+form;
+ if(featuredPaintKey!==paintKey){featuredPaintKey=paintKey;canvas.dataset.paintedHero=featured?.hero||'final';canvas.dataset.paintedForm=String(form);}
  if(railSize!==width+':'+height){railSize=width+':'+height;for(const button of menu.querySelectorAll('.char-card')){const cardIndex=w1sel.cards.findIndex(c=>c.hero===button.dataset.id),r=w1sel.rects[cardIndex];if(!r)continue;for(const [key,value] of Object.entries({x:r.x,y:r.y,w:r.w,h:r.h}))button.style.setProperty('--hit-'+key,value+'px');}}
  }
  else{ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);ctx.scale(view.scale,view.scale);ctx.translate(-view.x,0);ctx.drawImage(scenery,0,0);

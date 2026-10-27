@@ -1,3 +1,7 @@
+import {damageEnemy} from './mutations.js';
+import {adventureFinalePayload,applyAdventureFinale} from '../multiplayer/adventure-finale.js';
+import {renderCoopRole} from './coop-role-v604.js';
+import {adventureRoomProgress,applyAdventureProgress} from '../multiplayer/adventure-progress.js';
 import {drawFamilyDuet} from './family-duets.js';
 import {drawMichiDuet} from './michi-duet.js';
 import {drawChispinDuet} from './chispin-duet.js';
@@ -9,6 +13,7 @@ import { coopRetryDelay,remoteMotionSample } from "./coop-resilience.js";
 import { networkPacing, shouldSendPosition, roundtripEWMA } from "./coop-v103-pacing.js";
 import { shouldUseSnapshot, peerNetworkHealth } from "./coop-v104-sync.js";
 import { shouldFollowPeerRoom } from "./coop-v107-room-follow.js";
+import {renderTravelDialog} from "./coop-travel-dialog-v604.js";
 import { DirectPeerLink } from "./coop-v108-direct.js";
 import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./coop-v109-recovery.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
@@ -97,6 +102,10 @@ class OnlineCoop {
     this.lastRoomId = "";
     this.lastLocalWorld = "";
     this.localRoomGraceUntil = 0;
+    this._travelRequestKey = "";
+    this._travelApplied = "";
+    this._travelBusy = false;
+    this._travelGame = null;
     this.error = "";
     this.seenSignals = new Set();
     this.seenHitEvents = new Set();
@@ -143,9 +152,109 @@ class OnlineCoop {
 
   clearSession() {
     try { sessionStorage.removeItem("ohana-coop-session"); } catch (_) {}
+    renderTravelDialog(null,null);
+  }
+  isConsentMode(){return this.enabled&&this.snapshot?.mode==='adventure';}
+  requestTravel(game,destination){
+    if(!this.isConsentMode()||!game?.roomId)return false;
+    const key=game.roomId+'>'+destination;
+    if(this._travelRequestKey===key||this._travelBusy||this.snapshot?.travel?.status==='pending')return false;
+    this._travelRequestKey=key;this._travelGame=game;
+    void post({action:'travel',roomId:this.roomId,identity:this.identity,
+      decision:'propose',destination,attemptEpoch:game.coopAttemptEpoch||0}).then(snapshot=>{
+      if(snapshot&&(!this.snapshot||snapshot.revision>=this.snapshot.revision))this.snapshot=snapshot;
+      this.syncTravel(game);
+    }).catch(error=>{
+      this._travelRequestKey='';
+      game.nums?.add?.(game.player?.x||0,game.player?.y||0,error.message,'#f7ac9c');
+    });
+    return false;
+  }
+  async reportDeath(game){
+    if(!game?.player?.dead||!this.isConsentMode())return;
+    this._deathPending=true;
+    if(this._deathBusy||this.snapshot?.adventureRetry?.status==='down')return;
+    this._deathBusy=true;
+    try{const data=await post({action:'retry',decision:'down',epoch:game.coopAttemptEpoch||0,roomId:this.roomId,identity:this.identity,progress:adventureRoomProgress(game),finale:adventureFinalePayload(game),characterId:game.player.id,roleEpoch:this.currentPlayer(this.snapshot)?.roleEpoch||0,evolution:game.player.evo,experience:game.player.xp});if(shouldUseSnapshot(this.snapshot,data)){this.snapshot=data;this.updateRemote(data,game);this.syncTravel(game);}}
+    catch(e){if(e.code==='STALE_ATTEMPT'||e.code==='ROLE_CHANGED')this._deathPending=false;else{this.error=e.message;this.markRetry(e);}}finally{this._deathBusy=false;}
+  }
+  async requestRetry(game){
+    if(!this.isConsentMode()||this._retryBusy||this.snapshot?.adventureRetry?.status!=='down')return;
+    this._retryBusy=true;
+    try{const data=await post({action:'retry',decision:'ready',epoch:this.snapshot.adventureRetry.epoch,roomId:this.roomId,identity:this.identity,characterId:game.player.id,roleEpoch:this.currentPlayer(this.snapshot)?.roleEpoch||0,evolution:game.player.evo,experience:game.player.xp});if(shouldUseSnapshot(this.snapshot,data)){this.snapshot=data;this.updateRemote(data,game);this.syncTravel(game);}}
+    catch(e){if(e.code!=='STALE_ATTEMPT')this.error=e.message;}finally{this._retryBusy=false;}
+  }
+  syncRetry(game){
+    if(!game||!this.isConsentMode())return;
+    const retry=this.snapshot?.adventureRetry;if(!retry)return;
+    if(this._starting){game.coopAttemptEpoch=retry.epoch;return;}
+    const changed=game.coopAttemptEpoch!==retry.epoch;
+    game.coopAttemptEpoch=retry.epoch;
+    if(retry.status==='down'){
+      this._deathPending=false;
+      if(changed||!game.coopRetryWaiting){this.pendingMutations=[];game.onCoopRetryDown?.();}
+      if(game.coopRetryAnimationDone&&this.snapshot.players.every(p=>p.connected)&&!retry.ready.includes(this.identity?.playerId))void this.requestRetry(game);
+    }else if(game.coopRetryWaiting||changed){
+      this._deathPending=false;
+      this.pendingMutations=[];this.seenSignals.clear();this.seenHitEvents.clear();resetCombatMirror(game);
+      if(this.remoteCombatScope)this.retiredCombatScopes.add(this.remoteCombatScope);
+      this.combatEpoch=globalThis.crypto.randomUUID();this.lastCombatFrame=0;this.lastCombatReceivedAt=0;this.remoteCombatScope='';this.lastSentPose=null;this.lastSend=0;
+      game.onCoopRetryRestore?.(this.currentPlayer(this.snapshot));
+    }
+  }
+  async requestRole(characterId){
+    if(!this.isConsentMode())return;
+    const snapshot=await post({action:'role',roomId:this.roomId,identity:this.identity,characterId,attemptEpoch:this._travelGame?.coopAttemptEpoch||0,roleEpoch:this.currentPlayer(this.snapshot)?.roleEpoch||0});
+    if(shouldUseSnapshot(this.snapshot,snapshot)){this.snapshot=snapshot;this.updateRemote(snapshot,this._travelGame);this.syncTravel(this._travelGame);}
+    // Pending old-character positions must never overwrite the new role.
+    this.pendingMutations=this.pendingMutations.filter(item=>item.action==='signal'&&item.signalKind==='action'&&item.payload?.action==='rtc');this.lastSentPose=null;this.lastSend=0;
+  }
+  async respondTravel(accept,voteId){
+    if(this._travelBusy||!this.isConsentMode()||this.snapshot?.travel?.id!==voteId)return;
+    this._travelBusy=true;
+    try{
+      const snapshot=await post({action:'travel',roomId:this.roomId,identity:this.identity,
+        decision:accept?'accept':'reject',voteId,attemptEpoch:this._travelGame?.coopAttemptEpoch||0});
+      if(!this.snapshot||snapshot.revision>=this.snapshot.revision)this.snapshot=snapshot;
+      this.syncTravel(this._travelGame);
+    }catch(error){this.error=error.message;}
+    finally{this._travelBusy=false;}
+  }
+  syncTravel(game){
+    if(!this.isConsentMode()){renderTravelDialog(null,null);renderCoopRole(null,null);return;}
+    this._travelGame=game||this._travelGame;
+    if(this._travelGame)this._travelGame.coopAuthority=this.currentPlayer(this.snapshot)?.slot===0;
+    if(this._travelGame)this._travelGame.coopPeerWaiting=this.snapshot?.phase==='lobby'||this.snapshot?.players?.some(p=>!p.connected);
+    this.syncRetry(this._travelGame);
+    if(this._travelGame?.coopRetryWaiting){applyAdventureProgress(this._travelGame,this.snapshot?.adventureProgress);renderTravelDialog(null,null);renderCoopRole(null,null);return;}
+    const me=this.currentPlayer(this.snapshot),g=this._travelGame;
+    if(g?.player&&me?.characterId&&g.player.id!==me.characterId)g.changeCoopHero?.(me.characterId,me);
+    applyAdventureProgress(g,this.snapshot?.adventureProgress);
+    if(this._starting)return;
+    if(this._deathPending&&g?.player?.dead&&!g.coopPeerWaiting&&!this._deathBusy)void this.reportDeath(g);
+    applyAdventureFinale(g,this.snapshot?.adventureFinale,{host:me?.slot===0,players:this.snapshot?.players||[]});
+    renderCoopRole(g,this.snapshot,id=>this.requestRole(id));
+    const confirmed=this.snapshot?.lastTravel;
+    if(confirmed?.id&&confirmed.id!==this._travelApplied){
+      this._travelApplied=confirmed.id;
+      this._travelRequestKey='';
+      if(this._travelGame?.roomId===confirmed.from){
+        try{
+          if(this._travelGame.loadRoom?.(confirmed.to,'online-peer')!==false){
+            this._travelGame.placeCoopEntry?.(this.currentPlayer(this.snapshot));
+            this.pendingMutations=this.pendingMutations.filter(m=>m.action==='move'?m.worldRoomId===confirmed.to:m.payload?.action==='rtc'||m.payload?.roomId===confirmed.to);
+            this.lastSentPose=null;this.lastSend=0;
+          }
+        }catch(_){}
+      }
+    }
+    if(!this.snapshot?.travel)this._travelRequestKey='';
+    renderTravelDialog(this.snapshot,this.identity?.playerId,
+      id=>void this.respondTravel(true,id),id=>void this.respondTravel(false,id));
   }
 
   async start(game, definition) {
+    this._starting=true;this._deathPending=false;this._deathBusy=false;this._retryBusy=false;
     const session = this.readSession();
     if (!session || !definition) return false;
 
@@ -255,6 +364,7 @@ class OnlineCoop {
       local.grounded = true;
     }
 
+    this._starting=false;this.syncTravel(game);
     await this.sendPosition(game, true);
     this.ensurePeerHud();
     this.setupDirect(game);
@@ -283,7 +393,9 @@ class OnlineCoop {
       backdropFilter: "none",
       boxShadow: "0 8px 28px rgba(0,0,0,.22)",
     });
-    document.body.appendChild(badge);
+    const hud=document.querySelector('#hud .hud-block.world');
+    if(hud)Object.assign(badge.style,{position:'static',top:'auto',left:'auto',transform:'none',padding:'4px 0 0',border:'0',borderRadius:'0',background:'transparent',boxShadow:'none',fontSize:'9px',letterSpacing:'.02em'});
+    (hud||document.body).appendChild(badge);
   }
 
   // Network status is informational: keep it independent of FPS and physics.
@@ -322,7 +434,10 @@ class OnlineCoop {
       if(!direct&&(quality.quality==="late"||quality.quality==="lost"))text+=" · SEÑAL RETRASADA";
       else if(!direct&&quality.quality==="slow")text+=" · RED LENTA";
     }
-    if(badge.textContent!==text)badge.textContent=text;
+    badge.title=text;
+    const label=state==='connected'?'2 jugadores · '+(guest&&!synced?'Esperando combate':/SEÑAL RETRASADA|RED LENTA/.test(text)?'Conexión lenta':'Conectados'):
+      state==='waiting-peer'?'Esperando al compañero':state==='reconnecting'?'Recuperando conexión':state==='error'?'Conexión no disponible':'Conectando';
+    if(badge.textContent!==label)badge.textContent=label;
   }
 
   currentPlayer(snapshot) {
@@ -392,6 +507,7 @@ class OnlineCoop {
   }
 
   receiveDirectPose(pose){
+    if(this.isConsentMode?.()&&(pose.attemptEpoch||0)!==(this._combatGame?.coopAttemptEpoch||0))return;
     if(!this.remote||!this.enabled)return;
     const now=performance.now();
     const teleport=this.remoteWorld!==pose.room;
@@ -413,7 +529,9 @@ class OnlineCoop {
 
   receiveDirectEvent(game,event){
     if(!this.enabled||!this.remote)return;
+    if(this.isConsentMode?.()&&event.payload&&(event.payload.attemptEpoch||0)!==(game.coopAttemptEpoch||0))return;
     if(event.kind==="room"){
+      if(this.isConsentMode())return;
       const destination=String(event.payload?.roomId||"");
       if(!/^(hub|beach|jungle|cave|lab|ridge|space|reef|volcano|boss)$/.test(destination))return;
       this.remoteWorld=destination;
@@ -446,7 +564,7 @@ class OnlineCoop {
          spark(frame.chispinFx)&&spark(state.chispinFx));
       if(valid&&Number.isSafeInteger(frame.frameNo)&&frame.frameNo>0){
         this.direct?.sendEvent?.("state",{state:"fx-ack",
-          scope:frame.scope,frameNo:frame.frameNo});
+          scope:frame.scope,frameNo:frame.frameNo,attemptEpoch:game.coopAttemptEpoch||0});
       }
     }else if(event.kind==="state"&&event.payload?.state==="fx-ack"){
       const ack=event.payload,pending=this.pendingVisualCombo;
@@ -560,6 +678,7 @@ class OnlineCoop {
       const previousPeerRoom=this.remoteWorld;
       this.snapshot = snapshot;
       this.updateRemote(snapshot, game);
+      this.syncTravel(game);
       this.sequence = Math.max(
         this.sequence,
         this.currentPlayer(snapshot)?.lastSequence || 0
@@ -578,7 +697,7 @@ class OnlineCoop {
       }
 
       const remoteWorld = this.remote?.playerId ? this.remoteWorld : "";
-      if (shouldFollowPeerRoom(previousPeerRoom,remoteWorld,game.roomId,now,this.localRoomGraceUntil)) {
+      if ((!this.isConsentMode()||this.snapshot?.lastTravel?.to===remoteWorld)&&shouldFollowPeerRoom(previousPeerRoom,remoteWorld,game.roomId,now,this.localRoomGraceUntil)) {
         this.lastRoomId = remoteWorld;
         this.lastLocalWorld=remoteWorld;
         try {
@@ -602,6 +721,7 @@ class OnlineCoop {
     this.error=error?.message||"Sesión caducada";
     clearInterval(this.heartbeatTimer);this.heartbeatTimer=null;
     this.enabled=false;
+    renderTravelDialog(null,null);
     this.pendingMutations.length=0;
     this.direct?.close();this.direct=null;this.directAttempted=false;
     this.directConnectedAt=0;this.lastDirectPoseAt=0;
@@ -625,6 +745,7 @@ class OnlineCoop {
       this.identity=snapshot.identity;
       this.snapshot=snapshot;
       this.updateRemote(snapshot);
+      this.syncTravel(this._combatGame);
       // A reconnect increments connectionEpoch; future requests need new credentials.
       try{
         sessionStorage.setItem("ohana-coop-session",JSON.stringify({
@@ -671,6 +792,7 @@ class OnlineCoop {
   }
 
   markRetry(error){
+    if(this.isConsentMode()&&this._combatGame)this._combatGame.coopPeerWaiting=true;
     this.error=error?.message||String(error);
     this.retryFailures=Math.min(6,(this.retryFailures||0)+1);
     this.retryAfter=performance.now()+coopRetryDelay(this.retryFailures);
@@ -714,6 +836,7 @@ class OnlineCoop {
     if (!this.enabled || !game.player || game.player.dead || !this.roomId || !this.identity || this.snapshot?.phase==="lobby") return;
     const now=performance.now();
     const pacing=networkPacing(this.rttMs,this.retryFailures,this.snapshot?.phase==="lobby");
+    if(!force&&now-this.lastSend<pacing.moveMs)return;
     const pose={
       action: "move",
       roomId: this.roomId,
@@ -732,6 +855,7 @@ class OnlineCoop {
       melee: finite(game.player.melee, 0),
       dash: finite(game.player.dash, 0),
       worldRoomId: game.roomId || START_ROOM,
+      ...(this.isConsentMode()?{attemptEpoch:game.coopAttemptEpoch||0,adventureProgress:adventureRoomProgress(game),adventureFinale:adventureFinalePayload(game),characterId:game.player.id,roleEpoch:this.currentPlayer(this.snapshot)?.roleEpoch||0}:{}),
     };
     if(!shouldSendPosition(this.lastSentPose,pose,now-this.lastSend,pacing,force))return;
     const sequence=++this.sequence;
@@ -746,8 +870,8 @@ class OnlineCoop {
   classifyMutationError(error){
     const code=String(error?.code||"SERVER_UNAVAILABLE");
     if(typeof document!=="undefined")document.body.dataset.coopLastErrorCode=code.slice(0,48);
-    if(code==="DUPLICATE_ACTION")return "drop";
-    if(code==="NOT_READY"||code==="MATCH_STARTED")return "refresh";
+    if(code==="DUPLICATE_ACTION"||code==="ROLE_CHANGED"||code==="STALE_ATTEMPT"||code==="TEAM_DOWN")return "drop";
+    if(code==="NOT_READY"||code==="MATCH_STARTED"||code==="TRAVEL_CONSENT_REQUIRED")return "refresh";
     return "retry";
   }
 
@@ -765,6 +889,7 @@ class OnlineCoop {
             if(shouldUseSnapshot(this.snapshot,data)){
               this.snapshot = data;
               this.updateRemote(data, game);
+              this.syncTravel(game);
             }else this.outOfOrderPackets++;
           }
           this.clearRetry();
@@ -802,6 +927,7 @@ class OnlineCoop {
   }
 
   async signal(game, signalKind, payload = {}) {
+    if(this.isConsentMode())payload={...payload,attemptEpoch:game.coopAttemptEpoch||0};
     if (!this.enabled || !this.roomId || !this.identity || this.snapshot?.phase==="lobby") return;
     // Action/room feedback is shown directly before the authoritative POST.
     // The RTC handshake itself is carried ONLY over Netlify, never recursively.
@@ -829,6 +955,7 @@ class OnlineCoop {
       sequence,
       actionId: "online:" + this.identity.playerId + ":" + sequence,
       signalKind,
+      ...(this.isConsentMode()?{attemptEpoch:game.coopAttemptEpoch||0}:{}),
       payload: { ...payload, roomId: game.roomId || START_ROOM },
     });
     void this.drainMutations(game);
@@ -872,6 +999,7 @@ class OnlineCoop {
       if (event.signalKind === "state") {
         const state = String(event.payload?.state || "");
         if (state === "lost") {
+          if(this.isConsentMode())continue;
           this.localStateSent = "lost";
           try {
             game.player.dead = true;
@@ -914,6 +1042,7 @@ class OnlineCoop {
       }
 
       if (event.signalKind === "room") {
+        if(this.isConsentMode())continue;
         const nextRoom = String(event.payload?.roomId || "");
         if (nextRoom && nextRoom !== game.roomId) {
           try { game.loadRoom(nextRoom, "online-peer"); } catch (_) {}
@@ -979,6 +1108,7 @@ class OnlineCoop {
 
   receiveCombatFrame(game,frame){
     if(this.currentPlayer(this.snapshot)?.slot!==1)return false;
+    if(this.isConsentMode()&&(frame?.attemptEpoch||0)!==(game.coopAttemptEpoch||0))return false;
     if(frame?.protocol!==COMBAT_PROTOCOL){this.peerCombatProtocol=0;return false;}
     if(frame.roomId!==game.roomId||!validCombatFrame(frame)||this.retiredCombatScopes.has(frame.scope))return false;
     if(this.remoteCombatScope===frame.scope&&frame.frameNo<=this.lastCombatFrame)return false;
@@ -1075,7 +1205,8 @@ class OnlineCoop {
 
     if (!target || Math.hypot(target.x - x, target.y - y) > 180) return false;
 
-    target.hp = Math.max(0, target.hp - damage);
+    if(game.onlineAdventure){if(!damageEnemy(target,damage))return false;}
+    else target.hp = Math.max(0, target.hp - damage);
     target.dying = Number(payload.dying) || target.dying || 0;
     target.invuln = Math.max(target.invuln || 0, 8);
     // Dino's authorized impulse is bounded and boss-limited at the host.
@@ -1125,6 +1256,7 @@ class OnlineCoop {
     // Keep the authenticated room alive while a hidden/paused view stops RAF.
     // Reuse paced poll; never advance physics or increase foreground requests.
     this.direct?.ping();void this.poll(game);
+    if(this.isConsentMode()&&game.roomId==='w1-final')void this.sendPosition(game);
     if(typeof document==="undefined"||!document.hidden)this.repairDirect(game,now);
     return true;
   }
@@ -1162,7 +1294,7 @@ class OnlineCoop {
     }
     void this.poll(game);
 
-    const localState = game.player?.dead ? "lost" : game.won ? "won" : "";
+    const localState = this.isConsentMode()?"":game.player?.dead ? "lost" : game.won ? "won" : "";
     if (!localState && (this.localStateSent === "lost" || this.localStateSent === "won")) {
       this.localStateSent = "";
     }
@@ -1257,7 +1389,7 @@ class OnlineCoop {
       for(const bolt of peerFx.bolts)drawBolt(ctx,bolt,game.cam,t);
     }
     if(this.hasFreshCombat(game)){
-      for(const pr of game.coopRemoteEnemyBullets||[]){
+      for(const pr of game.onlineAdventure&&game.roomId==='w1-final'?[]:game.coopRemoteEnemyBullets||[]){
         const vx=pr.x-(game.cam?.x||0),vy=pr.y-(game.cam?.y||0);
         if(vx>-200&&vx<(game.viewW||1280)+200&&vy>-200&&vy<(game.viewH||720)+200)
           drawProjectile(ctx,pr,game.cam,t);

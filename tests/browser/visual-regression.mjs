@@ -7,6 +7,7 @@ const server = await startServer(4174);
 const base = 'http://127.0.0.1:4174/';
 const resultsDir = 'test-results/visual';
 const screenshots = [];
+const selectorOnly=process.env.OHANA_VISUAL_SELECT_ONLY==='1';
 
 function withinViewport(rect, width, height, margin = 2) {
   return rect.width > 0 && rect.height > 0 &&
@@ -97,6 +98,7 @@ try {
   assert.equal(openingState.complete, false, '00-opening-family: avanza sola al carrusel');
   assert.equal(openingState.mode, 'family-welcome', '00-opening-family: modo visual incorrecto');
   await capture(page, '00-opening-family');
+  if(!selectorOnly){
   // V344 directed frames prove that Dragon's personality is visible within
   // the full ten-hero composition, not merely described in source comments.
   for(const [at,phase,label] of [
@@ -550,6 +552,7 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  }
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
@@ -585,248 +588,77 @@ try {
   assert.ok(titleLayout.scrollWidth <= titleLayout.width + 2, '01-character-select: overflow horizontal');
   await capture(page, '01-character-select-1680x900');
 
-  await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = 4; });
-  await page.waitForTimeout(220);
-  const finalFormFit = await page.evaluate(() => {
-    const card=document.querySelector('#chars-grid .char-card.selected');
-    const canvas=card?.querySelector('canvas');
-    const r=card?.getBoundingClientRect();
-    return {
-      evo:Number(canvas?.dataset.evo ?? -1),
-      scale:Number(canvas?.dataset.fitScale || 0),
-      envelope:Number(canvas?.dataset.fitEnvelope || 0),
-      cardEvo:card?.dataset.evo || '',
-      backdrop:document.querySelector('#title-fx')?.dataset.backdrop || '',
-      scene:document.querySelector('#title-fx')?.dataset.heroScene || '',
-      card:r?{width:r.width,height:r.height}:null
-    };
+  // The current selector draws its featured hero in #camp-canvas. Legacy
+  // card portraits are intentionally display:none and must not drive this gate.
+  const selectorSave = await page.evaluate(()=>localStorage.getItem('ohana'));
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const cropFeatured = async()=>page.evaluate(()=>{
+    const cv=document.querySelector('#camp-canvas'),c=cv.getContext('2d');
+    const x=Math.floor(cv.width*.12),y=Math.floor(cv.height*.06),w=Math.floor(cv.width*.76),h=Math.floor(cv.height*.64);
+    const bytes=c.getImageData(x,y,w,h).data;let hash=2166136261,pixels=0;
+    for(let i=0;i<bytes.length;i+=16){hash=Math.imul(hash^bytes[i],16777619)>>>0;if(bytes[i+3]>20)pixels++;}
+    return {hash,pixels,visible:pixels};
   });
-  assert.equal(finalFormFit.evo, 4, '01c-final-form-fit: no entra en Forma 5');
-  assert.equal(finalFormFit.cardEvo, '4', '01c-final-form-fit: tarjeta no conoce su evolución');
-  assert.ok(finalFormFit.envelope >= 1.3, '01c-final-form-fit: Forma 5 sin margen de silueta');
-  assert.ok(finalFormFit.scale >= .34, '01c-final-form-fit: escala inválida');
-  // V468+: the family camp remains mounted, but its interactive Canvas selector
-  // is the World 1 hero-room portal map rather than the original paired islands.
-  assert.equal(await page.locator('#char-select').getAttribute('data-selector-mode'), 'world1-rooms', '01c-final-form-fit: portal del Mundo 1 no activado');
-  assert.equal(await page.locator('#family-camp').getAttribute('data-world'), '1', '01c-final-form-fit: campamento sin mapa del Mundo 1');
-  await capture(page, '01c-character-select-final-form-fit');
-  await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = null; });
-  await page.waitForTimeout(120);
-
-  // V53 Dragon art audit: each evolutionary silhouette must draw in the selector.
-  for(let n=0;n<4;n++) await page.keyboard.press('ArrowRight');
-  await page.waitForTimeout(280);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'dragon','01e-dragon: selección no llega a Dragón');
-  for(let form=0;form<5;form++){
-    await page.evaluate((f)=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
-    await page.waitForTimeout(160);
-    const image=await page.evaluate(()=>{
-      const card=document.querySelector('#chars-grid .char-card.selected');
-      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
-      const data=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
-      let signal=0;
-      if(data)for(let i=3;i<data.length;i+=64)if(data[i]>20)signal++;
-      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),signal};
-    });
-    assert.equal(image.form,form,'01e-dragon: forma no renderizada '+form);
-    assert.ok(image.scale>.2&&image.signal>10,'01e-dragon: silueta invisible o sin escala '+JSON.stringify(image));
-    await capture(page,'01e-dragon-solar-form-'+(form+1));
+  async function previewForm(form){
+    const before=await cropFeatured();await page.locator(`[data-camp-form="${form}"]`).click();
+    await page.waitForFunction(({form,hash})=>{
+      const host=document.querySelector('#family-camp'),cv=document.querySelector('#camp-canvas'),c=cv.getContext('2d');
+      if(host.dataset.form!==String(form)||cv.dataset.paintedHero!==host.dataset.hero||cv.dataset.paintedForm!==String(form)||document.querySelector(`[data-camp-form="${form}"]`).getAttribute('aria-pressed')!=='true')return false;
+      const bytes=c.getImageData(Math.floor(cv.width*.12),Math.floor(cv.height*.06),Math.floor(cv.width*.76),Math.floor(cv.height*.64)).data;let next=2166136261;
+      for(let i=0;i<bytes.length;i+=16)next=Math.imul(next^bytes[i],16777619)>>>0;return next!==hash;
+    },{form,hash:before.hash},{timeout:10000});return cropFeatured();
   }
-  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
-  for(let n=0;n<4;n++) await page.keyboard.press('ArrowLeft');
-  await page.waitForTimeout(280);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01e-dragon: selector no vuelve a Kilo');
-
-  // V54 Frita: capture each form without modifying the parallel Atrium intro.
-  for(let n=0;n<6;n++) await page.keyboard.press('ArrowRight');
-  await page.waitForTimeout(240);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'frita','01f-frita: selección no llega a Frita');
-  for(let form=0;form<5;form++){
-    await page.evaluate((f)=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
-    await page.waitForTimeout(180);
-    const image=await page.evaluate(()=>{
-      const card=document.querySelector('#chars-grid .char-card.selected');
-      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
-      const data=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
-      let pixels=0;
-      if(data)for(let i=3;i<data.length;i+=64)if(data[i]>20)pixels++;
-      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),pixels};
-    });
-    assert.equal(image.form,form,'01f-frita: forma incorrecta '+form);
-    assert.ok(image.scale>.2&&image.pixels>10,'01f-frita: silueta invisible '+JSON.stringify(image));
-    await capture(page,'01f-frita-crispy-form-'+(form+1));
-  }
-  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
-  for(let n=0;n<6;n++) await page.keyboard.press('ArrowLeft');
-  await page.waitForTimeout(260);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01f-frita: selector no vuelve a Kilo');
-
-  // V55 Pizza: five genuine Canvas portraits at every evolution stage.
-  for(let n=0;n<7;n++) await page.keyboard.press('ArrowRight');
-  await page.waitForTimeout(260);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'pizza','01g-pizza: selector does not reach Pizza');
-  for(let form=0;form<5;form++){
-    await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
-    await page.waitForTimeout(180);
-    const rendered=await page.evaluate(()=>{
-      const card=document.querySelector('#chars-grid .char-card.selected');
-      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
-      const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
-      let visible=0;
-      if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)visible++;
-      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),
-        growth:Number(cv?.dataset.cuernoGrowth||0),visible};
-    });
-    assert.equal(rendered.form,form,'01g-pizza: unexpected form '+form);
-    assert.ok(rendered.scale>.2&&rendered.visible>10,'01g-pizza: missing slice pixels '+JSON.stringify(rendered));
-    await capture(page,'01g-pizza-molten-form-'+(form+1));
-  }
-  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
-  for(let n=0;n<7;n++) await page.keyboard.press('ArrowLeft');
-  await page.waitForTimeout(260);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01g-pizza: selector did not return to Kilo');
-
-  // V56 Yomi: verify the guardian-lantern is legible across five evolution silhouettes.
-  for(let n=0;n<8;n++) await page.keyboard.press('ArrowRight');
-  await page.waitForTimeout(230);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'yomi','01h-yomi: selector does not reach Yomi');
-  for(let form=0;form<5;form++){
-    await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
-    await page.waitForTimeout(160);
-    const render=await page.evaluate(()=>{
-      const card=document.querySelector('#chars-grid .char-card.selected');
-      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
-      const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
-      let pixels=0;
-      if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)pixels++;
-      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),pixels};
-    });
-    assert.equal(render.form,form,'01h-yomi: unexpected form '+form);
-    assert.ok(render.scale>.2&&render.pixels>10,'01h-yomi: blank or cropped guardian '+JSON.stringify(render));
-    await capture(page,'01h-yomi-guardian-form-'+(form+1));
-  }
-  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
-  for(let n=0;n<8;n++) await page.keyboard.press('ArrowLeft');
-  await page.waitForTimeout(260);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01h-yomi: selector did not return to Kilo');
-
-  // V59 Cuerno: the baby is a living horn, not a four-legged ball.
-  for(let i=0;i<9;i++) await page.keyboard.press('ArrowRight');
-  await page.waitForTimeout(250);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'cuerno','01i-cuerno: selector does not reach Cuerno');
-  let cuernoLastGrowth=0;
-  for(const form of [0,1,2,3,4]){
-    await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
-    await page.waitForTimeout(220);
-    const state=await page.evaluate(()=>{
-      const card=document.querySelector('#chars-grid .char-card.selected');
-      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
-      const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
-      let visible=0;
-      if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)visible++;
-      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),growth:Number(cv?.dataset.cuernoGrowth||0),visible};
-    });
-    assert.equal(state.form,form,'01i-cuerno: wrong form');
-    assert.ok(state.scale>.2&&state.visible>12,'01i-cuerno: blank or cropped '+JSON.stringify(state));
-    assert.ok(state.growth>.6&&state.growth<=1,'01i-cuerno: invalid stage growth '+JSON.stringify(state));
-    if(form>0)assert.ok(state.growth>cuernoLastGrowth,'01i-cuerno: portrait progression reversed');
-    cuernoLastGrowth=state.growth;
-    await capture(page,'01i-cuerno-origin-form-'+(form+1));
-    if(form===1) await capture(page,'01j-cuerno-destello-first-metamorphosis');
-    if(form===2) await capture(page,'01l-cuerno-rainbow-foal-complete');
-    if(form===3) await capture(page,'01k-cuerno-stellar-unicorn-adult');
-    if(form===4) await capture(page,'01m-cuerno-aurora-final');
-  }
-  // V66 Cuerno soul: each authored comic beat is really drawn in the selector.
-  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=4;});
-  for(const beat of ['curious','shy','prance','stargaze','sneeze','bow']){
-    await page.evaluate(s=>{window.__OHANA_TITLE_CUERNO_BEAT=s;},beat);
-    await page.waitForTimeout(180);
-    const actual=await page.evaluate(()=>{
-      const cv=document.querySelector('#chars-grid .char-card.selected canvas');
-      return {beat:cv?.dataset.cuernoBeat,evo:Number(cv?.dataset.evo)};
-    });
-    assert.equal(actual.beat,beat,'01n-cuerno: showcase beat missing');
-    assert.equal(actual.evo,4,'01n-cuerno: final form absent');
-    await capture(page,'01n-cuerno-soul-'+beat);
-  }
-  // V67 four real horn-origin spells in the selector at final evolution.
-  await page.evaluate(()=>{window.__OHANA_TITLE_CUERNO_BEAT=null;});
-  for(const slot of [0,1,2,3]){
-    await page.evaluate(n=>{
-      window.__OHANA_TITLE_EVO_OVERRIDE=4;
-      window.__OHANA_TITLE_CUERNO_MAGIC=n;
-    },slot);
-    await page.waitForTimeout(180);
-    const actual=await page.evaluate(()=>{
-      const card=document.querySelector('#chars-grid .char-card.selected');
-      const cv=card?.querySelector('canvas');
-      return {hero:card?.dataset.id||card?.querySelector('canvas')?.dataset.id,
-        slot:Number(cv?.dataset.cuernoMagic),form:Number(cv?.dataset.evo)};
-    });
-    assert.equal(actual.slot,slot,'01o-cuerno: wrong magic slot');
-    assert.equal(actual.form,4,'01o-cuerno: missing Aurora');
-    await capture(page,'01o-cuerno-magia-viva-'+['j','k','l','u'][slot]);
-  }
-  // V69: verify victory is animated, not silently disabled when flourish is zero.
-  // Compare genuine Canvas pixels with the hurt pose in each of the five forms.
-  for(let form=0;form<5;form++){
-    const samples=[];
-    for(const pose of ['victory','hurt']){
-      await page.evaluate(({f,p})=>{
-        window.__OHANA_TITLE_EVO_OVERRIDE=f;
-        window.__OHANA_TITLE_CUERNO_MAGIC=null;
-        window.__OHANA_TITLE_CUERNO_BEAT=null;
-        window.__OHANA_TITLE_CUERNO_STATE=p;
-      },{f:form,p:pose});
-      await page.waitForTimeout(170);
-      const sample=await page.evaluate(()=>{
-        const cv=document.querySelector('#chars-grid .char-card.selected canvas');
-        const pixels=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data;
-        let hash=2166136261;
-        for(let i=0;i<pixels.length;i+=16)hash=Math.imul(hash^pixels[i],16777619)>>>0;
-        return {state:cv.dataset.cuernoState,form:Number(cv.dataset.evo),hash};
-      });
-      assert.equal(sample.state,pose,'01p-cuerno: wrong QA pose');
-      assert.equal(sample.form,form,'01p-cuerno: wrong evolution');
-      samples.push(sample.hash);
-      if(pose==='victory')await capture(page,'01p-cuerno-victory-form-'+(form+1));
+  const selectorRoster=await page.evaluate(async()=>(await import('./characters/roster.js')).ROSTER.map(r=>({id:r.id,names:r.evoNames,hp:r.forms.map(f=>f.hp)})));
+  const capturePrefixes={dragon:'01e-dragon-solar-form-',frita:'01f-frita-crispy-form-',pizza:'01g-pizza-molten-form-',yomi:'01h-yomi-guardian-form-',cuerno:'01i-cuerno-origin-form-'};
+  for(const def of selectorRoster){
+    await page.locator(`.char-card[data-id="${def.id}"]`).click();
+    assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),def.id);
+    // Force a genuine change before inspecting the baby; no hidden QA override.
+    await previewForm(4);const hashes=new Set();let cuernoLastGrowth=0;
+    for(const form of [0,1,2,3,4]){
+      const image=await previewForm(form);hashes.add(image.hash);
+      assert.equal(await page.locator('#camp-form-name').textContent(),def.names[form]);
+      assert.equal(await page.locator('#camp-stats dd').first().textContent(),String(def.hp[form]));
+      assert.ok(image.pixels>10,'selector: visible featured actor is empty');
+      if(def.id==='frita')assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),'frita');
+      if(def.id==='pizza'){const rendered=image;assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),'pizza');assert.ok(rendered.visible>10);}
+      if(def.id==='cuerno'){
+        const state=image;assert.ok(state.visible>12);
+        const growth=await page.evaluate(async form=>(await import('./characters/visual-size.js')).heroHeightTarget('cuerno',form),form);
+        assert.ok(growth>cuernoLastGrowth,'01i-cuerno: portrait progression reversed');cuernoLastGrowth=growth;
+      }
+      await capture(page,(capturePrefixes[def.id]||'01-current-'+def.id+'-form-')+(form+1));
+      if(def.id==='cuerno'){
+        if(form===1)await capture(page,'01j-cuerno-destello-first-metamorphosis');
+        if(form===2)await capture(page,'01l-cuerno-rainbow-foal-complete');
+        if(form===3)await capture(page,'01k-cuerno-stellar-unicorn-adult');
+        if(form===4)await capture(page,'01m-cuerno-aurora-final');
+      }
     }
-    assert.notEqual(samples[0],samples[1],'01p-cuerno: victory identical to injured form '+form);
+    assert.equal(hashes.size,5,def.id+': five forms must change the actual visible Canvas');
   }
-  await page.evaluate(()=>{
-    window.__OHANA_TITLE_EVO_OVERRIDE=null;
-    window.__OHANA_TITLE_CUERNO_BEAT=null;
-    window.__OHANA_TITLE_CUERNO_MAGIC=null;
-    window.__OHANA_TITLE_CUERNO_STATE=null;
-  });
-  for(let i=0;i<9;i++) await page.keyboard.press('ArrowLeft');
-  await page.waitForTimeout(250);
-  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01i-cuerno: selector did not restore');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('ohana')),selectorSave,'previewing all forms must not change the campaign save');
+  // The old Cuerno pose/spell art audit remains an explicit renderer fixture.
+  // It does not pretend that hidden card canvases are the player-facing UI.
+  async function cuernoArt(form,pose='idle',beat='',magic=-1){return page.evaluate(async({form,pose,beat,magic})=>{
+    const[{ROSTER},{campActor},{drawCharacter}]=await Promise.all([import('./characters/roster.js'),import('./systems/family-camp.js'),import('./characters/draw.js')]);
+    let cv=document.querySelector('#cuerno-visual-fixture');if(!cv){cv=document.createElement('canvas');cv.id='cuerno-visual-fixture';cv.width=700;cv.height=600;cv.style.cssText='position:fixed;inset:0;margin:auto;width:700px;height:600px;z-index:2147483600;pointer-events:none';document.body.append(cv);}
+    const c=cv.getContext('2d');c.clearRect(0,0,700,600);const actor=campActor(ROSTER.find(r=>r.id==='cuerno'),form,pose,230);actor._cuernoBeat=beat;actor._cuernoMagicSlot=magic;
+    c.save();c.translate(350,470);drawCharacter(c,actor,{x:0,y:0},84);c.restore();const pixels=c.getImageData(0,0,700,600).data;let hash=2166136261,visible=0;
+    for(let i=0;i<pixels.length;i+=16){hash=Math.imul(hash^pixels[i],16777619)>>>0;if(pixels[i+3]>20)visible++;}return {hash,visible};
+  },{form,pose,beat,magic});}
+  for(const beat of ['curious','shy','prance','stargaze','sneeze','bow']){assert.ok((await cuernoArt(4,'idle',beat)).visible>12);await capture(page,'01n-cuerno-soul-'+beat);}
+  for(const slot of [0,1,2,3]){assert.ok((await cuernoArt(4,'cast','',slot)).visible>12);await capture(page,'01o-cuerno-magia-viva-'+['j','k','l','u'][slot]);}
+  for(let form=0;form<5;form++){
+    const samples=[];for(const pose of ['victory','hurt']){samples.push((await cuernoArt(form,pose)).hash);if(pose==='victory')await capture(page,'01p-cuerno-victory-form-'+(form+1));}
+    assert.notEqual(samples[0],samples[1],'Cuerno victory and hurt must draw different poses');
+  }
+  await page.evaluate(()=>document.querySelector('#cuerno-visual-fixture').remove());await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.locator('.char-card[data-id="stitcho"]').click();await page.locator('#camp-film').click();assert.equal(await page.locator('#camp-film-stop').isVisible(),true);
+  await capture(page,'01b-character-select-stitcho-world');await capture(page,'01d-stitcho-voluntary-scene');await page.locator('#camp-film-stop').click();
+  await page.locator('.char-card[data-id="kilo"]').click();await page.locator('[data-camp-form="0"]').click();
 
-  await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = 60; });
-  await page.keyboard.press('ArrowRight');
-  await page.waitForTimeout(520);
-  const livingSelect = await page.evaluate(() => ({
-    hero:document.querySelector('#char-select')?.dataset.hero || '',
-    atriumOn:document.querySelector('#char-select')?.classList.contains('atrium-on') || false,
-    scene:document.querySelector('#char-select')?.dataset.hero || '',
-    stitchoBeat:document.querySelector('#chars-grid .char-card.selected')?.dataset.stitchoBeat || '',
-    visible:[...document.querySelectorAll('#chars-grid .char-card')].filter((card) => {
-      const s=getComputedStyle(card),r=card.getBoundingClientRect();
-      return s.display!=='none' && s.visibility!=='hidden' && r.width>2 && r.height>2;
-    }).map((card)=>card.dataset.id)
-  }));
-  assert.equal(livingSelect.hero, 'stitcho', '01b-living-select: selección no avanza a Stitcho');
-  assert.equal(livingSelect.scene, 'stitcho', '01b-living-select: fondo no reacciona al héroe');
-  assert.equal(livingSelect.visible.length, 10, '01b-living-select: cuadrícula debe mostrar los diez héroes');
-  assert.equal(livingSelect.stitchoBeat, 'plasma-roll', '01d-stitcho: coreografía de selector incorrecta');
-  await capture(page, '01b-character-select-stitcho-world');
-  await capture(page, '01d-stitcho-plasma-roll');
-  await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = null; });
-  await page.keyboard.press('ArrowLeft');
-  await page.waitForTimeout(420);
-
+  if(!selectorOnly){
   await page.locator('#btn-play').click();
   await page.waitForTimeout(500);
   await auditLayout(page, '02-hub');
@@ -1517,8 +1349,9 @@ try {
   assert.equal(await page.locator('#cinematic-beat').count(), 0, '10-death-ghost: V44 no debe montar tarjeta fullscreen de muerte');
   await capture(page, '10-death-ghost');
 
+  }
   await browser.close();
-  console.log('OHANA VISUAL MATRIX PASS');
+  console.log(selectorOnly?'OHANA VISUAL SELECTOR PROBE PASS':'OHANA VISUAL MATRIX PASS');
   console.log('Screenshots: ' + screenshots.join(', '));
 } finally {
   server.close();

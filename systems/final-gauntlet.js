@@ -1,12 +1,13 @@
+import {findRoster} from '../characters/roster.js';
 // Ten earned rematches, ten physical keepsakes, then the final Quimera.
 // No network/model calls. Position is sampled when a warning commits.
-import {KEEPSAKES,KEEPSAKE_ORDER,readKeepsakes,rememberKeepsake,drawKeepsake} from './keepsakes.js';
+import {KEEPSAKES,KEEPSAKE_ORDER,readKeepsakes,mergeKeepsakes,persistKeepsakes,drawKeepsake} from './keepsakes.js';
 import {WORLD1_ARENA,WORLD1_FLOOR} from './world1-rooms.js';
 import {readCombatDifficulty} from './combat-difficulty.js';
 import {guardianRhythm,guardianTechnique} from './guardian-techniques.js';
 const TAU=Math.PI*2,A=WORLD1_ARENA,F=WORLD1_FLOOR,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const tips={tide:'Salta las ondas. En el aire, esquiva la nota que apunta a tu posición.',crossfire:'La descarga apunta una vez: cambia de altura después del aviso.',lightning:'Las columnas marcan dónde caerá el rayo. Busca el hueco y usa tu rapidez.',moons:'Las lunas se abren en abanico. Pasa entre ellas y acércate al descansar.',charge:'Provoca la embestida y sal de su trayectoria. Castiga la frenada.',fire:'El suelo arde, pero las brasas también buscan el cielo. Cambia de altura.',quake:'Despega cuando caiga el coloso. Sus placas se abren después del aterrizaje.',geysers:'Lee las bocas del suelo. Salta hacia el espacio libre.',discs:'Las ruedas pasan a dos alturas. Salta la baja y deja pasar la alta.',prism:'La línea recuerda tu altura al avisar. Cambia de altura antes del destello.'};
-export function gauntletReady(g){return (g.finalGauntlet?.found||readKeepsakes(g.keepsakeStorage)).length===10;}
+export function gauntletReady(g){return (g.finalGauntlet?.found||mergeKeepsakes(g.keepsakes,readKeepsakes(g.keepsakeStorage))).length===10;}
 function makeGuardian(hero,g){
  const d=KEEPSAKES[hero],rhythm=guardianRhythm(readCombatDifficulty(g?.roomId)),hp=Math.round((hero==='dino'?940:hero==='cuerno'?740:820)*rhythm.health);
  return {x:9270,y:F-224,w:184,h:224,hp,max:hp,kind:'keeper',roomId:'w1-final',miniBoss:true,gauntletBoss:hero,evolved:true,
@@ -19,18 +20,19 @@ function beginDuel(g,v){
  if(!requested&&!g.world1Cine)v.phase='fight';
 }
 export function updateFinalGauntlet(g){
- if(g.roomId!=='w1-final'||!g.player||g.player.dead||g.world1Won)return false;
+ if(g.roomId!=='w1-final'||!g.player||g.player.dead||g.world1Won||g.onlineAdventure&&g.coopAuthority===false)return false;
  if(!KEEPSAKE_ORDER.every(h=>g.world1Seals?.includes(h)))return false;
- let v=g.finalGauntlet;if(!v)v=g.finalGauntlet={found:readKeepsakes(g.keepsakeStorage),phase:'dormant',hero:null,guardian:null,object:null,tick:0};
+ let v=g.finalGauntlet;if(!v)v=g.finalGauntlet={found:mergeKeepsakes(g.keepsakes,readKeepsakes(g.keepsakeStorage)),phase:'dormant',hero:null,guardian:null,object:null,tick:0};
  if(v.found.length===10){if(v.phase!=='complete'){v.phase='complete';g.onGauntletHero?.('kilo');}return true;}
  v.tick++;if(v.phase==='dormant')beginDuel(g,v);
  const p=g.player;if(v.phase==='fight'){
   p.x=clamp(p.x,A.left+550,A.right-550-p.w);
   if(v.guardian?.hp<=0){v.phase='released';g.projectiles=(g.projectiles||[]).filter(pr=>!pr.gauntlet);v.guardian.telegraph=false;g.onGauntletBeat?.('released',v.hero);}
  }
- if(v.phase==='released'&&Math.abs(p.x+p.w/2-v.object.x)<75&&Math.abs(p.y+p.h/2-(v.object.y-40))<115){
-  const fresh=!v.found.includes(v.hero);if(fresh){v.found.push(v.hero);rememberKeepsake(v.hero,g.keepsakeStorage);g.onGauntletAward?.(v.hero);}
-  v.phase='rescue';const requested=g.playWorld1Cine?.('keepsakeRescue',v.hero);if(!requested&&!g.world1Cine)v.phase='dormant';g.save?.();
+ const collectors=[p,...(g.onlineAdventure&&g.coopRemote&&!g.coopRemote.dead&&g.coopRemote.health>0?[{...g.coopRemote,w:findRoster(g.coopRemote.characterId)?.forms[g.coopRemote.evolution||0]?.w||60,h:findRoster(g.coopRemote.characterId)?.forms[g.coopRemote.evolution||0]?.h||80}]:[])];
+ if(v.phase==='released'&&collectors.some(p=>Math.abs(p.x+p.w/2-v.object.x)<75&&Math.abs(p.y+p.h/2-(v.object.y-40))<115)){
+  const fresh=!v.found.includes(v.hero);if(fresh){v.found.push(v.hero);g.keepsakes=[...v.found];g.keepsakeSavePending=!persistKeepsakes(v.found,g.keepsakeStorage);g.onGauntletAward?.(v.hero);}
+  v.phase='rescue';const requested=g.playWorld1Cine?.('keepsakeRescue',v.hero);if(!requested&&!g.world1Cine)v.phase='dormant';const checkpoint=g.save?.();if(checkpoint||v.found.every(id=>readKeepsakes(g.keepsakeStorage).includes(id)))g.keepsakeSavePending=false;
  }
  return false;
 }
@@ -72,7 +74,7 @@ function commitWarning(e,g,b,p,rhythm){
  b.beamYs=b.attack===1?[b.target.y,b.target.y-135]:[b.attack===2?F-38:b.target.y];
  b.chargeSpeed=(b.attack===1?15:12)*rhythm.shot;
  b.chargePath=pattern==='charge'&&b.attack!==2?{from:e.x+e.w/2,to:clamp(e.x+b.aim*b.chargeSpeed*58,A.left+600,A.right-600-e.w)+e.w/2,y:F}:null;
- e.damageTakenScale=0;e.telegraph=true;e.vx=0;
+ e._guardianDrowse=0;e._sleepUntil=0;e.damageTakenScale=0;e.telegraph=true;e.vx=0;
 }
 function guardianInView(e,g){return !g.cam||!Number.isFinite(g.viewW)||(e.x+e.w>g.cam.x+20&&e.x<g.cam.x+g.viewW-20);}
 export function updateGauntletGuardian(e,g,hurt){
@@ -81,10 +83,12 @@ export function updateGauntletGuardian(e,g,hurt){
  const rhythm=guardianRhythm(readCombatDifficulty(g.roomId));b.tick++;if(e.invuln>0)e.invuln--;e.stun=Math.min(4,e.stun||0);
  if(b.phase==='rest'){
   // Close a distant camping position, but keep the committed warning still.
-  const gap=p.x+p.w/2-e.x-e.w/2;e.vx=Math.abs(gap)>470?Math.sign(gap)*rhythm.pace:0;
+  const asleep=e._guardianDrowse>0&&e.damageWindowRemaining>0;
+  if(asleep){e._guardianDrowse--;e.vx=0;}
+  const gap=p.x+p.w/2-e.x-e.w/2;if(!asleep)e.vx=Math.abs(gap)>470?Math.sign(gap)*rhythm.pace:0;
   e.x=clamp(e.x+e.vx,A.left+600,A.right-600-e.w);
-  if(--b.clock<=0||e.damageWindowRemaining<=0)commitWarning(e,g,b,p,rhythm);
- }else if(b.phase==='idle'){if(guardianInView(e,g)&&--b.clock<=0){b.phase='rest';b.clock=rhythm.firstRest;e.damageWindowRemaining=rhythm.window;}}
+  if((!asleep&&--b.clock<=0)||e.damageWindowRemaining<=0)commitWarning(e,g,b,p,rhythm);
+ }else if(b.phase==='idle'){if(guardianInView(e,g)&&--b.clock<=0){b.phase='rest';b.clock=rhythm.firstRest;e.damageWindowRemaining=rhythm.window;e._guardianOpening=(e._guardianOpening||0)+1;}}
  else if(b.phase==='warn'){if(--b.clock<=0){b.phase='attack';b.clock=58;fire(e,g,b);}}
  else if(b.phase==='attack'){
   b.clock--;const age=58-b.clock;
@@ -93,18 +97,18 @@ export function updateGauntletGuardian(e,g,hurt){
   if(age===22&&b.attack===1&&['crossfire','moons','fire'].includes(d.pattern))volley(e,g,b,1,7);
   if(age===26&&b.attack===2&&d.pattern==='tide')waves(e,g,b,8);
   if(age===28&&b.attack===2&&['crossfire','moons'].includes(d.pattern))volley(e,g,b,3,6,.3);
-  if(b.clock<=0){b.phase='rest';b.clock=rhythm.rest;e.vx=0;e.y=F-e.h;e.damageWindowRemaining=rhythm.window;}
+  if(b.clock<=0){b.phase='rest';b.clock=rhythm.rest;e.vx=0;e.y=F-e.h;e.damageWindowRemaining=rhythm.window;e._guardianOpening=(e._guardianOpening||0)+1;e._guardianDrowse=0;e._sleepUntil=0;}
  }
  e.telegraph=b.phase==='warn';e.damageTakenScale=b.phase==='rest'&&e.damageWindowRemaining>0?1:0;
  return true;
 }
-export function gauntletSnapshot(g){const v=g.finalGauntlet;if(!v)return null;const e=v.guardian,b=e?e[KEEPSAKES[v.hero]?.key]:null;return {phase:v.phase,hero:v.hero,found:[...v.found],object:v.object?{...v.object}:null,guardian:e?{x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,phase:b?.phase,clock:b?.clock,target:b?.target?{...b.target}:null,marks:b?.marks?[...b.marks]:[],pattern:KEEPSAKES[v.hero].pattern,technique:b?.technique?{...b.technique}:null,beamYs:b?.beamYs?[...b.beamYs]:[],chargePath:b?.chargePath?{...b.chargePath}:null,columnWidth:b?.columnWidth,windowRemaining:e.damageWindowRemaining}:null};}
+export function gauntletSnapshot(g){const v=g.finalGauntlet;if(!v)return null;const e=v.guardian,b=e?e[KEEPSAKES[v.hero]?.key]:null;return {phase:v.phase,hero:v.hero,found:[...v.found],object:v.object?{...v.object}:null,savePending:!!g.keepsakeSavePending,guardian:e?{x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,phase:b?.phase,clock:b?.clock,target:b?.target?{...b.target}:null,marks:b?.marks?[...b.marks]:[],pattern:KEEPSAKES[v.hero].pattern,technique:b?.technique?{...b.technique}:null,beamYs:b?.beamYs?[...b.beamYs]:[],chargePath:b?.chargePath?{...b.chargePath}:null,columnWidth:b?.columnWidth,windowRemaining:e.damageWindowRemaining}:null};}
 // World geometry follows the exact camera transform used by bodies and shots.
 export function drawGauntletWorld(c,g,cam,t=0){
- const v=g.finalGauntlet;if(!v||v.phase==='complete'||g.world1Cine||g._pendingWorld1Cine)return;const d=KEEPSAKES[v.hero];if(!d||!v.object)return;
- const x=v.object.x-cam.x,y=v.object.y-cam.y;c.save();
+ const v=g.finalGauntlet;if(!v||v.phase==='complete'||g.world1Cine||g._pendingWorld1Cine)return;const d=KEEPSAKES[v.hero];if(!d)return;
+ if(v.object){const x=v.object.x-cam.x,y=v.object.y-cam.y;c.save();
  c.fillStyle='#1c3044';c.fillRect(x-46,y-6,92,16);c.strokeStyle=d.color;c.lineWidth=2;c.strokeRect(x-46,y-6,92,16);drawKeepsake(c,v.hero,x,y-8,65,{ghost:v.phase!=='released'});
- if(v.phase!=='released'){c.strokeStyle=d.color+'99';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y-48,50,65,0,Math.PI,TAU);c.stroke();}
+ if(v.phase!=='released'){c.strokeStyle=d.color+'99';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y-48,50,65,0,Math.PI,TAU);c.stroke();}}
  const b=v.guardian?.[d.key];if(b?.phase==='warn'){
   c.strokeStyle=d.color;c.fillStyle=d.color+'33';c.lineWidth=2;
   if(b.marks&&['lightning','geysers'].includes(d.pattern)){const width=b.columnWidth||34,height=d.pattern==='lightning'?500:300,reach=d.pattern==='lightning'?470:260;for(const xx of b.marks)c.fillRect(xx-cam.x-width/2,F-cam.y-height,width,reach);}
@@ -123,7 +127,8 @@ export function gauntletPresentation(g){
  const phase=released?'released':open?'opening':b.phase==='warn'?'warning':b.phase==='attack'?'attack':'ready';
  const status=released?'RELICARIO ABIERTO':open?'APERTURA · ATACA AHORA':phase==='warning'?'AVISO · ESQUIVA':phase==='attack'?'EVITA EL ATAQUE':'OBSERVA AL GUARDIÁN';
  const approach=b.phase==='idle'&&!guardianInView(e,g);
- const cue=approach?'Acércate al guardián, a tu '+(e.x>g.player?.x?'derecha':'izquierda')+'. El combate empieza cuando entra en pantalla.':released?'Acércate al relicario y recoge '+d.name:open?'Su defensa está abierta. Acércate y ataca antes de que se recupere.':b.technique?.cue||tips[d.pattern];
+ const objectDirection=v.object&&g.player?Math.sign(v.object.x-g.player.x-g.player.w/2):0,objectDistance=v.object&&g.player?Math.abs(v.object.x-g.player.x-g.player.w/2):0;
+ const cue=approach?'Acércate al guardián, a tu '+(e.x>g.player?.x?'derecha':'izquierda')+'. El combate empieza cuando entra en pantalla.':released?(objectDistance<75?'Toca el relicario para recuperar '+d.name:'El relicario está a tu '+(objectDirection>0?'derecha':'izquierda')+'. Acércate y recoge '+d.name):open?'Su defensa está abierta. Acércate y ataca antes de que se recupere.':b.technique?.cue||tips[d.pattern];
  return {guardian:d.guardian,object:d.name,color:d.color,phase,status,cue,move:b.technique?.name||'',found:v.found.length,hp:Math.max(0,e.hp),max:Math.max(1,e.max),open};
 }
 function hudLines(c,text,width){const lines=[];let line='';for(const word of String(text).split(/\s+/)){const next=line?line+' '+word:word;if(line&&c.measureText(next).width>width){lines.push(line);line=word;}else line=next;}if(line)lines.push(line);return lines;}

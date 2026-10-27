@@ -6,9 +6,7 @@
   <meta name="theme-color" content="#071226">
   <meta name="description" content="La aventura original de Isla Hoku, con dos jugadores compartiendo los mismos mundos.">
   <title>OHANA · La misma aventura para dos</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="style.css?v=ohana-coop-3">
   <link rel="stylesheet" href="multiplayer.css?v=ohana-coop-3">
 </head>
@@ -22,13 +20,15 @@
     <section id="entry" class="coop-panel entry-panel">
       <p class="eyebrow">DOS JUGADORES · LA MISMA AVENTURA</p>
       <h2>La misma Isla Hoku, ahora juntos</h2>
-      <p>Entrad desde dos dispositivos y elegid vuestro personaje. Compartiréis los mismos controles, diez salas, evoluciones y enfrentamiento con la Reina que existen en OHANA individual.</p>
+      <p>Elegid personajes distintos y un modo. Versus enfrenta a dos héroes con criaturas y un guardián; Aventura permite explorar juntos y votar el cambio de sala. Preparación local: la conexión pública sigue pausada.</p>
       <div class="campaign-teaser" aria-label="Recorrido de la misión">
-        <span>Claro Ohana</span><i aria-hidden="true">→</i><span>Diez salas compartidas</span><i aria-hidden="true">→</i><strong>Reina del Nido</strong>
+        <span>Diez héroes</span><i aria-hidden="true">→</i><span>Aventura o Versus</span><i aria-hidden="true">→</i><strong>Una partida juntos</strong>
       </div>
       <div class="coop-actions">
         <article class="coop-card">
           <h3>Crear una sala</h3>
+          <label>Modo <select id="room-mode"><option value="adventure">Aventura juntos</option><option value="versus">Versus · tres eliminaciones</option></select></label>
+          <label id="arena-choice" hidden>Arena <select id="room-arena"></select></label>
           <p>Crea vuestra isla compartida y pasa el código a la otra persona.</p>
           <button id="create-room" class="coop-button" type="button">Crear sala</button>
         </article>

@@ -1,20 +1,21 @@
 // Reads actual warnings and uses ordinary controls; never writes gameplay state.
 import assert from 'node:assert/strict';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
-export async function playGauntlet(page,{onBeat=()=>{}}={}){
- const state=()=>page.evaluate(()=>window.__OHANA_E2E.state());
- const step=async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return state();};
+export async function playGauntlet(page,{onBeat=()=>{},state:readState,step:advance,films,onDeath}={}){
+ const state=readState||(()=>page.evaluate(()=>window.__OHANA_E2E.state()));
+ const step=advance||(async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return state();});
  const down=k=>page.keyboard.down(k),up=k=>page.keyboard.up(k),press=k=>page.keyboard.press(k);
  let s=await state(),deaths=0;const rescued=new Set(),seen=new Set();
  for(let i=0;i<16000;i++){
+  if(films){await films();s=await state();}
   const supreme=page.locator('#supreme-cinema[aria-hidden="false"]');
   if(await supreme.count()){const duration=await supreme.evaluate(el=>Number(el.dataset.duration)||16000);await page.clock.runFor(duration+1000);s=await state();continue;}
   if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.clock.runFor(500);s=await state();continue;}
   if(s.world1Cine){assert.equal(await supreme.count(),0,'one cinema owner');seen.add(s.world1Cine);await press('Enter');s=await step(100);continue;}
-  if(s.hp<=0){assert.ok(++deaths<=30,'gauntlet natural retry limit');await page.evaluate(()=>window.__OHANA_E2E.respawn());s=await step(90);continue;}
+  if(s.hp<=0){assert.ok(++deaths<=30,'gauntlet natural retry limit');if(onDeath)await onDeath();else await page.evaluate(()=>window.__OHANA_E2E.respawn());s=await step(90);continue;}
   const v=s.gauntlet,p=s.player;
   if(v?.phase==='complete'){assert.equal(v.found.length,10);return{deaths,rescued:[...v.found],cinematics:[...seen]};}
-  if(!v){await down('d');s=await step(24);await up('d');continue;}
+  if(!v||v.phase==='dormant'&&p.x+p.w/2<6800){await down('d');s=await step(24);await up('d');if(i%150===0)await onBeat(s);continue;}
   for(const h of v.found)rescued.add(h);
   const b=v.guardian;let target;
   if(v.phase==='released')target=v.object.x;

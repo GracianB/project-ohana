@@ -1,3 +1,4 @@
+import {cleanKeepsakes,mergeKeepsakes} from './keepsakes.js';
 import {cleanRoomAlbums} from './room-album.js';
 // Save v3 (reads v2). Ids viejos se canonizan para no romper partidas.
 import {sanitizeUBonds} from "./u-partners.js";
@@ -70,6 +71,7 @@ export function packSave(game, MagicMod) {
     kills: game.kills || 0,
     won: !!game.won,
     world1Seals: cleanWorld1Seals(game.world1Seals),
+    keepsakes: mergeKeepsakes(game.keepsakes,game.finalGauntlet?.found),
     world1Stations: cleanWorld1Stations(game.world1Stations),
     world1Won: !!game.world1Won,
     world1Visited: cleanVisited(game.world1Visited),
@@ -143,6 +145,7 @@ export function unpackSave(raw, defId) {
     kills: Math.max(0, finiteNumber(raw.kills)),
     won: !!raw.won,
     world1Seals: cleanWorld1Seals(raw.world1Seals),
+    keepsakes: cleanKeepsakes(raw.keepsakes),
     world1Stations: cleanWorld1Stations(raw.world1Stations),
     world1Won: !!raw.world1Won,
     world1Visited: cleanVisited(raw.world1Visited),
@@ -205,7 +208,9 @@ export function createSaveStore(storage = () => globalThis.localStorage) {
         const latest = this.readRaw();
         const nextRevision = revision(latest) + 1;
         if (!Number.isSafeInteger(nextRevision)) return false;
-        const raw = JSON.stringify({ ...packSave(game, magic), revision: nextRevision });
+        const snapshot=packSave(game, magic);
+        snapshot.keepsakes=mergeKeepsakes(latest?.keepsakes,snapshot.keepsakes);
+        const raw = JSON.stringify({ ...snapshot, revision: nextRevision });
         store.setItem(SAVE_TMP_KEY, raw);
         store.setItem(SAVE_KEY, raw);
         try { store.removeItem?.(SAVE_TMP_KEY); } catch (_) {}

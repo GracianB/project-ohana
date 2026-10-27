@@ -2081,6 +2081,23 @@ for (const e of g.enemies) {
   if (f.hit.has(e) || !canHit(e)) continue;
   if (Math.hypot(cx(e) - cx(p), cy(e) - cy(p)) > rad) continue;
   f.hit.add(e);
+  // Guardians allow one short drowse per actual opening. A resisted purr
+  // must never paint ZZZ while their attack controller keeps running.
+  if(e.gauntletBoss){
+    if(!(e.damageTakenScale>0&&e.damageWindowRemaining>0)){
+      michiYomiImpact(cx(e),cy(e),"RESISTE","#e4c6b1");continue;
+    }
+    const landed=hitEnemy(g,e,f.dmg,{stun:0,color:"#ffb6e4",shake:0,xp:1,parts:6});
+    if(!landed||e.hp<=0)continue;
+    if(!(e.damageWindowRemaining>0)||e._guardianDrowseOpening===e._guardianOpening){
+      michiYomiImpact(cx(e),cy(e),"RESISTE","#e4c6b1");continue;
+    }
+    e._guardianDrowseOpening=e._guardianOpening;e._guardianDrowse=18;
+    e._sleepUntil=(g.t||0)+18;f.slept.push(e);
+    michiYomiImpact(cx(e),cy(e),"RONRONEO · APERTURA","#ffb6e4");
+    if(!f._zzz){f._zzz=true;add({kind:"zzz",list:f.slept,life:18});}
+    continue;
+  }
   const st = e.boss ? 40 + f.evo * 8 : f.stun;
   hitEnemy(g, e, f.dmg, { stun: st, color: "#ffb6e4", shake: 0, xp: 1, parts: 6 });
   michiYomiImpact(cx(e), cy(e), "¡RONRONEO!", "#ffb6e4");
@@ -2415,8 +2432,8 @@ if (f.life === strikeFrame) {
     if (dx < -16 || dx > f.len || Math.abs(dy) > f.half + e.h * .5) continue;
     f.hit.add(e);
     const marked=(Number(e._yomiMarkUntil)||0)>(Number(g.t)||0);
-    hitEnemy(g, e, f.dmg * (marked ? 1.7 : 1), { kx: f.face * 7, ky: -2, stun: marked ? 36 : 18, color: "#4ff0c8", crit:marked });
-    if (marked) { e._yomiMarkUntil = 0; f.learned++; }
+    const landed=hitEnemy(g, e, f.dmg * (marked ? 1.7 : 1), { kx: f.face * 7, ky: -2, stun: marked ? 36 : 18, color: "#4ff0c8", crit:marked });
+    if (marked && landed) { e._yomiMarkUntil = 0; f.learned++; }
   }
   if (f.learned) {
     healPlayer(p, (2 + f.evo) * f.learned);
@@ -3301,6 +3318,16 @@ for (let i = n; i >= 0; i--) {
   ctx.arc(px, py, r * jitter, 0, TAU);
   ctx.fill();
 }
+ // The J attack has a visible little fireball at the cone's advancing tip.
+ // It is presentation only: existing cone damage and cooldown are unchanged.
+ const reach = Math.min(1, Math.max(.05, (f.age - 1) / 10));
+ const bx = x + f.f * f.len * (.22 + .75 * reach);
+ const by = y + Math.sin(t * .25) * 4;
+ ctx.globalAlpha = .92 * k;
+ ctx.fillStyle = "#ff6526";
+ ctx.beginPath(); ctx.arc(bx, by, 11 + Math.min(5, f.len * .015), 0, TAU); ctx.fill();
+ ctx.fillStyle = "#fff3ae";
+ ctx.beginPath(); ctx.arc(bx - f.f * 3, by - 2, 6.5, 0, TAU); ctx.fill();
 ctx.globalCompositeOperation = "source-over";
 },
 gust(ctx, f, cam, t) {

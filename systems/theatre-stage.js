@@ -1,9 +1,7 @@
-// Shared hand-painted stage for the opening and the hero selection. Scenery is
+// Code-painted stage for the opening and the hero selection. Scenery is
 // baked once per size/hero (three bounded plates), actors remain real rigs.
 import {drawChapterVista} from '../worlds/chapter-vistas.js';
 const TAU=Math.PI*2,plates=new WeakMap();
-let artRevision=0;const keyArt=typeof Image!=='undefined'?new Image():null;
-if(keyArt){keyArt.decoding='async';keyArt.onload=()=>{artRevision++;};keyArt.src=new URL('../assets/scenes/observatory-keyart.png',import.meta.url).href;}
 const themes={kilo:['#455d79','#f4d8a1','#719e86'],stitcho:['#172d54','#c8b4e2','#477d91'],chispin:['#3c527d','#f7dc9d','#7c9db0'],cat:['#414878','#dfbed6','#8395b0'],cuerno:['#285b61','#e5d6ac','#779e8a'],dragon:['#543c64','#efbe90','#996d79'],dino:['#4c645c','#e9d4a3','#889b78'],frita:['#71586c','#f6d6a2','#b49798'],pizza:['#465c79','#f4cdad','#aa8d89'],yomi:['#325571','#d8e3c5','#72a6ae']};
 function path(c,fill,fn,stroke=null,w=1){c.beginPath();fn();c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=w;c.stroke();}}
 function line(c,col,w,fn){c.beginPath();fn();c.strokeStyle=col;c.lineWidth=w;c.lineCap='round';c.stroke();}
@@ -16,11 +14,6 @@ function terrace(c,x,y,w,H,col){
  for(let k=0;k<6;k++)line(c,'#1a314955',1,()=>{const xx=x-w*.4+k*w*.15;c.moveTo(xx,y+4);c.lineTo(xx-5,y+17);});
 }
 function paint(c,W,H,hero,opening){
- if(keyArt?.complete&&keyArt.naturalWidth){
-  const floor=opening?(W<760?.60:.80):.65,scale=Math.max(W/keyArt.naturalWidth,H/keyArt.naturalHeight),iw=keyArt.naturalWidth*scale,ih=keyArt.naturalHeight*scale;
-  c.fillStyle='#102338';c.fillRect(0,0,W,H);c.drawImage(keyArt,(W-iw)*.5,H*floor-ih*.80,iw,ih);
-  const shade=c.createLinearGradient(0,H*.48,0,H);shade.addColorStop(0,'#11243b00');shade.addColorStop(.7,'#10243518');shade.addColorStop(1,'#0b1d30d9');c.fillStyle=shade;c.fillRect(0,0,W,H);return;
- }
  const [sky,light,stone]=themes[hero]||themes.kilo;const floor=H*(opening?(W<760?.60:.80):.65),g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,sky);g.addColorStop(.6,'#8da5aa');g.addColorStop(1,'#d6c4a1');c.fillStyle=g;c.fillRect(0,0,W,H);
  glow(c,W*.67,H*.25,H*.6,light+'bb');
  // Layered cloud valleys and distant inhabited spires, never polygon mountains.
@@ -57,7 +50,7 @@ function paint(c,W,H,hero,opening){
  for(const side of [-1,1]){const x=archX+side*aw*.38,y=H*.29;line(c,'#cfbd8d',2,()=>{c.moveTo(x,H*.08);c.lineTo(x,y);});glow(c,x,y+12,H*.10,light+'55');oval(c,x,y+12,8,17,'#2b4255');oval(c,x,y+12,5,13,light);line(c,'#f6e0a7',1,()=>{c.moveTo(x-8,y);c.lineTo(x+8,y);});}
 }
 export function drawTheatreStage(ctx,W,H,hero='kilo',t=0,{opening=false,reduceMotion=false}={}){
- let map=plates.get(ctx);if(!map)plates.set(ctx,map=new Map());const key=[Math.round(W),Math.round(H),hero,opening,artRevision].join(':');let plate=map.get(key);
+ let map=plates.get(ctx);if(!map)plates.set(ctx,map=new Map());const key=[Math.round(W),Math.round(H),hero,opening].join(':');let plate=map.get(key);
  if(!plate&&typeof OffscreenCanvas!=='undefined'){plate=new OffscreenCanvas(Math.ceil(W),Math.ceil(H));paint(plate.getContext('2d'),W,H,hero,opening);if(map.size>=3)map.delete(map.keys().next().value);map.set(key,plate);}
  if(plate)ctx.drawImage(plate,0,0,W,H);else paint(ctx,W,H,hero,opening);
  ctx.save();for(let i=0;i<13;i++){const at=reduceMotion?0:t;const x=((i*173+at*.11)%(W+80))-40,y=H*(.18+(i%5)*.11)+Math.sin(at*.012+i)*6;ctx.globalAlpha=.17;oval(ctx,x,y,3,1.2,i%3?'#fff0bf':'#b9f2d1',i*.7);}ctx.restore();

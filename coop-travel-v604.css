@@ -1,0 +1,17 @@
+/* OHANA V604 · Co-op consent HUD: typography and mobile safety. */
+.ohana-travel-v604[hidden]{display:none!important}
+.ohana-travel-v604{position:fixed;z-index:140;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(530px,calc(100vw - 28px));padding:23px 25px 19px;border:1px solid #c1b182;border-radius:20px;background:linear-gradient(160deg,#102c39f7,#173a42f8);box-shadow:0 18px 65px #071820a6,0 0 0 3px #ffffff16;color:#f0f5e9;backdrop-filter:blur(14px);font-family:Outfit,system-ui,sans-serif}
+.ohana-travel-v604 .travel-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.ohana-travel-v604 .travel-head span{font-size:10px;font-weight:700;letter-spacing:.18em;color:#d0d8b5}
+.ohana-travel-v604 .travel-head strong{font:700 clamp(17px,3vw,23px) Fredoka,sans-serif;color:#ffe8a0}
+.ohana-travel-v604 .travel-copy{font-size:15px;line-height:1.55;margin:11px 0 14px;max-width:46ch}
+.ohana-travel-v604 .travel-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ohana-travel-v604 .travel-stats span{display:block;padding:9px 10px;border:1px solid #9fbdad55;background:#ffffff0c;border-radius:11px;color:#e9eedb;font-size:11px;line-height:1.45}
+.ohana-travel-v604 .travel-actions{display:flex;gap:10px;margin-top:17px}
+.ohana-travel-v604 button{border-radius:11px;padding:12px 16px;min-height:44px;font:700 12px Outfit,sans-serif;cursor:pointer}
+.ohana-travel-v604 .travel-yes{flex:1;background:#ffdf96;color:#16313c;border:1px solid #fff0b7}
+.ohana-travel-v604 .travel-no{background:#ffffff12;border:1px solid #b5c9b977;color:#f8efdc}
+.ohana-travel-v604 button:focus-visible{outline:3px solid #86e5df;outline-offset:3px}
+.ohana-travel-v604 .travel-countdown{font-size:11px;color:#d7d6bc;margin:13px 0 0}
+@media(max-width:520px){.ohana-travel-v604{padding:17px 15px}.ohana-travel-v604 .travel-stats{grid-template-columns:1fr}.ohana-travel-v604 .travel-actions{flex-wrap:wrap}.ohana-travel-v604 button{flex:1}}
+@media(prefers-reduced-motion:reduce){.ohana-travel-v604{backdrop-filter:none}}
