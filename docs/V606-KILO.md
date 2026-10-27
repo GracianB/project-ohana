@@ -1,6 +1,6 @@
 # Claro de Kilo · revisión por sala
 
-Primera entrega de la revisión del Mundo 1. Rama `feat/v606-kilo-encounters`, candidata `ohana-606`. Una sala por PR. La web estable continúa en V605 hasta que esta entrega se integre y se publique.
+Primera entrega de la revisión del Mundo 1. Rama `feat/v606-kilo-encounters`, versión `ohana-606`. Integrada en main y publicada; evidencia en [V606-PUBLICATION.json](V606-PUBLICATION.json). La API bloqueó la creación de la PR con Forbidden; se realizó el merge normal autorizado por el usuario. Las siguientes entregas mantienen el alcance de una sala por PR.
 
 ## Problema y resultado
 

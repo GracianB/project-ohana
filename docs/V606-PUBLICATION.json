@@ -1,0 +1,220 @@
+{
+  "release": "ohana-606",
+  "site": "https://gracianb.github.io/project-ohana/?release=606",
+  "verified_at": "2026-10-27T22:59:59.360181+00:00",
+  "feature_branch": "feat/v606-kilo-encounters",
+  "feature_commit": "047f6a13598f632e4a0fbc6a10fa6826819583e3",
+  "merged_source_commit": "15cf727c908b7561645fda3b575634c66b066424",
+  "integration": "Ordinary non-fast-forward merge on main, authorized by the user; tested feature and merged source trees are identical.",
+  "pull_request": {
+    "created": false,
+    "reason": "GitHub CLI GraphQL request returned Forbidden; no PR number is claimed."
+  },
+  "pages": {
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/40598490506",
+    "result": "Success",
+    "release_gate_seconds": 29,
+    "deploy_seconds": 32,
+    "total_seconds": 68
+  },
+  "public_source_verification": {
+    "site": "https://gracianb.github.io/project-ohana/",
+    "checked": "2026-10-27T22:58:15.502509+00:00",
+    "files": [
+      {
+        "path": "caprichos.css",
+        "expected": "9e8e38d165dd5e874ae4f8d7e0180b17d708c42e",
+        "actual": "9e8e38d165dd5e874ae4f8d7e0180b17d708c42e",
+        "match": true
+      },
+      {
+        "path": "characters/draw.js",
+        "expected": "a76c560b8512eb649eb8410c8a00c51bb5e6c91a",
+        "actual": "a76c560b8512eb649eb8410c8a00c51bb5e6c91a",
+        "match": true
+      },
+      {
+        "path": "characters/hula-depth.js",
+        "expected": "9e0acf8b849e7b3e25817dd8a7b5c60c4c0f467d",
+        "actual": "9e0acf8b849e7b3e25817dd8a7b5c60c4c0f467d",
+        "match": true
+      },
+      {
+        "path": "game.js",
+        "expected": "b6caf8957e13132de86c5806d74512d960663104",
+        "actual": "b6caf8957e13132de86c5806d74512d960663104",
+        "match": true
+      },
+      {
+        "path": "index.html",
+        "expected": "8d6fdede46bede8c117f685cbde7a6ac11d6d6dd",
+        "actual": "8d6fdede46bede8c117f685cbde7a6ac11d6d6dd",
+        "match": true
+      },
+      {
+        "path": "multiplayer/adventure-progress.js",
+        "expected": "a7a5269f535a27a0e914376af8fb8181ca11bdf9",
+        "actual": "a7a5269f535a27a0e914376af8fb8181ca11bdf9",
+        "match": true
+      },
+      {
+        "path": "sw.js",
+        "expected": "61d1117137cc02526b25b9c2dfde7a6bd042ede8",
+        "actual": "61d1117137cc02526b25b9c2dfde7a6bd042ede8",
+        "match": true
+      },
+      {
+        "path": "systems/abilities.js",
+        "expected": "8d9e591590285b607b3b4e035bb43a2556239eb8",
+        "actual": "8d9e591590285b607b3b4e035bb43a2556239eb8",
+        "match": true
+      },
+      {
+        "path": "systems/adventure-guide-v2.js",
+        "expected": "20cb47fb4557620c75e51d0c2c9179e677558440",
+        "actual": "20cb47fb4557620c75e51d0c2c9179e677558440",
+        "match": true
+      },
+      {
+        "path": "systems/campaign-creature-art.js",
+        "expected": "d8fb7db0e93d0ed1c4f3b5510b7699763183f723",
+        "actual": "d8fb7db0e93d0ed1c4f3b5510b7699763183f723",
+        "match": true
+      },
+      {
+        "path": "systems/campaign-enemies.js",
+        "expected": "ebbf2dec3e19c3255c22addf34aa7caaecf48bc2",
+        "actual": "ebbf2dec3e19c3255c22addf34aa7caaecf48bc2",
+        "match": true
+      },
+      {
+        "path": "systems/chapter-boss-art-v2.js",
+        "expected": "65c2ec4b19620378b89c8c85413968186d2406df",
+        "actual": "65c2ec4b19620378b89c8c85413968186d2406df",
+        "match": true
+      },
+      {
+        "path": "systems/chapter-boss-v2.js",
+        "expected": "025e57da29c02274ed62b480b2aef6f5825dd8c5",
+        "actual": "025e57da29c02274ed62b480b2aef6f5825dd8c5",
+        "match": true
+      },
+      {
+        "path": "systems/coop-combat-mirror.js",
+        "expected": "e1057296d8ac138b503556210fad0e27a7037730",
+        "actual": "e1057296d8ac138b503556210fad0e27a7037730",
+        "match": true
+      },
+      {
+        "path": "systems/field-guide.js",
+        "expected": "a203bf8c5bf224c5d80747e2cdc7f1c34bae5ded",
+        "actual": "a203bf8c5bf224c5d80747e2cdc7f1c34bae5ded",
+        "match": true
+      },
+      {
+        "path": "systems/grove-guardian.js",
+        "expected": "af3091d3fddbc4033c2391092bcb7df7a4016ba9",
+        "actual": "af3091d3fddbc4033c2391092bcb7df7a4016ba9",
+        "match": true
+      },
+      {
+        "path": "systems/hud-portrait-v606.js",
+        "expected": "f05800678591f7c5b1cabd9b8f2f90de6ad9e6e6",
+        "actual": "f05800678591f7c5b1cabd9b8f2f90de6ad9e6e6",
+        "match": true
+      },
+      {
+        "path": "systems/hud.js",
+        "expected": "9aa1d6de98d920513f9472f39355ff710c63167f",
+        "actual": "9aa1d6de98d920513f9472f39355ff710c63167f",
+        "match": true
+      },
+      {
+        "path": "systems/kilo-chapter-art-v606.js",
+        "expected": "3bbcef81eaeb66ee4633c78d011aa4879761dbfd",
+        "actual": "3bbcef81eaeb66ee4633c78d011aa4879761dbfd",
+        "match": true
+      },
+      {
+        "path": "systems/kilo-chapter.js",
+        "expected": "0feb0e79c051b3fa278c7d9190e1aa010d0baa37",
+        "actual": "0feb0e79c051b3fa278c7d9190e1aa010d0baa37",
+        "match": true
+      },
+      {
+        "path": "systems/kilo-encounters-v606.js",
+        "expected": "c346bdd40b286c441996d4790433c8297cd52e2c",
+        "actual": "c346bdd40b286c441996d4790433c8297cd52e2c",
+        "match": true
+      },
+      {
+        "path": "systems/power-status.js",
+        "expected": "d9445661037ea150c321952929a282d91ac86811",
+        "actual": "d9445661037ea150c321952929a282d91ac86811",
+        "match": true
+      },
+      {
+        "path": "systems/world1-collect.js",
+        "expected": "a99c3768a01075294dcbc5bb6fda0fb459e95195",
+        "actual": "a99c3768a01075294dcbc5bb6fda0fb459e95195",
+        "match": true
+      },
+      {
+        "path": "systems/world1-play.js",
+        "expected": "cfef7e483d265a024c79bc2a500294ce52bfbf72",
+        "actual": "cfef7e483d265a024c79bc2a500294ce52bfbf72",
+        "match": true
+      },
+      {
+        "path": "systems/world1-rooms.js",
+        "expected": "68305dc02e5fc25405f5d1c7e78986a2215bab81",
+        "actual": "68305dc02e5fc25405f5d1c7e78986a2215bab81",
+        "match": true
+      },
+      {
+        "path": "systems/world1-story.js",
+        "expected": "dc635eb6dced1378e8831f5a825ceff9111e401a",
+        "actual": "dc635eb6dced1378e8831f5a825ceff9111e401a",
+        "match": true
+      }
+    ]
+  },
+  "public_browser_smoke": {
+    "result": "PASS",
+    "profiles": [
+      {
+        "name": "desktop",
+        "width": 1280,
+        "height": 900,
+        "hero": "kilo",
+        "health": "80 de 80 puntos de salud",
+        "xp": "0 de 55 de experiencia; 0% hasta la siguiente forma",
+        "portrait": 144,
+        "title": "Claro de Kilo",
+        "version": true,
+        "errors": [],
+        "backend": []
+      },
+      {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "hero": "kilo",
+        "health": "80 de 80 puntos de salud",
+        "xp": "0 de 55 de experiencia; 0% hasta la siguiente forma",
+        "portrait": 144,
+        "title": "Claro de Kilo",
+        "version": true,
+        "errors": [],
+        "backend": []
+      }
+    ],
+    "certificate_note": "Chromium context ignores the executor certificate-authority error. Independent HTTPS source verification used Python default certificate validation."
+  },
+  "local_validation": "docs/V606-VALIDATION.json",
+  "limitations": [
+    "Netlify remains paused. No public multiplayer service was activated.",
+    "Automation verifies reachability and rendering, not acceptance of human difficulty.",
+    "Existing completed saves retain earned forms and wins."
+  ]
+}
