@@ -33,7 +33,7 @@ import { chispinWelcomeBeat, drawChispinWelcomeFX } from "./intro-chispin-stage.
 import { michiWelcomeBeat, drawMichiWelcomeFX } from "./intro-michi-stage.js";
 import { planWelcomeFantasy, activeFantasy, drawWelcomeFantasy, fantasyCamera } from "./intro-fantasy.js";
 import { cachedGradient } from "./canvas-gradient-cache.js";
-import { welcomeStoryAt, nextWelcomeLine, WELCOME_STORIES } from "./welcome-story.js";
+import { welcomeStoryAt, WELCOME_STORIES, WELCOME_STORY_DURATION } from "./welcome-story.js";
 import { WORLD1_PREMISE } from "./world1-story.js";
 import { makeFoe } from "../engine/foes.js";
 import { drawEnemy } from "../engine/enemies.js";
@@ -81,9 +81,9 @@ export function playTitleIntro(options = {}) {
   el._played = true;
   el.innerHTML =
     '<canvas aria-hidden="true"></canvas>' +
-    '<div class="oi-welcome" aria-hidden="true"><span>DIEZ VOCES. UNA FAMILIA.</span><strong>OHANA</strong><small>Un mundo que despierta cuando jugamos juntos.</small></div>' +
+    '<div class="oi-welcome" aria-hidden="true"><span>DIEZ VOCES. UNA FAMILIA.</span><strong class="ohana-wordmark" aria-label="Ohana"><i>O</i><i>H</i><i>A</i><i>N</i><i>A</i></strong><small>Un mundo que despierta cuando jugamos juntos.</small></div>' +
     '<div class="oi-story-dialogue" aria-live="polite" aria-atomic="true"><span class="oi-story-chapter"></span><strong class="oi-story-speaker"></strong><p class="oi-story-line"></p></div>' +
-    '<div class="oi-story-controls"><button type="button" class="oi-previous" aria-label="Frase anterior">←</button><button type="button" class="oi-pause" aria-pressed="false">Pausar</button><button type="button" class="oi-next">Siguiente frase →</button></div>' +
+    '<div class="oi-story-controls"><button type="button" class="oi-pause" aria-pressed="false">Pausar</button></div>' +
     '<button class="oi-enter" type="button">EMPEZAR LA AVENTURA →</button>';
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
@@ -109,6 +109,7 @@ export function playTitleIntro(options = {}) {
   if(isE2E)window.__OHANA_WELCOME_SET_FRAME = at => {
     frozenSceneTime = Number.isFinite(at) ? Math.max(0,at) : null;
   };
+  if(isE2E)window.__OHANA_WELCOME_SET_STORY_TIME = at => {storyTime=Math.max(0,Number(at)||0);};
   const CAST = WELCOME_CAST_ORDER;
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
@@ -175,7 +176,7 @@ export function playTitleIntro(options = {}) {
     });
   }
   let raf = 0, t0 = 0, last = 0, lastPaint = 0, ready = false, done = false;
-  let storyTime = 0, storyPaused = false, activeDirection = null;
+  let storyTime = 0, storyPaused = false, activeDirection = null, stageTouch=null;
   const storySpeaker = el.querySelector(".oi-story-speaker");
   const storyLine = el.querySelector(".oi-story-line");
   const storyChapter = el.querySelector(".oi-story-chapter");
@@ -186,8 +187,13 @@ export function playTitleIntro(options = {}) {
     return enemy;
   });
   pauseButton.onclick = () => { storyPaused = !storyPaused; duckMusic(storyPaused); pauseButton.textContent = storyPaused ? "Continuar" : "Pausar"; pauseButton.setAttribute("aria-pressed",String(storyPaused)); };
-  el.querySelector(".oi-next").onclick = () => { storyTime = nextWelcomeLine(storyTime); };
-  el.querySelector(".oi-previous").onclick = () => { storyTime = nextWelcomeLine(storyTime,-1); };
+  // The family performs continuously. No sentence picker between the player and the scene.
+  el.addEventListener("pointerdown", e => {
+    if(e.target.closest("button,.oi-story-dialogue"))return;
+    if(reduce)return;
+    const b=el.getBoundingClientRect();
+    stageTouch={x:e.clientX-b.left,y:e.clientY-b.top,at:performance.now()/1000};
+  });
 
   function layout() {
     const W = fc.W, H = fc.H;
@@ -228,6 +234,17 @@ export function playTitleIntro(options = {}) {
     ctx.save();
     if (activeDirection?.hero && id !== activeDirection.hero && id !== activeDirection.partner) ctx.globalAlpha *= .82;
     ctx.translate(x - fit.centerOffsetX * fit.scale, footY);
+    // Every visible actor answers a touch with its own stage-only comic gesture.
+    // The rig and its proportions stay intact; there is no gameplay state here.
+    if(stageTouch&&!reduce){
+      const age=performance.now()/1000-stageTouch.at,k=Math.max(0,1-age/1.4);
+      if(k>0&&age>=0){
+        const beat=Math.sin(Math.min(1,age/.55)*Math.PI);
+        const gestures={kilo:[-.06,14],stitcho:[.18,25],chispin:[-.1,17],cat:[-.13,20],cuerno:[.08,22],dragon:[-.08,28],dino:[.05,9],frita:[.14,19],pizza:[-.1,12],yomi:[.07,24]};
+        const [tilt,hop]=gestures[id]||[.05,14];
+        ctx.translate(0,-beat*hop);ctx.rotate(tilt*beat);ctx.scale(1+beat*.04,1-beat*.025);
+      }
+    }
     if (opts.alpha !== undefined) ctx.globalAlpha *= clamp(opts.alpha, 0, 1);
     if (opts.rotate) ctx.rotate(opts.rotate);
     const background=id!==activeDirection?.hero&&id!==activeDirection?.partner;
@@ -735,7 +752,7 @@ export function playTitleIntro(options = {}) {
     if(document.hidden||document.body.classList.contains("playing")){raf=requestAnimationFrame(frame);return;}
     lastPaint=now;
     const L=layout();
-    const direction = frozenSceneTime === null ? welcomeStoryAt(storyTime) : null;
+    const direction = frozenSceneTime === null ? welcomeStoryAt(storyTime % WELCOME_STORY_DURATION) : null;
     const line = direction?.line;
     const speaker = line ? (ROSTER.find(r=>r.id===line.speaker)?.name || (line.speaker==="avispa"?"Avispa":"Cangrejo")) : "La familia";
     const text = direction ? (line?.text || (direction.complete ? WORLD1_PREMISE : "Un pequeño respiro. Y otra travesura.")) : "";
@@ -769,6 +786,14 @@ export function playTitleIntro(options = {}) {
       }
     }
     scene(reduce?0.7:(frozenSceneTime ?? direction.sceneTime),L,direction);
+    if(stageTouch){
+      const age=performance.now()/1000-stageTouch.at;
+      if(age>1.6||age<0)stageTouch=null;
+      else {ctx.save();ctx.globalAlpha=Math.max(0,1-age/1.6);ctx.textAlign="center";ctx.font="bold 24px Fredoka";
+        for(let i=0;i<9;i++){const a=i*Math.PI*2/9;ctx.fillStyle=i%2?"#ffe8a9":"#aff3d9";ctx.fillText(['♪','✦','♥'][i%3],stageTouch.x+Math.cos(a)*age*72,stageTouch.y+Math.sin(a)*age*45-age*38);}
+        ctx.restore();
+      }
+    }
     const vign=cachedGradient(ctx,"welcome-vignette:"+L.W+"x"+L.H,()=>{
       const g=ctx.createRadialGradient(L.W*.5,L.H*.46,Math.min(L.W,L.H)*.12,L.W*.5,L.H*.46,Math.hypot(L.W,L.H)*.63);
       g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.12)");return g;
@@ -790,7 +815,7 @@ export function playTitleIntro(options = {}) {
     removeEventListener("keydown",enter,true);
     removeEventListener("keydown",storyKeys,true);
     el.removeEventListener("pointerdown",enter);
-    if(isE2E)delete window.__OHANA_WELCOME_SET_FRAME;
+    if(isE2E){delete window.__OHANA_WELCOME_SET_FRAME;delete window.__OHANA_WELCOME_SET_STORY_TIME;}
     finishClasses();
     el.remove();
     document.querySelector("#chars-grid .char-card.selected")?.focus({preventScroll:true});

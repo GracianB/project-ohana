@@ -18,6 +18,9 @@ function syncProgress(el, state) {
 export function syncHudStatus({ player, hp, xpPct, boss, document: doc = document }) {
   const hud = doc.getElementById("hud");
   if (!hud) return;
+  setAttribute(hud, "data-health-state", player.health / Math.max(1, player.maxHealth) <= .28 ? "danger" : "healthy");
+  setAttribute(hud, "data-form", player.evo + 1);
+  setAttribute(hud, "data-hero", player.id);
   syncProgress(hud.querySelector(".bar.hp"), progressState(player.health, player.maxHealth, `${hp} de ${player.maxHealth} puntos de salud`));
   syncProgress(hud.querySelector(".bar.xp"), progressState(xpPct, 100, player.evo >= 4 ? "Evolución máxima" : `${Math.round(xpPct)}% hasta la siguiente forma`));
   if (boss) syncProgress(doc.querySelector(".bar.boss"), progressState(boss.hp, boss.max, `${Math.max(0, Math.ceil(boss.hp))} de ${boss.max} puntos de salud`));

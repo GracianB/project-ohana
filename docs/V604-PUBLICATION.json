@@ -1,0 +1,124 @@
+{
+  "merge_commit": "d3428c3b9b999f963acffd97ec79a0ee1f4c5c5f",
+  "files": [
+    {
+      "path": "index.html",
+      "url": "https://gracianb.github.io/project-ohana/index.html?release=604&source=d3428c3b9b999f963acffd97ec79a0ee1f4c5c5f",
+      "status": 200,
+      "match": true,
+      "expected": "6972493539269b1db241c37440892ee2440f808f",
+      "actual": "6972493539269b1db241c37440892ee2440f808f"
+    },
+    {
+      "path": "game.js",
+      "url": "https://gracianb.github.io/project-ohana/game.js?release=604&source=d3428c3b9b999f963acffd97ec79a0ee1f4c5c5f",
+      "status": 200,
+      "match": true,
+      "expected": "69e29f640ba086a8b28c3ec2e671e3160285af6b",
+      "actual": "69e29f640ba086a8b28c3ec2e671e3160285af6b"
+    },
+    {
+      "path": "sw.js",
+      "url": "https://gracianb.github.io/project-ohana/sw.js?release=604&source=d3428c3b9b999f963acffd97ec79a0ee1f4c5c5f",
+      "status": 200,
+      "match": true,
+      "expected": "1927015a99039e8b55fc7457efdc52ddbac755be",
+      "actual": "1927015a99039e8b55fc7457efdc52ddbac755be"
+    },
+    {
+      "path": "worlds/living-realms.js",
+      "url": "https://gracianb.github.io/project-ohana/worlds/living-realms.js?release=604&source=d3428c3b9b999f963acffd97ec79a0ee1f4c5c5f",
+      "status": 200,
+      "match": true,
+      "expected": "60ca12726eb92819858a45da8de8ff02c8551ac3",
+      "actual": "60ca12726eb92819858a45da8de8ff02c8551ac3"
+    },
+    {
+      "path": "systems/theatre-stage.js",
+      "url": "https://gracianb.github.io/project-ohana/systems/theatre-stage.js?release=604&source=d3428c3b9b999f963acffd97ec79a0ee1f4c5c5f",
+      "status": 200,
+      "match": true,
+      "expected": "3ca86d68b96b718198bcc835c50b7f2e4870efc4",
+      "actual": "3ca86d68b96b718198bcc835c50b7f2e4870efc4"
+    },
+    {
+      "path": "systems/family-camp.js",
+      "url": "https://gracianb.github.io/project-ohana/systems/family-camp.js?release=604&source=d3428c3b9b999f963acffd97ec79a0ee1f4c5c5f",
+      "status": 200,
+      "match": true,
+      "expected": "23b2c603ea82ebcfba6c6922fc601965d23191e1",
+      "actual": "23b2c603ea82ebcfba6c6922fc601965d23191e1"
+    },
+    {
+      "path": "multiplayer/versus-client.js",
+      "url": "https://gracianb.github.io/project-ohana/multiplayer/versus-client.js?release=604&source=d3428c3b9b999f963acffd97ec79a0ee1f4c5c5f",
+      "status": 200,
+      "match": true,
+      "expected": "1a6c7a1a54c832b4561329c47499423e7f2c2355",
+      "actual": "1a6c7a1a54c832b4561329c47499423e7f2c2355"
+    }
+  ],
+  "all_match": true,
+  "pull_request": "https://github.com/GracianB/project-ohana/pull/441",
+  "pull_request_state": "Merged (public GitHub HTML verified)",
+  "pages": {
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/40449444639",
+    "status": "completed successfully",
+    "commit": "d3428c3b9b999f963acffd97ec79a0ee1f4c5c5f"
+  },
+  "ci": [
+    {
+      "run": "40447721196",
+      "status": "Success"
+    },
+    {
+      "run": "40447725489",
+      "status": "Success"
+    },
+    {
+      "run": "40447725495",
+      "status": "Success"
+    },
+    {
+      "run": "40447725499",
+      "status": "Success"
+    },
+    {
+      "run": "40447725508",
+      "status": "Success"
+    },
+    {
+      "run": "40447725525",
+      "status": "Success"
+    },
+    {
+      "run": "40447725565",
+      "status": "Success"
+    },
+    {
+      "run": "40447725575",
+      "status": "Success"
+    },
+    {
+      "run": "40447725597",
+      "status": "Success"
+    },
+    {
+      "run": "40447725660",
+      "status": "Success"
+    }
+  ],
+  "browser": {
+    "desktop": true,
+    "mobileViewport": true,
+    "nativeChapterStart": true,
+    "visibleFormFive": true,
+    "testHooksAbsent": true,
+    "landscapePreview": true,
+    "errors": [],
+    "raster": [],
+    "paid": []
+  },
+  "browser_tls": "Environment proxy CA pinned by SPKI for Chromium; no blanket certificate bypass",
+  "published_url": "https://gracianb.github.io/project-ohana/?release=604"
+}

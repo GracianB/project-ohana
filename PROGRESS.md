@@ -1,4 +1,10 @@
-# V604 · ohana-604 · candidato en PR #441 (no publicado)
+# V605 · ohana-605 · caprichos en revisión (no publicada)
+
+Interfaz de combate renovada: vida, XP, evolución, poderes, objetivos, avisos y controles táctiles. Tipografía OHANA con letras vivas, bienvenida continua sin selector de frases y gestos al tocar el escenario. Libro con diez estrategias, paisajes Canvas y explicación de modos. Diez detalles de comodidad y teclado documentados en docs/V605-CAPRICHOS.md. Preferencias de lectura/contraste persistentes e independientes del guardado. Corregido el keyup de Espacio que impedía activar controles nativos en ayuda.
+
+Validación local: 1.667 pruebas Node, Release Gate, auditoría general de navegador, matriz visual completa y pruebas de guía/interfaz a 1280/390/320 px. V605 sigue en rama feat/v605-caprichos-442; estos resultados no declaran CI ni publicación de esta tanda. Netlify continúa pausado.
+
+# V604 · ohana-604 · publicada y verificada
 
 Integrados Director’s Cut y correcciones de continuidad de recuerdos, respuestas de habilidades y objetivos del acto final. Cinco especies por capítulo, apertura con protagonistas, ojo de perfil del guardián Dino, bola de fuego J de Dragón y orden de su evolución.
 
@@ -10,7 +16,7 @@ Paisajes por código: retiradas las nueve láminas WebP y el PNG del observatori
 
 Segunda revisión de paisajes: ganchos y anillos alineados con sus estructuras al desplazar y elevar la cámara; resolución de caché adaptada al área de pantalla. Diez paisajes a tres alturas y once salas dentro del juego en móvil comprobados; la caché de dos escenarios en retrato usa un 44 % menos de bytes RGBA estimados.
 
-Validación local: 1.666 pruebas Node, Release Gate, auditoría general de navegador, galería de 18 especies y campaña individual Normal limpia hasta Quimera y cierre aprobados. No se declara publicación ni CI verde para este candidato. Evidencia: docs/V604-VALIDATION.json.
+Validación local: 1.666 pruebas Node, Release Gate, auditoría general de navegador, galería de 18 especies y campaña individual Normal limpia hasta Quimera y cierre aprobados. PR #441 integrada en main d3428c3; diez ejecuciones CI aprobadas en b8a3291 y Pages aprobado. Siete archivos públicos coinciden por hash Git; arranque real en escritorio y móvil, selección de forma cinco y paisaje Canvas comprobados sin errores ni peticiones al servidor pausado. Evidencia de publicación: docs/V604-PUBLICATION.json; validación previa: docs/V604-VALIDATION.json.
 
 # V603 · ohana-603 · publicada y verificada
 

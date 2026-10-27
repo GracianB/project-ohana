@@ -1,0 +1,124 @@
+{
+  "candidate": "ohana-605",
+  "branch": "feat/v605-caprichos-442",
+  "published": false,
+  "stable_publication": "docs/V604-PUBLICATION.json",
+  "checks": [
+    {
+      "command": "npm test",
+      "result": "PASS",
+      "tests": 1667,
+      "failures": 0
+    },
+    {
+      "command": "node tools/release-gate.mjs",
+      "result": "PASS",
+      "modules": 346,
+      "resources": 407
+    },
+    {
+      "command": "node tests/browser/v605-caprichos.mjs",
+      "result": "PASS",
+      "viewports": [
+        "1280x900",
+        "390x844",
+        "320x568"
+      ],
+      "coverage": [
+        "11 cast scenes",
+        "touch animates paused scene",
+        "HUD width/height and no document overflow",
+        "10 chapter strategies + multiplayer",
+        "native Tab/Space preferences",
+        "arrow navigation",
+        "preference persistence/reset",
+        "power inspector",
+        "real return from playing to selection and guide for a different hero",
+        "reduced motion",
+        "no legacy raster landscapes or runtime errors"
+      ]
+    },
+    {
+      "command": "node tests/browser/v420-welcome-story.mjs",
+      "result": "PASS",
+      "coverage": [
+        "33 lines",
+        "duration",
+        "pause",
+        "encore",
+        "mobile controls",
+        "replay",
+        "keyboard",
+        "cleanup"
+      ]
+    },
+    {
+      "command": "node tests/browser/visual-regression.mjs",
+      "result": "PASS",
+      "coverage": [
+        "opening",
+        "50 selector forms",
+        "worlds",
+        "abilities",
+        "help",
+        "map",
+        "death",
+        "ending"
+      ]
+    },
+    {
+      "command": "node tests/browser/e2e.mjs",
+      "result": "PASS",
+      "coverage": [
+        "desktop",
+        "mobile",
+        "native controls",
+        "module loading",
+        "save",
+        "offline"
+      ]
+    },
+    {
+      "command": "node tests/browser/v369-cache-migration.mjs",
+      "result": "PASS",
+      "from": "ohana-372",
+      "to": "ohana-605",
+      "reused": 113,
+      "downloaded": 294,
+      "offline_play": true
+    },
+    {
+      "command": "node tests/browser/v604-versus-network.mjs",
+      "result": "PASS on earlier caprichos commit b1c4111",
+      "coverage": [
+        "native lost pointer capture",
+        "network recovery"
+      ]
+    },
+    {
+      "command": "node tests/browser/v604-versus-match.mjs",
+      "result": "PASS on earlier caprichos commit b1c4111",
+      "coverage": [
+        "earned XP/forms",
+        "kills and respawn",
+        "shared results",
+        "keyboard exit"
+      ]
+    }
+  ],
+  "source_blobs": {
+    "index.html": "7010a557af023cac7f21cdd51572a90a7a37b552",
+    "caprichos.css": "3bfeded806796332c7b1365f74d80a28c93b54bb",
+    "systems/field-guide.js": "4db1268c68b110919733e5dd8e4b8908b5525519",
+    "systems/intro.js": "da6e1f3589ad26872e94f45aa0e519dcffb5cbbb",
+    "systems/title.js": "d161c7fb535c015fa8be155abcb579972e0e1eb0",
+    "systems/hud.js": "48765107ee645118470a593300572183c9859498",
+    "engine/input.js": "7acfab4e704ada18daadb9e049be4ded5330e0cf",
+    "multiplayer/versus-client.js": "4954eba39caf1dcb50d4b1305aadb292f5378c60"
+  },
+  "limitations": [
+    "Local results do not assert CI success for this branch.",
+    "Public multiplayer remains paused.",
+    "V605 is not published."
+  ]
+}
