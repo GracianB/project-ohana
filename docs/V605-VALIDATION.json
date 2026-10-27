@@ -1,7 +1,7 @@
 {
   "candidate": "ohana-605",
   "branch": "feat/v605-caprichos-442",
-  "published": false,
+  "published": true,
   "stable_publication": "docs/V604-PUBLICATION.json",
   "checks": [
     {
@@ -118,7 +118,7 @@
   },
   "limitations": [
     "Local results do not assert CI success for this branch.",
-    "Public multiplayer remains paused.",
-    "V605 is not published."
-  ]
+    "Public multiplayer remains paused."
+  ],
+  "publication": "docs/V605-PUBLICATION.json"
 }

@@ -1,8 +1,8 @@
-# V605 · ohana-605 · caprichos en revisión (no publicada)
+# V605 · ohana-605 · publicada y verificada
 
 Interfaz de combate renovada: vida, XP, evolución, poderes, objetivos, avisos y controles táctiles. Tipografía OHANA con letras vivas, bienvenida continua sin selector de frases y gestos al tocar el escenario. Libro con diez estrategias, paisajes Canvas y explicación de modos. Diez detalles de comodidad y teclado documentados en docs/V605-CAPRICHOS.md. Preferencias de lectura/contraste persistentes e independientes del guardado. Corregido el keyup de Espacio que impedía activar controles nativos en ayuda.
 
-Validación local: 1.667 pruebas Node, Release Gate, auditoría general de navegador, matriz visual completa y pruebas de guía/interfaz a 1280/390/320 px. V605 sigue en rama feat/v605-caprichos-442; estos resultados no declaran CI ni publicación de esta tanda. Netlify continúa pausado.
+Validación local: 1.667 pruebas Node, Release Gate, auditoría general de navegador, matriz visual completa y pruebas de guía/interfaz a 1280/390/320 px. Integrada en main mediante 9c0eeaa. Pages aprobado; diez archivos públicos coinciden por SHA256. Arranque público en escritorio y móvil comprobado: bienvenida automática, letras vivas, libro del héroe seleccionado, modos y entrada real a Kilo con HUD responsivo. Hooks de prueba ausentes, sin errores ni peticiones al backend pausado. Evidencia: docs/V605-PUBLICATION.json. Netlify continúa pausado.
 
 # V604 · ohana-604 · publicada y verificada
 

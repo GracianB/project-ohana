@@ -1,6 +1,6 @@
 # Caprichos · interfaz y libro de viaje
 
-Rama: `feat/v605-caprichos-442`. Siguiente PR después de la #441; el número definitivo lo asigna GitHub. La publicación estable es V604 (`ohana-604`), integrada y verificada; esta tanda V605 (`ohana-605`) sigue en su rama de revisión, con caché separada.
+V605 (`ohana-605`) publicada y verificada. Código candidato `57c90cc`, integración en main `9c0eeaa`. Web: https://gracianb.github.io/project-ohana/?release=605. Evidencia pública: `docs/V605-PUBLICATION.json`.
 
 ## Interfaz de partida
 
@@ -36,6 +36,6 @@ Los paisajes del libro pintan sólo mientras la ayuda está abierta y la pestañ
 - Migración offline Chromium a `ohana-605`: 113 recursos reutilizados, 294 descargados y arranque sin red aprobado. Auditoría general de navegador aprobada.
 - Primer pulido Versus ya validado en dos navegadores reales: pérdida de captura nativa y partida completa con resultado y regreso por teclado.
 
-Los checks de una rama anterior no acreditan CI de esta nueva tanda. La verificación pública corresponde a la #441: `docs/V604-PUBLICATION.json`. Netlify continúa pausado; esta tanda no acredita rendimiento del servidor externo ni equilibrio humano de todas las parejas PvP.
+Pages y los controles de publicación de V605 aprobados. Diez archivos runtime públicos coinciden por SHA256; bienvenida, libro y entrada nativa al capítulo comprobados en escritorio y móvil. La #441/V604 conserva su evidencia histórica en `docs/V604-PUBLICATION.json`. Netlify continúa pausado; esta tanda no acredita rendimiento del servidor externo ni equilibrio humano de todas las parejas PvP.
 
 Resultados y huellas del código comprobado: `docs/V605-VALIDATION.json`.

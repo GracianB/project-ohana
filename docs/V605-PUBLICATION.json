@@ -1,0 +1,142 @@
+{
+  "commit": "9c0eeaace55cf2cf0b3d52bc083706a2423cba00",
+  "files": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "60cab0bc732aaf273a449680ec68fbe92a70edf28317077c47508af5f47a160d",
+      "expected": "60cab0bc732aaf273a449680ec68fbe92a70edf28317077c47508af5f47a160d",
+      "match": true
+    },
+    {
+      "path": "sw.js",
+      "status": 200,
+      "sha256": "721d4cf6429262ef82775b46e4b5fda668bd41cc560f2253081fd89b81d7183b",
+      "expected": "721d4cf6429262ef82775b46e4b5fda668bd41cc560f2253081fd89b81d7183b",
+      "match": true
+    },
+    {
+      "path": "caprichos.css",
+      "status": 200,
+      "sha256": "5b41e25cd241ca59a70db735867e0a313cad2b322bab336748456b39af2ac266",
+      "expected": "5b41e25cd241ca59a70db735867e0a313cad2b322bab336748456b39af2ac266",
+      "match": true
+    },
+    {
+      "path": "game.js",
+      "status": 200,
+      "sha256": "bee47bcfff05255c947fe3200bfc6cb003045979eed5027863f8ad8fabc3fd51",
+      "expected": "bee47bcfff05255c947fe3200bfc6cb003045979eed5027863f8ad8fabc3fd51",
+      "match": true
+    },
+    {
+      "path": "systems/field-guide.js",
+      "status": 200,
+      "sha256": "77697d3af9f37718ae9e8b123c6cc99e2dff98918507dcb883e57f95774f819f",
+      "expected": "77697d3af9f37718ae9e8b123c6cc99e2dff98918507dcb883e57f95774f819f",
+      "match": true
+    },
+    {
+      "path": "systems/intro.js",
+      "status": 200,
+      "sha256": "e23e49b59c9ce72516413876abb02cd7b3d08538ee0001311f596f6d05d59f9b",
+      "expected": "e23e49b59c9ce72516413876abb02cd7b3d08538ee0001311f596f6d05d59f9b",
+      "match": true
+    },
+    {
+      "path": "systems/title.js",
+      "status": 200,
+      "sha256": "f49dd834151200c79855965d91b15bc58cae4c0bb4ad16a4fe604bb51232b969",
+      "expected": "f49dd834151200c79855965d91b15bc58cae4c0bb4ad16a4fe604bb51232b969",
+      "match": true
+    },
+    {
+      "path": "systems/hud.js",
+      "status": 200,
+      "sha256": "182146196bea32b334e9a7227b6d9df1b0b6ad15b45d050ab133babf2f5a007b",
+      "expected": "182146196bea32b334e9a7227b6d9df1b0b6ad15b45d050ab133babf2f5a007b",
+      "match": true
+    },
+    {
+      "path": "engine/input.js",
+      "status": 200,
+      "sha256": "70188909a9803e0410f96c8c6e97769508ddfe828555a16c16ee2d06f5532635",
+      "expected": "70188909a9803e0410f96c8c6e97769508ddfe828555a16c16ee2d06f5532635",
+      "match": true
+    },
+    {
+      "path": "multiplayer/versus-client.js",
+      "status": 200,
+      "sha256": "f0f8787f318ead666567b5996b0f749b1a765db001d9f7123f104c46bbb62f4d",
+      "expected": "f0f8787f318ead666567b5996b0f749b1a765db001d9f7123f104c46bbb62f4d",
+      "match": true
+    }
+  ],
+  "all_match": true,
+  "release": "ohana-605",
+  "candidate_commit": "57c90cc8c1a7d80c3c18f908cdc2f42b149eaf75",
+  "published_url": "https://gracianb.github.io/project-ohana/?release=605",
+  "pages": {
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/40507144482",
+    "status": "Success",
+    "commit": "9c0eeaace55cf2cf0b3d52bc083706a2423cba00"
+  },
+  "candidate_ci": {
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/40506554429",
+    "job": "Node tests",
+    "status": "Success"
+  },
+  "browser": {
+    "desktop": {
+      "liveWordmark": true,
+      "automaticWelcome": true,
+      "guideFromSelection": true,
+      "tenChapterGuides": true,
+      "multiplayerStatusAccurate": true,
+      "nativeChapterEntry": true,
+      "responsiveHud": [
+        {
+          "left": 14,
+          "right": 258,
+          "height": 138.390625,
+          "width": 244
+        },
+        {
+          "left": 1044,
+          "right": 1266,
+          "height": 108.84375,
+          "width": 222
+        }
+      ],
+      "productionHooksAbsent": true
+    },
+    "mobile": {
+      "liveWordmark": true,
+      "automaticWelcome": true,
+      "guideFromSelection": true,
+      "tenChapterGuides": true,
+      "multiplayerStatusAccurate": true,
+      "nativeChapterEntry": true,
+      "responsiveHud": [
+        {
+          "left": 10,
+          "right": 191,
+          "height": 109.6875,
+          "width": 181
+        },
+        {
+          "left": 199,
+          "right": 380,
+          "height": 92.25,
+          "width": 181
+        }
+      ],
+      "productionHooksAbsent": true
+    },
+    "errors": [],
+    "raster": [],
+    "paid": [],
+    "proxyTrust": "Environment proxy CA pinned by SPKI"
+  },
+  "note": "Verified the deployed runtime before committing this publication record. Subsequent documentation-only commits do not change the runtime source hashes."
+}
