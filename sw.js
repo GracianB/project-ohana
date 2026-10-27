@@ -1,6 +1,7 @@
 const VERSION = "ohana-606";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/stitcho-encounters-v607.js?v=" + VERSION,
   "./systems/hud-portrait-v606.js?v=" + VERSION,
   "./systems/kilo-encounters-v606.js?v=" + VERSION,
   "./systems/kilo-chapter-art-v606.js?v=" + VERSION,
@@ -421,6 +422,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/stitcho-encounters-v607.js": "7838b60c566ba454b113d2b6a683cdecaaae1d4a",
   "systems/hud-portrait-v606.js": "f05800678591f7c5b1cabd9b8f2f90de6ad9e6e6",
   "systems/kilo-encounters-v606.js": "c346bdd40b286c441996d4790433c8297cd52e2c",
   "systems/kilo-chapter-art-v606.js": "3bbcef81eaeb66ee4633c78d011aa4879761dbfd",
@@ -458,7 +460,7 @@ const PRECACHE_REVISIONS = {
   "systems/chapters-lunar-prism-embers.js": "f24c3b1c2e4688f99ea17dceea2d006b31887289",
   "worlds/ohana-crafted-scenes.js": "67c654f2ee9422a6bc1f62a08821f189a7a222c0",
   "systems/chispin-chapter.js": "4c8b4ef255cccf3336705ce113d1afcd92a49bc3",
-  "systems/stitcho-chapter.js": "b604a89aa75553340676550445d99e998da8a578",
+  "systems/stitcho-chapter.js": "9a96b68f3e8608cf1cbce9e163b01f03d544b91c",
   "worlds/ohana-environments.js": "665bd255ff2c6e5a0b8f265b6377e63694a8f903",
   "systems/kilo-chapter.js": "0feb0e79c051b3fa278c7d9190e1aa010d0baa37",
   "systems/power-status.js": "d9445661037ea150c321952929a282d91ac86811",
@@ -512,7 +514,7 @@ const PRECACHE_REVISIONS = {
   "systems/fusion-boss.js": "ed5b248a1e33315cb063b92b049e64d479393242",
   "systems/quimera-art.js": "b320aeff3660c6aa859dc545acd2778bc4fdf80a",
   "systems/world1-story.js": "dc635eb6dced1378e8831f5a825ceff9111e401a",
-  "systems/world1-rooms.js": "68305dc02e5fc25405f5d1c7e78986a2215bab81",
+  "systems/world1-rooms.js": "ba69e527a442f02032d076ccce5910112c2af7fc",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
   "worlds/chapter-stagecraft.js": "979021a3b2cd9fca0794d0fa70beb250a20845da",
   "systems/world1-play.js": "cfef7e483d265a024c79bc2a500294ce52bfbf72",

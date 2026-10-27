@@ -1,4 +1,5 @@
 import {authorKiloEncounters} from './kilo-encounters-v606.js';
+import {authorStitchoEncounters} from './stitcho-encounters-v607.js';
 import {authorExpedition} from './chapter-expedition-v2.js';
 import {composeChapterRoom} from './chapter-room-composition.js';
 import {KILO_CHAPTER_BOSS_ID,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
@@ -214,7 +215,9 @@ export function buildWorld1HeroRoom(hero) {
     }]);
     present.add(kind);
   }
-  return hero==='kilo'?authorKiloEncounters(composed):composed;
+  if(hero==='kilo') return authorKiloEncounters(composed);
+  if(hero==='stitcho') return authorStitchoEncounters(composed);
+  return composed;
 }
 
 // Las estaciones de cada sello se reparten por los sectores 1–4 para que la
