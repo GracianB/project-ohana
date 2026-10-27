@@ -416,7 +416,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "worlds/living-realms.js": "f11e95bf5768a839103694fd2238fb559e53363f",
+  "worlds/living-realms.js": "60ca12726eb92819858a45da8de8ff02c8551ac3",
   "versus.html": "015c6ab6f66b4dab8b44a7b7f989865d3b77a327",
   "versus.css": "1514f50bf9f794f82532214430b4fc176fdd7d93",
   "multiplayer/versus-client.js": "1a6c7a1a54c832b4561329c47499423e7f2c2355",

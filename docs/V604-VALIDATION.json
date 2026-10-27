@@ -879,9 +879,16 @@
           "bytes": 19440000
         },
         "timing": {
-          "medianMs": 0.30000000447034836,
-          "p95Ms": 2.7999999970197678,
+          "medianMs": 0.5,
+          "p95Ms": 1.1000000014901161,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 30375000
+          }
         }
       },
       {
@@ -894,9 +901,16 @@
           "bytes": 38880000
         },
         "timing": {
-          "medianMs": 0.29999999701976776,
-          "p95Ms": 0.5999999940395355,
+          "medianMs": 0.19999999552965164,
+          "p95Ms": 0.7000000029802322,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 21870000
+          }
         }
       },
       {
@@ -909,9 +923,16 @@
           "bytes": 38880000
         },
         "timing": {
-          "medianMs": 0.5,
-          "p95Ms": 11.799999997019768,
+          "medianMs": 0.20000000298023224,
+          "p95Ms": 0.30000000447034836,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 21870000
+          }
         }
       },
       {
@@ -924,9 +945,16 @@
           "bytes": 38880000
         },
         "timing": {
-          "medianMs": 0.30000000447034836,
-          "p95Ms": 3,
+          "medianMs": 0.20000000298023224,
+          "p95Ms": 0.30000000447034836,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 21870000
+          }
         }
       },
       {
@@ -939,9 +967,16 @@
           "bytes": 38880000
         },
         "timing": {
-          "medianMs": 0.20000000298023224,
-          "p95Ms": 0.6000000014901161,
+          "medianMs": 0.10000000149011612,
+          "p95Ms": 0.29999999701976776,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 21870000
+          }
         }
       },
       {
@@ -954,9 +989,16 @@
           "bytes": 38880000
         },
         "timing": {
-          "medianMs": 0.19999999552965164,
-          "p95Ms": 0.30000000447034836,
+          "medianMs": 0.20000000298023224,
+          "p95Ms": 0.6000000014901161,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 21870000
+          }
         }
       },
       {
@@ -969,9 +1011,16 @@
           "bytes": 38880000
         },
         "timing": {
-          "medianMs": 0.20000000298023224,
-          "p95Ms": 0.5999999940395355,
+          "medianMs": 0.19999999552965164,
+          "p95Ms": 0.29999999701976776,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 21870000
+          }
         }
       },
       {
@@ -984,9 +1033,16 @@
           "bytes": 38880000
         },
         "timing": {
-          "medianMs": 0.30000000447034836,
-          "p95Ms": 0.9000000059604645,
+          "medianMs": 0.19999999552965164,
+          "p95Ms": 0.30000000447034836,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 21870000
+          }
         }
       },
       {
@@ -999,9 +1055,16 @@
           "bytes": 38880000
         },
         "timing": {
-          "medianMs": 0.3999999985098839,
-          "p95Ms": 1.3999999985098839,
+          "medianMs": 0.20000000298023224,
+          "p95Ms": 0.4000000059604645,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 21870000
+          }
         }
       },
       {
@@ -1014,9 +1077,16 @@
           "bytes": 38880000
         },
         "timing": {
-          "medianMs": 0.29999999701976776,
-          "p95Ms": 0.5,
+          "medianMs": 0.19999999552965164,
+          "p95Ms": 0.4000000059604645,
           "scope": "CPU Canvas submission; not whole-game FPS"
+        },
+        "mobile": {
+          "verticalCamera": true,
+          "cache": {
+            "entries": 2,
+            "bytes": 21870000
+          }
         }
       }
     ],
@@ -1036,7 +1106,11 @@
     "mobile_views": [
       "stitcho",
       "chispin",
+      "cat",
       "cuerno",
+      "dragon",
+      "dino",
+      "frita",
       "pizza",
       "yomi",
       "final"
@@ -1049,6 +1123,28 @@
     "visual_fixtures_change_positions_and_evolution": true,
     "campaign_replayed_for_visual_change": false,
     "errors": [],
-    "interactive_preview": "passed: eleven scene selections and reduced-motion control in previews/living-realms.html"
+    "interactive_preview": "passed: eleven scene selections and reduced-motion control in previews/living-realms.html",
+    "mobile_game_integration_rooms": [
+      "kilo",
+      "stitcho",
+      "chispin",
+      "cat",
+      "cuerno",
+      "dragon",
+      "dino",
+      "frita",
+      "pizza",
+      "yomi",
+      "final"
+    ],
+    "mobile_vertical_camera_samples": [
+      0,
+      400,
+      850
+    ],
+    "registered_animated_machinery": "crane hooks and orbital lights use the same normalized camera depth and repeating anchors as their painted structures",
+    "portrait_two_layer_sets_rgba_bytes": 21870000,
+    "desktop_to_portrait_transition_rgba_bytes": 30375000,
+    "previous_portrait_two_layer_sets_rgba_bytes": 38880000
   }
 }

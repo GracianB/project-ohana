@@ -8,6 +8,8 @@ Versus completo en dos navegadores aprobado: Dino y Chispín en Claro, teclado y
 
 Paisajes por código: retiradas las nueve láminas WebP y el PNG del observatorio, incluida su sustitución de portada/selección. Nueve salas y acto final con tres capas de profundidad, detalles propios y ambiente animado; Kilo conserva su jardín, compartido ahora también por Versus en Claro. Galería de diez paisajes, integración de once escenarios, vistas móviles, movimiento reducido y ausencia de peticiones de esas imágenes comprobados. Caché limitada a dos entradas; 405 recursos offline. Detalles: docs/CANVAS-LANDSCAPES.md.
 
+Segunda revisión de paisajes: ganchos y anillos alineados con sus estructuras al desplazar y elevar la cámara; resolución de caché adaptada al área de pantalla. Diez paisajes a tres alturas y once salas dentro del juego en móvil comprobados; la caché de dos escenarios en retrato usa un 44 % menos de bytes RGBA estimados.
+
 Validación local: 1.666 pruebas Node, Release Gate, auditoría general de navegador, galería de 18 especies y campaña individual Normal limpia hasta Quimera y cierre aprobados. No se declara publicación ni CI verde para este candidato. Evidencia: docs/V604-VALIDATION.json.
 
 # V603 · ohana-603 · publicada y verificada

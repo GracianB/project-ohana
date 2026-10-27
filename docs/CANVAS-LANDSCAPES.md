@@ -26,3 +26,11 @@ Las capas estáticas se pintan en canvases auxiliares y se reutilizan para no re
 Son fixtures visuales de posición y evolución; no representan otra campaña ganada ni una prueba de dificultad. Los tiempos registrados corresponden al envío de órdenes Canvas con caché caliente, no a FPS del juego completo ni a dispositivos físicos. Capturas e informe: `test-results/v605/`.
 
 Galería interactiva sin capturas incrustadas: con el servidor local en marcha, abrir `/previews/living-realms.html`. Permite elegir las once salas, recorrer el paisaje con la cámara y congelar la animación. El archivo usa el mismo dibujante que el juego, no otra ilustración de presentación.
+
+## Segunda revisión en móvil y altura
+
+Los ganchos de Stitcho y los anillos de Chispín, Yomi y Corazón comparten ahora los anclajes, la repetición y la profundidad de cámara de sus estructuras. Se corrige el desfase producido al escalar la pantalla o ascender por la sala. Los grandes grupos de arquitectura se ajustan al ancho repetido de la capa para que no se corten al cambiar de tramo.
+
+La resolución interna de las capas considera también el área de la pantalla. En la prueba de 390 × 844, dos entradas de retrato pasan de 38.880.000 a 21.870.000 bytes RGBA estimados (44 % menos). Al conservar temporalmente una entrada de escritorio y otra de retrato se miden 30.375.000 bytes. No son cifras de memoria total del navegador ni una promesa de FPS.
+
+La galería comprueba los diez paisajes con alturas de cámara 0, 400 y 850, y captura ahora las once salas dentro del juego tanto en escritorio como en móvil. La vista interactiva añade un control de altura para revisar esas transiciones manualmente.
