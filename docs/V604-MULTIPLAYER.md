@@ -72,6 +72,7 @@ npm run release:check
 npx playwright install chromium
 npm run test:browser:adventure-network
 npm run test:browser:versus-network
+npm run test:browser:versus-match
 npm run test:browser:finale-network
 npm run test:browser:coop-campaign
 npm run test:browser:coop-complete
@@ -109,3 +110,11 @@ Para cargar una corrección durante un recorrido largo, el arnés admite `OHANA_
 Para guardar esos puntos al aceptar cada viaje: `OHANA_COOP_CHECKPOINT_FILE=/tmp/ohana-coop-earned.json npm run test:browser:coop-complete`. Para continuar: `OHANA_COOP_RESUME_FILE=/tmp/ohana-coop-earned.json npm run test:browser:coop-complete`. Ambos archivos y comandos son locales; el informe no contiene credenciales.
 
 Resultado del recorrido completo: diez salas y treinta descubrimientos ganados; punto del servidor reanudado tras Cuerno para cargar la corrección; cinco salas restantes, diez guardianes, las cuatro fases de Quimera y resultado compartido superados con controles ordinarios. No se prepararon sellos, XP, vida ni derrotas de jefes. Hubo dos reintentos naturales en las salas y ninguno en el acto final. Kilo y Dino recuperaron su estado ganado mediante el relevo de la entrada. Ambos obtuvieron exactamente un resultado con los diez recuerdos, sin errores JavaScript. Se acredita una campaña ganada con reanudación, no una ejecución ininterrumpida de navegador. El reloj sigue siendo el arnés local de simulación descrito arriba, sin promesas de latencia o rendimiento entre dispositivos.
+
+## Partida Versus completa en navegador
+
+`test:browser:versus-match` crea y une la sala desde el vestíbulo en dos contextos reales de Chromium. Dino juega con teclado y Chispín responde con los botones táctiles de una pantalla móvil. Solo se envían controles de producción; el servidor HTTP local conserva movimiento, daño, XP, evolución, eliminaciones y reapariciones. El piloto consulta el estado canónico para decidir sus controles, sin preparar posiciones, salud ni premios.
+
+Resultado del 27 de octubre: Claro de Kilo, cinco formas de Dino ganadas por combate y marcador final 3–0 coincidente en ambas pantallas. Se observaron las reapariciones ordinarias, incluidas las necesarias entre eliminaciones del rival. Los ataques posteriores no alteraron el resultado ni la simulación terminada. Sin errores JavaScript. Capturas y registro en `test-results/v604/versus-match*`.
+
+El enlace de los resultados para volver a elegir personajes ahora desconecta y borra la sesión terminada, igual que la salida de la cabecera. La prueba pulsa ese enlace y comprueba la entrada limpia al vestíbulo. La nueva partida completa queda incluida en el workflow de pruebas locales; no se declara que el CI remoto ya haya pasado. Esta pareja, este escenario y el defensor automatizado no prueban el equilibrio con personas ni todas las combinaciones de héroes. No se ha reactivado ningún servicio público.

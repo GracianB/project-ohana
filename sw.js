@@ -426,9 +426,9 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "versus.html": "411b44d7470261e944deac674fbff13ab4c4b88f",
+  "versus.html": "015c6ab6f66b4dab8b44a7b7f989865d3b77a327",
   "versus.css": "1514f50bf9f794f82532214430b4fc176fdd7d93",
-  "multiplayer/versus-client.js": "20a82a9a4350b71741485c3b21f50dc74458332c",
+  "multiplayer/versus-client.js": "7cef4165604d3461619f4150c41c6bce89b2bc79",
   "multiplayer/match-rules-v604.js": "22e0ec2591bf777b323edbd5b854aae0fa10f6e1",
   "multiplayer/adventure-progress.js": "605b4b3225d41bc39cb30cedb2de57bd4d2c364e",
   "multiplayer/adventure-finale.js": "e887dd378bdbce18259543dd239712c6081ad510",

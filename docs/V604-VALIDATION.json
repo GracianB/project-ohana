@@ -1,7 +1,7 @@
 {
   "version": "ohana-604",
   "status": "local_candidate_not_published",
-  "date": "2026-10-26",
+  "date": "2026-10-27",
   "integrated_pr": 441,
   "node": {
     "passed": 1666,
@@ -220,7 +220,54 @@
       "canonical_movement_and_actions": true,
       "reconnect_rotates_credentials": true,
       "server_control_pilot_finishes_three_kills": true,
-      "browser_full_match": false
+      "browser_full_match": true,
+      "browser_match": {
+        "status": "passed",
+        "arena": "w1-kilo",
+        "transport": "real local HTTP, real-time production server",
+        "input": "desktop keyboard attacker; mobile viewport opponent defends through real touch controls",
+        "prepared_health_xp_positions_or_kills": false,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "actors": [
+          {
+            "hero": "dino",
+            "hp": 88,
+            "xp": 695,
+            "evo": 4,
+            "maxHp": 360,
+            "kills": 3,
+            "deaths": 0,
+            "enemyKills": 7,
+            "bossKills": 0,
+            "score": 695
+          },
+          {
+            "hero": "chispin",
+            "hp": 0,
+            "xp": 35,
+            "evo": 0,
+            "maxHp": 56,
+            "kills": 0,
+            "deaths": 4,
+            "enemyKills": 1,
+            "bossKills": 0,
+            "score": 35
+          }
+        ],
+        "result": "Dino: 3 eliminaciones · Chispín: 0 eliminaciones",
+        "ordinary_respawns_observed": 3,
+        "stable_result_after_inputs": true,
+        "returns_to_fresh_lobby": true,
+        "errors": [],
+        "proves_human_pvp_balance": false,
+        "all_hero_pairs_and_arenas_tested": false
+      }
     },
     "local_http_adventure": {
       "two_browsers": true,
@@ -811,8 +858,7 @@
     "remaining": [
       "retry coverage in all chapters and four Quimera phases",
       "cross-device and cross-network latency and WebRTC",
-      "human PvP balancing",
-      "complete Versus browser match; previous full-match proof uses server controls"
+      "human PvP balancing"
     ]
   },
   "offline": {
