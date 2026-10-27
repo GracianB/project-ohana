@@ -9,7 +9,7 @@ test("V86 OHANA welcome and no Atrium wires",()=>{
  const intro=fs.readFileSync("systems/intro.js","utf8");
  const css=fs.readFileSync("atrium-interact.css","utf8");
  const atrium=fs.readFileSync("systems/atrium-interact.js","utf8");
- assert.ok(intro.includes("<strong>OHANA</strong>"));
+ assert.ok(intro.includes('class="ohana-wordmark" aria-label="Ohana"'));
  const fit=fs.readFileSync("systems/intro-cast-fit.js","utf8");
  assert.ok(intro.includes("welcomeActorFit(opticalBounds[id], h, slotWidth)"));
  assert.ok(intro.includes("measureCastArtwork()"));

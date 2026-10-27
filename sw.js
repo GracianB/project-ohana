@@ -1,6 +1,8 @@
-const VERSION = "ohana-604";
+const VERSION = "ohana-605";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./caprichos.css",
+  "./systems/field-guide.js?v=" + VERSION,
   "./worlds/living-realms.js?v=" + VERSION,
   "./versus.html",
   "./versus.css",
@@ -416,6 +418,8 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "caprichos.css": "3bfeded806796332c7b1365f74d80a28c93b54bb",
+  "systems/field-guide.js": "4db1268c68b110919733e5dd8e4b8908b5525519",
   "worlds/living-realms.js": "60ca12726eb92819858a45da8de8ff02c8551ac3",
   "versus.html": "015c6ab6f66b4dab8b44a7b7f989865d3b77a327",
   "versus.css": "1514f50bf9f794f82532214430b4fc176fdd7d93",
@@ -576,7 +580,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "6972493539269b1db241c37440892ee2440f808f",
+  "index.html": "7010a557af023cac7f21cdd51572a90a7a37b552",
   "multiplayer.html": "8700abcf3f860c504167facf1c37815debad59f9",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "b3178c951bec2a30bda0bb2b2d47763b24567189",
@@ -661,7 +665,7 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/dino.js": "7b05da88e41abc9eaed595bd18ff81ec8445fc20",
   "systems/evo-cine/dragon.js": "c1ab988df6711b082e7dee018352a98e401ac168",
   "engine/foes.js": "250d28a48300ca924fb7da7edf12674a5798bd6c",
-  "engine/input.js": "c797a4014e5013322fb81ef25a0735c9b31e6520",
+  "engine/input.js": "7acfab4e704ada18daadb9e049be4ded5330e0cf",
   "engine/platform-drop.js": "ec1f2a91aa47bfeba0b387d560bf736a1217bd84",
   "engine/music.js": "378371c4d659151a2abffbebe86b1cc3635933cc",
   "engine/particles.js": "f9846627187b481a8716480f388539b7257560e8",
@@ -758,13 +762,13 @@ const PRECACHE_REVISIONS = {
   "systems/supreme-storyboards.js": "a458edc944c821baf9d2733cdf641ac9cde69beb",
   "systems/evo-cinema.js": "a624da92ae681d35f8fa6bbb37d04cb7c965000f",
   "systems/floaters.js": "caa36305a89c892c70d86d01356df4d62280edb5",
-  "systems/hud.js": "5a168383aeb7896cb86991f4812040b80f548eee",
+  "systems/hud.js": "48765107ee645118470a593300572183c9859498",
   "systems/a11y-v97.js": "a636eae0e6b45bd8896d931d2e459e8049d4623f",
   "systems/render-v98-culling.js": "64725ac71706a84351b645c44b6615d8cebaf030",
   "systems/frame-pressure.js": "0386d6604ecfaa482a482eb9216962bf7413c720",
   "systems/hero-mastery.js": "830da8e6a6b2eb2352024b22b2b10cd69373c020",
   "systems/hazards.js": "c7e540b2c7b725405064887b53c46f01baf7759a",
-  "systems/intro.js": "4003f231a90f0d2c693bc5150aab75d2fceddb93",
+  "systems/intro.js": "da6e1f3589ad26872e94f45aa0e519dcffb5cbbb",
   "systems/intro-cast-fit.js": "e23ad877d1deadb5769d639d5fa2200fb69573c6",
   "systems/welcome-spotlight.js": "76ab5c1894dedacd695aa353658d853960a2048b",
   "systems/intro-dragon-stage.js": "d7a0d895dc6406011b408fc16c4ae6a0a9566eed",
@@ -796,7 +800,7 @@ const PRECACHE_REVISIONS = {
   "systems/save.js": "f61e63942df8093cd3bd88dee6f79592a9bd91e6",
   "systems/surprises.js": "9ac680c25713258f8e828eb396bf7f659ce390da",
   "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
-  "systems/title.js": "e14b7a233972654ca7b2408add240e40bc420c3e",
+  "systems/title.js": "d161c7fb535c015fa8be155abcb579972e0e1eb0",
   "systems/experience.js": "6ae2198d35393ab39584f42f974584a9c9a5d547",
   "systems/online-coop.js": "78e1d95a76007fd66a88661b68867f483bc381c6",
   "systems/duo-altar-art.js": "2563f6d83f5428ff00af011fff13a542ba6dfae4",

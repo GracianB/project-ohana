@@ -55,5 +55,5 @@ test("V100 production cinematic, accessible results, cache and release agree",()
  assert.ok(html.includes(sw.match(/const VERSION = "(ohana-\d+)"/)?.[1])&&progress.includes("ohana-300"));
  assert.match(sw,/systems\/v100-family-choreography\.js\?v=/);
  assert.match(intro,/PROJECT OHANA/);
- assert.match(intro,/<strong>OHANA<\/strong>/);
+ assert.match(intro,/class="ohana-wordmark" aria-label="Ohana"/);
 });

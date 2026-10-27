@@ -137,6 +137,16 @@ test("E funciona en teclado y táctil, pero las acciones no se ejecutan en pausa
   f.input.destroy();
 });
 
+test("abrir ayuda entre pulsar y soltar Espacio libera el salto y conserva la activación nativa", () => {
+  const f = inputFixture();
+  assert.equal(send(f.target, "keydown", { key: " ", code: "Space" }).defaultPrevented, true);
+  assert.equal(f.input.keys[" "], true);
+  f.disable();
+  assert.equal(send(f.target, "keyup", { key: " ", code: "Space" }).defaultPrevented, false);
+  assert.equal(f.input.keys[" "], false);
+  f.input.destroy();
+});
+
 test("saltar no cancela una dirección mantenida", () => {
   const f = inputFixture();
   send(f.target, "keydown", { key: "ArrowRight", code: "ArrowRight" });

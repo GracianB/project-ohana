@@ -1,3 +1,4 @@
+import './field-guide.js';
 import {MICHI_VISUAL_H} from "../characters/art/cat.js";
 import {CHISPIN_VISUAL_H} from "../characters/art/chispin.js";
 import {STITCHO_VISUAL_H} from "../characters/art/stitcho.js";

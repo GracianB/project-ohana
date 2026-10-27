@@ -157,7 +157,9 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   listen(target, "keyup", (event) => {
     const key = movementKey(event);
     if (!MOVEMENT.has(key)) return;
-    event.preventDefault();
+    // Always release a held direction. Modal controls still need their native
+    // keyup (Space activates summary/buttons); gameplay must not cancel it.
+    if (canAct()) event.preventDefault();
     hold(key, "keyboard:" + key, false);
   });
 
