@@ -107,7 +107,7 @@
     }
   ],
   "source_blobs": {
-    "index.html": "7010a557af023cac7f21cdd51572a90a7a37b552",
+    "index.html": "a6ccc0277738e013838b42d8616e744a1905db41",
     "caprichos.css": "3bfeded806796332c7b1365f74d80a28c93b54bb",
     "systems/field-guide.js": "4db1268c68b110919733e5dd8e4b8908b5525519",
     "systems/intro.js": "da6e1f3589ad26872e94f45aa0e519dcffb5cbbb",
@@ -120,5 +120,37 @@
     "Local results do not assert CI success for this branch.",
     "Public multiplayer remains paused."
   ],
-  "publication": "docs/V605-PUBLICATION.json"
+  "publication": "docs/V605-PUBLICATION.json",
+  "upgrade_guard": [
+    {
+      "mode": "menu",
+      "extraNavigations": 1,
+      "bodyPlaying": false,
+      "guide": true,
+      "controller": "http://127.0.0.1:46573/sw.js?v=ohana-605",
+      "pageErrors": []
+    },
+    {
+      "mode": "playing",
+      "extraNavigations": 0,
+      "bodyPlaying": true,
+      "guide": false,
+      "controller": "http://127.0.0.1:46573/sw.js?v=ohana-605",
+      "afterQuit": {
+        "extraNavigations": 1,
+        "bodyPlaying": false,
+        "guide": true
+      },
+      "pageErrors": []
+    },
+    {
+      "mode": "fresh",
+      "extraNavigations": 0,
+      "bodyPlaying": false,
+      "guide": true,
+      "controller": "http://127.0.0.1:46573/sw.js?v=ohana-605",
+      "pageErrors": []
+    }
+  ],
+  "upgrade_guard_note": "Real V604-to-V605 upgrade with a 2s delay on the new worker: one menu refresh; zero refreshes during gameplay and one after returning to menu; zero on fresh install. Full 1667 unit tests and 12 startup contracts passed."
 }

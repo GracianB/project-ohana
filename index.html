@@ -291,14 +291,30 @@
     </div>
   </section>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script type="module" src="systems/cinema-loader.js?v=ohana-605"></script>
-  <script type="module" src="game.js?v=ohana-605"></script>
-  <script type="module" src="systems/title.js?v=ohana-605"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-605"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-605"></script>
-  <script type="module" src="systems/demo.js?v=ohana-605"></script>
   <script>
     if ("serviceWorker" in navigator) {
+      // An older worker may serve its cached modules on the first visit to a
+      // new release. Refresh once after activation, only at the menu; never
+      // interrupt a running game. Fresh installs do not need another load.
+      (function () {
+        var initial = navigator.serviceWorker.controller;
+        var refreshing = false;
+        var waiting = null;
+        function refreshAtMenu() {
+          if (refreshing || document.body.classList.contains("playing")) return;
+          refreshing = true;
+          if (waiting) waiting.disconnect();
+          location.reload();
+        }
+        navigator.serviceWorker.addEventListener("controllerchange", function () {
+          var current = navigator.serviceWorker.controller;
+          if (!initial || !current || current.scriptURL === initial.scriptURL) return;
+          if (waiting || refreshing) return;
+          waiting = new MutationObserver(refreshAtMenu);
+          waiting.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+          refreshAtMenu();
+        });
+      })();
       window.addEventListener("load", function () {
         navigator.serviceWorker.register("./sw.js?v=ohana-605", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
@@ -306,5 +322,11 @@
       });
     }
   </script>
+  <script type="module" src="systems/cinema-loader.js?v=ohana-605"></script>
+  <script type="module" src="game.js?v=ohana-605"></script>
+  <script type="module" src="systems/title.js?v=ohana-605"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-605"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-605"></script>
+  <script type="module" src="systems/demo.js?v=ohana-605"></script>
 </body>
 </html>

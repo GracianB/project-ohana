@@ -138,5 +138,6 @@
     "paid": [],
     "proxyTrust": "Environment proxy CA pinned by SPKI"
   },
-  "note": "Verified the deployed runtime before committing this publication record. Subsequent documentation-only commits do not change the runtime source hashes."
+  "note": "Verified the deployed runtime before committing this publication record. Subsequent documentation-only commits do not change the runtime source hashes.",
+  "subsequent_upgrade_fix": "This is the initial publication proof. The later menu-only worker refresh guard and its updated source hashes are verified separately in docs/V605-VALIDATION.json."
 }

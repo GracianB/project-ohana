@@ -39,3 +39,5 @@ Los paisajes del libro pintan sólo mientras la ayuda está abierta y la pestañ
 Pages y los controles de publicación de V605 aprobados. Diez archivos runtime públicos coinciden por SHA256; bienvenida, libro y entrada nativa al capítulo comprobados en escritorio y móvil. La #441/V604 conserva su evidencia histórica en `docs/V604-PUBLICATION.json`. Netlify continúa pausado; esta tanda no acredita rendimiento del servidor externo ni equilibrio humano de todas las parejas PvP.
 
 Resultados y huellas del código comprobado: `docs/V605-VALIDATION.json`.
+
+Actualización desde V604: la primera visita renueva el menú al activarse la nueva caché. Si ya estás jugando, espera a que regreses al menú; no interrumpe la partida. Prueba real con latencia de 2 s al nuevo worker: menú una recarga, partida cero y una al salir, instalación fresca cero; sin errores JavaScript.
