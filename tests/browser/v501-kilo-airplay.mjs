@@ -2,6 +2,7 @@
 // separate chapter pilot earns all forms and chimes with actual movement.
 import assert from 'node:assert/strict';import fs from 'node:fs/promises';
 import {chromium} from 'playwright';import {startServer} from './server.mjs';
+import {KILO_CHAPTER_ARENA} from '../../systems/kilo-chapter.js';
 const server=await startServer(0);let browser;
 try{
  browser=await chromium.launch(process.env.CHROMIUM_BIN?{executablePath:process.env.CHROMIUM_BIN}:{});
@@ -28,14 +29,15 @@ try{
  assert.equal(s.roomId,'lab');assert.ok(s.hp>0);assert.equal(s.kiloFlight.mode,null,'accepted damage must interrupt flight; later healing may restore HP');
  // The boss's real warning renderer with an airborne target; access, form
  // position and four earned notes are fixtures; this does not claim a second earned victory.
- await page.evaluate(()=>{const e=window.__OHANA_E2E;e.startWorld1('kilo');const save=JSON.parse(localStorage.getItem('ohana'));Object.assign(save,{id:'kilo',roomId:'w1-kilo',evo:4,xp:420,world1Seals:[],clearedEncounters:{},world1Stations:{'w1-kilo':[0,1,2,3]}});localStorage.setItem('ohana',JSON.stringify(save));localStorage.removeItem('ohana.tmp');localStorage.setItem('ohana-resume','1');e.startWorld1('kilo');e.step(600);e.setPlayer(8500,730);});
+ await page.evaluate(left=>{const e=window.__OHANA_E2E;e.startWorld1('kilo');const save=JSON.parse(localStorage.getItem('ohana'));Object.assign(save,{id:'kilo',roomId:'w1-kilo',evo:4,xp:420,world1Seals:[],clearedEncounters:{},world1Stations:{'w1-kilo':[0,1,2,3]}});localStorage.setItem('ohana',JSON.stringify(save));localStorage.removeItem('ohana.tmp');localStorage.setItem('ohana-resume','1');e.startWorld1('kilo');e.step(600);e.setPlayer(left+350,730);},KILO_CHAPTER_ARENA.left);
  await page.locator('#game').focus();await page.keyboard.press('k');
  let aerial=null;
- for(let i=0;i<200;i++){
+ for(let i=0;i<600;i++){
   await step(1);aerial=await page.evaluate(()=>window.__OHANA_E2E.roomCast().find(e=>e.miniBoss)?.guardian);
-  if(aerial?.phase==='warn'&&aerial.aerialVolley?.length===3)break;
+  if(aerial?.phase==='warn'&&aerial.airTarget&&aerial.aerialVolley?.length)break;
  }
- assert.equal(aerial?.aerialVolley?.length,3);assert.equal(aerial.phase,'warn');
+ assert.equal(aerial?.airTarget,true);assert.equal(aerial.phase,'warn');
+ assert.ok(Number.isFinite(aerial.volleyAngle)&&Number.isFinite(aerial.targetY),'committed fan has a fixed aerial aim');
  await page.screenshot({path:'test-results/v501/kilo-guardian-aerial-warning.png'});
  const mobile=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});const phone=await mobile.newPage();phone.on('pageerror',e=>errors.push(e.message));
  await phone.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});

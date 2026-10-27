@@ -1,0 +1,630 @@
+{
+  "candidate": "ohana-606",
+  "branch": "feat/v606-kilo-encounters",
+  "base": "5754bbb47058aa91b5d198b75a4601c0dbcc5645",
+  "published_at_validation": false,
+  "scope": [
+    "Claro de Kilo: fauna, guardian, musical objectives and progression",
+    "Kilo flight depth and readable toggle state",
+    "shared HUD meters and Canvas portrait"
+  ],
+  "runner": "Local Linux, system Chromium /usr/bin/chromium; other browser engines and physical phones not tested.",
+  "checks": [
+    {
+      "command": "npm test",
+      "result": "PASS",
+      "tests": 1685,
+      "failures": 0
+    },
+    {
+      "command": "node tools/release-gate.mjs",
+      "result": "PASS",
+      "modules": 349,
+      "resources": 410,
+      "cache": "ohana-606"
+    },
+    {
+      "command": "node tests/browser/e2e.mjs",
+      "result": "PASS",
+      "coverage": [
+        "desktop/mobile",
+        "native controls",
+        "save",
+        "module loading",
+        "offline"
+      ]
+    },
+    {
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v606-kilo-journey.mjs",
+      "result": "PASS",
+      "stage": "final runtime including HUD/flight changes",
+      "evidence": {
+        "mode": "full-physical-chapter",
+        "difficulty": "normal",
+        "deaths": 0,
+        "minimumHp": 65.84,
+        "minimumHealthRatio": 0.764,
+        "iterations": 232,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "milestones": [
+          {
+            "instrument": 1,
+            "x": 2347,
+            "xp": 57,
+            "evo": 1,
+            "hp": 100,
+            "frame": 733,
+            "iteration": 28
+          },
+          {
+            "instrument": 2,
+            "x": 5187,
+            "xp": 140,
+            "evo": 2,
+            "hp": 109.4,
+            "frame": 1692,
+            "iteration": 76
+          },
+          {
+            "instrument": 3,
+            "x": 8097,
+            "xp": 260,
+            "evo": 3,
+            "hp": 151.84,
+            "frame": 2549,
+            "iteration": 112
+          },
+          {
+            "instrument": 4,
+            "x": 11469,
+            "xp": 420,
+            "evo": 4,
+            "hp": 210,
+            "frame": 3467,
+            "iteration": 150
+          }
+        ],
+        "guardianPhases": [
+          "waiting",
+          "intro",
+          "warn",
+          "strike",
+          "rest",
+          "step"
+        ],
+        "guardianPatterns": [
+          0,
+          1,
+          2
+        ],
+        "guardianAttacks": 5,
+        "journal": [],
+        "final": {
+          "done": 4,
+          "evo": 4,
+          "hp": 210,
+          "x": 13659.01004234158,
+          "sealed": true,
+          "bossAlive": false
+        },
+        "errors": []
+      }
+    },
+    {
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v513-full-campaign.mjs",
+      "result": "PASS",
+      "stage": "chapter core before final HUD/flight presentation changes",
+      "evidence": {
+        "difficulty": "normal",
+        "journal": [
+          {
+            "hero": "kilo",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 65.84,
+            "iterations": 253,
+            "sealCount": 1,
+            "discoveries": 0
+          },
+          {
+            "hero": "stitcho",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 72.3,
+            "iterations": 288,
+            "sealCount": 2,
+            "discoveries": 3
+          },
+          {
+            "hero": "chispin",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 47.339999999999996,
+            "iterations": 150,
+            "sealCount": 3,
+            "discoveries": 3
+          },
+          {
+            "hero": "cat",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 50.2,
+            "iterations": 228,
+            "sealCount": 4,
+            "discoveries": 3
+          },
+          {
+            "hero": "cuerno",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 72.46000000000001,
+            "iterations": 198,
+            "sealCount": 5,
+            "discoveries": 3
+          },
+          {
+            "hero": "dragon",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 104,
+            "iterations": 222,
+            "sealCount": 6,
+            "discoveries": 3
+          },
+          {
+            "hero": "dino",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 130.56,
+            "iterations": 250,
+            "sealCount": 7,
+            "discoveries": 3
+          },
+          {
+            "hero": "frita",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 30.139999999999993,
+            "iterations": 200,
+            "sealCount": 8,
+            "discoveries": 3
+          },
+          {
+            "hero": "pizza",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 110,
+            "iterations": 249,
+            "sealCount": 9,
+            "discoveries": 3
+          },
+          {
+            "hero": "yomi",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 74,
+            "iterations": 264,
+            "sealCount": 10,
+            "discoveries": 3
+          },
+          {
+            "gauntlet": {
+              "deaths": 0,
+              "rescued": [
+                "kilo",
+                "stitcho",
+                "chispin",
+                "cat",
+                "cuerno",
+                "dragon",
+                "dino",
+                "frita",
+                "pizza",
+                "yomi"
+              ],
+              "cinematics": [
+                "keepsakeIntro",
+                "keepsakeRescue",
+                "bossIntro"
+              ]
+            }
+          }
+        ],
+        "finalDeaths": 0,
+        "phases": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "films": [
+          "bossDefeat",
+          "ending"
+        ],
+        "won": true,
+        "combatReport": {
+          "hits": 154,
+          "damage": 2323.419999999999
+        },
+        "errors": []
+      }
+    },
+    {
+      "command": "OHANA_COOP_CHAPTERS=1 CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v604-coop-campaign.mjs",
+      "result": "PASS",
+      "stage": "chapter core before final HUD/flight presentation changes",
+      "evidence": {
+        "journal": [
+          {
+            "hero": "kilo",
+            "deaths": 0,
+            "forms": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "minHp": 35.80000000000001,
+            "iterations": 285,
+            "discoveries": 0,
+            "guest": {
+              "hero": "kilo",
+              "x": 12869.797426643709,
+              "hp": 171.8,
+              "report": {
+                "hits": 7,
+                "damage": 70.79999999999998
+              }
+            }
+          }
+        ],
+        "next": "w1-stitcho",
+        "errors": []
+      }
+    },
+    {
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v513-pressure.mjs",
+      "result": "PASS",
+      "evidence": [
+        {
+          "mode": "easy",
+          "policy": "idle",
+          "frames": 1200,
+          "hp": 34.350000000000016,
+          "maxHp": 80,
+          "damage": 45.649999999999984,
+          "hits": 10,
+          "faults": 0
+        },
+        {
+          "mode": "normal",
+          "policy": "idle",
+          "frames": 380,
+          "hp": 0,
+          "maxHp": 80,
+          "damage": 79.99999999999999,
+          "hits": 8,
+          "faults": 0
+        },
+        {
+          "mode": "hard",
+          "policy": "idle",
+          "frames": 200,
+          "hp": 0,
+          "maxHp": 80,
+          "damage": 80.00000000000001,
+          "hits": 6,
+          "faults": 0
+        },
+        {
+          "mode": "normal",
+          "policy": "active",
+          "frames": 1200,
+          "hp": 15.100000000000001,
+          "maxHp": 80,
+          "damage": 64.89999999999999,
+          "hits": 5,
+          "faults": 0
+        }
+      ]
+    },
+    {
+      "command": "node tests/browser/visual-regression.mjs",
+      "result": "PASS",
+      "stage": "chapter core; final HUD and flight checked separately",
+      "coverage": [
+        "opening",
+        "50 forms",
+        "worlds",
+        "powers",
+        "help",
+        "map",
+        "ending"
+      ]
+    },
+    {
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v605-caprichos.mjs",
+      "result": "PASS",
+      "coverage": [
+        "1280/390/320px HUD and guide",
+        "keyboard preferences",
+        "persistence",
+        "power inspector",
+        "reduced motion"
+      ]
+    },
+    {
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v600-presentation.mjs",
+      "result": "PASS",
+      "coverage": [
+        "ten guardians",
+        "four Kilo instrument instructions",
+        "nine other expeditions",
+        "real star pickup/music/expiration"
+      ]
+    },
+    {
+      "command": "node tests/browser/v606-kilo-flight-art.mjs",
+      "result": "PASS",
+      "evidence": {
+        "fixtures": 90,
+        "nonfinite": [],
+        "canvasDepth": 0,
+        "errors": [],
+        "scope": "isolated Canvas presentation; no gameplay acceptance claimed"
+      }
+    },
+    {
+      "command": "temporary HUD Canvas/render check",
+      "result": "PASS",
+      "evidence": {
+        "layouts": [
+          {
+            "w": 1280,
+            "h": 900,
+            "layout": [
+              {
+                "left": 14,
+                "right": 258,
+                "height": 144
+              },
+              {
+                "left": 1044,
+                "right": 1266,
+                "height": 108.84375
+              }
+            ]
+          },
+          {
+            "w": 390,
+            "h": 844,
+            "layout": [
+              {
+                "left": 10,
+                "right": 191,
+                "height": 120
+              },
+              {
+                "left": 199,
+                "right": 380,
+                "height": 92.25
+              }
+            ]
+          },
+          {
+            "w": 320,
+            "h": 568,
+            "layout": [
+              {
+                "left": 10,
+                "right": 156,
+                "height": 115
+              },
+              {
+                "left": 164,
+                "right": 310,
+                "height": 92.25
+              }
+            ]
+          }
+        ],
+        "portraits": 50,
+        "errors": [],
+        "fixtures": "portrait gallery only; responsive HUD starts real Kilo"
+      }
+    },
+    {
+      "command": "temporary petal Canvas/render check",
+      "result": "PASS",
+      "evidence": {
+        "kind": "cosmetic-render-check; fixtures do not certify physical play",
+        "results": [
+          {
+            "name": "desktop",
+            "viewport": {
+              "width": 1280,
+              "height": 800
+            },
+            "reducedMotion": "no-preference",
+            "errors": [],
+            "room": "w1-kilo",
+            "nonfinite": 0,
+            "fixtures": 6
+          },
+          {
+            "name": "mobile",
+            "viewport": {
+              "width": 390,
+              "height": 844
+            },
+            "reducedMotion": "no-preference",
+            "errors": [],
+            "room": "w1-kilo",
+            "nonfinite": 0,
+            "fixtures": 6
+          },
+          {
+            "name": "mobile-reduced",
+            "viewport": {
+              "width": 390,
+              "height": 844
+            },
+            "reducedMotion": "reduce",
+            "errors": [],
+            "room": "w1-kilo",
+            "nonfinite": 0,
+            "fixtures": 6
+          }
+        ]
+      }
+    },
+    {
+      "command": "V475 natural start + V476 physical earned checkpoint + V501 flight fixtures + V501 extended Kilo route",
+      "result": "PASS",
+      "coverage": [
+        "first instrument with keyboard combat",
+        "production respawn without duplicate rewards",
+        "aerial fan and keyboard/touch flight",
+        "Continue after two instruments",
+        "three optional chimes and persisted seal"
+      ]
+    },
+    {
+      "command": "node tests/browser/v366-performance.mjs",
+      "result": "PASS",
+      "evidence": {
+        "purpose": "Headless CI diagnostics; not a hardware FPS claim.",
+        "profiles": [
+          {
+            "device": "desktop-1280",
+            "samples": 120,
+            "totalFrames": 125,
+            "fps": 43,
+            "frameP95Ms": 33.4,
+            "renderP50Ms": 5.5,
+            "renderP95Ms": 7.7,
+            "maxRenderMs": 11,
+            "dpr": 1,
+            "mode": "quality"
+          },
+          {
+            "device": "mobile-iphone13",
+            "samples": 120,
+            "totalFrames": 162,
+            "fps": 58,
+            "frameP95Ms": 16.8,
+            "renderP50Ms": 4.9,
+            "renderP95Ms": 7,
+            "maxRenderMs": 9.3,
+            "dpr": 1.25,
+            "mode": "quality"
+          }
+        ]
+      },
+      "limitation": "Headless local diagnostics, not a physical-phone or comparative hardware benchmark."
+    }
+  ],
+  "source_blobs": {
+    "caprichos.css": "9e8e38d165dd5e874ae4f8d7e0180b17d708c42e",
+    "characters/draw.js": "a76c560b8512eb649eb8410c8a00c51bb5e6c91a",
+    "characters/hula-depth.js": "9e0acf8b849e7b3e25817dd8a7b5c60c4c0f467d",
+    "game.js": "b6caf8957e13132de86c5806d74512d960663104",
+    "index.html": "8d6fdede46bede8c117f685cbde7a6ac11d6d6dd",
+    "multiplayer/adventure-progress.js": "a7a5269f535a27a0e914376af8fb8181ca11bdf9",
+    "sw.js": "61d1117137cc02526b25b9c2dfde7a6bd042ede8",
+    "systems/abilities.js": "8d9e591590285b607b3b4e035bb43a2556239eb8",
+    "systems/adventure-guide-v2.js": "20cb47fb4557620c75e51d0c2c9179e677558440",
+    "systems/campaign-creature-art.js": "d8fb7db0e93d0ed1c4f3b5510b7699763183f723",
+    "systems/campaign-enemies.js": "ebbf2dec3e19c3255c22addf34aa7caaecf48bc2",
+    "systems/chapter-boss-art-v2.js": "65c2ec4b19620378b89c8c85413968186d2406df",
+    "systems/chapter-boss-v2.js": "025e57da29c02274ed62b480b2aef6f5825dd8c5",
+    "systems/coop-combat-mirror.js": "e1057296d8ac138b503556210fad0e27a7037730",
+    "systems/field-guide.js": "a203bf8c5bf224c5d80747e2cdc7f1c34bae5ded",
+    "systems/grove-guardian.js": "af3091d3fddbc4033c2391092bcb7df7a4016ba9",
+    "systems/hud-portrait-v606.js": "f05800678591f7c5b1cabd9b8f2f90de6ad9e6e6",
+    "systems/hud.js": "9aa1d6de98d920513f9472f39355ff710c63167f",
+    "systems/kilo-chapter-art-v606.js": "3bbcef81eaeb66ee4633c78d011aa4879761dbfd",
+    "systems/kilo-chapter.js": "0feb0e79c051b3fa278c7d9190e1aa010d0baa37",
+    "systems/kilo-encounters-v606.js": "c346bdd40b286c441996d4790433c8297cd52e2c",
+    "systems/power-status.js": "d9445661037ea150c321952929a282d91ac86811",
+    "systems/world1-collect.js": "a99c3768a01075294dcbc5bb6fda0fb459e95195",
+    "systems/world1-play.js": "cfef7e483d265a024c79bc2a500294ce52bfbf72",
+    "systems/world1-rooms.js": "68305dc02e5fc25405f5d1c7e78986a2215bab81",
+    "systems/world1-story.js": "dc635eb6dced1378e8831f5a825ceff9111e401a"
+  },
+  "limitations": [
+    "Automated state-reading pilots verify reachability and persistence, not human difficulty acceptance.",
+    "Visual fixtures do not count as earned gameplay.",
+    "Completed saves keep their earned forms; use a separate fresh profile to assess the new growth pace.",
+    "Only Claro encounters were redesigned. Other nine chapter rules stay unchanged.",
+    "Netlify remains paused; co-op was tested with a local service.",
+    "Local checks do not assert GitHub CI approval or public deployment."
+  ]
+}

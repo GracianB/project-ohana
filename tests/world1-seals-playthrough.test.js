@@ -6,7 +6,7 @@ import {nextChapterAbility,NEXT_CHAPTERS} from '../systems/chapters-lunar-prism-
 import test from "node:test";
 import assert from "node:assert/strict";
 import { WORLD1_ORDER, WORLD1_ROOMS, WORLD1_FLOOR, WORLD1_SEALS, world1DoorOpen, world1SealsComplete } from "../systems/world1-rooms.js";
-import { enterWorld1, updateWorld1, awardSeal, world1CanLeave, world1Snapshot, nodeLive } from "../systems/world1-play.js";
+import { enterWorld1, updateWorld1, awardSeal, world1CanLeave, world1Snapshot, nodeLive, kiloChapterAbility, interactKiloInstrument } from "../systems/world1-play.js";
 
 function setup(hero) {
   const room = WORLD1_ROOMS["w1-" + hero];
@@ -18,7 +18,7 @@ function setup(hero) {
     // This suite isolates station actions; guardian gating has its own tests.
     clearedEncounters: hero==='kilo'?{'w1-kilo':['w1-kilo-tambor-v1']}:{},
     world1Seals: [], world1Visited: {}, score: 0, projectiles: [],
-    player: { x: 0, y: WORLD1_FLOOR - 40, w: 28, h: 40, vx: 0, vy: 0, grounded: true, jumps: 0, health: 70, maxHealth: 100, xp: 0 },
+    player: { id: hero, evo: 0, x: 0, y: WORLD1_FLOOR - 40, w: 28, h: 40, vx: 0, vy: 0, grounded: true, jumps: 0, health: 70, maxHealth: 100, xp: 0 },
     nums: { add() {} }, fx: { emit() {} },
     onWorld1Beat: (type, id) => events.push([type, id]),
     save: () => { saves++; }
@@ -69,19 +69,26 @@ test("World 1: exactly ten distinct seal mechanics, stations, and east gates", (
   assert.equal(world1DoorOpen("w1-final", "right", { won: true }), true);
 });
 
-test("Kilo: serenade requires 45 stationary beats on each flower", () => {
+test("Kilo: each instrument needs its physical lesson rather than a stationary timer", () => {
   const run = setup("kilo"), { game, stand, tick } = run;
   assert.equal(world1CanLeave(game, "right"), false);
+  const cast=slot=>{game.player._cast={slot,t:game.world1.tick};kiloChapterAbility(game,game.player,slot);};
   for (const s of game.world1.stations) {
-    stand(s.x);
-    game.player.vx = 2;
-    for (let n = 0; n < 45; n++) tick();
-    assert.equal(s.done, false, "walking over a flower is not a stationary serenade");
-    game.player.vx = 0;
-    for (let n = 0; n < 44; n++) tick();
-    assert.equal(s.done, false, "must hold the full interval");
-    tick();
-    assert.equal(s.done, true);
+    stand(s.x);game.player.y=s.y-game.player.h;game.player.evo=s.note;
+    game.player.vx=2;for(let n=0;n<45;n++)tick();
+    assert.equal(s.done,false,"passing an instrument does not play it");
+    game.player.vx=0;for(let n=0;n<45;n++)tick();
+    assert.equal(s.done,false,"waiting cannot replace the lesson");
+    if(s.note===0)interactKiloInstrument(game);
+    else if(s.note===1){
+      interactKiloInstrument(game);assert.equal(s.done,false,"bamboo needs notes, not E");
+      cast(0);cast(0);assert.equal(s.done,false,"all three bamboo bars must sound");cast(0);
+    }else if(s.note===2){
+      cast(0);assert.equal(s.done,false,"harp must be played from the air");game.player.grounded=false;cast(0);
+    }else{
+      for(let n=0;n<3;n++)cast(0);assert.equal(s.done,false,"preparing I is not the remate");cast(4);
+    }
+    assert.equal(s.done,true);game.player.evo=s.note+1;
   }
   assertSealed(run, "kilo");
 });

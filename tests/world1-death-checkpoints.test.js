@@ -4,14 +4,14 @@ import assert from "node:assert/strict";
 import { WORLD1_FLOOR, WORLD1_ORDER, WORLD1_ROOMS } from "../systems/world1-rooms.js";
 import {
   enterWorld1, updateWorld1, world1Snapshot,
-  world1DeathCheckpoint, restoreWorld1DeathCheckpoint, world1CanLeave
+  world1DeathCheckpoint, restoreWorld1DeathCheckpoint, world1CanLeave, kiloChapterAbility, interactKiloInstrument
 } from "../systems/world1-play.js";
 
 function makeGame(hero) {
   const room = WORLD1_ROOMS["w1-"+hero];
   const g={
     roomId:room.id,roomDef:{...room,expedition:null},reduceMotion:true,world1Seals:[],world1Visited:{},
-    score:0,projectiles:[],player:{x:0,y:WORLD1_FLOOR-42,w:32,h:42,vx:0,vy:0,grounded:true,maxHealth:100,health:60,xp:0},
+    score:0,projectiles:[],player:{id:hero,evo:0,x:0,y:WORLD1_FLOOR-42,w:32,h:42,vx:0,vy:0,grounded:true,maxHealth:100,health:60,xp:0},
     nums:{add(){}},fx:{emit(){}},save(){this.saves=(this.saves||0)+1;},
     onWorld1Beat(type, id){this.events.push([type,id]);},events:[]
   };
@@ -23,14 +23,23 @@ function makeGame(hero) {
   },tick(){updateWorld1(g);},reload(){enterWorld1(g);}};
 }
 
+function playKiloInstrument(g,index){
+ const s=g.world1.stations[index],p=g.player;p.x=s.x-p.w/2;p.y=s.y-p.h;p.vx=0;p.vy=0;p.grounded=index!==2;p.evo=index;
+ const cast=slot=>{p._cast={slot,t:g.world1.tick};kiloChapterAbility(g,p,slot);};
+ if(index===0)interactKiloInstrument(g);else if(index===1)for(let n=0;n<3;n++)cast(0);else if(index===2)cast(0);else{for(let n=0;n<3;n++)cast(0);cast(4);}
+ if(s.done)p.evo=index+1;
+}
+
 test("death: authentic first Kilo note survives room reload without extra score, seal or XP",()=>{
   const x=makeGame("kilo"),s=x.g.world1.stations[0];
   // Isolate note persistence from the separately tested guardian gate.
   x.g.clearedEncounters={"w1-kilo":["w1-kilo-tambor-v1"]};
-  x.stand(s.x);for(let i=0;i<45;i++)x.tick();
+  playKiloInstrument(x.g,0);
   assert.equal(s.done,true);
   assert.equal(world1Snapshot(x.g).done,1);
   assert.equal(x.g.score,150);
+  const bamboo=x.g.world1.stations[1];x.stand(bamboo.x);x.g.player._cast={slot:0,t:x.g.world1.tick};kiloChapterAbility(x.g,x.g.player,0);
+  assert.equal(bamboo.tones,1);assert.equal(bamboo.done,false,"an unfinished phrase is not a saved station");
   const save=world1DeathCheckpoint(x.g);
   assert.deepEqual(save.completed,[0]);
   x.reload();
@@ -38,13 +47,12 @@ test("death: authentic first Kilo note survives room reload without extra score,
   assert.equal(restoreWorld1DeathCheckpoint(x.g,save),true);
   assert.equal(world1Snapshot(x.g).done,1);
   assert.equal(x.g.world1.stations[0]._scored,true);
+  assert.equal(x.g.world1.stations[1].tones||0,0,"unfinished bamboo notes reset on retry");
   assert.equal(x.g.world1.sealed,false);
   assert.deepEqual(x.g.world1Seals,[]);
   assert.equal(world1CanLeave(x.g,"right"),false);
   assert.equal(x.g.score,150);
-  for(const next of x.g.world1.stations.slice(1)){
-    x.stand(next.x);for(let i=0;i<45;i++)x.tick();
-  }
+  for(const next of x.g.world1.stations.slice(1))playKiloInstrument(x.g,next.note);
   assert.deepEqual(x.g.world1Seals,["kilo"]);
   assert.equal(x.g.score,600,"must never count a repeated note twice");
   assert.equal(x.g.player.xp,423);

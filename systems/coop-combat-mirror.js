@@ -13,7 +13,7 @@ const bools=["telegraph","fell","elite","baby","up","airborne","diving","chargin
 const strings=["mode","teleKind","aiRole","aiIntent","aiFormation","campaignRole"];
 const flags=[...numbers,...bools,...strings];
 const chapterKeys=['_drummer','_glitch','_titan','_astralCat','_prismBeast','_igneousDragon','_stoneColossus','_crispyKing','_magmaChef','_spiritGuide'];
-const mindKeys=['phase','clock','timer','attack','tier','pattern','aim','round','burst','exposed'];
+const mindKeys=['phase','clock','timer','attack','tier','pattern','aim','round','burst','exposed','warnMax','targetX','targetY','chargeStartX','chargeEndX','airTarget','turn'];
 function chapterMind(e){if(!e.miniBoss||e.gauntletBoss)return undefined;const key=chapterKeys.find(k=>e[k]);if(!key)return undefined;const state=Object.fromEntries(mindKeys.filter(k=>Object.hasOwn(e[key],k)).map(k=>[k,e[key][k]]));return {key,state};}
 function validMind(m){return m==null||chapterKeys.includes(m.key)&&m.state&&Object.keys(m.state).length<=mindKeys.length&&Object.entries(m.state).every(([k,v])=>mindKeys.includes(k)&&(typeof v==='boolean'||typeof v==='string'&&word(v)||Number.isFinite(v)&&Math.abs(v)<=1e6));}
 

@@ -26,10 +26,11 @@ export function chapterMapDetail(id,g){
  const destination=goal?`<circle class="wm-current-objective" cx="${goal.x/r.width*1000}" cy="${goal.y/1260*210}" r="8" fill="#ffb479" stroke="#fff1ce" stroke-width="2"><title>${goal.label}</title></circle>`:'';
  const you=current?`<circle cx="${(g.player.x+g.player.w/2)/r.width*1000}" cy="${(g.player.y+g.player.h/2)/1260*210}" r="6" fill="white" stroke="#143543" stroke-width="2"/>`:'';
  return `<h3>${r.name}</h3><p>${sealed?'Sello recuperado · exploración libre':current?currentProgress:'Cada historia tiene su héroe y sus herramientas'}</p>
- <svg style="width:100%;height:auto" viewBox="0 0 1000 220" role="img" aria-label="Terreno, destino actual ámbar, objetivos dorados, descubrimientos violetas y tu posición blanca"><rect width="1000" height="220" fill="#102b40"/>${platforms}${stations}${trials}${destination}${you}</svg>
- <p>${r.fusionBoss?'● Ámbar: destino actual · ● Blanco: tú':'● Dorado: crecimiento · ● Violeta: descubrimiento · ● Ámbar: destino actual · ● Blanco: tú'}</p>
+ <svg style="width:100%;height:auto" viewBox="0 0 1000 220" role="img" aria-label="Terreno, destino actual ámbar, objetivos dorados${r.expedition?', descubrimientos violetas':''} y tu posición blanca"><rect width="1000" height="220" fill="#102b40"/>${platforms}${stations}${trials}${destination}${you}</svg>
+ <p>${r.fusionBoss?'● Ámbar: destino actual · ● Blanco: tú':`● Dorado: ${r.kiloEncounterVersion?'instrumento':'crecimiento'}${r.expedition?' · ● Violeta: descubrimiento':''} · ● Ámbar: destino actual · ● Blanco: tú`}</p>
  ${goal?`<h4>Ahora: ${goal.label}</h4><p>${goal.action}</p>`:''}
  ${r.expedition?`<h4>Acto I · Despertar y guardián</h4><p>${r.hint}</p><h4>Acto II · ${r.expedition.name}</h4><p>${r.expedition.verb}. Tres descubrimientos para llevar la canción hasta el santuario final.</p>`:''}
+ ${r.kiloEncounterVersion?`<h4>Cuatro instrumentos · un guardián</h4><p>Cada voz recuperada despierta una forma. La XP se conserva mientras completas su aprendizaje.</p><ol>${r.seal.stations.map(s=>`<li><strong>${s.name}</strong> · ${s.action}. ${s.lesson}</li>`).join('')}</ol><p>El gran Tambor protege el final del Claro. Salta sus ondas, sal del destino de su carga y busca los huecos entre semillas. Ataca cuando recupera el compás. Los carillones del cielo y los recuerdos son opcionales.</p>`:''}
  ${r.hero?`<h4>Recuerdos: ${n}/100</h4><p>${rewardCopy(n)}</p><h4>Combinación de ${WORLD1_THEMES[r.hero].short}</h4><p><strong>${COMBO_GUIDES[r.hero][0]}</strong><br>${COMBO_GUIDES[r.hero][1]}</p><p>I: movimiento especial desde la cuarta forma. P: requiere quinta forma y 100 de carga ganada causando daño. U: compañero con recuperación propia.</p>`:''}`;
 }
 export function chapterAtlasHTML(g){

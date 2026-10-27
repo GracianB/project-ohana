@@ -22,10 +22,14 @@ test('Terrain culls both axes but retains visible hanging roots',()=>{
  assert.equal(terrainInView({x:300,y:100,w:100,h:22},cam,view),false);
  assert.equal(terrainInView({x:1200,y:800,w:100,h:22},cam,view),false);
 });
-test('Hula halves cover opposite semicircles, with no ring when inactive',()=>{
+test('Ceremonial hula halves cover opposite semicircles; K flight never adds a waist ring',()=>{
  const arcs=[],ctx={save(){},restore(){},beginPath(){},stroke(){},ellipse(...a){arcs.push(a);}};
- const p={id:'kilo',_cast:{id:'hula',t:0}};
+ const p={id:'kilo',_cast:{id:'hula',t:0},_kiloFlightT:200};
+ drawHulaDepth(ctx,p,100,20,false);drawHulaDepth(ctx,p,100,20,true);
+ assert.equal(arcs.length,0,'K uses petals below the feet, not a hoop through the body');
+ p._kiloOhanaT=180;p._kiloOhanaAt=0;
  drawHulaDepth(ctx,p,100,20,false);drawHulaDepth(ctx,p,100,20,true);
  assert.deepEqual(arcs.map(a=>a.slice(5)),[[Math.PI,Math.PI*2],[0,Math.PI]]);
+ p._kiloOhanaT=0;p._kiloFlightT=0;
  drawHulaDepth(ctx,p,100,96,true);assert.equal(arcs.length,2);
 });

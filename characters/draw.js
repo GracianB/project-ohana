@@ -1,5 +1,5 @@
 import {articulateStride} from './anatomical-stride.js';
-import {drawHulaDepth} from './hula-depth.js';
+import {drawHulaDepth,drawKiloFlightTrail} from './hula-depth.js';
 import {applyTenActionPose} from './ten-action-acting.js';
 import {applyPowerPerformance} from './power-performance.js';
 import {MICHI_VISUAL_H} from "./art/cat.js";
@@ -1284,7 +1284,7 @@ if(p.id==='kilo'&&!p.dead&&pose.state!=='hurt'){
  else if(powerAge>=0&&powerAge<24&&p._powerPerformance?.index===4)pose.kiloPerformance={kind:'remate',time:powerAge/60};
  else if(powerAge>=0&&powerAge<120&&p._powerPerformance?.index===5)pose.kiloPerformance={kind:'finale',time:powerAge/60};
  else if((p._kiloFlightT>0&&!(pose.state==='cast'&&p._cast?.slot!==1&&age<36))||(p._cast?.slot===1&&p._cast?.id==='hula'&&age>=0&&age<96))
-   pose.kiloPerformance={kind:'dance',time:age/60};
+   pose.kiloPerformance={kind:'dance',time:(p._kiloFlightT>0?t-(p._kiloFlightAt??t):age)/60};
  else if(entry>=0&&entry<96&&!moving&&!air&&pose.state==='idle')
    pose.kiloPerformance={kind:'entrance',time:entry/60};
  else if(!moving&&!air&&pose.state==='idle'&&!pose.reduceMotion)
@@ -1388,12 +1388,16 @@ if (burstK > 0.35) {
 }
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; if (p.id === "frita") flashA = hurtFresh ? 0.3 : 0.18; }
 const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
-drawHulaDepth(ctx,p,H,t,false,options.reduceMotion===true);
+drawKiloFlightTrail(ctx,p,H,t,options.reduceMotion===true);
 ctx.save();
 ctx.rotate(tilt * 0.5);
 // Per-hero ten-channel acting: exclusively stage-space transform, hitbox-safe.
 // Real movement/attack timing remains owned by the physics and character rig.
 applyTenActionPose(ctx,pose,p.id,evo);
+ctx.save();ctx.scale(sx,sy);
+drawHulaDepth(ctx,p,H,t,false,options.reduceMotion===true);
+ctx.restore();
+ctx.save();
 if (painted) {
 const ih = H * 1.05;
 const iw = ih * (painted.naturalWidth / painted.naturalHeight);
@@ -1408,11 +1412,13 @@ catch (err) {
 }
 }
 ctx.restore();
+ctx.scale(sx,sy);
+drawHulaDepth(ctx,p,H,t,true,options.reduceMotion===true);
+ctx.restore();
 
 if(p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, true);
 if(p.id!=="chispin")drawEvolutionSignatureFX(ctx, p, H, pose, t);
 drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);
-drawHulaDepth(ctx,p,H,t,true,options.reduceMotion===true);
 if (burstK > 0) {
 drawBurst(ctx, H, color, burstK);
 p.evoBurst--;

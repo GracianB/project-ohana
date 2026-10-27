@@ -1,178 +1,63 @@
-// V475 campaign pilot: the real Chromium gameplay loop and keyboard input
-// reach Kilo's first physical flower without teleporting, invulnerability
-// or granting progress. Full combat-capable campaign traversal remains open.
-// No setPlayer, loadRoom, grant, XP/HP cheats, or scripted seal completion.
+// Authentic first-instrument pilot. Native keyboard actions earn the caracola;
+// no positions, health, XP/forms, enemies, notes or seals are granted.
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import { chromium } from 'playwright';
-import { startServer } from './server.mjs';
-import { WORLD1_ROOMS, WORLD1_FLOOR } from '../../systems/world1-rooms.js';
+import {pathToFileURL} from 'node:url';
+import {chromium} from 'playwright';
+import {startServer} from './server.mjs';
+import {advanceTerrainControls} from './authored-terrain-controls.mjs';
+import {advanceKiloEncounterControls} from './kilo-encounter-controls-v606.mjs';
 
-const server=await startServer(0); let browser;
-try {
- browser=await chromium.launch();
- const page=await browser.newPage({viewport:{width:1440,height:900}});
- const faults=[];
- page.on('pageerror',e=>faults.push(e.message));
- const root='http://127.0.0.1:'+server.address().port;
- await page.goto(root+'/?e2e=1',{waitUntil:'domcontentloaded'});
+// Also used by the production-respawn audit: both tests earn the same real
+// instrument before asking different questions about its resulting state.
+export async function earnFirstKiloInstrument(page,root,{difficulty='easy'}={}){
+ await page.clock.install({time:new Date('2026-10-27T12:00:00Z')});
+ await page.clock.pauseAt(new Date('2026-10-27T12:00:01Z'));
+ await page.goto(root+'/?e2e=1',{waitUntil:'load'});
  await page.waitForFunction(()=>!!window.__OHANA_E2E);
- const initial=await page.evaluate(()=>{
-   localStorage.removeItem('ohana-w1-seals-v1');
-   localStorage.removeItem('ohana-resume');
-   // Use the actual selectable Easy difficulty, not an E2E HP or enemy hack.
-   // Normal mode is deliberately NOT claimed by this beginner-route pilot.
-   localStorage.setItem('ohana-difficulty','easy');
-   const e=window.__OHANA_E2E;
-   return e.startWorld1('kilo');
- });
- assert.equal(initial.roomId,'w1-kilo','start must use the genuine World 1 solo entry');
- assert.deepEqual(initial.world1Seals,[],'clean journey begins with no pre-earned seals');
- assert.equal(initial.world1?.done,0);
- assert.equal(initial.world1?.sealed,false);
- await page.locator('#game').focus();
-
+ await page.keyboard.press('Escape');
+ await page.locator('#difficulty [data-diff="'+difficulty+'"]').click();
+ const initial=await page.evaluate(()=>window.__OHANA_E2E.startWorld1('kilo'));
+ assert.equal(initial.roomId,'w1-kilo');assert.equal(initial.world1.done,0);
+ assert.deepEqual(initial.world1Seals,[]);assert.equal(initial.evo,0);
  const state=()=>page.evaluate(()=>window.__OHANA_E2E.state());
- const simulate=(frames)=>page.evaluate(n=>window.__OHANA_E2E.step(n),frames);
- async function finishCinema() {
-   for(let i=0;i<8;i++){
-     const s=await state();
-     if(!s.world1Cine) return s;
-     await simulate(600);
+ const step=async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return state();};
+ async function films(){
+  for(let n=0;n<24;n++){
+   if(await page.locator('#evo-stage.show .evo-skip').count()){
+    await page.locator('#evo-stage .evo-skip').click();await page.clock.runFor(400);continue;
    }
-   throw Error('A World 1 cinematic did not finish in 4800 simulation steps');
+   if(!(await state()).world1Cine)break;
+   await page.keyboard.press('Enter');await step(100);
+  }
+  await page.locator('#game').focus();
  }
- await finishCinema();
-
- const journal=[];
- async function walkTo(target,roomId,{exit=false}={}) {
-   for (let attempt=0;attempt<220;attempt++) {
-     await finishCinema();
-     let s=await state();
-     if(s.roomId!==roomId){
-       if(exit) return s;
-       throw Error('Unexpected room change while navigating '+roomId+' to '+target+': '+s.roomId);
-     }
-     if(!(s.hp>0))throw Error('Real hero died during unassisted walk: '+JSON.stringify({roomId,target,player:s.player,score:s.score}));
-     let gap=target-(s.player.x+18);
-     // Genuine keyboard combat/defense. The first pilot died near Kilo's
-     // fourth flower because it blindly walked through eight enemies.
-     // Here the player attacks and jumps, without touching HP or enemy state.
-     if (gap>0 && s.player.grounded) {
-       const foe=await page.evaluate(()=>window.__OHANA_E2E.roomCast()
-         .filter(f=>f.hp>0&&!f.miniBoss).map(f=>({x:f.x,y:f.y,w:f.w,h:f.h})));
-       const ahead=foe.filter(f=>f.x>s.player.x-10 && f.x<s.player.x+320).sort((a,b)=>a.x-b.x)[0];
-       if(ahead && ahead.x-s.player.x<260) {
-         await page.keyboard.down('w');
-         await simulate(3);
-         await page.keyboard.up('w');
-         await page.keyboard.down('h');
-         await simulate(2);
-         await page.keyboard.up('h');
-         s=await state();
-         gap=target-(s.player.x+18);
-       }
-     }
-     if(Math.abs(gap)<26 && !exit){
-       // A jump used to dodge foes may still be descending at this waypoint.
-       // Kilo's serenade requires 45 grounded and stationary simulation ticks:
-       // do not return early while airborne, even if X is already aligned.
-       await simulate(110);
-       s=await state();
-       if(Math.abs(target-(s.player.x+18))<48 && s.player.grounded)return s;
-     }
-     if(exit && s.player.x>s.worldW-180) {
-       // Continue holding forward so that the real door threshold starts
-       // its countdown; never call e.loadRoom or write world1Seals.
-       await page.keyboard.down('d');
-       s=await simulate(170);
-       await page.keyboard.up('d');
-       if(s.roomId!==roomId)return s;
-     }
-     const key=gap>0?'d':'a',other=gap>0?'a':'d';
-     await page.keyboard.up(other);
-     await page.keyboard.down(key);
-     const frames= Math.max(2,Math.min(95,Math.floor((Math.abs(gap)-42)/6)));
-     const before=s.player.x;
-     s=await simulate(frames);
-     await page.keyboard.up(key);
-     await simulate(10);
-     journal.push({room:roomId,target,at:Math.round(s.player?.x||0),hp:s.hp,seal:s.world1?.done});
-     if(journal.length>260)journal.shift();
-     // V511 added real 48px terraced banks. Ordinary walking must NOT phase
-     // through them: climb using the genuine jump key before diagnosing a bug.
-     if(Math.abs(s.player.x-before)<.3 && !s.world1Cine && frames>12){
-       const blocked=s.player.x;
-       if(s.player.grounded){
-         await page.keyboard.down('w'); await simulate(3); await page.keyboard.up('w');
-         await page.keyboard.down(key); s=await simulate(34); await page.keyboard.up(key);
-         await simulate(8);
-         s=await state();
-         journal.push({room:roomId,target,at:Math.round(s.player?.x||0),hp:s.hp,seal:s.world1?.done,action:'physical jump'});
-       }
-       if(s.player.x<=blocked+.3 && s.player.grounded)
-         throw Error('Player physically stuck after walking AND jumping: '+JSON.stringify(journal.slice(-8)));
-     }
-   }
-   throw Error('Could not walk to '+target+' in '+roomId+': '+JSON.stringify(journal.slice(-10)));
+ let s=await step(600);await films();s=await state();const journal=[];
+ for(let i=0;i<500&&s.world1.done<1;i++){
+  assert.ok(s.hp>0,'first instrument must be reached alive with real '+difficulty+' combat');
+  if(s.world1Cine||await page.locator('#evo-stage.show').count()){await films();s=await state();}
+  s=await advanceKiloEncounterControls(page,s,step,i);
+  if(i%10===0)journal.push({i,x:Math.round(s.player.x),hp:s.hp,xp:s.xp,done:s.world1.done,evo:s.evo});
+  assert.equal(s.roomId,'w1-kilo');assert.equal(s.runtimeFaults,0);
  }
-
- // The first independent acceptance stage: a real grounded note, never
- // a synthetic progress grant. Full ten-room E2E remains explicitly open.
- const flowers=WORLD1_ROOMS['w1-kilo'].seal.stations;
- assert.equal(flowers.length,4);
- let first=await walkTo(flowers[0].x,'w1-kilo');
- // Reaching a note and *earning* it are different. Kilo's chapter requires
- // real foes near the flower to be cleared, then 45 stationary grounded beats.
- // Combat here uses only J/H and actual walk/jump keys, never kill/HP setters.
- for(let attempt=0;attempt<100&&first.world1?.done<1;attempt++){
-   await finishCinema();
-   const guards=await page.evaluate(x=>window.__OHANA_E2E.roomCast()
-     .filter(e=>e.hp>0&&Math.abs(e.x+(e.w||0)/2-x)<130)
-     .map(e=>({x:e.x,w:e.w,hp:e.hp})),flowers[0].x);
-   if(guards.length){
-     const enemy=guards.sort((a,b)=>Math.abs(a.x-first.player.x)-Math.abs(b.x-first.player.x))[0];
-     const dx=enemy.x+(enemy.w||0)/2-(first.player.x+first.player.w/2);
-     if(Math.abs(dx)>38){
-       const direction=dx>0?'d':'a';
-       await page.keyboard.down(direction);await simulate(Math.min(9,Math.max(2,Math.floor(Math.abs(dx)/7))));
-       await page.keyboard.up(direction);
-     }
-     await page.keyboard.down('h');await simulate(2);await page.keyboard.up('h');
-     await page.keyboard.down('j');await simulate(2);await page.keyboard.up('j');
-     if(attempt%5===0&&first.player.grounded){
-       await page.keyboard.down('w');await simulate(3);await page.keyboard.up('w');
-     }
-     await simulate(20);
-   }else{
-     const dx=flowers[0].x-(first.player.x+first.player.w/2);
-     if(Math.abs(dx)>28){
-       await page.keyboard.down(dx>0?'d':'a');await simulate(Math.min(12,Math.max(2,Math.floor(Math.abs(dx)/5))));
-       await page.keyboard.up(dx>0?'d':'a');
-     }
-     await simulate(60);
-   }
-   first=await state();
-   if(first.hp<=0)throw Error('Kilo died during real flower combat before first note: '+JSON.stringify({attempt,guards,journal:journal.slice(-8)}));
- }
- assert.equal(first.world1?.done,1,
-   'one Kilo flower must actually sing after 45 grounded ticks: '+JSON.stringify(journal.slice(-8)));
- assert.equal(first.world1?.sealed,false,'one flower cannot grant Kilo a seal');
- assert.deepEqual(first.world1Seals,[],'progress was not granted by the harness');
- assert.ok(first.hp>0,'the player must arrive alive on real Easy difficulty');
- assert.equal(first.runtimeFaults,0,'no browser runtime exceptions during physical travel');
- await fs.mkdir('test-results/v475',{recursive:true});
- await page.screenshot({path:'test-results/v475/kilo-first-authentic-note.png'});
- await fs.writeFile('test-results/v475/physical-campaign-pilot.json',JSON.stringify({
-   startedAt:'w1-kilo',firstFlower:{x:flowers[0].x,completed:first.world1.done===1},
-   earnedSeals:first.world1Seals,health:first.hp,difficulty:'easy',
-   movement:'keyboard physics',teleports:false,invulnerability:false,
-   sealsGrantedByTests:0,roomsPhysicallyCompleted:0,
-   completeCampaignVerified:false,quimeraDefeated:false,
-   journal:journal.slice(-50),floor:WORLD1_FLOOR
- },null,2));
- assert.deepEqual(faults,[],'browser runtime errors');
- console.log('PASS V475: authentic solo World 1 startup, real keyboard walk, first 45-tick Kilo flower and locked seal. Full campaign NOT claimed.');
-} finally{
- await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+ assert.equal(s.world1.done,1,'the caracola must answer a real E/J action after combat');
+ assert.equal(s.world1.sealed,false);assert.deepEqual(s.world1Seals,[]);
+ assert.ok(s.hp>0);await films();s=await state();
+ return {initial,earned:s,journal,difficulty};
 }
+
+async function main(){
+ const server=await startServer(0);let browser;
+ try{
+  browser=await chromium.launch(process.env.CHROMIUM_BIN?{executablePath:process.env.CHROMIUM_BIN}:{});
+  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  const result=await earnFirstKiloInstrument(page,'http://127.0.0.1:'+server.address().port);
+  await fs.mkdir('test-results/v475',{recursive:true});
+  await page.screenshot({path:'test-results/v475/kilo-first-authentic-note.png'});
+  await fs.writeFile('test-results/v475/physical-campaign-pilot.json',JSON.stringify({...result,teleports:false,healthOrXpGranted:false,sealsGrantedByTests:0,completeCampaignVerified:false,errors},null,2));
+  assert.deepEqual(errors,[]);
+  console.log('PASS V475: authentic World 1 start, physical Easy combat/traversal, E/J caracola and locked seal; no progress grants');
+ }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
+}
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await main();

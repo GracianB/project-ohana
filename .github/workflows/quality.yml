@@ -84,11 +84,16 @@ jobs:
       - name: V473 five feline moon-jellies · idle, wake, unique palette and reduced motion
         run: node tests/browser/v473-lunar-jellies.mjs
 
-      - name: V475 World 1 authentic keyboard start and Kilo first flower
+      - name: V475 World 1 authentic keyboard start and Kilo caracola
         run: node tests/browser/v475-world1-natural-walk.mjs
 
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
+
+      - name: V606 Claro · four earned instruments and committed Tambor patterns
+        run: |
+          node tests/browser/v606-kilo-journey.mjs
+          node tests/browser/v606-kilo-flight-art.mjs
 
       - name: V459 ten kinetic animations per hero, lunar feline lineage and accessibility
         run: node tests/browser/v459-motion.mjs
