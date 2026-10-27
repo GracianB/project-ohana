@@ -21,7 +21,12 @@ export function mergeAdventureProgress(previous,payload,{roomId,host=false}={}){
  next.secrets[roomId]=union(next.secrets[roomId],secretIds).slice(0,64);
  next.encounters[roomId]=union(next.encounters[roomId],encounterIds).slice(0,64);
  const discoveries=r.expedition?.nodes||[];
- if(host&&payload.sealed===true&&next.stations[roomId].length===stations.size&&discoveries.every(n=>next.secrets[roomId].includes(n.id))&&next.encounters[roomId].length>0)
+ // Kilo's authored route no longer has the generic Act II gate. It still
+ // requires the real, unchanged guardian receipt: another room-scoped event
+ // must not become a substitute for defeating Tambor.
+ const guardian=r.kiloEncounterVersion?r.foes.find(f=>f[4]?.encounterId)?.[4].encounterId:null;
+ const guardianDone=guardian?next.encounters[roomId].includes(guardian):next.encounters[roomId].length>0;
+ if(host&&payload.sealed===true&&next.stations[roomId].length===stations.size&&discoveries.every(n=>next.secrets[roomId].includes(n.id))&&guardianDone)
   next.seals=WORLD1_ORDER.filter(h=>next.seals.includes(h)||h===r.hero);
  return next;
 }

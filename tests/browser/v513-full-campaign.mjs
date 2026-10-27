@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';import fs from 'node:fs/promises';
 import {chromium} from 'playwright';import {startServer} from './server.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
+import {advanceKiloEncounterControls} from './kilo-encounter-controls-v606.mjs';
 import {playGauntlet} from './gauntlet-controls.mjs';
 const server=await startServer(0);let browser;
 try{
@@ -33,6 +34,15 @@ try{
    iterations=i;
    if(s.hp<=0){assert.ok(++deaths<=12,'natural retries exhausted '+hero);await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();s=await step(90);}
    await films();s=await state();forms.add(s.evo);minHp=Math.min(minHp,s.hp);
+   if(hero==='kilo'){
+    // Same physical controller as the isolated V606 journey. Stay on this page,
+    // preserve the earned inventory, and play the complete opening chapter.
+    s=await advanceKiloEncounterControls(page,s,step,i);
+    forms.add(s.evo);minHp=Math.min(minHp,s.hp);
+    assert.equal(s.runtimeFaults,0);assert.ok(s.evo<=s.world1.done,'Kilo grows only after its current instrument');
+    if(i%150===0){await fs.writeFile('test-results/v600/campaign-debug.json',JSON.stringify({s,expedition:null,node:null}));await page.screenshot({path:'test-results/v600/campaign-current.png'});console.log('CAMPAIGN',JSON.stringify({hero,i,x:Math.round(s.player.x),hp:s.hp,done:s.world1.done,evo:s.evo,expedition:0,y:Math.round(s.player.y)}));}
+    continue;
+   }
    const data=await page.evaluate(()=>({next:window.__OHANA_E2E.nextChapterState(),workshop:window.__OHANA_E2E.stitchoChapterState(),fryer:window.__OHANA_E2E.fryerAstralState(),pizza:window.__OHANA_E2E.pizzaChapterState()}));
    const foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast()),boss=foes.find(e=>e.chapterBoss||e.guardian||e.stitchoBoss||e.chispinBoss),b=boss&&(boss.chapterBoss||boss.guardian||boss.stitchoBoss||boss.chispinBoss);
    const p=s.player,station=stations[s.world1.done],near=foes.filter(e=>e.hp>0&&Math.hypot(e.x+e.w/2-p.x-p.w/2,e.y+e.h/2-p.y-p.h/2)<430).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
@@ -101,9 +111,9 @@ try{
    if(i%150===0){await fs.writeFile('test-results/v600/campaign-debug.json',JSON.stringify({s,expedition,node}));await page.screenshot({path:'test-results/v600/campaign-current.png'});}
    if(i%150===0)console.log('CAMPAIGN',JSON.stringify({hero,i,x:Math.round(s.player.x),hp:s.hp,done:s.world1.done,evo:s.evo,boss:boss?.hp,expedition:expedition?.done.length,target:node?.id,y:Math.round(s.player.y)}));
   }
-  assert.equal(s.world1.sealed,true,hero+' earned seal');assert.equal(s.world1.expedition.done,3,'all three real Act II discoveries');assert.deepEqual([...forms].sort(),[0,1,2,3,4]);
+  assert.equal(s.world1.sealed,true,hero+' earned seal');assert.equal(s.world1.expedition?.done??0,expeditionNodes.length,'all authored Act II discoveries');if(hero==='kilo')assert.equal(s.world1.expedition,null,'Kilo instruments replace the generic Act II errands');assert.deepEqual([...forms].sort(),[0,1,2,3,4]);
   assert.deepEqual(s.world1Seals,order.slice(0,chapter+1),'one continuous earned seal inventory');
-  journal.push({hero,deaths,forms:[...forms],minHp,iterations,sealCount:s.world1Seals.length,discoveries:s.world1.expedition.done});
+  journal.push({hero,deaths,forms:[...forms],minHp,iterations,sealCount:s.world1Seals.length,discoveries:s.world1.expedition?.done??0});
   await page.screenshot({path:`test-results/v600/campaign-${hero}-sealed.png`});await films();
   for(let n=0;n<160&&s.roomId==='w1-'+hero;n++){await hold('d');s=await step(20);}await release('d');
   assert.notEqual(s.roomId,'w1-'+hero,'earned east exit crosses physically');await films();s=await state();
@@ -163,7 +173,12 @@ try{
  // last active-hero save, not merely within this one continuous page.
  for(const hero of order){
   await page.evaluate(hero=>{localStorage.removeItem('ohana-resume');window.__OHANA_E2E.startWorld1(hero);},hero);
-  assert.equal((await page.evaluate(()=>window.__OHANA_E2E.expeditionState())).done.length,3,hero+' discoveries survive chapter selection');
+  const revisit=await state(),expedition=await page.evaluate(()=>window.__OHANA_E2E.expeditionState());
+  if(hero==='kilo'){
+   assert.equal(expedition,null,'Kilo has no generic expedition to restore');
+   assert.equal(revisit.world1.done,4,'all four earned instruments survive selecting another chapter');
+   assert.equal(revisit.world1.sealed,true);assert.ok(revisit.world1Seals.includes('kilo'));
+  }else assert.equal(expedition.done.length,3,hero+' discoveries survive chapter selection');
  }
  await page.context().storageState({path:'test-results/v600/earned-campaign-storage.json'});
  await fs.writeFile('test-results/v600/full-campaign.json',JSON.stringify({difficulty:'normal',journal,finalDeaths:deaths,phases:[...phases],films:[...filmsSeen],won:true,combatReport:s.combatReport,errors},null,2));

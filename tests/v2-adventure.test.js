@@ -17,14 +17,14 @@ function fixture(hero){
  enterWorld1(g);g.world1.stations.forEach(s=>s.done=true);return g;
 }
 function stand(g,x,y,air=false){const p=g.player;p.x=x-p.w/2;p.y=y-p.h/2;p.grounded=!air;p.vx=p.vy=0;}
-test('V2 extends ten physical rooms by half with three unique discoveries and safe recovery floor',()=>{
- for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];assert.equal(r.width,14400);assert.equal(r.expedition.nodes.length,3);assert.ok(r.checkpoints.length>=9);assert.equal(r.seal.altar.x,13920);
+test('V2 keeps nine expedition chapters while Kilo uses the whole room for its four lessons',()=>{
+ for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];assert.equal(r.width,14400);if(hero==='kilo'){assert.equal(r.expedition,null);assert.equal(r.seal.stations.length,4);assert.ok(r.seal.stations[3].x>11000);continue;}assert.equal(r.expedition.nodes.length,3);assert.ok(r.checkpoints.length>=9);assert.equal(r.seal.altar.x,13920);
   for(const n of r.expedition.nodes){assert.ok(n.x>9600&&n.x<14000);assert.ok(n.id.startsWith(r.id+'-'));}
   assert.ok(r.plats.some(p=>p[0]===9600&&p[2]===4800&&p[1]===1134));
  }
 });
-test('V2 all thirty real discovery state machines gate seals and persist through the real save sanitizer',()=>{
- for(const hero of WORLD1_ORDER){const g=fixture(hero);assert.equal(awardSeal(g),false,'boss and stations do not replace Act II');
+test('V2 twenty-seven discovery state machines gate the other nine seals and persist through the save sanitizer',()=>{
+ for(const hero of WORLD1_ORDER){const g=fixture(hero);if(hero==='kilo'){assert.equal(expeditionReady(g),true);assert.equal(awardSeal(g),true,'Kilo has no generic post-guardian checklist');continue;}assert.equal(awardSeal(g),false,'boss and stations do not replace Act II');
   for(const [i,n] of g.roomDef.expedition.nodes.entries()){
    if(n.kind==='supper'){stand(g,n.x-700,1110);updateExpedition(g);assert.equal(g.expedition.carry,n.id);stand(g,n.x,1110);updateExpedition(g);}
    else if(n.kind==='plate'){stand(g,n.x,1000,true);g.player.vy=12;updateExpedition(g);stand(g,n.x,1134-g.player.h/2);updateExpedition(g);}
@@ -59,9 +59,9 @@ test('V2 ability invulnerability never becomes injury, real hurt recovers, and s
 
 test('V2 discoveries survive starting another hero and cannot pay again across attempts',()=>{
  const values=new Map(),storage={getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)};
- const a=fixture('kilo');a.expeditionStorage=storage;const n=a.roomDef.expedition.nodes[0];stand(a,n.x,n.y,true);expeditionAbility(a,a.player,0);const paid=a.score;
+ const a=fixture('chispin');a.expeditionStorage=storage;const n=a.roomDef.expedition.nodes[0];stand(a,n.x,n.y,true);expeditionAbility(a,a.player,0);const paid=a.score;
  const other=fixture('stitcho');other.expeditionStorage=storage;enterExpedition(other);
- const b=fixture('kilo');b.expeditionStorage=storage;b.secrets={};enterExpedition(b);assert.equal(b.expedition.done.length,1);stand(b,n.x,n.y,true);expeditionAbility(b,b.player,0);assert.equal(b.score||0,0);assert.equal(a.score,paid);
+ const b=fixture('chispin');b.expeditionStorage=storage;b.secrets={};enterExpedition(b);assert.equal(b.expedition.done.length,1);stand(b,n.x,n.y,true);expeditionAbility(b,b.player,0);assert.equal(b.score||0,0);assert.equal(a.score,paid);
 });
 
 test('V2 adaptive selection cannot erase the four-pattern native boss cycle',()=>{

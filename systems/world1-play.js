@@ -1,3 +1,4 @@
+import {drawKiloResonator} from './kilo-chapter-art-v606.js';
 import {updateFinalGauntlet} from './final-gauntlet.js';
 import {KEEPSAKES} from './keepsakes.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
@@ -7,7 +8,7 @@ import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact} fr
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
 import {stitchoGrowth,updateStitchoChapter,stitchoChapterReady,stitchoObjective,drawStitchoChapter} from './stitcho-chapter.js';
-import {enterKiloAirTrail,updateKiloAirTrail,drawKiloAirTrail,kiloNoteGrowth,kiloGuardianRequired,kiloFlowerThreat,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
+import {enterKiloAirTrail,updateKiloAirTrail,drawKiloAirTrail,kiloNoteGrowth,kiloGuardianRequired,kiloFlowerThreat,kiloInstrumentAction,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
 // OHANA V467 · MUNDO 1 · sellos, cinemáticas de sala y fondo-silueta del héroe.
 // Cada sala tiene UNA interacción propia (WORLD1_SEALS); el resto es sencillo.
 // Determinista: sin Math.random, sin degradados por fotograma y con geometría finita.
@@ -120,7 +121,7 @@ export function world1NextObjective(g) {
   if (!w || !p || !r) return null;
   const expedition=expeditionObjective(g);if(expedition)return expedition;
   if (w.sealed) return { x: r.width - 80, y: r.seal?.altar?.y || 1134, label: "Salida del este", action: "Sigue hacia la siguiente sala" };
-  if(kiloGuardianRequired(g)&&w.stations.every(s=>s.done))return {x:8750,y:KILO_CHAPTER_ARENA.floor,label:'Tambor del Claro',action:'Las cuatro notas están listas · vence al guardián. Salta sus ondas y ataca cuando se recupere.'};
+  if(kiloGuardianRequired(g)&&w.stations.every(s=>s.done))return {x:(KILO_CHAPTER_ARENA.left+KILO_CHAPTER_ARENA.right)/2,y:KILO_CHAPTER_ARENA.floor,label:'Tambor del Claro',action:'Las cuatro notas están listas · vence al guardián. Salta sus ondas y ataca cuando se recupere.'};
   const workshopGoal=stitchoObjective(g)||chispinObjective(g)||nextChapterObjective(g);if(workshopGoal)return workshopGoal;
   const remaining = w.stations.filter(s => !s.done && s.kind !== "oven");
   const nearest = list => [...list].sort((a,b) => Math.abs(a.x - cx(p)) - Math.abs(b.x - cx(p)))[0];
@@ -141,6 +142,10 @@ export function world1NextObjective(g) {
   }
   else if (w.kind === "prismas") label = "Prisma " + ["I","II","III"][w.order];
   else if (w.kind === "medusas") { label = "Medusa "+((target?.id??0)+1)+"/5"; action = "Salta hacia ella: despierta y se convierte en un apoyo para explorar más arriba"; }
+  else if (w.kind === "serenata" && r.kiloEncounterVersion) {
+    target=w.stations.find(s=>!s.done);label=target?.name||'El gran Tambor';
+    action=target?(kiloFlowerThreat(g,target)?'Despeja los enemigos que defienden el instrumento. '+target.lesson:target.action):'Continúa hacia el guardián del final del Claro';
+  }
   else if (w.kind === "serenata") {label = "Flor sin canción";
     if(target&&kiloFlowerThreat(g,target))action='Despeja los enemigos junto al hibisco antes de tocar. H cerca · J a distancia';
     else action='Nota '+((target?.note??0)+1)+'/4 → forma '+(w.stations.filter(s=>s.done).length+2)+'/5 · quédate quieto para tocar. Los cromos del álbum son opcionales';
@@ -221,6 +226,7 @@ export function updateWorld1(g,hurt) {
   const airborne = !p.grounded;
   switch (w.kind) {
     case "serenata": {
+      if(r.kiloEncounterVersion){for(const s of w.stations)if(!s.done)s.threatened=!!kiloFlowerThreat(g,s);break;}
       const damaged=p._kiloNoteHealth!=null&&p.health<p._kiloNoteHealth;
       for (const s of w.stations) {
         if (s.done) continue;
@@ -519,6 +525,7 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
   ctx.lineWidth = 3; ctx.strokeStyle = "#fff6e0";
   switch (s.kind) {
     case "flower": {
+      if(g.roomDef?.kiloEncounterVersion){drawKiloResonator(ctx,s,cam,t,{reduced:reduce,active:w.stations.find(n=>!n.done)===s,progress:s.done?1:(s.tones||0)/3,label:s.name,caption:s.done?'VOZ RECUPERADA':s.threatened?'DESPEJA EL INSTRUMENTO':s.action});break;}
       ctx.strokeStyle='#346b51';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x-6,y-27,x+8,y-46,x,y-68);ctx.stroke();
       for(const side of [-1,1]){ctx.fillStyle='#6ca486';ctx.strokeStyle='#346b51';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(x,y-27);ctx.bezierCurveTo(x+side*24,y-58,x+side*39,y-33,x+side*3,y-22);ctx.fill();ctx.stroke();}
       ctx.save();ctx.translate(x,y-73);ctx.rotate(reduce?0:Math.sin(t*.017+s.id)*.035);
@@ -630,3 +637,6 @@ export function drawWorld1Overlay(ctx, g, W, H) {
   }
   ctx.restore();
 }
+
+export function kiloChapterAbility(g,p,index){return kiloInstrumentAction(g,p,index,complete);}
+export function interactKiloInstrument(g){return kiloInstrumentAction(g,g.player,'interact',complete);}

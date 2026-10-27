@@ -114,3 +114,49 @@ body.playing #hud .bar-row{margin:0;line-height:1;}
 #camp-guide:hover{background:#254c55;}
 body.playing .ability-slot.locked{opacity:.68!important;filter:saturate(.35);}
 #help #btn-close-help{position:sticky;bottom:0;z-index:2;display:block;margin-left:auto;box-shadow:0 0 0 7px #f4efdf;}
+
+/* V606 · the hero, two resources, one glance. Canvas art keeps its real shape. */
+body.playing #hud .hud-block.player{padding:10px 12px 11px;background:linear-gradient(135deg,#284953f7,#0a2436f7 72%);border:1px solid #d4e6cc50;border-top:2px solid var(--tint,#b6e6ce);box-shadow:0 7px 20px #03172255,inset 0 1px #fff2ca14;}
+body.playing #hud .hud-ident{gap:10px;margin-bottom:8px;}
+body.playing #hud .hud-avatar{position:relative;width:52px;height:52px;flex:0 0 52px;overflow:visible;border-radius:15px;border:1px solid #e8d6a799;box-shadow:0 3px 0 #061b2b80,0 0 0 3px #e0dbad0c;background:#14303f;}
+body.playing #hud .hud-avatar canvas{border-radius:14px;}
+body.playing #hud .hud-avatar::after{content:attr(data-form);inset:auto -4px -3px auto;width:17px;height:17px;display:grid;place-items:center;background:#f1d693;border:2px solid #153242;border-radius:5px;color:#1b3944;font:700 10px/1 Outfit,sans-serif;z-index:2;}
+body.playing #hud .hud-kicker{font:700 8px/1.2 Outfit,sans-serif;letter-spacing:.18em;color:#c6ded5;}
+body.playing #hud .hud-name{font:600 21px/1.15 Fredoka,sans-serif;letter-spacing:.01em;text-shadow:0 2px #061c2c80;}
+body.playing #hud .bars-container{gap:6px;}
+body.playing #hud .bar-row{gap:6px;}
+body.playing #hud .bar-lab{flex:0 0 29px;width:29px;font:700 9px/1 Outfit,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:#dbede0;}
+body.playing #hud .bar{height:18px;isolation:isolate;overflow:hidden;border:1px solid #bcdbcf59;border-radius:6px;background:linear-gradient(#04131f,#112f3e);box-shadow:inset 0 2px 4px #0006,0 1px #ffffff0c;}
+body.playing #hud .bar-fill{height:100%;position:relative;min-height:100%;border-radius:4px;box-shadow:inset 0 1px #ffffff70,inset 0 -3px #153d4b35;}
+body.playing #hud .bar.hp .bar-fill{background:linear-gradient(90deg,#278d82 0%,#62cda1 55%,#b2edbc 100%);}
+body.playing #hud .bar.xp{height:16px;border-color:#e4cd9252;}
+body.playing #hud .bar.xp .bar-fill{background:linear-gradient(90deg,#996a3e,#dbb66b 55%,#fff0aa);}
+body.playing #hud .bar::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(20% - 1px),#061c2938 calc(20% - 1px),#061c2938 20%);}
+body.playing #hud .bar-fill::after{content:'';position:absolute;right:0;top:2px;bottom:2px;width:2px;background:#fff7d9b3;border-radius:2px;}
+body.playing #hud .bar-text{z-index:2;right:7px;font:700 11px/1 Outfit,sans-serif;letter-spacing:.025em;color:#fff9e7;text-shadow:0 1px 2px #071a24,1px 0 #071a24,-1px 0 #071a24,0 -1px #071a24;font-variant-numeric:tabular-nums;}
+body.playing #hud .hud-meta{font:500 10px/1.3 Outfit,sans-serif;margin:7px 0 0;color:#c7ded6;min-height:13px;}
+body.playing #hud[data-evolution-state=instrument] .bar.xp{border-color:#f8e2a3;}
+body.playing #hud[data-evolution-state=instrument] .bar.xp .bar-fill{background:linear-gradient(90deg,#ad7d47,#efd18a);}
+body.playing #hud[data-evolution-state=instrument] .hud-meta{color:#ffe3a5;}
+body.playing #hud[data-evolution-state=maximum] .bar.xp .bar-fill{background:linear-gradient(90deg,#738eb1,#b2b1dc,#f1d999);}
+body.playing #hud .hud-block.player.hurt .bar.hp .bar-fill{background:linear-gradient(90deg,#b84860,#f69985);animation:none;}
+body.playing #hud .hud-block.player.hurt .hud-avatar{border-color:#ffb79d;}
+body.comfort-contrast.playing #hud .hud-block.player{background:#061827;border-color:#d8e9df;}
+@media(max-width:640px){
+ body.playing #hud .hud-block.player{padding:8px;}
+ body.playing #hud .hud-ident{gap:7px;margin-bottom:7px;}
+ body.playing #hud .hud-avatar{width:40px;height:40px;flex-basis:40px;border-radius:11px;}
+ body.playing #hud .hud-avatar canvas{border-radius:10px;}
+ body.playing #hud .hud-avatar::after{width:15px;height:15px;font-size:9px;right:-3px;bottom:-3px;}
+ body.playing #hud .hud-name{font-size:15px;}
+ body.playing #hud .bars-container{gap:5px;}
+ body.playing #hud .bar-row{gap:4px;}
+ body.playing #hud .bar-lab{width:24px;flex-basis:24px;font-size:8px;letter-spacing:.03em;}
+ body.playing #hud .bar{height:17px;}
+ body.playing #hud .bar.xp{height:15px;}
+ body.playing #hud .bar-text{font-size:9px;right:4px;letter-spacing:0;}
+ body.playing #hud .hud-meta{font-size:9px;line-height:1.3;margin-top:5px;min-height:12px;}
+}
+@media(max-width:359px){body.playing #hud .hud-avatar{width:35px;height:35px;flex-basis:35px;}body.playing #hud .hud-ident{gap:6px;}body.playing #hud .hud-name{font-size:14px;}}
+@media(max-height:450px) and (pointer:coarse){body.playing #hud .hud-avatar{width:32px;height:32px;flex-basis:32px;}body.playing #hud .hud-ident{margin-bottom:5px;}body.playing #hud .hud-block.player{padding:6px 8px;}body.playing #hud .hud-meta{display:none;}}
+body.gentle-motion #hud .bar-fill{transition:none!important;}

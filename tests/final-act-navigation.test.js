@@ -19,6 +19,6 @@ test('after an edge-of-arena victory the minimap points to the relic instead of 
  const html=chapterMapDetail(g.roomId,g);assert.match(html,/class="wm-current-objective"/);assert.match(html,/<title>Primer pincel<\/title>/);assert.match(html,/Ahora: Primer pincel/);assert.match(html,/Ámbar: destino actual/);
 });
 test('ordinary chapters retain their authored growth destination',()=>{
- const g={roomId:'w1-kilo',roomDef:WORLD1_ROOMS['w1-kilo'],world1:{kind:'serenata',sealed:false,stations:[{id:0,note:0,x:1234,y:1034,done:false}]},player:{id:'kilo',x:100,y:1000,w:22,h:26},enemies:[]};
- const goal=world1NextObjective(g);assert.equal(goal.x,1234);assert.equal(goal.label,'Flor sin canción');assert.match(goal.action,/Nota 1\/4/);
+ const g={roomId:'w1-kilo',roomDef:WORLD1_ROOMS['w1-kilo'],world1:{kind:'serenata',sealed:false,stations:[{id:0,note:0,x:1234,y:1034,done:false,name:'Caracola del arroyo',action:'E o J · despierta la caracola'}]},player:{id:'kilo',x:100,y:1000,w:22,h:26},enemies:[]};
+ const goal=world1NextObjective(g);assert.equal(goal.x,1234);assert.equal(goal.label,'Caracola del arroyo');assert.match(goal.action,/E o J/);
 });

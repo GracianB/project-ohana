@@ -1,8 +1,9 @@
+import {recordKiloHit} from './kilo-combo.js';
 // Kilo's campaign chapter. Earned notes set a minimum XP; they do not add XP
 // repeatedly and never lower experience gained through combat/exploration.
 import {XP_NEED} from './xp.js';
 export const KILO_CHAPTER_BOSS_ID='w1-kilo-tambor-v1';
-export const KILO_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134});
+export const KILO_CHAPTER_ARENA=Object.freeze({left:12600,right:14100,floor:1134});
 export function kiloChapter(g){return g?.roomDef?.id==='w1-kilo'&&!!g.roomDef.kiloChapter;}
 export function kiloNoteGrowth(g){
  if(!kiloChapter(g)||!g.player||!g.world1)return 0;
@@ -27,16 +28,16 @@ export function kiloFlowerThreat(g,s){
 }
 
 export const KILO_AIR_CHIMES=Object.freeze([
- Object.freeze({id:'w1-kilo-wind-chime-1',x:7580,y:620}),
- Object.freeze({id:'w1-kilo-wind-chime-2',x:7930,y:480}),
- Object.freeze({id:'w1-kilo-wind-chime-3',x:8280,y:620})
+ Object.freeze({id:'w1-kilo-wind-chime-1',x:11850,y:760}),
+ Object.freeze({id:'w1-kilo-wind-chime-2',x:12140,y:540}),
+ Object.freeze({id:'w1-kilo-wind-chime-3',x:12450,y:680})
 ]);
 export const KILO_SKY_RINGS=Object.freeze([
- {id:'w1-kilo-sky-ring-1',x:4900,y:760},
- {id:'w1-kilo-sky-ring-2',x:5500,y:600},
- {id:'w1-kilo-sky-ring-3',x:6150,y:400},
- {id:'w1-kilo-sky-ring-4',x:7720,y:500},
- {id:'w1-kilo-sky-ring-5',x:8340,y:350}
+ {id:'w1-kilo-sky-ring-1',x:6600,y:760},
+ {id:'w1-kilo-sky-ring-2',x:7200,y:600},
+ {id:'w1-kilo-sky-ring-3',x:7800,y:400},
+ {id:'w1-kilo-sky-ring-4',x:10000,y:500},
+ {id:'w1-kilo-sky-ring-5',x:11000,y:350}
 ].map(Object.freeze));
 export function updateKiloSkyRoute(g){
  const p=g.player,w=g.world1;if(!kiloChapter(g)||!p||p.dead||!w||!(p._kiloFlightT>0))return;
@@ -100,4 +101,30 @@ export function drawKiloAirTrail(ctx,g,cam,t){
   ctx.font='700 11px sans-serif';ctx.fillText(ch.done?'♪':'VUELO SOLAR',x,y-32);
  }
  ctx.restore();
+}
+
+// Only the current instrument answers. Successful physical casts, not proximity,
+// advance the lesson. State is ephemeral until the existing station is earned.
+export function kiloInstrumentAction(g,p,index,complete){
+ if(!g.roomDef?.kiloEncounterVersion||!p||p.dead)return false;
+ const s=g.world1?.stations.find(s=>!s.done);if(!s)return false;
+ const distance=Math.hypot(p.x+p.w/2-s.x,p.y+p.h/2-(s.y-55));
+ if(distance>170)return false;
+ s.threatened=!!kiloFlowerThreat(g,s);
+ if(s.threatened){g.nums?.add?.(s.x,s.y-135,'DESPEJA EL INSTRUMENTO','#f5d0ac',false);return true;}
+ if(index==='interact'){
+  if(s.note===0)complete(g,s,'CARACOLA DESPIERTA');
+  else g.nums?.add?.(s.x,s.y-135,s.action,'#e9e8bf',false);
+  return true;
+ }
+ if(index===0){
+  if(p._cast&&typeof p._cast==='object'){s._playedCasts||=new WeakSet();if(s._playedCasts.has(p._cast))return true;s._playedCasts.add(p._cast);}
+  if(s.note===0)complete(g,s,'CARACOLA DESPIERTA');
+  else if(s.note===1){s.tones=Math.min(3,(s.tones||0)+1);s.glow=30;if(s.tones===3)complete(g,s,'BAMBÚ DESPIERTO');else g.nums?.add?.(s.x,s.y-135,'BAMBÚ · '+s.tones+'/3','#e5dfae',false);}
+  else if(s.note===2&&!p.grounded)complete(g,s,'EL DOSEL VUELVE A CANTAR');
+  else if(s.note===3){s.tones=Math.min(3,(s.tones||0)+1);s.glow=30;recordKiloHit(g,'J',p._cast||{});g.nums?.add?.(s.x,s.y-135,s.tones>=3?'I PREPARADO · HAZLO FLORECER':'COMPÁS · '+s.tones+'/3','#e5dfae',false);}
+  return true;
+ }
+ if(index===4&&s.note===3){complete(g,s,'EL CLARO RECUPERA SU VOZ');return true;}
+ return false;
 }

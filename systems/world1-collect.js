@@ -196,6 +196,16 @@ export function drawWorld1Collect(ctx, g, cam, t = 0) {
     if (have.has(it.id)) continue;
     const x = it.x - cx, y = it.y - cy + Math.sin(num(t) * 0.06 + it.id) * 3;
     if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
+    if(hero==='kilo'&&g.roomDef?.kiloEncounterVersion){
+      // A little petal carries the tune; XP keeps its separate gold diamond.
+      ctx.save();ctx.translate(x,y);ctx.rotate(g.reduceMotion?-.2:Math.sin(num(t)*.025+it.id)*.14-.2);
+      ctx.fillStyle=it.challenge?'#f5d892':'#efb7b0';ctx.strokeStyle='#655c58';ctx.lineWidth=1.4;
+      ctx.beginPath();ctx.moveTo(-10,6);ctx.bezierCurveTo(-15,-5,-2,-16,9,-13);ctx.bezierCurveTo(17,0,5,13,-10,6);ctx.fill();ctx.stroke();
+      ctx.strokeStyle='#fff5dd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-8,6);ctx.quadraticCurveTo(0,0,8,-10);ctx.stroke();
+      ctx.fillStyle='#58745a';ctx.beginPath();ctx.ellipse(-8,9,5,2.5,-.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#fff5d8';ctx.beginPath();ctx.arc(2,-3,2,0,Math.PI*2);ctx.fill();
+      ctx.restore();continue;
+    }
     // A small paper card reads as a memory, distinct from an XP crystal.
     ctx.fillStyle = "#f6ecd8";ctx.strokeStyle = c;ctx.lineWidth = it.challenge ? 2.5 : 1.5;
     ctx.beginPath();ctx.roundRect(x - 7,y - 10,14,20,3);ctx.fill();ctx.stroke();

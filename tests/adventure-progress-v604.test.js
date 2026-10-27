@@ -8,28 +8,42 @@ import {createRoomService} from '../netlify/lib/room-service.mjs';
 import {shouldSendPosition,networkPacing} from '../systems/coop-v103-pacing.js';
 import {LocalRoomStore} from '../tools/local-multiplayer-server.mjs';
 const roomId='w1-kilo',room=WORLD1_ROOMS[roomId];
-const fixture=()=>({onlineAdventure:true,roomId,roomDef:room,player:{id:'kilo',x:0,y:1000,w:30,h:40,health:70,xp:0,evo:0},world1Seals:[],secrets:{},expeditionStorage:createAdventureStorage()});
+const fixture=(hero='kilo')=>({onlineAdventure:true,roomId:'w1-'+hero,roomDef:WORLD1_ROOMS['w1-'+hero],player:{id:hero,x:0,y:1000,w:30,h:40,health:70,xp:0,evo:0},world1Seals:[],secrets:{},expeditionStorage:createAdventureStorage()});
 test('shared puzzle progress is authored, room scoped, monotonic and idempotent',()=>{
  const p={roomId,stations:[0,0,999],secrets:['w1-kilo-v2-trial-0','w1-cat-v2-trial-1'],encounters:['w1-kilo-drummer-v1'],sealed:true};
  const one=mergeAdventureProgress(null,p,{roomId});assert.deepEqual(one.stations[roomId],[0]);assert.deepEqual(one.secrets[roomId],['w1-kilo-v2-trial-0']);assert.deepEqual(one.encounters[roomId],[]);assert.deepEqual(one.seals,[]);
  assert.deepEqual(mergeAdventureProgress(one,{...p,stations:[]},{roomId}),one);assert.deepEqual(mergeAdventureProgress(one,p,{roomId:'w1-cat'}),one);
  assert.equal(JSON.stringify(mergeAdventureProgress(one,p,{roomId})),JSON.stringify(one));
 });
-test('only host seal receipts with completed stations and discoveries can unlock the room',()=>{
- const p={roomId,stations:room.seal.stations.map(s=>s.id),secrets:room.expedition.nodes.map(n=>n.id),encounters:['w1-kilo-drummer-v1'],sealed:true};
+test('Kilo requires four authored instruments and the real host guardian receipt, without a removed Act II gate',()=>{
+ assert.equal(room.expedition,null);
+ const p={roomId,stations:room.seal.stations.map(s=>s.id),secrets:[],encounters:['w1-kilo-tambor-v1'],sealed:true};
  assert.deepEqual(mergeAdventureProgress(null,p,{roomId}).seals,[]);
- assert.deepEqual(mergeAdventureProgress(null,{...p,secrets:[]},{roomId,host:true}).seals,[]);
+ assert.deepEqual(mergeAdventureProgress(null,{...p,stations:p.stations.slice(1)},{roomId,host:true}).seals,[]);
+ assert.deepEqual(mergeAdventureProgress(null,{...p,encounters:[]},{roomId,host:true}).seals,[]);
+ assert.deepEqual(mergeAdventureProgress(null,{...p,encounters:['w1-kilo-fake']},{roomId,host:true}).seals,[]);
  assert.deepEqual(mergeAdventureProgress(null,p,{roomId,host:true}).seals,['kilo']);
 });
+test('the other nine chapters retain their authored discovery requirements and host-only seals',()=>{
+ for(const r of Object.values(WORLD1_ROOMS).filter(r=>r.hero&&r.hero!=='kilo')){
+  assert.equal(r.expedition.nodes.length,3,r.hero);
+  const id=r.id,p={roomId:id,stations:r.seal.stations.filter(s=>s.kind!=='oven').map(s=>s.id),secrets:r.expedition.nodes.map(n=>n.id),encounters:[id+'-guardian-v1'],sealed:true};
+  assert.deepEqual(mergeAdventureProgress(null,p,{roomId:id}).seals,[],r.hero+' guest cannot seal');
+  assert.deepEqual(mergeAdventureProgress(null,{...p,secrets:p.secrets.slice(1)},{roomId:id,host:true}).seals,[],r.hero+' requires every discovery');
+  assert.deepEqual(mergeAdventureProgress(null,p,{roomId:id,host:true}).seals,[r.hero]);
+ }
+});
 test('applying shared objectives preserves identity, health and rewards through retries',()=>{
- const g=fixture();enterWorld1(g);const progress=mergeAdventureProgress(null,{roomId,stations:[0],secrets:[room.expedition.nodes[0].id]},{roomId});
+ const g=fixture();enterWorld1(g);const progress=mergeAdventureProgress(null,{roomId,stations:[0],secrets:['w1-kilo-v2-trial-0']},{roomId});
  for(let i=0;i<3;i++)assert.equal(applyAdventureProgress(g,progress),true);
- assert.equal(g.world1.stations[0].done,true);assert.equal(g.world1.stations[0]._scored,true);assert.equal(g.player.health,70);assert.equal(g.player.xp,0);assert.equal(g.score,undefined);assert.equal(g.player.id,'kilo');assert.equal(g.expedition.done.length,1);
- enterWorld1(g);assert.equal(g.world1.stations[0].done,true);assert.equal(g.expedition.done.length,1);
+ assert.equal(g.world1.stations[0].done,true);assert.equal(g.world1.stations[0]._scored,true);assert.equal(g.player.health,70);assert.equal(g.player.xp,0);assert.equal(g.score,undefined);assert.equal(g.player.id,'kilo');assert.equal(g.expedition,null);
+ assert.deepEqual(g.secrets[roomId],['w1-kilo-v2-trial-0'],'previously earned optional receipts are retained');
+ enterWorld1(g);assert.equal(g.world1.stations[0].done,true);assert.equal(g.expedition,null);
  g.onlineAdventure=false;assert.equal(applyAdventureProgress(g,progress),false);
 });
 test('cooperative discoveries use disposable storage instead of the solo expedition profile',()=>{
- const a=fixture(),b=fixture();a.expeditionStorage.setItem('ohana-expeditions-v2',JSON.stringify({[roomId]:[room.expedition.nodes[0].id]}));enterExpedition(a);enterExpedition(b);assert.equal(a.expedition.done.length,1);assert.equal(b.expedition.done.length,0);
+ const a=fixture('stitcho'),b=fixture('stitcho'),id=a.roomId,r=a.roomDef;a.expeditionStorage.setItem('ohana-expeditions-v2',JSON.stringify({[id]:[r.expedition.nodes[0].id]}));enterExpedition(a);enterExpedition(b);assert.equal(a.expedition.done.length,1);assert.equal(b.expedition.done.length,0);
+ const kilo=fixture();enterExpedition(kilo);assert.equal(kilo.expedition,null,'Kilo does not fabricate removed discoveries or storage');
 });
 test('both authenticated players contribute objectives; guest cannot manufacture boss or seal receipts',async()=>{
  const service=createRoomService(new LocalRoomStore());const h=await service.create('adventure'),g=await service.join(h.roomId);await service.choose(h.roomId,h.identity,'kilo');await service.choose(h.roomId,g.identity,'stitcho');await service.ready(h.roomId,h.identity);await service.ready(h.roomId,g.identity);
@@ -38,6 +52,15 @@ test('both authenticated players contribute objectives; guest cannot manufacture
  const host=await service.poll(h.roomId,h.identity);assert.deepEqual(host.adventureProgress.stations[roomId],[0]);
  const stale=await service.move(h.roomId,g.identity,pose);assert.equal(stale.replayed,true);assert.deepEqual(stale.adventureProgress,host.adventureProgress);
  await assert.rejects(service.move(h.roomId,{...g.identity,token:'wrong'},{...pose,sequence:2}),e=>e.code==='INVALID_SESSION');
+ const solved=await service.move(h.roomId,g.identity,{...pose,sequence:2,actionId:'guest:instruments',adventureProgress:{roomId,stations:room.seal.stations.map(s=>s.id),encounters:['w1-kilo-tambor-v1'],sealed:true}});
+ assert.equal(solved.adventureProgress.stations[roomId].length,4);
+ assert.deepEqual(solved.adventureProgress.encounters[roomId],[]);
+ assert.deepEqual(solved.adventureProgress.seals,[],'even all guest instruments cannot replace the host guardian receipt');
+ const receipt={...pose,sequence:1,actionId:'host:guardian',adventureProgress:{roomId,stations:[],encounters:['w1-kilo-tambor-v1'],sealed:true}};
+ const cleared=await service.move(h.roomId,h.identity,receipt);
+ assert.deepEqual(cleared.adventureProgress.seals,['kilo'],'the real authenticated host receipt completes the new route without removed discoveries');
+ const repeated=await service.move(h.roomId,h.identity,receipt);
+ assert.equal(repeated.replayed,true);assert.deepEqual(repeated.adventureProgress.seals,['kilo']);
 });
 
 test('objective updates respect pacing and do not wait for an idle heartbeat',()=>{

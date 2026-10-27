@@ -17,7 +17,7 @@ test('K spends petals once, expands real geometry and cooldown cannot consume ne
   clearAbilityFx(); const g=game(evo);for(let i=0;i<3;i++)earnKiloPetal(g,{});
   assert.equal(useAbility(g,1),true);assert.equal(kiloPetals(g),0);updateAbilityFx(g);
   assert.equal(g.kiloAbilityFx.find(f=>f.kind==='hula').r,70+evo*6);
-  earnKiloPetal(g,{});assert.equal(useAbility(g,1),evo===4,'solar K cancels; intermediate K remains cooling');assert.equal(kiloPetals(g),1);
+  earnKiloPetal(g,{});assert.equal(useAbility(g,1),true,'K cancels hover or solar without recasting');assert.equal(kiloPetals(g),1);
   assert.equal(useAbility(g,1),false,'restarting remains blocked by cooldown');assert.equal(kiloPetals(g),1);
  }
  clearAbilityFx();

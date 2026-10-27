@@ -156,7 +156,7 @@ const p = game?.player;
 if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 5 || (Number(p.evo)||0)<POWER_LEVELS[index]) return false;
 if(index===5&&rhythmPress(game))return true;
 if(index===3&&game._evolutionAttacks?.guest)return false;
-if(p.id==='kilo'&&index===1&&p.evo>=4&&p._kiloFlightMode==='solar'&&p._kiloFlightT>0){
+if(p.id==='kilo'&&index===1&&p._kiloFlightT>0){
  stopKiloFlight(p);game.nums?.add?.(cx(p),p.y-40,'DESCENSO','#ffe3a6',false);return true;
 }
 const supreme = index === 3 ? SUPREME[p.id] : null;
@@ -959,6 +959,7 @@ drawEvolutionAttacks(ctx,game,cam,t,drawCharacter,ROSTER);
 function drawCastSignature(ctx, p, cam, t) {
 const cast = p._cast;
 if (!cast || t - cast.t > 28) return;
+if(p.id==='kilo'&&cast.slot===1)return; // K is identified by petals and the foot trail, never a body-covering circle.
 const k = 1 - (t - cast.t) / 28;
 const x = p.x + p.w / 2 - cam.x;
 const y = p.y + p.h * 0.4 - cam.y;
@@ -1224,6 +1225,7 @@ boom(g, h.x, h.y, "#ffb347", 8, { star: true });
 hula(g, p, evo) {
 const petals = spendKiloPetals(g);
 startKiloFlight(p,evo);
+p._kiloFlightAt=Number(g.t)||0;
 g.nums?.add?.(cx(p),p.y-48,evo>=4?'VUELO SOLAR · K ↓':'LEVITA · ↑ ↓ ← →','#ffe3a6',true);
 add({
   kind: "hula",
@@ -1245,6 +1247,7 @@ const heal = 20 + evo * 8 + petals * 3;
 const R = 240 + evo * 35 + petals * 25;
 const duration=180+evo*30;
 p._kiloOhanaT=duration;
+p._kiloOhanaAt=Number(g.t)||0;
 add({ kind: "ohana", x: cx(p), y: cy(p), r: 48, max: R, life: duration, duration, hit: new Set(), n: 8 + evo * 2, dmg: (30 + evo * 4 + petals * 4) * pw(p), lifesteal: 6+evo, healBudget:heal });
 g.flash = Math.max(g.flash || 0, 2);
 g.flashColor = "#ffe9a0";
@@ -3125,29 +3128,22 @@ ctx.ellipse(f.x - cam.x, f.y - cam.y, 6 + k * 26, 2 + k * 6, 0, 0, TAU);
 ctx.stroke();
 },
 hula(ctx, f, cam, t, g, p) {
-const x = cx(p) - cam.x, y = p.y+p.h - cam.y;
+// The six petals sit on the actual radial field, clear of Kilo's silhouette.
+// They describe the temporary attack/reflection range, not sustained flight.
+const x = cx(p) - cam.x, y = cy(p) - cam.y;
 const k = Math.min(1, f.life / 10);
-ctx.globalAlpha = 0.25 * k;
-ctx.fillStyle = "#ff5ad5";
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r*.24, 0, 0, TAU); ctx.fill();
-ctx.globalAlpha = 0.9 * k;
-ctx.strokeStyle = "#ffb3ee";
-ctx.lineWidth = 2;
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r*.24, 0, 0, TAU); ctx.stroke();
-// Four stationary hibiscus accents mark the four dance beats.
-const n = 4;
-const beat = Math.floor((96-f.life)/24)%4;
-for (let i = 0; i < n; i++) {
-  const a = (i / n) * TAU - Math.PI/2;
-  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r*.24;
+const beat = Math.floor((f.age || 0)/24)%3;
+for (const side of [-1,1]) for (let i = 0; i < 3; i++) {
+  const dy = (i-1)*f.r*.55, dx = Math.sqrt(Math.max(0,f.r*f.r-dy*dy));
   ctx.save();
-  ctx.translate(px, py);
-  ctx.rotate(a + Math.PI / 2);
-  ctx.fillStyle = i===beat ? "#fff3a0" : "#ff8db8";
+  ctx.globalAlpha = (i===beat?.9:.55)*k;
+  ctx.translate(x+side*dx,y+dy);
+  ctx.rotate(side*(i-1)*.5);
+  ctx.fillStyle = i===beat ? "#fff0b7" : "#efb7bd";
   ctx.beginPath();
-  for(let petal=0;petal<5;petal++){const a=petal*TAU/5;ctx.ellipse(Math.cos(a)*5,Math.sin(a)*5,4,3,a,0,TAU);}
+  ctx.ellipse(0,0,5,2.5,side*.4,0,TAU);
   ctx.fill();
-  if (i % 2 === 0) { ctx.fillStyle = "#fff36a"; ctx.beginPath(); ctx.arc(0, 0, 2, 0, TAU); ctx.fill(); }
+  ctx.strokeStyle='#fff5d6';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-3,0);ctx.lineTo(3,0);ctx.stroke();
   ctx.restore();
 }
 },

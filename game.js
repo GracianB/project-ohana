@@ -1,3 +1,6 @@
+import {drawHudPortrait} from './systems/hud-portrait-v606.js';
+import {kiloGrowthWaiting,kiloUnlockedForm} from './systems/kilo-encounters-v606.js';
+import {kiloChapterAbility,interactKiloInstrument} from './systems/world1-play.js';
 import {createAdventureStorage} from './multiplayer/adventure-progress.js';
 import {drawLivingRealm} from './worlds/living-realms.js';
 import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
@@ -410,7 +413,7 @@ return "C";
 function canAct() { return game.running && !world1CineActive(game) && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
-if (!interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
+if (!interactKiloInstrument(game) && !interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
 if(game.relicScene?.kind==='memory-v2'&&game.relicScene.age>90){game.relicScene=null;game.onRelicEnd?.();game.resetInput?.();return;}
@@ -673,7 +676,7 @@ if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4){
 }
 if(game.world1?.cinema&&!r.fusionBoss){game.world1.cinema=null;playWorld1Cine(game,"roomEnter",r.hero);}
 if(!r.fusionBoss)game.world1Boss=null;
-game.onHeroAbility=(p,index)=>{expeditionAbility(game,p,index);groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);chispinChapterAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);nextChapterAbility(game,p,index);dinoChapterAbility(game,p,index);fryerAstralAbility(game,p,index);};
+game.onHeroAbility=(p,index)=>{kiloChapterAbility(game,p,index);expeditionAbility(game,p,index);groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);chispinChapterAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);nextChapterAbility(game,p,index);dinoChapterAbility(game,p,index);fryerAstralAbility(game,p,index);};
 game.onDinoLandingHit=(e,dmg)=>hitArenaEnemy(game,e,dmg,{color:'#deedbc',stun:25,ky:-4,kx:Math.sign(e.x-game.player.x)*4,shake:2,parts:6});
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
@@ -1074,13 +1077,19 @@ const fromEvo = p.evo;
 const fromName = p.evoNames?.[fromEvo] || p.forms?.[fromEvo]?.name || p.name || "Forma";
 if (reason !== "xp" && reason !== "manual") return;
 if (p.evo >= 4) { if (reason === "manual") showSystemMessage("MAX", "Ya eres GOD (forma 5)."); return; }
+if(kiloGrowthWaiting(game)){
+ if(reason==='manual')showObjectiveMessage('ESCUCHA EL CLARO',world1NextObjective(game)?.action||'Despierta el siguiente instrumento');
+ return;
+}
 const need = XP_NEED[p.evo + 1];
 if (need == null || p.xp < need) {
 if (reason === "manual") showSystemMessage("XP", "Te faltan " + Math.max(0, Math.ceil(need - p.xp)) + " para evolucionar.");
 return;
 }
+const previousHealth=p.health,previousMax=p.maxHealth;
 p.evo += 1;
 applyForm(p);
+if(game.roomDef?.kiloEncounterVersion)p.health=Math.min(p.maxHealth,previousHealth+Math.max(0,p.maxHealth-previousMax));
 if (p.id === "cuerno") { try { cuernoEvolveBurst(game, p); } catch (_) {} }
 paintFit(p);
 if (p.evo === 4) Surprises.onBecomeGod(game);
@@ -2038,12 +2047,16 @@ else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abr
 else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
 else if (p.y < 90 && r.doors.up && nearUpDoor(p)) setPrompt("ARRIBA · salta al techo", true);
 else if (p.y > game.worldH - 160 && r.doors.down && inPitX(p)) setPrompt("ABAJO · cae por el hueco", true);
+else if (kiloGrowthWaiting(game) && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
+const instrument = world1NextObjective(game);
+setPrompt(instrument ? instrument.label + " · " + instrument.action : "Devuelve su voz al siguiente instrumento", true);
+}
 else if (p.evo < 4 && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
 const nxt = p.forms && p.forms[p.evo + 1];
 setPrompt("Tu experiencia despierta" + (nxt ? " · " + nxt.name : " la siguiente forma"), true);
 }
 else setPrompt("", false);
-while (!game.relicScene && p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
+while (!game.relicScene && p.evo < kiloUnlockedForm(game) && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
 tickRam(p);
 }
 function tickRam(p) {
@@ -2926,7 +2939,7 @@ if (e.kind === "cucaracho") {
   });
 }
 if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
-punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
+punch(e.x, e.y, e.color); beep("kill"); addKill(); if(!game.roomDef?.kiloEncounterVersion)healPlayer(game.player, 4);
 if(e.miniBoss&&!e.gauntletBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":e._chispinBoss?"¡TITÁN DE TRUENO VENCIDO!":e._growthChapter?NEXT_CHAPTERS[e._growthChapter].name.toUpperCase()+" VENCIDO":"¡EL CLARO VUELVE A CANTAR!",e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
@@ -2968,7 +2981,7 @@ if (pr.owner === "player") {
         pr.hit.add(e);
         if (pr.hit.size >= pr.pierce) pr.life = 0;
       } else pr.life = 0;
-      punch(e.x, e.y, pr.color); addPlayerXp(game.player, 3);
+      punch(e.x, e.y, pr.color); addPlayerXp(game.player, game.roomDef?.kiloEncounterVersion?1:3);
       game.nums.add(e.x, e.y, "" + dmg, "#ffe66a", dmg >= 40);
     }
   }
@@ -3476,18 +3489,7 @@ cv.width = 88; cv.height = 88;
 cv.style.cssText = "position:relative;z-index:1;width:100%;height:100%;display:block";
 av.appendChild(cv);
 }
-const c = cv.getContext("2d");
-c.clearRect(0, 0, cv.width, cv.height);
-const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
-const dummy = {
-id: p.id, evo, color: p.color, x: -10, y: -20, w: 20, h: 20, facing: 1,
-grounded: true, vx: 0, vy: 0, melee: 0, invuln: 0,
-visualScale: 70 / [36, 48, 58, 68, 80][evo],
-};
-c.save();
-c.translate(cv.width / 2, cv.height - 8);
-drawCharacter(c, dummy, { x: 0, y: 0 }, t);
-c.restore();
+drawHudPortrait(cv,p,t,{reduceMotion:game.reduceMotion||reduceMotion});
 }
 
 function updateHUD() {
@@ -3525,19 +3527,17 @@ const mk = markAt(p.id, p.evo);
 const mastery = masteryOf(p.id);
 setText(DOM.hudTrait, mastery.name + " · H " + mk.name);
 DOM.hudTrait?.setAttribute("title", mastery.desc + ((p.passive && p.passive.name) ? " · Base: " + p.passive.name : ""));
-const need = p.evo >= 4 ? p.xp : XP_NEED[p.evo + 1];
 let orbsLeft = 0;
 for (let i = 0; i < game.orbs.length; i++) if (!game.orbs[i].taken) orbsLeft++;
 const hp = Math.max(0, Math.ceil(p.health));
-setText(DOM.hudMeta, "Forma " + (p.evo + 1) + "/5 · " + (p.evo < 4 ? p.xp + "/" + need + " de experiencia" : "Evolución completa"));
 const hpPct = Math.max(0, Math.min(100, (p.health / Math.max(1, p.maxHealth)) * 100));
 if (DOM.hpBar) {
 const w = hpPct + "%";
 if (DOM.hpBar.style.width !== w) DOM.hpBar.style.width = w;
 }
 setText(DOM.hpText, hp + "/" + p.maxHealth);
-const avatarKey = p.id + ":" + p.evo;
-if (avatarKey !== hudAvatarKey || (t & 63) === 0) {
+const avatarKey = p.id + ":" + p.evo + ":" + (p.health/Math.max(1,p.maxHealth)<=.28) + ":" + !!(game.reduceMotion||reduceMotion);
+if (avatarKey !== hudAvatarKey || (!(game.reduceMotion||reduceMotion) && t % 5 === 0)) {
 hudAvatarKey = avatarKey;
 drawHudAvatar(p);
 }
@@ -3547,7 +3547,6 @@ const xpPct = p.evo >= 4 ? 100 : Math.max(0, Math.min(100, ((p.xp - prev) / Math
 if (DOM.xpBar) {
 const w = xpPct + "%";
 if (DOM.xpBar.style.width !== w) DOM.xpBar.style.width = w;
-setText(DOM.xpText, p.evo >= 4 ? "MAX" : Math.round(xpPct) + "%");
 }
 setText(DOM.hudWorld, room().name);
 const seen = Object.keys(game.visited || {}).length;
@@ -3662,7 +3661,7 @@ DOM.bossWrap?.setAttribute("aria-label", status.accessible + (voiceCue ? " Ataqu
 } else {
 setText(DOM.bossLabel, "REINA DEL NIDO");
 }
-syncHudStatus({ player: p, hp, xpPct, boss });
+syncHudStatus({player:p,hp,xpPct,boss,evolutionLocked:kiloGrowthWaiting(game),objective:goal,reduceMotion:game.reduceMotion||reduceMotion});
 for(const item of abilitySlots){
  const index=Number(item.slot.dataset.index),status=powerStatus(game,index,index===3?supremeOf(p.id):null);
  if(!status||!item.fill)continue;
@@ -4113,7 +4112,7 @@ companionActorState(){const a=game._evolutionAttacks?.guest;return a?{x:a.x,y:a.
 chispinChapterState(){return {gates:[0,1,2].map(i=>({state:chispinGateState(game,i),until:game.world1?.chispinSilenced?.[i]||0})),tick:game.world1?.tick,lastAbility:game._lastAbilityId};},
 stitchoChapterState(){return {move:game.player?._abilMove,carry:game.world1?.carry,railDone:!!game.secrets?.['w1-stitcho']?.includes('w1-stitcho-main-rail-v1'),stations:(game.world1?.stations||[]).map(s=>({id:s.id,done:s.done}))};},
 kiloAirState(){return {skyRings:(game.world1?.skyRings||[]).map(r=>({...r})),chimes:(game.world1?.airChimes||[]).map(c=>({...c})),effects:(game.kiloAbilityFx||[]).map(f=>({...f}))};},
-roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,blockedNoticeTick:e._blockNoticeAt,damageWindowRemaining:e.damageWindowRemaining,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,chapterBoss:NEXT_CHAPTERS[e._growthChapter]?{...e[NEXT_CHAPTERS[e._growthChapter].state],hero:e._growthChapter}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
+roomCast(){return game.enemies.map(e=>({kind:e.kind,x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,blockedNoticeTick:e._blockNoticeAt,damageWindowRemaining:e.damageWindowRemaining,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,chapterBoss:NEXT_CHAPTERS[e._growthChapter]?{...e[NEXT_CHAPTERS[e._growthChapter].state],hero:e._growthChapter}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
@@ -4160,6 +4159,7 @@ state() {
     roomId: game.roomId,
     // Read-only campaign snapshots: no grant, bypass, or victory injection.
     world1: world1Snapshot(game),
+    kiloInstruments:game.roomDef?.kiloEncounterVersion?game.world1?.stations.map(s=>({id:s.id,name:s.name,x:s.x,y:s.y,done:s.done,tones:s.tones||0,threatened:!!s.threatened})):null,
     world1Won: !!game.world1Won,
     combatReport:{...(game.combatReport||{hits:0,damage:0})},
     world1Seals: [...(game.world1Seals || [])],
