@@ -845,7 +845,7 @@ test("V49 Stitcho Soul Pass keeps one coherent character language", () => {
   assert.match(evolution, /Stitcho Nébula cose el vacío y se ríe al otro lado/);
   assert.match(evolution, /const open = stage >= 4/);
   assert.match(supreme, /comicBubble\(ctx,"NO\."/);
-  assert.match(visual, /01d-stitcho-plasma-roll/);
+  assert.match(visual, /01d-stitcho-voluntary-scene/);
 });
 
 test("V48 signature U uses ten real storyboards and stays regression-protected", () => {
