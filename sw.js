@@ -428,8 +428,8 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/cat-chapter-art-v609.js": "4b04ed188602e0184c2828ecf7df4322692d9936",
-  "systems/cat-chapter.js": "d3eeee64938376e2b7bf382647bc6704b92da0fc",
+  "systems/cat-chapter-art-v609.js": "87f52249a92332b75ebbd4184feb9d705369f108",
+  "systems/cat-chapter.js": "04d603d298e6d5396f8f152b0efb605bc1d25c20",
   "systems/cat-encounters-v609.js": "ea157f84cde45fe857174cc809f3b3a991b6aa54",
   "systems/chispin-chapter-art-v608.js": "aed0a9bdbfd9773d0d144dde4227db1eb743cc70",
   "systems/chispin-encounters-v608.js": "14bee555a4edaa14f059fb2bb5a8a594d7402b3e",
@@ -493,7 +493,7 @@ const PRECACHE_REVISIONS = {
   "systems/michi-room.js": "9560352b5247d62ddc9d1aa7703c2e22779980a8",
   "systems/michicornio-foes.js": "e494944594c929ea0dfd5b7797d20d7a3b975c02",
   "systems/michi-trail.js": "dae5fc60c0b0a8a316fe657f9c9a5fb7347de2ac",
-  "systems/michi-boss.js": "ca8a4bdf62297017bf735a8567f9c24e6c03a550",
+  "systems/michi-boss.js": "10d2e77007cd276b7afc93b30b95683d508aa3b0",
   "worlds/michi-gardens.js": "718f50b0a29d2af8120537e91038d0f29006e8c6",
   "systems/dragon-room.js": "3a7562fa0656cf4b65f952c0883c8344acd5463f",
   "systems/dragon-trail.js": "323221dcf00d9bb785aa2b3ed0e2f17f57cc31ec",
@@ -529,7 +529,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-rooms.js": "ecb1b6c742b795802fed9ab76001962cb1fc746f",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
   "worlds/chapter-stagecraft.js": "979021a3b2cd9fca0794d0fa70beb250a20845da",
-  "systems/world1-play.js": "40114ed4671786241111d3994b1499f93f0a5158",
+  "systems/world1-play.js": "974d8f07f84b09ce5faf0235f38c85b64d8df276",
   "systems/yomi-trail.js": "d39306a5ada636f9c9b2dee5107e7990da01134c",
   "systems/yomi-boss.js": "686a49d7eafe5b1d4ba91349392f71c747ed8522",
   "worlds/yomi-observatory.js": "bbc3e453a487d67ec7ae8f51dde1b58d959cc2ce",

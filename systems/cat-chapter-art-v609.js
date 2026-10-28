@@ -322,3 +322,51 @@ export function drawCatMoonJelly(ctx,s,cam,t=0,reduced=false){
 
  ctx.restore();
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PUENTE DE CRISTAL LUNAR (activado al despertar la medusa sagrada)
+// ─────────────────────────────────────────────────────────────────────────────
+export function drawCatCrystalBridge(ctx,s,cam,t=0,reduced=false){
+ const x=(Number(s.x)||0)-cam.x-78,y=(Number(s.y)||0)-cam.y+26;
+ const w=156,h=16;
+ ctx.save();
+
+ // Cristal lunar facetado translúcido
+ const grad=ctx.createLinearGradient(x,y,x+w,y+h);
+ grad.addColorStop(0,'rgba(180,140,255,0.78)');
+ grad.addColorStop(0.5,'rgba(235,215,255,0.94)');
+ grad.addColorStop(1,'rgba(140,210,255,0.78)');
+ ctx.fillStyle=grad;
+ roundRect(ctx,x,y,w,h,6);
+ ctx.fill();
+
+ ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;
+ roundRect(ctx,x,y,w,h,6);ctx.stroke();
+
+ // Runas de selenita grabadas
+ ctx.strokeStyle='rgba(255,245,190,0.85)';ctx.lineWidth=1.2;
+ for(let i=24;i<w-20;i+=32){
+  const rx=x+i,ry=y+8+(reduced?0:Math.sin(t*0.08+i)*1.5);
+  ctx.beginPath();ctx.moveTo(rx-5,ry);ctx.lineTo(rx,ry-4);ctx.lineTo(rx+5,ry);ctx.lineTo(rx,ry+4);ctx.closePath();
+  ctx.stroke();
+ }
+
+ // Gemas en los extremos del puente
+ ctx.fillStyle='#fff4a8';
+ for(const gx of [x+8,x+w-8]){
+  ctx.beginPath();ctx.arc(gx,y+8,3.5,0,TAU);ctx.fill();
+  ctx.strokeStyle='#4a2868';ctx.lineWidth=1;ctx.stroke();
+ }
+
+ // Partículas ascendentes de polvo estelar
+ if(!reduced){
+  ctx.fillStyle='rgba(255,235,170,0.65)';
+  for(let p=0;p<4;p++){
+   const px=x+20+((t*0.4+p*37)%(w-40));
+   const py=y-4-((t*0.6+p*23)%28);
+   ctx.beginPath();ctx.arc(px,py,1.5,0,TAU);ctx.fill();
+  }
+ }
+
+ ctx.restore();
+}

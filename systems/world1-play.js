@@ -1,7 +1,7 @@
 import {drawKiloResonator} from './kilo-chapter-art-v606.js';
 import {drawStitchoPart,drawStitchoPartStation} from './stitcho-chapter-art-v607.js';
 import {drawChispinRod} from './chispin-chapter-art-v608.js';
-import {drawCatMoonJelly} from './cat-chapter-art-v609.js';
+import {drawCatMoonJelly,drawCatCrystalBridge} from './cat-chapter-art-v609.js';
 import {updateFinalGauntlet} from './final-gauntlet.js';
 import {KEEPSAKES} from './keepsakes.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
@@ -568,7 +568,11 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       if(done){ctx.strokeStyle='#a0c4c7';ctx.lineWidth=1.5;for(let k=0;k<3;k++){ctx.beginPath();ctx.arc(x,y-142,20+k*12,-Math.PI*.8,-Math.PI*.2);ctx.stroke();}}
       ctx.fillStyle='#244756';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(done?'ANTENA '+(s.id+1)+' CONECTADA ✓':'CONECTA LA ANTENA '+(s.id+1),x,y-194);break; }
     case "jelly": {
-      if(g.roomDef?.growthChapter==='cat'){drawCatMoonJelly(ctx,s,cam,t,reduce);break;}
+      if(g.roomDef?.growthChapter==='cat'){
+        if(done)drawCatCrystalBridge(ctx,s,cam,t,reduce);
+        drawCatMoonJelly(ctx,s,cam,t,reduce);
+        break;
+      }
       drawWorld1MoonJelly(ctx, { x, y, id: s.id, done }, t, reduce);
       break; }
     case "prism": {

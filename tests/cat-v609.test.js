@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
 import {CAT_JELLIES_V609} from '../systems/cat-encounters-v609.js';
 import {catGrowth,catObjective,MICHI_CHAPTER_ARENA} from '../systems/cat-chapter.js';
-import {drawCatCreature,drawCatMoonJelly} from '../systems/cat-chapter-art-v609.js';
+import {drawCatCreature,drawCatMoonJelly,drawCatCrystalBridge} from '../systems/cat-chapter-art-v609.js';
 
 test('V609 Cat room: single authored route of 14400 with lunar crystal terraces', () => {
  const room = WORLD1_ROOMS['w1-cat'];
@@ -103,9 +103,10 @@ test('V609 Cat vector art renderers: fauna and moon jelly callable without error
  };
  assert.equal(drawCatCreature(dummyCtx, dummyFoe, { x: 0, y: 0 }, 100), true);
 
- // Moon jelly
+ // Moon jelly and crystal bridge
  const dummyStation = { id: 0, x: 1680, y: 914, done: false };
  drawCatMoonJelly(dummyCtx, dummyStation, { x: 0, y: 0 }, 100);
  dummyStation.done = true;
  drawCatMoonJelly(dummyCtx, dummyStation, { x: 0, y: 0 }, 100);
+ drawCatCrystalBridge(dummyCtx, dummyStation, { x: 0, y: 0 }, 100);
 });
