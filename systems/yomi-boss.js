@@ -18,17 +18,19 @@ export function createYomiBoss(makeFoe,rng=()=>.5,options={}){
  e._campaignOriginal=true;e.spawnIndex=992;
  e._encounterSaveId=options.encounterId||YOMI_BOSS_ID;
  e.roomId=roomId;e.color='#ce93d8';e.contactDmg=0;
- e._spiritGuide={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false,orbitAngle:0};
+ e._spiritGuide={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false,orbitAngle:0,orbit:0};
+ e._custodian=e._spiritGuide;
  return e;
 }
 
 export function updateYomiBoss(e,g,hurt){
  if(!e?._yomiBoss)return false;
- const b=e._spiritGuide,p=g.player,arena=e._chapterArena||YOMI_BOSS,previous=b.phase;
+ const b=e._spiritGuide||e._custodian,p=g.player,arena=e._chapterArena||YOMI_BOSS,previous=b.phase;
  if(e.invuln>0)e.invuln--;
  e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x));
  e.y=arena.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
  b.orbitAngle=(b.orbitAngle||0)+0.04*(b.tier===3?2:1);
+ b.orbit=b.orbitAngle;
  if(!p||p.dead||e.hp<=0)return true;
  if(!chapterBossStart(e,g,b))return true;
 
@@ -72,14 +74,33 @@ export function updateYomiBoss(e,g,hurt){
 }
 
 function _drawSpirit(ctx,e,t){
- const b=e._spiritGuide,tier=b.tier;
- const robe  =tier===3?'rgba(123,31,162,0.82)':tier===2?'rgba(171,71,188,0.75)':'rgba(206,147,216,0.70)';
+ const b=e._spiritGuide||e._custodian,tier=b.tier;
+ const robe  =tier===3?'rgba(123,31,162,0.85)':tier===2?'rgba(171,71,188,0.78)':'rgba(206,147,216,0.72)';
  const robeS =tier===3?'#ce93d8':tier===2?'#e1bee7':'#f3e5f5';
  const orb   =tier===3?'#7b1fa2':tier===2?'#ab47bc':'#ce93d8';
  const eyeG  =tier===3?'#ff4081':'#e040fb';
  const float =Math.sin(t*.07)*6;
+ const FAM   =['#eb554a','#5ad1ff','#ffe14a','#c9a8ff','#ff6a2a','#4cbf56','#f0b43a','#e0402a','#f2c1ff','#4ff0c8'];
 
  ctx.save();ctx.translate(0,float);
+
+ // ── Portal Cuántico Detrás del Custodio ──
+ ctx.save();
+ const portalR=tier===3?65:tier===2?55:45;
+ const portalGlow=ctx.createRadialGradient(0,25,10,0,25,portalR);
+ portalGlow.addColorStop(0,tier===3?'rgba(123,31,162,0.45)':'rgba(79,240,200,0.3)');
+ portalGlow.addColorStop(0.7,tier===3?'rgba(206,147,216,0.2)':'rgba(42,36,104,0.15)');
+ portalGlow.addColorStop(1,'rgba(13,20,48,0)');
+ ctx.fillStyle=portalGlow;
+ ctx.beginPath();ctx.ellipse(0,25,portalR*1.1,portalR,0,0,Math.PI*2);ctx.fill();
+
+ // Anillo cuántico de datos
+ ctx.strokeStyle=tier===3?'rgba(206,147,216,0.6)':'rgba(79,240,200,0.5)';
+ ctx.lineWidth=1.8;
+ ctx.setLineDash([4,6]);
+ ctx.beginPath();ctx.ellipse(0,25,portalR,portalR*0.8,t*0.02,0,Math.PI*2);ctx.stroke();
+ ctx.setLineDash([]);
+ ctx.restore();
 
  // ── Flowing robe body ──
  ctx.fillStyle=robe;ctx.strokeStyle=robeS;ctx.lineWidth=2.5;
@@ -95,26 +116,31 @@ function _drawSpirit(ctx,e,t){
  ctx.beginPath();ctx.moveTo(-38,68);ctx.quadraticCurveTo(-50,90,-30,100);ctx.quadraticCurveTo(-20,95,-20,75);ctx.closePath();ctx.fill();
  ctx.beginPath();ctx.moveTo(38,68);ctx.quadraticCurveTo(50,90,30,100);ctx.quadraticCurveTo(20,95,20,75);ctx.closePath();ctx.fill();
 
+ // Código binario holográfico en la túnica
+ ctx.fillStyle=tier===3?'rgba(255,255,255,0.7)':'rgba(79,240,200,0.65)';
+ ctx.font='bold 8px monospace';ctx.textAlign='center';
+ const b0=Math.floor(t*0.15)%2?'1':'0',b1=Math.floor(t*0.15+1)%2?'0':'1';
+ ctx.fillText(b0,-12,38);ctx.fillText(b1,12,42);ctx.fillText(b0,0,58);
+
  // ── Upper body / torso glow ──
  ctx.fillStyle=tier===3?'rgba(123,31,162,0.6)':'rgba(206,147,216,0.45)';
  ctx.beginPath();ctx.ellipse(0,-18,24,30,0,0,Math.PI*2);ctx.fill();
 
- // ── Star crown ──
- const starCount=tier===3?8:5;
+ // ── Corona de 10 Estrellas Ohana ──
+ const starCount=10;
  for(let s=0;s<starCount;s++){
-  const ang=s*(Math.PI*2/starCount)+(t*.04);
+  const ang=s*(Math.PI*2/starCount)+(t*.035);
   const sr=34+Math.sin(t*.12+s)*3;
-  const sx=Math.cos(ang)*sr,sy=-55+Math.sin(ang)*sr;
-  const starPulse=0.6+Math.sin(t*.14+s)*.3;
-  ctx.fillStyle=`rgba(${tier===3?'200,50,255':'180,100,240'},${starPulse})`;
+  const sx=Math.cos(ang)*sr,sy=-55+Math.sin(ang)*10;
+  const starPulse=0.7+Math.sin(t*.14+s)*.3;
+  ctx.fillStyle=FAM[s % FAM.length];
   ctx.beginPath();
-  ctx.moveTo(sx,sy-5);ctx.lineTo(sx+2,sy-2);ctx.lineTo(sx+5,sy);
-  ctx.lineTo(sx+2,sy+2);ctx.lineTo(sx,sy+5);ctx.lineTo(sx-2,sy+2);
-  ctx.lineTo(sx-5,sy);ctx.lineTo(sx-2,sy-2);ctx.closePath();ctx.fill();
+  ctx.arc(sx,sy,2.5+starPulse,0,Math.PI*2);
+  ctx.fill();
  }
 
  // ── Face — void dark with glowing soul eyes ──
- ctx.fillStyle='rgba(10,0,22,0.85)';ctx.strokeStyle=robeS;ctx.lineWidth=2;
+ ctx.fillStyle='rgba(10,0,22,0.92)';ctx.strokeStyle=robeS;ctx.lineWidth=2;
  ctx.beginPath();ctx.ellipse(0,-36,18,20,0,0,Math.PI*2);ctx.fill();ctx.stroke();
  // Soul eyes
  ctx.fillStyle=eyeG;
@@ -127,14 +153,23 @@ function _drawSpirit(ctx,e,t){
  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-8,-38,2,0,Math.PI*2);ctx.fill();
  ctx.beginPath();ctx.arc(8,-38,2,0,Math.PI*2);ctx.fill();
 
+ // ── Manos Espectrales de Luz ──
+ for(let side of [-1,1]){
+  const hWave=Math.sin(t*0.12+side)*4;
+  const hx=side*36+hWave,hy=20+Math.abs(hWave)*2;
+  ctx.fillStyle='rgba(79,240,200,0.7)';
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.arc(hx,hy,5.5,0,Math.PI*2);ctx.fill();ctx.stroke();
+ }
+
  // ── Orbiting spirit orbs ──
- const orbCount=tier===3?4:tier===2?3:2;
+ const orbCount=tier===3?5:tier===2?4:3;
  for(let o=0;o<orbCount;o++){
   const ang=b.orbitAngle+o*(Math.PI*2/orbCount);
-  const ox=Math.cos(ang)*44,oy=Math.sin(ang)*18-22;
-  ctx.fillStyle=orb;ctx.globalAlpha=0.75;
-  ctx.beginPath();ctx.arc(ox,oy,7,0,Math.PI*2);ctx.fill();
-  ctx.globalAlpha=0.3;ctx.fillStyle='#fff';
+  const ox=Math.cos(ang)*46,oy=Math.sin(ang)*18-22;
+  ctx.fillStyle=FAM[o % FAM.length];ctx.globalAlpha=0.85;
+  ctx.beginPath();ctx.arc(ox,oy,6.5,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=0.4;ctx.fillStyle='#fff';
   ctx.beginPath();ctx.arc(ox-2,oy-2,2.5,0,Math.PI*2);ctx.fill();
   ctx.globalAlpha=1;
  }

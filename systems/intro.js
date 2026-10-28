@@ -208,7 +208,9 @@ export function playTitleIntro(options = {}) {
 
   function actor(id, x, footY, h, tf, opts = {}) {
     const p = actors[id];
-    if (!p || !welcomeSpotlightAllows(id,activeDirection)) return;
+    if (!p) return;
+    const inSpotlight = welcomeSpotlightAllows(id, activeDirection);
+    if (!inSpotlight && activeDirection?.strictPair) return;
     p.facing = opts.facing || 1;
     p.grounded = opts.grounded !== false;
     p.vx = Number(opts.vx || 0);
@@ -232,7 +234,8 @@ export function playTitleIntro(options = {}) {
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     if(isE2E){const audit=window.__OHANA_WELCOME_CAST_AUDIT?.find(row=>row.id===id);if(audit)Object.assign(audit,{visible:true,x,foot:footY,slotWidth,paintedHeight:fit.paintedHeight,paintedWidth:fit.paintedWidth,targetHeight:h,row:openingCastSpot(id,fc.W,fc.H,activeDirection).row});}
     ctx.save();
-    if (activeDirection?.hero && id !== activeDirection.hero && id !== activeDirection.partner) ctx.globalAlpha *= .82;
+    if (!inSpotlight) ctx.globalAlpha *= .78;
+    else if (activeDirection?.hero && id !== activeDirection.hero && id !== activeDirection.partner) ctx.globalAlpha *= .88;
     ctx.translate(x - fit.centerOffsetX * fit.scale, footY);
     // Every visible actor answers a touch with its own stage-only comic gesture.
     // The rig and its proportions stay intact; there is no gameplay state here.

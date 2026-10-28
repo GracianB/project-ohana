@@ -40,9 +40,9 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
     case "keepsakeIntro": return [{dur:230,bg:'#132239',color:th.color,layout:'keeper',heroes:[hero],lit:[hero],kicker:'EL ECO GUARDÓ ALGO TUYO',title:KEEPSAKES[hero].guardian,line:KEEPSAKES[hero].name+'. El guardián ha evolucionado. Espera su apertura y recupéralo.'}];
     case "keepsakeRescue": return [{dur:250,bg:'#183448',color:th.color,layout:'keepsake',heroes:[hero],lit:[hero],dance:true,kicker:'ESTO NO ERA UN TESORO CUALQUIERA',title:KEEPSAKES[hero].name,line:KEEPSAKES[hero].memory}];
     case "intro": return [
-      { dur: 200, bg: "#1a1030", color: "#ffd6f2", layout: "circle", heroes: ALL, kicker: "Ohana · la familia", title: "Diez héroes, una canción", line: "En Ohana cada héroe guardaba una nota. Juntas sonaban a hogar." },
+      { dur: 200, bg: "#1a1030", color: "#ffd6f2", layout: "circle", heroes: ALL, lit: ALL, kicker: "Ohana · la familia", title: "Diez héroes, una canción", line: "En Ohana cada héroe guardaba una nota. Juntas sonaban a hogar." },
       { dur: 190, bg: "#12081f", color: "#ff7ad0", layout: "fused", heroes: ALL, kicker: "Una noche…", title: "EL ECO", line: "Una sombra que solo sabe copiar robó las diez notas para hacerse un cuerpo." },
-      { dur: 200, bg: "#0e0a1c", color: "#cfc4ff", layout: "scatter", heroes: ALL, kicker: "Sin su canción", title: "Dispersos", line: "Los héroes se apagaron y cayeron, cada uno en una sala lejana y enorme." },
+      { dur: 200, bg: "#0e0a1c", color: "#cfc4ff", layout: "scatter", heroes: ALL, lit: ALL, kicker: "Sin su canción", title: "Dispersos", line: "Los héroes se apagaron y cayeron, cada uno en una sala lejana y enorme." },
       { dur: 220, bg: "#1e1838", color: WORLD1_THEMES.kilo.color, layout: "one", heroes: ["kilo"], kicker: WORLD1_TITLE, title: "Despierta el primer sello", line: WORLD1_PREMISE }
     ];
     case "roomEnter": return th ? [
@@ -148,7 +148,7 @@ const STARS = Array.from({ length: 80 }, (_, i) => [((i * 7919) % 997) / 997, ((
 function heroPos(layout, i, n, W, H, k, t) {
   const cx = W / 2, cy = H * 0.5, R = Math.min(W, H) * 0.3, a = i / Math.max(1, n) * Math.PI * 2 - Math.PI / 2;
   switch (layout) {
-    case "scatter": { const sx = ((i * 0.37 + 0.11) % 1) * W * 0.86 + W * 0.07, sy = ((i * 0.61 + 0.23) % 1) * H * 0.5 + H * 0.18; return [sx + Math.sin(t * 0.01 + i) * 6, sy + k * 30, 0.85]; }
+    case "scatter": { const sx = ((i * 0.37 + 0.11) % 1) * W * 0.86 + W * 0.07, sy = ((i * 0.61 + 0.23) % 1) * H * 0.45 + H * 0.22; return [sx + Math.sin(t * 0.01 + i) * 6, sy + k * 20, 1.05]; }
     case "converge": { const e = k * k; return [cx + Math.cos(a) * R * (1.3 - e), cy + Math.sin(a) * R * 0.6 * (1.3 - e), 1 - e * 0.4]; }
     case "fused": { const r = R * 0.28; return [cx + Math.cos(a + t * 0.01) * r, cy + Math.sin(a + t * 0.01) * r * 0.7, 0.75]; }
     case "burst": { const e = Math.min(1, k * 1.4); return [cx + Math.cos(a) * R * 0.2 * (1 - e) + Math.cos(a) * R * e, cy + Math.sin(a) * R * 0.6 * e, 0.8 + e * 0.3]; }
@@ -206,7 +206,19 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
     const size = Math.min(W, H) * 0.12 * num(sc, 1);
     ctx.globalAlpha = fadeIn * fadeOut * (s.layout === "fused" ? 0.85 : 1);
     const hop = s.dance && !reduce ? Math.abs(Math.sin(t * 0.09 + i)) * 14 : 0;
-    if (drawActor && on && s.layout !== "fused") { try { drawActor(ctx,h,x,y+size*.5-hop,size/60,s.layout==='arrival'?{pose:reduce?'idle':k<.45?'run':k<.7?'cast':'victory',form:0}:null); return; } catch (_) {} }
+    // Layouts que siempre intentan drawActor (iluminados o no)
+    const alwaysActor = ['circle','scatter','line','burst','converge'].includes(s.layout);
+    if (drawActor && (on || alwaysActor) && s.layout !== 'fused') {
+      try {
+        if (!on && alwaysActor) ctx.globalAlpha *= 0.45;
+        drawActor(ctx, h, x, y + size * .5 - hop, size / 60,
+          s.layout === 'arrival'
+            ? { pose: reduce ? 'idle' : k < .45 ? 'run' : k < .7 ? 'cast' : 'victory', form: 0 }
+            : { pose: on ? (s.dance ? 'victory' : 'idle') : 'idle', form: 0 });
+        ctx.globalAlpha = fadeIn * fadeOut;
+        return;
+      } catch (_) {}
+    }
     drawHeroEmblem(ctx, h, x, y - hop, size, col, reduce ? 0 : t);
     if (s.dim && s.layout === "one") { ctx.globalAlpha = 0.5 * fadeIn; ctx.fillStyle = s.bg; ctx.fillRect(x - size, y - size * 0.8 + size * 1.6 * k * 0.6, size * 2, size * 1.6 * (1 - k * 0.6)); }
   });

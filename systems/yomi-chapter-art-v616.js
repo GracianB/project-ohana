@@ -14,10 +14,11 @@ export function drawYomiCreature(ctx, e, cam, t, reduced = false) {
 
  const x = e.x + e.w / 2 - cam.x, y = e.y + e.h - cam.y, facing = e.facing || 1;
  const hurt = e.invuln > 0 || e.stun > 4;
+ const glitch = hurt && !reduced ? Math.floor(Math.sin(t * 0.3 + (e.spawnIndex || 0) * 11) * 5) : 0;
  const step = reduced ? 0 : Math.sin((t * 0.15) + (e.spawnIndex || 0) * 1.3);
 
  ctx.save();
- ctx.translate(x, y);
+ ctx.translate(x + glitch, y);
  ctx.scale(facing, 1);
  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
@@ -355,6 +356,20 @@ export function drawYomiAtmosphere(ctx, g, cam, t = 0, reduced = false) {
  ctx.fillRect(0, 0, w, h);
 
  if (!reduced) {
+  // Barrido de radar astronómico del observatorio
+  const radarCX = w * 0.5 - (cam.x * 0.04) % w, radarCY = -60;
+  const radarAng = (t * 0.005) % TAU;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(79, 240, 200, 0.07)'; ctx.lineWidth = 1.2;
+  for (let beam = 0; beam < 3; beam++) {
+   const ba = radarAng + beam * (TAU / 3);
+   ctx.beginPath();
+   ctx.moveTo(radarCX, radarCY);
+   ctx.lineTo(radarCX + Math.cos(ba) * 950, radarCY + Math.sin(ba) * 950);
+   ctx.stroke();
+  }
+  ctx.restore();
+
   // Constelaciones conectándose en el cielo
   const STARS = [
    [120, 80], [240, 110], [310, 60], [450, 95], [600, 70],
