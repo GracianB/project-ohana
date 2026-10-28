@@ -1,6 +1,7 @@
 import {drawKiloCreature} from './kilo-chapter-art-v606.js';
 import {drawStitchoCreature} from './stitcho-chapter-art-v607.js';
 import {drawChispinCreature} from './chispin-chapter-art-v608.js';
+import {drawCatCreature} from './cat-chapter-art-v609.js';
 import {drawFaunaMorph} from './fauna-morphs.js';
 import {drawChapterSpecies,drawChapterSpeciesCue} from './chapter-species-v604.js';
 // Ten locally authored fauna families. Role equipment is drawn separately;
@@ -34,6 +35,7 @@ export function drawCampaignCreature(c,e,cam,t,reduced=false){
  if(drawKiloCreature(c,e,cam,t,reduced))return true;
  if(drawStitchoCreature(c,e,cam,t,reduced))return true;
  if(drawChispinCreature(c,e,cam,t,reduced))return true;
+ if(drawCatCreature(c,e,cam,t,reduced))return true;
  const hero=String(e.roomId||'').replace('w1-',''),P=CHAPTER_FAUNA[hero];
  if(!P||!e.campaignRole||e.boss||e.miniBoss)return false;
  const a=e._campaign||{},time=reduced?0:t,phase=time*.19+(e.spawnIndex||0),run=Math.abs(e.vx||0)>.4,

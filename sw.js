@@ -1,6 +1,9 @@
 const VERSION = "ohana-606";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/cat-chapter-art-v609.js?v=" + VERSION,
+  "./systems/cat-chapter.js?v=" + VERSION,
+  "./systems/cat-encounters-v609.js?v=" + VERSION,
   "./systems/chispin-chapter-art-v608.js?v=" + VERSION,
   "./systems/chispin-encounters-v608.js?v=" + VERSION,
   "./systems/stitcho-chapter-art-v607.js?v=" + VERSION,
@@ -425,6 +428,9 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/cat-chapter-art-v609.js": "4b04ed188602e0184c2828ecf7df4322692d9936",
+  "systems/cat-chapter.js": "d3eeee64938376e2b7bf382647bc6704b92da0fc",
+  "systems/cat-encounters-v609.js": "ea157f84cde45fe857174cc809f3b3a991b6aa54",
   "systems/chispin-chapter-art-v608.js": "aed0a9bdbfd9773d0d144dde4227db1eb743cc70",
   "systems/chispin-encounters-v608.js": "14bee555a4edaa14f059fb2bb5a8a594d7402b3e",
   "systems/stitcho-chapter-art-v607.js": "a8853e8d5fac6f19f2bfc4725a925ab1120f4423",
@@ -461,7 +467,7 @@ const PRECACHE_REVISIONS = {
   "characters/identity-v2.js": "1200f339e2612f597607d48dbd6c5419dbe9b60f",
   "characters/anatomical-stride.js": "3a0bb654e3f7d8cc65c28a6c86f07c5bf0169b1d",
   "systems/chapter-encounters.js": "457d07ff55d9fa992e81cefc66a7a80451a4c9f7",
-  "systems/campaign-creature-art.js": "d482dbe9798b87d8a41bb7dce18c26f7a103e3a3",
+  "systems/campaign-creature-art.js": "72bbe44ad941a27df55e80c7c835704ce7689981",
   "worlds/chapter-vistas.js": "4add1f6b1654dcaf33924bb8a912aef9af2feb22",
   "systems/chapters-lunar-prism-embers.js": "f24c3b1c2e4688f99ea17dceea2d006b31887289",
   "worlds/ohana-crafted-scenes.js": "67c654f2ee9422a6bc1f62a08821f189a7a222c0",
@@ -520,10 +526,10 @@ const PRECACHE_REVISIONS = {
   "systems/fusion-boss.js": "ed5b248a1e33315cb063b92b049e64d479393242",
   "systems/quimera-art.js": "b320aeff3660c6aa859dc545acd2778bc4fdf80a",
   "systems/world1-story.js": "dc635eb6dced1378e8831f5a825ceff9111e401a",
-  "systems/world1-rooms.js": "9a8c71a44c01b6e0adcc8e2474fa7bf4e662b4ea",
+  "systems/world1-rooms.js": "ecb1b6c742b795802fed9ab76001962cb1fc746f",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
   "worlds/chapter-stagecraft.js": "979021a3b2cd9fca0794d0fa70beb250a20845da",
-  "systems/world1-play.js": "8c18cb9075116b03038d96f5839fbada2a8d5a03",
+  "systems/world1-play.js": "40114ed4671786241111d3994b1499f93f0a5158",
   "systems/yomi-trail.js": "d39306a5ada636f9c9b2dee5107e7990da01134c",
   "systems/yomi-boss.js": "686a49d7eafe5b1d4ba91349392f71c747ed8522",
   "worlds/yomi-observatory.js": "bbc3e453a487d67ec7ae8f51dde1b58d959cc2ce",
@@ -557,7 +563,7 @@ const PRECACHE_REVISIONS = {
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
   "systems/family-islands.js": "3e2b8366c48f7556f89c35c9efc9a31f700da3a9",
   "systems/hero-combos.js": "f9e8a95a3f3af4e66805c71a1bf1479fbb5a3a25",
-  "systems/campaign-enemies.js": "ade7b2fee863707d1564bd7d3962d72932b93d9e",
+  "systems/campaign-enemies.js": "94ad9d65dd65ab02470f005f38f37923c381009d",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
   "systems/island-springs.js": "c1244e0a82b4ae7db6e4ae66ffa04bc6b1f3437f",

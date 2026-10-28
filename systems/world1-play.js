@@ -1,6 +1,7 @@
 import {drawKiloResonator} from './kilo-chapter-art-v606.js';
 import {drawStitchoPart,drawStitchoPartStation} from './stitcho-chapter-art-v607.js';
 import {drawChispinRod} from './chispin-chapter-art-v608.js';
+import {drawCatMoonJelly} from './cat-chapter-art-v609.js';
 import {updateFinalGauntlet} from './final-gauntlet.js';
 import {KEEPSAKES} from './keepsakes.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
@@ -9,6 +10,7 @@ import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaCha
 import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact} from './dino-chapter.js';
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
+import {catGrowth,updateCatChapter,catChapterReady,catObjective,drawCatChapter} from './cat-chapter.js';
 import {stitchoGrowth,updateStitchoChapter,stitchoChapterReady,stitchoObjective,drawStitchoChapter} from './stitcho-chapter.js';
 import {enterKiloAirTrail,updateKiloAirTrail,drawKiloAirTrail,kiloNoteGrowth,kiloGuardianRequired,kiloFlowerThreat,kiloInstrumentAction,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
 // OHANA V467 · MUNDO 1 · sellos, cinemáticas de sala y fondo-silueta del héroe.
@@ -47,7 +49,7 @@ export function enterWorld1(g) {
     } : null,
     statuesLit: r.statues ? r.statues.map((s) => g.world1Seals.includes(s.hero)) : null
   };
-  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);nextChapterGrowth(g);enterKiloAirTrail(g);
+  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);catGrowth(g);nextChapterGrowth(g);enterKiloAirTrail(g);
   enterExpedition(g);
   return g.world1;
 }
@@ -124,7 +126,7 @@ export function world1NextObjective(g) {
   const expedition=expeditionObjective(g);if(expedition)return expedition;
   if (w.sealed) return { x: r.width - 80, y: r.seal?.altar?.y || 1134, label: "Salida del este", action: "Sigue hacia la siguiente sala" };
   if(kiloGuardianRequired(g)&&w.stations.every(s=>s.done))return {x:(KILO_CHAPTER_ARENA.left+KILO_CHAPTER_ARENA.right)/2,y:KILO_CHAPTER_ARENA.floor,label:'Tambor del Claro',action:'Las cuatro notas están listas · vence al guardián. Salta sus ondas y ataca cuando se recupere.'};
-  const workshopGoal=stitchoObjective(g)||chispinObjective(g)||nextChapterObjective(g);if(workshopGoal)return workshopGoal;
+  const workshopGoal=stitchoObjective(g)||chispinObjective(g)||catObjective(g)||nextChapterObjective(g);if(workshopGoal)return workshopGoal;
   const remaining = w.stations.filter(s => !s.done && s.kind !== "oven");
   const nearest = list => [...list].sort((a,b) => Math.abs(a.x - cx(p)) - Math.abs(b.x - cx(p)))[0];
   let target = w.kind === "prismas" ? remaining.find(s => s.order === w.order) : nearest(remaining);
@@ -187,7 +189,7 @@ function complete(g, s, label) {
   g.fx?.emit?.(s.x, s.y - 50, { color: WORLD1_THEMES[w.hero]?.color || "#fff", count: g.reduceMotion ? 6 : 20, size: 4, up: 2, star: true, life: 30 });
   // Each physical station grants score only once, including after a reload.
   if (!s._scored) { g.score = (g.score || 0) + 150; s._scored = true; }
-  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);nextChapterGrowth(g);
+  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);catGrowth(g);nextChapterGrowth(g);
   g.onWorld1Beat?.("station", w.hero);
   g.world1Stations = cleanWorld1Stations({ ...(g.world1Stations || {}),
     [w.room]: w.stations.filter(x => x.done && x.kind !== "oven").map(x => x.id) });
@@ -197,7 +199,7 @@ function complete(g, s, label) {
 
 export function awardSeal(g) {
   if(g.onlineAdventure&&g.coopAuthority===false)return false;
-  const w = g.world1; if (!w || w.sealed || !w.hero || !expeditionReady(g) || !stitchoChapterReady(g) || !chispinChapterReady(g) || !nextChapterReady(g) || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
+  const w = g.world1; if (!w || w.sealed || !w.hero || !expeditionReady(g) || !stitchoChapterReady(g) || !chispinChapterReady(g) || !catChapterReady(g) || !nextChapterReady(g) || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
   w.sealed = true; w.flash = 40;
   g.world1Seals = cleanWorld1Seals([...(g.world1Seals || []), w.hero]);
   const p = g.player;
@@ -217,12 +219,13 @@ export function updateWorld1(g,hurt) {
   if (w.flash > 0) w.flash--;
   for (const s of w.stations) if (s.glow > 0) s.glow--;
   if (r.fusionBoss) return updateFinalRoom(g, w, p, r);
-  updateKiloAirTrail(g);updateStitchoChapter(g);updateChispinChapter(g,hurt);updateNextChapter(g);updateDinoDive(g);
+  updateKiloAirTrail(g);updateStitchoChapter(g);updateChispinChapter(g,hurt);updateCatChapter(g,hurt);updateNextChapter(g);updateDinoDive(g);
   if (w.sealed) {updateExpedition(g);if(r.dinoChapter){trackDinoAir(g);w.wasGrounded=!!p.grounded;}return;}
   updateExpedition(g);
   kiloNoteGrowth(g);
   if(r.growthChapter&&w.stations.every(s=>s.kind==='oven'||s.done)&&nextChapterReady(g)){awardSeal(g);return;}
   if(r.chispinChapter&&w.stations.every(s=>s.done)&&chispinChapterReady(g)){awardSeal(g);return;}
+  if(r.growthChapter==='cat'&&w.stations.every(s=>s.done)&&catChapterReady(g)){awardSeal(g);return;}
   if(r.stitchoChapter&&w.stations.every(s=>s.done)&&stitchoChapterReady(g)){awardSeal(g);return;}
   if(r.kiloChapter&&w.stations.every(s=>s.done)&&!kiloGuardianRequired(g)){awardSeal(g);return;}
   const airborne = !p.grounded;
@@ -383,7 +386,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -565,6 +568,7 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       if(done){ctx.strokeStyle='#a0c4c7';ctx.lineWidth=1.5;for(let k=0;k<3;k++){ctx.beginPath();ctx.arc(x,y-142,20+k*12,-Math.PI*.8,-Math.PI*.2);ctx.stroke();}}
       ctx.fillStyle='#244756';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(done?'ANTENA '+(s.id+1)+' CONECTADA ✓':'CONECTA LA ANTENA '+(s.id+1),x,y-194);break; }
     case "jelly": {
+      if(g.roomDef?.growthChapter==='cat'){drawCatMoonJelly(ctx,s,cam,t,reduce);break;}
       drawWorld1MoonJelly(ctx, { x, y, id: s.id, done }, t, reduce);
       break; }
     case "prism": {
