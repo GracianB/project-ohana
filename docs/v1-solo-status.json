@@ -3,14 +3,15 @@
   "updated_on": "2026-10-28",
   "release": "ohana-623",
   "repository": "GracianB/project-ohana",
-  "published": false,
+  "published": true,
   "v1_ready": false,
-  "next_task": "publish_and_verify_public_build",
+  "next_task": "user_play_review_of_V623_art_movement_and_finale",
   "validation": "docs/V623-VALIDATION.json",
   "publication": "docs/V623-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
   "remote_multiplayer": "paused_backend",
-  "human_acceptance": "pending_user_review_of_reported_visual_fixes",
+  "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
-  "campaign_complete_verified": true
+  "campaign_complete_verified": true,
+  "source_commit": "ae920905e12650182b762f685f19425c7da0212d"
 }

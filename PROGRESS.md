@@ -1,3 +1,5 @@
+V623 publicada y comprobada: merge ae92090; Pages aprobado (pruebas Node e integridad incluidas). Los 27 archivos runtime cambiados coinciden por hash con el origen publicado. Arranque nativo público, primer recuerdo, álbum, HUD y J táctil aprobados en escritorio/móvil, sin hooks de prueba, errores ni llamadas al backend pausado. No se ha creado etiqueta de cierre definitivo ni atribuido al jugador una aceptación visual. La API denegó crear el PR (Forbidden). Registro: docs/V623-PUBLICATION.json.
+
 Validación local V623 aprobada: 1.772 pruebas Node, Release Gate, campaña continua Normal hasta Quimera y cierre, selector 1280/390/320, diez cine-guardianes opacos, diez escenarios Canvas, movimiento físico de Frita, pausa/guardado/Continue, arranque nativo y Versus local entre dos navegadores. Los mil recuerdos ganados en V622 se conservan al recargar. Pendiente la verificación pública; valoración humana de arte y dificultad no inferida.
 
 ## V623 validada para publicación · revisión del jugador
