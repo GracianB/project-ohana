@@ -39,14 +39,15 @@ test('README local source and docs links resolve to existing repository paths',a
   }
 });
 
-test('README truthfully distinguishes World 1 candidate, deployment and paused multiplayer',()=>{
-  assert.match(readme,/V500 integrada[^\n]*main/i);
-  assert.match(readme,/V501 en desarrollo/i);
-  assert.match(readme,/981526f/);
-  assert.match(readme,/cambios locales no acreditan publicación/i);
-  assert.match(readme,/Mundo 2[^\n]*en construcción/i);
-  assert.match(readme,/multijugador remoto[^\n]*en pausa/i);
-  assert.match(readme,/No confundimos tres cosas/i);
+test('README describes the current development line, evidenced release and multiplayer availability',()=>{
+  assert.match(readme,/10 salas/i);
+  assert.match(readme,/V620/);
+  assert.match(readme,/V606/);
+  assert.match(readme,/V606-PUBLICATION\.json/);
+  assert.match(readme,/V606-VALIDATION\.json/);
+  assert.match(readme,/Mundo 2[^\n]*no está anunciado como campaña terminada/i);
+  assert.match(readme,/cooperativo remoto[^\n]*no se anuncia aquí como servicio disponible/i);
   assert.match(readme,/GitHub Pages/i);
+  assert.match(readme,/no sustituyen jugar cada capítulo en dispositivos reales/i);
   assert.doesNotMatch(readme,/V460 permanece en revisión/i);
 });
