@@ -1,194 +1,141 @@
 <div align="center">
 
-<img src="favicon.svg" alt="Símbolo de Project OHANA" width="76" />
+<img src="favicon.svg" alt="Símbolo de Project Ohana" width="76" />
 
 # PROJECT OHANA
 
-### Diez héroes. Cincuenta formas. Una historia para toda la familia.
+### Diez héroes. Cincuenta formas. Una familia que vuelve a encontrarse.
 
-**Plataformas · exploración · combate · evolución · aventura narrativa en Canvas 2D**
+Una aventura de plataformas en Canvas 2D: explora Isla Hoku, descubre qué hace único a cada héroe, evoluciona desde bebé y reúne a Ohana.
 
-**10 héroes** · **50 formas** · **10 salas temáticas + final de Mundo 1**
+[**JUGAR OHANA**](https://gracianb.github.io/project-ohana/) · [**VER LOS DIEZ HÉROES**](https://gracianb.github.io/project-ohana/gallery.html) · [**CÓMO EMPEZAR**](#empieza-a-jugar) · [**INFORMAR DE UN PROBLEMA**](https://github.com/GracianB/project-ohana/issues)
 
-[**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
+<br />
 
-<sub><strong>V501 en desarrollo · La aventura se entiende jugando.</strong> Parte de V500 integrada en <code>main</code> (`981526f`) e incorpora antenas persistentes, viajes voluntarios, objetivos concretos, historia con avance táctil, avisos de poderes por forma y un álbum accesible que detiene el combate. Conserva 10 héroes, 50 formas y 10 salas temáticas con su final. Los cambios locales no acreditan publicación; verifica GitHub Pages sobre el commit integrado. Multijugador remoto en pausa.</sub>
-
-V501 añade una bienvenida costera, diez ambientes y músicas propias, estrategias de sala y estados de poderes legibles. Corrige las plataformas que aparecían al llegar al borde y explica paso a paso el combo H → J → H de Kilo. Detalles y alcance de las pruebas en [la entrega V501](docs/V501-AVENTURA-CLARA.md).
-
-Plan de cierre: [V1 para un jugador](docs/V1-SOLO-ESTRATEGIA.md) · [estado por capítulo](docs/v1-solo-status.json) · [punto de reanudación](docs/HANDOFF-V1-SOLO.md).
-
+**10 héroes** · **50 formas** · **10 capítulos** · **1 final de Mundo 1**
 
 </div>
 
 ---
 
-## V501 · La aventura se entiende jugando
+## La aventura
 
-- Chispín recupera una red de cuatro antenas: contacto o ataque las conecta y ninguna cuenta atrás borra el avance. Las conexiones y los demás objetivos completados se guardan al conseguirlos.
-- Los vórtices dejan de absorber por sorpresa. Vórtices y catapultas muestran el destino y esperan **E**, también en móvil. Las rutas cerradas no inician un viaje.
-- Una única tarjeta accesible explica el siguiente objetivo y su dirección. Las piezas guían hasta su taller, las pizzas hasta el cliente y los carteles señalan la salida; no hay que activar otro altar.
-- Las cinco formas siguen despertando con experiencia y conservan sus habilidades. El álbum de 100 recuerdos por sala es opcional y se muestra en su botón, sin duplicar paneles sobre el juego.
+La familia Ohana vive en Isla Hoku. Cada héroe tiene una manera propia de moverse, luchar y atravesar el mundo. Empiezas como bebé, ganas experiencia jugando y ves cómo tu personaje cambia de forma. Las salas mezclan plataformas, criaturas, mecanismos, secretos y recuerdos. Al reunir los diez sellos, se abre el camino al final de Mundo 1.
 
-[Diseño y validación V501](docs/V501-AVENTURA-CLARA.md). `npm run test:browser:journey` comprueba las interacciones nuevas. Para usar Chromium instalado: `CHROMIUM_BIN=/ruta/a/chromium npm run test:browser:journey`.
+El juego se dibuja en tiempo real con Canvas 2D. Personajes, criaturas, efectos y paisajes forman parte del motor; la galería muestra los personajes que realmente pinta el juego.
 
-## V500 · Un lugar para ti
+## Empieza a jugar
 
-Al completar el Mundo 1 aparece una constelación interactiva: diez héroes pintados por el motor, diez voces de regreso a casa y una última luz para quien ha jugado. Escucha cada voz a tu ritmo; el recuerdo se guarda aparte de la partida y puede volver a abrirse desde el menú. Incluye teclado, móvil y movimiento reducido. No añade daño, ventajas ni requisitos para terminar la campaña.
+1. [Abre Ohana en tu navegador](https://gracianb.github.io/project-ohana/).
+2. Elige un héroe en el campamento. Puedes cambiarlo más adelante.
+3. Sigue el objetivo que aparece en pantalla, explora la sala y combate para ganar experiencia.
+4. Usa los portales para continuar la historia. Al terminar Mundo 1, podrás enfrentarte al desafío final.
 
-V495–V499 preparan ese cierre: objetivos y sellos coherentes, ayuda de Quimera, foco accesible, recuerdo de victoria y epílogo. [Alcance y aceptación V500](docs/V500-UN-LUGAR-PARA-TI.md).
+No necesitas instalar nada. En ordenador se juega con teclado; en móvil aparecen controles táctiles. El progreso se guarda en el navegador de ese dispositivo.
 
-## Un videojuego que se dibuja en tiempo real
-
-OHANA es un plataformas 2D construido con **JavaScript modular y Canvas 2D**. Los personajes reaccionan al movimiento, el combate y sus poderes; los escenarios tienen plataformas, rutas verticales, peligros y encuentros propios.
-
-**El arte que se debe evaluar es el que pinta el motor del juego, no los retratos JPG ni los sprites PNG históricos del repositorio.** Por eso este README enlaza las vistas **renderizadas de verdad** y deja de presentar imágenes antiguas como si fueran el diseño de V457.
-
-| Ver el juego real | Dónde |
-| :--- | :--- |
-| **Aventura y controles** | [Abrir OHANA](https://gracianb.github.io/project-ohana/) |
-| **Galería del motor** | [Diez héroes en Canvas](https://gracianb.github.io/project-ohana/gallery.html) |
-| **Evoluciones de Cuerno** | [Estudio interactivo de sus cinco formas](https://gracianb.github.io/project-ohana/previews/cuerno-design.html) |
-| **Implementación gráfica** | [Renderizador](characters/draw.js) · [Arte de personajes](characters/art/) · [Mundos](worlds/) |
-
-> **Fidelidad visual:** la galería pública utiliza la versión desplegada, que puede ir por detrás de V457. Para comprobar el arte exacto de esta PR, ejecuta el proyecto desde su rama. El motor combina dibujo procedural y, en ciertos casos o modos, atlas pintados; **no se afirma que se hayan eliminado todos los PNG del código**.
-
-## Mundo 1 · La Ruta de los Diez
-
-El Eco ha robado las canciones de la familia. La aventura recorre **diez salas de personaje en un solo mundo**, desde el Claro de Kilo hasta el Observatorio de Yomi, y desemboca en el **Corazón de Ohana**. Cada sala tiene una misión de sello propia, plataformas, enemigos, puntos de control y un capítulo de la misma historia. Al reunir los diez sellos aparece la **Quimera Ohana**, el jefe que reúne los ecos de los protagonistas.
-
-Las salas se abren en orden. Elegir personaje en el campamento enseña sus cinco formas y su portal; las salas cerradas indican qué sello hace falta. La salida de V470 presenta **«Mundo 2 · en construcción»** en lugar de enviar silenciosamente al jugador a contenido anterior. El código de ese contenido se conserva, sin anunciarlo como un segundo mundo terminado.
-
-**Ver el diseño ejecutable:** [grafo y salas](systems/world1-rooms.js) · [historia completa](systems/world1-story.js) · [selector de portales](systems/world1-select.js) · [estado de sellos](systems/world1-progress.js) · [PR V470](https://github.com/GracianB/project-ohana/pull/404).
-
-> **Aceptación diferenciada:** Chromium ya ha completado una ruta física con diez sellos y derrota de la Quimera, sin alterar los estados de salud, sellos o victoria. Esto **no sustituye** la prueba humana de accesibilidad, mando, móvil, todos los recuerdos y persistencia, ni certifica por sí solo el despliegue de Pages.
-
-**Plan vigente de cierre:** [candidata single player, alcance y puertas de salida](docs/SINGLE-PLAYER-RELEASE.md). La auditoría V457 se conserva como histórico; la candidata actual reúne V493 y V494 y debe acreditar las cinemáticas finales antes de publicarse.
-
-## V460 · Michicornio vivo: actuación corporal e intro / evolución cinematográfica
-
-Michicornio deja de limitarse a diez poses estáticas. Ahora su **carrera articula patas y hombros**, las orejas reaccionan, **parpadea y mira alrededor**, la Medusa respira con su campana y sus **siete filamentos se desplazan independientemente**. El dragón hereda ese movimiento y el Guardián Eclipse lo culmina con **nueve tentáculos de vidrio animados**. Todo sucede en Canvas, sin alterar hitboxes.
-
-La **intro familiar** incorpora corona, iris lunar y gestos de personalidad exclusivos. La **cinemática de evolución** pasa de un retrato inmóvil a cuatro actos con dos formas pintadas durante la metamorfosis, luz en el cuerno y presentación animada.
-
-[**Ver el storyboard cinematográfico V460**](previews/michicornio-cinema.html) · [**Laboratorio de cinco formas y diez acciones**](previews/michi-design.html) · [**Comprobar el movimiento de los diez héroes**](previews/animation-lab.html)
-
-> **Control de publicación:** La publicación de V460 se acredita únicamente con CI, regresión visual y GitHub Pages aprobados para el commit de <code>main</code>. El modo de movimiento reducido mantiene las escenas principales sin vibración.
-
-## V459 · Cien animaciones de personaje y evolución felina coherente
-
-**Diez héroes × diez acciones corporales**, con perfiles de peso, elasticidad, ritmo y reacción distintos por personaje. No son diez GIF ni cambios de color: el renderizador transforma el cuerpo en cada acción (`idle`, carrera, salto, caída, planeo, pared, ataque, magia, daño y celebración) sin alterar las colisiones.
-
-**Michicornio ya no cambia de gato a conejo.** Su árbol es **Gatito Lunar → Hada Felina → Medusa Onírica con orejas gatunas → Dragón Astral con vibrisas y filamentos → Michicornio Eclipse con nueve tentáculos cristalinos**. El cuerno, la anatomía de orejas y el hilo onírico permiten reconocer el personaje incluso cuando cambia por completo de forma.
-
-[**Estudio vivo de las cinco formas de Michicornio**](previews/michi-design.html) · [**Laboratorio interactivo: diez héroes y diez animaciones**](previews/animation-lab.html) · [**Código de actuación compartida**](characters/ten-action-acting.js)
-
-> **Historial de arte:** V459 y V460 están fusionadas en `main`. Sus galerías siguen siendo útiles para inspeccionar animaciones; su disponibilidad pública depende del último despliegue de Pages.
-
-## La familia: diez maneras distintas de jugar
-
-Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habilidades propias. Pulsa en su nombre para verlo dibujado por el motor, en lugar de consultar un retrato estático desactualizado.
-
-| Héroe y galería en vivo | Personalidad jugable | Héroe y galería en vivo | Personalidad jugable |
-| :--- | :--- | :--- | :--- |
-| [**Kilo**](https://gracianb.github.io/project-ohana/gallery.html?id=kilo) | Ukelele, ritmo y planeo | [**Stitcho**](https://gracianb.github.io/project-ohana/gallery.html?id=stitcho) | Plasma, caos y paredes |
-| [**Chispín**](https://gracianb.github.io/project-ohana/gallery.html?id=chispin) | Electricidad y aceleración | [**Michicornio**](https://gracianb.github.io/project-ohana/gallery.html?id=cat) | Sueños, esquiva y nueve vidas |
-| [**Dragón**](https://gracianb.github.io/project-ohana/gallery.html?id=dragon) | Fuego, viento y altura | [**Dino**](https://gracianb.github.io/project-ohana/gallery.html?id=dino) | Fuerza e impacto |
-| [**Frita**](https://gracianb.github.io/project-ohana/gallery.html?id=frita) | Velocidad y derrape | [**Pizza**](https://gracianb.github.io/project-ohana/gallery.html?id=pizza) | Rebotes y giros |
-| [**Yomi**](https://gracianb.github.io/project-ohana/gallery.html?id=yomi) | IA familiar, análisis y red neuronal | [**Cuerno**](https://gracianb.github.io/project-ohana/gallery.html?id=cuerno) | Luz, prismas y protección |
-
-### De bebé a forma final
-
-**50 combinaciones jugables**: cada uno de los diez héroes tiene cinco formas, de la inicial a su evolución definitiva. El crecimiento modifica tamaño visual, atributos, animación y posibilidades de combate, **sin confundir la silueta pintada con la caja física de colisión**.
-
-El combate usa **H** para el ataque base y **J / K / L** para las habilidades. No todos los personajes saltan, vuelan o atacan igual: esa diferencia es parte del diseño.
-
-**Michicornio V458–V459 (ya integrado):** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → lince lunar → medusa felina con orejas → dragón astral → guardián de nueve tentáculos. [Ver su implementación Canvas](characters/art/cat.js). El diseño se encuentra en el código de `main` desde V459 y se refina en V460.
-
-## Un mundo ahora, el siguiente después
-
-**Mundo 1**, la campaña actual, tiene diez salas grandes de héroe y un escenario final. El Claro, Costa, Jungla, Cueva, Laboratorio, Cumbre, Caldera, Órbita, Arrecife y el antiguo Nido de la Reina permanecen en el código histórico como base del **Mundo 2**, pero no se presentan como contenido completado en el modo individual V470.
-
-Hay un álbum y progresión de recuerdos por protagonista; la lógica de recompensas está automatizada, aunque la accesibilidad física de todos los objetos no se ha demostrado recorriendo cada nivel manualmente.
-
-La ruta, sus sellos y sus enemigos están definidos en [Mundo 1](systems/world1-rooms.js). Para la estructura de combate, consulta [motor](game.js) y [sistemas](systems/).
-
-## Cómo se juega
+### Controles
 
 | Acción | Teclado |
 | :--- | :--- |
-| Movimiento | **A / D** o flechas |
-| Salto | **W** o **Espacio** |
-| Descender de plataforma | **S** o **↓** |
-| Dash | **Shift** |
-| Ataque | **H** |
-| Habilidades | **J / K / L** |
-| Interacción | **E** |
+| Moverse | **A / D** o **← / →** |
+| Saltar | **W**, **↑** o **Espacio** |
+| Bajar de una plataforma | **S** o **↓** |
+| Correr | **Shift** o doble toque de dirección |
+| Atacar | **H** |
+| Habilidades del héroe | **J / K / L** |
+| Interactuar o usar portal | **E** |
 | Mapa | **M** |
 | Pausa | **Esc** |
 
-Hay controles táctiles en móvil.
+Las habilidades disponibles y sus efectos dependen del héroe y de su forma. Consulta la ayuda dentro del juego para ver las del personaje elegido.
 
-## Estado verificable · Mundo 1 validado físicamente
+## La familia
 
-| Área | Estado del código |
+Cada personaje tiene cinco formas y una identidad de combate. Selecciona uno para ver su arte en la [galería interactiva](https://gracianb.github.io/project-ohana/gallery.html).
+
+| Héroe | Su estilo |
 | :--- | :--- |
-| **Motor, diez héroes y cincuenta formas** | Integrados en `main`; existe galería Canvas y batería de regresión. |
-| **Mundo 1: diez salas + Quimera Ohana** | Diez sellos físicos, primer impacto y segunda fase real fusionados en `main` desde V492. V493 demuestra las cuatro fases y el jefe a 0 HP en una PR candidata. |
-| **Selección de personajes** | Portales Canvas con navegación por teclado, sincronizados con las tarjetas HTML. |
-| **Progresión y coleccionables** | Contratos y guardado implementados. Los diez sellos y las puertas se han recorrido en Chromium; pendientes las auditorías exhaustivas de recuerdos y persistencia. |
-| **Pruebas y publicación** | [Diez sellos V490](https://github.com/GracianB/project-ohana/actions/runs/40008058098) · [Victoria física V493](https://github.com/GracianB/project-ohana/actions/runs/40017010179) · [HUD V494](https://github.com/GracianB/project-ohana/actions/runs/40012431683). Exigir además Quality, CI y Pages del commit de publicación. |
-| **Multijugador remoto** | En pausa; sin reactivar servidores ni créditos de servicios. |
+| [Kilo](https://gracianb.github.io/project-ohana/gallery.html?id=kilo) | Ritmo, ukelele y vuelo con hula |
+| [Stitcho](https://gracianb.github.io/project-ohana/gallery.html?id=stitcho) | Plasma, acrobacias y rutas por paredes |
+| [Chispín](https://gracianb.github.io/project-ohana/gallery.html?id=chispin) | Velocidad y ataques eléctricos encadenados |
+| [Michicornio](https://gracianb.github.io/project-ohana/gallery.html?id=cat) | Agilidad lunar, sueños y nueve colas |
+| [Dragón](https://gracianb.github.io/project-ohana/gallery.html?id=dragon) | Fuego, corrientes térmicas y vuelo |
+| [Dino](https://gracianb.github.io/project-ohana/gallery.html?id=dino) | Fuerza, embestidas e impactos de suelo |
+| [Frita](https://gracianb.github.io/project-ohana/gallery.html?id=frita) | Derrapes, velocidad y terreno abrasador |
+| [Pizza](https://gracianb.github.io/project-ohana/gallery.html?id=pizza) | Porciones, rebotes y ataques giratorios |
+| [Yomi](https://gracianb.github.io/project-ohana/gallery.html?id=yomi) | Pasos espectrales y lectura del campo |
+| [Cuerno](https://gracianb.github.io/project-ohana/gallery.html?id=cuerno) | Prismas, luz y protección |
 
-### Evidencia reproducible del Mundo 1
+La evolución cambia las posibilidades y la animación del héroe. Las formas son visualmente distintas y mantienen una colisión separada del dibujo para conservar un control predecible.
 
-La campaña de Chromium comienza con **cero sellos**, usa movimiento, saltos, ataques y habilidades reales, y admite muertes/reapariciones normales. La prueba [V493 de victoria física](https://github.com/GracianB/project-ohana/actions/runs/40017010179) registró **10/10 sellos, fases 1–4, Quimera a 0 HP y `world1Won=true`**, con una muerte y sin intervenciones sobre vida, posiciones, sellos ni estado de victoria. Su artefacto incluye captura y JSON.
+## Isla Hoku y el final de Mundo 1
 
-- [V490 · Ruta física de diez sellos](tests/browser/v490-ten-physical-seals.mjs)
-- [V493 · Quimera con controles reales y final de campaña](tests/browser/v493-quimera-full-victory.mjs)
-- [V494 · HUD de jefe y accesibilidad](tests/browser/v494-quimera-hud-physical.mjs)
+La campaña reúne diez capítulos inspirados en sus protagonistas: Claro, Bahía, Santuario del Trueno, Jardines Lunares, Caldera, Valle de los Gigantes, Mercado Dorado, Reino del Horno, Observatorio Astral y Bosque del Prisma. Cada capítulo añade su propio recorrido, objetivos, enemigos y guardián. Los sellos abren el avance entre salas; la Quimera Ohana espera al final.
 
-La [PR #431](https://github.com/GracianB/project-ohana/pull/431) amplía la aceptación a las escenas de derrota, reunión y resultados, cuyo gate se valida por separado. Las PR #431 y #434 pueden seguir abiertas mientras se repiten las Quality completas. **El sello de publicación corresponde únicamente al mismo SHA aprobado en Pages.**
+Los recuerdos opcionales amplían el álbum de cada personaje. Explorar también puede revelar rutas alternativas, secretos y objetos especiales. El progreso de la aventura y las colecciones se conservan en el guardado local.
 
-**No confundimos tres cosas:** código fusionado, pruebas automáticas y juego realmente publicado. Para concursar debe existir un mismo commit con CI, pruebas de navegador, regresión visual, puerta de lanzamiento y Pages aprobados, seguido de revisión manual.
+**Mundo 2 no está anunciado como campaña terminada.** El contenido se presenta desde la selección y los portales del juego según su disponibilidad; tener archivos o prototipos en el repositorio no significa que sean una aventura publicada.
 
-## Desarrollo local
+## Publicación y estado del proyecto
 
-Requiere Node.js y un navegador compatible. Los módulos ES se deben servir por HTTP; **no** abras `index.html` con `file://`.
+El código de `main` incluye trabajo hasta la serie **V620**. El número de una versión de desarrollo no certifica por sí solo una publicación. La web oficial se sirve desde GitHub Pages; su estado debe comprobarse junto a las ejecuciones de CI del commit integrado. El registro de la última entrega publicada con evidencia detallada es [V606](docs/V606-PUBLICATION.json), con sus [pruebas y límites](docs/V606-VALIDATION.json).
+
+La campaña y las mejoras recientes se siguen desarrollando. Las pruebas automatizadas ayudan a comprobar movimiento, guardado, interfaz y recorridos; no sustituyen jugar cada capítulo en dispositivos reales ni aceptar personalmente su dificultad y ritmo.
+
+El cooperativo remoto no se anuncia aquí como servicio disponible. Algunas pruebas usan un servidor local, y eso no equivale a tener una conexión pública activada.
+
+## Tecnología
+
+- JavaScript modular, HTML y CSS; dibujo con **Canvas 2D**.
+- Simulación de juego a pasos fijos y sistemas de personaje desacoplados de la presentación.
+- Guardado local, modo web instalable y caché para recursos sin conexión.
+- Pruebas con Node.js y Playwright; comprobación de recursos offline antes de publicar.
+
+## Ejecutar el proyecto
+
+Necesitas Node.js. Sirve los archivos por HTTP; no abras `index.html` directamente con `file://`.
 
 ```bash
+git clone https://github.com/GracianB/project-ohana.git
+cd project-ohana
 npm ci
 npm test
 npm run test:browser
+```
+
+Para jugar durante el desarrollo, inicia un servidor estático en la carpeta del proyecto y abre su dirección local. Algunos navegadores pueden requerir instalar Chromium para las pruebas de Playwright.
+
+### Comprobaciones de publicación
+
+```bash
 npm run test:visual
 npm run release:check
 ```
 
-Para ejecutar el juego, sirve esta carpeta mediante un servidor HTTP local y abre `index.html`. Las pruebas de navegador usan **Playwright**.
+El flujo de GitHub Actions ejecuta las comprobaciones asociadas a la integración y a GitHub Pages. Si falla una prueba, consulta el registro de esa ejecución y su commit antes de atribuir el resultado a una versión posterior.
 
-El motor, los rigs, el progreso, el combate y la interfaz están versionados en este repositorio. Los archivos raster de `assets/` se conservan donde siguen siendo necesarios para modos opcionales, compatibilidad o recursos históricos, **pero no se utilizan como presentación visual oficial de este README**. [Ver inventario de recursos](assets/README.md).
+## Contribuir
 
-<details>
-<summary><strong>Arquitectura y seguimiento técnico</strong></summary>
+Lee [`AGENTS.md`](AGENTS.md) y el [plan de entrega por personaje y sala](docs/CHARACTER-PHASES.md) antes de cambiar mecánicas compartidas. Conserva las pruebas de regresión y verifica que los recursos offline siguen incluyendo los módulos nuevos.
 
-- [Motor de dibujo](characters/draw.js) y [arte por héroe](characters/art/).
-- [Estadísticas y cinco formas](characters/roster.js), [modo visual](characters/look.js).
-- [Escenarios](worlds/), [mapa canónico](systems/world-graph.js) y [colecciones por héroe](systems/hero-collections.js).
-- [Pruebas de diez héroes V457](tests/browser/v457-ten-heroes.mjs) y [proporciones visuales](tests/browser/character-size.mjs).
-- [Checklist de cierre, pendientes y clasificación de PR](docs/V457-CIERRE-SOLO.md).
+Para un error, abre un [issue](https://github.com/GracianB/project-ohana/issues) con navegador, dispositivo, personaje, sala y pasos para reproducirlo. Para proponer una mejora, describe qué debería poder hacer quien juega y cómo comprobar el resultado.
 
-**Criterio de publicación:** CI + quality + release gate + Pages para el mismo commit; después, prueba real del juego, accesibilidad, móvil, colisiones, jefes, progresión y guardado.
+## Documentación del proyecto
 
-</details>
+| Tema | Documento |
+| :--- | :--- |
+| Plan para cerrar la campaña individual | [Estrategia V1](docs/V1-SOLO-ESTRATEGIA.md) |
+| Estado y límites por capítulo | [Estado single player](docs/v1-solo-status.json) |
+| Punto de reanudación | [Handoff de campaña](docs/HANDOFF-V1-SOLO.md) |
+| Última entrega publicada con evidencia | [Publicación V606](docs/V606-PUBLICATION.json) |
+| Pruebas y limitaciones de esa entrega | [Validación V606](docs/V606-VALIDATION.json) |
 
 ---
 
 <div align="center">
 
-**OHANA está hecho para jugarlo. Su README debe mostrar lo que realmente existe.**
+**Una isla, muchas formas de jugar. Ohana significa que nadie se queda atrás.**
 
-[**JUGAR**](https://gracianb.github.io/project-ohana/) · [**GALERÍA CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**SYSTEMS LAB**](https://gracianb.github.io/systems-lab/)
-
-<sub>© 2026 Gracián Baena · Licencia MIT</sub>
+[Jugar ahora](https://gracianb.github.io/project-ohana/) · [Galería](https://gracianb.github.io/project-ohana/gallery.html) · [Código fuente](https://github.com/GracianB/project-ohana)
 
 </div>
