@@ -536,7 +536,7 @@ const PRECACHE_REVISIONS = {
   "systems/dragon-trail.js": "323221dcf00d9bb785aa2b3ed0e2f17f57cc31ec",
   "systems/dragon-boss.js": "213409a45060a320942e9c94c25737c662b6f106",
   "worlds/dragon-caldera.js": "a6c9d9e27a16c0eb8e190c1c480e240dc37ec272",
-  "systems/dino-room.js": "205e05765a82c462bfc3472d20a30b45a622382e",
+  "systems/dino-room.js": "a7520e867de3034d528dfbb1b93495f102d089a4",
   "systems/dino-trail.js": "b79b2662571b85d8b958e0657210d56846423845",
   "systems/dino-boss.js": "7e1c779f449f82b640b4ed9484bb00240d6e4e11",
   "systems/dino-chapter.js": "baa9700c6e3373cb940f7fa9d367613298e19091",
