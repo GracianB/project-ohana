@@ -1,7 +1,15 @@
 // Stitcho's own three-phase encounter. Uses the same enemy hit pipeline as
 // ordinary campaign foes, so H/J/K/L, team echoes and XP remain authoritative.
+import {readCombatDifficulty,scaleCombatHealth} from './combat-difficulty.js';
+import {STITCHO_RAIL} from './stitcho-chapter.js';
+import {drawStitchoGuardian} from './stitcho-chapter-art-v607.js';
 export const STITCHO_BOSS_ID='hub-stitcho-glitch-v1';
 export const STITCHO_BOSS=Object.freeze({hp:480,left:3120,right:3990,floor:1134});
+export const STITCHO_GUARDIAN_RHYTHMS=Object.freeze({
+ easy:Object.freeze({warn:86,rest:118,window:210,step:1.6,disc:5.1,charge:7.4,fall:4.8,count:2,gap:172,lead:4}),
+ normal:Object.freeze({warn:60,rest:84,window:165,step:2.7,disc:7.2,charge:10,fall:6.1,count:3,gap:164,lead:8}),
+ hard:Object.freeze({warn:44,rest:65,window:145,step:3.3,disc:8.4,charge:12,fall:7.5,count:4,gap:150,lead:12})
+});
 const PATTERNS=Object.freeze(['sweep','charge','cross','meteor']);
 export function createStitchoBoss(makeFoe,rng=()=>.5,options={}){
   const arena=Object.freeze({...STITCHO_BOSS,...options.arena});
@@ -16,10 +24,99 @@ export function createStitchoBoss(makeFoe,rng=()=>.5,options={}){
   e._encounterSaveId=options.encounterId||STITCHO_BOSS_ID;
   e.roomId=roomId;e.color='#80ddf8';e.contactDmg=0;
   e._glitch={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false};
+  if(options.chapterVersion===607&&roomId==='w1-stitcho'){
+    e.w=184;e.h=188;e.y=arena.floor-e.h;e.hp=e.max=620;
+    scaleCombatHealth(e,options.combatDifficulty||readCombatDifficulty(roomId));
+    e._stitchoGuardianV607=true;e.damageTakenScale=0;e.damageWindowRemaining=0;
+    Object.assign(e._glitch,{phase:'waiting',clock:0,turn:0,sleepPause:0,attacksExecuted:0});
+  }
   return e;
+}
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+function chapterRhythm(g){const d=g.combatDifficulty||readCombatDifficulty('w1-stitcho');return d.budget<=1?STITCHO_GUARDIAN_RHYTHMS.easy:d.budget>=4?STITCHO_GUARDIAN_RHYTHMS.hard:STITCHO_GUARDIAN_RHYTHMS.normal;}
+function chapterReady(g){return g.world1?.stations?.length>=3&&g.world1.stations.every(s=>s.done)&&g.secrets?.['w1-stitcho']?.includes(STITCHO_RAIL.id)&&(g.player.evo??0)>=4;}
+function chapterWarning(e,g){
+ const b=e._glitch,p=g.player,a=e._stitchoArena,r=chapterRhythm(g);
+ b.rhythm=r;b.turn++;b.attack=(b.turn-1)%3;
+ // One adaptive turn in four reads a repeated approach. The intervening
+ // cycle guarantees all three attacks remain learnable instead of baitable.
+ const air=p.y+p.h<a.floor-110,rolling=p._abilMove==='roll';
+ if(b.turn%4===0)b.attack=air||rolling?2:Math.abs(p.x-e.x)>420?1:0;
+ b.aim=Math.sign(p.x+p.w/2-e.x-e.w/2)||b.aim||1;
+ b.targetX=clamp(p.x+p.w/2+clamp((p.vx||0)*r.lead,-100,100),a.left+(b.attack===2?300:20),a.right-(b.attack===2?300:20));
+ b.targetY=p.y+p.h/2;b.chargeStartX=e.x;
+ b.chargeEndX=clamp(b.targetX-e.w/2+b.aim*100,a.left,a.right-e.w);
+ b.dropCount=r.count;b.dropGap=r.gap;b.dropTop=a.floor-390;
+ b.warnMax=Math.max(32,r.warn-(b.tier-1)*5);b.phase='warn';b.clock=b.warnMax;b.sleepPause=0;b.exposed=false;
+ e._sleepUntil=0;e._guardianDrowse=0;e.damageWindowRemaining=0;e.damageTakenScale=0;
+}
+function chapterProjectile(e,g,properties){
+ if((g.projectiles?.length||0)>=150)return;
+ (g.projectiles||=[]).push({owner:'enemy',shape:'orb',color:'#a5dfed',dmg:18,life:240,...properties});
+}
+function chapterDiscs(e,g){
+ const b=e._glitch,a=e._stitchoArena,r=b.rhythm;
+ chapterProjectile(e,g,{x:e.x+e.w/2,y:a.floor-28,w:28,h:22,vx:b.aim*r.disc,vy:0,stitchoGuardian:'disc'});
+ if(b.tier>=2)chapterProjectile(e,g,{x:e.x+e.w/2,y:a.floor-28,w:28,h:22,vx:-b.aim*r.disc*.85,vy:0,stitchoGuardian:'disc'});
+}
+function chapterCapacitors(e,g){
+ const b=e._glitch,r=b.rhythm;
+ for(let i=0;i<b.dropCount;i++){
+  const x=b.targetX+(i-(b.dropCount-1)/2)*b.dropGap;
+  chapterProjectile(e,g,{x:x-12,y:b.dropTop,w:24,h:30,vx:0,vy:r.fall,life:110,dmg:20,stitchoGuardian:'capacitor'});
+ }
+}
+function chapterOpening(e){
+ const b=e._glitch;b.phase='rest';b.clock=b.rhythm.rest;b.sleepPause=0;b.exposed=true;
+ e.vx=0;e.damageWindowRemaining=b.rhythm.window;e.damageTakenScale=1;
+ e._guardianOpening=(e._guardianOpening||0)+1;e._guardianDrowse=0;e._sleepUntil=0;
+}
+function updateChapterCore(e,g,hurt){
+ const p=g.player,b=e._glitch,a=e._stitchoArena;
+ if(!p||p.dead||e.hp<=0)return true;
+ const dx=p.x+p.w/2-e.x-e.w/2;
+ const visible=e.x+e.w>g.cam.x&&e.x<g.cam.x+(g.viewW||1100)&&e.y+e.h>g.cam.y&&e.y<g.cam.y+(g.viewH||800);
+ if(e.invuln>0)e.invuln--;
+ b.tier=e.hp<=e.max*.25?3:e.hp<=e.max*.63?2:1;
+ e.x=clamp(e.x,a.left,a.right-e.w);e.y=a.floor-e.h;e.vy=0;e.vx=0;e.grounded=true;
+ e.telegraph=b.phase==='warn';e.wind=0;e.lunge=0;
+ // Control effects have a bounded pause per state, never a renewable lock.
+ if(e.sleep>0&&b.sleepPause<10){e.sleep--;b.sleepPause++;return true;}
+ e.sleep=0;e._sleepUntil=0;e.stun=Math.min(e.stun||0,2);
+ if(b.phase==='waiting'){
+  if(chapterReady(g)&&visible&&Math.abs(dx)<880){b.phase='intro';b.clock=76;b.sleepPause=0;g.nums?.add?.(e.x,e.y-45,'NÚCLEO GLITCH · ÚLTIMO PROTOCOLO','#c3ecf4',true);}
+ }else if(b.phase==='intro'){
+  if(--b.clock<=0){b.phase='step';b.clock=100;b.sleepPause=0;}
+ }else if(b.phase==='step'){
+  const r=chapterRhythm(g);
+  if(Math.abs(dx)>560)e.vx=(Math.sign(dx)||1)*r.step;
+  if((Math.abs(dx)<=560||--b.clock<=0)&&visible&&e.aiAttackPermit!==false)chapterWarning(e,g);
+ }else if(b.phase==='warn'){
+  e.wind=b.clock;
+  if(--b.clock<=0){
+   b.phase='attack';b.elapsed=0;b.sleepPause=0;b.attacksExecuted++;e.telegraph=false;
+   b.clock=b.attack===1?Math.max(34,Math.ceil(Math.abs(b.chargeEndX-e.x)/b.rhythm.charge)+15):b.attack===2?(b.tier===3?112:88):(b.tier===3?62:44);
+   if(b.attack===0)chapterDiscs(e,g);
+   if(b.attack===2)chapterCapacitors(e,g);
+  }
+ }else if(b.phase==='attack'){
+  b.elapsed++;e.lunge=b.clock;
+  if(b.attack===1){const remaining=b.chargeEndX-e.x;if(remaining*b.aim>0)e.vx=b.aim*Math.min(Math.abs(remaining),b.rhythm.charge);}
+  if(b.tier===3&&b.elapsed===24){if(b.attack===0)chapterDiscs(e,g);if(b.attack===2)chapterCapacitors(e,g);}
+  if(--b.clock<=0)chapterOpening(e);
+ }else if(b.phase==='rest'){
+  if(--b.clock<=0||e.damageWindowRemaining<=0){b.phase='step';b.clock=100;b.sleepPause=0;b.exposed=false;e.damageWindowRemaining=0;}
+ }
+ e.damageTakenScale=b.phase==='rest'&&e.damageWindowRemaining>0?1:0;
+ if(b.phase!=='rest')e.damageWindowRemaining=0;
+ e.x=clamp(e.x+e.vx,a.left,a.right-e.w);e.y=a.floor-e.h;
+ if(!['waiting','intro','rest'].includes(b.phase)&&p.x<e.x+e.w&&p.x+p.w>e.x&&p.y<e.y+e.h&&p.y+p.h>e.y)
+  hurt?.(b.phase==='attack'&&b.attack===1?22:12,'CARCASA DEL NÚCLEO · BUSCA EL FLANCO');
+ e._campaign={wind:e.wind,active:e.lunge,aim:b.aim};return true;
 }
 export function updateStitchoBoss(e,g,hurt){
  if(!e?._stitchoBoss)return false;
+ if(e._stitchoGuardianV607)return updateChapterCore(e,g,hurt);
  const b=e._glitch,p=g.player,arena=e._stitchoArena||STITCHO_BOSS;
  if(e.invuln>0)e.invuln--;
  e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x));
@@ -61,8 +158,48 @@ export function updateStitchoBoss(e,g,hurt){
  e._campaign={wind:e.wind,active:e.lunge,aim:b.aim};
  return true;
 }
+function drawChapterCoreSignals(c,e,cam){
+ const b=e._glitch,a=e._stitchoArena,x=e.x+e.w/2-cam.x,y=e.y-cam.y,floor=a.floor-cam.y;
+ c.save();c.textAlign='center';c.lineCap='round';c.lineJoin='round';
+ c.fillStyle='#102b40ed';c.strokeStyle='#91bdca';c.lineWidth=1;c.beginPath();c.roundRect(x-140,y-85,280,70,12);c.fill();c.stroke();
+ c.fillStyle='#e4f3e9';c.font='600 12px Outfit,sans-serif';c.fillText('NÚCLEO GLITCH · PROTOCOLO '+b.tier+'/3',x,y-66);
+ const cue=b.phase==='waiting'?'REPARA LA NAVE Y EL RAÍL':b.phase==='intro'?'OBSERVA SUS COMPUERTAS':b.phase==='rest'?'NÚCLEO ABIERTO · ¡RESPONDE!':b.phase==='step'?'TOMA DISTANCIA Y BUSCA EL FLANCO':b.phase==='warn'?[
+  b.tier===3?'DOBLE SOLDADURA · SALTA LOS DISCOS':'SOLDADURA RASANTE · SALTA EL DISCO',
+  'PINZAS EN MARCHA · SALTA LA EMBESTIDA',
+  b.tier===3?'DOBLE CARGA · RUEDA FUERA DE LAS MARCAS':'CARGA SUSPENDIDA · RUEDA A UN HUECO'
+ ][b.attack]:'DEJA TERMINAR EL PROTOCOLO';
+ c.fillStyle=b.phase==='rest'?'#c7edc9':'#d6e2e0';c.font='600 10px Outfit,sans-serif';c.fillText(cue,x,y-47,264);
+ c.fillStyle='#365363';c.fillRect(x-124,y-34,248,6);c.fillStyle='#9cdae4';c.fillRect(x-124,y-34,248*clamp(e.hp/e.max,0,1),6);
+ if(b.phase==='warn'){
+  c.fillStyle='#e5c89e';c.fillRect(x-124,y-21,248*clamp(1-b.clock/(b.warnMax||60),0,1),2);
+  if(b.attack===1){
+   const start=(b.chargeStartX??e.x)+e.w/2-cam.x,end=(b.chargeEndX??e.x)+e.w/2-cam.x,left=Math.min(start,end)-e.w/2,width=Math.abs(end-start)+e.w;
+   c.fillStyle='#8fc9d6';c.globalAlpha=.14;c.beginPath();c.roundRect(left,floor-e.h,width,e.h,8);c.fill();
+   c.globalAlpha=.65;for(let i=0;i<Math.max(1,Math.ceil(width/100));i++){const px=left+25+i*100;c.beginPath();c.moveTo(px,floor-13);c.lineTo(px+12*b.aim,floor-7);c.lineTo(px,floor-1);c.stroke();}c.globalAlpha=1;
+  }else if(b.attack===0){
+   c.strokeStyle='#afc9cd';c.lineWidth=2;
+   for(const direction of b.tier>=2?[-1,1]:[b.aim])for(let i=1;i<=4;i++){
+    const xx=x+direction*(i*68+e.w/2);c.beginPath();c.arc(xx,floor-10,7,0,Math.PI*2);c.stroke();
+   }
+  }
+ }
+ // These landing sockets use the same frozen positions as the projectiles.
+ // No screen-space line or retargeted marker can claim a different hazard.
+ if((b.phase==='warn'||b.phase==='attack')&&b.attack===2){
+  c.strokeStyle='#abd7db';c.fillStyle='#b2e0df';c.lineWidth=2;
+  for(let i=0;i<Math.min(9,b.dropCount||0);i++){
+   const xx=b.targetX+(i-((b.dropCount||0)-1)/2)*b.dropGap-cam.x,top=b.dropTop-cam.y;
+   c.globalAlpha=b.phase==='warn'?.8:.35;
+   c.beginPath();c.ellipse(xx,floor-4,20,6,0,0,Math.PI*2);c.stroke();
+   c.beginPath();c.moveTo(xx-8,floor-45);c.lineTo(xx,floor-34);c.lineTo(xx+8,floor-45);c.stroke();
+   c.beginPath();c.roundRect(xx-12,top,24,30,5);c.stroke();c.fillRect(xx-6,top+8,12,3);
+  }
+ }
+ c.restore();
+}
 export function drawStitchoBossSignals(ctx,e,cam,t=0,reduced=false){
  if(!e?._stitchoBoss||e.hp<=0)return;
+ if(e._stitchoGuardianV607)return drawChapterCoreSignals(ctx,e,cam);
  const b=e._glitch,x=e.x+e.w/2-cam.x,y=e.y-cam.y;
  ctx.save();ctx.textAlign='center';
  ctx.fillStyle='#092d42';ctx.fillRect(x-120,y-72,240,47);
@@ -90,6 +227,7 @@ export function drawStitchoBossSignals(ctx,e,cam,t=0,reduced=false){
 // animate six segmented arms; no static cangrejo sprite or image dependency.
 export function drawStitchoBossBody(ctx,e,cam,t=0,reduced=false){
  if(!e?._stitchoBoss||e.hp<=0)return false;
+ if(e._stitchoGuardianV607&&!e.gauntletBoss)return drawStitchoGuardian(ctx,e,cam,t,reduced);
  const b=e._glitch,phase=b.tier||1,active=b.phase==='attack',warning=b.phase==='warn';
  const cx=e.x+e.w/2-cam.x,cy=e.y+e.h/2-cam.y;
  const time=reduced?0:t,sw=Math.sin(time*.09);

@@ -1,0 +1,115 @@
+{
+  "release": "ohana-607",
+  "published": false,
+  "checks": {
+    "unit": {
+      "pass": 1699,
+      "fail": 0
+    },
+    "release_gate": "PASS: 351 runtime modules, 412 resources",
+    "browser_audit": "PASS before the last purely visual dracornio contour adjustment; final renderer covered by unit tests and Canvas gallery",
+    "stitcho_physical_journey": {
+      "mode": "full-physical-chapter",
+      "difficulty": "normal",
+      "deaths": 0,
+      "minimumHp": 86,
+      "iterations": 247,
+      "forms": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "milestones": [
+        {
+          "kind": "module",
+          "module": 1,
+          "x": 2745,
+          "xp": 55,
+          "evo": 1,
+          "hp": 104,
+          "iteration": 28
+        },
+        {
+          "kind": "rail",
+          "x": 4767,
+          "xp": 140,
+          "evo": 2,
+          "hp": 117.74,
+          "iteration": 51
+        },
+        {
+          "kind": "module",
+          "module": 2,
+          "x": 8019,
+          "xp": 260,
+          "evo": 2,
+          "hp": 126,
+          "iteration": 108
+        },
+        {
+          "kind": "module",
+          "module": 3,
+          "x": 11704,
+          "xp": 420,
+          "evo": 4,
+          "hp": 195,
+          "iteration": 166
+        }
+      ],
+      "phases": [
+        "waiting",
+        "intro",
+        "warn",
+        "attack",
+        "rest",
+        "step"
+      ],
+      "patterns": [
+        0,
+        1,
+        2
+      ],
+      "attacks": 5,
+      "resumed": true,
+      "final": {
+        "done": 3,
+        "evo": 4,
+        "sealed": true,
+        "hp": 179.88,
+        "x": 13654.869257666622
+      },
+      "errors": [],
+      "mobileRoll": true,
+      "next": {
+        "room": "w1-chispin",
+        "hero": "chispin",
+        "evo": 0
+      }
+    },
+    "stitcho_art": {
+      "fixtures": 240,
+      "nonfinite": [],
+      "canvasDepth": 0,
+      "errors": [],
+      "scope": "isolated Canvas fixtures; not physical campaign acceptance"
+    },
+    "michi_art": "50 real Canvas before/after fixtures; final gallery rendered without browser errors"
+  },
+  "fixes": [
+    "offline manifest/version/modules",
+    "physical pilot entry into Stitcho",
+    "rail visible length matches actual 460-unit trigger",
+    "charge endpoint at arena boundary",
+    "legacy expedition assertions follow the eight remaining expedition chapters",
+    "Canvas fixture depth is checked relative to its caller"
+  ],
+  "michi_direction": "Moon kitten → fairy → jellyfish → pearly dracornio with two forepaws and suspended body → lunar guardian. Stable hero ID/forms/moves/hitboxes/saves.",
+  "limitations": [
+    "Artwork is a visual proposal, not human acceptance.",
+    "Automated pilot verifies reachability, not human balance.",
+    "No public deployment performed in this revision.",
+    "Live cooperative campaign has not been rerun for V607."
+  ]
+}

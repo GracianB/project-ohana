@@ -2,6 +2,7 @@
 // No teleports, health/XP grants, station flags or boss-health writes.
 import assert from 'node:assert/strict';
 import {advanceKiloEncounterControls} from './kilo-encounter-controls-v606.mjs';
+import {advanceStitchoEncounterControls} from './stitcho-encounter-controls-v607.mjs';
 export async function playChapter(page,{hero,state,step,films,onDeath=()=>page.evaluate(()=>window.__OHANA_E2E.respawn()),onBeat=()=>{}}){
  let s=await state();const press=k=>page.keyboard.press(k),hold=k=>page.keyboard.down(k),release=k=>page.keyboard.up(k);
   const expeditionNodes=await page.evaluate(async hero=>(await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-'+hero].expedition?.nodes||[],hero);
@@ -12,10 +13,10 @@ export async function playChapter(page,{hero,state,step,films,onDeath=()=>page.e
    iterations=i;
    if(s.hp<=0){assert.ok(++deaths<=12,'natural retries exhausted '+hero);await onDeath();await films();s=await step(90);}
    await films();s=await state();forms.add(s.evo);minHp=Math.min(minHp,s.hp);
-   if(hero==='kilo'){
-    s=await advanceKiloEncounterControls(page,s,step,i);
+   if(hero==='kilo'||hero==='stitcho'){
+    s=await (hero==='kilo'?advanceKiloEncounterControls:advanceStitchoEncounterControls)(page,s,step,i);
     forms.add(s.evo);minHp=Math.min(minHp,s.hp);
-    assert.equal(s.runtimeFaults,0);assert.ok(s.evo<=s.world1.done,'Kilo grows only after its current instrument');
+    assert.equal(s.runtimeFaults,0);assert.ok(s.evo<=s.world1.done+(hero==='stitcho'&&(await page.evaluate(()=>window.__OHANA_E2E.stitchoChapterState())).railDone?1:0),'growth follows earned lessons');
     if(i%150===0){await onBeat(s,{hero,i,expedition:null,node:null});console.log('CAMPAIGN',JSON.stringify({hero,i,x:Math.round(s.player.x),hp:s.hp,done:s.world1.done,evo:s.evo,expedition:0,y:Math.round(s.player.y)}));}
     continue;
    }

@@ -95,7 +95,7 @@ test('V462 polish: lilac cat legs — haunches over the body on F0/F3, dancer le
  const f0=src.slice(src.indexOf('MOON KITTEN'),src.indexOf('FAIRY CAT'));
  assert.ok(f0.indexOf("oval(0,-21,21,18")<f0.indexOf('drawCatHaunch('),'F0 hind legs drawn over the body, not hidden behind it');
  const f3=src.slice(src.indexOf('ASTRAL DRAGON'),src.indexOf('NINE-TAIL GUARDIAN'));
- assert.ok(f3.includes('drawCatHaunch(')&&f3.split('drawCatLeg(').length>=2,'F3 has haunches + forelegs');
+ assert.ok(!f3.includes('drawCatHaunch(')&&f3.includes('drawCatLeg(')&&f3.includes('for(const side of [-1,1])'),'F3 has two articulated forepaws and no terrestrial haunches');
  assert.match(src.slice(src.indexOf('FAIRY CAT')),/pawS:1\.25/);
  for(const f of [0,1,3]){const a=rec(),b=rec();cat.draw(a.c,pose('run',10,f),{});cat.draw(b.c,pose('run',30,f),{});assert.equal(a.log.grad,0);}
 });

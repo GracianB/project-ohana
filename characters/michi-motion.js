@@ -29,7 +29,7 @@ export function michiMotion(pose={},form=0){
  const inspect=clamp(stage?.inspect,0,1),groom=clamp(stage?.groom,0,1);
  const flick=clamp(stage?.flick,0,1),purr=clamp(stage?.purr,0,1);
  const castBeat=motion==='cast'?sin(cast*PI):0;
- const formJelly=form===2||form===4;
+ const formJelly=form===2||form===3||form===4;
  const legReach=run?step*anim:motion==='jump'?-1.1:motion==='fall'?.55:0;
  return {
   state:motion,slot,cycle:step,

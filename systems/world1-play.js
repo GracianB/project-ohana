@@ -1,4 +1,5 @@
 import {drawKiloResonator} from './kilo-chapter-art-v606.js';
+import {drawStitchoWorkshop,drawStitchoCarriedPart} from './stitcho-chapter-art-v607.js';
 import {updateFinalGauntlet} from './final-gauntlet.js';
 import {KEEPSAKES} from './keepsakes.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
@@ -7,7 +8,7 @@ import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaCha
 import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact} from './dino-chapter.js';
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
-import {stitchoGrowth,updateStitchoChapter,stitchoChapterReady,stitchoObjective,drawStitchoChapter} from './stitcho-chapter.js';
+import {stitchoGrowth,updateStitchoChapter,stitchoChapterReady,stitchoObjective,drawStitchoChapter,stitchoModuleAbility,stitchoModuleContact} from './stitcho-chapter.js';
 import {enterKiloAirTrail,updateKiloAirTrail,drawKiloAirTrail,kiloNoteGrowth,kiloGuardianRequired,kiloFlowerThreat,kiloInstrumentAction,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
 // OHANA V467 · MUNDO 1 · sellos, cinemáticas de sala y fondo-silueta del héroe.
 // Cada sala tiene UNA interacción propia (WORLD1_SEALS); el resto es sencillo.
@@ -238,6 +239,17 @@ export function updateWorld1(g,hurt) {
       p._kiloNoteHealth=p.health;
       break; }
     case "reparar":
+      if(r.stitchoEncounterVersion){
+        stitchoModuleContact(g);
+        const module=w.stations.find(s=>!s.done);
+        if(w.carry==null&&module?.released&&near(p,module.x,module.y-30,55,75)){
+          w.carry=module.id;g.nums?.add?.(p.x,p.y-40,module.name.toUpperCase()+' → PUERTO','#b4eff1',false);
+        }else if(w.carry!=null){
+          const carried=w.stations.find(s=>s.id===w.carry);
+          if(carried&&near(p,carried.target.x,carried.target.y-30,65,85)){w.carry=null;complete(g,carried,'MÓDULO REPARADO');}
+        }
+        break;
+      }
       // Piece 0 is a valid carried item. A truthiness check makes it look empty
       // and prevents delivery of the first part (blocking Stitcho's seal).
       if (w.carry == null) { for (const s of w.stations) if (!s.done && (!r.stitchoChapter || s.id===0 || g.secrets?.[r.id]?.includes("w1-stitcho-main-rail-v1")) && near(p, s.x, s.y - 30, 50, 70)) { w.carry = s.id; g.nums?.add?.(p.x, p.y - 40, "PIEZA COGIDA → TALLER", "#8cecff", false); break; } }
@@ -381,7 +393,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam,t);drawChispinChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -405,11 +417,14 @@ export function drawWorld1(ctx, g, cam, t) {
   // Lo que llevas encima (pieza o pizza).
   if (w.carry != null) {
     const p = g.player, px = cx(p) - cam.x, py = p.y - cam.y - 26;
+    if(g.roomDef?.stitchoEncounterVersion)drawStitchoCarriedPart(ctx,w.carry,px,py,t,reduce);
+    else {
     ctx.fillStyle = w.carry === "pizza" ? "#ffcf5a" : PART_COLORS[w.carry % PART_COLORS.length]; ctx.strokeStyle = "#3a2a1a"; ctx.lineWidth = 2;
     ctx.beginPath(); if (w.carry === "pizza") { ctx.moveTo(px - 14, py - 8); ctx.lineTo(px + 14, py - 8); ctx.lineTo(px, py + 14); } else { ctx.moveTo(px - 10, py - 10); ctx.lineTo(px + 10, py - 10); ctx.lineTo(px + 10, py + 10); ctx.lineTo(px - 10, py + 10); }
     ctx.closePath(); ctx.fill(); ctx.stroke();
     if (w.carry !== "pizza") {
       ctx.fillStyle = "#102738";ctx.font = "900 13px Outfit, sans-serif";ctx.textAlign = "center";ctx.fillText(String(w.carry + 1),px,py + 5);
+    }
     }
   }
   ctx.restore();
@@ -535,6 +550,7 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       ctx.fillStyle='#173d3b';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(done?'NOTA RECUPERADA ✓':s.threatened?'DESPEJA EL HIBISCO':'QUIETO · NOTA '+(s.note+1)+'/4 → CRECER',x,y-128);
       break; }
     case "part": {
+      if(g.roomDef?.stitchoEncounterVersion){drawStitchoWorkshop(ctx,s,cam,t,{reduced:reduce,active:w.stations.find(n=>!n.done)===s,progress:s.done?1:s.released?.5:0,label:s.name,caption:s.done?'MÓDULO INSTALADO':w.carry===s.id?'TRANSPORTANDO AL PUERTO':s.released?'MÓDULO LIBRE · RECOGE':s.action,carried:w.carry===s.id});break;}
       const color=PART_COLORS[s.id%3];
       if(!done&&w.carry!==s.id){ctx.save();ctx.translate(x,y-35+pulse);ctx.fillStyle=color;ctx.strokeStyle='#294858';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,21,17,-.25,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#f1ffef';ctx.beginPath();ctx.arc(-4,-3,7,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#517b92';ctx.lineWidth=2;for(let j=-1;j<=1;j++){ctx.beginPath();ctx.moveTo(j*8,8);ctx.lineTo(j*8+3,16);ctx.stroke();}ctx.fillStyle='#173b4a';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(String(s.id+1),0,4);ctx.restore();}
       const tx=s.target.x-cam.x,ty=s.target.y-cam.y;
@@ -640,3 +656,4 @@ export function drawWorld1Overlay(ctx, g, W, H) {
 
 export function kiloChapterAbility(g,p,index){return kiloInstrumentAction(g,p,index,complete);}
 export function interactKiloInstrument(g){return kiloInstrumentAction(g,g.player,'interact',complete);}
+export function stitchoChapterAbility(g,p,index){return stitchoModuleAbility(g,p,index);}

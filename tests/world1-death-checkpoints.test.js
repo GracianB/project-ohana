@@ -6,6 +6,7 @@ import {
   enterWorld1, updateWorld1, world1Snapshot,
   world1DeathCheckpoint, restoreWorld1DeathCheckpoint, world1CanLeave, kiloChapterAbility, interactKiloInstrument
 } from "../systems/world1-play.js";
+import {pickStitchoModule,deliverStitchoModule} from './helpers/stitcho-actions-v607.mjs';
 
 function makeGame(hero) {
   const room = WORLD1_ROOMS["w1-"+hero];
@@ -61,19 +62,20 @@ test("death: authentic first Kilo note survives room reload without extra score,
 
 test("death: Stitcho delivered part ID 0 stays repaired; loose part is dropped",()=>{
   const x=makeGame("stitcho"),s=x.g.world1.stations;
-  x.stand(s[0].x);x.tick();assert.equal(x.g.world1.carry,0);
-  x.stand(s[0].target.x);x.tick();assert.equal(s[0].done,true);
+  pickStitchoModule(x.g,s[0]);assert.equal(x.g.world1.carry,0);
+  deliverStitchoModule(x.g,s[0]);assert.equal(s[0].done,true);
   x.g.secrets={'w1-stitcho':['w1-stitcho-main-rail-v1']}; // earned rail is isolated in chapter tests
-  x.stand(s[1].x);x.tick();assert.equal(x.g.world1.carry,1);
+  pickStitchoModule(x.g,s[1]);assert.equal(x.g.world1.carry,1);
   const snapshot=world1DeathCheckpoint(x.g);
   assert.deepEqual(snapshot.completed,[0]);
   x.reload();restoreWorld1DeathCheckpoint(x.g,snapshot);
   assert.equal(world1Snapshot(x.g).done,1);
   assert.equal(x.g.world1.carry,null,"must retrieve undelivered item anew");
+  assert.equal(!!x.g.world1.stations[1].released,false,'an undelivered machine must be released again after retry');
   assert.equal(x.g.score,150);
   for(const station of x.g.world1.stations.slice(1)){
-    x.stand(station.x);x.tick();assert.equal(x.g.world1.carry,station.id);
-    x.stand(station.target.x);x.tick();
+    pickStitchoModule(x.g,station);assert.equal(x.g.world1.carry,station.id);
+    deliverStitchoModule(x.g,station);
   }
   assert.deepEqual(x.g.world1Seals,[],'repair persistence cannot bypass Glitch');
   x.g.clearedEncounters={'w1-stitcho':['w1-stitcho-glitch-v1']};x.tick();

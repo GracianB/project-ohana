@@ -1,3 +1,7 @@
+# V607 · ohana-607 · revisión de Stitcho y propuesta visual de Michi
+
+Stitcho: autor único de encuentros, tres módulos por acciones distintas, raíl con geometría visual y física alineadas, progreso por aprendizaje y Glitch nativo con tres patrones. Corregidos destino de carga en bordes, entrada del piloto, contratos de expedición y caché. Recorrido físico Normal aprobado con tres módulos, raíl, cinco formas, continuar guardado y salida a Chispín. Michi: proporciones de patas revisadas y propuesta de dracornio de nácar con dos extremidades delanteras y suspensión heredada de medusa; comparación Canvas en test-results/v607/michi-before.png y michi-after.png. Versión de trabajo, todavía sin publicar.
+
 # V606 · ohana-606 · Claro de Kilo publicada y verificada
 
 Primera sala de la revisión por capítulos. Paisaje y héroe conservados; cinco especies con anatomía y roles propios, dieciocho criaturas repartidas en encuentros y Tambor al final del recorrido. Cuatro instrumentos distintos enseñan E/J, tres notas J, ataque aéreo y remate I; sus IDs anteriores conservan guardados. Crecimiento repartido por 14.400 unidades, sin salto de formas por gemas ni lista genérica de tres objetos después del guardián. La evolución conserva el daño recibido y los KO no curan automáticamente en esta sala. Boss con un controlador, aperturas sin recarga duplicada, tres patrones comprometidos y dificultades distintas. El resto de capítulos conserva sus reglas. Esta entrega revisa Claro; la aceptación humana del balance queda pendiente de jugarla.

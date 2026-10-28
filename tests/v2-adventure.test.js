@@ -17,14 +17,14 @@ function fixture(hero){
  enterWorld1(g);g.world1.stations.forEach(s=>s.done=true);return g;
 }
 function stand(g,x,y,air=false){const p=g.player;p.x=x-p.w/2;p.y=y-p.h/2;p.grounded=!air;p.vx=p.vy=0;}
-test('V2 keeps nine expedition chapters while Kilo uses the whole room for its four lessons',()=>{
- for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];assert.equal(r.width,14400);if(hero==='kilo'){assert.equal(r.expedition,null);assert.equal(r.seal.stations.length,4);assert.ok(r.seal.stations[3].x>11000);continue;}assert.equal(r.expedition.nodes.length,3);assert.ok(r.checkpoints.length>=9);assert.equal(r.seal.altar.x,13920);
+test('V2 keeps eight expedition chapters while Kilo uses the whole room for its four lessons',()=>{
+ for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];assert.equal(r.width,14400);if(['kilo','stitcho'].includes(hero)){assert.equal(r.expedition,null);assert.equal(r.seal.stations.length,hero==='kilo'?4:3);assert.ok(r.seal.stations.at(-1).x>10900);continue;}assert.equal(r.expedition.nodes.length,3);assert.ok(r.checkpoints.length>=9);assert.equal(r.seal.altar.x,13920);
   for(const n of r.expedition.nodes){assert.ok(n.x>9600&&n.x<14000);assert.ok(n.id.startsWith(r.id+'-'));}
   assert.ok(r.plats.some(p=>p[0]===9600&&p[2]===4800&&p[1]===1134));
  }
 });
-test('V2 twenty-seven discovery state machines gate the other nine seals and persist through the save sanitizer',()=>{
- for(const hero of WORLD1_ORDER){const g=fixture(hero);if(hero==='kilo'){assert.equal(expeditionReady(g),true);assert.equal(awardSeal(g),true,'Kilo has no generic post-guardian checklist');continue;}assert.equal(awardSeal(g),false,'boss and stations do not replace Act II');
+test('V2 twenty-four discovery state machines gate the other nine seals and persist through the save sanitizer',()=>{
+ for(const hero of WORLD1_ORDER){const g=fixture(hero);if(['kilo','stitcho'].includes(hero)){assert.equal(expeditionReady(g),true);assert.equal(awardSeal(g),true,'Kilo has no generic post-guardian checklist');continue;}assert.equal(awardSeal(g),false,'boss and stations do not replace Act II');
   for(const [i,n] of g.roomDef.expedition.nodes.entries()){
    if(n.kind==='supper'){stand(g,n.x-700,1110);updateExpedition(g);assert.equal(g.expedition.carry,n.id);stand(g,n.x,1110);updateExpedition(g);}
    else if(n.kind==='plate'){stand(g,n.x,1000,true);g.player.vy=12;updateExpedition(g);stand(g,n.x,1134-g.player.h/2);updateExpedition(g);}
@@ -42,7 +42,7 @@ test('V2 twenty-seven discovery state machines gate the other nine seals and per
  }
 });
 test('V2 a living boss blocks discoveries; unearned memories cannot replay rewards',()=>{
- const g=fixture('stitcho'),n=g.roomDef.expedition.nodes[0];stand(g,n.x,n.y,true);g.enemies=[{miniBoss:true,hp:10}];expeditionAbility(g,g.player,0);assert.equal(g.expedition.done.length,0);
+ const g=fixture('chispin'),n=g.roomDef.expedition.nodes[0];stand(g,n.x,n.y,true);g.enemies=[{miniBoss:true,hp:10}];expeditionAbility(g,g.player,0);assert.equal(g.expedition.done.length,0);
  assert.equal(startMemoryCelebration(g,'stitcho'),false);assert.deepEqual(memoryBenefits(24),{compass:false,magnet:false,celebration:false});assert.equal(memoryBenefits(25).compass,true);assert.equal(memoryBenefits(50).magnet,true);
  g.world1Collect={rooms:{stitcho:{found:Array.from({length:100},(_,i)=>i),relic:true}}};assert.equal(startMemoryCelebration(g,'stitcho'),true);assert.equal(g.relicScene.hero,'stitcho');assert.equal(startMemoryCelebration(g,'stitcho'),false);
 });

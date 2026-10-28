@@ -1,8 +1,9 @@
-// Act I isolated; V2 expansion gate is covered by v2-adventure tests and the real full campaign.
+// Isolated accepted puzzle actions; physical traversal has its browser pilot.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { WORLD1_ROOMS } from '../systems/world1-rooms.js';
 import { enterWorld1, updateWorld1, world1CanLeave, awardSeal } from '../systems/world1-play.js';
+import {pickStitchoModule,rollStitchoRail} from './helpers/stitcho-actions-v607.mjs';
 
 function createStitchoRun() {
   const room = WORLD1_ROOMS['w1-stitcho'];
@@ -13,7 +14,7 @@ function createStitchoRun() {
     roomDef: {...room,expedition:null},
     world1Visited: {},
     world1Seals: [],
-    player: { x: 0, y: 0, w: 28, h: 40, vx: 0, vy: 0, grounded: true, maxHealth: 100, health: 75, xp: 0 },
+    player: { id:'stitcho',evo:0,x: 0, y: 0, w: 28, h: 40, vx: 0, vy: 0, grounded: true, maxHealth: 100, health: 75, xp: 0 },
     nums: { add() {} },
     fx: { emit() {} },
     onWorld1Beat(kind, hero) { beats.push([kind, hero]); },
@@ -40,6 +41,8 @@ test('World 1 Stitcho: first repair piece uses numeric zero and can be delivered
 
   standNear(part.x, part.y - 30);
   updateWorld1(game);
+  assert.equal(game.world1.carry,null,'a closed module cannot be picked up just by touching it');
+  pickStitchoModule(game,part);
   assert.equal(game.world1.carry, 0, 'piece 0 must be picked up');
 
   // Staying at the pickup point must not discard or re-pick the held piece.
@@ -59,13 +62,8 @@ test('World 1 Stitcho: repairs need the roll rail and defeated Glitch before the
   const { game, standNear } = run;
   assert.equal(game.world1.stations.length, 3);
   for (const part of game.world1.stations) {
-    if(part.id===1){
-      game.player.id='stitcho';game.player._abilMove='roll';
-      for(let x=2940;x<=3340;x+=10){game.player.x=x-game.player.w/2;game.player.y=1134-game.player.h;updateWorld1(game);}
-      game.player._abilMove=null;
-    }
-    standNear(part.x, part.y - 30);
-    updateWorld1(game);
+    if(part.id===1)rollStitchoRail(game);
+    pickStitchoModule(game,part);
     assert.equal(game.world1.carry, part.id, 'must carry part ' + part.id);
 
     standNear(part.target.x, part.target.y - 30);

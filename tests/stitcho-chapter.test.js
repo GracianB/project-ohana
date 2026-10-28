@@ -7,10 +7,10 @@ const roll=(g,x)=>{Object.assign(g.player,{x:x-14,_abilMove:'roll'});updateWorld
 test('workshop growth derives from permanent actions without repeat XP or rewards',()=>{
  const g=make();assert.equal(stitchoGrowth(g),0);
  g.world1.stations[0].done=true;assert.equal(stitchoGrowth(g),55);
- assert.match(world1NextObjective(g).label,/Raíl/);
- for(let x=2940;x<=3340;x+=10)roll(g,x);
+ assert.match(world1NextObjective(g).label,/Vía|Raíl/);
+ for(let x=STITCHO_RAIL.left-60;x<=STITCHO_RAIL.right+20;x+=10)roll(g,x);
  assert.equal(stitchoRailDone(g),true);assert.equal(g.player.xp,140);assert.equal(g.score,150);
- for(let x=2940;x<=3340;x+=10)roll(g,x);assert.equal(g.score,150);
+ for(let x=STITCHO_RAIL.left-60;x<=STITCHO_RAIL.right+20;x+=10)roll(g,x);assert.equal(g.score,150);
  g.world1.stations[1].done=true;assert.equal(stitchoGrowth(g),260);
  g.world1.stations[2].done=true;assert.equal(stitchoGrowth(g),420);
  assert.equal(awardSeal(g),false,'repairs and rail cannot grant a boss victory');
@@ -19,9 +19,9 @@ test('workshop growth derives from permanent actions without repeat XP or reward
 test('walking, discontinuous movement and interrupted rolls cannot restore the rail',()=>{
  for(const mode of ['walk','teleport','interrupt']){
   const g=make();g.world1.stations[0].done=true;
-  if(mode==='walk')for(let x=2940;x<=3340;x+=10){g.player.x=x-14;updateWorld1(g);}
-  if(mode==='teleport'){roll(g,2940);roll(g,3340);}
-  if(mode==='interrupt'){roll(g,2940);roll(g,3060);g.player._abilMove=null;updateWorld1(g);roll(g,3340);}
+  if(mode==='walk')for(let x=STITCHO_RAIL.left-60;x<=STITCHO_RAIL.right+20;x+=10){g.player.x=x-14;updateWorld1(g);}
+  if(mode==='teleport'){roll(g,STITCHO_RAIL.left-60);roll(g,STITCHO_RAIL.right+20);}
+  if(mode==='interrupt'){roll(g,STITCHO_RAIL.left-60);roll(g,STITCHO_RAIL.left-40);g.player._abilMove=null;updateWorld1(g);roll(g,STITCHO_RAIL.right+20);}
   assert.equal(stitchoRailDone(g),false,mode);
  }
 });

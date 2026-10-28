@@ -24,8 +24,19 @@ test('Kilo requires four authored instruments and the real host guardian receipt
  assert.deepEqual(mergeAdventureProgress(null,{...p,encounters:['w1-kilo-fake']},{roomId,host:true}).seals,[]);
  assert.deepEqual(mergeAdventureProgress(null,p,{roomId,host:true}).seals,['kilo']);
 });
-test('the other nine chapters retain their authored discovery requirements and host-only seals',()=>{
- for(const r of Object.values(WORLD1_ROOMS).filter(r=>r.hero&&r.hero!=='kilo')){
+test('Stitcho requires three modules, the actual roll rail and host Glitch receipt, without generic discoveries',()=>{
+ const id='w1-stitcho',r=WORLD1_ROOMS[id];assert.equal(r.expedition,null);
+ const p={roomId:id,stations:r.seal.stations.map(s=>s.id),secrets:['w1-stitcho-main-rail-v1'],encounters:['w1-stitcho-glitch-v1'],sealed:true};
+ assert.deepEqual(mergeAdventureProgress(null,p,{roomId:id}).seals,[],'guest cannot issue a guardian win or seal');
+ for(const missing of [{stations:p.stations.slice(1)},{secrets:[]},{encounters:[]},{encounters:['w1-stitcho-fake']},{secrets:['w1-stitcho-unrelated-rail']}])
+  assert.deepEqual(mergeAdventureProgress(null,{...p,...missing},{roomId:id,host:true}).seals,[],JSON.stringify(missing));
+ const contributed=mergeAdventureProgress(null,{...p,encounters:[]},{roomId:id});
+ assert.deepEqual(contributed.stations[id],[0,1,2]);assert.deepEqual(contributed.secrets[id],p.secrets);assert.deepEqual(contributed.encounters[id],[]);
+ const cleared=mergeAdventureProgress(contributed,{roomId:id,stations:[],encounters:p.encounters,sealed:true},{roomId:id,host:true});
+ assert.deepEqual(cleared.seals,['stitcho']);assert.deepEqual(mergeAdventureProgress(cleared,p,{roomId:id,host:true}),cleared);
+});
+test('the other eight chapters retain their authored discovery requirements and host-only seals',()=>{
+ for(const r of Object.values(WORLD1_ROOMS).filter(r=>r.hero&&!['kilo','stitcho'].includes(r.hero))){
   assert.equal(r.expedition.nodes.length,3,r.hero);
   const id=r.id,p={roomId:id,stations:r.seal.stations.filter(s=>s.kind!=='oven').map(s=>s.id),secrets:r.expedition.nodes.map(n=>n.id),encounters:[id+'-guardian-v1'],sealed:true};
   assert.deepEqual(mergeAdventureProgress(null,p,{roomId:id}).seals,[],r.hero+' guest cannot seal');
@@ -42,8 +53,9 @@ test('applying shared objectives preserves identity, health and rewards through 
  g.onlineAdventure=false;assert.equal(applyAdventureProgress(g,progress),false);
 });
 test('cooperative discoveries use disposable storage instead of the solo expedition profile',()=>{
- const a=fixture('stitcho'),b=fixture('stitcho'),id=a.roomId,r=a.roomDef;a.expeditionStorage.setItem('ohana-expeditions-v2',JSON.stringify({[id]:[r.expedition.nodes[0].id]}));enterExpedition(a);enterExpedition(b);assert.equal(a.expedition.done.length,1);assert.equal(b.expedition.done.length,0);
+ const a=fixture('chispin'),b=fixture('chispin'),id=a.roomId,r=a.roomDef;a.expeditionStorage.setItem('ohana-expeditions-v2',JSON.stringify({[id]:[r.expedition.nodes[0].id]}));enterExpedition(a);enterExpedition(b);assert.equal(a.expedition.done.length,1);assert.equal(b.expedition.done.length,0);
  const kilo=fixture();enterExpedition(kilo);assert.equal(kilo.expedition,null,'Kilo does not fabricate removed discoveries or storage');
+ const stitcho=fixture('stitcho');enterExpedition(stitcho);assert.equal(stitcho.expedition,null,'Stitcho does not fabricate removed discoveries or storage');
 });
 test('both authenticated players contribute objectives; guest cannot manufacture boss or seal receipts',async()=>{
  const service=createRoomService(new LocalRoomStore());const h=await service.create('adventure'),g=await service.join(h.roomId);await service.choose(h.roomId,h.identity,'kilo');await service.choose(h.roomId,g.identity,'stitcho');await service.ready(h.roomId,h.identity);await service.ready(h.roomId,g.identity);

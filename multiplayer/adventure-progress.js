@@ -21,12 +21,14 @@ export function mergeAdventureProgress(previous,payload,{roomId,host=false}={}){
  next.secrets[roomId]=union(next.secrets[roomId],secretIds).slice(0,64);
  next.encounters[roomId]=union(next.encounters[roomId],encounterIds).slice(0,64);
  const discoveries=r.expedition?.nodes||[];
- // Kilo's authored route no longer has the generic Act II gate. It still
- // requires the real, unchanged guardian receipt: another room-scoped event
- // must not become a substitute for defeating Tambor.
- const guardian=r.kiloEncounterVersion?r.foes.find(f=>f[4]?.encounterId)?.[4].encounterId:null;
- const guardianDone=guardian?next.encounters[roomId].includes(guardian):next.encounters[roomId].length>0;
- if(host&&payload.sealed===true&&next.stations[roomId].length===stations.size&&discoveries.every(n=>next.secrets[roomId].includes(n.id))&&guardianDone)
+ // Authored routes replace the generic Act II gate, not the real guardian.
+ // Stitcho also needs the continuous roll receipt, even when both teammates
+ // already delivered all three modules. Unrelated receipts cannot substitute.
+ const authored=r.kiloEncounterVersion||r.stitchoEncounterVersion;
+ const guardian=r.kiloEncounterVersion?r.foes.find(f=>f[4]?.encounterId)?.[4].encounterId:r.stitchoEncounterVersion?r.guardian?.encounterId:null;
+ const guardianDone=authored?typeof guardian==='string'&&next.encounters[roomId].includes(guardian):next.encounters[roomId].length>0;
+ const workshopDone=!r.stitchoEncounterVersion||next.secrets[roomId].includes('w1-stitcho-main-rail-v1');
+ if(host&&payload.sealed===true&&next.stations[roomId].length===stations.size&&discoveries.every(n=>next.secrets[roomId].includes(n.id))&&guardianDone&&workshopDone)
   next.seals=WORLD1_ORDER.filter(h=>next.seals.includes(h)||h===r.hero);
  return next;
 }

@@ -7,6 +7,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { WORLD1_ORDER, WORLD1_ROOMS, WORLD1_FLOOR, WORLD1_SEALS, world1DoorOpen, world1SealsComplete } from "../systems/world1-rooms.js";
 import { enterWorld1, updateWorld1, awardSeal, world1CanLeave, world1Snapshot, nodeLive, kiloChapterAbility, interactKiloInstrument } from "../systems/world1-play.js";
+import {pickStitchoModule,rollStitchoRail} from './helpers/stitcho-actions-v607.mjs';
 
 function setup(hero) {
   const room = WORLD1_ROOMS["w1-" + hero];
@@ -97,8 +98,8 @@ test("Stitcho: part zero and the remaining pieces reach their own workshops", ()
   const run = setup("stitcho"), { game, stand, tick } = run;
   assert.equal(game.world1.stations[0].id, 0);
   for (const s of game.world1.stations) {
-    if(s.id===1){game.player.id='stitcho';game.player._abilMove='roll';for(let x=2940;x<=3340;x+=10){stand(x);tick();}game.player._abilMove=null;}
-    stand(s.x); tick();
+    if(s.id===1)rollStitchoRail(game);
+    pickStitchoModule(game,s);
     assert.equal(game.world1.carry, s.id);
     stand(s.target.x); tick();
     assert.equal(s.done, true);

@@ -558,7 +558,8 @@ function drawMichiMythic(ctx,pose,r,f){
   }
   ctx.restore();return;
  }
- if(f===3){ // ASTRAL DRAGON: long coiled serpent with horns and whiskers.
+ if(f===3){ // ASTRAL DRAGON: dracornio with medusa suspension, pearly spine and two forepaws.
+  const attack=r.st==='attack',cast=r.st==='cast',atkK=Math.sin(Math.PI*Math.max(0,Math.min(1,r.atk||0))),castK=Math.sin(Math.PI*Math.max(0,Math.min(1,r.cast||0)));
   // V461: tapered serpentine body with a translucent jelly dorsal fin and a
   // medusa tail-tuft, so the dragon visibly descends from the Medusa Onírica.
   const g=michiGenome(pose.michiSeed),pal=g.palette;
@@ -574,8 +575,8 @@ function drawMichiMythic(ctx,pose,r,f){
   const fin=spine.map((q,k)=>{const a=spine[Math.max(0,k-1)],b=spine[Math.min(15,k+1)];let nx=-(b[1]-a[1]),ny=b[0]-a[0];const d=Math.hypot(nx,ny)||1;
    const off=widths[k]*.5+4+(still?0:Math.sin(k*1.1-t*.12)*2);return [q[0]+nx/d*off,q[1]+ny/d*off];});
   ctx.save();ctx.globalAlpha=.55;ribbon(ctx,fin,widths.map(w=>w*.45+3),pal.glow,pal.ink,.8);ctx.restore();
-  ribbon(ctx,spine,widths,'#5b3f7c',ink,2.2);
-  ribbon(ctx,spine.map(q=>[q[0]+1.5,q[1]+1.5]),widths.map(w=>w*.42),'#a98ad3',null);
+  ribbon(ctx,spine,widths,pal.deep,ink,2.2);
+  ribbon(ctx,spine.map(q=>[q[0]+1.5,q[1]+1.5]),widths.map(w=>w*.42),pal.rim,null);
   ctx.save();ctx.strokeStyle='#e2c07a';ctx.lineWidth=1.3;ctx.globalAlpha=.85;
   for(let k=2;k<14;k+=2){const q=spine[k];ctx.beginPath();ctx.arc(q[0],q[1],widths[k]*.22,Math.PI*.1,Math.PI*.9);ctx.stroke();}
   ctx.restore();
@@ -584,18 +585,13 @@ function drawMichiMythic(ctx,pose,r,f){
   halo(ctx,tip[0],tip[1],9,9,pal.glow,1.2);
   for(let j=0;j<3;j++)drawTentacle(ctx,{x:tip[0],y:tip[1],len:18+j*4,phase:g.phases[j],t,still,amp:2.6,
    dir:Math.PI*(1.05+j*.22),width:5,alpha:.9,core:'#ffffff',fill:j%2?pal.glow:pal.arm,edge:pal.ink,edgeWidth:.7,beads:pal.bead});
-  oval(0,-28,23,25,'#573e7a');oval(3,-24,12,15,'#b99ac9',null);
-  // V462: digitigrade hind legs (thigh, hock, clawed paw) driven by the gait rig.
-  // V462 polish: real feline stance instead of two straight tubes. Two powerful
-  // haunches on the hips (digitigrade shin, clawed paw) plus two slimmer forelegs
-  // in front of the chest; fore and hind legs on a side move in opposite phase.
-  for(const s of [-1,1]){
-   const dx=(s>0?r.motion?.frontX:r.motion?.backX)||0,dy=(s>0?r.motion?.frontY:r.motion?.backY)||0;
-   drawCatHaunch(ctx,{side:s,hip:[s*18,-20],paw:[s*22+dx*.6,0+dy*.8],thigh:13,width:10,fur:'#7b5b9b',dark:'#4b3466',ink,lift:Math.min(1,-dy/7),claws:true,toe:'#d8b17c',pad:'#e79bc0',pawS:1.2});
-  }
-  for(const s of [-1,1]){
-   const dx=(s>0?r.motion?.backX:r.motion?.frontX)||0,dy=(s>0?r.motion?.backY:r.motion?.frontY)||0;
-   drawCatLeg(ctx,{hip:[s*8,-34],paw:[s*8+dx*.45,0+dy*.7],upper:17,lower:17,bend:1,width:8.5,fur:'#8a68ab',dark:'#4b3466',ink,lift:Math.min(1,-dy/7),claws:r.st==='attack'||r.st==='run',toe:'#e2bd86',pad:'#e79bc0',pawS:1.15});
+  ctx.beginPath();ctx.moveTo(-18,-48);ctx.bezierCurveTo(-30,-26,-16,2,4,0);ctx.bezierCurveTo(25,-5,26,-29,16,-48);ctx.closePath();ctx.fillStyle=pal.bell;ctx.fill();stroke(pal.ink,2);oval(3,-25,10,16,pal.deep,null);
+  // The astral form inherits the medusa's suspension: a coiled dragon body
+  // and two expressive forepaws, rather than four boots under a cat torso.
+  for(const side of [-1,1]){
+   const reach=attack&&side>0?atkK*13:cast?castK*8:0;
+   const drift=still?0:Math.sin(t*.065+side)*2;
+   drawCatLeg(ctx,{hip:[side*17,-43],paw:[side*(34+reach),-23+drift-(['jump','fall','glide'].includes(r.st)?5:0)],upper:11,lower:12,bend:side>0?1:-1,width:5.4,fur:pal.bell,dark:pal.deep,ink:pal.ink,lift:.45,claws:attack,toe:pal.rim,pawS:.9});
   }
   // V462: the five belly ribbons that dangled over the legs like stubby tentacles are gone;
   // the jelly lineage lives in the dorsal fin and the tail-tip tuft only.
@@ -603,12 +599,14 @@ function drawMichiMythic(ctx,pose,r,f){
   ctx.lineTo(-6,-95);ctx.closePath();ctx.fillStyle='#e0b969';ctx.fill();stroke(ink,1.7);
   ctx.beginPath();ctx.moveTo(22,-75);ctx.quadraticCurveTo(37,-100,20,-111);
   ctx.lineTo(6,-95);ctx.closePath();ctx.fillStyle='#e0b969';ctx.fill();stroke(ink,1.7);
-  oval(0,-68,29,25,'#5a3878');oval(0,-56,19,9,'#b798bb',null);
+  oval(0,-68,29,25,pal.bell);oval(0,-56,19,9,pal.deep,null);
   // V462: the dark cat finally has a real mouth: nose, ω lips, fangs, tongue; the jaw opens to roar.
   {const roar=r.st==='attack'?.95:r.st==='cast'?.6:r.st==='victory'?.75:r.st==='hurt'?.4:Math.max(0,(r.motion?.jaw||0)*.5);
    drawCatMouth(ctx,{x:0,y:-61,s:1.35,open:roar,smile:r.st==='victory'?1:0,ink,nose:'#f2a3c6',inside:'#2a0f2e',tongue:'#ff7fae',fangs:true});}
-  ctx.save();ctx.globalAlpha=.35;oval(-10,-80,10,5,'#8f6db8',null);ctx.restore();
-  eye(-12,-73,'#ffa43b',5,6.5);eye(12,-73,'#ffa43b',5,6.5);
+  ctx.save();ctx.globalAlpha=.35;oval(-10,-80,10,5,pal.glow2,null);ctx.restore();
+  ctx.beginPath();ctx.moveTo(-5,-94);ctx.bezierCurveTo(-8,-108,1,-120,4,-134);ctx.quadraticCurveTo(12,-111,6,-94);ctx.closePath();ctx.fillStyle=pal.bead;ctx.fill();stroke(pal.ink,1.6);
+  for(let h=0;h<3;h++){ctx.beginPath();ctx.moveTo(-3+h,-101-h*8);ctx.lineTo(6,-104-h*8);stroke('#b99669',1);}
+  eye(-12,-73,'#7866bb',5,6.5);eye(12,-73,'#7866bb',5,6.5);
   // V462: dragon barbels are tapered golden whiskers rooted at the muzzle sides.
   // They flow OUT and down past the cheeks and never cross the face (V461 drew
   // flat 2px strings from the mouth line that read as stray threads).

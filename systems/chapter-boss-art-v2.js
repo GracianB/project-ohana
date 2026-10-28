@@ -1,4 +1,5 @@
 import {drawKiloGuardian} from './kilo-chapter-art-v606.js';
+import {drawStitchoGuardian} from './stitcho-chapter-art-v607.js';
 import {chapterBossMind} from './chapter-boss-v2.js';
 const TAU=Math.PI*2,INK='#192a40';
 const PALETTES={kilo:['#987059','#f0d3a0','#4a7766'],stitcho:['#466d93','#b5ebeb','#977ae3'],chispin:['#8178ac','#fff0a1','#8bc4dc'],cat:['#967db0','#f0d6ec','#b8c5ee'],cuerno:['#668f88','#e4e9bc','#c2ace6'],dragon:['#92545e','#ffd092','#d78363'],dino:['#718971','#ebe0b7','#b7ce97'],frita:['#c19765','#fff0ba','#d28a7c'],pizza:['#bf805e','#f7deb0','#c6534f'],yomi:['#7a9daa','#ecedc9','#9edbd2']};
@@ -13,6 +14,7 @@ export function drawChapterBossV2(c,e,cam,t,reduced=false){
  if(!e.miniBoss||!e.roomId?.startsWith('w1-'))return false;
  const id=e.gauntletBoss||e.roomId.slice(3),P=PALETTES[id],b=chapterBossMind(e);if(!P||!b)return false;
  if(id==='kilo'&&!e.gauntletBoss)return drawKiloGuardian(c,e,cam,t,reduced);
+ if(id==='stitcho'&&!e.gauntletBoss&&e._stitchoGuardianV607)return drawStitchoGuardian(c,e,cam,t,reduced);
  const time=reduced?0:t,warn=b.phase==='warn',attack=['attack','strike'].includes(b.phase),rest=b.phase==='rest',aim=b.aim||1,
   age=b.clock??b.timer??0,lift=warn?Math.max(0,Math.min(1,1-age/(b.rhythm?.warn||60))):attack?1:0,flap=reduced?0:Math.sin(time*.07),step=reduced?0:Math.sin(time*.15),scale=e.h/180;
  c.save();c.translate(e.x+e.w/2-cam.x,e.y+e.h-cam.y);c.scale(scale,scale);c.lineCap='round';c.lineJoin='round';
