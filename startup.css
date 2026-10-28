@@ -1,0 +1,13 @@
+/* The welcome still draws its own Canvas scene once the family is ready. */
+#startup-screen{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 35%,#254e57 0,#102937 46%,#091923 100%);color:#f8efd8;text-align:center;}
+#startup-screen .startup-content{max-width:28rem;display:grid;justify-items:center;gap:20px;}
+#startup-screen .startup-brand{font:700 clamp(48px,14vw,86px)/1 Fredoka,system-ui,sans-serif;letter-spacing:.08em;color:#ffe5a9;text-shadow:0 5px 0 #132832,0 14px 40px #0004;}
+#startup-screen .startup-family{display:flex;align-items:center;justify-content:center;gap:10px;height:32px;}
+#startup-screen .startup-family i{display:block;width:12px;height:12px;border-radius:50%;background:var(--voice);box-shadow:0 0 18px color-mix(in srgb,var(--voice) 45%,transparent);animation:ohana-gather 1.4s ease-in-out infinite;animation-delay:calc(var(--order)*.09s);}
+#startup-screen [role=status]{font:500 16px/1.6 Outfit,system-ui,sans-serif;margin:0;max-width:30ch;min-height:3.2em;}
+#startup-screen button{border:1px solid #e6d5aa;border-radius:12px;background:#f2dcad;color:#17333c;padding:14px 22px;min-height:48px;font:700 16px Outfit,system-ui,sans-serif;cursor:pointer;}
+#startup-screen button[hidden]{display:none!important;}
+#startup-screen button:focus-visible{outline:3px solid #b1f6e8;outline-offset:5px;}
+#startup-screen[data-state=error] .startup-family i{animation:none;opacity:.65;}
+@keyframes ohana-gather{0%,65%,100%{transform:translateY(0) scale(.8);opacity:.5;}30%{transform:translateY(-12px) scale(1.1);opacity:1;}}
+@media(prefers-reduced-motion:reduce){#startup-screen .startup-family i{animation:none;}}

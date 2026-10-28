@@ -1,0 +1,430 @@
+{
+  "release": "ohana-622",
+  "base": "0dd2b51",
+  "recorded_at": "2026-10-28T19:39:22.940026+00:00",
+  "review": "docs/V622-STARTUP-AND-MEMORIES.md",
+  "checks": {
+    "node": {
+      "result": "pass",
+      "tests": 1764,
+      "failures": 0,
+      "command": "npm test"
+    },
+    "release_gate": {
+      "result": "pass",
+      "cache": "ohana-622",
+      "runtime_modules": 376,
+      "precache_resources": 438
+    },
+    "native_startup": {
+      "result": "pass",
+      "evidence": [
+        {
+          "scenario": "slow module resolves after visible waiting state",
+          "nativeEntry": true,
+          "earnedMemory": true,
+          "errors": []
+        },
+        {
+          "scenario": "failed game module and manual mobile retry",
+          "attempts": 2,
+          "earnedSavePreserved": true,
+          "errors": []
+        },
+        {
+          "scenario": "Enter before the first animation frame",
+          "singleInputReachesSelection": true,
+          "doesNotStartGame": true
+        }
+      ],
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v622-startup.mjs",
+      "regression": "Early Enter before first animation frame failed before the intro input correction, then passed."
+    },
+    "general_browser_audit": {
+      "result": "pass",
+      "command": "npm run test:browser",
+      "stage": "Final runtime including inline startup and early Enter correction."
+    },
+    "memory_art": {
+      "result": "pass",
+      "evidence": {
+        "results": [
+          {
+            "hero": "kilo",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 26
+            },
+            "silhouetteHash": 3093510936
+          },
+          {
+            "hero": "stitcho",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 29
+            },
+            "silhouetteHash": 2616185573
+          },
+          {
+            "hero": "chispin",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 30
+            },
+            "silhouetteHash": 1833947715
+          },
+          {
+            "hero": "cat",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 35
+            },
+            "silhouetteHash": 2368727465
+          },
+          {
+            "hero": "cuerno",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 26
+            },
+            "silhouetteHash": 4207802296
+          },
+          {
+            "hero": "dragon",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 33
+            },
+            "silhouetteHash": 2820434423
+          },
+          {
+            "hero": "dino",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 30
+            },
+            "silhouetteHash": 1802804593
+          },
+          {
+            "hero": "frita",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 33
+            },
+            "silhouetteHash": 3843760261
+          },
+          {
+            "hero": "pizza",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 34
+            },
+            "silhouetteHash": 765585324
+          },
+          {
+            "hero": "yomi",
+            "staticReduced": true,
+            "bounds": {
+              "w": 35,
+              "h": 37
+            },
+            "silhouetteHash": 4001118556
+          }
+        ],
+        "errors": []
+      },
+      "gallery": "test-results/v622/memory-gallery.png"
+    },
+    "physical_thousand_memories": {
+      "result": "pass",
+      "evidence": {
+        "report": [
+          {
+            "hero": "kilo",
+            "found": 100,
+            "deaths": 0
+          },
+          {
+            "hero": "stitcho",
+            "found": 100,
+            "deaths": 0
+          },
+          {
+            "hero": "chispin",
+            "found": 100,
+            "deaths": 0
+          },
+          {
+            "hero": "cat",
+            "found": 100,
+            "deaths": 0
+          },
+          {
+            "hero": "cuerno",
+            "found": 100,
+            "deaths": 0
+          },
+          {
+            "hero": "dragon",
+            "found": 100,
+            "deaths": 0
+          },
+          {
+            "hero": "dino",
+            "found": 100,
+            "deaths": 0
+          },
+          {
+            "hero": "frita",
+            "found": 100,
+            "deaths": 0
+          },
+          {
+            "hero": "pizza",
+            "found": 100,
+            "deaths": 0
+          },
+          {
+            "hero": "yomi",
+            "found": 100,
+            "deaths": 0
+          }
+        ],
+        "total": 1000,
+        "errors": []
+      },
+      "source": "Actual earned V621 campaign storage; collection resumed from earned checkpoints while the read-only physical-input guide was corrected. No granted forms, XP, position, invulnerability, objects or win. Not one uninterrupted run.",
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v513-all-memories.mjs"
+    },
+    "memory_save_reload": {
+      "result": "pass",
+      "evidence": {
+        "total": 1000,
+        "relics": 10,
+        "albumPanels": 10,
+        "reloadPreserved": true,
+        "errors": []
+      },
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v513-memory-save.mjs"
+    }
+  },
+  "moved_memories": [
+    {
+      "hero": "cat",
+      "id": 30,
+      "before": {
+        "x": 4509,
+        "y": 1100
+      },
+      "after": {
+        "x": 4516,
+        "y": 1032
+      }
+    },
+    {
+      "hero": "cuerno",
+      "id": 13,
+      "before": {
+        "x": 2163,
+        "y": 1100
+      },
+      "after": {
+        "x": 2124,
+        "y": 1100
+      }
+    },
+    {
+      "hero": "dragon",
+      "id": 13,
+      "before": {
+        "x": 2163,
+        "y": 1100
+      },
+      "after": {
+        "x": 2124,
+        "y": 1100
+      }
+    },
+    {
+      "hero": "dragon",
+      "id": 32,
+      "before": {
+        "x": 4785,
+        "y": 1100
+      },
+      "after": {
+        "x": 4785,
+        "y": 1030
+      }
+    },
+    {
+      "hero": "dragon",
+      "id": 50,
+      "before": {
+        "x": 7269,
+        "y": 1100
+      },
+      "after": {
+        "x": 7269,
+        "y": 1035
+      }
+    },
+    {
+      "hero": "dino",
+      "id": 13,
+      "before": {
+        "x": 2163,
+        "y": 1100
+      },
+      "after": {
+        "x": 2124,
+        "y": 1100
+      }
+    },
+    {
+      "hero": "dino",
+      "id": 32,
+      "before": {
+        "x": 4785,
+        "y": 1100
+      },
+      "after": {
+        "x": 4785,
+        "y": 1030
+      }
+    },
+    {
+      "hero": "frita",
+      "id": 6,
+      "before": {
+        "x": 1197,
+        "y": 1100
+      },
+      "after": {
+        "x": 1197,
+        "y": 1035
+      }
+    },
+    {
+      "hero": "frita",
+      "id": 35,
+      "before": {
+        "x": 5199,
+        "y": 1100
+      },
+      "after": {
+        "x": 5199,
+        "y": 1035
+      }
+    },
+    {
+      "hero": "frita",
+      "id": 36,
+      "before": {
+        "x": 5337,
+        "y": 1100
+      },
+      "after": {
+        "x": 5337,
+        "y": 1035
+      }
+    },
+    {
+      "hero": "pizza",
+      "id": 6,
+      "before": {
+        "x": 1197,
+        "y": 1100
+      },
+      "after": {
+        "x": 1197,
+        "y": 1035
+      }
+    },
+    {
+      "hero": "pizza",
+      "id": 20,
+      "before": {
+        "x": 3129,
+        "y": 1100
+      },
+      "after": {
+        "x": 3129,
+        "y": 1030
+      }
+    },
+    {
+      "hero": "pizza",
+      "id": 45,
+      "before": {
+        "x": 6579,
+        "y": 1100
+      },
+      "after": {
+        "x": 6579,
+        "y": 1035
+      }
+    },
+    {
+      "hero": "yomi",
+      "id": 6,
+      "before": {
+        "x": 1197,
+        "y": 1100
+      },
+      "after": {
+        "x": 1197,
+        "y": 1035
+      }
+    },
+    {
+      "hero": "yomi",
+      "id": 20,
+      "before": {
+        "x": 3129,
+        "y": 1100
+      },
+      "after": {
+        "x": 3129,
+        "y": 1030
+      }
+    },
+    {
+      "hero": "yomi",
+      "id": 43,
+      "before": {
+        "x": 6303,
+        "y": 1100
+      },
+      "after": {
+        "x": 6303,
+        "y": 1035
+      }
+    }
+  ],
+  "source_blobs": {
+    "index.html": "b8de9ffd5ae2082ad165764cc588dfc93d71273b",
+    "sw.js": "b5dfb99e97fbae599fa4faa9732049c51ffdfb00",
+    "systems/intro.js": "74cd52f5a40e32143e47271679c625cc1baaec32",
+    "systems/title.js": "3a733d5516cff01d1e280feb13486a9bdc1f9084",
+    "systems/world1-collect.js": "cc3223c710bddeb8f1587dd462292f8fb60956eb",
+    "startup.css": "546f7e36e6d84813d5498ed70e66ca8272f14db4",
+    "systems/memory-pickup-art.js": "f85aa423441c0efa82ee158246b2e64ea47cc216"
+  },
+  "limits": [
+    "Art gallery and native-bound checks do not establish subjective visual acceptance.",
+    "No new human difficulty acceptance or hardware performance profiling is claimed.",
+    "V621 full campaign and cooperative runs remain historical baseline evidence. They were not rerun or claimed for V622.",
+    "Netlify remains paused; no backend is activated.",
+    "Public source and native desktop/mobile startup checks are recorded separately after publication."
+  ]
+}

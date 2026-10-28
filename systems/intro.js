@@ -807,7 +807,9 @@ export function playTitleIntro(options = {}) {
   }
 
   function enter(e){
-    if(done||(!ready&&e?.key!=="Escape")) return;
+    // Explicit input is valid as soon as the handlers exist. Waiting for a
+    // painted frame here used to discard a quick Enter on a cold start.
+    if(done) return;
     if(e?.type==="keydown"&&!["Enter","Escape"].includes(e.key)) return;
     if(e?.type==="keydown"&&e.key!=="Escape"&&e.target?.closest?.(".oi-story-controls")) return;
     if(e?.type==="keydown"){e.preventDefault();e.stopPropagation();}

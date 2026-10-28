@@ -64,6 +64,9 @@ jobs:
             fi
           fi
 
+      - name: V622 native startup recovery and Canvas memory silhouettes
+        run: npm run test:browser:startup && npm run test:browser:memory-art
+
       - name: V500 constellation UI and persistence
         run: node tests/browser/v500-constellation.mjs
 

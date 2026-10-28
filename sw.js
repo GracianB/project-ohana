@@ -1,6 +1,8 @@
-const VERSION = "ohana-621";
+const VERSION = "ohana-622";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/memory-pickup-art.js?v=" + VERSION,
+  "./startup.css?v=" + VERSION,
   "./systems/cat-chapter-art-v609.js?v=" + VERSION,
   "./systems/cat-chapter.js?v=" + VERSION,
   "./systems/cat-encounters-v609.js?v=" + VERSION,
@@ -447,6 +449,8 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/memory-pickup-art.js": "f85aa423441c0efa82ee158246b2e64ea47cc216",
+  "startup.css": "546f7e36e6d84813d5498ed70e66ca8272f14db4",
   "systems/cat-chapter-art-v609.js": "53381fc30b84a40de9124312ff04e280ef2bb0f4",
   "systems/cat-chapter.js": "accaf1067000c4c7b004596052a03f83b083704c",
   "systems/cat-encounters-v609.js": "2df5bfa5a0217d3b345abb0e1cbc38471c399ddd",
@@ -559,7 +563,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-select.js": "1a9f7a9c91e166d2993e1d87056e1dcec1ff0f9b",
   "systems/theatre-stage.js": "1824c8672997164ac18403f85fccd8ef7d87d50d",
   "systems/world1-progress.js": "52c9c5ded533dc649210fd913b737614b2bb67dc",
-  "systems/world1-collect.js": "a99c3768a01075294dcbc5bb6fda0fb459e95195",
+  "systems/world1-collect.js": "cc3223c710bddeb8f1587dd462292f8fb60956eb",
   "systems/world1-boss.js": "3b913abb4bcb2f59c4f55ca15325fd654fdff877",
   "systems/fusion-boss.js": "ed5b248a1e33315cb063b92b049e64d479393242",
   "systems/quimera-art.js": "b320aeff3660c6aa859dc545acd2778bc4fdf80a",
@@ -638,7 +642,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "d9641e8a2abdb92ccdd8ca1e46f4ec903d558fcd",
+  "index.html": "b8de9ffd5ae2082ad165764cc588dfc93d71273b",
   "multiplayer.html": "8700abcf3f860c504167facf1c37815debad59f9",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "b3178c951bec2a30bda0bb2b2d47763b24567189",
@@ -826,7 +830,7 @@ const PRECACHE_REVISIONS = {
   "systems/frame-pressure.js": "0386d6604ecfaa482a482eb9216962bf7413c720",
   "systems/hero-mastery.js": "830da8e6a6b2eb2352024b22b2b10cd69373c020",
   "systems/hazards.js": "c7e540b2c7b725405064887b53c46f01baf7759a",
-  "systems/intro.js": "1ca97b96f1bd359d811c8edfa856f117fb5f6e60",
+  "systems/intro.js": "74cd52f5a40e32143e47271679c625cc1baaec32",
   "systems/intro-cast-fit.js": "e23ad877d1deadb5769d639d5fa2200fb69573c6",
   "systems/welcome-spotlight.js": "bde0b1deb3a2f1fc80eb182dd761fc09c93014bc",
   "systems/intro-dragon-stage.js": "d7a0d895dc6406011b408fc16c4ae6a0a9566eed",
@@ -858,7 +862,7 @@ const PRECACHE_REVISIONS = {
   "systems/save.js": "f61e63942df8093cd3bd88dee6f79592a9bd91e6",
   "systems/surprises.js": "9ac680c25713258f8e828eb396bf7f659ce390da",
   "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
-  "systems/title.js": "d161c7fb535c015fa8be155abcb579972e0e1eb0",
+  "systems/title.js": "3a733d5516cff01d1e280feb13486a9bdc1f9084",
   "systems/experience.js": "6ae2198d35393ab39584f42f974584a9c9a5d547",
   "systems/online-coop.js": "78e1d95a76007fd66a88661b68867f483bc381c6",
   "systems/duo-altar-art.js": "2563f6d83f5428ff00af011fff13a542ba6dfae4",

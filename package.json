@@ -57,7 +57,9 @@
     "test:browser:adventure-network": "node tests/browser/v604-adventure-network.mjs",
     "test:browser:coop-complete": "OHANA_COOP_FINALE=1 node tests/browser/v604-coop-campaign.mjs",
     "test:browser:versus-match": "node tests/browser/v604-versus-match.mjs",
-    "test:browser:living-realms": "node tests/browser/v605-living-realms.mjs"
+    "test:browser:living-realms": "node tests/browser/v605-living-realms.mjs",
+    "test:browser:startup": "node tests/browser/v622-startup.mjs",
+    "test:browser:memory-art": "node tests/browser/v622-memories-art.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"
