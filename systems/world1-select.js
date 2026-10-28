@@ -76,8 +76,17 @@ const COLS = 6;
 export function world1SelectCardRects(sel,W,H){return layout(sel,W,H);}
 function layout(sel,W,H){
  const compact=W<600,cols=5,gap=compact?5:9,margin=compact?9:22;
- const w=(W-margin*2-gap*4)/5,h=Math.min(76,H*.115);sel.columns=5;
- sel.rects=sel.cards.map((card,i)=>card.final?{x:W-(compact?100:146)-margin,y:18,w:compact?100:146,h:44}:{x:margin+(i%cols)*(w+gap),y:H*.73+Math.floor(i/5)*(h+9),w,h});return sel.rects;
+ const w=(W-margin*2-gap*4)/5,h=Math.min(68,H*.100);sel.columns=5;
+ // 10 hero cards in two rows, final mirror room as a wider card centered below them.
+ const rowH=h+8, baseY=H*.68;
+ sel.rects=sel.cards.map((card,i)=>{
+  if(card.final){
+   const fw=Math.min(W-margin*2, w*2+gap);
+   return {x:(W-fw)/2, y:baseY+2*rowH, w:fw, h:h+6};
+  }
+  return {x:margin+(i%cols)*(w+gap), y:baseY+Math.floor(i/5)*rowH, w, h};
+ });
+ return sel.rects;
 }
 
 function choose(sel) {
@@ -146,7 +155,27 @@ export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=fals
  if(!cur.hero) {ctx.save();ctx.translate(cx,foot);const k=base/460;ctx.scale(k,k);drawQuimeraCreature(ctx,{x:-115,y:-290,w:230,h:290,hp:100,phase:4,_fusion:{mode:'rest'}},{x:0,y:0},time,reduceMotion);ctx.restore();}
  ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#fff1ca';ctx.font=`600 ${compact?12:16}px Outfit,sans-serif`;ctx.fillText(`${String(cur.index+1).padStart(2,'0')} / ${cur.final?'EL CORAZÓN':'DIEZ HISTORIAS'}`,compact?16:28,compact?H*.135:112,W*.52);
  ctx.fillStyle='#e2ead8';ctx.font=`${compact?10:12}px Outfit,sans-serif`;ctx.fillText(cur.roomName,compact?16:28,compact?H*.185:140,W*.65);
- const frame=rects[10];ctx.fillStyle=cur.final?'#d9bb87':'#132737dd';roundRect(ctx,frame.x,frame.y,frame.w,frame.h,12);ctx.fill();ctx.strokeStyle='#c5be9b77';ctx.lineWidth=1;ctx.stroke();ctx.textAlign='center';ctx.fillStyle=cur.final?'#172b3c':'#eedab4';ctx.font=`700 ${compact?10:12}px Outfit,sans-serif`;ctx.fillText('✦ CORAZÓN '+sel.cards.filter(c=>c.sealed).length+'/10',frame.x+frame.w/2,frame.y+frame.h/2);
+ // Final mirror room card at the bottom. Locked until the ten seals are done.
+ const frame=rects[10],finalCard=sel.cards[10],focusF=sel.index===10,hoverF=sel.hover===10;
+ if(frame&&finalCard){
+  const locked=!finalCard.unlocked, seals=sel.cards.filter(c=>c.sealed).length;
+  ctx.save();
+  ctx.fillStyle=focusF?'#f3e0c0':hoverF?'#3a2a4a':'#1a1228e8';
+  roundRect(ctx,frame.x,frame.y,frame.w,frame.h,14);ctx.fill();
+  ctx.strokeStyle=focusF?'#fff0c7':locked?'#7a6a88':'#ffd6f2';ctx.lineWidth=focusF?2.4:1.4;ctx.stroke();
+  // Oval portals suggesting the trapped family
+  const colors=['#ffe14a','#5ad1ff','#ffb6e4','#4ff0c8','#ff8a3a','#c8f04a','#ffd36a','#ff8a2a','#ce93d8','#c9a8ff'];
+  for(let i=0;i<10;i++){
+   const ox=frame.x+18+i*((frame.w-36)/9), oy=frame.y+frame.h*.42;
+   ctx.beginPath();ctx.ellipse(ox,oy,7,11,0,0,Math.PI*2);
+   ctx.fillStyle=locked?colors[i]+'55':colors[i]+'cc';ctx.fill();
+   ctx.strokeStyle=locked?'#9aa':'#fff6c8';ctx.lineWidth=.8;ctx.stroke();
+  }
+  ctx.textAlign='center';ctx.fillStyle=locked?'#c8b8d0':'#fff1e0';
+  ctx.font=`700 ${compact?11:14}px Outfit,sans-serif`;
+  ctx.fillText(locked?`✦ ESPEJOS · ${seals}/10`:'✦ CORAZÓN · ENTRAR',frame.x+frame.w/2,frame.y+frame.h-8,frame.w-12);
+  ctx.restore();
+ }
  // Two low casting rails: large hit areas, names and real animated silhouettes.
  sel.cards.slice(0,10).forEach((card,i)=>{
   const r=rects[i],focus=i===sel.index,hover=i===sel.hover,x=r.x+r.w/2,y=r.y+r.h*.72;
