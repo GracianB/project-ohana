@@ -9,16 +9,18 @@ test('V604: five authored and actual species in every chapter',()=>{
   for(const kind of cast)assert.ok(foes.has(kind),hero+' missing '+kind);
  }
 });
-test('V604: opening stages only the featured pair',()=>{
+test('V619: full family always on stage; story pair is nudged forward',()=>{
  const d={hero:'dragon',partner:'dino'},base={x:10,foot:20,slotWidth:10,row:2};
+ // Full cast is always allowed.
  assert.equal(welcomeSpotlightAllows('dragon',d),true);
  assert.equal(welcomeSpotlightAllows('dino',d),true);
- assert.equal(welcomeSpotlightAllows('pizza',d),false);
- assert.equal(welcomeSpotlightAllows('pizza',null),false);
+ assert.equal(welcomeSpotlightAllows('pizza',d),true);
+ assert.equal(welcomeSpotlightAllows('pizza',null),true);
+ assert.equal(welcomeSpotlightAllows('kilo',null),true);
+ // Speaking pair is moved forward; others keep their mark.
  const a=welcomeSpotlightSpot('dragon',base,1200,720,90,d),b=welcomeSpotlightSpot('dino',base,1200,720,90,d);
  assert.ok(a.x>420&&a.x<516);assert.ok(b.x>720&&b.x<840);
  assert.equal(a.row,0);assert.equal(b.row,0);
  assert.equal(welcomeSpotlightSpot('pizza',base,1200,720,90,d),base);
- assert.equal(welcomeSpotlightAllows('kilo',null),true);
- assert.equal(welcomeSpotlightSpot('kilo',base,1200,720,90,null).row,0);
+ assert.equal(welcomeSpotlightSpot('kilo',base,1200,720,90,null).row,base.row);
 });

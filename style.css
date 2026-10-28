@@ -2412,10 +2412,12 @@ a:focus-visible {
   font-size: 12px;
 }
 #pause-overlay .panel {
-  width: min(360px, calc(100vw - 32px));
+  width: min(880px, calc(100vw - 48px));
+  max-height: min(92vh, 820px);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow: auto;
 }
 #room-banner,
 #prompt {
