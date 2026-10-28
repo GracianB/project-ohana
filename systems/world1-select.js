@@ -141,7 +141,7 @@ export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=fals
  const foot=H*.645,base=Math.min(H*.52,W*(compact?.49:.39));
  const ratio=cur.hero?Math.min(1.1,heroHeightTarget(cur.hero,previewForm)/180):1;
  const height=base*(.48+ratio*.52),cx=W*.50;
- if(cur.hero&&drawActor)drawActor(ctx,cur.hero,cx,foot,height/64,{form:previewForm,pose:reduceMotion?'idle':({kilo:'idle',stitcho:'wall',chispin:'jump',cat:'idle',cuerno:'victory',dragon:'glide',dino:'victory',frita:'run',pizza:'victory',yomi:'cast'}[cur.hero]),performance:cur.hero==='kilo'?'dance':null});
+ if(cur.hero&&drawActor)drawActor(ctx,cur.hero,cx,foot,height/64,{form:previewForm,pose:reduceMotion?'idle':({kilo:'idle',stitcho:'wall',chispin:'jump',cat:'idle',cuerno:'victory',dragon:'glide',dino:'victory',frita:'victory',pizza:'victory',yomi:'cast'}[cur.hero]),performance:cur.hero==='kilo'?'dance':null});
  if(cur.hero&&cur.keepsakeRecovered){drawKeepsake(ctx,cur.hero,cx+Math.min(W*.17,160),foot,Math.min(100,base*.30));ctx.textAlign='center';ctx.fillStyle='#fff0c8';ctx.font='11px Outfit,sans-serif';ctx.fillText(KEEPSAKES[cur.hero].name,cx+Math.min(W*.17,160),foot+17,Math.min(150,W*.3));}
  if(!cur.hero) {ctx.save();ctx.translate(cx,foot);const k=base/460;ctx.scale(k,k);drawQuimeraCreature(ctx,{x:-115,y:-290,w:230,h:290,hp:100,phase:4,_fusion:{mode:'rest'}},{x:0,y:0},time,reduceMotion);ctx.restore();}
  ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#fff1ca';ctx.font=`600 ${compact?12:16}px Outfit,sans-serif`;ctx.fillText(`${String(cur.index+1).padStart(2,'0')} / ${cur.final?'EL CORAZÓN':'DIEZ HISTORIAS'}`,compact?16:28,compact?H*.135:112,W*.52);

@@ -510,7 +510,9 @@ if (st === "run" && pose.move !== "slide") {
   const ph = pose.phase, s = Math.sin(ph);
   P.a0 = 0.16 * pose.speed;
   P.bend = Math.sin(ph * 2 + 0.8) * 0.28 + pose.sway * 0.35;
-  P.wig = -0.35 * pose.speed + Math.sin(ph * 2) * 0.2;
+  // Clamp wig: a la velocidad máxima la punta solo se curva ligeramente hacia atrás
+  // sin que el cuerpo se pliegue como un boomerang.
+  P.wig = Math.max(-0.18, -0.20 * pose.speed + Math.sin(ph * 2) * 0.14);
   P.lift = -Math.abs(Math.cos(ph)) * 4.5;
   P.legF = [s * 1.12, 3 + Math.max(0, s) * 6];
   P.legB = [-s * 1.12, 3 + Math.max(0, -s) * 6];

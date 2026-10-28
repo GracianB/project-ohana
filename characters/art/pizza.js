@@ -389,7 +389,9 @@ const heavy = f >= 3;
 if (st === "run") {
   const ph = pose.phase;
   const s = Math.sin(ph);
-  P.roll = s * 0.16;
+  // Un triángulo de pizza se balancea suave: lean leve, sin giro completo de eje.
+  // roll máximo ±3.4° (0.06 rad) para que la punta señale siempre hacia arriba.
+  P.roll = s * 0.06;
   P.bx = s * 2.2;
   P.lift = -Math.abs(Math.cos(ph)) * 3.6;
   P.legF = [Math.max(0, s) * 0.85 - 0.1, 3];
