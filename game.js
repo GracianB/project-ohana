@@ -3,6 +3,7 @@ import {kiloGrowthWaiting,kiloUnlockedForm} from './systems/kilo-encounters-v606
 import {kiloChapterAbility,interactKiloInstrument} from './systems/world1-play.js';
 import {createAdventureStorage} from './multiplayer/adventure-progress.js';
 import {drawLivingRealm} from './worlds/living-realms.js';
+import {drawPortalMirrors, FINAL_PORTALS} from './systems/final-portal-mirrors.js';
 import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
 import {KEEPSAKES,readKeepsakes,mergeKeepsakes,persistKeepsakes} from './systems/keepsakes.js';
 import {chapterAtlasHTML,chapterMapDetail,drawAdventureGuide} from './systems/adventure-guide-v2.js';
@@ -3194,6 +3195,7 @@ drawNestArena(ctx,game,game.cam,t);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
 portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
+if(game.roomId==="w1-final")drawPortalMirrors(ctx, FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion);
 Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
