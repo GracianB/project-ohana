@@ -1,4 +1,4 @@
-const VERSION = "ohana-606";
+const VERSION = "ohana-618";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/cat-chapter-art-v609.js?v=" + VERSION,
@@ -555,7 +555,7 @@ const PRECACHE_REVISIONS = {
   "worlds/pizza-ovens.js": "28440ea475b0e5499a04f91d396b1785355ce8e2",
   "systems/yomi-room.js": "0916aa8f05dd7b6dccfafe698f01d43c856bbe3a",
   "systems/world1-cine.js": "b41765d23083fa8c64d26364d23348a22e1e7430",
-  "systems/final-portal-mirrors.js": "411f8019f71066e5021ad7f48c94065e8b8ff911",
+  "systems/final-portal-mirrors.js": "d35af6e9e1c68609d11afd7f4427fcd32da3c5bb",
   "systems/world1-select.js": "1a9f7a9c91e166d2993e1d87056e1dcec1ff0f9b",
   "systems/theatre-stage.js": "1824c8672997164ac18403f85fccd8ef7d87d50d",
   "systems/world1-progress.js": "52c9c5ded533dc649210fd913b737614b2bb67dc",
@@ -563,7 +563,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-boss.js": "3b913abb4bcb2f59c4f55ca15325fd654fdff877",
   "systems/fusion-boss.js": "ed5b248a1e33315cb063b92b049e64d479393242",
   "systems/quimera-art.js": "b320aeff3660c6aa859dc545acd2778bc4fdf80a",
-  "systems/world1-story.js": "dc635eb6dced1378e8831f5a825ceff9111e401a",
+  "systems/world1-story.js": "c69eee457325a434a8747deb2c7a313aa7d67446",
   "systems/world1-rooms.js": "3a2f55f983c7a9c61bbd23d6eaeacf39dcc403e7",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
   "worlds/chapter-stagecraft.js": "979021a3b2cd9fca0794d0fa70beb250a20845da",
@@ -638,7 +638,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "8d6fdede46bede8c117f685cbde7a6ac11d6d6dd",
+  "index.html": "fb1a43eef7aa13d9b776d4cad1ad30d82ad59d13",
   "multiplayer.html": "8700abcf3f860c504167facf1c37815debad59f9",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "b3178c951bec2a30bda0bb2b2d47763b24567189",
@@ -663,7 +663,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "bda52ccf19fa48a77d9688805056dac7f72034fb",
+  "game.js": "9acc922a836fabd58983919ed33540e25685e977",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "e92148d6386f7ce1a9ece2ae12bbe81d2c6f78a1",
   "characters/ten-action-acting.js": "8c56db05f0625ebce31e10abbba5305be881d0ff",
