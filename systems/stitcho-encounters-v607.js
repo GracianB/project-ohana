@@ -36,28 +36,17 @@ export function authorStitchoEncounters(room){
  room.stitchoShipX=STITCHO_SHIP_V607.x;
 
  // ── Terrain ────────────────────────────────────────────────────────────
- // Terraces, ramps, crane bases and shipyard structures
+ // Unbroken floor spanning the full 14400 length ensures carrying parts and
+ // ball rolling (K) never collide with abrupt floor steps or trigger unintended wall-climb.
+ const floor=[[0,FLOOR,room.width,126]];
+
  const banks=[
-  [1020,260,52],    // Dock ramp at entry
-  [2680,240,70],    // Workshop 0 bench elevation
-  [3600,280,88],    // Scrap mound after the rail
-  [5100,260,78],    // Crane foundation
-  [6100,280,95],    // Workshop 1 elevated bench
-  [7400,260,70],    // Intermediate catwalk
-  [9100,280,90],    // Hangar entrance ramp
-  [9900,250,75],    // Workshop 2 loading platform
-  [11600,270,82]    // Pre-arena corridor rise
+  [1020,260,52],[2680,240,70],[3600,280,88],[5100,260,78],[6100,280,95],
+  [7400,260,70],[9100,280,90],[9900,250,75],[11600,270,82]
  ];
  room.terraces=banks.map(([x,w,rise])=>({x,w,y:FLOOR-rise,rise}));
 
- const topAt=x=>room.terraces.find(b=>x>=b.x&&x<b.x+b.w)?.y??FLOOR;
-
- // Ground segments with real elevation changes
- const floor=[];let end=0;
- for(const b of room.terraces){floor.push([end,FLOOR,b.x-end,126],[b.x,b.y,b.w,126+b.rise]);end=b.x+b.w;}
- floor.push([end,FLOOR,room.width-end,126]);
-
- // Shelves: crane catwalks, container stacks, maintenance platforms.
+ // Elevated catwalks, crane structures and maintenance perches (all thin shelves)
  const shelves=[
   // Sector 0 · Dock stepping stones
   [1400,1034,200],[1680,944,220],
@@ -123,7 +112,7 @@ export function authorStitchoEncounters(room){
 
  room.foes=cast.map(([x,kind,hp,stage],i)=>{
   const role=CAST[kind],air=role==='flyer'||role==='gunner';
-  const support=topAt(x+20);
+  const support=FLOOR;
   const y=air?(stage===2?720:stage===3?810:support-220):support-40;
   return [x,y,kind,false,{
    role,chapterHP:hp,variant:i%3,
@@ -145,13 +134,12 @@ export function authorStitchoEncounters(room){
   [7800,989],[8100,898],[8500,798],[8900,989],
   [9300,889],[10400,989],[10700,889],[11200,989],
   [11500,889],[12000,929],[12700,929],[13700,929]
- ])room.orbs.push([x,y]);
- for(const o of room.orbs)o[1]=Math.min(o[1],topAt(o[0])-42);
+ ])room.orbs.push([x,Math.min(y,FLOOR-42)]);
 
  // ── Sectors ────────────────────────────────────────────────────────────
  const names=['Dique de llegada','Primer astillero','Canal de chatarra','Grúas de plasma','Dársena y taller','Puente del raíl','Cámaras del hangar','Corredor de la nave','Arena del Núcleo Glitch'];
  room.sectors=names.map((name,i)=>({id:i<6?'w1-stitcho-'+i:'w1-stitcho-act2-'+(i-6),name,x:i*1600,w:1600,role:i===8?'combat':i===3?'platform':'explore'}));
- room.checkpoints=room.sectors.map((s,i)=>({id:s.id,x:i===8?12480:s.x+160,y:topAt(i===8?12480:s.x+160),sector:i}));
+ room.checkpoints=room.sectors.map((s,i)=>({id:s.id,x:i===8?12480:s.x+160,y:FLOOR,sector:i}));
 
  room.nooks=[{id:'w1-stitcho-secret-0',x:4820,y:790},{id:'w1-stitcho-secret-1',x:8500,y:800}];
 

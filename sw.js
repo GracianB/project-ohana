@@ -1,6 +1,7 @@
 const VERSION = "ohana-606";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/stitcho-chapter-art-v607.js?v=" + VERSION,
   "./systems/stitcho-encounters-v607.js?v=" + VERSION,
   "./systems/hud-portrait-v606.js?v=" + VERSION,
   "./systems/kilo-encounters-v606.js?v=" + VERSION,
@@ -422,7 +423,8 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/stitcho-encounters-v607.js": "7838b60c566ba454b113d2b6a683cdecaaae1d4a",
+  "systems/stitcho-chapter-art-v607.js": "12b84dd9d4c97fa8509f3d57bc87d443e4fb655f",
+  "systems/stitcho-encounters-v607.js": "7c27e0e6ce5db5f8fe5db61f62de64c2176446cf",
   "systems/hud-portrait-v606.js": "f05800678591f7c5b1cabd9b8f2f90de6ad9e6e6",
   "systems/kilo-encounters-v606.js": "c346bdd40b286c441996d4790433c8297cd52e2c",
   "systems/kilo-chapter-art-v606.js": "3bbcef81eaeb66ee4633c78d011aa4879761dbfd",
@@ -455,7 +457,7 @@ const PRECACHE_REVISIONS = {
   "characters/identity-v2.js": "1200f339e2612f597607d48dbd6c5419dbe9b60f",
   "characters/anatomical-stride.js": "3a0bb654e3f7d8cc65c28a6c86f07c5bf0169b1d",
   "systems/chapter-encounters.js": "457d07ff55d9fa992e81cefc66a7a80451a4c9f7",
-  "systems/campaign-creature-art.js": "d8fb7db0e93d0ed1c4f3b5510b7699763183f723",
+  "systems/campaign-creature-art.js": "6cc346d74c27075e8f2be6538b5eeaa62b9a0f74",
   "worlds/chapter-vistas.js": "4add1f6b1654dcaf33924bb8a912aef9af2feb22",
   "systems/chapters-lunar-prism-embers.js": "f24c3b1c2e4688f99ea17dceea2d006b31887289",
   "worlds/ohana-crafted-scenes.js": "67c654f2ee9422a6bc1f62a08821f189a7a222c0",
@@ -551,7 +553,7 @@ const PRECACHE_REVISIONS = {
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
   "systems/family-islands.js": "3e2b8366c48f7556f89c35c9efc9a31f700da3a9",
   "systems/hero-combos.js": "f9e8a95a3f3af4e66805c71a1bf1479fbb5a3a25",
-  "systems/campaign-enemies.js": "ebbf2dec3e19c3255c22addf34aa7caaecf48bc2",
+  "systems/campaign-enemies.js": "b779421580eadefc95f54ddee8e62acd373c41ed",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
   "systems/island-springs.js": "c1244e0a82b4ae7db6e4ae66ffa04bc6b1f3437f",
