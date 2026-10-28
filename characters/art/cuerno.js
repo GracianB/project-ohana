@@ -135,16 +135,25 @@ function drawRootedTail(ctx,pose,form,t,rootX,rootY,colors){
  const {swing,lift}=cuernoTailPose(pose,form,t);
  const length=form===4?35:form===3?27:21;
  const strands=form===4?6:form===3?5:4;
- ctx.save();ctx.lineCap="round";ctx.lineJoin="round";
+ // Inercia de resorte: la cola retrasa al cuerpo en frenadas y arranques
+ const run=pose?.state==='run',air=!!pose?.air||pose?.state==='jump'||pose?.state==='fall';
+ const sp=Math.max(0,Math.min(1,Number(pose?.speed)||0));
+ const brake=Math.max(0,Math.min(1,Number(pose?.brake)||0));
+ const springLag=run?(sp*.8+brake*1.4):0;
+ const airSpread=air?3:0;
+ ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
  for(let i=0;i<strands;i++){
-  const endX=rootX-length-swing+(i%2?1.4:0);
+  // Cada hebra tiene un retraso de fase diferente → movimiento orgánico de látigo
+  const lag=i*.28,swingI=swing+springLag*(1+i*.4)+airSpread*(i*.3);
+  const endX=rootX-length-swingI+(i%2?1.4:0);
   const endY=rootY+8+i*2.8-lift;
+  const ctrl1X=rootX-8-lag,ctrl1Y=rootY-10+i*1.2;
+  const ctrl2X=rootX-17-swingI*.4,ctrl2Y=rootY+14+i*1.8-lift*.5;
   ctx.strokeStyle=colors[i%colors.length];
-  ctx.lineWidth=(form===4?4.6:form===3?4.0:3.7)-i*.24;
-  ctx.globalAlpha=.91-i*.045;
-  ctx.beginPath();ctx.moveTo(rootX-i*.65,rootY+i*.64);
-  ctx.bezierCurveTo(rootX-11,rootY-8+i*1.4,
-    rootX-17-swing*.3,rootY+17+i*2-lift*.65,endX,endY);
+  ctx.lineWidth=(form===4?4.8:form===3?4.2:3.8)-i*.26;
+  ctx.globalAlpha=.93-i*.04;
+  ctx.beginPath();ctx.moveTo(rootX-i*.5,rootY+i*.5);
+  ctx.bezierCurveTo(ctrl1X,ctrl1Y,ctrl2X,ctrl2Y,endX,endY);
   ctx.stroke();
  }
  ctx.restore();
@@ -484,29 +493,37 @@ drawCuernoOverlays(ctx,pose,R,1,t,lift,tilt);
 
 // F2 · First foal body, precisely FOUR articulated legs.
 function drawRainbowFoal(ctx,pose,R,t){
-const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
-const phase=Number(pose.phase)||0,beat=Math.sin(phase);
+const TAU=Math.PI*2,run=pose.state==='run',air=!!pose.air||pose.state==='jump'||pose.state==='fall';
+const phase=Number(pose.phase)||0,beat=Math.sin(phase),beat2=Math.sin(phase*2);
 const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
-const hurt=pose.state==="hurt"||pose.state==="dead";
-const cast=pose.state==="cast"||pose.state==="attack";
+const hurt=pose.state==='hurt'||pose.state==='dead';
+const cast=pose.state==='cast'||pose.state==='attack';
 const ritual=cuernoRitualBody(pose,2);
 const intro=cuernoWelcomeAnatomy(pose,2);
-const spring=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(Math.sin(phase*2)):Math.sin(t*.082)*1.35)+(ritual?.lift||0)+intro.lift;
-const ink="#645478",coat="#f9efff",pearl="#e7d9ff";
-const tilt=(air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0)+(ritual?.tilt||0)+intro.tilt;
+const sp=Math.max(0,Math.min(1,Number(pose.speed)||0));
+// Rebote corporal del galope: doble frecuencia (dos impulsos por ciclo)
+const gallopBounce=run?-2.8*Math.max(0,-beat2):0;
+const landSquash=air&&(pose.state==='fall')?.04:0;
+const spring=(Number(pose.bounce)||0)+(run?gallopBounce:Math.sin(t*.082)*1.35)+(ritual?.lift||0)+intro.lift;
+const ink='#645478',coat='#f9efff',pearl='#e7d9ff';
+// Pitch de cabeza hacia adelante en galope, hacia atrás en el aire
+const headPitch=run?-beat*.12*sp:air&&pose.state==='jump'?.08:air?.04:Math.sin(t*.055)*.03;
+const tilt=(air?-.10:0)+(run?-.04*beat:0)+(cast?-.055:0)+headPitch+(ritual?.tilt||0)+intro.tilt;
 ctx.save();ctx.translate(0,spring);ctx.rotate(tilt);
 if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
-const ribbons=["#faadd9","#fbd27e","#91d7ff","#d2b2ff"];
-// All four strands emerge from the croup; no detached tail during the gallop.
+// Squash/stretch en aterrizaje
+if(landSquash>0)ctx.scale(1+landSquash*.5,1-landSquash*.4);
+const ribbons=['#faadd9','#fbd27e','#91d7ff','#d2b2ff'];
+// Cola arraigada a la grupa
 drawRootedTail(ctx,pose,2,t,-29,-40,ribbons);
 function leg(x,clock,far){
 const gait=cuernoLegPose(pose,2,t,clock,far);
 const {reach,kneeLift,hoofLift}=gait;
-const tuck=gait.tuck+(cuernoSoulBeat(pose,2)==="prance"&&!far&&!air?4:0);
+const tuck=gait.tuck+(cuernoSoulBeat(pose,2)==='prance'&&!far&&!air?4:0);
 const kneeX=x+reach*.43+(far?-2:2),kneeY=-14+tuck*.48-kneeLift;
 const hoofX=x+reach+(far?-2:2),hoofY=2-tuck-hoofLift;
-R.limb(ctx,x,-26,kneeX,kneeY,hoofX,hoofY,far?4.4:5.1,far?"#dac6ec":"#f8e4f9",{hand:false});
-ctx.fillStyle=far?"#ad95c7":"#bb9dcc";ctx.strokeStyle=ink;ctx.lineWidth=1.35;
+R.limb(ctx,x,-26,kneeX,kneeY,hoofX,hoofY,far?4.4:5.1,far?'#dac6ec':'#f8e4f9',{hand:false});
+ctx.fillStyle=far?'#ad95c7':'#bb9dcc';ctx.strokeStyle=ink;ctx.lineWidth=1.35;
 ctx.beginPath();ctx.moveTo(hoofX-4.5,hoofY-3);
 ctx.quadraticCurveTo(hoofX+1.5,hoofY-4.8,hoofX+5,hoofY-2);
 ctx.lineTo(hoofX+5,hoofY+2);ctx.lineTo(hoofX-4.5,hoofY+2);
@@ -522,7 +539,7 @@ ctx.quadraticCurveTo(-33,-29,-30,-40);ctx.closePath();ctx.fill();ctx.stroke();
 ctx.fillStyle=pearl;ctx.globalAlpha=.63;ctx.beginPath();
 ctx.ellipse(-10,-30,16,5.5,-.13,0,TAU);ctx.fill();ctx.globalAlpha=1;
 for(let i=0;i<3;i++){
-ctx.strokeStyle=["#f1a7d5","#f5d081","#8bceea"][i];ctx.lineWidth=2.1;
+ctx.strokeStyle=['#f1a7d5','#f5d081','#8bceea'][i];ctx.lineWidth=2.1;
 ctx.beginPath();ctx.moveTo(-24+i*4,-40+i*1.3);
 ctx.quadraticCurveTo(-19+i*4,-36+i*1.2,-14+i*4,-39+i*1.2);ctx.stroke();
 }
@@ -532,39 +549,46 @@ ctx.bezierCurveTo(5,-43,7,-55,12,-65);
 ctx.bezierCurveTo(19,-73,25,-65,26,-57);
 ctx.bezierCurveTo(24,-46,19,-37,15,-31);
 ctx.quadraticCurveTo(11,-28,3,-33);ctx.closePath();ctx.fill();ctx.stroke();
+// Crin con arrastre diferencial por hebra — física de látigo
 for(let i=0;i<5;i++){
 const flutter=cuernoManePose(pose,2,t,i);
-ctx.strokeStyle=["#ffc0e0","#ffd98a","#a1e6db","#9dcbff","#d1aeff"][i];
-ctx.lineWidth=3.3-i*.19;ctx.lineCap="round";
+const windDrag=run?sp*(-1.8-i*.5):0; // más arrastre en velocidad
+ctx.strokeStyle=['#ffc0e0','#ffd98a','#a1e6db','#9dcbff','#d1aeff'][i];
+ctx.lineWidth=3.3-i*.19;ctx.lineCap='round';
 ctx.beginPath();ctx.moveTo(9+i*.7,-64+i*4);
-ctx.bezierCurveTo(0-i*1.5,-68+i*4,-4+flutter-i,-59+i*5,-9+flutter-i,-64+i*5);ctx.stroke();
+ctx.bezierCurveTo(0-i*1.5,-68+i*4,-4+flutter+windDrag-i,-59+i*5,-9+flutter+windDrag-i,-64+i*5);ctx.stroke();
 }
 leg(-16,Math.PI*.04,false);leg(15,Math.PI*1.04,false);
-blendLegRoots(ctx,-16,15,-27,coat,"#d5c0e5");
+blendLegRoots(ctx,-16,15,-27,coat,'#d5c0e5');
+// Orejas: se pliegan atrás al correr, se yerguen al observar
+const earBack=run?sp*.28:0,earAlert=cuernoSoulBeat(pose,2)==='curious'?.12:0;
 for(const side of [-1,1]){
 const x=22+side*6;
-ctx.fillStyle="#ffecfa";ctx.strokeStyle=ink;ctx.lineWidth=1.6;
-ctx.beginPath();ctx.moveTo(x-3,-68);
-ctx.quadraticCurveTo(x+side*3,-84,x+side*7,-70);
-ctx.quadraticCurveTo(x+2,-65,x-3,-68);ctx.fill();ctx.stroke();
+const eX=x+side*(earBack*4),eY=-68-(earAlert*4);
+ctx.fillStyle='#ffecfa';ctx.strokeStyle=ink;ctx.lineWidth=1.6;
+ctx.beginPath();ctx.moveTo(x-3,eY);
+ctx.quadraticCurveTo(eX+side*3-side*earBack*3,eY-14,eX+side*7-side*earBack*5,eY+2);
+ctx.quadraticCurveTo(x+2,eY+3,x-3,eY);ctx.fill();ctx.stroke();
 }
-ctx.fillStyle="#fff5fb";ctx.strokeStyle=ink;ctx.lineWidth=2.5;
+ctx.fillStyle='#fff5fb';ctx.strokeStyle=ink;ctx.lineWidth=2.5;
 ctx.beginPath();ctx.ellipse(27,-62,11.6,10,-.12,0,TAU);ctx.fill();ctx.stroke();
 ctx.beginPath();ctx.moveTo(31,-61);
 ctx.bezierCurveTo(40,-63,43,-56,42,-52);
 ctx.quadraticCurveTo(36,-47,29,-53);ctx.closePath();ctx.fill();ctx.stroke();
-R.blush(ctx,34,-56,2.3,"#ffc8e6");
-const mood=hurt?"closed":cast?"angry":pose.state==="victory"?"happy":"normal";
-R.eye(ctx,26,-64,4.4,pose,{iris:"#8862b9",mood});
-R.mouth(ctx,36,-51,3.4,pose.state==="victory"?"happy":cast?"grin":"smile");
-ctx.fillStyle="#8b72a0";ctx.beginPath();ctx.arc(40,-56,1.25,0,TAU);ctx.fill();
-ctx.save();ctx.translate(24,-71);ctx.rotate((cast?-.12:0)+Math.sin(t*.085)*.018);
-horn(ctx,29,"#dab3ff",Math.sin(t*.11)*.29);ctx.restore();
-if(cast||pose.state==="victory"||flourish>.2)
-R.sparkle(ctx,25,-106,3.1+2.4*Math.max(flourish,.18),"#ffe0a5");
-if(run&&Number(pose.speed)>.25){
-ctx.save();ctx.globalAlpha=.65;ctx.strokeStyle="#ffdbb9";ctx.lineWidth=1.4;
-for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(-42-i*8,-14-i*8);ctx.lineTo(-51-i*8,-13-i*8);ctx.stroke();}
+R.blush(ctx,34,-56,2.3,'#ffc8e6');
+const mood=hurt?'closed':cast?'angry':pose.state==='victory'?'happy':'normal';
+R.eye(ctx,26,-64,4.4,pose,{iris:'#8862b9',mood});
+// Pupila mira hacia adelante al correr
+if(run&&sp>.3&&!hurt){ctx.fillStyle='#7050a0';ctx.globalAlpha=.7;ctx.beginPath();ctx.arc(28,-63.5,2.2,0,TAU);ctx.fill();ctx.globalAlpha=1;}
+R.mouth(ctx,36,-51,3.4,pose.state==='victory'?'happy':cast?'grin':'smile');
+ctx.fillStyle='#8b72a0';ctx.beginPath();ctx.arc(40,-56,1.25,0,TAU);ctx.fill();
+ctx.save();ctx.translate(24,-71);ctx.rotate((cast?-.12:0)+Math.sin(t*.085)*.018+(headPitch*.4));
+horn(ctx,29,'#dab3ff',Math.sin(t*.11)*.29);ctx.restore();
+if(cast||pose.state==='victory'||flourish>.2)
+R.sparkle(ctx,25,-106,3.1+2.4*Math.max(flourish,.18),'#ffe0a5');
+if(run&&sp>.25){
+ctx.save();ctx.globalAlpha=.45+sp*.2;ctx.strokeStyle='#ffdbb9';ctx.lineWidth=1.4;
+for(let i=0;i<3;i++){const yOff=-14-i*8,xOff=-42-i*8;ctx.beginPath();ctx.moveTo(xOff,yOff);ctx.lineTo(xOff-12-sp*6,yOff+1);ctx.stroke();}
 ctx.restore();
 }
 ctx.restore();
@@ -573,28 +597,34 @@ drawCuernoOverlays(ctx,pose,R,2,t,spring,tilt);
 
 // F3 Unicornio Estelar: true adult anatomy, separate four-beat gallop and a living mane.
 function drawStellarUnicorn(ctx,pose,R,t){
-const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
+const TAU=Math.PI*2,run=pose.state==='run',air=!!pose.air||pose.state==='jump'||pose.state==='fall';
 const phase=Number(pose.phase)||0,speed=Math.max(0,Math.min(1.4,Number(pose.speed)||0));
 const gallop=run?Math.sin(phase):0,flight=air?1:0;
+const beat2=run?Math.sin(phase*2):0; // doble golpe por ciclo
 const ritual=cuernoRitualBody(pose,3);
 const intro=cuernoWelcomeAnatomy(pose,3);
-const bounce=(Number(pose.bounce)||0)+(run?-2.7*Math.abs(Math.sin(phase*2)):Math.sin(t*.07)*1.1)+(ritual?.lift||0)+intro.lift;
-const rear=-24,front=13,coat="#e7f4ff",ink="#475075",shade="#b6d2f3",gold="#ffe49e";
+// Rebote del galope: dos impulsos por ciclo (trote de 4 patas real)
+const gallopBounce=run?-3.0*Math.max(0,-beat2)*speed:0;
+const breathe=Math.sin(t*.048)*1.6; // respiración en idle
+const bounce=(Number(pose.bounce)||0)+(run?gallopBounce:breathe)+(ritual?.lift||0)+intro.lift;
+const rear=-24,front=13,coat='#e7f4ff',ink='#475075',shade='#b6d2f3',gold='#ffe49e';
 const flare=Math.max(0,Math.min(1,Number(pose.flourish)||0));
 const flourish=Math.sin(Math.PI*flare);
-const angry=pose.state==="attack"||pose.state==="cast";
-const tilt=(air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0)+(ritual?.tilt||0)+intro.tilt;
+const angry=pose.state==='attack'||pose.state==='cast';
+// Cabeceo: baja en el impulso del galope, sube en el aire
+const headNod=run?gallop*.09*speed:air&&pose.state==='jump'?.06:air?-.04:Math.sin(t*.048)*.02;
+const tilt=(air?-.075:0)+(run?-.022*gallop:0)+(cuernoSoulBeat(pose,3)==='stargaze'?-.04:0)+headNod+(ritual?.tilt||0)+intro.tilt;
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
 if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
-drawRootedTail(ctx,pose,3,t,-34,-45,["#b8ddff","#d6b4f4","#ffb9d4","#ffe6a1","#b3f0e7"]);
+drawRootedTail(ctx,pose,3,t,-34,-45,['#b8ddff','#d6b4f4','#ffb9d4','#ffe6a1','#b3f0e7']);
 // Hooves and knees follow four distinct gallop timings. Rear legs paint behind the torso.
 function limb(x,clock,back){
 const {reach,tuck,kneeLift,hoofLift}=cuernoLegPose(pose,3,t,clock,back);
 const bend=4+kneeLift*2;
 const kneeX=x+reach*.42+(back?-3:4),kneeY=-18+tuck*.45-kneeLift*.3;
 const hoofX=x+reach+(back?-3:3),hoofY=5-tuck-hoofLift;
-R.limb(ctx,x,-32,kneeX,kneeY,hoofX,hoofY,back?5.6:6.2,back?"#b6cee9":"#d2e4fc",{hand:false});
-ctx.fillStyle=back?"#8c9ac0":"#9eb1d2";ctx.strokeStyle=ink;ctx.lineWidth=1.7;
+R.limb(ctx,x,-32,kneeX,kneeY,hoofX,hoofY,back?5.6:6.2,back?'#b6cee9':'#d2e4fc',{hand:false});
+ctx.fillStyle=back?'#8c9ac0':'#9eb1d2';ctx.strokeStyle=ink;ctx.lineWidth=1.7;
 ctx.beginPath();ctx.moveTo(hoofX-5.5,hoofY-3);
 ctx.quadraticCurveTo(hoofX+1,hoofY-6-bend*.05,hoofX+6,hoofY-2);
 ctx.lineTo(hoofX+6,hoofY+3);ctx.lineTo(hoofX-5.5,hoofY+3);
@@ -608,6 +638,12 @@ ctx.bezierCurveTo(-29,-58,-12,-56,5,-49);
 ctx.bezierCurveTo(19,-51,27,-41,22,-31);
 ctx.bezierCurveTo(16,-20,5,-22,-5,-23);
 ctx.bezierCurveTo(-18,-19,-35,-27,-37,-46);ctx.closePath();ctx.fill();ctx.stroke();
+// Expansión pectoral de respiración visible en idle
+if(!run&&!air){
+ const ribswell=Math.sin(t*.048)*.5;
+ ctx.save();ctx.globalAlpha=.18+ribswell*.12;ctx.fillStyle=shade;ctx.beginPath();
+ ctx.ellipse(-10,-33,22+ribswell,8+ribswell*.4,-.1,0,TAU);ctx.fill();ctx.restore();
+}
 ctx.save();ctx.globalAlpha=.52;ctx.fillStyle=shade;ctx.beginPath();
 ctx.ellipse(-12,-32,20,7,-.13,0,TAU);ctx.fill();ctx.restore();
 // V74: wings are born in F3, not first in the final form.
@@ -616,14 +652,13 @@ function stellarWing(far){
  const flutter=wingMotion.flap*(far?.72:1);
  ctx.save();ctx.translate(far?-17:-6,-48);
  ctx.rotate(-.13-spread*.20+wingMotion.hinge*(far?.6:1));
- // F3 plumes must be discernible from the pale foal's white coat.
  ctx.fillStyle=far?"#aebce0":"#b0d4f2";ctx.strokeStyle="#617ba9";
  ctx.globalAlpha=far?.68:.93;ctx.lineWidth=2;
  ctx.beginPath();ctx.moveTo(0,0);
  ctx.bezierCurveTo(-19,-10,-31-spread*11,-27,-39,-29-spread*21+flutter);
  ctx.bezierCurveTo(-50,-47-spread*22,-33,-56-spread*20,-21,-46-spread*13);
  ctx.bezierCurveTo(-10,-26,5,-16,8,-3);ctx.closePath();ctx.fill();ctx.stroke();
- for(let i=0;i<4;i++){ctx.strokeStyle=["#ffd9ea","#c8d4ff","#bbece6","#ffe3b5"][i];
+ for(let i=0;i<4;i++){ctx.strokeStyle=['#ffd9ea','#c8d4ff','#bbece6','#ffe3b5'][i];
  ctx.lineWidth=2.5-i*.3;ctx.beginPath();ctx.moveTo(-2+i*2,-5-i*4);
  ctx.quadraticCurveTo(-23-i*3,-25-spread*10,-29-i*3,-29-spread*(25-i*5)+flutter);
  ctx.stroke();}
@@ -636,55 +671,67 @@ ctx.bezierCurveTo(3,-52,9,-70,13,-78);
 ctx.bezierCurveTo(19,-88,30,-80,32,-69);
 ctx.bezierCurveTo(29,-56,26,-44,21,-35);
 ctx.quadraticCurveTo(13,-28,4,-35);ctx.closePath();ctx.fill();ctx.stroke();
-// A constellation on the flank: discreet embroidered stars in motion.
-ctx.fillStyle="#8ba8dc";
+// Constelación en el flanco con estrellas que parpadean
+ctx.fillStyle='#8ba8dc';
 for(const [x,y] of [[-24,-43],[-14,-39],[-5,-44]]){
-ctx.beginPath();ctx.arc(x,y,1.4,0,TAU);ctx.fill();
+ ctx.globalAlpha=.6+Math.sin(t*.07+x*.1)*.3;
+ ctx.beginPath();ctx.arc(x,y,1.4,0,TAU);ctx.fill();
 }
-ctx.strokeStyle="#a1bde5";ctx.lineWidth=1.2;ctx.beginPath();
+ctx.globalAlpha=1;
+ctx.strokeStyle='#a1bde5';ctx.lineWidth=1.2;ctx.beginPath();
 ctx.moveTo(-24,-43);ctx.lineTo(-14,-39);ctx.lineTo(-5,-44);ctx.stroke();
 stellarWing(false);
-drawWingScapula(ctx,-6,-48,"#d0e7f9","#effaff");
+drawWingScapula(ctx,-6,-48,'#d0e7f9','#effaff');
 limb(rear+5,Math.PI*.02,false);
 limb(front+6,Math.PI*1.02,false);
-blendLegRoots(ctx,rear+5,front+6,-33,coat,"#9cbeda");
+blendLegRoots(ctx,rear+5,front+6,-33,coat,'#9cbeda');
+// Crin con arrastre diferencial: cada hebra más pesada que la anterior
 for(let i=0;i<5;i++){
 const drag=cuernoManePose(pose,3,t,i);
-ctx.strokeStyle=["#b1e7ff","#e0c0fb","#ffb4d5","#ffe3a3","#c5d8ff"][i];
-ctx.lineWidth=5.3-i*.24;ctx.lineCap="round";
+const windDrag=run?speed*(-2.2-i*.6):0;
+ctx.strokeStyle=['#b1e7ff','#e0c0fb','#ffb4d5','#ffe3a3','#c5d8ff'][i];
+ctx.lineWidth=5.3-i*.24;ctx.lineCap='round';
 ctx.beginPath();ctx.moveTo(9+i*.8,-78+i*4);
-ctx.bezierCurveTo(1-i*2,-82+i*5,-7-i*2+drag,-68+i*6,-18-i*2+drag,-75+i*5);
+ctx.bezierCurveTo(1-i*2,-82+i*5,-7-i*2+drag+windDrag,-68+i*6,-18-i*2+drag+windDrag,-75+i*5);
 ctx.stroke();
 }
+// Orejas: se pliegan atrás al galopar, alerta en stargaze
+const earBack=run?speed*.35:0,earAlert=cuernoSoulBeat(pose,3)==='stargaze'?.14:0;
 for(const side of [-1,1]){
 const x=20+side*8;
-ctx.fillStyle="#ecf4ff";ctx.strokeStyle=ink;ctx.lineWidth=1.8;
-ctx.beginPath();ctx.moveTo(x-4,-76);ctx.quadraticCurveTo(x+side*4,-94,x+side*9,-78);
-ctx.quadraticCurveTo(x+3,-73,x-4,-76);ctx.fill();ctx.stroke();
+const eTilt=-earBack*side*.22;
+ctx.save();ctx.translate(x,-76);ctx.rotate(eTilt);
+ctx.fillStyle='#ecf4ff';ctx.strokeStyle=ink;ctx.lineWidth=1.8;
+ctx.beginPath();ctx.moveTo(-4,0);
+ctx.quadraticCurveTo(side*(3+earAlert*4),-(18+earAlert*6),side*(9+earAlert*3),2-earBack*3);
+ctx.quadraticCurveTo(3,-3,-4,0);ctx.fill();ctx.stroke();
+ctx.restore();
 }
-ctx.fillStyle="#ecf4ff";ctx.strokeStyle=ink;ctx.lineWidth=3;
+ctx.fillStyle='#ecf4ff';ctx.strokeStyle=ink;ctx.lineWidth=3;
 ctx.beginPath();ctx.ellipse(30,-72,14,13,-.17,0,TAU);ctx.fill();ctx.stroke();
 ctx.beginPath();ctx.moveTo(33,-70);ctx.bezierCurveTo(43,-73,47,-65,46,-59);
 ctx.quadraticCurveTo(41,-52,31,-56);ctx.closePath();ctx.fill();ctx.stroke();
-R.blush(ctx,37,-65,2.6,"#f2afcf");
-const mood=pose.state==="hurt"||pose.state==="dead"?"closed":angry?"angry":pose.state==="victory"?"happy":"normal";
-R.eye(ctx,29,-73,5,pose,{iris:"#5667ad",mood});
-R.mouth(ctx,40,-56,4.2,pose.state==="victory"?"happy":angry?"grin":"smile");
-ctx.fillStyle="#7c7ca3";ctx.beginPath();ctx.arc(43,-64,1.8,0,TAU);ctx.fill();
+R.blush(ctx,37,-65,2.6,'#f2afcf');
+const mood=pose.state==='hurt'||pose.state==='dead'?'closed':angry?'angry':pose.state==='victory'?'happy':'normal';
+R.eye(ctx,29,-73,5,pose,{iris:'#5667ad',mood});
+// Pupila direccional
+if(run&&speed>.3){ctx.fillStyle='#3a4a8c';ctx.globalAlpha=.65;ctx.beginPath();ctx.arc(31,-72.5,2.8,0,TAU);ctx.fill();ctx.globalAlpha=1;}
+R.mouth(ctx,40,-56,4.2,pose.state==='victory'?'happy':angry?'grin':'smile');
+ctx.fillStyle='#7c7ca3';ctx.beginPath();ctx.arc(43,-64,1.8,0,TAU);ctx.fill();
 ctx.save();ctx.translate(25,-83);
-ctx.rotate(-.06+(angry?-.12*Math.sin(Math.PI*(Number(pose.cast)||Number(pose.atk)||0)):0));
-horn(ctx,37,"#9ad7ff",Math.sin(t*.12)*.48);
+ctx.rotate(-.06+(angry?-.12*Math.sin(Math.PI*(Number(pose.cast)||Number(pose.atk)||0)):0)+(headNod*.5));
+horn(ctx,37,'#9ad7ff',Math.sin(t*.12)*.48);
 ctx.restore();
-if(angry||pose.state==="victory"){
-R.sparkle(ctx,25,-124,5+2*Math.sin(t*.07),"#ffdfa2");
+if(angry||pose.state==='victory'){
+R.sparkle(ctx,25,-124,5+2*Math.sin(t*.07),'#ffdfa2');
 }
 if(run&&speed>.23){
-ctx.save();ctx.strokeStyle=gold;ctx.lineWidth=1.8;ctx.globalAlpha=.35+.25*speed;
-for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-47-i*9,-25-i*9);ctx.lineTo(-61-i*9,-24-i*9);ctx.stroke();}
+ctx.save();ctx.strokeStyle=gold;ctx.lineWidth=1.8;ctx.globalAlpha=.35+.28*speed;
+for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-47-i*9,-25-i*9);ctx.lineTo(-61-i*9*speed,-24-i*9);ctx.stroke();}
 ctx.restore();
 }
 if(flourish>.05){
-ctx.save();ctx.globalAlpha=.38*flourish;ctx.strokeStyle="#f8d0ff";ctx.lineWidth=2;
+ctx.save();ctx.globalAlpha=.38*flourish;ctx.strokeStyle='#f8d0ff';ctx.lineWidth=2;
 ctx.beginPath();ctx.arc(25,-121,9+18*flourish,-.6,2.7);ctx.stroke();ctx.restore();
 }
 ctx.restore();
@@ -693,33 +740,42 @@ drawCuernoOverlays(ctx,pose,R,3,t,bounce,tilt);
 
 // V74 F4: elegant OBSIDIAN BLACK unicorn, not a scaled-up white foal.
 function drawAuroraUnicorn(ctx,pose,R,t){
-const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
-const cast=pose.state==="cast"||pose.state==="attack",triumph=pose.state==="victory";
-const hurt=pose.state==="hurt"||pose.state==="dead";
+const TAU=Math.PI*2,run=pose.state==='run',air=!!pose.air||pose.state==='jump'||pose.state==='fall';
+const cast=pose.state==='cast'||pose.state==='attack',triumph=pose.state==='victory';
+const hurt=pose.state==='hurt'||pose.state==='dead';
 const phase=Number(pose.phase)||0,beat=Math.sin(phase),speed=Math.max(0,Number(pose.speed)||0);
+const beat2=run?Math.sin(phase*2):0;
 const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
 const soul=cuernoSoulBeat(pose,4);
 const magic=cuernoMagicPose(pose,4);
 const wingMotion=cuernoWingPose(pose,4,t),unfold=wingMotion.open;
 const ink="#a69ab6",coat="#1b1a28",shadow="#39364e",gold="#f8d994";
-const colors=["#ffe1be","#f7bddf","#e5c7f2","#f2dba9","#d9c9ff","#fff2bd"];
+const colors=['#ffe1be','#f7bddf','#e5c7f2','#f2dba9','#d9c9ff','#fff2bd'];
 const ritual=cuernoRitualBody(pose,4);
 const intro=cuernoWelcomeAnatomy(pose,4);
-const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8)+(ritual?.lift||0)+intro.lift;
-const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0)+(ritual?.tilt||0)+intro.tilt;
+// Respiración real idle: pecho se expande y cuello oscila
+const breathCycle=Math.sin(t*.042);
+const breathX=run||air?0:breathCycle*.012;
+const breathY=run||air?0:breathCycle*.008;
+// Galope doble-impulso: cuatro tiempos reales
+const gallopBounce=run?-2.8*Math.max(0,-beat2)*speed:0;
+const idleBreathe=breathCycle*.9;
+const bounce=(Number(pose.bounce)||0)+(run?gallopBounce:idleBreathe)+(ritual?.lift||0)+intro.lift;
+// Cabeceo del cuello: hacia adelante en trote, levanta en salto
+const headNod=run?beat*.07*speed:air&&pose.state==='jump'?.09:air?-.05:breathCycle*.025;
+const tilt=(air?-.065:0)+(run?-.024*beat:0)+(cast?-.04:0)+(soul==='bow'?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==='sneeze'?-.06:0)+headNod+(ritual?.tilt||0)+intro.tilt;
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
-if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
-// V75: root the rainbow tail beneath the obsidian croup. Its arc stays inside
-// a small envelope during runs, jumps and cinematic poses, never flying away.
+if(intro.active)ctx.scale(intro.bodyX+breathX,intro.bodyY+breathY);
+// V75: root the rainbow tail beneath the obsidian croup.
 drawRootedTail(ctx,pose,4,t,-40,-44,colors);
-// Translucent aurora pinions: folded while resting, unfolding for jumps and casting.
+// Translucent aurora pinions
 function wing(far){
 const flap=wingMotion.flap*(far?.72:1)+(cast?-1.2:0);
 ctx.save();ctx.translate(far?-12:0,-52);
 ctx.rotate((far?-.24:.05)-unfold*.24+wingMotion.hinge*(far?.7:1));
 ctx.globalAlpha=far?.45:.68;
-ctx.fillStyle=far?"#373653":"#343650";
-ctx.strokeStyle=far?"#8f82ba":"#b5a6cb";ctx.lineWidth=1.6;
+ctx.fillStyle=far?'#373653':'#343650';
+ctx.strokeStyle=far?'#8f82ba':'#b5a6cb';ctx.lineWidth=1.6;
 ctx.beginPath();ctx.moveTo(0,0);
 ctx.bezierCurveTo(-9,-14,-27,-25-unfold*12,-34,-34-unfold*36+flap);
 ctx.bezierCurveTo(-48,-60-unfold*32,-34,-80-unfold*20,-20,-62-unfold*28);
@@ -733,29 +789,31 @@ ctx.quadraticCurveTo(-24-spread,-30-unfold*13,-23-spread,tipY);ctx.stroke();
 ctx.restore();
 }
 wing(true);
-// Four physically independent legs, different from the young foal and stellar gallop.
+// Four physically independent legs
 function leg(x,clock,far){
 const {reach,tuck,kneeLift,hoofLift}=cuernoLegPose(pose,4,t,clock,far);
 const kneeX=x+reach*.48+(far?-4:4),kneeY=-17+tuck*.5-kneeLift*.3;
 const hoofX=x+reach+(far?-5:4),hoofY=6-tuck-hoofLift;
-R.limb(ctx,x,-33,kneeX,kneeY,hoofX,hoofY,far?5.8:6.5,far?"#363247":"#272431",{hand:false});
-ctx.fillStyle=far?"#57516b":"#66576d";ctx.strokeStyle=ink;ctx.lineWidth=1.6;
+R.limb(ctx,x,-33,kneeX,kneeY,hoofX,hoofY,far?5.8:6.5,far?'#363247':'#272431',{hand:false});
+ctx.fillStyle=far?'#57516b':'#66576d';ctx.strokeStyle=ink;ctx.lineWidth=1.6;
 ctx.beginPath();ctx.moveTo(hoofX-5.8,hoofY-3);
 ctx.quadraticCurveTo(hoofX+.5,hoofY-6,hoofX+6,hoofY-2);
 ctx.lineTo(hoofX+6,hoofY+3);ctx.lineTo(hoofX-5.8,hoofY+3);
 ctx.closePath();ctx.fill();ctx.stroke();
+// Línea dorada en los cascos F4
 ctx.strokeStyle=gold;ctx.lineWidth=1.1;ctx.beginPath();
 ctx.moveTo(hoofX-4,hoofY+1);ctx.lineTo(hoofX+4,hoofY+1);ctx.stroke();
 }
 leg(-30,Math.PI*.67,true);leg(12,Math.PI*1.72,true);
-// Sleek long barrel with a defined croup and shoulder, no spherical body.
+// Sleek long barrel — expansión de costillas en idle
 ctx.fillStyle=coat;ctx.strokeStyle=ink;ctx.lineWidth=2.9;
+const ribW=run||air?0:breathCycle*.4; // costillas se expanden al respirar
 ctx.beginPath();ctx.moveTo(-43,-45);
 ctx.bezierCurveTo(-37,-62,-18,-61,-3,-53);
-ctx.bezierCurveTo(17,-57,30,-45,23,-30);
+ctx.bezierCurveTo(17,-57,30+ribW,-45,23,-30);
 ctx.bezierCurveTo(10,-22,-8,-23,-26,-26);
 ctx.bezierCurveTo(-39,-27,-46,-37,-43,-45);ctx.closePath();ctx.fill();ctx.stroke();
-// An indigo rim reads as BLACK fur even when the sky and UI are dark.
+// An indigo rim reads as BLACK fur
 ctx.save();ctx.globalAlpha=.7;ctx.lineWidth=1.7;ctx.strokeStyle="#a7a1d8";
 ctx.beginPath();ctx.moveTo(-39,-46);
 ctx.bezierCurveTo(-30,-58,-16,-59,-4,-52);
@@ -764,81 +822,104 @@ ctx.restore();
 ctx.fillStyle=shadow;ctx.globalAlpha=.46;ctx.beginPath();
 ctx.ellipse(-11,-31,27,6,-.06,0,TAU);ctx.fill();ctx.globalAlpha=1;
 // An opalescent embroidery on Aurora's flank, never a second drawn character.
-ctx.save();ctx.strokeStyle="#a998cb";ctx.lineWidth=1.3;ctx.globalAlpha=.66;
+ctx.save();ctx.strokeStyle='#a998cb';ctx.lineWidth=1.3;ctx.globalAlpha=.66;
 for(let i=0;i<3;i++){
  ctx.beginPath();ctx.moveTo(-27+i*9,-48+i*.7);
  ctx.quadraticCurveTo(-24+i*9,-44+i*.5,-20+i*9,-47+i*.5);ctx.stroke();
 }
 ctx.restore();
-// The flanks carry their own narrow starmap, not a ring of visual clutter.
-ctx.strokeStyle="#c2a2d9";ctx.lineWidth=1.5;ctx.beginPath();
+// Starmap con estrellas parpadeantes
+ctx.strokeStyle='#c2a2d9';ctx.lineWidth=1.5;ctx.beginPath();
 ctx.moveTo(-28,-45);ctx.lineTo(-18,-40);ctx.lineTo(-9,-46);ctx.lineTo(0,-40);ctx.stroke();
 for(const [x,y] of [[-28,-45],[-18,-40],[-9,-46],[0,-40]]){
+ctx.globalAlpha=.5+Math.sin(t*.09+x*.08)*.45;
 ctx.fillStyle=gold;ctx.beginPath();ctx.arc(x,y,1.7,0,TAU);ctx.fill();
 }
+ctx.globalAlpha=1;
 // Proud swan-neck and true chest, joining the mature equine body organically.
 // The swan-neck tapers from chest to poll: two unequal S-curves, no rectangle.
+const neckSway=run||air?0:breathCycle*.8;
 ctx.fillStyle=coat;ctx.strokeStyle=ink;ctx.lineWidth=2.8;
 ctx.beginPath();ctx.moveTo(3,-34);
-ctx.bezierCurveTo(5,-49,6,-71,22,-85);
+ctx.bezierCurveTo(5+neckSway,-49,6+neckSway,-71,22,-85);
 ctx.bezierCurveTo(27,-91,35,-88,35,-79);
 ctx.bezierCurveTo(37,-70,29,-65,26,-56);
 ctx.bezierCurveTo(22,-45,29,-38,26,-31);
 ctx.quadraticCurveTo(13,-25,3,-34);ctx.closePath();ctx.fill();ctx.stroke();
 ctx.save();ctx.strokeStyle="#b1a5d0";ctx.lineWidth=1.7;ctx.globalAlpha=.8;
 ctx.beginPath();ctx.moveTo(9,-42);ctx.bezierCurveTo(14,-51,15,-67,22,-76);ctx.stroke();
-// The reflected moon separates the throat and curved chest, no rectangular slab.
-ctx.strokeStyle="#6d668c";ctx.lineWidth=1.1;ctx.globalAlpha=.56;
+ctx.strokeStyle='#6d668c';ctx.lineWidth=1.1;ctx.globalAlpha=.56;
 ctx.beginPath();ctx.moveTo(24,-57);ctx.bezierCurveTo(19,-47,26,-38,20,-32);ctx.stroke();
 ctx.restore();
 wing(false);
-drawWingScapula(ctx,0,-52,"#343347","#c6b7dc");
+drawWingScapula(ctx,0,-52,'#343347','#c6b7dc');
 leg(-20,Math.PI*.03,false);leg(20,Math.PI*1.04,false);
-blendLegRoots(ctx,-20,20,-34,coat,"#8f7ea5");
-// Seven locks of iridescent mane: reactive but bounded.
+blendLegRoots(ctx,-20,20,-34,coat,'#8f7ea5');
+// Siete mechones de crin con arrastre diferencial en galope
 for(let i=0;i<7;i++){
 const drag=cuernoManePose(pose,4,t,i);
+const windDrag=run?speed*(-2.5-i*.55):0;
 ctx.strokeStyle=colors[(i+1)%colors.length];ctx.lineWidth=5.8-i*.40;
-ctx.lineCap="round";ctx.beginPath();ctx.moveTo(17+i*.75,-83+i*3.9);
-ctx.bezierCurveTo(7-i*1.6,-94+i*5,-8-i*2+drag,-70+i*5,-23-i*2+drag,-83+i*5);
+ctx.lineCap='round';ctx.beginPath();ctx.moveTo(17+i*.75,-83+i*3.9);
+ctx.bezierCurveTo(7-i*1.6,-94+i*5,-8-i*2+drag+windDrag,-70+i*5,-23-i*2+drag+windDrag,-83+i*5);
 ctx.stroke();
 }
-// Expressive adult head: ear silhouette, broad forehead, proper equine muzzle.
+// Orejas expresivas: plegadas al galopar, alertas en idle, atrás en ataque
+const earBack=run?speed*.38:cast?.5:0;
+const earAlert=soul==='stargaze'||soul==='curious'?.16:triumph?.08:0;
 for(const side of [-1,1]){
-const x=28+side*8;ctx.fillStyle="#292634";ctx.strokeStyle=ink;ctx.lineWidth=1.9;
-ctx.beginPath();ctx.moveTo(x-4,-81);ctx.quadraticCurveTo(x+side*5,-101,x+side*9,-84);
-ctx.quadraticCurveTo(x+2,-77,x-4,-81);ctx.fill();ctx.stroke();
+const x=28+side*8;
+const eTilt=-earBack*side*.24+earAlert*side*.06;
+ctx.save();ctx.translate(x,-81);ctx.rotate(eTilt);
+ctx.fillStyle='#292634';ctx.strokeStyle=ink;ctx.lineWidth=1.9;
+ctx.beginPath();ctx.moveTo(-4,0);
+ctx.quadraticCurveTo(side*(5+earAlert*3),-(20+earAlert*7),side*(9+earAlert*3),-earBack*3);
+ctx.quadraticCurveTo(2,-2,-4,0);ctx.fill();ctx.stroke();
+// Pelaje interior de la oreja
+if(!hurt){ctx.fillStyle='#3a2840';ctx.globalAlpha=.6;ctx.beginPath();
+ctx.moveTo(-2,0);ctx.quadraticCurveTo(side*3,-(12+earAlert*4),side*(6+earAlert*2),-earBack*2);
+ctx.quadraticCurveTo(1,-1,-2,0);ctx.fill();ctx.globalAlpha=1;}
+ctx.restore();
 }
-ctx.fillStyle="#292735";ctx.strokeStyle="#c1b3d7";ctx.lineWidth=2.5;
+ctx.fillStyle='#292735';ctx.strokeStyle="#c1b3d7";ctx.lineWidth=2.5;
 ctx.beginPath();ctx.ellipse(37,-77,14.5,13,-.12,0,TAU);ctx.fill();ctx.stroke();
-ctx.fillStyle="#3e3648";ctx.beginPath();ctx.moveTo(39,-75);
+ctx.fillStyle='#3e3648';ctx.beginPath();ctx.moveTo(39,-75);
 ctx.bezierCurveTo(53,-78,56,-68,53,-62);
 ctx.quadraticCurveTo(48,-57,38,-61);ctx.closePath();ctx.fill();ctx.stroke();
-// A cheekbone and soft muzzle bridge give the black profile an actual face.
-ctx.save();ctx.strokeStyle="#aa8fae";ctx.globalAlpha=.42;ctx.lineWidth=1.3;
+ctx.save();ctx.strokeStyle='#aa8fae';ctx.globalAlpha=.42;ctx.lineWidth=1.3;
 ctx.beginPath();ctx.moveTo(41,-71);ctx.quadraticCurveTo(48,-72,51,-67);ctx.stroke();
 ctx.beginPath();ctx.moveTo(13,-40);ctx.quadraticCurveTo(20,-38,22,-33);ctx.stroke();
 ctx.restore();
-R.blush(ctx,45,-68,2.0,"#bb7d99");
-R.eye(ctx,36,-79,6.2,pose,{iris:"#e6b875",mood:hurt?"closed":triumph?"happy":"normal"});
-R.mouth(ctx,48,-61,4.1,soul==="sneeze"?"o":magic?.slot===3?"smile":triumph?"happy":cast?"grin":"smile");
-ctx.fillStyle="#e7c9e2";ctx.beginPath();ctx.arc(51,-69,1.8,0,TAU);ctx.fill();
-// A crown-horn rises naturally from the brow with visible spiral relief.
-ctx.save();ctx.translate(33,-90);ctx.rotate(-.085+(cast?-.08:0));
-ctx.fillStyle="#fff5ce";ctx.strokeStyle="#9e9bc1";ctx.lineWidth=1.7;
+R.blush(ctx,45,-68,2.0,'#bb7d99');
+const eyeMood=hurt?'closed':triumph?'happy':'normal';
+R.eye(ctx,36,-79,6.2,pose,{iris:'#e6b875',mood:eyeMood});
+// Pupila dorada que sigue la dirección de movimiento
+if(!hurt){
+ const pupilOff=run?speed*2.5:(cast?.8:0);
+ ctx.fillStyle='#b8902a';ctx.globalAlpha=.55;ctx.beginPath();
+ ctx.arc(37+pupilOff,-78.5,3.2,0,TAU);ctx.fill();ctx.globalAlpha=1;
+ // Reflejo especular
+ ctx.fillStyle='#fffcec';ctx.globalAlpha=.7;ctx.beginPath();
+ ctx.arc(35+pupilOff*.3,-80,1.4,0,TAU);ctx.fill();ctx.globalAlpha=1;
+}
+R.mouth(ctx,48,-61,4.1,soul==='sneeze'?'o':magic?.slot===3?'smile':triumph?'happy':cast?'grin':'smile');
+ctx.fillStyle='#e7c9e2';ctx.beginPath();ctx.arc(51,-69,1.8,0,TAU);ctx.fill();
+// Corona-cuerno: reacciona al casteo y al cabeceo
+ctx.save();ctx.translate(33,-90);ctx.rotate(-.085+(cast?-.08:0)+(headNod*.55));
+ctx.fillStyle='#fff5ce';ctx.strokeStyle='#9e9bc1';ctx.lineWidth=1.7;
 ctx.beginPath();ctx.moveTo(-5,0);ctx.quadraticCurveTo(-3,-18,-1,-49);
 ctx.quadraticCurveTo(6,-25,6,0);ctx.closePath();ctx.fill();ctx.stroke();
-ctx.strokeStyle="#d3a4e3";ctx.lineWidth=1.8;
+ctx.strokeStyle='#d3a4e3';ctx.lineWidth=1.8;
 for(let i=1;i<=5;i++){
 const y=-i*8,w=4.7-i*.55;ctx.beginPath();ctx.moveTo(-w,y+2);
 ctx.quadraticCurveTo(0,y+5,w,y-2);ctx.stroke();
 }
-ctx.strokeStyle="#fffbea";ctx.lineWidth=.9;ctx.globalAlpha=.78;
+ctx.strokeStyle='#fffbea';ctx.lineWidth=.9;ctx.globalAlpha=.78;
 ctx.beginPath();ctx.moveTo(-1,-9);ctx.quadraticCurveTo(-1,-23,-1,-42);ctx.stroke();
 ctx.restore();
 // F4 U is carried by the anatomy: the living horn crowns the quiet dream.
 if(magic?.slot===3){
-ctx.save();ctx.lineCap="round";
+ctx.save();ctx.lineCap='round';
 const bloom=Math.max(.15,Math.min(1,magic.strength||.35));
 for(let i=0;i<7;i++){
 const angle=(i/7)*Math.PI*1.4-.25;
@@ -851,13 +932,13 @@ ctx.restore();
 // Rare magical accents appear with actions, not perpetual particles.
 if(cast||triumph||flourish>.12){
 ctx.save();ctx.globalAlpha=.35+.3*Math.max(flourish,.1);
-ctx.strokeStyle="#c4ffe9";ctx.lineWidth=2;ctx.beginPath();
+ctx.strokeStyle='#c4ffe9';ctx.lineWidth=2;ctx.beginPath();
 ctx.arc(33,-139,8+17*flourish,-.8,2.5);ctx.stroke();ctx.restore();
 R.sparkle(ctx,32,-144,4+flourish*4,gold);
 }
 if(run&&speed>.25){
-ctx.save();ctx.globalAlpha=.40;ctx.strokeStyle=gold;ctx.lineWidth=1.5;
-for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-51-i*8,-20-i*9);ctx.lineTo(-68-i*8,-19-i*9);ctx.stroke();}
+ctx.save();ctx.globalAlpha=.40+speed*.1;ctx.strokeStyle=gold;ctx.lineWidth=1.5;
+for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-51-i*8,-20-i*9);ctx.lineTo(-68-i*8*speed,-19-i*9);ctx.stroke();}
 ctx.restore();
 }
 ctx.restore();
@@ -947,11 +1028,30 @@ function draw(ctx, pose, R) {
 // retroceso al recibir golpe y saltito de victoria. Solo transformaciones.
 function cuernoActionLean(ctx,pose,f){
   if(pose.reduceMotion)return;
-  const st=pose.state,k=1-f*.12;
-  if(st==="attack"){const a=Math.max(0,Math.min(1,Number(pose.atk)||0)),thrust=Math.sin(Math.min(1,a/.55)*Math.PI);
-    ctx.translate((a<.2?-2*a/.2:thrust*6)*k,0);ctx.rotate((a<.2?-.06:.1*thrust)*k);}
-  else if(st==="hurt"){ctx.translate(-5*k,0);ctx.rotate(-.16*k);ctx.scale(1.04,.95);}
-  else if(st==="victory"){const hop=Math.abs(Math.sin((Number(pose.t)||0)*.15));ctx.translate(0,-hop*6*k);ctx.scale(1-hop*.03,1+hop*.04);}
+  const st=pose.state,k=1-f*.10;
+  const t=Number(pose.t)||0;
+  if(st==="attack"){
+    const a=Math.max(0,Math.min(1,Number(pose.atk)||0));
+    const wind=Math.sin(Math.min(1,a/.28)*Math.PI*.5);   // telegrafío
+    const thrust=Math.sin(Math.min(1,(a-.28)/.45)*Math.PI); // embestida
+    const recoil=a>.73?Math.sin((a-.73)/.27*Math.PI)*.4:0;
+    ctx.translate((wind*-3+(thrust*9-recoil*4))*k, -thrust*2*k);
+    ctx.rotate((-wind*.08+thrust*.14-recoil*.06)*k);
+    if(f>=2)ctx.scale(1+thrust*.04,1-thrust*.03);
+  }else if(st==="hurt"){
+    const h=Math.max(0,Math.min(1,Number(pose.atk)||.5));
+    ctx.translate(-5*k-h*3*k,h*1.5*k);ctx.rotate(-.18*k);ctx.scale(1.05,.93);
+  }else if(st==="victory"){
+    const hop=Math.abs(Math.sin(t*.18));
+    const wiggle=Math.sin(t*.34)*.025*k;
+    ctx.translate(0,-hop*7*k);ctx.rotate(wiggle);ctx.scale(1-hop*.04,1+hop*.05);
+  }else if(st==="run"){
+    // El cuello y el torso se inclinan hacia adelante a alta velocidad
+    const sp=Math.max(0,Math.min(1,Number(pose.speed)||0));
+    const lean=-sp*.07*k;
+    ctx.rotate(lean);
+    ctx.translate(sp*2*k,0);
+  }
 }
 function drawCuernoForm(ctx,pose,R,f){
   if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }

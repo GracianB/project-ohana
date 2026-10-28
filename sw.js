@@ -639,7 +639,7 @@ const PRECACHE_REVISIONS = {
   "previews/michi-design.html": "ba6f32aef28b06966e4871c981eb9f4e4bab77ac",
   "previews/michicornio-cinema.html": "55639b9b914e45ba33ad2fb1abe38eca803639fa",
   "characters/art/chispin.js": "f3d39aa3235904fe07727c0d93c986075355bbe0",
-  "characters/art/cuerno.js": "631782625bd105135092e25c36f249e72514fbcc",
+  "characters/art/cuerno.js": "4fe312cfb5ac54ba0aee1d0157264e441f564f29",
   "characters/art/dino.js": "f9758388c83c9d6757a8e927400459ebfc77e042",
   "characters/art/dragon.js": "3a675ca7f5c41bae9bb4d11816b47f3d63f4ebf5",
   "characters/art/frita.js": "f951a46ee9423f774aaaa0a7a4cc3fba91e76170",
