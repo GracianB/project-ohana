@@ -12,7 +12,7 @@ Una aventura de plataformas en Canvas 2D: explora Isla Hoku, descubre qué hace 
 
 <br />
 
-**10 héroes** · **50 formas** · **10 capítulos** · **1 final de Mundo 1**
+**10 héroes** · **50 formas** · **10 salas** · **1 final de Mundo 1**
 
 </div>
 
