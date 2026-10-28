@@ -1,0 +1,111 @@
+{
+  "release": "ohana-622",
+  "site": "https://gracianb.github.io/project-ohana/?release=622",
+  "verified_at": "2026-10-28T19:43:09.813847+00:00",
+  "feature_branch": "fix/v622-startup-continuity",
+  "feature_commit": "dc3986b790bedb14c07bdc5f4c53574af677b64c",
+  "merged_source_commit": "33c9da07e358ea114a3d7671c7ca7437177f516c",
+  "integration": "Ordinary non-fast-forward merge authorized by user. Merged source tree identical to tested feature branch.",
+  "pull_request": {
+    "created": false,
+    "reason": "gh pr create returned GraphQL Forbidden. No PR number is claimed."
+  },
+  "pages": {
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/40756338652",
+    "result": "Success",
+    "unit_and_release_seconds": 38,
+    "deploy_seconds": 33,
+    "total_seconds": 78
+  },
+  "public_source_verification": {
+    "checked": "2026-10-28T19:42:16.295210+00:00",
+    "site": "https://gracianb.github.io/project-ohana/",
+    "files": [
+      {
+        "path": "index.html",
+        "expected": "b8de9ffd5ae2082ad165764cc588dfc93d71273b",
+        "actual": "b8de9ffd5ae2082ad165764cc588dfc93d71273b",
+        "match": true
+      },
+      {
+        "path": "sw.js",
+        "expected": "b5dfb99e97fbae599fa4faa9732049c51ffdfb00",
+        "actual": "b5dfb99e97fbae599fa4faa9732049c51ffdfb00",
+        "match": true
+      },
+      {
+        "path": "systems/intro.js",
+        "expected": "74cd52f5a40e32143e47271679c625cc1baaec32",
+        "actual": "74cd52f5a40e32143e47271679c625cc1baaec32",
+        "match": true
+      },
+      {
+        "path": "systems/title.js",
+        "expected": "3a733d5516cff01d1e280feb13486a9bdc1f9084",
+        "actual": "3a733d5516cff01d1e280feb13486a9bdc1f9084",
+        "match": true
+      },
+      {
+        "path": "systems/world1-collect.js",
+        "expected": "cc3223c710bddeb8f1587dd462292f8fb60956eb",
+        "actual": "cc3223c710bddeb8f1587dd462292f8fb60956eb",
+        "match": true
+      },
+      {
+        "path": "startup.css",
+        "expected": "546f7e36e6d84813d5498ed70e66ca8272f14db4",
+        "actual": "546f7e36e6d84813d5498ed70e66ca8272f14db4",
+        "match": true
+      },
+      {
+        "path": "systems/memory-pickup-art.js",
+        "expected": "f85aa423441c0efa82ee158246b2e64ea47cc216",
+        "actual": "f85aa423441c0efa82ee158246b2e64ea47cc216",
+        "match": true
+      }
+    ],
+    "all_match": true
+  },
+  "public_browser_smoke": {
+    "result": "pass",
+    "scenarios": [
+      {
+        "name": "desktop",
+        "width": 1280,
+        "height": 900,
+        "boot": "ready",
+        "portrait": 144,
+        "health": "80 de 80 puntos de salud",
+        "xp": "0 de 55 de experiencia; 0% hasta la siguiente forma",
+        "hero": "kilo",
+        "overflow": false,
+        "memories": 1,
+        "purpose": "Busca pétalos de canción. Son recuerdos para tu álbum; los cristales dorados dan XP y los mecanismos de la sala completan su sello.",
+        "errors": [],
+        "backend": []
+      },
+      {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "boot": "ready",
+        "portrait": 144,
+        "health": "80 de 80 puntos de salud",
+        "xp": "0 de 55 de experiencia; 0% hasta la siguiente forma",
+        "hero": "kilo",
+        "overflow": false,
+        "memories": 1,
+        "purpose": "Busca pétalos de canción. Son recuerdos para tu álbum; los cristales dorados dan XP y los mecanismos de la sala completan su sello.",
+        "errors": [],
+        "backend": []
+      }
+    ],
+    "scope": "Fresh native desktop/mobile entry, real keyboard movement and first memory pickup, readable album, live HUD and mobile J tap. No game test hooks or grants.",
+    "tls_note": "Chromium ignores execution-environment CA errors. Independent Python urllib source verification uses default TLS validation; no claim of a site certificate defect."
+  },
+  "limits": [
+    "Netlify remains paused. No deployment or remote multiplayer activation.",
+    "Local thousand-memory collection resumed earned checkpoints while its physical-input guide was corrected; details are in V622-VALIDATION.json.",
+    "Visual acceptance and difficulty balance are not established by automated checks."
+  ]
+}
