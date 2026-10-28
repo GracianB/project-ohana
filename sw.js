@@ -428,9 +428,9 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/cat-chapter-art-v609.js": "87f52249a92332b75ebbd4184feb9d705369f108",
-  "systems/cat-chapter.js": "04d603d298e6d5396f8f152b0efb605bc1d25c20",
-  "systems/cat-encounters-v609.js": "ea157f84cde45fe857174cc809f3b3a991b6aa54",
+  "systems/cat-chapter-art-v609.js": "53381fc30b84a40de9124312ff04e280ef2bb0f4",
+  "systems/cat-chapter.js": "accaf1067000c4c7b004596052a03f83b083704c",
+  "systems/cat-encounters-v609.js": "2df5bfa5a0217d3b345abb0e1cbc38471c399ddd",
   "systems/chispin-chapter-art-v608.js": "aed0a9bdbfd9773d0d144dde4227db1eb743cc70",
   "systems/chispin-encounters-v608.js": "14bee555a4edaa14f059fb2bb5a8a594d7402b3e",
   "systems/stitcho-chapter-art-v607.js": "a8853e8d5fac6f19f2bfc4725a925ab1120f4423",

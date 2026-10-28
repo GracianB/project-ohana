@@ -3,14 +3,16 @@ import assert from 'node:assert/strict';
 import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
 import {CAT_JELLIES_V609} from '../systems/cat-encounters-v609.js';
 import {catGrowth,catObjective,MICHI_CHAPTER_ARENA} from '../systems/cat-chapter.js';
-import {drawCatCreature,drawCatMoonJelly,drawCatCrystalBridge} from '../systems/cat-chapter-art-v609.js';
+import {drawCatCreature,drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust} from '../systems/cat-chapter-art-v609.js';
 
-test('V609 Cat room: single authored route of 14400 with lunar crystal terraces', () => {
+test('V609 Cat room: single authored route of 14400 with lunar crystal terraces, pits and traps', () => {
  const room = WORLD1_ROOMS['w1-cat'];
  assert.equal(room.catEncounterVersion, 609);
  assert.equal(room.width, 14400);
  assert.ok(room.plats?.length >= 25, 'must combine ground terraces and crystal bridges');
  assert.ok(room.plats.some(p => p[0] === 9600 && p[2] === 4800 && p[1] === 1134), 'must preserve continuous ground for V2 adventure');
+ assert.ok(room.hazards?.length >= 3, 'must feature three deep astral fog pits');
+ assert.ok(room.catTraps?.length >= 3, 'must feature three veil spider web traps');
 });
 
 test('V609 Cat stations: five sacred lunar jellyfish in ascending air layers', () => {
@@ -109,4 +111,9 @@ test('V609 Cat vector art renderers: fauna and moon jelly callable without error
  dummyStation.done = true;
  drawCatMoonJelly(dummyCtx, dummyStation, { x: 0, y: 0 }, 100);
  drawCatCrystalBridge(dummyCtx, dummyStation, { x: 0, y: 0 }, 100);
+
+ // Astral traps, atmosphere and stardust
+ drawCatTrap(dummyCtx, { x: 2740, y: 1064, w: 90, h: 70 }, { x: 0, y: 0 }, 100);
+ drawCatAtmosphere(dummyCtx, { viewW: 1280 }, { x: 0, y: 0 }, 100);
+ drawCatStardust(dummyCtx, { x: 1000, y: 1000, w: 40, h: 40, vx: 4, grounded: true }, { x: 0, y: 0 }, 100);
 });

@@ -370,3 +370,139 @@ export function drawCatCrystalBridge(ctx,s,cam,t=0,reduced=false){
 
  ctx.restore();
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TRAMPAS DE SEDA ASTRAL Y TELARAÑAS DEL VELO
+// ─────────────────────────────────────────────────────────────────────────────
+export function drawCatTrap(ctx,trap,cam,t=0,reduced=false){
+ const x=trap.x-cam.x,y=trap.y-cam.y,w=trap.w||90,h=trap.h||70;
+ ctx.save();
+
+ // Voluta de niebla en la base
+ const wave=reduced?0:Math.sin(t*0.06+trap.x)*4;
+ const grad=ctx.createLinearGradient(x,y,x,y+h);
+ grad.addColorStop(0,'rgba(210,180,255,0.05)');
+ grad.addColorStop(0.7,'rgba(180,140,240,0.35)');
+ grad.addColorStop(1,'rgba(140,90,210,0.65)');
+ ctx.fillStyle=grad;
+ ctx.beginPath();
+ ctx.moveTo(x-10,y+h);
+ ctx.bezierCurveTo(x+w*.3,y+wave,x+w*.7,y+wave,x+w+10,y+h);
+ ctx.closePath();ctx.fill();
+
+ // Hilos de seda lunar tensados entre las rocas
+ ctx.strokeStyle='rgba(245,235,255,0.72)';
+ ctx.lineWidth=1.4;
+ const strands=[
+  [x,y+10,x+w,y+h-10],
+  [x+w,y+15,x,y+h-15],
+  [x+w*.5,y,x+w*.5,y+h],
+  [x+10,y+h*.5,x+w-10,y+h*.5]
+ ];
+ for(const [x1,y1,x2,y2] of strands){
+  ctx.beginPath();ctx.moveTo(x1,y1);
+  const mx=(x1+x2)/2+(reduced?0:Math.sin(t*0.1+x1)*3);
+  const my=(y1+y2)/2+(reduced?0:Math.cos(t*0.1+y1)*3);
+  ctx.quadraticCurveTo(mx,my,x2,y2);
+  ctx.stroke();
+ }
+
+ // Anillos concéntricos de telaraña astral
+ ctx.strokeStyle='rgba(220,190,255,0.55)';ctx.lineWidth=1;
+ for(let r=12;r<=36;r+=12){
+  ctx.beginPath();
+  ctx.ellipse(x+w*.5,y+h*.5,r,r*.7,0,0,TAU);
+  ctx.stroke();
+ }
+
+ // Rocío de perlas lunares atrapadas en la red
+ ctx.fillStyle='#ffe7a8';
+ for(let i=0;i<4;i++){
+  const a=i*TAU/4+t*0.02;
+  const px=x+w*.5+Math.cos(a)*22,py=y+h*.5+Math.sin(a)*15;
+  ctx.beginPath();ctx.arc(px,py,2,0,TAU);ctx.fill();
+ }
+
+ ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ATMÓSFERA CELESTIAL: AURORAS BOREALES Y NEBULOSAS
+// ─────────────────────────────────────────────────────────────────────────────
+export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
+ if(!ctx)return;
+ ctx.save();
+
+ // Auroras astrales ondulando en la bóveda superior del santuario
+ const vw=g.viewW||1280;
+ const cur1=reduced?0:Math.sin(t*0.025)*35;
+ const cur2=reduced?0:Math.cos(t*0.02)*40;
+
+ const auroraGrad=ctx.createLinearGradient(0,40,0,260);
+ auroraGrad.addColorStop(0,'rgba(175,130,255,0)');
+ auroraGrad.addColorStop(0.4,'rgba(195,140,255,0.14)');
+ auroraGrad.addColorStop(0.7,'rgba(120,230,220,0.18)');
+ auroraGrad.addColorStop(1,'rgba(140,110,240,0)');
+ ctx.fillStyle=auroraGrad;
+
+ ctx.beginPath();
+ ctx.moveTo(-60,180+cur1);
+ ctx.bezierCurveTo(vw*.3,100+cur2,vw*.7,240+cur1,vw+60,140+cur2);
+ ctx.lineTo(vw+60,0);
+ ctx.lineTo(-60,0);
+ ctx.closePath();
+ ctx.fill();
+
+ // Segunda cortina de aurora en contra-fase
+ const auroraGrad2=ctx.createLinearGradient(0,80,0,320);
+ auroraGrad2.addColorStop(0,'rgba(230,160,255,0)');
+ auroraGrad2.addColorStop(0.5,'rgba(240,170,220,0.12)');
+ auroraGrad2.addColorStop(1,'rgba(100,180,255,0)');
+ ctx.fillStyle=auroraGrad2;
+
+ ctx.beginPath();
+ ctx.moveTo(-60,220-cur2);
+ ctx.bezierCurveTo(vw*.35,160-cur1,vw*.65,280-cur2,vw+60,200-cur1);
+ ctx.lineTo(vw+60,0);
+ ctx.lineTo(-60,0);
+ ctx.closePath();
+ ctx.fill();
+
+ ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ESTELA DE POLVO DE ESTRELLAS DE MICHI AL CORRER Y SALTAR
+// ─────────────────────────────────────────────────────────────────────────────
+export function drawCatStardust(ctx,p,cam,t=0,reduced=false){
+ if(!p||reduced)return;
+ const px=p.x+p.w/2-cam.x,py=p.y+p.h-cam.y;
+ const moving=Math.abs(p.vx||0)>0.8||!p.grounded;
+ if(!moving)return;
+
+ ctx.save();
+ const count=p.grounded?3:5;
+ for(let i=0;i<count;i++){
+  const lag=((t*0.3+i*13)%24);
+  const spread=Math.sin(t*0.2+i*1.7)*8;
+  const sx=px-Math.sign(p.vx||1)*(lag*4)-spread;
+  const sy=py-4-lag*1.8;
+  const alpha=Math.max(0,1-lag/24)*0.65;
+
+  ctx.globalAlpha=alpha;
+  ctx.fillStyle=i%2?'#ffe6aa':'#deb3ff';
+  ctx.beginPath();
+  ctx.arc(sx,sy,1.6+Math.sin(i)*0.8,0,TAU);
+  ctx.fill();
+
+  // Pequeña cruz estelar en el destello
+  if(i===0){
+   ctx.strokeStyle='#ffffff';ctx.lineWidth=0.8;
+   ctx.beginPath();
+   ctx.moveTo(sx-3,sy);ctx.lineTo(sx+3,sy);
+   ctx.moveTo(sx,sy-3);ctx.lineTo(sx,sy+3);
+   ctx.stroke();
+  }
+ }
+ ctx.restore();
+}

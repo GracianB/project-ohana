@@ -30,13 +30,36 @@ export function authorCatEncounters(room){
  // Almacenar geometría y referencias V609
  room.catArena=MICHI_CHAPTER_ARENA;
 
- // ── Terreno ──────────────────────────────────────────────────────────────────
- // Suelo principal + zona de expedición separada para conservar expedition data
- const floor=[[0,FLOOR,9600,126],[9600,FLOOR,4800,126]];
+ // ── Terreno y Pozos Astrales ────────────────────────────────────────────────
+ // Suelo con tres pozos de niebla astral que exigen saltos de precisión y acrobacias,
+ // más la zona de expedición continua (9600-14400) para V2 Adventure.
+ const floor=[
+  [0,FLOOR,2200,126],
+  [2380,FLOOR,2100,126],
+  [4670,FLOOR,2300,126],
+  [7150,FLOOR,2450,126],
+  [9600,FLOOR,4800,126]
+ ];
 
- // Plataformas de cristal lunar y cuevas bioluminiscentes escalonadas
- // Diseño en espiral ascendente: amplias cornisas bajas → puentes flotantes altos
+ // Pozos y abismos lunares con niebla gravitatoria
+ room.hazards=[
+  {id:'cat-pit-1',x:2200,y:FLOOR-20,w:180,h:380,type:'death',label:'POZO DE NIEBLA ASTRAL',color:'#c495ff'},
+  {id:'cat-pit-2',x:4480,y:FLOOR-20,w:190,h:380,type:'death',label:'ABISMO DEL ECLIPSE',color:'#9b64f2'},
+  {id:'cat-pit-3',x:6970,y:FLOOR-20,w:180,h:380,type:'death',label:'VÓRTICE ESTELAR',color:'#7adbe5'}
+ ];
+
+ // Trampas de seda astral y niebla espesa (se disipan con J o K)
+ room.catTraps=[
+  {id:0,x:2740,y:FLOOR-70,w:90,h:70,name:'Telaraña del Velo I'},
+  {id:1,x:5340,y:FLOOR-70,w:90,h:70,name:'Telaraña del Velo II'},
+  {id:2,x:7540,y:FLOOR-70,w:90,h:70,name:'Telaraña del Velo III'}
+ ];
+
+ // Plataformas de cristal lunar y cornisas flotantes sobre los pozos y terrazas
  const shelves=[
+  // Cornisas de paso y trampolines sobre los tres pozos astrales
+  [2210,FLOOR-60,160],[4490,FLOOR-68,170],[6980,FLOOR-64,160],
+
   // Sector 0 — Umbral del sueño (x: 0 – 2400)
   [340,1054,200],[580,974,180],[840,894,200],
   [1100,974,180],[1400,894,200],[1700,814,180],
