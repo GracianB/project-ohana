@@ -1,1 +1,4377 @@
-PLACEHOLDER_GAME_REAL
+import {drawHudPortrait} from './systems/hud-portrait-v606.js';
+import {kiloGrowthWaiting,kiloUnlockedForm} from './systems/kilo-encounters-v606.js';
+import {kiloChapterAbility,interactKiloInstrument} from './systems/world1-play.js';
+import {createAdventureStorage} from './multiplayer/adventure-progress.js';
+import {drawLivingRealm} from './worlds/living-realms.js';
+import {drawPortalMirrors, FINAL_PORTALS} from './systems/final-portal-mirrors.js';
+import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
+import {KEEPSAKES,readKeepsakes,mergeKeepsakes,persistKeepsakes} from './systems/keepsakes.js';
+import {chapterAtlasHTML,chapterMapDetail,drawAdventureGuide} from './systems/adventure-guide-v2.js';
+import {drawMemoryAura} from './systems/memory-rewards-v2.js';
+import {drawChapterBossV2} from './systems/chapter-boss-art-v2.js';
+import {prepareChapterBossV2} from './systems/chapter-boss-v2.js';
+import {expeditionAbility} from './systems/chapter-expedition-v2.js';
+import {drawChapterVista} from './worlds/chapter-vistas.js';
+import {drawCampaignCreature} from './systems/campaign-creature-art.js';
+import {readCombatDifficulty,scaleCombatHealth} from './systems/combat-difficulty.js';
+import {drawChapterLandmarks} from './worlds/chapter-stagecraft.js';
+import {drawYomiDawn} from './worlds/yomi-dawn.js';
+import {fryerAstralAbility,fritaVentState,yomiNodeState} from './systems/frita-yomi-chapters.js';
+import {pizzaOvens,pizzaBaked} from './systems/pizza-chapter.js';
+import {dinoChapterAbility} from './systems/dino-chapter.js';
+import {NEXT_CHAPTERS,NEXT_ARENA,nextChapterAbility,drawChapterBossHud,mirrorRestored} from './systems/chapters-lunar-prism-embers.js';
+import {CHISPIN_CHAPTER_BOSS_ID,CHISPIN_CHAPTER_ARENA,chispinChapterAbility,chispinGateState} from './systems/chispin-chapter.js';
+import {STITCHO_CHAPTER_BOSS_ID,STITCHO_CHAPTER_ARENA} from './systems/stitcho-chapter.js';
+import {drawOhanaPlace} from "./worlds/ohana-environments.js";
+import {installFamilyConstellation} from "./systems/family-constellation.js";
+import {world1Guidance} from "./systems/world1-guidance.js";
+import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianBody,drawGroveGuardianSignals} from './systems/grove-guardian.js';
+import {steerKiloFlight,stopKiloFlight} from './systems/kilo-flight.js';
+import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
+import {updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
+import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
+import {drawRelicCinema} from './systems/relic-cinema.js';
+import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
+import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
+import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail,stitchoTrailSnapshot,stitchoAbility} from './systems/stitcho-trail.js';
+import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,drawStitchoBossBody,drawStitchoEnemyAccent,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
+import {createStitchoRoom} from "./systems/stitcho-room.js";
+import {drawStitchoArchipelago} from "./worlds/stitcho-archipelago.js";
+import {createChispinRoom} from "./systems/chispin-room.js";
+import {drawChispinSanctuary} from "./worlds/chispin-sanctuary.js";
+import {enterChispinTrail,interactChispinTrail,chispinTrailPrompt,updateChispinTrail,drawChispinTrail,chispinTrailSnapshot,chispinAbility} from './systems/chispin-trail.js';
+import {createChispinBoss,updateChispinBoss,drawChispinBossSignals,drawChispinBossBody,CHISPIN_BOSS_ID} from './systems/chispin-boss.js';
+import {createMichiRoom,drawMichicornioPlatformTrim} from "./systems/michi-room.js";
+import {drawMichicornioFoe} from "./systems/michicornio-foes.js";
+import {drawMichiGardens} from "./worlds/michi-gardens.js";
+import {enterMichiTrail,interactMichiTrail,michiTrailPrompt,updateMichiTrail,drawMichiTrail,michiTrailSnapshot,michiAbility} from './systems/michi-trail.js';
+import {createMichiBoss,updateMichiBoss,drawMichiBossSignals,drawMichiBossBody,MICHI_BOSS_ID} from './systems/michi-boss.js';
+import {createDragonRoom} from "./systems/dragon-room.js";
+import {drawDragonCalderaBackdrop} from "./worlds/dragon-caldera.js";
+import {enterDragonTrail,updateDragonTrail,drawDragonTrail,dragonTrailSnapshot,dragonAbility} from './systems/dragon-trail.js';
+import {createDragonBoss,updateDragonBoss,drawDragonBoss,DRAGON_BOSS_ID} from './systems/dragon-boss.js';
+
+import {createDinoRoom} from "./systems/dino-room.js";
+import {drawDinoCraterBackdrop} from "./worlds/dino-crater.js";
+import {enterDinoTrail,updateDinoTrail,drawDinoTrail,dinoTrailSnapshot,dinoAbility} from './systems/dino-trail.js';
+import {createDinoBoss,updateDinoBoss,drawDinoBoss,DINO_BOSS_ID} from './systems/dino-boss.js';
+
+import {createFritaRoom} from "./systems/frita-room.js";
+import {drawFritaMarketBackdrop} from "./worlds/frita-market.js";
+import {enterFritaTrail,updateFritaTrail,drawFritaTrail,fritaTrailSnapshot,fritaAbility} from './systems/frita-trail.js';
+import {createFritaBoss,updateFritaBoss,drawFritaBoss,FRITA_BOSS_ID} from './systems/frita-boss.js';
+
+import {createPizzaRoom} from "./systems/pizza-room.js";
+import {drawPizzaOvensBackdrop} from "./worlds/pizza-ovens.js";
+import {enterPizzaTrail,updatePizzaTrail,drawPizzaTrail,pizzaTrailSnapshot,pizzaAbility} from './systems/pizza-trail.js';
+import {createPizzaBoss,updatePizzaBoss,drawPizzaBoss,PIZZA_BOSS_ID} from './systems/pizza-boss.js';
+
+import {createYomiRoom} from "./systems/yomi-room.js";
+import {drawYomiObservatoryBackdrop} from "./worlds/yomi-observatory.js";
+import {enterYomiTrail,updateYomiTrail,drawYomiTrail,yomiTrailSnapshot,yomiAbility} from './systems/yomi-trail.js';
+import {createYomiBoss,updateYomiBoss,drawYomiBoss,YOMI_BOSS_ID} from './systems/yomi-boss.js';
+
+import {createCuernoRoom} from "./systems/cuerno-room.js";
+import {drawCuernoForestBackdrop} from "./worlds/cuerno-forest.js";
+import {enterCuernoTrail,updateCuernoTrail,drawCuernoTrail,cuernoTrailSnapshot,cuernoAbility} from './systems/cuerno-trail.js';
+import {createCuernoBoss,updateCuernoBoss,drawCuernoBoss,CUERNO_BOSS_ID} from './systems/cuerno-boss.js';
+import {renderStitchoAtlasHTML,stitchoAtlasDetail} from "./systems/stitcho-atlas.js";
+import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot,takeHeroCollectionItem} from "./systems/hero-collections.js";
+import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
+import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
+import {powerStatus} from "./systems/power-status.js";
+import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
+import {checkpointFor,updateCampaignProgress,drawCheckpoints} from "./systems/campaign-layout.js";
+import {drawLocalMap} from "./systems/local-map.js";
+import {updateNestArena,drawNestArena,nestArenaSnapshot} from './systems/nest-arena.js';
+import {updateIslandSprings,drawIslandSprings,islandSpringsSnapshot} from './systems/island-springs.js';
+import {updateChampions,drawChampionSignals} from './systems/enemy-champions.js';
+import {enterAdventure,adventurePrompt,interactAdventure,updateAdventure,drawAdventure,adventureSnapshot} from './systems/room-adventures.js';
+import { horizontalLook, clearBufferedActions } from "./engine/camera.js";
+import { sanitizeRuntimeState } from "./systems/runtime-state.js";
+import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
+import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
+import { mountSelectScreen } from "./systems/select-screen.js";
+import { evolutionMessage } from "./characters/evolution.js";
+import { signature, markAt, difficulty } from "./characters/signature.js";
+import { drawCharacter } from "./characters/draw.js";
+import {chooseUPartner,uPartnerInfo,uExpRank,loadUPartnerChoice,storeUPartnerChoice,
+ readStoredUBonds,persistUBonds,combineUBonds,bondXP,switchUPartner,uBondProgress} from "./systems/u-partners.js";
+import { WORLDS, renderWorld } from "./worlds/index.js";
+import { drawTerrain } from "./worlds/terrain.js";
+import { drawRoomAtmosphere } from "./worlds/room-atmosphere.js";
+import { drawLivingWorld, livingWorldSnapshot } from "./worlds/living-worlds.js";
+import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
+import { drawPaintedRoom } from "./worlds/painted-rooms.js";
+import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
+import { clearRank, formatClear, rememberBest } from "./systems/save.js";
+import { earnKiloPetal } from "./systems/kilo-rhythm.js";
+import {POWER_LEVELS,extraAbility,powerAbility} from "./systems/evolution-attacks.js";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction,hitEnemy as hitArenaEnemy } from "./systems/abilities.js";
+import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications, setPersistentObjective, clearPersistentObjective, messageManager } from "./systems/notify.js";
+import { ParticleSystem } from "./engine/particles.js";
+import { sfx, relicMemoryPhrase, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js";
+import { setMusicOverride, playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
+import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
+import { WORLD1_ROOMS, WORLD1_ORDER, world1SealsComplete, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
+import { enterWorld1, updateWorld1, world1Snapshot, world1NextObjective, world1ObjectiveDirection, world1DeathCheckpoint, restoreWorld1DeathCheckpoint, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
+import { updateFusionProjectilesOnly, fusionShotHitsPlayer, createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
+import { FUSION_STORY } from "./systems/world1-story.js";
+import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, syncWorld1Album, toggleWorld1Album, world1AlbumKey, world1AlbumFor } from "./systems/world1-collect.js";
+import { readWorld1Seals, storeWorld1Seals, world1StartRoom, world1ChapterEntry } from "./systems/world1-progress.js";
+import { createWorld1BossDirector, world1BossFilterDamage, updateWorld1BossDirector, drawWorld1BossBackdrop, drawWorld1BossTelegraphs, drawWorld1BossOverlay, world1BossAccessibleText } from "./systems/world1-boss.js";
+import { playWorld1Cine, flushWorld1CineQueue, updateWorld1Cine, skipWorld1Cine, drawWorld1Cine, world1CineActive, syncWorld1CineControls } from "./systems/world1-cine.js";
+import { makeDummy as w1MakeDummy, drawDummy as w1DrawDummy, baseHeight as w1BaseHeight } from "./systems/cinema-kit.js";
+// V468: Mundo 1 (diez salas de héroe + Corazón de Ohana) convive con el Mundo 2 (salas clásicas).
+const ROOMS = Object.freeze({ ...WORLD2_ROOMS, ...WORLD1_ROOMS });
+import { renderWorldGraphHTML, worldMapDetailHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
+import { drawEnemy } from "./engine/enemies.js";
+import { visibleForRender } from "./systems/render-v98-culling.js";
+import { Floaters } from "./systems/floaters.js";
+import { portals } from "./systems/portals.js";
+import { DeathFx } from "./systems/death-fx.js";
+import { Rain } from "./systems/rain.js";
+import { Surprises } from "./systems/surprises.js";
+import { Festival } from "./systems/v1002-festival.js";
+import { createBossNido, updateBossNido } from "./systems/boss-nido.js";
+import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
+import { sense, think } from "./engine/foe-brain.js";
+import { directEnemyEncounter, enemyCanCommit, enemySteering, enemyDirectorSnapshot } from "./systems/enemy-director.js";
+import { drawEncounterSignals } from "./systems/encounter-signals.js";
+import { resolveBody, hitsSolid } from "./engine/collide.js";
+import { XP_NEED } from "./systems/xp.js";
+import { saveStore } from "./systems/save.js";
+import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill, addCombo as safeAddCombo } from "./systems/mutations.js";
+import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, compactLiveList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
+import { createFixedClock } from "./engine/clock.js";
+import { canvasDpr,createFramePressureMonitor,initialCanvasPressure,createResolutionRecovery } from "./systems/frame-pressure.js";
+import { createRenderProfiler } from "./systems/render-profiler.js";
+import { bindInput } from "./engine/input.js";
+import { beginPlatformDrop, dropIgnoresPlatform, advancePlatformDrop } from "./engine/platform-drop.js";
+import { bindDialogs } from "./systems/dialogs.js";
+import { syncHudStatus } from "./systems/hud.js";
+import { Passives } from "./systems/passives.js";
+import { masteryOf, playerMasteryPlatforms, masterySnapshot } from "./systems/hero-mastery.js";
+import { HAZARD_TYPES, hazardContainsX, hazardTrigger, drawHazards } from "./systems/hazards.js";
+import { Magic } from "./systems/magic.js";
+import { CombatFX, combatTier } from "./systems/combat-fx.js";
+import { damageFeedback,showBlockedHit } from "./systems/combat-feedback.js";
+import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
+import { bossAttackCue } from "./systems/boss-v94-readability.js";
+import { drawBossFallScene, bossFallStage } from "./systems/boss-fall-scene.js";
+import { dragonEmbersForRoom,newDragonTrial, updateDragonTrial, drawDragonTrial, dragonTrialSnapshot } from "./systems/dragon-trial.js";
+import { formatBossStatus } from "./systems/boss-hud.js";
+import { ExperienceDirector } from "./systems/experience.js";
+import { baitLabel } from "./systems/boss-bait.js";
+import { baitFeedbackLabel } from "./systems/boss-bait-feedback.js";
+import { encounterLabel } from "./systems/boss-encounter-memory.js";
+import { onlineCoop } from "./systems/online-coop.js";
+import { applyCoopChallenge } from "./systems/coop-challenge.js";
+import { supportBelow } from "./systems/platform-geometry.js";
+import { stepChispinCloud,drawChispinCloud } from "./systems/chispin-cloud.js";
+import { resetCombatMirror,mirroredProjectileHits } from "./systems/coop-combat-mirror.js";
+import { cachedGradient } from "./systems/canvas-gradient-cache.js";
+import { updateKiloFoeAI } from "./engine/foes/kilo-ai.js";
+import { updateStitchoFoeAI, updateStitchoWebs, clearStitchoWebs } from "./engine/foes/stitcho-ai.js";
+import { drawStitchoWebs } from "./engine/foes/stitcho-foes.js";
+import { updateMichiFoeAI } from "./engine/foes/michi-ai.js";
+import { updateChispinFoeAI, chispinFoeBlocks } from "./engine/foes/chispin-ai.js";
+import { updateDinoFoeAI, updateDinoHazards, onDinoFoeDeath, resetDinoFoeAI, dinoPuddles, dinoSparks } from "./engine/foes/dino-ai.js";
+import { drawDinoHazards, drawDinoAbductFx } from "./engine/foes/dino-foes.js";
+import { createCuernoFx, updateCuernoFx, drawCuernoFx, cuernoDoubleJump } from "./systems/cuerno-fx.js";
+import { castCuerno, resetCuerno } from "./systems/cuerno-kit.js";
+import { updateCuernoPlay, drawCuernoPlay, queueCuernoPlay, resetCuernoPlay, CUERNO_PLAY_KEYS } from "./systems/cuerno-play-v373.js";
+import { cuernoFormMods, cuernoEvolveBurst, updateCuernoBursts, drawCuernoBursts, resetCuernoEvoV373, drawCuernoIntro, drawCuernoDeath, drawCuernoVictory, CUERNO_INTRO_DURATION, CUERNO_DEATH_DURATION, CUERNO_VICTORY_DURATION } from "./systems/cuerno-evo-v373.js";
+import { installKiloFritaInteractions, updateKiloFritaInteractions, drawKiloFritaInteractions } from "./systems/kilo-frita-interactions.js";
+
+const e2eParams = new URLSearchParams(location.search);
+const e2eEnabled = location.hostname === "127.0.0.1" && e2eParams.has("e2e");
+let e2eManualClock=false;
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
+let input;
+let keys;
+const CONTROL_FEEL = Object.freeze({
+jumpBufferFrames: 10,
+coyoteFrames: 10,
+groundAccel: 0.42,
+airAccel: 0.26,
+reverseGroundAccel: 0.58,
+reverseAirAccel: 0.36,
+groundBrake: 0.68,
+airBrake: 0.94,
+});
+const clock = createFixedClock({ maxSteps: 3 });
+const framePressure=createFramePressureMonitor();
+const resolutionRecovery=createResolutionRecovery();
+const renderProfiler=createRenderProfiler();
+let adaptiveLowRes=initialCanvasPressure({
+ width:window.innerWidth,height:window.innerHeight,
+ touch:(navigator.maxTouchPoints||0)>0 || window.matchMedia("(pointer: coarse)").matches,
+ memoryGB:navigator.deviceMemory,cores:navigator.hardwareConcurrency
+});
+if(adaptiveLowRes)resolutionRecovery.reducedAt(performance.now());
+const $ = (id) => document.getElementById(id);
+const DOM = {
+help: $("help"),
+map: $("map-overlay"),
+mapGrid: $("map-grid"),
+pause: $("pause-overlay"),
+finale: $("win-cinema"),
+evoStage: $("evo-stage"),
+prompt: $("prompt"),
+mute: $("btn-mute"),
+abilityBar: $("ability-bar"),
+hudAvatar: $("hud-avatar"),
+hudName: $("hud-name"),
+hudTrait: $("hud-trait"),
+hudMeta: $("hud-meta"),
+hpBar: $("hp-bar"),
+hpText: $("hp-text"),
+xpBar: $("xp-bar"),
+xpText: $("xp-text"),
+hudWorld: $("hud-world"),
+hudEvo: $("hud-evo"),
+combo: $("hud-combo"),
+comboChip: $("combo-chip"),
+comboValue: document.querySelector("#combo-chip .combo-value"),
+bossWrap: $("boss-wrap"),
+bossBar: $("boss-bar"),
+bossLabel: document.querySelector("#boss-wrap .boss-label"),
+formPips: document.querySelectorAll("#form-pips b"),
+};
+let abilitySlots = [];
+let touchPowers = [];
+let abilityBarKey = "";
+let hudAvatarKey = "";
+let pipKey = "";
+function setText(el, text) {
+if (el && el.textContent !== text) el.textContent = text;
+}
+let t = 0;
+let muted = false;
+let paused = false;
+const RMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+let gentleMotion = false;
+try { gentleMotion = localStorage.getItem("ohana-gentle-motion") === "1"; } catch (_) {}
+let reduceMotion = RMQ.matches || gentleMotion;
+document.body.classList.toggle("gentle-motion", gentleMotion);
+try { RMQ.addEventListener("change", (e) => { reduceMotion = e.matches || gentleMotion; game.reduceMotion = reduceMotion; }); } catch (_) {}
+
+const game = {
+  get paused() { return paused; },
+player: null, enemies: [], projectiles: [], bolts: [], slashes: [], platforms: [], orbs: [], hearts: [], ghosts: [],
+rng: Math.random,
+fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
+worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y: 500 },
+shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), experience: new ExperienceDirector(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false, summonDelay: 0, runtimeFaults: 0, lastRuntimeFault: ""
+};
+
+
+const coopEnemyKinds=new Set(['phosquito','mosquito','libelula','abeja','pez','planta','medusa','anguila','rana','cangrejo','gaviota','murcielago','arana','brasita','escoria','ufo','cucaracho']);
+game.createCoopEnemy=(spec)=>{
+ if(spec.boss?spec.kind!=='boss':!coopEnemyKinds.has(spec.kind))return null;
+ const enemy=spec.boss?createBossNido():makeFoe(spec.x,spec.y,spec.kind,game.roomId,spec.index,{baby:!!spec.flags?.baby,rng:()=>.5});
+ if(enemy.kind!==spec.kind)return null;
+ enemy.spawnIndex=spec.index;enemy.roomId=game.roomId;enemy._coopChallengeApplied=true;
+ return enemy;
+};
+
+game.cuernoFx=createCuernoFx();
+game.onAbilityHit=(enemy,damage,options)=>forwardCoopAbilityHit(game,onlineCoop,enemy,damage,options);
+game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
+game.festivalSfx = (name) => beep(name);
+game.festivalVibrate = (ms) => buzz(ms);
+Festival.openWorld1Album = () => {
+  if(!world1CineActive(game) && !paused && (!overlayOpen() || game.world1CollectUI?.open)) toggleWorld1Album(game);
+};
+Festival.mount();
+function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
+
+function vfxUnit(seed) {
+const value = Math.sin(Number(seed) * 12.9898 + 78.233) * 43758.5453123;
+return value - Math.floor(value);
+}
+
+function vfxRandom(salt = 0) {
+return vfxUnit(game.t * 31.73 + Number(salt) * 17.11);
+}
+function boundedFinite(value, fallback, min, max) { return runtimeBoundedFinite(value, fallback, min, max); }
+
+
+let viewW = 1280, viewH = 720, viewDpr = 1;
+const CAM_ZOOM = 1.02;
+function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
+function camW() { return viewW / camZoom(); }
+function camH() { return viewH / camZoom(); }
+function fit() {
+viewW = Math.max(320, innerWidth | 0);
+viewH = Math.max(240, innerHeight | 0);
+viewDpr = canvasDpr(viewW,viewH,window.devicePixelRatio || 1,reduceMotion,adaptiveLowRes);
+const bw = Math.round(viewW * viewDpr);
+const bh = Math.round(viewH * viewDpr);
+if (canvas.width !== bw) canvas.width = bw;
+if (canvas.height !== bh) canvas.height = bh;
+canvas.style.width = viewW + "px";
+canvas.style.height = viewH + "px";
+ctx.imageSmoothingEnabled = false;
+game.renderDirty = true;
+}
+addEventListener("resize", fit); fit();
+
+
+function overlayOpen() {
+return !!(
+game.world1CollectUI?.open ||
+document.getElementById("family-constellation")?.classList.contains("open") ||
+DOM.help?.classList.contains("open") ||
+DOM.map?.classList.contains("open") ||
+DOM.pause?.classList.contains("open") ||
+DOM.finale?.classList.contains("show") ||
+DOM.evoStage?.classList.contains("show") ||
+Festival.isOpen()
+);
+}
+function setMuted(on) {
+muted = !!on;
+setAudioMuted(muted);
+setText(DOM.mute, muted ? "Mute · N" : "Sonido · N");
+DOM.mute?.setAttribute("aria-pressed", String(muted));
+DOM.mute?.setAttribute("aria-label", muted ? "Activar sonido" : "Silenciar sonido");
+}
+function setPaused(on) {
+if (game.finale && game.finale.t > 0) return;
+
+paused = !!on && game.running;
+clearBufferedActions(game.player);
+
+const pauseLayer = DOM.pause || document.getElementById("pause-overlay");
+
+if (pauseLayer) {
+pauseLayer.classList.toggle("open", paused);
+pauseLayer.setAttribute("aria-hidden", paused ? "false" : "true");
+}
+
+try {
+input?.reset();
+} catch (_) {}
+
+try {
+clock.reset();
+} catch (_) {}
+
+if (paused) {
+const p = game.player;
+setText(document.getElementById("pause-hero"), p?.name || "Familia Ohana");
+setText(document.getElementById("pause-objective"), world1Guidance(game.roomId,game)?.objective || room().hint || room().goal || "Explora la isla y reúne a la familia.");
+setText(document.getElementById("pause-room-strategy"),game.player?.id==='kilo'&&room().hero==='kilo' ? [
+ "Bebé: J te permite atacar a distancia; H sirve cuando el enemigo se acerca. Despeja cada hibisco antes de detenerte a tocar. U llama a tu compañero.",
+ "Kilo: K permite volar y reflejar proyectiles. Úsalo para cambiar de posición; aterriza en una zona despejada antes de tocar el hibisco.",
+ "Ohana: L combina golpe y curación. Resérvalo para recuperar terreno cuando te rodean; ya dispones de doble salto.",
+ "I: acierta tres ataques H o J en cualquier orden. Cuando aparezca I LISTO, pulsa I para un paso evasivo y golpe ascendente. No caduca.",
+ "Flor Solar: K activa vuelo sostenido y otra pulsación permite descender. Dirige J moviéndote antes de disparar. El daño corta el vuelo; esquiva el abanico del Tambor. Busca los tres carillones elevados."
+ ][game.player.evo] : room().strategy||"");
+setText(document.getElementById("pause-form"), ((p?.evo || 0) + 1) + " / 5");
+setText(document.getElementById("pause-journey"), world1Guidance(game.roomId,game)?.journey || Math.min(10, Object.keys(game.visited || {}).length) + " / 10");
+setText(document.getElementById("pause-score"), String(game.score || 0));
+try {
+  save();
+} catch (_) {}
+}
+
+try {
+duckMusic(paused);
+} catch (_) {}
+
+if (pauseLayer) {
+pauseLayer.classList.toggle("open", paused);
+pauseLayer.setAttribute("aria-hidden", paused ? "false" : "true");
+}
+}function closeOverlays() {
+DOM.help?.classList.remove("open");
+DOM.map?.classList.remove("open");
+Festival.close();
+setPaused(false);
+}
+function hitStop(frames) {
+if (!frames) return;
+if (game.reduceMotion) frames = Math.max(1, Math.ceil(frames * 0.35));
+game.hitstop = Math.min(8, Math.max(game.hitstop || 0, frames | 0));
+}
+function buzz(ms) {
+if (game.reduceMotion) return;
+try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+}
+
+function comboRank(n) {
+if (n > 12) return "S";
+if (n > 7) return "A";
+if (n > 3) return "B";
+return "C";
+}
+
+function canAct() { return game.running && !world1CineActive(game) && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
+function interact() {
+if (!canAct()) return;
+if (!interactKiloInstrument(game) && !interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
+}
+function escape() {
+if(game.relicScene?.kind==='memory-v2'&&game.relicScene.age>90){game.relicScene=null;game.onRelicEnd?.();game.resetInput?.();return;}
+if(game.world1CollectUI?.open){toggleWorld1Album(game,false);return;}
+const constellation=document.getElementById("family-constellation");
+if(constellation?.classList.contains("open")){constellation.querySelector(".constellation-close")?.click();return;}
+if (Festival.isOpen()) { Festival.close(); return; }
+if (DOM.evoStage?.classList.contains("show") || DOM.finale?.classList.contains("show")) return;
+if (game.finale && game.finale.t > 40) { game.finale.t = 8; return; }
+if (DOM.help?.classList.contains("open")) { DOM.help.classList.remove("open"); return; }
+if (DOM.map?.classList.contains("open")) { DOM.map.classList.remove("open"); return; }
+setPaused(!paused);
+}
+function suspend() {
+input?.reset();
+clock.reset();
+if (!game.running) return;
+setPaused(true);
+}
+addEventListener("pagehide", () => save());
+document.addEventListener("visibilitychange", () => {
+clock.reset();
+if (document.hidden) suspend();
+});
+function toggleHelp() {
+const help = DOM.help;
+if (!help) return;
+const open = !help.classList.contains("open");
+DOM.map?.classList.remove("open");
+if (open) setPaused(false);
+help.classList.toggle("open", open);
+}
+function setPrompt(text, on) {
+const el = DOM.prompt;
+if (!el) return;
+if (!on) { el.classList.remove("show"); return; }
+setText(el, text);
+el.classList.add("show");
+}
+function room() { return game.roomDef || ROOMS[game.roomId] || ROOMS.hub; }
+let saveWarning = false;
+function save() {
+if (!game.player || game.player.dead || game.onlineAdventure) return;
+const saved = saveStore.write(game, Magic);
+if(saved)game.keepsakeSavePending=false;
+if (!saved && !saveWarning) showSystemMessage("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
+saveWarning = !saved;
+return saved;
+}
+game.save=save;
+game.onRelicBegin=()=>{duckMusic(true);document.body.classList.add("relic-cinema");DOM.evoStage?.classList.remove("show");};
+game.onRelicEnd=()=>{setMusicOverride(Magic.status().some(p=>p.id==='star')?'star-power':null);duckMusic(paused);document.body.classList.remove("relic-cinema");};
+game.onRelicBeat=beat=>game.relicScene?.kind==='memory-v2'?relicMemoryPhrase(game.relicScene.hero,beat):relicUkulele(beat);
+canvas.addEventListener('pointerdown',event=>{if(game.relicScene?.kind==='memory-v2'&&game.relicScene.age>90){escape();event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
+game.onRoomAlbumChange=()=>Festival.setCounter();
+function returnToMenu() {
+save();
+if(game.world1CollectUI)toggleWorld1Album(game,false);
+if(game.relicScene){game.relicScene=null;document.body.classList.remove('relic-cinema');duckMusic(false);}
+game.running = false;
+input?.reset();
+clock.reset();
+if (DeathFx.isPlaying()) DeathFx.cancel();
+t = 0;
+paused = false;
+game.hitstop = 0;
+game.camPunch = 0;
+game.fading = 0;
+game.flash = 0;
+game.flashColor = null;
+game.doorWait = null;
+game.doorHold = 0;
+game.finale = null;
+// A World 1 cutscene must never survive a new run, menu return, or room change.
+// Otherwise step() keeps advancing the old cinematic and freezes gameplay.
+game.world1Cine = null;game._pendingWorld1Cine=null;
+game.summonDelay = 0;
+game.roomId = "hub";
+game.won = false;
+game.summoned = false;
+game.runtimeFaults = 0;
+game.lastRuntimeFault = "";
+game.cam.x = 0;
+game.cam.y = 0;
+playMusic("title");
+game.experience?.reset();
+closeOverlays();
+document.body.classList.remove("playing", "boss-fight");
+$("char-select")?.classList.remove("hidden");
+DOM.bossWrap?.classList.add("hidden");
+DOM.comboChip?.classList.remove("show");
+setPrompt("", false);
+document.querySelector(".char-card.selected")?.focus();
+}
+function bounceLocked(fromDir) {
+const p = game.player;
+if (!p) return;
+if (fromDir === "right") p.x = Math.min(p.x, game.worldW - 80);
+else if (fromDir === "left") p.x = Math.max(p.x, 24);
+else if (fromDir === "up") p.y = Math.max(p.y, 120);
+else if (fromDir === "down") p.y = Math.min(p.y, game.worldH - 220);
+else if (fromDir === "portal") {
+p.x = Math.max(40, Math.min(p.x - 48 * (p.facing || 1), game.worldW - 80));
+p.y = Math.min(p.y, game.worldH - 220);
+}
+p.vx = 0; p.vy = 0;
+}
+function safeX(preferred) {
+const p = game.player;
+const w = p ? p.w : 24;
+const tries = [preferred, 120, 240, 400, 1080, 1280, 60, 1480];
+for (const x of tries) {
+if (floorsAtX(x, w).some((pl) => pl.h > 40)) return x;
+}
+return preferred;
+}
+function snapToFloor(p) {
+if (!p) return;
+const feet = p.y + p.h;
+const next = nearestBelow(p.x, p.w, feet - 8) || lowestFloor(p.x, p.w);
+if (next) landOn(p, next);
+}
+function placeFrom(fromDir) {
+const p = game.player;
+if (!p) return;
+if (fromDir === "right") p.x = game.roomId === "boss" ? 280 : 56;
+else if (fromDir === "left") p.x = game.worldW - 56 - p.w;
+else if (fromDir === "up") {
+p.x = safeX(220);
+p.y = game.worldH - 240;
+} else if (fromDir === "down") {
+p.x = safeX(220);
+p.y = 70;
+} else if (fromDir === "portal") {
+const spot = portals.spawnPoint(p.w, p.h, game.worldW, game.worldH);
+if (spot) {
+  p.x = safeX(spot.x);
+  p.y = spot.y;
+} else {
+  p.x = safeX(180);
+}
+const kick = typeof portals.arrivalKick === "function" ? portals.arrivalKick() : null;
+portals.armArrival();
+if (kick) {
+  p.vx = kick.vx || 0;
+  p.vy = kick.vy || 0;
+  if (kick.facing) p.facing = kick.facing;
+  if (kick.type) portals.trailType = kick.type;
+}
+if (game.roomId === "reef") {
+  portals.trailColor = "#5ecfff";
+  if (!portals.trailType || portals.trailType === "catapult") portals.trailType = "water";
+}
+game.shake = Math.min(14, (game.shake || 0) + (reduceMotion ? 3 : 5));
+if (reduceMotion && portals.trailTicks > 0) {
+  portals.trailTicks = Math.min(portals.trailTicks, 8);
+}
+let col = (kick && (kick.type === "catapult" || Math.abs(kick.vy || 0) > 5)) ? "#ffc078" : "#c9a0ff";
+if (portals.trailColor) col = portals.trailColor;
+else if (game.roomId === "reef") col = "#5ecfff";
+game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, {
+  color: col, count: reduceMotion ? 10 : 22, size: 4, up: 1.8, speed: 3.2, life: 18, star: true
+});
+game.flash = Math.max(game.flash || 0, 8);
+if (!kick) { p.vx = 0; p.vy = 0; snapToFloor(p); }
+return;
+} else {
+p.x = safeX(p.x || 180);
+}
+p.vx = 0; p.vy = fromDir === "down" ? 2 : 0;
+if (fromDir !== "down") snapToFloor(p);
+}
+function loadRoom(id, fromDir) {
+// V470: el Mundo 2 está en construcción — ningún menú, portal o puerta lleva allí en solo.
+if (world2Locked(id, { solo: !!game.personalAdventureSolo, e2e: fromDir === "e2e" || !!game._e2eLegacyStart })) {
+  showSystemMessage("MUNDO 2", WORLD2_LOCK_TEXT);
+  beep("locked");
+  if (game.roomDef) bounceLocked(fromDir);
+  return false;
+}
+let r = ROOMS[id];
+if(id==="hub"&&game.player?.id==="stitcho"&&game.personalAdventureSolo)r=createStitchoRoom(r);
+if(id==="hub"&&game.player?.id==="chispin"&&game.personalAdventureSolo)r=createChispinRoom(r);
+if(id==="hub"&&game.player?.id==="cat"&&game.personalAdventureSolo)r=createMichiRoom(r);
+if(id==="hub"&&game.player?.id==="dragon"&&game.personalAdventureSolo)r=createDragonRoom(r);
+if(id==="hub"&&game.player?.id==="dino"&&game.personalAdventureSolo)r=createDinoRoom(r);
+if(id==="hub"&&game.player?.id==="frita"&&game.personalAdventureSolo)r=createFritaRoom(r);
+if(id==="hub"&&game.player?.id==="pizza"&&game.personalAdventureSolo)r=createPizzaRoom(r);
+if(id==="hub"&&game.player?.id==="yomi"&&game.personalAdventureSolo)r=createYomiRoom(r);
+if(id==="hub"&&game.player?.id==="cuerno"&&game.personalAdventureSolo)r=createCuernoRoom(r);
+if (!r) return false;
+// V604: doors and portals are proposals in shared adventure. Only a server
+// accepted vote will load the next level in both browsers.
+if(onlineCoop.isConsentMode?.()&&game.roomId&&id!==game.roomId&&
+ ['right','left','up','down','portal'].includes(fromDir)){
+  return onlineCoop.requestTravel(game,id);
+}
+if(id==="w1-final"&&readKeepsakes(game.keepsakeStorage).length<10){game.world1Won=false;game._w1WinSent=false;}
+if (r.needEvo && game.player && game.player.evo < r.needEvo) {
+showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
+beep("locked");
+bounceLocked(fromDir);
+return false;
+}
+if(game.personalAdventureSolo&&!game._e2eLegacyStart){
+ const finalEntry=id==="w1-final"&&world1SealsComplete(game.world1Seals);
+ const chapter=finalEntry?{hero:"kilo",reset:game.roomId!==id||game.player?.id!=="kilo"}:world1ChapterEntry(id,{hero:game.player?.id,previousRoom:game.roomId,resume:!!game._resumeCheckpoint});
+ if(chapter?.reset){
+  const def=ROSTER.find(h=>h.id===chapter.hero);
+  game.player=makePlayer(def);
+  if(finalEntry){game.player.evo=4;game.player.xp=420;applyForm(game.player,{silent:true});}
+  game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
+  game.player.uBonds=readStoredUBonds(localStorage,def.id);
+  game.player.uExp=bondXP(game.player);
+  game.player.uSurprise=!e2eEnabled;
+  renderAbilityBar();
+ }
+}
+const first = !game.visited[id];
+// Clear only the cinematic of the previous room. Do this BEFORE enterWorld1()
+// and playWorld1Cine() create the new room's introduction.
+game.world1Cine = null;game._pendingWorld1Cine=null;
+game.roomId = id;
+resetKiloCombo(game);resetPlayerLocomotion(game.player);stopKiloFlight(game.player);
+game.islandSprings=null;game.nestArena=null;
+game._evolutionAttacks = null;
+game._assist = null;
+// Hazards and movement debuffs from the previous room must not cross portals.
+// Blocked portals return above, so their traps and effects are untouched.
+clearStitchoWebs(game);
+resetDinoFoeAI();
+try { resetCuernoEvoV373(); resetCuernoPlay(); resetCuerno(game.player); game.cuernoFx = createCuernoFx(); } catch (_) {}
+game.coopRoomVisit=(game.coopRoomVisit||0)+1;
+resetCombatMirror(game);game.coopPeerEffects=null;game._familyDuet=null;game._michiDuet=null;game.michiAbilityFx=[];game.dinoAbilityFx=[];game._chispinDuet=null;game._stitchoDuet=null;game._kiloDuet=null;game.chispinAbilityFx=[];game.kiloAbilityFx=[];
+// Keep the ritual when briefly leaving Caldera, never restart a completed reward.
+if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
+dismissNotifications();
+game.renderDirty = true;
+game.roomDef = r;
+game.finalGauntlet=null;
+game._defeatedThisVisit=new Set();
+game.finale = null;
+game.visited[id] = true;
+game.worldIndex = r.world;
+const paint = getLook() === "paint";
+const S = paint ? PAINT_WORLD : 1;
+game.worldW = (r.width || ROOM_W) * S;
+game.worldH = (r.height || ROOM_H) * S;
+game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
+enterCampaignExploration(game);
+enterKiloGrove(game);enterStitchoTrail(game);enterChispinTrail(game);enterMichiTrail(game);enterDragonTrail(game);enterDinoTrail(game);enterFritaTrail(game);enterPizzaTrail(game);enterYomiTrail(game);enterCuernoTrail(game);enterRoomAlbum(game);enterHeroCollection(game);
+// V468: en el Mundo 1 hay UN solo coleccionable (álbum de 100 cromos por sala).
+if(r.world1){if(game.roomAlbums)delete game.roomAlbums[id];game.roomAlbumItems=[];game.heroCollection=null;}
+enterWorld1Collect(game);enterWorld1(game);
+// A genuinely earned seal restores exploration tools quietly. First visits
+// still start as babies; revisits do not replay four evolution cinematics.
+if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4){
+ game.player.xp=Math.max(game.player.xp||0,420);game.player.evo=4;
+ applyForm(game.player,{silent:true});renderAbilityBar();
+}
+if(game.world1?.cinema&&!r.fusionBoss){game.world1.cinema=null;playWorld1Cine(game,"roomEnter",r.hero);}
+if(!r.fusionBoss)game.world1Boss=null;
+game.onHeroAbility=(p,index)=>{kiloChapterAbility(game,p,index);expeditionAbility(game,p,index);groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);chispinChapterAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);nextChapterAbility(game,p,index);dinoChapterAbility(game,p,index);fryerAstralAbility(game,p,index);};
+game.onDinoLandingHit=(e,dmg)=>hitArenaEnemy(game,e,dmg,{color:'#deedbc',stun:25,ky:-4,kx:Math.sign(e.x-game.player.x)*4,shake:2,parts:6});
+// Never carry a previous room's one-way ledge into the next room.
+if (game.player) game.player._dropPlatform = null;
+game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
+game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
+game.enemies = (r.foes || []).map((f, i) => {
+const e = makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng});
+e.spawnIndex = i;e._campaignOriginal=true;
+if(r.world1&&f[4]?.role){const foot=e.y+e.h;e.w=Math.max(46,e.w);e.h=Math.max(58,e.h);e.y=foot-e.h;}
+if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=Number.isFinite(f[4].anchorFloor)?f[4].anchorFloor-e.h:f[4].anchorY;}}
+if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
+e.roomId = id;
+if((r.kiloChapter||r.stitchoChapter||r.chispinChapter||r.growthChapter)&&e.roomPersona?.chapterHP)e.hp=e.max=e.roomPersona.chapterHP;
+initGroveGuardian(e);
+if (f[3]) applyElite(e);
+return scaleFoe(e);
+});
+game.enemies=game.enemies.filter(e=>!(r.world1&&game.world1?.sealed&&e.miniBoss)&&!(id==='hub'&&game.personalAdventureSolo&&(game.player?.id==='stitcho'||game.player?.id==='chispin'||game.player?.id==='cat'||game.player?.id==='dragon'||game.player?.id==='dino'||game.player?.id==='frita'||game.player?.id==='pizza'||game.player?.id==='yomi'||game.player?.id==='cuerno')&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
+if(r.stitchoChapter&&!game.world1?.sealed&&!game.clearedEncounters?.[id]?.includes(STITCHO_CHAPTER_BOSS_ID)){game.enemies.push(createStitchoBoss(makeFoe,game.rng,{roomId:id,encounterId:STITCHO_CHAPTER_BOSS_ID,x:8750,arena:STITCHO_CHAPTER_ARENA}));}
+game.spawnStitchoBoss=()=>{
+  if(game.roomId!=='hub'||game.player?.id!=='stitcho'||!game.personalAdventureSolo)return false;
+  if((game.clearedEncounters?.hub||[]).includes(STITCHO_BOSS_ID))return true;
+  if(game.enemies.some(e=>e._stitchoBoss))return true;
+  const enemy=createStitchoBoss(makeFoe,game.rng);
+  game.enemies.push(enemy);
+  return true;
+};
+if(r.chispinChapter&&!game.world1?.sealed&&!game.clearedEncounters?.[id]?.includes(CHISPIN_CHAPTER_BOSS_ID))game.enemies.push(createChispinBoss(makeFoe,game.rng,{roomId:id,encounterId:CHISPIN_CHAPTER_BOSS_ID,x:8750,arena:CHISPIN_CHAPTER_ARENA}));
+game.spawnChispinBoss=()=>{
+  if(game.roomId!=='hub'||game.player?.id!=='chispin'||!game.personalAdventureSolo)return false;
+  if((game.clearedEncounters?.hub||[]).includes(CHISPIN_BOSS_ID))return true;
+  if(game.enemies.some(e=>e._chispinBoss))return true;
+  const enemy=createChispinBoss(makeFoe,game.rng);
+  game.enemies.push(enemy);
+  return true;
+};
+if(r.growthChapter&&!game.world1?.sealed&&!game.clearedEncounters?.[id]?.includes(NEXT_CHAPTERS[r.growthChapter].bossId)){const create={cat:createMichiBoss,cuerno:createCuernoBoss,dragon:createDragonBoss,dino:createDinoBoss,pizza:createPizzaBoss,frita:createFritaBoss,yomi:createYomiBoss}[r.growthChapter];game.enemies.push(create(makeFoe,game.rng,{roomId:id,encounterId:NEXT_CHAPTERS[r.growthChapter].bossId,x:8750,arena:NEXT_ARENA,chapter:r.growthChapter}));}
+game.spawnMichiBoss=()=>{
+  if(game.roomId!=='hub'||game.player?.id!=='cat'||!game.personalAdventureSolo)return false;
+  if((game.clearedEncounters?.hub||[]).includes(MICHI_BOSS_ID))return true;
+  if(game.enemies.some(e=>e._michiBoss))return true;
+  const enemy=createMichiBoss(makeFoe,game.rng);
+  game.enemies.push(enemy);
+  return true;
+};
+game.spawnDragonBoss=()=>{
+  if(game.roomId!=='hub'||game.player?.id!=='dragon'||!game.personalAdventureSolo)return false;
+  if((game.clearedEncounters?.hub||[]).includes(DRAGON_BOSS_ID))return true;
+  if(game.enemies.some(e=>e._dragonBoss))return true;
+  const enemy=createDragonBoss(makeFoe,game.rng);
+  game.enemies.push(enemy);
+  return true;
+};
+for (const e of game.enemies) {
+ if(e.miniBoss&&!e._combatHealthScaled)scaleFoe(e);
+ Surprises.onMakeFoe(e, id, game);
+}
+for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
+for (const e of game.enemies) {
+if (isAirFoe(e)||e.campaignRole==="flyer") continue;
+const floor = supportBelow(e,game.platforms,280);
+if (floor) e.y = floor.y - e.h;
+}
+game.bossFx?.clear();
+game.boss = null;
+game.spawnFusionBoss=()=>{
+  if(game.roomId!=="w1-final"||game.world1Won||game.boss)return false;
+  if(!world1SealsComplete(game.world1Seals))return false;
+  game.boss=createFusionBoss((game.player?.michiSeed||0)+467);
+  game.enemies.push(game.boss);
+  game.storyLine=FUSION_STORY.intro[0];
+  game.world1Boss=createWorld1BossDirector(game.boss);
+  playWorld1Cine(game,"bossIntro");
+  playMusic("jefe");beep("boss");
+  game.shake=Math.max(game.shake||0,reduceMotion?2:12);
+  return true;
+};
+if (r.boss && !r.fusionBoss && !game.won) {
+game.boss = scaleFoe(createBossNido());
+game.enemies.push(game.boss);
+applyCoopChallenge(game.boss,onlineCoop.enabled);
+}
+game.projectiles.length = 0;
+game.bolts.length = 0;
+game.slashes.length = 0;
+game.fx.clear?.();
+game.slashes.length = 0;
+game.ghosts.length = 0;
+portals.spawnFromRoom(r);
+if (paint) {
+for (const portal of portals.items) {
+  portal.x *= S;
+  portal.y *= S;
+  portal.w *= S;
+  portal.h *= S;
+}
+}
+if (game.player) placeFrom(fromDir);
+game.cam.x = 0;
+game.fading = 16;
+game.doorHold = reduceMotion ? 4 : 8;
+game.doorWait = null;
+game.flash = Math.max(game.flash || 0, reduceMotion ? 4 : 8);
+if (first && game.player) {
+game.player.health = Math.min(game.player.maxHealth, game.player.health + 15);
+game.nums.add(game.player.x, game.player.y, "+15", "#6f6");
+}
+const LINES = {
+hub: "Aquí empieza Ohana. Reúne fuerzas y abre la ruta por la costa.",
+beach: "La costa abre el este. Cruza el hueco y sigue hacia la jungla.",
+jungle: "La jungla guarda la bajada. Busca la forma necesaria para entrar en la caldera.",
+cave: "La cueva protege la ruta oeste. El laboratorio queda al otro lado.",
+lab: "El laboratorio guarda una ruta alternativa. Mira el paraguas y sigue adelante.",
+ridge: "La cumbre conecta el claro con la órbita. El camino continúa hacia las estrellas.",
+space: "Aquí caen estrellas. El vórtice abre la bajada al arrecife.",
+reef: "El arrecife devuelve a la costa. Recoge lo que encuentres antes de volver.",
+volcano: "La caldera es la última puerta. La Reina del Nido espera más adelante.",
+boss: "La Reina ha despertado. Aquí termina la ruta de este Mundo."
+};
+dispatchEvent(new CustomEvent("ohana-cinema-room", { detail: { id, repeat: !first, boss: !!r.boss } }));
+if (!r.boss || r.fusionBoss) {
+const story = r.world1 ? "" : LINES[id] || "";
+const objective = r.hint || r.goal || "";
+showRoomMessage(r.name, first && story ? story + (objective ? " " + objective : "") : objective || story || "Explora la sala.", {
+  key: "room:" + id + ":" + (first ? "first" : "repeat")
+});
+} else if (!r.fusionBoss) {
+game.bossIntro = { t: 220 };
+game.storyLine = "La Reina sale del nido. No negocia.";
+showBossMessage("REINA DEL NIDO", "Has llegado al corazón del Nido. Derrota a la Reina y cierra el Mundo 2.", {
+  key: "boss:intro"
+});
+game.flash = 16;
+game.flashColor = "#ff4060";
+game.shake = 12;
+}
+game.experience?.room(id, r.name, !!r.boss);
+beep(r.boss ? "boss" : "door");
+playMusic(themeForRoom(id));
+worldClear();
+Surprises.onEnterRoom(game);
+enterAdventure(game);
+Festival.onEnterRoom(game);
+Passives.onRoom(game);
+Magic.onRoom(game, id);
+save();
+dispatchEvent(new CustomEvent("ohana-room", { detail: {
+id,
+name: r.name,
+world1Seals: [...(game.world1Seals || [])],
+world1Won: !!game.world1Won,
+visited: game.visited,
+won: !!game.won,
+evo: game.player ? game.player.evo : 0
+}}));
+return true;
+}
+function showMap() {
+const overlay = DOM.map;
+const grid = DOM.mapGrid;
+if (!overlay || !grid) {
+showSystemMessage("MAPA", Object.keys(game.visited).map((id) => (ROOMS[id] && ROOMS[id].name) || id).join(" · "));
+return;
+}
+if (overlay.classList.contains("open")) {
+overlay.classList.remove("open");
+return;
+}
+DOM.help?.classList.remove("open");
+setPaused(false);
+const chapterMap=!!game.roomDef?.world1,personalMap=!chapterMap&&!!game.stitchoTrail;
+const title=document.getElementById("map-title");if(title)title.textContent=chapterMap?"La ruta de los diez · mapa de aventura":personalMap?"Archipiélago del Caos":"Mapa de Isla Hoku";
+grid.innerHTML = chapterMap?chapterAtlasHTML(game):personalMap?renderStitchoAtlasHTML(game):renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
+grid.onclick = event => {
+  const node=event.target.closest('.wm-node');
+  if(!node||!grid.contains(node))return;
+  for(const other of grid.querySelectorAll('.wm-node')){
+    other.classList.toggle('selected',other===node);
+    other.setAttribute('aria-pressed',String(other===node));
+  }
+  grid.querySelector('.wm-detail').innerHTML=chapterMap?chapterMapDetail(node.dataset.room,game):personalMap?stitchoAtlasDetail(node.dataset.room,game):worldMapDetailHTML(node.dataset.room,game.roomId,game.visited,game.player?.evo||0);
+};
+requestAnimationFrame(()=>{
+ const node=grid.querySelector('.wm-node.here');
+ node?.focus({preventScroll:true});
+ const scroll=grid.querySelector('.wm-scroll');
+ if(scroll&&node)scroll.scrollLeft=node.offsetLeft-scroll.clientWidth/2;
+});
+overlay.classList.add("open");
+}
+function michiRunSeed(resume){
+ try{const pinned=new URLSearchParams(location.search).get('michiSeed');if(pinned!==null)return Math.max(0,Math.floor(Number(pinned))||0);}catch(_){}
+ if(e2eEnabled)return 0;
+ try{const kept=Number(localStorage.getItem('ohana-michi-seed'));if(resume&&kept>0)return kept;}catch(_){}
+ const fresh=1+Math.floor(game.rng()*2147483646);
+ try{localStorage.setItem('ohana-michi-seed',String(fresh));}catch(_){}
+ return fresh;
+}
+function makePlayer(def) {
+const p = {
+...def,
+x: 180, y: 500, vx: 0, vy: 0,
+facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0,
+cds: {}, cdDur: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0,
+dash: 0, dashBuf: 0, melee: 0, meleeBuf: 0, wall: 0,
+abilities: Array.isArray(def.abilities) ? def.abilities.slice() : (def.abilities || []),
+};
+if (!p.facing) p.facing = 1;
+applyForm(p, { silent: true });
+paintFit(p);
+return p;
+}
+function start(def) {
+game.loadRoom = loadRoom;
+game._cuernoIntroT = def?.id === "cuerno" && !reduceMotion ? 0 : null;
+game.lastAbilityId = null;
+game.lastAbilitySlot = null;game._signatureLink=null;
+if (!def) return;
+const onlineSession = onlineCoop.readSession?.();
+const onlineMode = !!onlineSession?.originalEngine;
+game.onlineAdventure = onlineMode;game.coopAuthority=undefined;game.coopAbilityStates={};game.coopAttemptEpoch=0;game.coopRetryWaiting=false;game.coopPeerWaiting=false;game.coopRetryAnimationDone=false;
+const adventureStorage=onlineMode?createAdventureStorage():undefined;
+game.expeditionStorage=adventureStorage;game.keepsakeStorage=adventureStorage;
+game.personalCollectionStorage=adventureStorage;
+game.personalAdventureSolo = !onlineMode;
+const resume = !onlineMode && (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
+// A campaign save follows the active chapter, regardless of the highlighted
+// title card. Chapter transitions can change the hero without reopening title.
+if(resume&&game.personalAdventureSolo&&!game._e2eLegacyStart){
+ const saved=saveStore.read();
+ if(saved&&isWorld1Room(saved.roomId))def=ROSTER.find(h=>h.id===saved.id)||def;
+}
+try { localStorage.removeItem("ohana-resume"); } catch (e) {}
+input?.reset();
+clock.reset();
+t = 0;
+game.t = 0;
+paused = false;
+game.hitstop = 0;
+game.camPunch = 0;
+game.fading = 0;
+game.flash = 0;
+game.flashColor = null;
+game.doorWait = null;
+game.doorHold = 0;
+game.finale = null;
+// A World 1 cutscene must never survive a new run, menu return, or room change.
+// Otherwise step() keeps advancing the old cinematic and freezes gameplay.
+game.world1Cine = null;game._pendingWorld1Cine=null;
+game.summonDelay = 0;
+game.roomId = "hub";
+game.won = false;
+game.summoned = false;
+game.runtimeFaults = 0;
+game.lastRuntimeFault = "";
+game.cam.x = 0;
+game.cam.y = 0;
+game._magicSnap = null;
+game.hitstop = 0;
+game.combatFx?.clear();
+game.experience?.reset();
+game.experience?.mount();
+game.player = makePlayer(def);
+if(def.id==='kilo')game.player._kiloEntranceAt=t;
+else game.player._ohanaEntranceAt=t;
+// Browser audits can pin a pair; normal play always invokes a surprise.
+game.player.uSurprise=!e2eEnabled;
+// V461: every Michicornio run dreams its own palette, tentacle rhythm and
+// evolution motif. ?michiSeed=N pins it; audits stay on the canonical seed 0.
+if(def.id==='cat')game.player.michiSeed=michiRunSeed(resume);
+game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
+game.player.uBonds=readStoredUBonds(localStorage,def.id);
+game.player.uExp=bondXP(game.player);
+game.combatReport={hits:0,damage:0};
+game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
+game.world1Stations = {};
+game.keepsakes=readKeepsakes(game.keepsakeStorage);game.keepsakeSavePending=false;
+game.world1Seals = onlineMode?[]:readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
+game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){if(!game.onlineAdventure)storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='album-ceremony'){setMusicOverride(themeForRoom('w1-'+hero));}else if(kind==='album-page'||kind==='album-unlock'){beep('win');}else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
+game.canWorld1CineStart=()=>!game.relicScene&&!document.querySelector('#evo-stage.show,#supreme-cinema[aria-hidden="false"],#win-cinema.show');
+game.playWorld1Cine=(id,hero)=>playWorld1Cine(game,id,hero);
+game.onGauntletHero=(hero)=>{
+ clearPersistentObjective();dismissNotifications();
+ if(game.onlineAdventure||!world1SealsComplete(game.world1Seals))return;const def=ROSTER.find(r=>r.id===hero);if(!def)return;
+ game.player=makePlayer(def);const p=game.player;p.evo=4;p.xp=420;applyForm(p,{silent:true});paintFit(p);p.x=8600;p.y=1134-p.h;p.grounded=true;p.invuln=90;
+ p.uPartner=loadUPartnerChoice(localStorage,hero);p.uBonds=readStoredUBonds(localStorage,hero);p.uExp=bondXP(p);p.uSurprise=!e2eEnabled;
+ game._signatureLink=null;game._combatFlow=null;game._assist=null;game._supremeFlow=null;game._evolutionAttacks=null;game.ult=null;game.bolts=[];game.slashes=[];game.projectiles=[];game.resetInput?.();renderAbilityBar();playMusic("w1-"+hero);game.renderDirty=true;
+};
+game.placeCoopEntry=me=>{
+ if(!game.onlineAdventure||!game.player||!me||me.worldRoomId!==game.roomId)return;
+ const p=game.player;p.x=me.x;p.y=me.y;p.vx=0;p.vy=0;p.grounded=true;p.jumps=0;p.facing=me.facing||1;
+ game.resetInput?.();game.cam.x=Math.max(0,Math.min(game.worldW-camW(),p.x-camW()/2));game.cam.y=Math.max(0,Math.min(game.worldH-camH(),p.y-camH()/2));game.renderDirty=true;
+};
+game.changeCoopHero=(hero,stats)=>{
+ const def=ROSTER.find(r=>r.id===hero);if(!game.onlineAdventure||!def||!game.player)return false;
+ const old=game.player,feet=old.y+old.h;
+ game.coopAbilityStates[old.id]={cds:{...old.cds},cdDur:{...old.cdDur},finisherCharge:old.finisherCharge||0,uPartner:old.uPartner,uBonds:old.uBonds,uExp:old.uExp};
+ game.player=makePlayer(def);const p=game.player;Object.assign(p,game.coopAbilityStates[hero]||{});
+ p.evo=stats.evolution||0;p.xp=stats.experience||0;applyForm(p,{silent:true});paintFit(p);
+ p.x=old.x;p.y=feet-p.h;p.health=Math.max(0,Math.min(p.maxHealth,stats.health??p.maxHealth));
+ p.vx=0;p.vy=0;p.grounded=old.grounded;p.invuln=0;
+ game._signatureLink=null;game._combatFlow=null;game._assist=null;game._supremeFlow=null;game._evolutionAttacks=null;game.ult=null;
+ game.bolts=[];game.slashes=[];game.projectiles=(game.projectiles||[]).filter(p=>p.owner!=='player');game.resetInput?.();renderAbilityBar();game.renderDirty=true;
+ return true;
+};
+game.onGauntletAward=(hero)=>{addScore(1000);healPlayer(game.player,game.player.maxHealth*.2);game.nums.add(game.player.x,game.player.y-30,KEEPSAKES[hero].name.toUpperCase(),KEEPSAKES[hero].color,true);beep("win");};
+game.onWorld1CineEnd=(id)=>{gauntletCineEnded(game,id);
+ if(id==='ending'&&game.onlineAdventure&&game.coopFinalWon&&!game._coopFinalResultSent){game._coopFinalResultSent=true;game._w1WinSent=true;game.world1Won=true;const detail=game._w1WinDetail||{world:1,room:game.roomId,id:game.player.id,hero:game.player.name,evo:game.player.evo,score:game.score,kills:game.kills,rank:'JUNTOS'};detail.keepsakes=[...game.keepsakes];detail.coop=true;detail.uPartner=onlineCoop.remote?.characterId||null;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine='';syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent('ohana-win',{detail}));}
+if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine="";syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
+game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
+game._coopFinalCue=null;game._coopFinalReady=null;game._coopFinalRevision=-1;game.coopFinaleState=null;game.coopFinalWon=false;game._coopFinalResultSent=false;game._coopFinalConsumed=new Set();game.coopFinalShots=[];
+game.createCoopBossDirector=createWorld1BossDirector;
+game.onCoopRetryDown=()=>{
+ game.coopRetryWaiting=true;game.coopRetryAnimationDone=false;dispatchEvent(new Event('ohana-coop-down'));if(game.relicScene)game.onRelicEnd?.();dismissNotifications();game.relicScene=null;game.ult=null;game.player.dead=true;game.player.health=0;game.world1Cine=null;game._pendingWorld1Cine=null;game.projectiles=[];game.coopFinalShots=[];game.resetInput?.();
+ showErrorMessage('REINTENTO CONJUNTO','Conserváis lo conseguido. Preparando a los dos jugadores…');
+ if(!DeathFx.isPlaying())DeathFx.start(game.player,()=>{game.coopRetryAnimationDone=true;void onlineCoop.requestRetry(game);},{reason:'hurt'});
+};
+game.onCoopRetryRestore=me=>{
+ if(!me||!game.player)return;
+ DeathFx.cancel();game.coopRetryWaiting=false;game.coopFinalWon=false;game.world1Cine=null;game._pendingWorld1Cine=null;game.finale=null;game.world1Won=false;game._w1WinSent=false;game._w1WinDetail=null;
+ game._coopFinalRevision=-1;game._coopFinalCue=null;game._coopFinalReady=null;game._coopFinalWaiting=false;game.coopFinaleState=null;game._coopFinalConsumed=new Set();game.coopFinalShots=[];
+ game.player.dead=false;game.player.evo=me.evolution||0;game.player.xp=me.experience||0;applyForm(game.player,{silent:true});loadRoom(me.worldRoomId,'online-retry');
+ const p=game.player;p.x=me.x;p.y=me.y;p.vx=0;p.vy=0;p.grounded=true;p.health=me.health;p.dead=false;p.invuln=90;
+ game._combatFlow=null;game._assist=null;game._supremeFlow=null;game.combo=0;game._coopFinalResultSent=false;Magic.reset(game);game.resetInput?.();
+};
+try { loadWorld1Collect(game); toggleWorld1Album(game,false); } catch (err) { console.warn("[ohana] world1 collect", err); }
+game.clearTicks = 0;
+game.dragonTrial = null;
+game.checkpoints={};game.explored={};game.secrets={};game.clearedEncounters={};game.roomAlbums=readRoomAlbums();if(game.relicScene)game.onRelicEnd?.();game.relicScene=null;game.resetInput=()=>input?.reset();
+game.best = null;
+Surprises.reset();
+Festival.reset();
+game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
+game.running = true; closeOverlays();
+// V468: una partida nueva en solitario empieza en el Mundo 1 (Claro de Kilo).
+// V470: el arnés e2e (window.__OHANA_E2E.start) conserva el arranque clásico del Mundo 2
+// para las suites de navegador heredadas; el jugador real empieza en el Mundo 1.
+let roomId = game.personalAdventureSolo && !game._e2eLegacyStart ? world1StartRoom(def.id, game.world1Seals, globalThis.__ohanaWorld1Start) : "hub";
+globalThis.__ohanaWorld1Start = null;
+if (resume) {
+try {
+  const u = saveStore.read(def.id);
+  if (u) {
+    game.player.evo = u.evo;
+    game.player.xp = u.xp;
+    // V313 saves contained one U EXP value. Migrate it to the equipped
+    // partner only, rather than gifting it to all nine companions.
+    const legacy=(u.uExp>0&&!Object.keys(u.uBonds||{}).length)?
+      {[game.player.uPartner]:u.uExp}:null;
+    game.player.uBonds=combineUBonds(def.id,game.player.uBonds,u.uBonds,legacy);
+    game.player.uExp=bondXP(game.player);
+    persistUBonds(localStorage,def.id,game.player.uBonds);
+    game.visited = { hub: true };
+    for (const key of Object.keys(u.visited)) if (ROOMS[key]) game.visited[key] = true;
+    game.score = u.score;
+    game.kills = u.kills;
+    game.won = u.won;
+    game.world1Seals = storeWorld1Seals([...game.world1Seals, ...(Array.isArray(u.world1Seals) ? u.world1Seals : [])]);
+    game.keepsakes=mergeKeepsakes(game.keepsakes,u.keepsakes);persistKeepsakes(game.keepsakes);
+    game.world1Won = !!u.world1Won;
+    game.world1Visited = u.world1Visited || {};
+    game.world1Stations = u.world1Stations || {};
+    applyForm(game.player, { silent: true });
+    paintFit(game.player);
+    if (u.hp != null) game.player.health = Math.max(1, Math.min(game.player.maxHealth, u.hp));
+    if (u.nineUsed) game.player._nineUsed = true;
+    game.clearTicks = u.clearTicks || 0;
+    game.best = u.best || null;
+    game.clearedEncounters=u.clearedEncounters||{};game.checkpoints=u.checkpoints||{};game.explored=u.explored||{};game.secrets=u.secrets||{};game._resumeCheckpoint=true;game.roomAlbums=mergeRoomAlbums(game.roomAlbums,u.roomAlbums);
+    game._magicSnap = u.magic;
+    game.dragonTrial = u.dragonTrial || null;
+    roomId = ROOMS[u.roomId] ? u.roomId : "hub";
+  }
+} catch (e) {}
+}
+document.body.classList.add("playing");
+document.getElementById("char-select")?.classList.add("hidden");
+renderAbilityBar();
+if (!loadRoom(roomId)) loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub");
+if (!resume && game.roomDef?.world1 && !game.world1Seals.length) playWorld1Cine(game, "intro");
+if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
+if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
+if (onlineMode) {
+void onlineCoop.start(game, def).catch((error) => {
+  console.error("[OHANA online]", error);
+  showErrorMessage("ONLINE", "No se pudo conectar a la partida online.");
+});
+} else {
+save();
+}
+updateHUD();
+canvas.focus({ preventScroll: true });
+}
+function evolve(reason) {
+const p = game.player; if (!p || p.dead || game.relicScene) return;
+p.evo = Number(p.evo) || 0;
+const fromEvo = p.evo;
+const fromName = p.evoNames?.[fromEvo] || p.forms?.[fromEvo]?.name || p.name || "Forma";
+if (reason !== "xp" && reason !== "manual") return;
+if (p.evo >= 4) { if (reason === "manual") showSystemMessage("MAX", "Ya eres GOD (forma 5)."); return; }
+if(kiloGrowthWaiting(game)){
+ if(reason==='manual')showObjectiveMessage('ESCUCHA EL CLARO',world1NextObjective(game)?.action||'Despierta el siguiente instrumento');
+ return;
+}
+const need = XP_NEED[p.evo + 1];
+if (need == null || p.xp < need) {
+if (reason === "manual") showSystemMessage("XP", "Te faltan " + Math.max(0, Math.ceil(need - p.xp)) + " para evolucionar.");
+return;
+}
+const previousHealth=p.health,previousMax=p.maxHealth;
+p.evo += 1;
+applyForm(p);
+if(game.roomDef?.kiloEncounterVersion)p.health=Math.min(p.maxHealth,previousHealth+Math.max(0,p.maxHealth-previousMax));
+if (p.id === "cuerno") { try { cuernoEvolveBurst(game, p); } catch (_) {} }
+paintFit(p);
+if (p.evo === 4) Surprises.onBecomeGod(game);
+const toGod = p.evo >= 4;
+game.shake = toGod ? 26 : 12;
+game.flashColor = p.color || (p.forms && p.forms[p.evo] && p.forms[p.evo].color) || "#fff";
+game.flash = reduceMotion ? (toGod ? 12 : 8) : (toGod ? 32 : 14);
+game.fx.emit(p.x + p.w / 2, p.y, {
+color: p.color,
+count: toGod ? 96 : 48,
+size: toGod ? 10 : 6,
+up: toGod ? 3.5 : 2,
+speed: toGod ? 5.5 : undefined,
+star: toGod || undefined,
+});
+if (toGod) {
+game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, {
+  color: "#fff8c8", count: 48, size: 7, up: 2.5, speed: 4, star: true,
+});
+}
+game.experience?.evolution(p, toGod);
+const toName = p.evoNames?.[p.evo] || p.forms?.[p.evo]?.name || p.name || "Nueva forma";
+dispatchEvent(new CustomEvent("ohana-evolve", { detail: {
+id: p.id,
+name: p.name,
+evo: p.evo,
+fromEvo,
+fromName,
+toName,
+color: p.color,
+final: toGod,
+michiSeed: p.michiSeed || 0
+}}));
+save();
+}
+function cheatEvolve() {
+if(game.relicScene)return;
+const p = game.player;
+if (!p || p.dead || !game.running || paused || overlayOpen() || document.hidden) return;
+if (p.evo >= 4) {
+showSystemMessage("CHEAT", "Forma final ya desbloqueada.");
+return;
+}
+const need = XP_NEED[p.evo + 1];
+if (need != null) p.xp = Math.max(p.xp, need);
+evolve("xp");
+showSystemMessage("CHEAT", "Evolución de prueba: Ctrl+Z");
+}
+
+function respawn() {
+if(game.onlineAdventure){game.coopRetryAnimationDone=true;void onlineCoop.requestRetry(game);return;}
+let p = game.player; if (!p) return;
+if (DeathFx.isPlaying()) DeathFx.cancel();
+p.x = 180; p.y = 500; p.vx = 0; p.vy = 0; p.health = p.maxHealth; p.dead = false; p.invuln = 50; game.combo = 0;
+p._combatChain = [];
+game._combatFlow = null;
+game._assist = null;
+game._supremeFlow = null;
+Magic.reset(game);
+const r=ROOMS[game.roomId]||ROOMS.hub;
+const checkpoint=checkpointFor(r,game.checkpoints?.[r.id]);
+// Capture only legitimately completed station IDs before enterWorld1() resets
+// per-room state. Carried items and transient timers are deliberately excluded.
+const puzzleCheckpoint=world1DeathCheckpoint(game);
+if(loadRoom(r.id)) restoreWorld1DeathCheckpoint(game,puzzleCheckpoint);
+p=game.player;
+if(checkpoint){p.x=checkpoint.x-p.w/2;p.y=checkpoint.y-p.h;p.grounded=true;p.jumps=0;}
+game.cam.x=Math.max(0,p.x-camW()/2);game.cam.y=Math.max(0,p.y-camH()/2);
+}
+function dash() {
+if(game.relicScene)return;
+const p = game.player;
+if (!p || p.dead) return;
+if (p.dash > 0) { p.dashBuf = 8; return; }
+const sig = signature(p.id);
+p._dashFace = p.facing || 1;
+p._dashGo = 11;
+p.vx = sig.dash * p._dashFace;
+p.invuln = Math.max(p.invuln, sig.iframe);
+p.dash = 20 + Math.round(sig.dash * 0.35);
+p.dashBuf = 0;
+if (sig.hop) p.vy = Math.min(p.vy || 0, sig.hop);
+if (sig.ram) p._ram = 8;
+for (let i = 0; i < 3; i++) {
+pushRuntime(game.ghosts, { x: p.x - p._dashFace * i * 10, y: p.y, w: p.w, h: p.h, life: 10 + i * 3, color: p.color }, MAX_RUNTIME_GHOSTS);
+}
+game.fx.emit(p.x, p.y + p.h * 0.5, { color: p.color || "#fff", count: sig.heavy ? 14 : 10, size: 3, star: true, speed: 3.2, life: 16 });
+beep("dash");
+game.experience?.dash(p);
+void onlineCoop.signal(game, "action", { action: "dash", characterId: p.id });
+}
+function finiteOr(value, fallback = 0) { return safeFiniteOr(value, fallback); }
+function damageEnemy(e, amount) { if (e.dying > 0) return true; if (e._fusionBoss && e.invuln > 0) return true; const before=e.hp;const ok=safeDamageEnemy(e, amount);if(ok)chargeFinisher(game,Math.max(0,before-e.hp));return ok; }
+function healPlayer(p, amount) { return safeHealPlayer(p, amount); }
+function damagePlayer(p, amount) { return safeDamagePlayer(p, amount); }
+function addPlayerXp(p, amount) { return safeAddPlayerXp(p, amount); }
+function addScore(amount) { return safeAddScore(game, amount); }
+function addKill() { return safeAddKill(game); }
+function addCombo(amount = 1) { return safeAddCombo(game, amount); }
+function registerBossPunish(e) {
+if (!e?.boss || !e.vulnerable || e.dying) return false;
+e.punishHits = (Number(e.punishHits) || 0) + 1;
+if (e.punishAwarded) return true;
+
+e.punishAwarded = true;
+const reward = 50 + Math.max(1, Math.min(3, Number(e.phase) || 1)) * 25;
+addScore(reward);
+game.shake = Math.min(14, (game.shake || 0) + 5);
+game.flash = Math.max(game.flash || 0, 4);
+game.flashColor = "#fff6c8";
+game.nums.add(e.x, e.y - 12, "PUNISH +" + reward, "#ffe66a", true);
+game.bossFx?.counter?.(e.x + e.w / 2, e.y + e.h / 2, e.phase, reward);
+return true;
+}
+function markHit(p, e, dmg, kb) {
+const evo = Number(p.evo) || 0;
+let d = dmg;
+const push = kb == null ? 1 : kb;
+const shieldBlock=shieldBlocksHit(e,p);
+const crit = !shieldBlock && (d >= 32 || push >= 1.5);
+if (shieldBlock){
+ d=Math.max(1,Math.ceil(d*.3));
+ e._shieldImpact=18;
+ game.nums?.add?.(e.x,e.y-26,'¡BLOQUEADO!','#bcf3ff',false);
+}
+if (e.boss) d = Math.ceil(d * 0.55);
+if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.y + e.h * 0.35)) {
+  d = Math.max(1, Math.round(d * 0.35));
+  game.fx.emit(e.x + e.w / 2, e.y + e.h / 3, { color: "#9fe8ff", count: 5, size: 2, up: 0.8, life: 10 });
+}
+const healthBefore=e.hp;
+damageEnemy(e, d);
+const applied=Math.max(0,healthBefore-e.hp);
+if(!applied){showBlockedHit(game,e);return;}
+d=applied;
+if(e.hp<healthBefore)recordKiloHit(game,'H',p._swing);
+registerBossPunish(e);
+const face = p.facing || 1;
+e.vx = shieldBlock ? 0 : face * (e.boss ? 3 : 8) * push;
+e.vy = shieldBlock ? e.vy : Math.min(e.vy || 0, -2.2 * Math.abs(push));
+e.stun = Math.max(e.stun || 0, shieldBlock ? 3 : 10);
+e.flash = crit ? 18 : 14;
+e.invuln = Math.max(e.invuln || 0, shieldBlock ? 4 : 8);
+e._hitT = crit ? 16 : 12;
+e._hitMax = e._hitT;
+e._hitDir = face;
+e._hitColor = crit ? "#ffe66a" : (p.color || "#ffffff");
+e._hitCrit = crit;
+
+const feedback = damageFeedback({
+crit,
+boss: !!e.boss,
+combo: game.combo,
+});
+
+if (feedback.showNumber) {
+game.nums.add(
+  e.x,
+  e.y,
+  crit ? d + "!" : String(d),
+  crit ? "#ffe66a" : (p.color || "#fff"),
+  crit
+);
+}
+
+game.combatFx?.add(
+e.x + e.w / 2,
+e.y + e.h / 2,
+crit ? "#ffe66a" : (p.color || "#fff"),
+{
+  tier: feedback.tier,
+  dir: face,
+  label: feedback.label,
+  seed: game.combo + (e.boss ? 11 : 0),
+}
+);
+
+punch(e.x, e.y, crit ? "#ffe66a" : p.color);
+earnKiloPetal(game, p._swing);
+const flow = registerCombatAction(game, "H", markAt(p.id, evo)?.name || "H");
+if (flow.label && flow.distinct >= 2) game._combatFlow = { ...game._combatFlow, label: flow.label };
+game.experience?.hit(p, e, { damage: d, crit, boss: !!e.boss });
+hitStop(e.boss ? (crit ? 5 : 3) : (crit ? 8 : 4));
+if (crit) {
+game.shake = Math.min(16, (game.shake || 0) + 5);
+game.flash = Math.max(game.flash || 0, reduceMotion ? 2 : 4);
+game.flashColor = "#fff6c8";
+}
+addPlayerXp(p, 1);
+void onlineCoop.signal(game, "hit", {
+characterId: p.id,
+targetId: e.id,
+targetSyncId:e._coopSyncId,targetVisit:e._coopVisit,
+kind: e.kind,
+x: e.x,
+y: e.y,
+damage: d,
+});
+if (game.combo >= 5) {
+game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: p.color || "#fff6c8", count: 8, size: 3, star: true, speed: 2.4 });
+game.nums.add(e.x, e.y - 16, "x" + game.combo, "#fff6c8");
+}
+}
+function cuernoDeathT(p) { return Number.isFinite(p?._cuernoDeadAt) ? Math.max(0, (t - p._cuernoDeadAt) / 60) : Infinity; }
+function hornPoke(p, evo, def) {
+const face = p.facing || 1;
+p._thrust = 6;
+p._thrustFace = face;
+const reach = 92 + evo * 12;
+const box = {
+x: face > 0 ? p.x + p.w - 6 : p.x - reach,
+y: p.y - 2,
+w: reach,
+h: Math.max(22, p.h * 0.62),
+};
+pushRuntime(game.slashes, {
+x: p.x + p.w / 2 + face * 20,
+y: p.y + 4,
+facing: face,
+life: 14,
+max: 14,
+color: "#ffe9a8",
+kind: "poke",
+w: reach,
+}, MAX_RUNTIME_SLASHES);
+p._swing = { reach, low: false, dmg: def.dmg, kb: 1.2, hit: new Set() };
+for (const e of game.enemies) {
+if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
+if (aabb(box, e)) {
+  p._swing.hit.add(e);
+  markHit(p, e, def.dmg, 1.2);
+}
+}
+game.fx.emit(box.x + box.w * 0.7, box.y + 8, { color: "#fff6c8", count: 8, size: 3, star: true, speed: 2.4 });
+game.shake = Math.min(10, (game.shake || 0) + 3);
+}
+function showSwing(p, evo, def) {
+const face = p.facing || 1;
+const sig = signature(p.id);
+p._thrust = sig.heavy ? 7 : 5;
+p._thrustFace = face;
+if (sig.hop) p.vy = Math.min(p.vy || 0, sig.hop);
+const reach = Math.max(48, (def.reach || 64) + (sig.reach || 0));
+const low = !!sig.low;
+const box = low
+? { x: p.x - reach * 0.12, y: p.y + p.h * 0.42, w: p.w + reach, h: p.h * 0.7 }
+: { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
+const mouth = p.id === "dino" || p.id === "yomi";
+const life = sig.heavy ? 20 : 16;
+const slash = {
+x: p.x + p.w / 2 + face * (low ? 8 : 18),
+y: low ? p.y + p.h * 0.72 : (mouth ? p.y + p.h * 0.4 : p.y + p.h * 0.32),
+facing: face, life, max: life,
+color: def.color || p.color,
+kind: def.kind || "slice",
+w: reach,
+};
+pushRuntime(game.slashes, slash, MAX_RUNTIME_SLASHES);
+pushRuntime(game.slashes, { ...slash, life: 8, max: 8, w: reach * 0.72, y: slash.y - 8 }, MAX_RUNTIME_SLASHES);
+p._swing = { reach, low, dmg: def.dmg, kb: sig.kb || 1, hit: new Set() };
+for (const e of game.enemies) {
+if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
+if (aabb(box, e)) {
+  p._swing.hit.add(e);
+  markHit(p, e, def.dmg, sig.kb || 1);
+}
+}
+const tipX = face > 0 ? box.x + box.w - 6 : box.x + 6;
+game.fx.emit(tipX, box.y + box.h * 0.45, {
+color: def.color || p.color, count: sig.heavy ? 18 : 12, size: 3.6,
+star: true, speed: 3.4, angle: face > 0 ? 0 : Math.PI, spread: 0.8,
+});
+game.fx.emit(tipX, box.y + box.h * 0.45, { color: "#fff", count: 6, size: 2, speed: 2.2, life: 10 });
+game.shake = Math.min(14, (game.shake || 0) + (sig.heavy ? 6 : 4));
+if (sig.heavy) hitStop(2);
+}
+
+function tickSwing(p) {
+const s = p._swing;
+if (!s || !(p.melee > 0)) { p._swing = null; return; }
+const face = p.facing || 1;
+const reach = s.reach;
+const box = s.low
+? { x: p.x - reach * 0.12, y: p.y + p.h * 0.42, w: p.w + reach, h: p.h * 0.7 }
+: { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
+for (const e of game.enemies) {
+if (!e || e.dying || e.hp <= 0 || e.invuln > 0 || s.hit.has(e)) continue;
+if (!aabb(box, e)) continue;
+s.hit.add(e);
+markHit(p, e, s.dmg, s.kb);
+}
+}
+
+function attack() {
+if(game.relicScene)return;
+const p = game.player;
+if (!p || p.dead) return;
+if (p.melee > 0) { p.meleeBuf = 8; return; }
+p._chargeAction=(p._chargeAction||0)+1;
+
+if (!p.facing) p.facing = 1;
+
+const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
+const def = markAt(p.id, evo);
+
+p.melee = Math.max(7, 12 - evo)+(p.id==="dino"?8:p.id==="dragon"?4:0);
+p.meleeBuf = 0;
+
+beep("slash");
+game.experience?.attack(p, def);
+
+if (p._markName !== def.name) {
+p._markName = def.name;
+game.nums.add(
+  p.x,
+  p.y - 18,
+  def.name,
+  def.color || p.color || "#ffe66a"
+);
+}
+
+void onlineCoop.signal(game, "action", {
+action: "attack",
+characterId: p.id,
+});
+
+if (p.id === "cuerno") {
+if (game.cuernoFx) { castCuerno("M", p, game, def); return; }
+hornPoke(p, evo, def);
+return;
+}
+
+showSwing(p, evo, def);
+}
+function gameDifficulty() {
+try {
+const v = localStorage.getItem("ohana-difficulty");
+return v === "easy" || v === "hard" ? v : "normal";
+} catch (e) { return "normal"; }
+}
+function scaleFoe(e) {
+return scaleCombatHealth(e,readCombatDifficulty(e.roomId));
+}
+function hurtPlayer(amount, label) {
+const p = game.player;
+if (!p || p.dead || p.invuln > 0) return;
+if (game.boss?._fusionBoss && game.world1Boss) { amount = world1BossFilterDamage(game, amount); if (!(amount > 0)) return; }
+const diffMul = readCombatDifficulty(game.roomId).damage;
+amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
+if (!(amount > 0)) return;
+const beforeDamage=p.health;damagePlayer(p, amount);p._hurtAt=t;p.hurtFlash=18;
+game.combatReport||={hits:0,damage:0};game.combatReport.hits++;game.combatReport.damage+=Math.max(0,beforeDamage-p.health);
+resetPlayerLocomotion(p);if(p._kiloFlightMode==='solar')stopKiloFlight(p);
+p.invuln = 42;
+p.vx = Math.sign(p.vx || p.facing || 1) * -8;
+p.vy = -6.5;
+p.flash = Math.max(p.flash || 0, 10);
+game.shake = 12;
+game.combo = 0;
+game.comboT = 0;
+p._combatChain = [];
+game._combatFlow = null;
+game._assist = null;
+game._supremeFlow = null;
+beep("hurt");
+buzz(24);
+hitStop(2);
+game.experience?.hurt(p, amount);
+void onlineCoop.signal(game, "hurt", {
+targetPlayerId: onlineCoop.identity?.playerId || null,
+amount,
+health: Math.max(0, p.health),
+});
+game.nums.add(p.x, p.y, label || ("-" + Math.round(amount)), "#ff6a7a");
+const hurt = document.getElementById("fx-hurt");
+if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 220); }
+if (p.health <= 0 && Passives.onLethal(game)) return;
+if (p.health <= 0) {
+p.health = 0;
+p.dead = true; p._cuernoDeadAt = t;
+dispatchEvent(new CustomEvent("ohana-death", { detail: { reason: "hurt", id: p.id, hero: p.name } }));
+showErrorMessage("DERROTA", "R vuelve al claro");
+if (!DeathFx.isPlaying()) DeathFx.start(p, () => respawn(), { reason: "hurt" });
+}
+}
+function overlapX(px, pw, plat, pad) {
+const m = pad == null ? 1 : pad;
+return px + pw > plat.x + m && px < plat.x + plat.w - m;
+}
+function floorsAtX(px, pw) {
+const out = [];
+for (const plat of game.platforms) if (overlapX(px, pw, plat, 0)) out.push(plat);
+return out;
+}
+function nearestBelow(px, pw, feetY) {
+let best = null;
+for (const plat of floorsAtX(px, pw)) {
+if (plat.y >= feetY - 28 && (!best || plat.y < best.y)) best = plat;
+}
+return best;
+}
+function lowestFloor(px, pw) {
+let best = null;
+for (const plat of floorsAtX(px, pw)) if (!best || plat.y > best.y) best = plat;
+return best;
+}
+function landOn(p, plat) {
+const wasAir = !p.grounded;
+const impactSpeed = Number(p.vy) || 0;
+
+if (wasAir && impactSpeed > 7) {
+beep("land");
+game.experience?.land(p, impactSpeed);
+game.fx.emit(p.x + p.w / 2, plat.y, { color: p.color || "#fff", count: impactSpeed > 11 ? 16 : 8, size: 3, speed: 2.4, up: 0.4, life: 14 });
+// V468: no screen shake on normal landings, only on very long falls.
+if (impactSpeed > 20) game.shake = Math.min(6, (game.shake || 0) + 2);
+}
+
+p.y = plat.y - p.h;
+p.vy = 0;
+p.grounded = true;
+p.jumps = 0;
+p.coyote = CONTROL_FEEL.coyoteFrames;
+}
+function inPitX(p) {
+const cx = p.x + p.w / 2;
+const grounds = game.platforms.filter((pl) => pl.h > 40).sort((a, b) => a.x - b.x);
+for (let i = 0; i < grounds.length - 1; i++) {
+const left = grounds[i].x + grounds[i].w;
+const right = grounds[i + 1].x;
+if (right - left >= 40 && cx > left && cx < right) return true;
+}
+return false;
+}
+function dieVoid(p) {
+if (!p || p.dead) return;
+p.dead = true; p._cuernoDeadAt = t; p.health = 0; game.shake = 16; beep("hurt");
+dispatchEvent(new CustomEvent("ohana-death", { detail: { reason: "void", id: p.id, hero: p.name } }));
+const hurt = document.getElementById("fx-hurt");
+if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 280); }
+showErrorMessage("VACÍO", "Pozo real. R vuelve al claro");
+game.fx.emit(p.x + p.w / 2, p.y, { color: "#7ee7ff", count: 28, size: 5, up: 2 });
+if (!DeathFx.isPlaying()) DeathFx.start(p, () => respawn(), { reason: "void" });
+}
+function checkVoidDeath() {
+const p = game.player;
+if (!p || p.dead) return;
+const r = room();
+const feet = p.y + p.h;
+
+const hazardAxis = hazardContainsX(game.roomId, p);
+const hazard = hazardTrigger(game.roomId, p);
+
+if (hazard) {
+const hazardKey = game.roomId + ":" + hazard.id;
+
+if (hazard.type === HAZARD_TYPES.TRANSFER && hazard.dest) {
+  p._hazardEscapeKey = "";
+  dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
+    type: hazard.type, id: hazard.id, room: game.roomId, dest: hazard.dest, hero: p.id
+  }}));
+  if(!loadRoom(hazard.dest, "down"))respawn();
+  return;
+}
+
+if (hazard.type === HAZARD_TYPES.DEATH) {
+  if (hazard.heroEscape && p.id === hazard.heroEscape && p._hazardEscapeKey !== hazardKey) {
+    p._hazardEscapeKey = hazardKey;
+    p.vy = -Math.max(9, p.jumpPower * 0.88);
+    p.vx += (p.facing || 1) * 1.8;
+    p.grounded = false;
+    p.coyote = 0;
+    p.jumps = Math.min(p.jumps || 0, Math.max(0, (p.maxJumps || 1) - 1));
+    p._masteryMove = "wingbeat";
+    game.flash = Math.max(game.flash || 0, 8);
+    game.shake = Math.min(14, (game.shake || 0) + 5);
+    game.fx?.emit(p.x + p.w / 2, p.y + p.h, {
+      color: hazard.color || "#ffd36a", count: 14, size: 3.5, up: 2.6, speed: 3.4, life: 18, star: true
+    });
+    game.nums?.add(p.x + p.w / 2, p.y - 14, "¡ÚLTIMA BATIDA!", "#ffe7a0", true);
+    return;
+  }
+  dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
+    type: hazard.type, id: hazard.id, room: game.roomId, hero: p.id
+  }}));
+  dieVoid(p);
+  return;
+}
+}
+
+if (!hazardAxis) {
+p._hazardEscapeKey = "";
+const next = nearestBelow(p.x, p.w, feet - 8);
+if (next && !(p._kiloFlightT>0&&next.h<=40) && feet >= next.y && !dropIgnoresPlatform(p, next)) {
+  landOn(p, next);
+  return;
+}
+
+const low = lowestFloor(p.x, p.w);
+if (low && feet > low.y && p.vy >= 0 && !dropIgnoresPlatform(p, low)) {
+  landOn(p, low);
+  return;
+}
+}
+
+if (!r.pit && !hazardAxis) {
+const floorY = game.worldH - 90;
+if (feet > floorY) {
+  p.y = floorY - p.h;
+  p.vy = 0;
+  p.grounded = true;
+}
+return;
+}
+
+const inGap = inPitX(p);
+const crossedBottom = feet > game.worldH - 24;
+const deepFall = p.y > game.worldH + 8;
+
+if (!hazardAxis && inGap && crossedBottom) {
+if (r.doors.down) loadRoom(r.doors.down, "down");
+else dieVoid(p);
+return;
+}
+
+if (deepFall) dieVoid(p);
+}
+function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+function punch(x, y, color, dir = 1) {
+game.shake = Math.min(18, game.shake + 6);
+addCombo(1);
+game.comboT = 480;
+addScore(10 * game.combo);
+const tier = combatTier(game.combo);
+const label = tier >= 4 ? "RÁFAGA" : tier === 3 ? "IMPACTO" : tier === 2 ? "COMBO" : "";
+game.combatFx?.add(x, y, color || "#fff", { tier, dir, label, seed: game.combo });
+game.fx.emit(x, y, { color, count: 10 + tier * 2, size: 3.2 + tier * 0.35, up: 1.2 + tier * 0.18 });
+game.fx.emit(x, y, { color: "#fff", count: 6 + tier * 2, size: 2, up: 1.8, speed: 4.4 + tier * 0.3, life: 16, star: true });
+if (tier >= 3) hitStop(tier === 4 ? 4 : 3);
+beep("hit");
+}
+function beginFinale(e) {
+dispatchEvent(new CustomEvent("ohana-boss-fall", { detail: {
+hero: game.player?.name || "Ohana",
+id: game.player?.id || "",
+room: game.roomId
+}}));
+game.finale = {
+t: 210,
+max: 210,
+x: e.x + e.w / 2,
+y: e.y + e.h * 0.42,
+lines: e._fusionBoss ? [...FUSION_STORY.fall] : [
+  "El nido se abre.",
+  "Los que se quedaron atrás salen a la luz.",
+  "Ohana no es el poder. Es no dejar a nadie."
+]
+};
+game.storyLine = "";
+game.hitstop = 0;
+game.flash = 5;
+game.flashColor = "#fff6c8";
+game.shake = 6;
+game.projectiles = [];
+game.bossFx?.clear(); // Kill stale boss circling effects before the victory story.
+game.fx?.emit(game.finale.x, game.finale.y, {
+color: "#ffe66a",
+count: game.reduceMotion ? 5 : 12,
+size: 3,
+up: 1.4,
+speed: 2,
+star: false,
+life: 16,
+});
+game.bolts = [];
+game.slashes = [];
+playMusic("victoria");
+}
+function tickFinale() {
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')return;
+const f = game.finale;
+if (!f || f.t <= 0) return;
+f.t--;
+// One impact, one fragmentation, then one cinematic. No continuous shower
+// of damage flash or post-combat projectiles pretending the fight continues.
+const stage = bossFallStage(f);
+if (stage.progress < .34 && f.t % 20 === 0) {
+  game.fx?.emit(f.x, f.y, { color: "#ff8799", count: 3, size: 3, up: 1, life: 16 });
+}
+if (f.t === 135) {
+  game.flash = game.reduceMotion ? 3 : 10;
+  game.flashColor = "#fff1ce";
+  game.shake = game.reduceMotion ? 0 : 19;
+  game.fx?.emit(f.x, f.y, {
+    color: "#ff9d74", count: game.reduceMotion ? 10 : 38,
+    size: 5, up: 2.3, speed: 5.3, star: false, life: 34
+  });
+  game.fx?.emit(f.x, f.y, {
+    color: "#a2e6ff", count: game.reduceMotion ? 7 : 25,
+    size: 4, up: 2.0, speed: 4.8, star: true, life: 35
+  });
+  beep("win");
+}
+if (f.t === 55) game.storyLine = "";
+const w1Final = game.roomDef?.fusionBoss;
+if (f.t === 0 && (w1Final ? !game._w1WinSent : !game.won)) {
+if (w1Final) { game.world1Won = true; game._w1WinSent = true; }
+else game.won = true;
+game._cuernoWonT = t;
+const p = game.player;
+const ticks = game.clearTicks || 0;
+const rank = clearRank(ticks);
+if(!game.onlineAdventure)game.best = rememberBest(game.best, {
+  ticks, kills: game.kills, score: game.score, evo: p ? p.evo : 0, rank, id: p ? p.id : ""
+});
+save();
+const winDetail = {
+  score: game.score,
+  kills: game.kills,
+  id: p ? p.id : "kilo",
+  uPartner: p?.uPartner || null,
+  evo: p ? p.evo : 4,
+  hero: p ? p.name : "Ohana",
+  form: p && p.evoNames ? p.evoNames[p.evo] || p.evoNames[4] : "forma final",
+  rank,
+  keepsakes: mergeKeepsakes(game.keepsakes,game.finalGauntlet?.found),
+  world: w1Final ? 1 : 2,
+  room: game.roomId,
+  time: formatClear(ticks),
+  best: game.best ? formatClear(game.best.ticks) : ""
+};
+// Mundo 1: la tarjeta de resultados llega después de las cinemáticas de caída y final.
+if (w1Final && (world1CineActive(game) || (game.world1Boss && !game.world1Boss.done))) game._w1WinDetail = winDetail;
+else dispatchEvent(new CustomEvent("ohana-win", { detail: winDetail }));
+dispatchEvent(new CustomEvent("ohana-room", { detail: {
+  id: game.roomId, visited: game.visited, won: true, evo: p ? p.evo : 0
+}}));
+}
+}
+function worldClear() {
+const need = ["hub", "beach", "jungle", "cave", "lab", "ridge", "space", "volcano"];
+if (game.won || game.summoned || game.roomId === "boss" || isWorld1Room(game.roomId)) return;
+if (!need.every((id) => game.visited[id])) return;
+game.summoned = true;
+game.summonDelay = 132; // 2.2 s a 60 Hz, pausables y reproducibles.
+beep("alert");
+showBossMessage("EL NIDO DESPIERTA", "El monstruo te espera. Prepárate.");
+}
+
+function tickWorldSummon() {
+if (!(game.summonDelay > 0)) return;
+if (game.won || game.roomId === "boss" || !game.running) {
+if (game.roomId === "boss" || game.won) game.summonDelay = 0;
+return;
+}
+game.summonDelay--;
+if (game.summonDelay <= 0) {
+game.summonDelay = 0;
+if (!game.won && game.running) loadRoom("boss", "right");
+}
+}
+function nearUpDoor(p) {
+const cx = p.x + p.w / 2;
+const exit=game.roomDef?.upExit;
+return !!exit && cx>exit.x && cx<exit.x+exit.w;
+}
+function tryDoors() {
+const p = game.player; const r = room();
+const nestLocked = r.id === "boss" && !game.won;
+// Mundo 1: el sello de la sala abre el este; la arena final se cierra durante la Quimera.
+if (r.world1) {
+  const wantR = p.x > game.worldW - 24 && r.doors.right, wantL = p.x < -8 && r.doors.left;
+  if ((wantR && !world1CanLeave(game,"right")) || (wantL && !world1CanLeave(game,"left"))) {
+    p.x = wantR ? game.worldW - p.w - 30 : 30; p.vx = 0;
+    if (!game._w1LockMsgT || t - game._w1LockMsgT > 180) { game._w1LockMsgT = t; showObjectiveMessage("SELLO DORMIDO", world1LockedMessage(game)); beep("locked"); }
+    return;
+  }
+}
+if (nestLocked && p.x < 72) p.x = 72;
+let dest = null, dir = null;
+if (p.x > game.worldW - 24 && r.doors.right) { dest = r.doors.right; dir = "right"; }
+else if (p.x < -8 && r.doors.left && !nestLocked) { dest = r.doors.left; dir = "left"; }
+else if (p.y < 8 && r.doors.up && nearUpDoor(p)) { dest = r.doors.up; dir = "up"; }
+if (p.x > game.worldW - 24 && !r.doors.right) p.x = game.worldW - p.w;
+if (p.x < -8 && (!r.doors.left || nestLocked)) p.x = nestLocked ? 72 : 0;
+if (nestLocked && p.x < 72) p.x = 72;
+if (p.y < 0 && !r.doors.up) p.y = 0;
+if (!dest || game.doorWait) return;
+const next = ROOMS[dest];
+if (next && next.needEvo && p.evo < next.needEvo) { loadRoom(dest, dir); return; }
+const hold = reduceMotion ? 8 : 30;
+game.doorWait = { id: dest, dir, t: hold, max: hold };
+p.vx = 0;
+p.vy = 0;
+if (dir === "right") p.x = Math.min(p.x, game.worldW - p.w - 2);
+else if (dir === "left") p.x = Math.max(p.x, 2);
+else if (dir === "up") p.y = Math.max(p.y, 6);
+}
+function updatePlayer() {
+const p = game.player; if (p.dead) return;
+if (game.doorWait) {
+p.vx = 0;
+p.vy = 0;
+game.doorWait.t--;
+if (game.doorWait.t <= 0) {
+  const w = game.doorWait;
+  game.doorWait = null;
+  loadRoom(w.id, w.dir);
+}
+return;
+}
+if (p.markT > 0) p.markT--;
+if (game.doorHold > 0) {
+game.doorHold--;
+p.vx = 0;
+p.vy = 0;
+return;
+}
+if (game.finale && game.finale.t > 0) {
+p.vx = 0;
+p.vy = 0;
+return;
+}
+tickEvoTween(p);
+const rawLeft = !!(keys["a"] || keys["arrowleft"]);
+const rawRight = !!(keys["d"] || keys["arrowright"]);
+const axisX = input?.axisX?.() ?? (rawLeft === rawRight ? 0 : rawRight ? 1 : -1);
+const left = axisX < 0;
+const right = axisX > 0;
+const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
+const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
+const drop = !!(keys["s"] || keys["arrowdown"]);
+const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
+if (p.dash > 0) p.dash--;
+if (p._dashGo > 0) p._dashGo--;
+if (p.melee > 0) p.melee--;
+if (p.dashBuf > 0) { p.dashBuf--; if (p.dash <= 0) dash(); }
+if (p.meleeBuf > 0) { p.meleeBuf--; if (p.melee <= 0) attack(); }
+if (p._thrust > 0) {
+p._thrust--;
+p.facing = p._thrustFace || p.facing || 1;
+const burst = p.facing * (p.speed + 4);
+if (p._dashGo > 0) {
+  const dv = signature(p.id).dash * (p._dashFace || p.facing || 1);
+  p.vx = Math.abs(dv) >= Math.abs(burst) ? dv : burst;
+} else p.vx = burst;
+} else if (p._dashGo > 0) {
+const face = p._dashFace || p.facing || 1;
+const oppose = (face > 0 && left && !right) || (face < 0 && right && !left);
+if (oppose) {
+  p._dashGo = 0;
+  p.vx *= 0.35;
+} else {
+  p.vx = face * signature(p.id).dash;
+  p.facing = face;
+}
+} else if (axisX !== 0) {
+const target = axisX * moveSpeed;
+const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
+const accel = p.grounded
+  ? (reversing ? CONTROL_FEEL.reverseGroundAccel : CONTROL_FEEL.groundAccel)
+  : (reversing ? CONTROL_FEEL.reverseAirAccel : CONTROL_FEEL.airAccel);
+p.vx += (target - p.vx) * accel;
+if (Math.abs(target - p.vx) < 0.06) p.vx = target;
+p.facing = axisX;
+} else {
+p.vx *= p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake;
+if (Math.abs(p.vx) < 0.04) p.vx = 0;
+}
+if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
+else if (p.buffer > 0) p.buffer--;
+const masteryPlatforms = playerMasteryPlatforms(game);
+const allPlayerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
+const playerPlatforms=p._kiloFlightT>0?allPlayerPlatforms.filter(plat=>plat.h>40):allPlayerPlatforms;
+p.wall = 0;
+if (!p.grounded) {
+for (const plat of game.platforms) {
+  if (p.y + p.h > plat.y && p.y < plat.y + plat.h) {
+    if (p.x + p.w > plat.x && p.x + p.w < plat.x + 10 && right) p.wall = -1;
+    if (p.x < plat.x + plat.w && p.x > plat.x + plat.w - 10 && left) p.wall = 1;
+  }
+}
+}
+const canJump = p.jumps < p.maxJumps || p.coyote > 0 || p.wall;
+if (p.buffer > 0 && canJump) {
+const cuernoAirJump = !(p.coyote > 0 || p.wall);
+p.vy = -p.jumpPower; p.jumps = p.coyote > 0 || p.wall ? 1 : p.jumps + 1;
+if (p.id === "cuerno" && cuernoAirJump && p.jumps === 2 && cuernoFormMods((Number(p.evo) || 0) + 1)?.unlock?.rainbowJump) cuernoDoubleJump(game.cuernoFx, p);
+if (p.wall) p.vx = 8 * p.wall;
+p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; beep("jump");
+game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: p.color || "#fff", count: 10, size: 2.6, up: 1.4, speed: 2.2, life: 14 });
+}
+if (!jump) {
+if (p._jumpHeld && p.vy < -4) p.vy *= 0.55;
+p._jumpHeld = false;
+}
+if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
+if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
+{
+const holdGlide = !!(p.glide && !p.grounded && p.vy > 1 && jump);
+const glideActive = holdGlide || (p.gliding > 0);
+if (glideActive && (p.evo >= 4 || p.glide) && (t % 5 === 0)) {
+  const behind = p.x + p.w / 2 - p.facing * 10;
+  const under = p.y + p.h * 0.88;
+  game.fx.emit(behind, under, {
+    color: p.color || "#fff8e0",
+    count: 2 + (vfxRandom(3) < 0.45 ? 1 : 0),
+    size: 1.7,
+    up: 0.12,
+    speed: 0.85,
+    life: 12,
+    gravity: 0.035,
+    angle: Math.PI / 2 + (vfxRandom(4) - 0.5) * 0.8,
+    spread: 0.6,
+  });
+}
+}
+if (p.wall) p.vy = Math.min(p.vy, 2.2);
+stepChispinCloud(p,{jump,left,right});
+const inputState = { axisX, left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jumpPressed, t };
+p._jumpPrev = !!jump;
+Passives.update(game, inputState);
+const kiloStep=game._evolutionAttacks?.moves?.find(m=>m.id==='kilo'&&m.index===4&&m.life>0);
+if(p.id==='kilo'&&kiloStep&&!(p._dashGo>0)){inputState.kiloBurst=kiloStep.face*(kiloStep.age<6?3:kiloStep.speed);p.vx=inputState.kiloBurst;p.facing=kiloStep.face;}
+const kiloFlight=steerKiloFlight(p,inputState);
+const wasGrounded = !!p.grounded;
+const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
+const incoming = p.vy;
+p.vy = Math.min(14, p.vy + (kiloFlight?0:p._dashGo > 0 ? 0.14 : 0.5));
+p.grounded = false;
+const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 8));
+let wall = 0;
+for (let s = 0; s < steps; s++) {
+const sx = p.x;
+const sy = p.y;
+p.x += p.vx / steps;
+p.y += p.vy / steps;
+const hit = resolveBody(p, playerPlatforms, {
+  prevX: sx,
+  prevY: sy,
+  dropThroughY,
+});
+if (hit.grounded) {
+  if (!p.grounded && incoming > 7) beep("land");
+  p.vy = 0;
+  p.grounded = true;
+  p.jumps = 0;
+  p.coyote = CONTROL_FEEL.coyoteFrames;
+}
+if (hit.hitX) wall = hit.hitX;
+if (hit.hitY === -1) break;
+}
+if (wall && !p.grounded) p.wall = wall;
+advancePlatformDrop(p);
+tickSwing(p);
+Passives.afterMove(game, inputState);
+const dragonEmber = updateDragonTrial(game);
+if(dragonEmber){
+ const s=dragonEmber.ember;
+ game.fx?.emit?.(s.x,s.y,{color:s.color,count:game.reduceMotion?9:20,size:3,star:true,up:2.4,life:22});
+ game.nums?.add?.(s.x,s.y-32,"BRASA "+dragonEmber.count+"/3",s.color,true);
+ if(dragonEmber.complete){
+  healPlayer(p,25);addScore(350);
+  showObjectiveMessage("ASCENSO DEL DRAGÓN","Tres brasas despiertas. El Dragón te presta su fuego.");
+ }else{
+  showObjectiveMessage("PRUEBA DEL DRAGÓN","Brasa "+dragonEmber.count+" de 3 · "+s.title);
+ }
+}
+Magic.update(game);
+updateKiloFritaInteractions(game);
+
+if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
+if (!p.grounded && p.coyote > 0) p.coyote--;
+if (p._specialFlightT > 0) {
+p.grounded = false;
+p.coyote = 0;
+p.jumps = p.maxJumps;
+}
+if (p.invuln > 0) p.invuln--;
+if(p.hurtFlash>0)p.hurtFlash--;
+for (const o of game.orbs) {
+if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
+  o.taken = true;
+  const orbXp = 4 + Surprises.starOrbBonus();
+  addPlayerXp(p, orbXp);
+  void onlineCoop.signal(game, "orb", { x: o.x, y: o.y, xp: orbXp, roomId: game.roomId });
+  addScore(25); beep("pickup"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
+  if (game.orbs.every((q) => q.taken)) { beep("objective"); showObjectiveMessage("CRISTALES COMPLETOS", room().name + " · todos los cristales recogidos"); addScore(100); }
+}
+}
+for (const h of game.hearts) {
+if (!h.taken && Math.hypot(p.x + p.w / 2 - h.x, p.y + p.h / 2 - h.y) < 36) {
+  h.taken = true; healPlayer(p, 25); game.nums.add(h.x, h.y, "+HP", "#f66"); beep("pickup");
+}
+}
+if (!(portals.isBusy && portals.isBusy())) { tryDoors(); checkVoidDeath(); }
+portals.update(game);
+if (portals.isBusy && portals.isBusy() && portals.charge) {
+const ov = typeof portals.getOverlay === "function" ? portals.getOverlay() : null;
+const bh = portals.charge.type === "blackhole";
+if (!reduceMotion && ov && ov.alpha > 0.15) {
+  game.shake = Math.min(15, Math.max(game.shake || 0, 2 + ov.alpha * 9));
+}
+if (ov && ov.alpha > 0.45) {
+  game.flash = Math.max(game.flash || 0, bh ? 3 : 2);
+  game._portalFlash = bh ? "purple" : "amber";
+}
+}
+const trip = portals.consume();
+if (trip && trip.dest) {
+const bh = trip.type === "blackhole";
+game.fading = reduceMotion ? 16 : 24;
+game.flash = bh ? (reduceMotion ? 10 : 16) : (reduceMotion ? 8 : 12);
+game.shake = Math.min(22, (game.shake || 0) + (reduceMotion ? 4 : (bh ? 14 : 10)));
+game._portalFlash = bh ? "purple" : "amber";
+game._portalFadeMax = game.fading;
+if (bh) {
+  game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: "#b48cff", count: reduceMotion ? 14 : 36, size: 5, up: 1.6, speed: 3.4, life: 22 });
+  game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: "#fff", count: reduceMotion ? 4 : 12, size: 2.5, up: 2, speed: 4, life: 14, star: true });
+  beep("orb");
+} else {
+  game.fx.emit(p.x + p.w / 2, p.y, { color: "#ffc078", count: reduceMotion ? 12 : 28, size: 4, up: 2.4, speed: 4, life: 18 });
+  game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: "#ffe8c0", count: reduceMotion ? 4 : 10, size: 2.5, up: 2.8, speed: 3.5, life: 14, star: true });
+  beep("jump");
+}
+const fadeLen = game.fading;
+const flashLen = game.flash;
+const flashKind = game._portalFlash;
+const ok = loadRoom(trip.dest, "portal");
+if (ok) {
+  game.fading = fadeLen;
+  game.flash = Math.max(game.flash || 0, flashLen);
+  game._portalFlash = flashKind;
+  game._portalFadeMax = fadeLen;
+} else {
+  game._portalFlash = null;
+  game._portalFadeMax = 0;
+  game.fading = 0;
+  game.flash = Math.min(game.flash || 0, 6);
+  if (typeof portals.abortTrip === "function") portals.abortTrip(game);
+  else portals.armArrival();
+  snapToFloor(p);
+  beep("hurt");
+}
+}
+const r = room();
+if (stitchoTrailPrompt(game))setPrompt(stitchoTrailPrompt(game),true);
+else if (chispinTrailPrompt(game))setPrompt(chispinTrailPrompt(game),true);
+else if (michiTrailPrompt(game))setPrompt(michiTrailPrompt(game),true);
+else if (grovePrompt(game))setPrompt(grovePrompt(game),true);
+else if (portals.prompt) setPrompt(portals.prompt, true);
+else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
+else if (p.x > game.worldW - 90 && r.doors.right) setPrompt(r.world1 && !world1CanLeave(game,"right") ? "SELLO DORMIDO · " + (r.fusionBoss ? "vence a la Quimera" : r.hero===WORLD1_ORDER.at(-1)&&!world1SealsComplete(game.world1Seals)?"reúne los diez sellos":"despierta el sello de la sala") : "ESTE · sigue andando", true);
+else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
+else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
+else if (p.y < 90 && r.doors.up && nearUpDoor(p)) setPrompt("ARRIBA · salta al techo", true);
+else if (p.y > game.worldH - 160 && r.doors.down && inPitX(p)) setPrompt("ABAJO · cae por el hueco", true);
+else if (kiloGrowthWaiting(game) && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
+const instrument = world1NextObjective(game);
+setPrompt(instrument ? instrument.label + " · " + instrument.action : "Devuelve su voz al siguiente instrumento", true);
+}
+else if (p.evo < 4 && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
+const nxt = p.forms && p.forms[p.evo + 1];
+setPrompt("Tu experiencia despierta" + (nxt ? " · " + nxt.name : " la siguiente forma"), true);
+}
+else setPrompt("", false);
+while (!game.relicScene && p.evo < kiloUnlockedForm(game) && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
+tickRam(p);
+}
+function tickRam(p) {
+if (!p || !(p._ram > 0)) return;
+p._ram--;
+const box = { x: p.x - 8, y: p.y + 4, w: p.w + 16, h: p.h - 4 };
+for (const e of game.enemies) {
+if (e._rammed > 0) e._rammed--;
+if (e._rammed > 0 || e.dying || e.hp <= 0 || e.invuln > 0) continue;
+if (!aabb(box, e)) continue;
+e._rammed = 12;
+const d = 10 + (Number(p.evo) || 0) * 4;
+damageEnemy(e, e.boss ? Math.ceil(d * 0.45) : d);
+registerBossPunish(e);
+e.vx = p.facing * 7;
+e.vy = Math.min(e.vy || 0, -2);
+e.flash = 12;
+punch(e.x, e.y, p.color);
+}
+}
+function solidifyFoe(e) {
+if (!e || e.boss) {
+if (e && e.boss && !e.dying) {
+  e.x = Math.max(48, Math.min(e.x, game.worldW - e.w - 48));
+  e.y = Math.min(e.y, game.worldH - 90 - e.h);
+}
+return;
+}
+if (e.x < 12) { e.x = 12; if (e.vx < 0) e.vx *= -1; }
+if (e.x > game.worldW - e.w - 12) { e.x = game.worldW - e.w - 12; if (e.vx > 0) e.vx *= -1; }
+const water = e.kind === "pez" || e.kind === "medusa" || e.kind === "anguila";
+const planted = e.kind === "planta";
+if (water || planted) {
+e.y = Math.max(180, Math.min(game.worldH - 150, e.y));
+e.grounded = !!planted;
+return;
+}
+if (isAirFoe(e)) {
+const hit = resolveBody(e, game.platforms, {
+  prevX: e.x - (e.vx || 0),
+  prevY: e.y - (e.vy || 0),
+  solidsOnly: true,
+});
+if (hit.hitY === 1) e.vy = -Math.abs(e.vy || 1.4);
+if (hit.hitX) e.vx *= -1;
+e.y = Math.max(64, Math.min(game.worldH - 190, e.y));
+e.grounded = false;
+return;
+}
+const rising = e.vy < -0.4 && (e.kind === "rana" || e.lunge > 0 || e.hop > 0);
+const hit = resolveBody(e, game.platforms, {
+prevX: e.x - (e.vx || 0),
+prevY: e.y - (e.vy || 0),
+solidsOnly: rising,
+});
+if (rising) { e.grounded = false; return; }
+if (!hit.grounded) {
+e.grounded = false;
+if (e.y > game.worldH) e.hp = 0;
+return;
+}
+e.grounded = true;
+if (e.kind === "arana") e.dropping = false;
+if (e.kind === "rana" && e.hopCd > 0 && !(e.sitting > 0)) e.sitting = 16;
+const under = game.platforms.find((plat) => overlapX(e.x, e.w, plat, 0) && Math.abs(e.y + e.h - plat.y) < 3);
+if (under && e.kind !== "rana") {
+const margin = 8;
+if (e.x <= under.x + margin || e.x + e.w >= under.x + under.w - margin) {
+  e.vx *= -1;
+  e.x = e.x <= under.x + margin ? under.x + margin : under.x + under.w - e.w - margin;
+}
+}
+}
+function dmgFor(e) {
+let dmg = 7;
+if (e.boss) dmg = e.contactDmg || 22;
+else if (e.kind === "planta") dmg = 12;
+else if ((e.kind === "abeja" || e.kind === "avispa") && (e.diving > 0 || e.charging > 0)) dmg = 14;
+else if (e.kind === "mosquito") dmg = 9;
+else if (e.kind === "libelula") dmg = 8;
+else if (e.kind === "pez") dmg = 8;
+else if (e.kind === "medusa") dmg = 10;
+else if (e.kind === "anguila") dmg = 10;
+else if (e.kind === "rana") dmg = 8;
+else if (e.kind === "cangrejo") dmg = (e.clawSnap > 0) ? 11 : 8;
+else if (e.kind === "gaviota") dmg = e.diving ? 10 : 7;
+else if (e.kind === "murcielago") dmg = e.diving ? 11 : 8;
+else if (e.kind === "arana") dmg = 9;
+else if (e.kind === "brasita") dmg = 9;
+else if (e.kind === "escoria") dmg = e.hp < e.max * 0.4 ? 12 : 9;
+else if (e.kind === "ufo") dmg = 8;
+else if (e.kind === "cucaracho" && e.evo >= 2) dmg = 12;
+else if (e.kind === "cucaracho" && e.evo >= 1) dmg = 10;
+else if (e.kind === "cucaracho") dmg = 7;
+else if (e.evo) dmg = 10;
+if (e.elite) dmg = Math.round(dmg * 1.25);
+return dmg;
+}
+function resolveEnemyContact(e) {
+const p = game.player;
+const solid = !(e.kind === "planta" && !e.up);
+if (p && !p.dead && e.hp>0 && !e.dying && solid && aabb(p, e)) {
+  const kb = Math.sign((p.x + p.w / 2) - (e.x + e.w / 2) || p.facing || 1);
+  const feet = p.y + p.h;
+  const stomp = p.vy > 1.5 && feet - p.vy <= e.y + 8 && p.y < e.y && feet < e.y + e.h;
+  if (stomp) {
+    p.vy = -9.4;
+    p.grounded = false;
+    p.jumps = Math.max(0, (p.jumps || 1) - 1);
+    p.invuln = Math.max(p.invuln || 0, 10);
+    if (!e.boss && !(e.invuln > 0) && e.hp > 0) {
+      const dmg = 8 + (Number(p.evo) || 0) * 2;
+      const hpBefore=e.hp;
+      damageEnemy(e, dmg);
+      registerBossPunish(e);
+      e.vy = 2.4;
+      e.stun = Math.max(e.stun || 0, 10);
+      e.flash = 10;
+      e.invuln = Math.max(e.invuln || 0, 10);
+      if(e.hp<hpBefore)game.nums.add(e.x, e.y - 6, "" + Math.ceil(hpBefore-e.hp), "#fff");
+      punch(e.x, e.y, p.color || "#fff");
+      hitStop(2);
+    } else {
+      e.flash = Math.max(e.flash || 0, 6);
+      game.shake = Math.min(10, (game.shake || 0) + 3);
+      beep("land");
+    }
+    game.fx.emit(p.x + p.w / 2, feet, { color: "#fff", count: 6, size: 2, up: 0.4, life: 12 });
+  } else {
+    const hp0 = p.health;
+    hurtPlayer(dmgFor(e), "-" + dmgFor(e));
+    const took = p.health < hp0;
+    if (took && !p.dead) {
+      p.vx = kb * 11;
+      p.vy = -6.6;
+      p.x += kb * 5;
+      if (!e.boss) e.x -= kb * 7;
+    } else if (!p.dead && !(p._dashGo > 0) && !(p.invuln > 0)) {
+      p.x += kb * 2.4;
+      if (!e.boss) e.x -= kb * 1.6;
+    }
+    if (e.kind === "mosquito" && took) {
+      game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: "#ff2020", count: 6, size: 2.4, up: 1.0, life: 14 });
+    }
+  }
+}
+}
+function updateEnemies() {
+if (!game.player) return;
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final'){
+ const p=game.player,consumed=game._coopFinalConsumed||=new Set();
+ if(performance.now()-(game._coopFinalPacketAt||0)<750){
+  for(const shot of game.coopFinalShots||[]){if(shot.life<=0)continue;shot.x+=shot.vx;shot.y+=shot.vy;shot.life--;if(p.invuln<=0&&aabb(p,shot)){hurtPlayer(shot.dmg,'GUARDIÁN');if(!['prism','lightning','geysers','ember'].includes(shot.gauntlet)){shot.life=0;consumed.add('g:'+shot.id);}}}
+  const shots=[...(game.boss?._fusion?.shots||[])];updateFusionProjectilesOnly(game.boss,game,damage=>hurtPlayer(damage,'ECO'));for(const shot of shots)if(shot.hit||shot.life<=1)consumed.add('q:'+(game.boss?._coopSyncId||0)+':'+shot.id);
+  const e=game.finalGauntlet?.guardian;if(e?.hp>0&&e.contactDmg>0&&p.invuln<=0&&aabb(p,e))hurtPlayer(e.contactDmg,'GUARDIÁN');
+ }
+ while(consumed.size>2048)consumed.delete(consumed.values().next().value);
+ return;
+}
+// WebRTC host is the single source of enemy decisions during fresh frames.
+// Guest only extrapolates that state instead of independently picking targets.
+if (onlineCoop.advanceGuestCombat(game)) {
+  if(onlineCoop.hasFreshCombat(game)){
+    mirroredProjectileHits(game,damage=>hurtPlayer(damage,"-"+Math.round(damage)));
+    for(const enemy of game.enemies){
+      const p=game.player;
+      if(!p||p.dead||p.invuln>0)break;
+      if(enemy.hp>0&&!enemy.dying&&!enemy.fell&&!(enemy.kind==="planta"&&!enemy.up)&&aabb(p,enemy)){
+        if(!enemy.boss&&p.vy>1.5&&p.y+p.h<enemy.y+Math.min(28,enemy.h*.5)){
+          const damage=8+(Number(p.evo)||0)*2;
+          damageEnemy(enemy,damage);p.vy=-9.4;p.grounded=false;p.invuln=Math.max(p.invuln||0,10);
+          void onlineCoop.signal(game,"hit",{targetSyncId:enemy._coopSyncId,targetVisit:enemy._coopVisit,
+            targetId:enemy.id,kind:enemy.kind,x:enemy.x,y:enemy.y,damage,characterId:p.id});
+        }else if(!enemy.boss||enemy.contactDmg>0)hurtPlayer(enemy.boss?enemy.contactDmg:dmgFor(enemy),"CONTACTO");
+      }
+    }
+  }
+  return;
+}
+game.bossFx?.update();
+game.viewW=camW();game.viewH=camH();
+game.combatDifficulty=readCombatDifficulty(game.roomId);
+game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t, {x:game.cam.x,y:game.cam.y,w:camW(),h:camH()});
+updateChampions(game);
+{ const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
+if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
+for (const e of game.enemies) {
+prepareChapterBossV2(e,game);
+const molts = !(e.roomId?.startsWith("w1-")&&e.campaignRole) && e.kind === "cucaracho" && !e.baby && (e.evo || 0) < 2;
+const posed = e.kind === "cucaracho" || e.kind === "mosquito" || e.kind === "cangrejo";
+if (!e.boss && e.hp <= 0 && posed && !molts) {
+  if (e.dying == null) {
+    e.dying = 28;
+    game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: e.color || "#fff", count: 16, size: 4, star: true, speed: 3.2, up: 1.6 });
+    game.nums.add(e.x, e.y - 10, "KO", "#fff6c8", true);
+  }
+  e.deathHold = 1;
+  e.dying--;
+  e.vx = 0;
+  e.vy = Math.min(5, (e.vy || -2) + 0.4);
+  e.y += e.vy;
+  continue;
+}
+if (e.flash > 0) e.flash--;
+if (e._hitT > 0) e._hitT--;
+if (e.stun > 0) {
+  e.stun--;
+  if (!e.boss && e.stun > 5) {
+    e.vx *= 0.4;
+    e.telegraph = false;
+    if (e.wind) e.wind = 0;
+    if (e.hopWind) e.hopWind = 0;
+    if (e.clawWind) e.clawWind = 0;
+  }
+}
+
+if (e.boss) {
+  if (e.fell) {
+    // Hold the defeated Queen on screen. The finale owns her fragmentation.
+    e.vx = 0; e.vy = 0; e.telegraph = false;
+    e.dying = Math.max(0, (e.dying || 0) - 1);
+    continue;
+  }
+  if (e.invuln > 0) e.invuln--;
+  try {
+    if (e._fusionBoss) updateFusionBoss(e, game, { hurtPlayer, showBossMessage, beep, reduceMotion: game.reduceMotion || reduceMotion });
+    else updateBossNido(e, game, {
+      t, hurtPlayer, showBossMessage, makeFoe,
+      ROOM_W: game.worldW, ROOM_H: game.worldH,
+      reduceMotion: game.reduceMotion || reduceMotion,
+      beep,
+    });
+  } catch (err) {
+    console.warn("[Ohana] boss update:", err);
+    e.mode = "idle";
+    e.telegraph = false;
+    e.attackCd = Math.max(e.attackCd || 0, 30);
+  }
+  e.x += e.vx || 0;
+  e.y += e.vy || 0;
+  e.x = Math.max(40, Math.min(e.x, game.worldW - e.w - 40));
+  e.y = Math.max(80, Math.min(e.y, game.worldH - 90 - e.h));
+  const pBoss = game.player;
+  if (pBoss && !pBoss.dead && !e.dying && e.contactDmg > 0 && aabb(pBoss, e)) {
+    const dmg = e.contactDmg || 22;
+    hurtPlayer(dmg, "-" + dmg);
+    if (!pBoss.dead) {
+      pBoss.vx = Math.sign(pBoss.x - e.x || 1) * 10;
+      pBoss.vy = -6.5;
+    }
+  }
+  continue;
+}
+
+if(updateGauntletGuardian(e,game,hurtPlayer))continue;
+if(updateStitchoBoss(e,game,hurtPlayer))continue;
+if(updateChispinBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updateMichiBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updateDragonBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updateDinoBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updateFritaBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updatePizzaBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updateYomiBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updateCuernoBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updateGroveGuardian(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updateCampaignEnemy(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+// Sleep suppresses only decisions and locomotion, preserving contact and deaths.
+const cuernoSleeping = !e.boss && e.sleep > 0;
+if (cuernoSleeping) {
+  e.sleep--; e.vx = 0; e.telegraph = false;
+  if (e.invuln > 0) e.invuln--;
+}
+if (!cuernoSleeping) {
+const aiTarget=onlineCoop.enemyTarget(game,e)||game.player;
+const flyer = e.kind === "phosquito" || e.kind === "mosquito" || e.kind === "gaviota" || e.kind === "murcielago" || e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja" || e.kind === "brasita" || e.kind === "ufo";
+if (flyer) {
+  const band = e.kind === "gaviota" ? 280 : 360;
+  if (e.y > band) e.vy = Math.min(e.vy || 0, -0.8);
+  else e.vy += 0.04;
+}
+else if (e.kind === "planta" || e.kind === "medusa" || e.kind === "pez" || e.kind === "anguila") e.vy = 0;
+else e.vy += 0.5;
+e.x += e.vx; e.y += e.vy;
+{
+const s = sense(e, aiTarget);
+const pack = Math.max(0, Number(e.aiPack) || 0);
+const next = think(e, s, pack);
+if (next !== "patrol" && (e.mode || "patrol") === "patrol") e.alertPing = 16;
+e.mode = next;
+e._dx = s.dx;
+e._over = s.over;
+const steering = enemySteering(e, aiTarget);
+e._aiSteer = steering.x;
+e._aiSteerScale = steering.scale;
+if (e.alertPing > 0) e.alertPing--;
+e.shoot = (e.shoot || 0) + 1;
+const rate = e.kind === "planta" ? 70 : 9999;
+if (e.kind === "planta" && e.up) {
+  if ((e.plantWind || 0) > 0) {
+    e.plantWind--;
+    e.telegraph = true;
+    e.aimDx = aiTarget.x - e.x;
+    e.aimDy = aiTarget.y - e.y;
+    if (e.plantWind <= 0) {
+      e.telegraph = false;
+      e.aimDx = e.aimDy = null;
+      const aim = Math.sign(aiTarget.x - e.x) || 1;
+      pushRuntime(game.projectiles, {
+        x: e.x + 10, y: e.y + 8,
+        vx: aim * 4.2 * 0.7,
+        vy: -1.2,
+        w: 10, h: 10, life: 80,
+        dmg: 9, color: "#7dca5a",
+        owner: "enemy",
+      }, MAX_RUNTIME_PROJECTILES);
+      game.fx.emit(e.x + e.w / 2, e.y + 10, { color: "#7dca5a", count: 5, size: 2.2, up: 0.8, life: 12 });
+    }
+  } else if (e.shoot > rate && enemyCanCommit(e)) {
+    e.shoot = 0;
+    e.plantWind = 20;
+    e.telegraph = true;
+  } else if (!enemyCanCommit(e)) {
+    e.telegraph = false;
+  }
+}
+}
+if (e.kind === "phosquito" && e.canSplit && !e.split && e.hp < e.max * 0.5) {
+  e.split = true;
+  pushRuntime(game.enemies, makeFoe(e.x + 18, e.y - 8, "phosquito", game.roomId, 1, { baby: true }), MAX_RUNTIME_ENEMIES);
+  game.fx.emit(e.x, e.y, { color: "#6ad0a8", count: 10, size: 3, up: 1.4 });
+}
+if (e.kind === "planta") {
+  e.vx = 0;
+  e.hide = (e.hide || 0) + 1;
+  if (e.hide > 110) { e.hide = 0; e.up = !e.up; }
+}
+if (e.invuln > 0) e.invuln--;
+const kiloAI = updateKiloFoeAI(e, game, 1, { t, target: aiTarget, canCommit: enemyCanCommit(e) });
+const stitchoAI = updateStitchoFoeAI(e, game, 1, { t, target: aiTarget, canCommit: enemyCanCommit(e) });
+if (!kiloAI && e.kind === "phosquito") {
+  e.diveCd = (e.diveCd || 0) - 1;
+  if (e.diving) {
+    e.diving--;
+    e.telegraph = false;
+    if (e.diving <= 0) e.diveCd = 70;
+  } else if (e.diveCd <= 0 && aiTarget && enemyCanCommit(e)) {
+    e.wind = (e.wind || 0) + 1;
+    e.telegraph = true;
+    e.vx *= 0.9;
+    if (e.wind > 12) {
+      e.wind = 0; e.telegraph = false; e.diving = 28;
+      e.vx += Math.sign(aiTarget.x - e.x) * 1.8;
+      e.vy = 3.4;
+    }
+  } else {
+    e.telegraph = false;
+    e.vy += 0.04;
+    if (e.y < 520) e.vy += 0.45;
+    if (e.y > 720) e.vy = -1.8;
+  }
+  e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
+}
+if (e.kind === "cucaracho" && e.evo >= 2) {
+  e.telegraph = false;
+  if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x || 1) * 0.16;
+  e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
+  if (e.grounded && (e.hop || 0) <= 0 && (e.mode === "chase" || e.mode === "strike") && enemyCanCommit(e) && (t + Math.floor(e.x)) % 70 === 0) {
+    e.vy = -6.2;
+    e.hop = 18;
+    e.flash = 4;
+  }
+  if (e.hop > 0) e.hop--;
+}
+if (!kiloAI && e.kind === "cucaracho" && e.evo < 2) {
+  if (e.lunge > 0) {
+    e.lunge--;
+    if (e.lunge <= 0) e.vx *= 0.4;
+  } else {
+    e.lungeCd = (e.lungeCd || 0) - 1;
+    if (e.evo >= 1 && e.lungeCd <= 0 && aiTarget && e.mode === "strike" && enemyCanCommit(e)) {
+      e.lungeCd = 90;
+      e.lunge = 18;
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * 5.2;
+      e.vy = -3.5;
+      e.flash = 6;
+      game.fx.emit(e.x, e.y + e.h, { color: "#c45a18", count: 6, size: 2.5, up: 1.2 });
+    }
+  }
+}
+if (!kiloAI && e.kind === "mosquito") {
+  e.diveCd = (e.diveCd || 0) - 1;
+  if (e.spiral > 0) {
+    e.spiral--;
+    e.telegraph = false;
+    e.diving = false;
+    e.vx = Math.cos(t / 4 + e.x * 0.01) * 3.2;
+    e.vy = -2.6;
+    if (t % 3 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#ff6a4a", count: 1, size: 1.8, up: 0.2, life: 10 });
+  } else if (e.diving) {
+    e.diving--;
+    e.telegraph = false;
+    if (e.diving <= 0) { e.spiral = 28; e.diveCd = 48; }
+  } else if (e.diveCd <= 0 && aiTarget && e.mode === "strike" && enemyCanCommit(e)) {
+    e.wind = (e.wind || 0) + 1;
+    e.telegraph = true;
+    e.vx *= 0.85;
+    e.vy *= 0.7;
+    if (e.wind > 14) {
+      e.wind = 0; e.telegraph = false; e.diving = 22;
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * 3.4;
+      e.vy = 5.5;
+    }
+  } else {
+    e.telegraph = false;
+    e.vy += 0.05;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.12;
+    if (e.y < 480) e.vy += 0.55;
+    if (e.y > 740) e.vy = -2.4;
+  }
+  e.vx = Math.max(-5.0, Math.min(5.0, e.vx));
+}
+if (!stitchoAI && e.kind === "libelula") {
+  e.bob = (e.bob || 0) + 0.07;
+  e.dart = (e.dart || 0) - 1;
+  if (e.baseY == null) e.baseY = e.y;
+  if (e.darting) {
+    e.darting--;
+    e.telegraph = false;
+    if (t % 2 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4aba7a" }, MAX_RUNTIME_GHOSTS);
+    if (e.darting <= 0) { e.dart = 55 + (t % 35); e.vx *= 0.35; }
+  } else if (e.wind > 0 || (e.dart <= 0 && aiTarget && enemyCanCommit(e))) {
+    if (e.dart <= 0 && e.wind <= 0) e.wind = 1;
+    e.wind++;
+    e.telegraph = true;
+    e.vx = Math.sin(e.wind * 0.7) * 1.8;
+    e.y = e.baseY + Math.sin(e.bob) * 10;
+    e.vy = 0;
+    if (e.wind > 10) {
+      e.wind = 0; e.telegraph = false; e.darting = 16;
+      const dx = aiTarget.x - e.x;
+      const dy = aiTarget.y - e.y;
+      const len = Math.hypot(dx, dy) || 1;
+      e.vx = (dx / len) * 6.2 + (game.rng() - 0.5) * 1.5;
+      e.vy = (dy / len) * 4.5;
+      e.baseY += Math.sign(aiTarget.y - e.baseY) * 36;
+      e.baseY = Math.max(220, Math.min(620, e.baseY));
+    }
+  } else {
+    e.telegraph = false;
+    e.y = e.baseY + Math.sin(e.bob) * 16;
+    e.x += Math.sin(e.bob * 2) * 0.55;
+    e.vy = 0;
+    e.vx *= 0.988;
+    e.vx = Math.max(-3.2, Math.min(3.2, e.vx));
+  }
+  if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
+}
+if (!kiloAI && !stitchoAI && (e.kind === "abeja" || e.kind === "avispa")) {
+  e.bob = (e.bob || 0) + 0.07;
+  if (e.baseY == null) e.baseY = e.y;
+  e.cd = (e.cd || 0) - 1;
+  if (e.diving > 0) {
+    e.diving--;
+    e.telegraph = false;
+    e.charging = e.diving; // drives drawAbeja sting stretch
+    if (t % 3 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 8, color: "#ffcc33" }, MAX_RUNTIME_GHOSTS);
+    if (e.diving <= 0) {
+      e.cd = 80;
+      e.charging = 0;
+      e.vx *= 0.25;
+      e.vy *= 0.15;
+      e.baseY = Math.max(220, Math.min(620, e.y));
+    }
+  } else if (e.cd <= 0 && aiTarget && enemyCanCommit(e)) {
+    e.wind = (e.wind || 0) + 1;
+    e.telegraph = true;
+    e.vx *= 0.9;
+    e.vy = 0;
+    e.y = e.baseY + Math.sin(e.bob * 1.6) * 10;
+    if (e.wind > 36) {
+      e.wind = 0;
+      e.telegraph = false;
+      e.diving = 26;
+      e.charging = 26;
+      const dx = aiTarget.x - e.x;
+      const dy = aiTarget.y - e.y + 12;
+      const len = Math.hypot(dx, dy) || 1;
+      e.vx = (dx / len) * 6.2;
+      e.vy = (dy / len) * 8.4;
+      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffcc33", count: 7, size: 2.6, up: 1.0 });
+    }
+  } else {
+    e.telegraph = false;
+    e.charging = 0;
+    e.vy = 0;
+    e.y = e.baseY + Math.sin(e.bob) * 16 + Math.sin(e.bob * 2.5) * 5;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.03;
+    e.vx = Math.max(-2.0, Math.min(2.0, e.vx));
+    e.baseY += Math.sign((aiTarget ? aiTarget.y : e.baseY) - e.baseY) * 0.18;
+    e.baseY = Math.max(220, Math.min(620, e.baseY));
+  }
+  if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
+}
+if (e.kind === "pez") {
+  e.vy = 0;
+  e.bob = (e.bob || 0) + 0.06;
+  if (e.baseY == null) e.baseY = e.y;
+  e.dashCd = (e.dashCd || 0) - 1;
+  if (e.dashSwim > 0) {
+    e.dashSwim--;
+    if (t % 2 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#a0e8ff", count: 2, size: 2.2, up: 0.3, speed: 0.6, life: 14 });
+    if (e.dashSwim <= 0) e.vx *= 0.45;
+  } else if (e.dashCd <= 0 && aiTarget && enemyCanCommit(e)) {
+    e.dashCd = 90 + (t % 40);
+    e.dashSwim = 18;
+    e.vx = Math.sign(aiTarget.x - e.x || 1) * 4.4;
+    e.baseY += Math.sign(aiTarget.y - e.baseY) * 28;
+  }
+  e.y = e.baseY + Math.sin(e.bob) * 26 + Math.sin(e.bob * 2.2) * 8;
+  if (aiTarget) {
+    e.vx += Math.sign(aiTarget.x - e.x) * 0.035;
+    e.baseY += Math.sign(aiTarget.y - e.baseY) * 0.25;
+  }
+  e.vx = Math.max(e.dashSwim > 0 ? -4.6 : -2.4, Math.min(e.dashSwim > 0 ? 4.6 : 2.4, e.vx));
+  e.baseY = Math.max(280, Math.min(560, e.baseY));
+  if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
+  if (t % 3 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#7ec8f0", count: 2, size: 2.0, up: 0.28, speed: 0.5, life: 16 });
+}
+if (e.kind === "medusa") {
+  e.vy = 0;
+  e.bob = (e.bob || 0) + 0.04;
+  if (e.baseY == null) e.baseY = e.y;
+  e.baseY += Math.sign((aiTarget ? aiTarget.y : e.baseY) - e.baseY) * 0.18;
+  e.y = e.baseY + Math.sin(e.bob) * 40;
+  if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.015;
+  e.vx = Math.max(-1.4, Math.min(1.4, e.vx));
+  if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
+  if (t % 8 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h - 4, { color: "#ff9ad8", count: 1, size: 2, up: 0.4, speed: 0.5, life: 14 });
+  if (e.pulsezap > 0) {
+    e.pulsezap--;
+    e.telegraph = e.pulsezap > 8; // pulse ring visible ~0.4s (pulsezap 32→9)
+    if (e.pulsezap === 8 && aiTarget) {
+      const aim = Math.sign(aiTarget.x - e.x) || 1;
+      pushRuntime(game.projectiles, {
+        x: e.x + e.w / 2 - 5, y: e.y + e.h / 2,
+        vx: aim * 1.6, vy: (aiTarget.y - e.y) * 0.012,
+        w: 12, h: 12, life: 90, dmg: 10, color: "#ff8ad0",
+        owner: "enemy", trail: true,
+}, MAX_RUNTIME_PROJECTILES);
+      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff8ad0", count: 10, size: 3, up: 1.2, star: true });
+    }
+    if (e.pulsezap <= 0) e.zapCd = 100;
+  } else {
+    e.telegraph = false;
+    e.zapCd = (e.zapCd || 0) - 1;
+    if (e.zapCd <= 0 && aiTarget && enemyCanCommit(e)) {
+      const dist = Math.hypot(aiTarget.x - e.x, aiTarget.y - e.y);
+      if (dist < 280) e.pulsezap = 32; // ~0.4s telegraph before sting
+      else e.zapCd = 20;
+    }
+  }
+}
+if (e.kind === "anguila" && !(e.stun > 5)) {
+  e.vy = 0;
+  e.bob = (e.bob || 0) + 0.055;
+  if (e.baseY == null) e.baseY = e.y;
+  e.y = e.baseY + Math.sin(e.bob) * 22 + Math.sin(e.bob * 1.7) * 8;
+  if (aiTarget) {
+    e.vx += Math.sign(aiTarget.x - e.x) * 0.028;
+    e.baseY += Math.sign(aiTarget.y - e.baseY) * 0.2;
+  }
+  e.vx = Math.max(-2.2, Math.min(2.2, e.vx));
+  e.baseY = Math.max(260, Math.min(560, e.baseY));
+  if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
+  if (t % 4 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#40e0d0", count: 1, size: 1.8, up: 0.2, speed: 0.4, life: 12 });
+  if (e.pulsezap > 0) {
+    e.pulsezap--;
+    e.telegraph = e.pulsezap > 12; // ~0.4s telegraph (pulsezap 36→12)
+    if (aiTarget && e.telegraph) {
+      e.aimDx = aiTarget.x - e.x;
+      e.aimDy = aiTarget.y - e.y;
+    }
+    if (e.pulsezap === 12 && aiTarget) {
+      const dx = aiTarget.x - e.x, dy = aiTarget.y - e.y;
+      const len = Math.hypot(dx, dy) || 1;
+      pushRuntime(game.projectiles, {
+        x: e.x + e.w / 2 - 5, y: e.y + e.h / 2,
+        vx: (dx / len) * 2.4, vy: (dy / len) * 2.0,
+        w: 11, h: 11, life: 80, dmg: 10, color: "#ff8ad0",
+        owner: "enemy", trail: true,
+}, MAX_RUNTIME_PROJECTILES);
+      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#7ee7ff", count: 8, size: 2.8, up: 1.0, star: true });
+    }
+    if (e.pulsezap <= 0) { e.zapCd = 110; e.aimDx = e.aimDy = null; }
+  } else {
+    e.telegraph = false;
+    e.aimDx = e.aimDy = null;
+    e.zapCd = (e.zapCd || 0) - 1;
+    if (e.zapCd <= 0 && aiTarget && enemyCanCommit(e)) {
+      const dist = Math.hypot(aiTarget.x - e.x, aiTarget.y - e.y);
+      if (dist < 320) e.pulsezap = 36;
+      else e.zapCd = 18;
+    }
+  }
+}
+if (e.kind === "rana" && !(e.stun > 5)) {
+  if (e.hopWind > 0) {
+    e.hopWind--;
+    e.telegraph = true;
+    e.vx *= 0.35;
+    e.sitting = Math.max(e.sitting || 0, 2);
+    if (e.hopWind <= 0 && aiTarget) {
+      e.telegraph = false;
+      e.sitting = 0;
+      e.hopCd = 52 + (t % 28);
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * (3.2 + game.rng());
+      e.vy = -7.2;
+      e.flash = 5;
+      game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#6ad070", count: 6, size: 2.4, up: 1.1 });
+    }
+  } else if (e.sitting > 0) {
+    e.sitting--;
+    e.vx *= 0.7;
+    e.telegraph = false;
+  } else {
+    e.hopCd = (e.hopCd || 0) - 1;
+    if (e.hopCd <= 0 && aiTarget && (e.mode === "chase" || e.mode === "strike") && enemyCanCommit(e)) {
+      e.hopWind = 24; // ~0.4s telegraph
+      e.telegraph = true;
+    } else if (Math.abs(e.vy) < 0.2 && e.hopCd > 0 && e.hopCd < 40) {
+      e.sitting = 20;
+      e.vx = 0;
+    }
+  }
+}
+if (e.kind === "cangrejo" && !(e.stun > 5)) {
+  e.clawCd = (e.clawCd || 0) - 1;
+  const near = aiTarget && Math.abs(aiTarget.x - e.x) < 130 && Math.abs(aiTarget.y - e.y) < 90;
+  if (e.clawWind > 0) {
+    e.clawWind--;
+    e.telegraph = true;
+    e.claws = true;
+    e.vx *= 0.55;
+    if (e.clawWind <= 0) {
+      e.telegraph = false;
+      e.clawSnap = 16;
+      e.clawCd = 55;
+      e.flash = 5;
+      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff8040", count: 8, size: 2.6, up: 1.0 });
+    }
+  } else if (e.clawSnap > 0) {
+    e.clawSnap--;
+    e.claws = true;
+    e.telegraph = false;
+    if (near && aiTarget) e.vx += Math.sign(aiTarget.x - e.x || 1) * 0.14;
+  } else {
+    e.claws = !!near;
+    e.telegraph = false;
+    if (e.mode === "hold" || e.mode === "patrol") e.vx *= 0.86;
+    else if (e.mode === "strike" && e.clawCd <= 0 && enemyCanCommit(e)) e.clawWind = 24;
+    else if (e.mode === "chase") e.vx += Math.sign(e._dx || 1) * 0.1;
+  }
+  e.vx = Math.max(-2.6, Math.min(2.6, e.vx));
+}
+updateChispinFoeAI(e, game, t, aiTarget);
+if (e.kind === "gaviota") {
+  e.diveCd = (e.diveCd || 0) - 1;
+  if (e.baseY == null) e.baseY = e.y;
+  e.bob = (e.bob || 0) + 0.05;
+  if (e.diving) {
+    e.diving--;
+    e.telegraph = false;
+    if (e.diving <= 0) { e.diveCd = 70; e.vy = -2.0; e.baseY = Math.max(240, Math.min(520, e.y)); }
+  } else if (e.diveCd <= 0 && aiTarget && enemyCanCommit(e)) {
+    e.wind = (e.wind || 0) + 1;
+    e.telegraph = true;
+    e.vx *= 0.88;
+    e.vy *= 0.75;
+    if (e.wind > 24) { // ~0.4s telegraph
+      e.wind = 0; e.telegraph = false; e.diving = 26;
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * 2.6;
+      e.vy = 4.2;
+    }
+  } else {
+    e.telegraph = false;
+    e.vy += 0.03;
+    e.y = e.baseY + Math.sin(e.bob) * 12;
+    e.vy = 0;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.05;
+    if (e.y < 260) e.baseY += 0.4;
+    if (e.y > 560) e.baseY -= 0.4;
+  }
+  e.vx = Math.max(-3.4, Math.min(3.4, e.vx));
+  if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
+}
+if (!stitchoAI && e.kind === "murcielago") {
+  e.diveCd = (e.diveCd || 0) - 1;
+  if (e.baseY == null) e.baseY = e.y;
+  e.bob = (e.bob || 0) + 0.09;
+  const angry = e.hp < e.max * 0.5;
+  if (e.diving) {
+    e.diving--;
+    e.telegraph = false;
+    if (t % 3 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4a3060" }, MAX_RUNTIME_GHOSTS);
+    if (e.diving <= 0) { e.diveCd = angry ? 40 : 65; e.vy = -2.4; e.baseY = Math.max(200, Math.min(500, e.y)); }
+  } else if ((e.diveCd <= 0 || (angry && e.diveCd < 20)) && aiTarget && enemyCanCommit(e)) {
+    e.wind = (e.wind || 0) + 1;
+    e.telegraph = true;
+    e.vx *= 0.86;
+    if (e.wind > 12) {
+      e.wind = 0; e.telegraph = false; e.diving = 24;
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * 3.0;
+      e.vy = 5.0;
+    }
+  } else {
+    e.telegraph = false;
+    e.y = e.baseY + Math.sin(e.bob) * 14;
+    e.vy = 0;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.07;
+    e.vx = Math.max(-3.2, Math.min(3.2, e.vx));
+  }
+  if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
+}
+if (!stitchoAI && e.kind === "arana") {
+  e.dropCd = (e.dropCd || 0) - 1;
+  if (e.dropping) {
+    e.telegraph = true;
+    e.vx *= 0.92;
+    if (e.vy > 6) e.dropping = false;
+  } else if (e.dropCd <= 0 && aiTarget && Math.abs(aiTarget.x - e.x) < 160 && enemyCanCommit(e)) {
+    e.dropCd = 140;
+    e.dropping = true;
+    e.y = Math.max(80, e.y - 180);
+    e.vy = 0.5;
+    e.telegraph = true;
+    game.fx.emit(e.x + e.w / 2, e.y, { color: "#888", count: 4, size: 2, up: 0.3 });
+  } else {
+    e.telegraph = false;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.04;
+    e.vx = Math.max(-2.0, Math.min(2.0, e.vx));
+  }
+  if (!e.dropping && Math.abs(e.vy) < 0.15) e.dropping = false;
+}
+const dinoHandled = !game.paused && e.hp > 0 && !e.dying && updateDinoFoeAI(e, game, 1, { t, target: aiTarget, canCommit: enemyCanCommit(e), contactDmg: dmgFor(e) });
+if (dinoHandled) { /* V372 Dino AI */ }
+else if (e.kind === "brasita") {
+  e.bob = (e.bob || 0) + 0.08;
+  if (e.baseY == null) e.baseY = e.y;
+  e.y = e.baseY + Math.sin(e.bob) * 18;
+  e.vy = 0;
+  if (aiTarget) {
+    e.vx += Math.sign(aiTarget.x - e.x) * 0.04;
+    e.baseY += Math.sign(aiTarget.y - e.baseY) * 0.22;
+  }
+  e.vx = Math.max(-1.8, Math.min(1.8, e.vx));
+  e.baseY = Math.max(220, Math.min(620, e.baseY));
+  if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
+  if (t % 3 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff8a30", count: 2, size: 2.4, up: 0.8, speed: 0.9, life: 16 });
+}
+else if (e.kind === "escoria") {
+  const hot = e.hp < e.max * 0.45;
+  const spd = hot ? 2.4 : 1.1;
+  if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x || 1) * (hot ? 0.12 : 0.04);
+  e.vx = Math.max(-spd, Math.min(spd, e.vx));
+  e.enraged = hot;
+  e.telegraph = false;
+  e.color = hot ? "#ff4020" : "#c04010";
+  if (hot && t % 4 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff6020", count: 2, size: 2.2, up: 0.6, life: 12 });
+}
+else if (e.kind === "ufo" && !(e.stun > 5)) {
+  e.bob = (e.bob || 0) + 0.04;
+  if (e.baseY == null) e.baseY = e.y;
+  e.y = e.baseY + Math.sin(e.bob) * 14;
+  e.vy = 0;
+  if (aiTarget) {
+    e.vx += Math.sign(aiTarget.x - e.x) * 0.03;
+    e.baseY += Math.sign(aiTarget.y - 40 - e.baseY) * 0.15;
+  }
+  e.vx = Math.max(-1.6, Math.min(1.6, e.vx));
+  e.baseY = Math.max(180, Math.min(520, e.baseY));
+  if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
+  e.shootCd = (e.shootCd || 0) - 1;
+  if (e.shootCd <= 30 && enemyCanCommit(e)) e.telegraph = true;
+  else e.telegraph = false;
+  if (e.shootCd <= 0 && aiTarget && enemyCanCommit(e)) {
+    e.shootCd = 90;
+    e.telegraph = false;
+    const dx = aiTarget.x - e.x, dy = aiTarget.y - e.y;
+    const len = Math.hypot(dx, dy) || 1;
+    pushRuntime(game.projectiles, {
+      x: e.x + e.w / 2 - 6, y: e.y + e.h,
+      vx: (dx / len) * 1.8, vy: (dy / len) * 1.5 + 0.4,
+      w: 12, h: 12, life: 110, dmg: 9, color: "#7ee7ff",
+      owner: "enemy", trail: true,
+}, MAX_RUNTIME_PROJECTILES);
+    game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#7ee7ff", count: 6, size: 2.5, up: 0.8 });
+  }
+}
+if (!e.telegraph && aiTarget) {
+  const steer = enemySteering(e, aiTarget);
+  if (e.mode === "retreat" || e.mode === "flank") {
+    e.vx += steer.x * steer.scale;
+  } else if (e.mode === "hold" && !enemyCanCommit(e)) {
+    e.vx *= 0.94;
+    e.vx += steer.x * steer.scale;
+  }
+}
+
+updateMichiFoeAI(e, game, t, aiTarget);
+solidifyFoe(e);
+}
+resolveEnemyContact(e);
+}
+updateStitchoWebs(game);
+updateDinoHazards(game, (n) => hurtPlayer(n, "-" + n));
+game.enemies = game.enemies.filter((e) => {
+if (e.hp <= 0) onDinoFoeDeath(e);
+if (e.boss && e.hp <= 0) {
+  if (!e.fell) {
+    e.fell = true;
+    e.dying = e.dyingMax || 120;
+    e.hp = 0;
+    e.vx = 0;
+    e.vy = 0;
+    e.telegraph = false;
+    e.mode = "idle";
+    game.flash = 18;
+    game.shake = 24;
+    beep("win");
+    game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: game.reduceMotion ? 12 : 32, size: 6, up: 2.8, star: true });
+    game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff4060", count: game.reduceMotion ? 8 : 20, size: 4, up: 2, speed: 3.5 });
+    beginFinale(e);
+    return true;
+  }
+  if (e.dying > 0) return true;
+  return false;
+}
+if (e.hp > 0) return true;
+if (e.deathHold && e.dying > 0) return true;
+if (!(e.roomId?.startsWith("w1-")&&e.campaignRole) && e.kind === "cucaracho" && !e.baby && e.evo < 2) {
+  e.evo += 1;
+  e.hp = Math.round(e.max * 0.9);
+  e.max = Math.max(e.max, e.hp);
+  e.w += e.evo === 1 ? 10 : 8;
+  e.h += e.evo === 1 ? 6 : 4;
+  e.vx *= e.evo === 1 ? 1.35 : 1.25;
+  e.color = e.evo >= 2 ? "#c81818" : "#8a2010";
+  e.flash = 18;
+  e.invuln = 28;
+  game.flash = Math.max(game.flash, 8);
+  game.shake = Math.max(game.shake, e.evo >= 2 ? 14 : 10);
+  game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, {
+    color: e.evo >= 2 ? "#ff4a20" : "#c45a18",
+    count: e.evo >= 2 ? 29 : 21, size: 5, up: 2.4, star: true,
+  });
+  game.fx.emit(e.x + e.w / 2, e.y, {
+    color: "#ffe0a0", count: 13, size: 3.5, up: 2.8, speed: 3.5, life: 20,
+  });
+  if (e.evo >= 2) {
+    e.bob = 0;
+    e.baseY = Math.max(260, Math.min(620, e.y - 40));
+    e.y = e.baseY;
+    e.vy = -3.2;
+    e.diveCd = 40;
+    e.diving = false;
+    e.telegraph = false;
+    showCombatMessage("¡VUELA!", "Cucaracho alado.");
+  } else {
+    e.lungeCd = 40;
+    showCombatMessage("CUCARACHO+", "Ha mudado. Más cabreado.");
+  }
+  return true;
+}
+Surprises.onEnemyKilled(e, game);
+game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: e.color || "#fff6c8", count: 14, size: 4, star: true, speed: 3, up: 1.8 });
+game.nums.add(e.x, e.y - 8, "KO", "#fff6c8", true);
+if (e.kind === "cucaracho") {
+  game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, {
+    color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
+  });
+}
+if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
+punch(e.x, e.y, e.color); beep("kill"); addKill(); if(!game.roomDef?.kiloEncounterVersion)healPlayer(game.player, 4);
+if(e.miniBoss&&!e.gauntletBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":e._chispinBoss?"¡TITÁN DE TRUENO VENCIDO!":e._growthChapter?NEXT_CHAPTERS[e._growthChapter].name.toUpperCase()+" VENCIDO":"¡EL CLARO VUELVE A CANTAR!",e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
+if (e.dropsOrb) {
+  pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
+  game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
+}
+return false;
+});
+}
+function updateProjectiles() {
+for (const pr of game.projectiles) {
+if (pr.homing && game.enemies[0]) { pr.vx += Math.sign(game.enemies[0].x - pr.x) * 0.35; pr.vy += Math.sign(game.enemies[0].y - pr.y) * 0.35; }
+const previous = { x: pr.x, y: pr.y };
+pr.x += pr.vx; pr.y += pr.vy; pr.life--;
+if (hitsSolid(pr, game.platforms, previous)) {
+  pr.life = 0;
+  game.fx.emit(pr.x, pr.y, { color: pr.color || "#fff", count: 4, size: 2, up: 0.6, life: 10 });
+  continue;
+}
+if (pr.trail && pr.life % 2 === 0) {
+  game.fx.emit(pr.x + pr.w / 2, pr.y + pr.h / 2, {
+    color: pr.color, count: 1, size: 2, speed: 0.4, life: 8, gravity: 0, up: 0,
+  });
+}
+if (pr.owner === "player") {
+  for (const e of game.enemies) {
+    if (!pr.pickup && !e.dying && !(e.invuln > 0) && !(pr.hit && pr.hit.has(e)) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
+    let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
+      dmg = Math.round(dmg);
+      const before=e.hp;damageEnemy(e,dmg);dmg=Math.max(0,before-e.hp);
+      if(!dmg){showBlockedHit(game,e);pr.life=0;continue;}
+      registerBossPunish(e);
+      void onlineCoop.signal(game,"hit",{targetSyncId:e._coopSyncId,targetVisit:e._coopVisit,targetId:e.id,
+        kind:e.kind,x:e.x,y:e.y,damage:dmg,characterId:game.player.id});
+      e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
+      e.stun = Math.max(e.stun || 0, e.boss ? 4 : 12);
+      e.flash = Math.max(e.flash || 0, 14);
+      if (pr.pierce) {
+        if (!pr.hit) pr.hit = new Set();
+        pr.hit.add(e);
+        if (pr.hit.size >= pr.pierce) pr.life = 0;
+      } else pr.life = 0;
+      punch(e.x, e.y, pr.color); addPlayerXp(game.player, game.roomDef?.kiloEncounterVersion?1:3);
+      game.nums.add(e.x, e.y, "" + dmg, "#ffe66a", dmg >= 40);
+    }
+  }
+} else if (game.player && !game.player.dead && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, game.player)) {
+  if(!resolveGuardianProjectileContact(pr,game.player,hurtPlayer)){
+    if (game.player.invuln <= 0) hurtPlayer(pr.dmg, "-" + Math.round(pr.dmg));
+    pr.life = 0;
+  }
+}
+}
+compactLiveList(game.projectiles);
+compactLiveList(game.bolts, { tickLife: true, max: MAX_RUNTIME_BOLTS });
+compactLiveList(game.slashes, { tickLife: true, max: MAX_RUNTIME_SLASHES });
+compactLiveList(game.ghosts, { tickLife: true });
+}
+function updateCam() {
+const p = game.player; if (!p) return;
+const vw = camW(), vh = camH();
+let lerp = 0.24;
+const look = horizontalLook(p);
+let tx = p.x + p.w / 2 + look - vw / 2;
+// V468 calm camera: Y follows a platform anchor, not every jump. The anchor
+// re-centres only when the hero lands on a new height or leaves the vertical
+// dead zone (top 28% / bottom 30% of the view), so normal jumps don't bob the view.
+const pcY = p.y + p.h / 2;
+const cs = game._camCalm || (game._camCalm = { anchor: pcY });
+if (!Number.isFinite(cs.anchor) || p.dead) cs.anchor = pcY;
+if (p.grounded) cs.anchor = pcY;
+else {
+  const top = game.cam.y + vh * 0.28, bottom = game.cam.y + vh * 0.70;
+  if (pcY < top) cs.anchor = Math.min(cs.anchor, pcY + vh * 0.14);
+  else if (pcY > bottom) cs.anchor = Math.max(cs.anchor, pcY - vh * 0.06);
+}
+let ty = cs.anchor - vh * 0.56;
+let lerpY = 0.075;
+const boss = game.enemies.find((e) => e.boss && !e.fell);
+const fin = game.finale && game.finale.t > 0 ? game.finale : null;
+if (fin) {
+tx = fin.x - vw / 2;
+ty = fin.y - vh * 0.46;
+lerp = 0.07;
+} else if (boss) {
+const bx = boss.x + boss.w / 2;
+const by = boss.y + boss.h * 0.28;
+const px = p.x + p.w / 2;
+const py = p.y + p.h * 0.35;
+tx = (px + bx) / 2 - vw / 2;
+ty = (py * 0.45 + by * 0.55) - vh * 0.42;
+lerp = 0.18;
+}
+game.cam.x += (tx - game.cam.x) * lerp;
+{
+  const k = (fin || boss) ? lerp : lerpY;
+  const maxVy = vh * 0.022; // vertical speed cap (px per frame)
+  const dy = Math.max(-maxVy, Math.min(maxVy, (ty - game.cam.y) * k));
+  game.cam.y += Math.abs(ty - game.cam.y) > vh * 1.5 ? (ty - game.cam.y) : dy; // teleports snap
+}
+if (game.camPunch > 0) game.camPunch *= 0.82;
+game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - vw)));
+game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - vh + 80)));
+if (game.shake > 0) game.shake *= 0.86;
+if (game.comboT > 0) game.comboT--; else game.combo = 0;
+if (game.fading > 0) game.fading--;
+if (game.bossIntro && game.bossIntro.t > 0) {
+game.bossIntro.t--;
+if (game.bossIntro.t === 120) game.storyLine = "Quien no llegó a la forma final sigue dentro.";
+if (game.bossIntro.t === 0) game.storyLine = "";
+}
+if (game.flash > 0) {
+game.flash--;
+if (game.flash <= 0) game.flashColor = null;
+}
+game.nums.update();
+}
+
+function drawMinimap() {
+drawLocalMap(ctx,game,viewW,viewH);
+}
+function drawCrystal(o) {
+const x = o.x - game.cam.x;
+const y = o.y - game.cam.y + Math.sin(t / 12) * 4;
+ctx.save();
+ctx.globalAlpha=1;ctx.filter='none';
+ctx.translate(x, y);
+ctx.rotate(Math.sin(t / 18) * 0.12);
+ctx.shadowColor = "#ffe66a";
+ctx.shadowBlur = 12;
+ctx.fillStyle = "#ffe66a";
+ctx.beginPath();
+ctx.moveTo(0, -12); ctx.lineTo(8, 0); ctx.lineTo(0, 12); ctx.lineTo(-8, 0);
+ctx.closePath();
+ctx.fill();
+ctx.shadowBlur = 0;ctx.strokeStyle="#45341c";ctx.lineWidth=2;ctx.stroke();
+ctx.fillStyle = "rgba(255,255,255,.9)";
+ctx.beginPath();
+ctx.moveTo(0, -12); ctx.lineTo(3.2, -1); ctx.lineTo(0, 3); ctx.lineTo(-2.2, -4);
+ctx.closePath();
+ctx.fill();
+ctx.restore();
+}
+// V468: cada sala del Mundo 1 usa el decorado de su héroe y su silueta gigante.
+function drawWorld1Backdrop(world,W,H){
+ const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
+ if(h!=="kilo"&&drawLivingRealm(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H,t,{reduceMotion:rd})){drawChapterLandmarks(ctx,game,game.cam,t,W,H);return;}
+ if(h==="stitcho"||h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
+ else if(h==="cat")drawMichiGardens(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
+
+ else if(h==="dragon")drawDragonCalderaBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="dino")drawDinoCraterBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="frita")drawFritaMarketBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="pizza")drawPizzaOvensBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="yomi")drawYomiDawn(ctx,game.cam,t,W,H,rd);
+ else if(h==="cuerno")drawCuernoForestBackdrop(ctx,game.cam,t,W,H,rd);
+ else renderWorld(ctx,world,game.cam,t,W,H);
+ // One complete backdrop per room: never paint a second sky over the first.
+ if(h==="kilo")drawOhanaPlace(ctx,game,game.cam,t,W,H);
+ drawChapterVista(ctx,game,game.cam,t,W,H);
+ drawChapterLandmarks(ctx,game,game.cam,t,W,H);
+ if(!['stitcho','chispin','cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(h))drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
+ if(game.roomDef.fusionBoss)drawWorld1BossBackdrop(ctx,game,game.cam,t);
+}
+const w1Actors=new Map();
+function w1CineActor(c,hero,x,y,scale,acting=null){const form=acting?.form??1,key=hero+':'+form;let d=w1Actors.get(key);if(!d){const def=ROSTER.find(r=>r.id===hero);if(!def)throw Error('hero');d=w1MakeDummy(hero,form,def.color);d.facing=1;d.grounded=true;w1Actors.set(key,d);}d._poseOverride=acting?.pose||'idle';w1DrawDummy(c,d,x,y,Math.max(.2,scale)*60/Math.max(1,w1BaseHeight(hero,form)),reduceMotion?0:t);}
+
+// B abre el álbum del Mundo 1 cuando estás en una de sus salas (un solo álbum).
+addEventListener("keydown",(e)=>{
+ if(!game.running||!game.roomDef?.world1||e.ctrlKey||e.altKey||e.metaKey||e.target?.closest?.("input,textarea,select,[contenteditable=true]"))return;
+ const k=e.key;
+ if(world1CineActive(game)&&(k==="Enter"||k===" "||k==="Escape")){skipWorld1Cine(game);e.preventDefault();e.stopImmediatePropagation();return;}
+ if(!world1CineActive(game)&&(k==="b"||k==="B")){if(!e.repeat)toggleWorld1Album(game);e.preventDefault();e.stopImmediatePropagation();return;}
+ if(game.world1CollectUI?.open&&world1AlbumKey(game,k)){e.preventDefault();e.stopImmediatePropagation();}
+},true);
+function render() {
+syncWorld1Album(game);
+syncWorld1CineControls(game, document, !paused && !overlayOpen());
+if (!game.player) return;
+ctx.setTransform(viewDpr, 0, 0, viewDpr, 0, 0);
+ctx.imageSmoothingEnabled = true;
+const world = WORLDS[game.worldIndex] || WORLDS[0];
+// One consistent camera viewport per draw. The gameplay camera and collision
+// logic are unchanged; bounds no longer get recomputed per enemy/projectile.
+const viewportW=camW(),viewportH=camH();
+const shake = reduceMotion ? 0 : game.shake;
+const z = camZoom() * (game.experience?.zoomPulse(game) || 1);
+const centerX = viewW / 2;
+const centerY = viewH / 2;
+const shakeX = (vfxRandom(5) - 0.5) * shake;
+const shakeY = (vfxRandom(6) - 0.5) * shake;
+
+ctx.save();
+ctx.translate(centerX + shakeX, centerY + shakeY);
+ctx.scale(z, z);
+ctx.translate(-centerX, -centerY);
+if (paintedHubOn(game.roomId)) {
+drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, viewportW,viewportH);
+drawLivingWorld(ctx, game, t, viewportW,viewportH);
+} else {
+if(game.stitchoTrail){
+ const tier=game.enemies.find(e=>e._stitchoBoss)?._glitch?.tier||1;
+ drawStitchoArchipelago(ctx,game.cam,t,viewportW,viewportH,{
+  reducedMotion:game.reduceMotion||reduceMotion,tier,progress:game.stitchoTrail.index
+ });
+}else if(game.michiTrail){
+ const tier=game.enemies.find(e=>e._michiBoss)?._astralCat?.tier||1;
+ drawMichiGardens(ctx,game.cam,t,viewportW,viewportH,{
+  reducedMotion:game.reduceMotion||reduceMotion,tier,progress:game.michiTrail.index
+ });
+}else if(game.chispinTrail){
+ const tier=game.enemies.find(e=>e._chispinBoss)?._titan?.tier||1;
+ drawChispinSanctuary(ctx,game.cam,t,viewportW,viewportH,{
+  reducedMotion:game.reduceMotion||reduceMotion,tier,progress:game.chispinTrail.index
+ });
+}else if(game.dragonTrail){
+ drawDragonCalderaBackdrop(ctx,game.cam,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
+}else if(game.dinoTrail){
+ drawDinoCraterBackdrop(ctx,game.cam,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
+}else if(game.fritaTrail){
+ drawFritaMarketBackdrop(ctx,game.cam,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
+}else if(game.pizzaTrail){
+ drawPizzaOvensBackdrop(ctx,game.cam,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
+}else if(game.yomiTrail){
+ drawYomiObservatoryBackdrop(ctx,game.cam,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
+}else if(game.cuernoTrail){
+ drawCuernoForestBackdrop(ctx,game.cam,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
+}else if(game.roomDef?.world1){
+ drawWorld1Backdrop(world,viewportW,viewportH);
+}else{
+ renderWorld(ctx, world, game.cam, t, viewportW,viewportH);
+ drawRoomAtmosphere(
+   ctx,game.roomId,game.cam,t,viewportW,viewportH,game.player?.id,
+   game.reduceMotion||reduceMotion
+ );
+ drawLivingWorld(ctx, game, t, viewportW,viewportH);
+}
+drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
+drawCheckpoints(ctx,game,game.cam,t);
+drawCampaignExploration(ctx,game,game.cam,t);
+drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChispinTrail(ctx,game,game.cam,t);drawMichiTrail(ctx,game,game.cam,t);drawDragonTrail(ctx,game,game.cam,t);drawDinoTrail(ctx,game,game.cam,t);drawFritaTrail(ctx,game,game.cam,t);drawPizzaTrail(ctx,game,game.cam,t);drawYomiTrail(ctx,game,game.cam,t);drawCuernoTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
+if(!game.roomDef?.world1)drawIslandLandmarks(ctx,game,game.cam,t);
+drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,game,game.cam,t);
+const realmTerrain={frita:{id:'frita-market',groundTop:'#e5cfa5',ground:'#9c8492',edge:'#f7e8c4'},yomi:{id:'yomi-observatory',groundTop:'#d7e6de',ground:'#8ca7af',edge:'#e8f4eb'},pizza:{id:'pizza-harbor',groundTop:'#eacba5',ground:'#b09179',edge:'#fff0cd'},dino:{id:'fossil-valley',groundTop:'#d9deb9',ground:'#90a48a',edge:'#eff1ce'},cat:{id:'lunar-garden',groundTop:'#e4d5e4',ground:'#a598ab',edge:'#f3e6e5'},cuerno:{id:'prism-grove',groundTop:'#cbdca9',ground:'#93a684',edge:'#edf1cb'},dragon:{id:'ember-forge',groundTop:'#e4c4a4',ground:'#9c8070',edge:'#f5dbb3'}}[game.roomDef?.hero];
+const heroTerrain=realmTerrain?{...world,...realmTerrain}:game.roomDef?.hero==='stitcho'?{...world,id:'dock',groundTop:'#e2c6a0',ground:'#a78f77',edge:'#efe0b9',platOutline:'#466577'}:game.roomDef?.hero==='chispin'?{...world,id:'sanctuary',groundTop:'#f1e5ca',ground:'#a3b8bf',edge:'#fff3d8',platOutline:'#5a788e'}:world;
+game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
+if(game.roomDef?.kiloChapter&&!game.roomDef?.composition){ctx.save();ctx.strokeStyle='#273329';ctx.lineWidth=2;for(const pl of game.platforms){if(pl.h>24||!visibleForRender(pl,game.cam,viewportW,viewportH))continue;const px=pl.x-game.cam.x,py=pl.y-game.cam.y;ctx.fillStyle='#e0c67f';ctx.fillRect(px,py,pl.w,5);ctx.strokeRect(px,py,pl.w,pl.h);}ctx.restore();}
+if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
+}
+drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
+drawIslandSprings(ctx,game,game.cam,t);
+drawNestArena(ctx,game,game.cam,t);
+const r = room();
+drawSigns(ctx, r, game.cam, t, game.player.evo);
+portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
+if(game.roomId==="w1-final")drawPortalMirrors(ctx, FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion);
+Rain.draw(ctx, game.cam);
+Rain.drawPlayerHint(ctx, game.cam, game.player);
+Surprises.draw(ctx, game.cam, t, game);
+drawAdventure(ctx,game,game.cam,t);
+Festival.draw(ctx,game.cam,t,game,{w:viewW,h:viewH});
+drawStitchoWebs(ctx, game, game.cam);
+for (const o of game.orbs) {
+if (o.taken || !visibleForRender(o,game.cam,viewportW,viewportH)) continue;
+drawCrystal(o);
+}
+for (const h of game.hearts) {
+if (h.taken || !visibleForRender(h,game.cam,viewportW,viewportH)) continue;
+ctx.fillStyle = "#f45"; ctx.beginPath(); ctx.arc(h.x - game.cam.x, h.y - game.cam.y, 8, 0, Math.PI * 2); ctx.fill();
+}
+for (const g of game.ghosts) {
+if (!visibleForRender(g,game.cam,viewportW,viewportH)) continue;
+ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
+}
+if (!game.finale && !game.boss?._fusionBoss) game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
+for (const e of game.enemies) {
+  // Keep the Queen's actual authored sprite until it breaks into shards.
+  // Everything else freezes and disappears during the scripted epilogue.
+  const fall = game.finale && e.boss ? bossFallStage(game.finale) : null;
+  if (game.finale && (!e.boss || !fall.queenVisible)) continue;
+  if (!e.boss && !visibleForRender(e, game.cam, viewportW,viewportH)) continue;
+  ctx.save();
+  if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
+  if(drawChapterBossV2(ctx,e,game.cam,t,game.reduceMotion||reduceMotion)){}
+  else if(e._fusionBoss)drawFusionBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._drummer)drawGroveGuardianBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._michiBoss)drawMichiBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t);
+  else if(e._dinoBoss)drawDinoBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._pizzaBoss)drawPizzaBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._fritaBoss)drawFritaBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._yomiBoss)drawYomiBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._cuernoBoss)drawCuernoBoss(ctx,e,game.cam,t);
+  else {
+    const bespoke=drawCampaignCreature(ctx,e,game.cam,t,game.reduceMotion||reduceMotion)||(!!game.michiTrail&&drawMichicornioFoe(ctx,e,game.cam,t,game.reduceMotion||reduceMotion));
+    if(!bespoke)drawEnemy(ctx,e,game.cam,t,{reduceMotion:game.reduceMotion||reduceMotion});
+    if(game.stitchoTrail)drawStitchoEnemyAccent(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  }
+  if(!e.gauntletBoss)drawChapterBossHud(ctx,e,game.cam);
+  if(e._fusionBoss){}
+  else if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._michiBoss){if(!e._growthChapter)drawMichiBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);}
+  else if(e._dragonBoss){}
+  else if(e._dinoBoss){}
+  else if(e._fritaBoss){}
+  else if(e._pizzaBoss){}
+  else if(e._yomiBoss){}
+  else if(e._cuernoBoss){}
+  else if(e.gauntletBoss){}
+  else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
+  ctx.restore();
+}
+if (!game.finale) {
+  ctx.save(); ctx.translate(-game.cam.x, -game.cam.y);
+  drawDinoHazards(ctx, dinoPuddles, dinoSparks, t); drawDinoAbductFx(ctx, game.player, t);
+  drawCuernoFx(ctx, game.cuernoFx); drawCuernoBursts(ctx);
+  ctx.restore();
+}
+if(game.world1Boss)drawWorld1BossTelegraphs(ctx,game,game.cam,t);
+if (!game.finale){drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);drawChampionSignals(ctx,game,game.cam);}
+Magic.draw(ctx, game, t);
+Passives.draw(ctx, game, t);
+// Network freshness is stable for this paint; asking it for each bolt also
+// touches performance.now() repeatedly, without changing synchronization.
+const peerCombatFresh=onlineCoop.hasFreshCombat(game);
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')for(const shot of game.coopFinalShots||[])if(shot.life>0)drawGauntletProjectile(ctx,shot,game.cam,t);
+for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t))drawProjectile(ctx, pr, game.cam, t);}
+for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
+for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
+onlineCoop.render(ctx, game, t);
+game.fx.render(ctx, game.cam, { width: viewportW, height: viewportH }); game.combatFx?.render(ctx, game.cam, game.reduceMotion || reduceMotion); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
+if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);
+if (DeathFx.isPlaying()) {
+DeathFx.draw(ctx, game.cam, t);
+if (game.player.id === "cuerno" && game.player.dead) {
+  const cp = game.player;
+  if (cuernoDeathT(cp) < CUERNO_DEATH_DURATION) try { drawCuernoDeath(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, cuernoDeathT(cp), (Number(cp.evo) || 0) + 1); } catch (_) {}
+} else {
+ctx.globalAlpha = typeof DeathFx.playerAlpha === "function" ? DeathFx.playerAlpha() : 0.45;
+drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
+ctx.globalAlpha = 1;
+}
+} else if (game.player.dead) {
+if (game.player.id === "cuerno") {
+  const cp = game.player;
+  if (cuernoDeathT(cp) < CUERNO_DEATH_DURATION) try { drawCuernoDeath(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, cuernoDeathT(cp), (Number(cp.evo) || 0) + 1); } catch (_) {}
+} else {
+ctx.globalAlpha = 0.45;
+drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
+ctx.globalAlpha = 1;
+}
+} else if (!(game.player.hurtFlash>0&&game.player.invuln%4===1) && !(game.won && game.player.id === "cuerno" && game._cuernoWonT != null && (t - game._cuernoWonT) / 60 < CUERNO_VICTORY_DURATION)) {
+const pv = typeof portals.playerVisual === "function" ? portals.playerVisual() : null;
+if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
+  const px = game.player.x + game.player.w / 2 - game.cam.x;
+  const py = game.player.y + game.player.h / 2 - game.cam.y;
+  ctx.save();
+  ctx.translate(px, py);
+  ctx.scale(pv.scale, pv.scale);
+  ctx.translate(-px, -py);
+  ctx.globalAlpha = Math.max(0, pv.alpha);
+  drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
+  ctx.restore();
+} else {
+  drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
+}
+}
+if(!game.player.dead)drawMemoryAura(ctx,game,game.cam,t);
+if (!game.player.dead) drawKiloFritaInteractions(ctx, game, game.cam, t, drawCharacter, ROSTER);
+if (!game.player.dead) drawCuernoPlay(ctx, game, t, drawCharacter, ROSTER);
+if (game.won && game.player.id === "cuerno" && !game.player.dead && game._cuernoWonT != null && (t - game._cuernoWonT) / 60 < CUERNO_VICTORY_DURATION) {
+  const cp = game.player;
+  try { drawCuernoVictory(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, (t - game._cuernoWonT) / 60, (Number(cp.evo) || 0) + 1); } catch (_) {}
+}
+drawGauntletWorld(ctx,game,game.cam,t);
+ctx.restore();
+if (game.storyLine && game.bossIntro && !game.finale && !document.querySelector("#notification-container .game-notification")) {
+ctx.save();
+ctx.globalAlpha = 0.92;
+ctx.fillStyle = "rgba(4,8,16,.55)";
+ctx.fillRect(0, viewH * 0.72, viewW, 64);
+ctx.fillStyle = "#fff6c8";
+ctx.font = "700 22px Outfit, sans-serif";
+ctx.textAlign = "center";
+ctx.fillText(game.storyLine, viewW / 2, viewH * 0.72 + 40);
+ctx.restore();
+}
+if (!DeathFx.isPlaying()) {
+const hpRatio = game.player.health / Math.max(1, game.player.maxHealth);
+if (hpRatio <= 0.65) {
+  // V372: 8 niveles de peligro cacheados por tamaño; nunca un gradiente nuevo por fotograma.
+  const low = Math.round((1 - Math.max(0, hpRatio)) * 8) / 8;
+  const vg = cachedGradient(ctx, "lowhp:" + viewW + "x" + viewH + ":" + low, () => {
+    const g = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.3, viewW / 2, viewH / 2, viewW * 0.72);
+    g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
+    return g;
+  });
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, viewW, viewH);
+}
+}
+{
+const ov = typeof portals.getOverlay === "function" ? portals.getOverlay() : null;
+if (game.fading > 0) {
+  const fadeMax = game._portalFadeMax || 12;
+  const fa = Math.min(1, game.fading / Math.max(1, fadeMax));
+  let tint = "0,0,0";
+  if (ov && ov.color) tint = ov.color;
+  else if (game._portalFlash === "purple") tint = "90,40,160";
+  else if (game._portalFlash === "amber") tint = "255,160,60";
+  ctx.fillStyle = "rgba(" + tint + "," + Math.min(0.92, fa * 0.95) + ")";
+  ctx.fillRect(0, 0, viewW, viewH);
+  const vgA = fa * 0.35;
+  if (vgA > 0.02) {
+    const g = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.2, viewW / 2, viewH / 2, viewW * 0.7);
+    g.addColorStop(0, "rgba(0,0,0,0)");
+    g.addColorStop(1, "rgba(" + tint + "," + vgA + ")");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, viewW, viewH);
+  }
+} else if (ov && ov.alpha > 0.02) {
+  const a = Math.min(0.9, ov.alpha);
+  ctx.fillStyle = "rgba(" + (ov.color || "0,0,0") + "," + a + ")";
+  ctx.fillRect(0, 0, viewW, viewH);
+  if (ov.vignette > 0.05) {
+    const g = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.18, viewW / 2, viewH / 2, viewW * 0.72);
+    g.addColorStop(0, "rgba(0,0,0,0)");
+    g.addColorStop(1, "rgba(" + (ov.color || "0,0,0") + "," + (ov.vignette * 0.55) + ")");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, viewW, viewH);
+  }
+} else if (game._portalFlash && game.flash <= 0) {
+  game._portalFlash = null;
+  game._portalFadeMax = 0;
+}
+}
+if (game.doorWait) {
+const w = game.doorWait;
+const k = 1 - w.t / Math.max(1, w.max || 30);
+ctx.fillStyle = "rgba(4,8,16," + (0.12 + k * 0.62) + ")";
+ctx.fillRect(0, 0, viewW, viewH);
+}
+if (game.finale && game.finale.t > 0 && !game.roomDef?.fusionBoss) {
+  drawBossFallScene(ctx, game.finale, game.cam, { w: viewW, h: viewH }, reduceMotion || game.reduceMotion);
+}
+
+if (game.ult && game.ult.t > 0) {
+game.ult.t--;
+const u = game.ult.t / 42;
+ctx.save();
+ctx.strokeStyle = game.ult.color || "#ffe66a";
+ctx.globalAlpha = Math.min(0.85, u + 0.15);
+ctx.font = "800 18px Fraunces, serif";
+ctx.textAlign = "center";
+ctx.fillStyle = game.ult.color || "#fff";
+ctx.globalAlpha = Math.min(1, u * 2);
+ctx.fillText(game.ult.name || "", viewW / 2, Math.max(105,viewH*.15));
+ctx.restore();
+}
+if (game.flash > 0) {
+const fa = (reduceMotion ? Math.min(game.flash, 5) : game.flash) / 20;
+if (game.flashColor && !game._portalFlash) {
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, fa);
+  ctx.fillStyle = game.flashColor || "#fff";
+  ctx.fillRect(0, 0, viewW, viewH);
+  ctx.restore();
+} else {
+  let rgb = "255,255,220";
+  if (game._portalFlash === "purple") rgb = "200,150,255";
+  else if (game._portalFlash === "amber") rgb = "255,200,120";
+  ctx.fillStyle = "rgba(" + rgb + "," + fa + ")";
+  ctx.fillRect(0, 0, viewW, viewH);
+}
+}
+game.experience?.render(ctx, game, viewW, viewH, t);
+if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
+  try { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, (CUERNO_INTRO_DURATION * 60 - game._cuernoIntroT) / 12)); drawCuernoIntro(ctx, viewW, viewH, game._cuernoIntroT / 60, (Number(game.player.evo) || 0) + 1); ctx.restore(); } catch (_) { game._cuernoIntroT = null; }
+}
+drawMinimap();
+drawWorld1Overlay(ctx,game,viewW,viewH);
+drawAdventureGuide(ctx,game,viewW,viewH,Magic.status());
+if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH,{badge:false});}
+if(game.boss?._fusionBoss&&!game.world1Boss&&!world1CineActive(game))drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
+if(game.world1Boss)drawWorld1BossOverlay(ctx,game,viewW,viewH,t);
+drawGauntletHud(ctx,game,viewW,viewH);
+if(world1CineActive(game))drawWorld1Cine(ctx,game,viewW,viewH,t,{drawActor:w1CineActor});
+drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
+}
+function castPower(index) {
+if(game.relicScene || world1CineActive(game))return;
+const p = game.player;
+if (!p) return;
+const status=powerStatus(game,index,index===3?supremeOf(p.id):null);
+if(!status)return;
+if(!useAbility(game, index)){
+  if(!status.available){
+    const key=p.id+":"+index+":"+status.kind,previous=game._powerFeedback;
+    if(!previous||previous.key!==key||game.t<previous.t||game.t-previous.t>=90){
+      if(showCombatMessage(status.kind==="locked"?"PODER POR DESCUBRIR · "+status.def.key:status.def.key+" · "+status.def.name,status.label,{key:"power-block:"+key,duration:1300,priority:70})!==false)game._powerFeedback={key,t:game.t};
+    }
+  }
+  return;
+}
+if(messageManager.current?.key?.startsWith("power-block:"))dismissNotifications();
+dispatchEvent(new CustomEvent("ohana-power-used",{detail:{key:status.def.key}}));
+void onlineCoop.signal(game, "action", {
+action: "ability",
+slot: index,
+characterId: p.id,
+});
+}
+function renderAbilityBar() {
+const bar = DOM.abilityBar;
+if (!bar || !game.player) return;
+const evo = Number(game.player.evo) || 0;
+const kiloHelp=document.getElementById("kilo-kit-help");if(kiloHelp)kiloHelp.hidden=game.player.id!=="kilo";
+const slots = (game.player.abilities || []).map((id, i) => ({ id, need: [0, 1, 2][i] || 0 }));
+slots.push(...[4,5].map(index=>({id:extraAbility(game.player.id,index).id,need:POWER_LEVELS[index],index})));
+slots.push({ id: "supreme", need: 0, supreme: true, index:3 });
+bar.innerHTML = slots.map((slot) => {
+const d = slot.supreme
+  ? supremeOf(game.player.id)
+  : slot.index>3?extraAbility(game.player.id,slot.index):ABILITY_DEFS[slot.id];
+if (!d) return "";
+const locked = evo < slot.need;
+const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
+const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
+const bond=slot.supreme?uBondProgress(game.player):null;
+const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante "+(game.player.id==="kilo"?"2 s":"6 s")) : d.name + (d.desc ? " · " + d.desc : "");
+return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
+}).join("");
+abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
+slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
+}));
+touchPowers = Array.from(document.querySelectorAll(".touch-btn.pw"));
+abilityBarKey = game.player.id + ":" + evo + ":" + (game.player.abilities || []).join(",")
+ + ":" + game.player.uPartner;
+}
+function drawHudAvatar(p) {
+const av = DOM.hudAvatar;
+if (!av) return;
+let cv = av.querySelector("canvas");
+if (!cv) {
+cv = document.createElement("canvas");
+cv.width = 88; cv.height = 88;
+cv.style.cssText = "position:relative;z-index:1;width:100%;height:100%;display:block";
+av.appendChild(cv);
+}
+drawHudPortrait(cv,p,t,{reduceMotion:game.reduceMotion||reduceMotion});
+}
+
+function updateHUD() {
+const p = game.player; if (!p) return;
+const goal = world1NextObjective(game);
+if (goal) {
+  const progress = world1Snapshot(game);
+  const direction = world1ObjectiveDirection(game, goal);
+  const text = (progress.sealed ? "Sello recuperado" : "Sello " + progress.done + "/" + progress.total) + " · " + direction + " · " + goal.label + ": " + goal.action;
+  // A dismissed/expired toast can leave its DOM slot empty while the
+  // persistent objective model is still correct. Restore the actual card
+  // whenever no higher-priority message owns the slot; never overwrite a
+  // live notification or fake progress to repair the HUD.
+  const missingObjectiveCard = !messageManager.current &&
+    !messageManager.node?.querySelector('.game-notification[data-persistent="1"]');
+  if (messageManager.objective !== text || missingObjectiveCard)
+    setPersistentObjective(text, progress.sealed);
+  game._world1ObjectiveText = text;
+} else if (game._world1ObjectiveText) {
+  if (messageManager.objective === game._world1ObjectiveText) clearPersistentObjective();
+  game._world1ObjectiveText = null;
+}
+if (game.world1CollectHero) {
+  const found = world1AlbumFor(game,game.world1CollectHero).found.length;
+  const album = document.getElementById("btn-festival");
+  setText(album,"✦ Álbum " + found + "/100");
+  album?.setAttribute("aria-label","Álbum opcional: " + found + " de 100 recuerdos; no bloquea la evolución");
+  album?.setAttribute("aria-controls","world1-album");
+  album?.setAttribute("aria-expanded",String(!!game.world1CollectUI?.open));
+}
+const nextAbilityBarKey = p.id + ":" + (Number(p.evo) || 0) + ":" + (p.abilities || []).join(",") + ":" + p.uPartner;
+if (abilityBarKey !== nextAbilityBarKey) renderAbilityBar();
+setText(DOM.hudName, p.name);
+const mk = markAt(p.id, p.evo);
+const mastery = masteryOf(p.id);
+setText(DOM.hudTrait, mastery.name + " · H " + mk.name);
+DOM.hudTrait?.setAttribute("title", mastery.desc + ((p.passive && p.passive.name) ? " · Base: " + p.passive.name : ""));
+let orbsLeft = 0;
+for (let i = 0; i < game.orbs.length; i++) if (!game.orbs[i].taken) orbsLeft++;
+const hp = Math.max(0, Math.ceil(p.health));
+const hpPct = Math.max(0, Math.min(100, (p.health / Math.max(1, p.maxHealth)) * 100));
+if (DOM.hpBar) {
+const w = hpPct + "%";
+if (DOM.hpBar.style.width !== w) DOM.hpBar.style.width = w;
+}
+setText(DOM.hpText, hp + "/" + p.maxHealth);
+const avatarKey = p.id + ":" + p.evo + ":" + (p.health/Math.max(1,p.maxHealth)<=.28) + ":" + !!(game.reduceMotion||reduceMotion);
+if (avatarKey !== hudAvatarKey || (!(game.reduceMotion||reduceMotion) && t % 5 === 0)) {
+hudAvatarKey = avatarKey;
+drawHudAvatar(p);
+}
+const nxt = p.evo >= 4 ? 1 : XP_NEED[p.evo + 1];
+const prev = XP_NEED[p.evo] || 0;
+const xpPct = p.evo >= 4 ? 100 : Math.max(0, Math.min(100, ((p.xp - prev) / Math.max(1, nxt - prev)) * 100));
+if (DOM.xpBar) {
+const w = xpPct + "%";
+if (DOM.xpBar.style.width !== w) DOM.xpBar.style.width = w;
+}
+setText(DOM.hudWorld, room().name);
+const seen = Object.keys(game.visited || {}).length;
+setText(document.getElementById("hud-journey"), world1Guidance(game.roomId,game)?.journey || "Isla Hoku · " + Math.min(10, seen) + "/10");
+setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5");
+const ally=uPartnerInfo(p.id,p.uPartner),bond=uBondProgress(p);
+setText(document.getElementById("u-exp-hud"),
+ p.uSurprise&&![game._familyDuet,game._michiDuet,game._chispinDuet,game._stitchoDuet,game._kiloDuet].some(s=>s&&s.age>=18&&s.age<120)?"U · ? · Compañero sorpresa":
+ "U EXP " + bond.rank + "/3 · " + (ally?.name||"Familia") +
+ " · L: "+(ally?.lName||"L")+" · "+bond.xp+"/200"+
+ (bond.rank<3?" · faltan "+bond.remaining:" · Leyenda"));
+const bondFill=document.getElementById("u-exp-fill");
+if(bondFill){
+ const width=bond.percent+"%";
+ if(bondFill.style.width!==width)bondFill.style.width=width;
+ bondFill.parentElement?.setAttribute("aria-valuenow",String(bond.xp));
+}
+
+
+if (p.evo >= 4) {
+const sup = supremeOf(p.id);
+const sp = specialOf(p.id);
+DOM.hudEvo?.setAttribute("title", "Suprema U: " + sup.name + " · " + sp.name + " · " + sp.text);
+}
+const evoIdx = Math.max(0, Math.min(4, Number(p.evo) || 0));
+const col = p.color || "#7ee7ff";
+const nextPip = evoIdx + ":" + col;
+if (nextPip !== pipKey) {
+pipKey = nextPip;
+const pips = DOM.formPips;
+for (let i = 0; i < pips.length; i++) {
+  const pip = pips[i];
+  const filled = i <= evoIdx;
+  const active = i === evoIdx;
+  pip.classList.toggle("on", filled);
+  pip.classList.toggle("active", active);
+  if (active) {
+    pip.style.background = col;
+    pip.style.borderColor = col;
+    pip.style.boxShadow = "0 0 12px " + col;
+  } else {
+    pip.style.background = "";
+    pip.style.borderColor = "";
+    pip.style.boxShadow = "";
+  }
+}
+}
+setText(DOM.combo, "Combo " + game.combo + " · Score " + game.score);
+const chip = DOM.comboChip;
+if (chip) {
+const show = game.combo >= 1 && game.comboT > 0 && !(game.finalGauntlet&&game.finalGauntlet.phase!=="complete");
+const text = show ? String(game.combo) : "";
+if (DOM.comboValue && DOM.comboValue.textContent !== text) {
+  DOM.comboValue.textContent = text;
+  if (show) {
+    DOM.comboValue.style.animation = "none";
+    void DOM.comboValue.offsetWidth;
+    DOM.comboValue.style.animation = "";
+  }
+}
+chip.classList.toggle("show", show);
+chip.classList.toggle("hidden", !show);
+const rank = show ? comboRank(game.combo) : "";
+if (chip.dataset.rank !== rank) chip.dataset.rank = rank;
+const signature = show && game._signatureLink?.id===p.id && t>=Number(game._signatureLink.t||0) && (t - Number(game._signatureLink.t || 0) <= 90)
+  ? String(game._signatureLink.name || "")
+  : "";
+const flow = signature || (show && game._combatFlow && (t - Number(game._combatFlow.t || 0) <= 180)
+  ? String(game._combatFlow.label || "")
+  : "");
+if (chip.dataset.flow !== flow) chip.dataset.flow = flow;
+chip.classList.toggle("flow", !!flow);
+}
+const boss = game.boss || game.enemies.find((e) => e.boss);
+// World 1 Quimera has its own dedicated four-phase arena HUD.
+if (DOM.bossWrap) DOM.bossWrap.classList.toggle("hidden", !boss || !!boss._fusionBoss);
+// Canvas HP bars have no text accessibility. Keep a dedicated screen-reader
+// status with only coarse health bands, not a noisy update per hit.
+let bossA11y = document.getElementById("world1-quimera-a11y");
+if (!bossA11y && boss?._fusionBoss) {
+  bossA11y = document.createElement("span");
+  bossA11y.id = "world1-quimera-a11y";
+  bossA11y.setAttribute("role", "status");
+  bossA11y.setAttribute("aria-live", "polite");
+  bossA11y.setAttribute("aria-atomic", "true");
+  bossA11y.style.cssText = "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0";
+  document.body.appendChild(bossA11y);
+}
+if (bossA11y) {
+  const accessibleBoss = world1BossAccessibleText(boss);
+  if (bossA11y.textContent !== accessibleBoss) bossA11y.textContent = accessibleBoss;
+  lastAnnouncedQuimeraPhase = boss?._fusionBoss ? Number(boss.phase) : null;
+}
+// The rematches use a Canvas HUD too. Announce phase changes and coarse health
+// bands without flooding assistive technology for every hit or animation frame.
+let guardianA11y=document.getElementById("world1-guardian-a11y");
+const guardianText=gauntletAccessibleText(game),guardianView=gauntletPresentation(game);
+document.body.classList.toggle("guardian-fight",!!guardianView&&game.running);
+if(guardianView&&game.running){ctx.save();const layout=gauntletHudLayout(ctx,guardianView,viewW,viewH);ctx.restore();document.body.style.setProperty("--guardian-notice-top",(layout.y+layout.h+10)+"px");}else document.body.style.removeProperty("--guardian-notice-top");
+if(!guardianA11y&&guardianText){guardianA11y=document.createElement("span");guardianA11y.id="world1-guardian-a11y";guardianA11y.setAttribute("role","status");guardianA11y.setAttribute("aria-live","polite");guardianA11y.setAttribute("aria-atomic","true");guardianA11y.style.cssText="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0";document.body.appendChild(guardianA11y);}
+if(guardianA11y&&guardianA11y.textContent!==guardianText)guardianA11y.textContent=guardianText;
+document.body.classList.toggle("boss-fight", !!boss);
+if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
+if (boss) {
+const phase = bossPhaseProfile(boss.phase);
+const status = formatBossStatus(boss, phase.name);
+const attack = boss.telegraph && boss.teleKind ? bossAttackProfile(boss.teleKind) : null;
+const attackText = attack ? " · " + attack.icon : "";
+setText(DOM.bossLabel, status.visible + attackText);
+const voiceCue = attack ? bossAttackCue(boss.teleKind) : null;
+DOM.bossWrap?.setAttribute("aria-label", status.accessible + (voiceCue ? " Ataque: " + voiceCue.label + ". " + voiceCue.hint + "." : ""));
+} else {
+setText(DOM.bossLabel, "REINA DEL NIDO");
+}
+syncHudStatus({player:p,hp,xpPct,boss,evolutionLocked:kiloGrowthWaiting(game),objective:goal,reduceMotion:game.reduceMotion||reduceMotion});
+for(const item of abilitySlots){
+ const index=Number(item.slot.dataset.index),status=powerStatus(game,index,index===3?supremeOf(p.id):null);
+ if(!status||!item.fill)continue;
+ const width=status.pct+"%";if(item.fill.style.width!==width)item.fill.style.width=width;
+ if(item.sec?.textContent!==status.short)item.sec.textContent=status.short;
+ item.slot.classList.toggle("cooling",!status.available&&status.kind!=="locked");
+ item.slot.dataset.powerState=status.kind;
+ item.slot.setAttribute("aria-label",status.def.key+" · "+status.def.name+" · "+status.label);
+ item.slot.title=status.def.name+" · "+status.label+(status.def.desc?" · "+status.def.desc:"");
+}
+const PWIDX = { j: 0, k: 1, l: 2, u: 3, i:4, p:5 };
+for(const btn of touchPowers){
+ const index=PWIDX[btn.dataset.k],status=powerStatus(game,index,index===3?supremeOf(p.id):null);
+ if(!status)continue;
+ const key=btn.dataset.k.toUpperCase(),caption=status.kind==='flight'?'K ↓':status.kind==='cooldown'?status.short:status.kind==='charge'?'P '+Math.floor(status.pct)+'%':status.kind==='locked'?key+'·'+(POWER_LEVELS[index]+1):key+(index===4&&status.available?'✓':'');
+ if(btn.textContent!==caption)btn.textContent=caption;
+ btn.classList.toggle("off",status.kind==='locked');btn.classList.toggle("cooling",!status.available&&status.kind!=='locked');
+ btn.dataset.powerState=status.kind;btn.style.setProperty("--cd",status.pct+"%");
+ btn.title=status.def.name+" · "+status.label;
+ btn.setAttribute("aria-label",key+" · "+status.def.name+" · "+status.label);
+}
+}
+// HUD refreshes at 10 Hz normally, but boss phase transitions are immediate:
+ // never let assistive technology announce the previous Quimera phase.
+let lastAnnouncedQuimeraPhase = null;
+function step() {
+if(game.onlineAdventure&&game.coopPeerWaiting){void onlineCoop.poll(game);return;}
+if(game.coopRetryWaiting){if(!paused&&!document.hidden&&DeathFx.isPlaying())DeathFx.update(game);void onlineCoop.poll(game);return;}
+if(game.relicScene){if(!paused&&!DOM.pause?.classList.contains("open")&&!document.hidden)tickRelicScene(game);return;}
+if(game._pendingWorld1Cine&&!game.world1Cine){flushWorld1CineQueue(game);if(game._pendingWorld1Cine)return;}
+if(world1CineActive(game)){if(!paused&&!document.hidden)updateWorld1Cine(game);return;}
+if (!canAct()) return;
+t++;
+game.t = t;
+if (game._cuernoIntroT != null) {
+  if (++game._cuernoIntroT > CUERNO_INTRO_DURATION * 60) game._cuernoIntroT = null;
+  return;
+}
+sanitizeRuntimeState(game);
+game.experience?.update(game);
+if (game.hitstop > 0) {
+game.hitstop--;
+if (game.shake > 0) game.shake *= 0.92;
+if (game.flash > 0) game.flash--;
+return;
+}
+if (!game.won) game.clearTicks = (game.clearTicks || 0) + 1;
+tickFinale();
+if (game.finale) {
+  // The generic death beat freezes combat, but World 1 must still finish
+  // its own defeat director and hand off to the reunion cinematics.
+  if(game.world1Boss && game.roomId === "w1-final") {
+    const event = updateWorld1BossDirector(game);
+    if(event === "defeated") { game.world1Boss.special=null; game.world1Boss.card=null; playWorld1Cine(game, "bossDefeat"); }
+  }
+  // Locked, deterministic 3.5-second death beat: no enemy AI, bullets,
+  // hazards or renewed damage while the boss dissolves. Camera/FX still run.
+  game.fx.update();
+  game.combatFx?.update();
+  updateCam();
+  onlineCoop.tick(game);
+  if (t % 6 === 0 || (game.boss?._fusionBoss && Number(game.boss.phase) !== lastAnnouncedQuimeraPhase)) updateHUD();
+  return;
+}
+tickWorldSummon();
+if (!canAct()) return;
+updateCampaignExploration(game);
+updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);updateChispinTrail(game,hurtPlayer);updateMichiTrail(game,hurtPlayer);updateDragonTrail(game,hurtPlayer);updateDinoTrail(game,hurtPlayer);updateFritaTrail(game,hurtPlayer);updatePizzaTrail(game,hurtPlayer);updateYomiTrail(game,hurtPlayer);updateCuernoTrail(game,hurtPlayer);
+updatePlayer();
+updateRoomAlbum(game);updateHeroCollection(game);updateWorld1(game,hurtPlayer);if(game.roomDef?.world1)updateWorld1Collect(game);
+if(game.world1Boss&&game.roomId==="w1-final"){const ev=updateWorld1BossDirector(game);if(ev==="defeated")playWorld1Cine(game,"bossDefeat");}
+if(game.relicScene)return;
+updateCampaignProgress(game);
+updateIslandSprings(game);
+updateCuernoPlay(game, t);
+updateCuernoBursts(game);
+updateEnemies();
+updateNestArena(game,{hurt:hurtPlayer,hit:hitArenaEnemy});
+updateProjectiles();
+game.fx.update();
+game.combatFx?.update();
+if (DeathFx.isPlaying()) DeathFx.update(game);
+Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") });
+Surprises.update(game, t);
+updateAdventure(game);
+Festival.update(game, t);
+updateCuernoFx(game.cuernoFx, game.player?.id === "cuerno" ? game.player : null, t, paused);
+updateCam();
+game.coopRemote = onlineCoop.remote;
+onlineCoop.tick(game);
+if (t % 6 === 0 || (game.boss?._fusionBoss && Number(game.boss.phase) !== lastAnnouncedQuimeraPhase)) updateHUD();
+if (t % 300 === 0) save();
+}
+function containRuntimeFault(scope, error) {
+game.runtimeFaults = Math.min(32, Math.max(0, Number(game.runtimeFaults) || 0) + 1);
+game.lastRuntimeFault = String(scope) + ": " + (error?.stack || error?.message || String(error));
+try { console.error("[OHANA runtime fault]", scope, error); } catch (_) {}
+try { input?.reset(); } catch (_) {}
+try { clock.reset(); } catch (_) {}
+game.hitstop = 0;
+game.renderDirty = true;
+if (game.running) {
+paused = true;
+try { DOM.pause?.classList.add("open"); } catch (_) {}
+}
+}
+
+let renderedTick = -1;
+function loop(now) {
+if (game.running && !document.hidden) {
+// Only change drawing resolution, never simulation, hitboxes or input.
+if(!paused){
+  if (!adaptiveLowRes && framePressure.observe(now)) {
+    adaptiveLowRes = true;
+    resolutionRecovery.reducedAt(now);
+    fit();
+  } else if(adaptiveLowRes && resolutionRecovery.observe(now)){
+    adaptiveLowRes = false;
+    framePressure.reset();
+    fit();
+  }
+} else resolutionRecovery.pause();
+try {
+  if(!e2eManualClock)clock.advance(now, step);
+} catch (error) {
+  containRuntimeFault("simulation", error);
+}
+if ((game.renderDirty || renderedTick !== t) && !paused) {
+  try {
+    const paintStarted=performance.now();
+    render();
+    renderProfiler.sample(now,performance.now()-paintStarted);
+    renderedTick = t;
+    game.renderDirty = false;
+  } catch (error) {
+    containRuntimeFault("render", error);
+  }
+}
+} else clock.reset();
+// The title has its own paced Canvas loop. When the game is stopped, paused or
+// hidden, polling game logic at 60fps only burns battery (and schedules GC).
+// Wake at ~8Hz until play resumes; active gameplay still uses native rAF.
+if (game.running && !paused && !document.hidden) requestAnimationFrame(loop);
+else setTimeout(() => requestAnimationFrame(loop), 120);
+}
+function setupSelect() {
+const partnerSelect=document.getElementById("u-partner-select");
+const technique=document.getElementById("u-partner-technique");
+const preview=document.getElementById("u-partner-portrait");
+function renderUPartnerChoices(hero){
+ if(partnerSelect){partnerSelect.hidden=true;partnerSelect.disabled=true;partnerSelect.style.display="none";partnerSelect.setAttribute("aria-hidden","true");}
+ if(technique)technique.textContent="Pulsa U: un compañero sorpresa entra en acción y presta su poder.";
+ if(preview){const ctx=preview.getContext('2d');ctx.clearRect(0,0,preview.width,preview.height);ctx.fillStyle='#ffe69d';ctx.font='700 62px Fredoka, sans-serif';ctx.textAlign='center';ctx.fillText('?',preview.width/2,74);preview.setAttribute('aria-label','Compañero sorpresa: se revela al activar U');}
+}
+renderUPartnerChoices("kilo");
+addEventListener("ohana-select",e=>renderUPartnerChoices(e.detail?.id));
+const wrap = document.getElementById("chars");
+if (!wrap) return;
+const grid = document.getElementById("chars-grid") || wrap;
+const RANKS = ["", "Fácil", "Media", "Difícil"];
+grid.innerHTML = ROSTER.map((c, i) => {
+const rank = difficulty(c.id);
+const hit = markAt(c.id, 0).name;
+return '<button class="char-card" type="button" data-id="' + c.id + '" aria-label="' + c.name + ", " + RANKS[rank] + '"><span class="role r' + rank + '">' + RANKS[rank] + '</span><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><span class="h-move">H · ' + hit + '</span><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>';
+}).join("");
+grid.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => dispatchEvent(new CustomEvent("ohana-select", { detail: { id: el.dataset.id } }))));
+try { mountSelectScreen({ grid, roster: ROSTER }); } catch (err) { console.error("[ohana] select screen", err); }
+addEventListener("keydown", (e) => {
+if (!canAct() || e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.target?.closest?.("input, textarea, select, [contenteditable]" ) || game.player?.id !== "cuerno") return;
+const kind = Object.keys(CUERNO_PLAY_KEYS).find((k) => CUERNO_PLAY_KEYS[k] === e.key);
+if (kind) queueCuernoPlay(kind);
+});
+addEventListener("ohana-start", (e) => start(ROSTER.find((r) => r.id === e.detail?.id)));
+addEventListener("keydown", (e) => {
+if (game.running || overlayOpen() || e.repeat) return;
+if (/^[0-9]$/.test(e.key)) {
+  const c = ROSTER[e.key === "0" ? 9 : Number(e.key) - 1];
+  if (c) dispatchEvent(new CustomEvent("ohana-select", { detail: { id: c.id } }));
+}
+});
+const helpBtn = document.getElementById("btn-help");
+const fullBtn = document.getElementById("btn-full");
+const mapBtn = document.getElementById("btn-map");
+const muteBtn = document.getElementById("btn-mute");
+const help = document.getElementById("help");
+if (helpBtn) helpBtn.onclick = toggleHelp;
+if (mapBtn) mapBtn.onclick = () => { if (game.running) showMap(); };
+if (muteBtn) muteBtn.onclick = () => { setMuted(!muted); showSystemMessage("AUDIO", muted ? "Mute" : "On"); };
+if (fullBtn) fullBtn.onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen(); };
+if (help) help.addEventListener("click", (e) => { if (e.target.id === "help") help.classList.remove("open"); });
+const map = document.getElementById("map-overlay");
+if (map) map.addEventListener("click", (e) => { if (e.target.id === "map-overlay") map.classList.remove("open"); });
+const pause = document.getElementById("pause-overlay");
+if (pause) pause.addEventListener("click", (e) => { if (e.target.id === "pause-overlay") setPaused(false); });
+const resume = document.getElementById("btn-resume");
+const quit = document.getElementById("btn-quit");
+const musicSlider = document.getElementById("pause-music");
+const musicValue = document.getElementById("pause-music-value");
+if (musicSlider) {
+  musicSlider.value = String(Math.round(musicVolume() * 100));
+  setText(musicValue, musicSlider.value + "%");
+  musicSlider.addEventListener("input", () => {
+    setMusicVolume(Number(musicSlider.value) / 100);
+    setText(musicValue, musicSlider.value + "%");
+  });
+}
+const gentleToggle = document.getElementById("pause-gentle");
+if (gentleToggle) {
+  gentleToggle.checked = gentleMotion;
+  gentleToggle.addEventListener("change", () => {
+    gentleMotion = gentleToggle.checked;
+    document.body.classList.toggle("gentle-motion", gentleMotion);
+    reduceMotion = RMQ.matches || gentleMotion;
+    game.reduceMotion = reduceMotion;
+    try { localStorage.setItem("ohana-gentle-motion", gentleMotion ? "1" : "0"); } catch (_) {}
+    fit();
+  });
+}
+if (resume) resume.onclick = () => setPaused(false);
+if (quit) quit.onclick = returnToMenu;
+$("btn-close-help")?.addEventListener("click", () => DOM.help.classList.remove("open"));
+$("btn-close-map")?.addEventListener("click", () => DOM.map.classList.remove("open"));
+addEventListener('ohana-death',()=>{if(game.onlineAdventure)void onlineCoop.reportDeath(game);});
+addEventListener("ohana-online-state", (event) => {
+if (!onlineCoop.enabled || !game.player || game.onlineAdventure) return;
+const state = event.detail?.state;
+if (state === "won" && game.boss && !game.finale && !game.won) {
+  game.boss.hp = 0;
+  game.boss.fell = true;
+  game.boss.dying = Math.max(120, game.boss.dying || 0);
+  beginFinale(game.boss);
+} else if (state === "lost" && !game.won) {
+  game.player.dead = true;
+  game.player.health = 0;
+  dispatchEvent(new CustomEvent("ohana-death", { detail: { reason: "online", id: game.player.id, hero: game.player.name } }));
+  showErrorMessage("DERROTA", "La familia cae junta. R vuelve al claro.");
+}
+});
+
+addEventListener("ohana-after", (e) => {
+const act = e.detail && e.detail.action;
+if(act==='lobby'){
+ navigator.sendBeacon('/.netlify/functions/game',new Blob([JSON.stringify({action:'disconnect',roomId:onlineCoop.roomId,identity:onlineCoop.identity})],{type:'application/json'}));
+ onlineCoop.enabled=false;clearInterval(onlineCoop.heartbeatTimer);onlineCoop.direct?.close();onlineCoop.clearSession();location.href='./multiplayer.html';return;
+}
+if (act === "continue") {
+  game.running = true;
+  // V470: el juego termina en el Mundo 1 (Mundo 2 en construcción): seguir = quedarse en el Corazón.
+  return;
+}
+if (act === "home") { returnToMenu(); return; }
+if (act === "repeat" && game.roomId === "w1-final") {
+  game.world1Won = false; game._w1WinSent = false; game.boss = null; game.world1Boss = null;
+  if (game.player) { game.player.dead = false; game.player.health = game.player.maxHealth; }
+  game.world1Visited && (game.world1Visited["w1-final"] = true);
+  loadRoom("w1-final", "right");
+  return;
+}
+if (act === "repeat") {
+  game.won = false;
+  if (game.player) {
+    game.player.dead = false;
+    game.player.health = game.player.maxHealth;
+  }
+  loadRoom("boss", "right");
+  return;
+}
+if (act === "roster") returnToMenu();
+});
+addEventListener("keydown", (event) => {
+if (
+  event.key !== "Escape" ||
+  event.repeat ||
+  event.ctrlKey ||
+  event.altKey ||
+  event.metaKey ||
+  event.target?.closest?.("input, textarea, select, [contenteditable='true']")
+) return;
+
+// A running victory film owns Escape: skip to its results instead of
+// opening the pause/menu handler underneath the cinematic overlay.
+if (!game.running && document.getElementById("ohana-intro")?.classList.contains("show")) return;
+const endingOverlay = document.getElementById("win-cinema");
+if (endingOverlay?.classList.contains("cinema-running")) {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  endingOverlay.querySelector(".win-skip")?.click();
+  return;
+}
+event.preventDefault();
+event.stopImmediatePropagation();
+escape();
+}, true);
+addEventListener("keydown", (event) => {
+const key = String(event.key || "").toLowerCase();
+if (event.repeat || key !== "z" || !event.ctrlKey || event.altKey || event.metaKey) return;
+if (!game.running || paused || overlayOpen() || document.hidden) return;
+event.preventDefault();
+event.stopImmediatePropagation();
+cheatEvolve();
+}, true);
+
+installKiloFritaInteractions(game, { target: window, canAct });
+input = bindInput({
+target: window, canvas, buttons: document.querySelectorAll(".touch-btn"), canAct,
+isRunning: () => game.running,
+actions: {
+  attack, dash, interact, respawn, escape,
+  power: (index) => castPower(index),
+  help: () => { if(!game.world1CollectUI?.open)toggleHelp(); },
+  map: () => { if (game.running && !game.world1CollectUI?.open) showMap(); },
+  mute: () => { setMuted(!muted); showSystemMessage("AUDIO", muted ? "Mute" : "On"); }
+}
+});
+keys = input.keys;
+const abilityBar = document.getElementById("ability-bar");
+abilityBar?.addEventListener("click", (ev) => {
+const slot = ev.target.closest(".ability-slot");
+if (!slot || !game.running || paused || overlayOpen()) return;
+ev.preventDefault();
+const idx = Number(slot.dataset.index);
+if (idx >= 0) castPower(idx);
+});
+}
+addEventListener("ohana-evolve-done", (e) => {
+const detail = e?.detail || {};
+const p = game.player;
+if (!p || detail.id !== p.id) return;
+const evo = Math.max(0, Math.min(4, Number(detail.evo) || p.evo));
+const story = evolutionMessage(p.id, evo);
+const index = [null, 1, 2, 4, 5][evo];
+const unlocked = index == null ? null : powerAbility(p, index, ABILITY_DEFS, supremeOf(p.id));
+const opened = unlocked ? unlocked.key + " · " + unlocked.name : "";
+showEvolutionMessage(
+"NUEVA FORMA · " + (evo + 1) + "/5",
+opened ? opened + (unlocked.desc ? ": " + unlocked.desc : "") + (p.id==='kilo'&&evo===4?' K también activa vuelo solar sostenido; otra K desciende.':'') : p.name + " · " + story.line,
+{
+  key: "evolution:" + p.id + ":" + evo,
+  duration: 5200
+}
+);
+if (opened) game.nums.add(p.x, p.y - 28, opened, "#fff6c8", true);
+updateHUD();
+});
+
+document.getElementById("world1-cine-next")?.addEventListener("click", () => {
+  if (!paused && !overlayOpen()) skipWorld1Cine(game);
+});
+document.getElementById("world1-album-close")?.addEventListener("click",()=>toggleWorld1Album(game,false));
+for(const [id,key] of [["world1-album-prev","ArrowLeft"],["world1-album-next","ArrowRight"]]) {
+  document.getElementById(id)?.addEventListener("click",()=>world1AlbumKey(game,key));
+}
+setupSelect();
+
+const onlineBoot = new URLSearchParams(location.search);
+if (onlineBoot.get("online") === "1") {
+const session = onlineCoop.readSession?.();
+const id = session?.characterId || session?.selectedCharacterId;
+const def = id && ROSTER.find((character) => character.id === id);
+if (session?.originalEngine && def) {
+start(def);
+}
+}
+
+
+// Local developer diagnostic: ?perf=1. No analytics, cookies, requests,
+// gameplay callbacks, user identifiers, or timers in ordinary sessions.
+if (e2eEnabled || e2eParams.get("perf") === "1") {
+  window.__OHANA_PERF=Object.freeze({
+    snapshot:()=>renderProfiler.snapshot({dpr:viewDpr,mode:adaptiveLowRes?"economy":"quality"}),
+    reset:()=>renderProfiler.reset()
+  });
+  if(e2eParams.get("perf")==="1"){
+    const panel=document.createElement("output");
+    panel.id="ohana-perf-metrics";
+    panel.setAttribute("aria-label","Diagnóstico local del renderizado OHANA");
+    panel.style.cssText="position:fixed;right:8px;bottom:8px;z-index:10000;background:rgba(5,13,25,.91);color:#d9ffe6;border:1px solid #78bfac;border-radius:8px;padding:7px 10px;font:12px/1.45 monospace;pointer-events:none";
+    panel.textContent="OHANA · esperando fotogramas";
+    document.body.appendChild(panel);
+    setInterval(()=>{
+      const a=window.__OHANA_PERF.snapshot();
+      panel.textContent="OHANA "+a.mode+" · "+a.dpr.toFixed(2)+"x · "+a.fps+" FPS · render p95 "+a.renderP95Ms+" ms · frame p95 "+a.frameP95Ms+" ms";
+    },1200);
+  }
+}
+
+if (e2eEnabled) {
+const dismissE2EOverlays = ({ preserveRoom = false } = {}) => {
+DOM.help?.classList.remove("open");
+DOM.map?.classList.remove("open");
+DOM.pause?.classList.remove("open");
+DOM.finale?.classList.remove("show");
+DOM.evoStage?.classList.remove("show");
+paused = false;
+input?.reset();
+clock.reset();
+t = 0;
+paused = false;
+game.hitstop = 0;
+game.camPunch = 0;
+game.fading = 0;
+game.flash = 0;
+game.flashColor = null;
+game.doorWait = null;
+game.doorHold = 0;
+game.finale = null;
+game.summonDelay = 0;
+// Legacy tests deliberately reset to hub; the physical World 1 pilot must
+// retain the room actually loaded by start() and its genuine collision map.
+if (!preserveRoom) game.roomId = "hub";
+game.won = false;
+game.summoned = false;
+game.runtimeFaults = 0;
+game.lastRuntimeFault = "";
+game.cam.x = 0;
+game.cam.y = 0;
+};
+
+window.__OHANA_E2E = {
+campaignContactTarget(options={}){
+ const p=game.player;const e=makeFoe(650,1094,'cucaracho',game.roomId,0,{rng:()=>.5});
+ Object.assign(e,{x:650,y:1094,w:40,h:40,hp:120,max:120,campaignRole:'pursuer',invuln:0,sleep:99999});
+ if(options.isolateRewards)game.orbs=[];
+ if(options.guarded)e.damageTakenScale=0;
+ if(Number.isFinite(options.budget))e.damageWindowRemaining=options.budget;
+ game.enemies=[e];game.hitstop=0;p.invuln=0;return {x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp};
+},
+combatTarget(){
+ const p=game.player;if(!p)return null;
+ const e=makeFoe(p.x+p.w+22,p.y,'cucaracho',game.roomId,0,{rng:()=>.5});
+ e.hp=e.max=5000;e.w=48;e.h=90;e.invuln=0;e.stun=60000;e.y=p.y+p.h-e.h;game.enemies=[e];
+ return {x:e.x,y:e.y,hp:e.hp};
+},
+setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
+checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
+albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
+ heroItems(){return (game.heroCollection?.items||[]).map(item=>({...item}));},
+ // E2E-only domain contract for state/persistence; unlike walking through a
+ // locked gate, this deliberately does NOT verify route reachability.
+ grantHeroItem(id){return takeHeroCollectionItem(game,id);},
+ interact(){interact();return this.state();},
+expeditionState(){return game.expedition?JSON.parse(JSON.stringify(game.expedition)):null;},
+roomTraversal(){return {terraces:game.roomDef?.terraces||[],nooks:game.roomDef?.nooks||[],composition:game.roomDef?.composition?.name||null};},
+fryerAstralState(){return {launches:game.world1?.fritaLaunches||0,corrections:game.world1?.fritaAirCorrections||0,extensions:game.world1?.yomiWindowExtensions||0,launched:game.world1?.launchedGeyser,stations:(game.world1?.stations||[]).map(s=>({id:s.id,x:s.x,done:s.done,state:game.roomDef?.fritaChapter?fritaVentState(game.world1.tick,s):yomiNodeState(game,s)}))};},
+pizzaChapterState(){return {carry:game.world1?.carry,remaining:(game.world1?.pizzaUntil||0)-(game.world1?.tick||0),baked:pizzaBaked(game),ovens:pizzaOvens(game).map(s=>s.x)};},
+nextChapterState(){return {dinoQuakeHits:game.world1?.dinoQuakeHits||0,dinoQuakes:game.world1?.dinoQuakes||0,dinoLandings:game.world1?.dinoLandings||0,dinoDives:game.world1?.dinoDives||0,dinoPeak:game.world1?.dinoPeak,mirror:mirrorRestored(game),bridges:game.platforms.filter(p=>p._michiBridge!=null).length,thermalFrames:game.world1?.thermalFrames||0};},
+companionActorState(){const a=game._evolutionAttacks?.guest;return a?{x:a.x,y:a.y,air:a.air,id:a.id,age:a.age,life:a.life,heroFoot:game.player.y+game.player.h,heroX:game.player.x+game.player.w/2}:null;},
+chispinChapterState(){return {gates:[0,1,2].map(i=>({state:chispinGateState(game,i),until:game.world1?.chispinSilenced?.[i]||0})),tick:game.world1?.tick,lastAbility:game._lastAbilityId};},
+stitchoChapterState(){return {move:game.player?._abilMove,carry:game.world1?.carry,railDone:!!game.secrets?.['w1-stitcho']?.includes('w1-stitcho-main-rail-v1'),stations:(game.world1?.stations||[]).map(s=>({id:s.id,done:s.done}))};},
+kiloAirState(){return {skyRings:(game.world1?.skyRings||[]).map(r=>({...r})),chimes:(game.world1?.airChimes||[]).map(c=>({...c})),effects:(game.kiloAbilityFx||[]).map(f=>({...f}))};},
+roomCast(){return game.enemies.map(e=>({kind:e.kind,x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,blockedNoticeTick:e._blockNoticeAt,damageWindowRemaining:e.damageWindowRemaining,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,chapterBoss:NEXT_CHAPTERS[e._growthChapter]?{...e[NEXT_CHAPTERS[e._growthChapter].state],hero:e._growthChapter}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
+ setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
+ selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
+foeBoxes() {
+  return { worldW: game.worldW, worldH: game.worldH,
+    enemies: game.enemies.filter((e) => !e.boss).map((e) => ({ kind: e.kind, x: e.x, y: e.y, w: e.w, h: e.h, hp: e.hp })),
+    platforms: (game.platforms || []).filter((q) => q && q.h > 24).map((q) => ({ x: q.x, y: q.y, w: q.w, h: q.h })) };
+},
+setSeed(seed = 1) {
+  let state = (Number(seed) >>> 0) || 1;
+  game.rng = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+  return state;
+},
+injectFault(kind = "nan") {
+  if (kind === "nan") {
+    game.score = NaN;
+    game.kills = Infinity;
+    if (game.player) game.player.x = NaN;
+    pushRuntime(game.projectiles, { x: NaN, y: Infinity, w: NaN, h: NaN, vx: NaN, vy: NaN, life: NaN, dmg: NaN }, MAX_RUNTIME_PROJECTILES);
+  } else if (kind === "collection") {
+    game.projectiles[0] = null;
+    game.projectiles[1] = { x: NaN };
+    game.ghosts[0] = null;
+    game.ghosts[1] = { x: Infinity, y: NaN };
+    game.bolts[0] = null;
+    game.bolts[1] = { x: NaN };
+  }
+  this.step(1);
+  return this.state();
+},
+state() {
+  const p = game.player;
+  const boss = game.boss || game.enemies.find((e) => e.boss);
+  return {
+    running: !!game.running,
+    paused,
+    runtimeFaults: game.runtimeFaults || 0,
+    lastRuntimeFault: game.lastRuntimeFault || "",
+    camera: { x: game.cam.x, y: game.cam.y },
+    platformDrop: p ? {held:!!p._dropWasHeld,target:p._dropPlatform||null,vy:p.vy,t:game.t,hitstop:game.hitstop,doorHold:game.doorHold} : null,
+    bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
+    roomId: game.roomId,
+    // Read-only campaign snapshots: no grant, bypass, or victory injection.
+    world1: world1Snapshot(game),
+    kiloInstruments:game.roomDef?.kiloEncounterVersion?game.world1?.stations.map(s=>({id:s.id,name:s.name,x:s.x,y:s.y,done:s.done,tones:s.tones||0,threatened:!!s.threatened})):null,
+    world1Won: !!game.world1Won,
+    combatReport:{...(game.combatReport||{hits:0,damage:0})},
+    world1Seals: [...(game.world1Seals || [])],
+    world1Cine: game.world1Cine?.id || null,
+    gauntlet:gauntletSnapshot(game),
+    pendingWorld1Cine:game._pendingWorld1Cine?.id||null,
+    worldW:game.worldW,worldH:game.worldH,kiloCombo:kiloComboStatus(game),sprinting:!!p?._sprinting,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
+    hero: p?.id || null,
+    evo: p ? p.evo : -1,
+    xp: p ? p.xp : 0,
+    hp: p ? p.health : 0,
+    maxHealth: p ? p.maxHealth : 0,
+    player: p ? {
+      x: p.x, y: p.y, w: p.w, h: p.h, vx: p.vx, vy: p.vy,
+      grounded: !!p.grounded, jumps: p.jumps, maxJumps: p.maxJumps,
+      dropHeld:!!p._dropWasHeld,dropPlatform:p._dropPlatform?{...p._dropPlatform}:null,
+    } : null,
+    input: {
+      left: !!(input?.keys?.a || input?.keys?.arrowleft),
+      right: !!(input?.keys?.d || input?.keys?.arrowright),
+      jump: !!(input?.keys?.w || input?.keys?.arrowup || input?.keys?.[" "]),
+      down: !!(input?.keys?.s || input?.keys?.arrowdown),
+      axisX: input?.axisX?.() || 0,
+    },
+    score: game.score,
+    kills: game.kills,
+    combo: game.combo,
+    projectiles: game.projectiles.length,
+    ghosts: game.ghosts.length,
+    bolts: game.bolts.length,
+    slashes: game.slashes.length,
+    rain: !!Rain.active,
+    umbrella: !!Rain.hasUmbrella,
+    starBonus: Surprises.starOrbBonus(),
+    familyDuet:game._familyDuet?{hero:game._familyDuet.hero,ally:game._familyDuet.ally||null,age:game._familyDuet.age,evo:game._familyDuet.evo}:null,
+    uPartner:p?.uPartner||null,
+    uExp:p?.uExp||0,
+    uExpRank:uBondProgress(p).rank,
+    uBonds:p?{...p.uBonds}:null,
+    michiDuet:game._michiDuet?{age:game._michiDuet.age,evo:game._michiDuet.evo}:null,
+    chispinDuet:game._chispinDuet?{age:game._chispinDuet.age,evo:game._chispinDuet.evo}:null,
+    stitchoDuet:game._stitchoDuet?{age:game._stitchoDuet.age,evo:game._stitchoDuet.evo}:null,
+    kiloDuet: game._kiloDuet?{age:game._kiloDuet.age,evo:game._kiloDuet.evo}:null,
+    cuerno: p?.id === "cuerno" ? { acts: (p._cuernoKit?.acts || []).map(a=>({key:a.key,phase:a.phase})), trails: (p._cuernoKit?.trail || []).filter(a=>a.on).length } : null,
+    lastAbilityId: game.lastAbilityId,
+    lastAbilitySlot: game.lastAbilitySlot,
+    flow: game._combatFlow ? {
+      label: game._combatFlow.label || "",
+      distinct: game._combatFlow.distinct || 0,
+      multiplier: game._combatFlow.multiplier || 1,
+    } : null,
+    assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
+    hazardEscape: p?._hazardEscapeKey || "",
+    mastery: masterySnapshot(game),
+    dragonTrialEmbers:game.roomId==="volcano"?dragonEmbersForRoom(game.roomDef):[],
+    dragonTrial: game.roomId==="volcano" ? dragonTrialSnapshot(game.dragonTrial) : null,
+    masteryPlatforms: playerMasteryPlatforms(game).map((pl) => ({ x:pl.x, y:pl.y, w:pl.w, h:pl.h, mastery:pl.mastery })),
+    worldGraph: worldGraphSnapshot(game.roomId, game.visited, p?.evo || 0),
+    livingWorld: livingWorldSnapshot(game.roomId, p?.id || ""),
+    enemyDirector: game.enemyDirector ? {
+      roomId: game.enemyDirector.roomId,
+      hard: game.enemyDirector.hard,
+      alive: game.enemyDirector.alive,
+      budget: game.enemyDirector.budget,
+      committed: game.enemyDirector.committed,
+      ecology: game.enemyDirector.ecology || "",
+      formation: game.enemyDirector.formation || "",
+    } : null,
+    kiloFlight:p?{mode:p._kiloFlightMode||null,aim:{x:p._kiloAimX||0,y:p._kiloAimY||0},remaining:p._kiloFlightT||0,ohana:p._kiloOhanaT||0}:null,
+    roomAlbum:roomAlbumSnapshot(game),heroCollection:heroCollectionSnapshot(game),stitchoTrail:stitchoTrailSnapshot(game),chispinTrail:chispinTrailSnapshot(game),michiTrail:michiTrailSnapshot(game),dragonTrail:dragonTrailSnapshot(game),dinoTrail:dinoTrailSnapshot(game),fritaTrail:fritaTrailSnapshot(game),pizzaTrail:pizzaTrailSnapshot(game),yomiTrail:yomiTrailSnapshot(game),cuernoTrail:cuernoTrailSnapshot(game),roomName:game.roomDef?.name,grove:groveSnapshot(game),terrainStats:game.terrainStats,
+    adventure: adventureSnapshot(game),
+    nestArena: nestArenaSnapshot(game),
+    springs: islandSpringsSnapshot(game),
+    enemyAI: enemyDirectorSnapshot(game.enemies).slice(0, 12),
+    boss: boss ? {
+      x: boss.x,
+      y: boss.y,
+      hp: boss.hp,
+      max: boss.max,
+      phase: boss.phase,
+      vulnerable: !!boss.vulnerable,
+      dying: !!boss.dying,
+    } : null,
+  };
+},
+// Local harness scheduling only: timers/network can advance separately
+// while every physics tick still uses the production step and held inputs.
+manualClock(enabled=true){e2eManualClock=enabled===true;clock.reset();return e2eManualClock;},
+step(frames = 1) {
+  const n = Math.max(0, Math.min(600, Math.floor(Number(frames) || 0)));
+  for (let i = 0; i < n; i++) step();
+  updateHUD();
+  return this.state();
+},
+start(id = "kilo") {
+  const def = ROSTER.find((r) => r.id === id);
+  game._e2eLegacyStart = true;
+  start(def);
+  game._cuernoIntroT = null;
+  dismissE2EOverlays();
+  return this.state();
+},
+// E2E setup takes the real solo entry path, unlike legacy start(). It does
+// not move the player, disable enemies, grant a seal, or mark a room complete.
+startWorld1(id = "kilo") {
+  const def = ROSTER.find((r) => r.id === id);
+  if (!def) throw new Error("Unknown World 1 hero: " + id);
+  game._e2eLegacyStart = false;
+  start(def);
+  game._cuernoIntroT = null;
+  dismissE2EOverlays({ preserveRoom: true });
+  return this.state();
+},
+loadRoom(id) {
+  loadRoom(String(id), "e2e");
+  return this.state();
+},
+cast(index) {
+  useAbility(game, Math.max(0, Math.min(5, Math.floor(Number(index) || 0))));
+  return this.state();
+},
+setCombo(value) {
+  game.combo = Math.max(0, Math.min(99, Math.floor(Number(value) || 0)));
+  game.comboT = game.combo > 0 ? 480 : 0;
+  return this.state();
+},
+attack() {
+  attack();
+  return this.state();
+},
+dash() {
+  dash();
+  return this.state();
+},
+setXp(value) {
+  if (!game.player) return this.state();
+  game.player.xp = Math.max(0, Number(value) || 0);
+  const state = this.step(1);
+  dismissE2EOverlays();
+  return state;
+},
+setEvo(value) {
+  if (!game.player) return this.state();
+  game.player.evo = Math.max(0, Math.min(4, Math.floor(Number(value) || 0)));
+  applyForm(game.player, { silent: true });
+  paintFit(game.player);
+  return this.step(1);
+},
+setPlayer(x, y) {
+  if (!game.player) return this.state();
+  game.player.x = Number.isFinite(Number(x)) ? Number(x) : game.player.x;
+  game.player.y = Number.isFinite(Number(y)) ? Number(y) : game.player.y;
+  game.player.vx = 0;
+  game.player.vy = 0;
+  return this.step(1);
+},
+setPlayerVelocity(vx = 0, vy = 0) {
+  if (!game.player) return this.state();
+  game.player.vx = Number.isFinite(Number(vx)) ? Number(vx) : 0;
+  game.player.vy = Number.isFinite(Number(vy)) ? Number(vy) : 0;
+  return this.state();
+},
+exhaustPlayerJumps() {
+  if (!game.player) return this.state();
+  game.player.jumps = Math.max(0, Number(game.player.maxJumps) || 0);
+  game.player.grounded = false;
+  game.player.coyote = 0;
+  game.player.buffer = 0;
+  game.player._jumpHeld = false;
+  game.player._jumpPrev = false;
+  return this.state();
+},
+resetInput() {
+  input?.reset();
+  return this.state();
+},
+setInvulnerable(frames = 600) {
+  if (game.player) game.player.invuln = Math.max(0, Math.min(600, Math.floor(Number(frames) || 0)));
+  return this.state();
+},
+forceRain() {
+  Rain.start(game);
+  return this.state();
+},
+setStitchoBossHp(value){const boss=game.enemies.find(e=>e._stitchoBoss);if(boss)boss.hp=Math.max(0,Math.min(boss.max,Number(value)||0));return this.state();},
+setBossHp(value) {
+  const boss = game.boss || game.enemies.find((e) => e.boss);
+  if (boss) boss.hp = Math.max(1, Math.min(boss.max, Number(value) || boss.max));
+  return this.state();
+},
+// Invoke the real production retry in browser integration tests. This
+// never grants a station or overrides the room checkpoint.
+respawn() { respawn(); return this.state(); },
+die(reason = "hurt") {
+  const p = game.player;
+  if (!p) return this.state();
+  p.health = 0;
+  p.dead = true; p._cuernoDeadAt = t;
+  dispatchEvent(new CustomEvent("ohana-death", { detail: { reason, id: p.id, hero: p.name } }));
+  if (!DeathFx.isPlaying()) DeathFx.start(p, () => {}, { reason: reason === "void" ? "void" : "hurt" });
+  return this.state();
+},
+};
+}
+
+bindDialogs({
+document,
+onChange: () => { input.reset(); clock.reset(); },
+onEscape: () => escape()
+});
+requestAnimationFrame(loop);
+
+installFamilyConstellation();
