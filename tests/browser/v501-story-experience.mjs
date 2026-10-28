@@ -55,7 +55,7 @@ try{
  assert.ok((await page.evaluate(()=>window.__OHANA_E2E.state().player.x))>before.player.x,'control returns after story');
  // Test the authored unlock message for each form using actual evolution code.
  for(const [evo,key,index] of [[1,'K',1],[2,'L',2],[3,'I',4],[4,'P',5]]){
-  await page.locator('#game').focus();await page.keyboard.press('Control+z');
+  await page.evaluate(()=>window.__OHANA_E2E.debugEvolve());
   await page.locator('#evo-stage.show .evo-skip').waitFor({state:'visible'});
   await page.locator('#evo-stage .evo-skip').click();
   await page.waitForFunction(()=>!document.querySelector('#evo-stage')?.classList.contains('show'));

@@ -1,6 +1,6 @@
-# V622 · Espejos del Corazón con la familia visible
+# V623 · Espejos del Corazón con la familia visible
 
-Los diez portales del final muestran los cuerpos completos con el arte canónico de cada héroe, formas finales, poses rotatorias propias y orientación hacia Kilo. Los actores del espejo conservan el estado entre fotogramas: la respiración, el ataque y el salto ya no se reinician cada frame. Cada cristal recibe luz y motivo gráfico de su personaje, doble marco y reflejo frontal sutil; el personaje sigue siendo el elemento legible. Movimiento reducido congela cuerpo y ambiente sin ocultar las figuras. Los muñecos se reutilizan para evitar crear diez actores en cada frame. Caché offline: ohana-622.
+Los diez portales del final muestran los cuerpos completos con el arte canónico de cada héroe, formas finales, poses rotatorias propias y orientación hacia Kilo. Los actores del espejo conservan el estado entre fotogramas: la respiración, el ataque y el salto ya no se reinician cada frame. Cada cristal recibe luz y motivo gráfico de su personaje, doble marco y reflejo frontal sutil; el personaje sigue siendo el elemento legible. Movimiento reducido congela cuerpo y ambiente sin ocultar las figuras. Los muñecos se reutilizan para evitar crear diez actores en cada frame. Se corrigen dos capturas ambiguas en pruebas de silueta y se hace determinista el fixture de evolución cinematográfica. Caché offline: ohana-623.
 
 # V606 · ohana-606 · Claro de Kilo publicada y verificada
 

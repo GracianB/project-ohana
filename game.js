@@ -4319,6 +4319,10 @@ setXp(value) {
   dismissE2EOverlays();
   return state;
 },
+debugEvolve() {
+  cheatEvolve();
+  return this.state();
+},
 setEvo(value) {
   if (!game.player) return this.state();
   game.player.evo = Math.max(0, Math.min(4, Math.floor(Number(value) || 0)));
