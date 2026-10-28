@@ -554,7 +554,7 @@ const PRECACHE_REVISIONS = {
   "systems/pizza-chapter.js": "328fb0f36e5e8bb8e6f7fd18c0aba0d7a059a268",
   "worlds/pizza-ovens.js": "28440ea475b0e5499a04f91d396b1785355ce8e2",
   "systems/yomi-room.js": "0916aa8f05dd7b6dccfafe698f01d43c856bbe3a",
-  "systems/world1-cine.js": "b41765d23083fa8c64d26364d23348a22e1e7430",
+  "systems/world1-cine.js": "9952af40b7c4a030d057b25bdb00ab5f479cbe6c",
   "systems/final-portal-mirrors.js": "de67078a9847a809aca3087ed58a20e14f49794b",
   "systems/world1-select.js": "1a9f7a9c91e166d2993e1d87056e1dcec1ff0f9b",
   "systems/theatre-stage.js": "1824c8672997164ac18403f85fccd8ef7d87d50d",
