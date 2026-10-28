@@ -1078,7 +1078,7 @@ const fromEvo = p.evo;
 const fromName = p.evoNames?.[fromEvo] || p.forms?.[fromEvo]?.name || p.name || "Forma";
 if (reason !== "xp" && reason !== "manual") return;
 if (p.evo >= 4) { if (reason === "manual") showSystemMessage("MAX", "Ya eres GOD (forma 5)."); return; }
-if(kiloGrowthWaiting(game)){
+if(!game._e2eForceEvolution&&kiloGrowthWaiting(game)){
  if(reason==='manual')showObjectiveMessage('ESCUCHA EL CLARO',world1NextObjective(game)?.action||'Despierta el siguiente instrumento');
  return;
 }
@@ -4320,7 +4320,12 @@ setXp(value) {
   return state;
 },
 debugEvolve() {
-  cheatEvolve();
+  const p=game.player;
+  if(!p||p.evo>=4)return this.state();
+  p.xp=Math.max(p.xp,XP_NEED[p.evo+1]||0);
+  const previous=game._e2eForceEvolution;
+  game._e2eForceEvolution=true;
+  try { evolve("xp"); } finally { game._e2eForceEvolution=previous; }
   return this.state();
 },
 setEvo(value) {
