@@ -305,6 +305,14 @@ jobs:
           export CHROMIUM_BIN
           node tests/browser/v513-full-campaign.mjs
 
+      - name: V1 release polish from earned campaign · links, pause, save and Continue
+        run: npm run test:browser:release-polish
+
+      - name: V623 reported visuals · final portal, guardian films and room signatures
+        run: |
+          npm run test:browser:reported-visuals
+          npm run test:browser:frita-motion
+
       # Full continuous Normal play runs after fast regressions; it is also
       # checked independently by the V514 workflow on every PR.
       - name: Release gate

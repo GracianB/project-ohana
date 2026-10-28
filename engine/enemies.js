@@ -1,3 +1,4 @@
+import {drawCreatureFinish} from './foes/creature-finish.js';
 import { drawBossQueen } from "./boss-art.js";
 import { drawQueenV94Warning } from "../systems/boss-v94-readability.js";
 import { drawFoeRig } from "./foe-rig.js";
@@ -97,6 +98,7 @@ export function drawEnemy(ctx, e, cam, t, {reduceMotion=false}={}) {
   else drawCucaracho(ctx, e, t);
 
   if (!e.boss) {
+    drawCreatureFinish(ctx,e);
     drawDamageWear(ctx, e, t);
   }
   ctx.filter = "none";

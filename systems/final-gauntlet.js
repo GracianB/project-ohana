@@ -158,7 +158,17 @@ export function gauntletAccessibleText(g){
 // Kept for art fixtures and integrations that draw without a separate camera.
 export function drawFinalGauntlet(c,g,cam,W,H,t=0){drawGauntletWorld(c,g,cam,t);drawGauntletHud(c,g,W,H);}
 export function drawGauntletProjectile(c,pr,cam,t=0){if(!pr.gauntlet)return false;const x=pr.x-cam.x,y=pr.y-cam.y;c.save();c.fillStyle=pr.color;c.strokeStyle='#fff0c7';c.lineWidth=2;
- if(['prism','lightning','geysers'].includes(pr.gauntlet)){c.globalAlpha=.7;c.fillRect(x,y,pr.w,pr.h);c.fillStyle='#fff3cd';c.fillRect(x+pr.w*.4,y,Math.max(2,pr.w*.18),pr.h);}
+ if(['prism','lightning','geysers'].includes(pr.gauntlet)){
+  // A stable dark edge identifies the exact hit band; the translucent interior
+  // leaves the hero visible. Lightning, crystal and steam have distinct bodies.
+  c.fillStyle='#152b40';c.fillRect(x-1,y-1,pr.w+2,pr.h+2);
+  c.globalAlpha=.82;c.fillStyle=pr.color;c.fillRect(x,y,pr.w,pr.h);
+  c.globalAlpha=1;c.strokeStyle='#fff3cd';c.lineWidth=2;c.beginPath();
+  if(pr.gauntlet==='lightning'){c.moveTo(x+pr.w*.7,y);for(let i=1;i<=8;i++)c.lineTo(x+pr.w*(i%2?.25:.7),y+pr.h*i/8);}
+  else if(pr.gauntlet==='prism'){c.moveTo(x+pr.w/2,y);c.lineTo(x+pr.w*.8,y+pr.h*.5);c.lineTo(x+pr.w/2,y+pr.h);c.lineTo(x+pr.w*.2,y+pr.h*.5);c.closePath();}
+  else{c.moveTo(x+pr.w*.3,y+pr.h);c.bezierCurveTo(x,y+pr.h*.65,x+pr.w,y+pr.h*.35,x+pr.w*.5,y);}
+  c.stroke();
+ }
  else if(pr.gauntlet==='orb'&&pr.gauntletHero){drawGuardianNote(c,pr,x,y,t);}
  else{c.translate(x+pr.w/2,y+pr.h/2);if(pr.gauntlet==='disc')c.rotate(t*.14);c.beginPath();c.ellipse(0,0,pr.w/2,pr.h/2,0,0,TAU);c.fill();c.stroke();if(pr.gauntlet==='disc'){c.fillStyle='#a85f66';for(let k=0;k<3;k++){c.beginPath();c.arc(Math.cos(k*TAU/3)*10,Math.sin(k*TAU/3)*7,4,0,TAU);c.fill();}}}
  c.restore();return true;}

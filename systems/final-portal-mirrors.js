@@ -1,92 +1,13 @@
+import {drawCharacter} from '../characters/draw.js';
+import {findRoster} from '../characters/roster.js';
+import {heroHeightTarget} from '../characters/visual-size.js';
 // systems/final-portal-mirrors.js
 // V618 — Portales/Espejos de la Sala Final EXTREMO
-// Los miembros de la familia aparecen dentro de los óvalos haciendo muecas,
-// como atrapados. Vector puro, determinista, sin Math.random en arte.
+// The actual family actors live inside clipped oval glass. Offscreen mirrors
+// are culled before their animated Canvas portraits are rendered.
 // Posiciones alineadas con las estatuas de world1-rooms.js (900 + i*560).
 
 const TAU = Math.PI * 2;
-
-const FAMILY = Object.freeze({
-  michi:    { name: 'Michicornio', base: '#c9a8ff', eye: '#5a3d7a', accent: '#f2c1ff', ears: true },
-  cuerno:   { name: 'Cuerno',      base: '#4ff0c8', eye: '#0d4a3a', accent: '#e0f7fa', horns: true },
-  kilo:     { name: 'Kilo',        base: '#ffe14a', eye: '#8a5a1a', accent: '#fff6c8', crown: true },
-  stitcho:  { name: 'Stitcho',     base: '#5ad1ff', eye: '#1a4a7a', accent: '#b3e5fc', antenna: true },
-  chispin:  { name: 'Chispín',     base: '#ffe14a', eye: '#7a5a00', accent: '#fff9c4', spark: true },
-  cat:      { name: 'Michi',       base: '#ffb6e4', eye: '#7a3d6a', accent: '#f8bbd0', ears: true },
-  dragon:   { name: 'Dragón',      base: '#ff8a3a', eye: '#5a2a00', accent: '#ffe0b2', horns: true },
-  dino:     { name: 'Dino',        base: '#c8f04a', eye: '#3a5a1a', accent: '#e6ee9c', snout: true },
-  frita:    { name: 'Frita',       base: '#ffd36a', eye: '#7a4a1a', accent: '#fff3e0', hat: true },
-  pizza:    { name: 'Pizza',       base: '#ff8a2a', eye: '#7a2a1a', accent: '#ffccbc', hat: true },
-  yomi:     { name: 'Yomi',        base: '#ce93d8', eye: '#4a148c', accent: '#e1bee7', void: true }
-});
-
-function hn(i) {
-  const x = Math.sin(i * 127.1 + 11.7) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-function drawFace(ctx, fam, t, intensity, looking) {
-  const phase = Math.sin(t * 0.11 + intensity);
-  const blink = Math.abs(Math.sin(t * 0.18 + intensity * 2)) > 0.92;
-  const open = Math.sin(t * 0.15 + intensity) > 0.35;
-
-  ctx.fillStyle = fam.base;
-  ctx.beginPath();
-  ctx.ellipse(0, -8, 30, 36, 0, 0, TAU);
-  ctx.fill();
-
-  if (fam.ears) {
-    ctx.fillStyle = fam.accent;
-    ctx.beginPath(); ctx.moveTo(-28, -28); ctx.lineTo(-18, -48); ctx.lineTo(-8, -26); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(28, -28); ctx.lineTo(18, -48); ctx.lineTo(8, -26); ctx.closePath(); ctx.fill();
-  }
-  if (fam.horns) {
-    ctx.strokeStyle = fam.accent; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(-14, -38); ctx.quadraticCurveTo(-22, -58, -10, -62); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(14, -38); ctx.quadraticCurveTo(22, -58, 10, -62); ctx.stroke();
-  }
-  if (fam.crown) {
-    ctx.fillStyle = fam.accent;
-    for (let i = -1; i <= 1; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * 12 - 6, -40);
-      ctx.lineTo(i * 12, -52);
-      ctx.lineTo(i * 12 + 6, -40);
-      ctx.closePath(); ctx.fill();
-    }
-  }
-
-  if (!blink) {
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.ellipse(-11, -16, 8, 9, 0, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(11, -16, 8, 9, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = fam.eye;
-    const lookX = looking * 3;
-    ctx.beginPath(); ctx.arc(-11 + lookX, -16, 4, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(11 + lookX, -16, 4, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(-13 + lookX, -18, 1.6, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(9 + lookX, -18, 1.6, 0, TAU); ctx.fill();
-  } else {
-    ctx.strokeStyle = fam.eye; ctx.lineWidth = 2.4;
-    ctx.beginPath(); ctx.moveTo(-16, -16); ctx.lineTo(-6, -16); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(6, -16); ctx.lineTo(16, -16); ctx.stroke();
-  }
-
-  ctx.strokeStyle = fam.eye; ctx.lineWidth = 2.6;
-  ctx.beginPath();
-  if (open && intensity > 0.4) {
-    ctx.moveTo(-10, 8);
-    ctx.quadraticCurveTo(0, 22 + phase * 4, 10, 8);
-  } else if (phase > 0.3) {
-    ctx.moveTo(-9, 6);
-    ctx.quadraticCurveTo(0, 14, 9, 6);
-  } else {
-    ctx.moveTo(-8, 10);
-    ctx.quadraticCurveTo(0, 6, 8, 10);
-  }
-  ctx.stroke();
-}
 
 export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false) {
   if (!portals?.length) return;
@@ -94,8 +15,8 @@ export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false)
   for (const p of portals) {
     const x = p.x - cam.x;
     const y = p.y - cam.y;
-    const fam = FAMILY[p.hero] || FAMILY.kilo;
-    const intensity = hn(p.x * 0.013 + t * 0.02);
+    const viewport=ctx.canvas?.width/Math.max(.01,Math.abs(ctx.getTransform?.().a||1));
+    if(Number.isFinite(viewport)&&(x+(p.rx||72)<0||x-(p.rx||72)>viewport))continue;
     const near = player ? Math.hypot(player.x + player.w / 2 - p.x, player.y + player.h / 2 - p.y) < 220 : false;
     const looking = near ? Math.sign(player.x + player.w / 2 - p.x) : Math.sin(t * 0.08 + p.x) * 0.6;
 
@@ -129,22 +50,16 @@ export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false)
       ctx.globalAlpha = 1;
     }
 
-    const scale = near ? 1.08 : 1;
-    ctx.save();
-    ctx.scale(scale, scale);
-    drawFace(ctx, fam, t, intensity + (near ? 0.4 : 0), looking);
-    ctx.restore();
-
-    if (near && !reduced) {
-      ctx.globalAlpha = 0.55;
-      ctx.fillStyle = fam.base;
-      ctx.beginPath();
-      ctx.ellipse(-28, 18, 10, 7, -0.4, 0, TAU);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(28, 18, 10, 7, 0.4, 0, TAU);
-      ctx.fill();
-      ctx.globalAlpha = 1;
+    // Render the actual vector actor, clipped INSIDE the glass. No proxy faces.
+    const def=findRoster(p.hero),form=def?.forms?.[1];
+    if(form){
+      ctx.save();ctx.beginPath();ctx.ellipse(0,0,p.rx||72,p.ry||112,0,0,TAU);ctx.clip();
+      ctx.translate(0,(p.ry||112)*.72);ctx.shadowBlur=0;ctx.filter='none';ctx.globalAlpha=1;
+      const actor={id:p.hero,evo:1,color:form.color||def.color,w:form.w,h:form.h,x:-form.w/2,y:-form.h,
+        facing:looking<0?-1:1,grounded:true,vx:0,vy:0,health:form.hp,maxHealth:form.hp,
+        visualScale:(p.ry||112)*(['dragon','dino','cuerno','yomi'].includes(p.hero)?1.15:1.5)/heroHeightTarget(p.hero,1),invuln:0,
+        _poseOverride:near?'victory':'idle',_introForceCanvas:true,_duetActor:true,_theatreHQ:true};
+      drawCharacter(ctx,actor,{x:0,y:0},reduced?0:t,{reduceMotion:reduced});ctx.restore();
     }
 
     ctx.restore();

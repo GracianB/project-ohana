@@ -1,3 +1,7 @@
+# Estado de entrega
+
+La entrega de V1.0 se prepara en `ohana-623`, incorporando los fallos visuales y de recorrido señalados por el usuario. La publicación y los resultados efectivos figuran en los registros enlazados. Consultar [criterios y alcance](V1.0.0-CIERRE.md), [estado actual](v1-solo-status.json) y [handoff vigente](HANDOFF-V1-SOLO.md). La lista de abajo se conserva como contrato de mantenimiento por personaje; sus referencias históricas no sustituyen los resultados de V623.
+
 # Entregas por personaje y sala
 
 Plan vigente de la campaña individual: [V1-SOLO-ESTRATEGIA.md](V1-SOLO-ESTRATEGIA.md). Estado verificable: [v1-solo-status.json](v1-solo-status.json). Para reanudar: [HANDOFF-V1-SOLO.md](HANDOFF-V1-SOLO.md). Los cierres de repertorio históricos de abajo no acreditan integración en las salas nuevas. Kilo ha sido reabierto expresamente por el usuario.

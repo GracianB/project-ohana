@@ -10,7 +10,7 @@ export function powerStatus(g,index,supreme=null){
  const now=(Number(g.t)||0)*1000/60,left=Math.max(0,(Number(p.cds?.[def.id||p.abilities?.[index]])||0)-now);
  const need=POWER_LEVELS[index],base={def,left};
  const state=(kind,short,label,pct=0)=>({...base,kind,short,label,pct,available:kind==='ready'||kind==='rhythm'||kind==='flight'});
- if((Number(p.evo)||0)<need)return state('locked','Forma '+(need+1),'Se desbloquea en la forma '+(need+1)+'. '+(g.roomId==='w1-kilo'?(g.roomDef?.kiloEncounterVersion?'Despierta los cuatro instrumentos para evolucionar; los recuerdos son opcionales.':'Completa las notas de los hibiscos para evolucionar; los cromos no dan XP.'):'Recoge cristales de XP.'));
+ if((Number(p.evo)||0)<need)return state('locked','Forma '+(need+1),'Se desbloquea en la forma '+(need+1)+'. '+(g.roomId==='w1-kilo'?(g.roomDef?.kiloEncounterVersion?'Despierta los cuatro instrumentos para evolucionar; los recuerdos son opcionales.':'Completa las notas de los hibiscos para evolucionar; los cromos no dan XP.'):g.roomDef?.stitchoEncounterVersion?'Repara los módulos y cruza el raíl del astillero para evolucionar; los recuerdos son opcionales.':'Recoge cristales de XP.'));
  if(index===1&&p.id==='kilo'&&p._kiloFlightT>0){
   if(p._kiloFlightMode==='solar')return state('flight','Vuelo · K bajar','Vuelo solar sostenido. Dirige con mover/saltar/bajar; J dispara en esa dirección. K baja y recibir daño corta el vuelo. Los pétalos laterales duran sólo mientras protege la hula.',100);
   const seconds=(Math.ceil(p._kiloFlightT/6)/10).toFixed(1);

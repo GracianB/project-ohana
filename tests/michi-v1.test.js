@@ -13,7 +13,7 @@ test('Michi V1: 5 forms include pure vector Canvas metadata and active roster en
   assert.equal(def.forms[0].name, 'Michicornio Bebé');
   assert.equal(def.forms[1].name, 'Hada Felina');
   assert.equal(def.forms[2].name, 'Medusa Onírica');
-  assert.equal(def.forms[3].name, 'Dragón Astral');
+  assert.equal(def.forms[3].name, 'Conejornio Lunar');
   assert.equal(def.forms[4].name, 'Michicornio Eclipse');
   assert.equal(def.evoNames[4], 'Michicornio Eclipse');
   assert.equal(def.passive.id, 'ninelives');

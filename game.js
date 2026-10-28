@@ -1,4 +1,6 @@
+import {drawRealmSignatures} from './systems/realm-signatures.js';
 import {drawHudPortrait} from './systems/hud-portrait-v606.js';
+import {combatCoach} from './systems/combat-coach.js';
 import {kiloGrowthWaiting,kiloUnlockedForm} from './systems/kilo-encounters-v606.js';
 import {stitchoGrowthWaiting,stitchoUnlockedForm} from './systems/stitcho-encounters-v607.js';
 import {kiloChapterAbility,interactKiloInstrument} from './systems/world1-play.js';
@@ -309,7 +311,7 @@ function camH() { return viewH / camZoom(); }
 function fit() {
 viewW = Math.max(320, innerWidth | 0);
 viewH = Math.max(240, innerHeight | 0);
-viewDpr = canvasDpr(viewW,viewH,window.devicePixelRatio || 1,reduceMotion,adaptiveLowRes);
+viewDpr = canvasDpr(viewW,viewH,window.devicePixelRatio || 1,reduceMotion,adaptiveLowRes&&!world1CineActive(game));
 const bw = Math.round(viewW * viewDpr);
 const bh = Math.round(viewH * viewDpr);
 if (canvas.width !== bw) canvas.width = bw;
@@ -367,8 +369,8 @@ const p = game.player;
 setText(document.getElementById("pause-hero"), p?.name || "Familia Ohana");
 setText(document.getElementById("pause-objective"), world1Guidance(game.roomId,game)?.objective || room().hint || room().goal || "Explora la isla y reúne a la familia.");
 setText(document.getElementById("pause-room-strategy"),game.player?.id==='kilo'&&room().hero==='kilo' ? [
- "Bebé: J te permite atacar a distancia; H sirve cuando el enemigo se acerca. Despeja cada hibisco antes de detenerte a tocar. U llama a tu compañero.",
- "Kilo: K permite volar y reflejar proyectiles. Úsalo para cambiar de posición; aterriza en una zona despejada antes de tocar el hibisco.",
+ "Bebé: J ataca a distancia; H sirve de cerca. La caracola responde a E o J. Los instrumentos, el combate y el Tambor forman tu recorrido; los recuerdos son opcionales.",
+ "Kilo: K permite levitar; otra K te baja. Cambia de posición y usa J para tocar las tres notas del bambú. En el arpa del dosel necesitarás altura.",
  "Ohana: L combina golpe y curación. Resérvalo para recuperar terreno cuando te rodean; ya dispones de doble salto.",
  "I: acierta tres ataques H o J en cualquier orden. Cuando aparezca I LISTO, pulsa I para un paso evasivo y golpe ascendente. No caduca.",
  "Flor Solar: K activa vuelo sostenido y otra pulsación permite descender. Dirige J moviéndote antes de disparar. El daño corta el vuelo; esquiva el abanico del Tambor. Busca los tres carillones elevados."
@@ -376,9 +378,11 @@ setText(document.getElementById("pause-room-strategy"),game.player?.id==='kilo'&
 setText(document.getElementById("pause-form"), ((p?.evo || 0) + 1) + " / 5");
 setText(document.getElementById("pause-journey"), world1Guidance(game.roomId,game)?.journey || Math.min(10, Object.keys(game.visited || {}).length) + " / 10");
 setText(document.getElementById("pause-score"), String(game.score || 0));
+setText(document.getElementById('pause-progress'),(game.world1Seals?.length||0)+'/10 sellos · '+Object.values(game.world1Collect?.rooms||{}).reduce((n,a)=>n+(a.found?.length||0),0)+'/1000 recuerdos');
 try {
-  save();
-} catch (_) {}
+  const saved=save();
+  setText(document.getElementById('pause-save-status'),game.onlineAdventure?'El progreso compartido pertenece a esta aventura.':saved?'Progreso guardado en este navegador. Continuar retomará tu aventura.':'Guardado no disponible. Mantén esta pestaña abierta para conservar la partida actual.');
+} catch (_) {setText(document.getElementById('pause-save-status'),'Guardado no disponible. Mantén esta pestaña abierta.');}
 }
 
 try {
@@ -3088,7 +3092,7 @@ ctx.restore();
 // V468: cada sala del Mundo 1 usa el decorado de su héroe y su silueta gigante.
 function drawWorld1Backdrop(world,W,H){
  const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
- if(h!=="kilo"&&drawLivingRealm(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H,t,{reduceMotion:rd})){drawChapterLandmarks(ctx,game,game.cam,t,W,H);return;}
+ if(h!=="kilo"&&drawLivingRealm(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H,t,{reduceMotion:rd})){drawChapterLandmarks(ctx,game,game.cam,t,W,H);drawRealmSignatures(ctx,h,game.cam,W,H,t,rd);return;}
  if(h==="stitcho"||h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
  else if(h==="cat")drawMichiGardens(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
 
@@ -3101,13 +3105,14 @@ function drawWorld1Backdrop(world,W,H){
  else renderWorld(ctx,world,game.cam,t,W,H);
  // One complete backdrop per room: never paint a second sky over the first.
  if(h==="kilo")drawOhanaPlace(ctx,game,game.cam,t,W,H);
+ drawRealmSignatures(ctx,h,game.cam,W,H,t,rd);
  drawChapterVista(ctx,game,game.cam,t,W,H);
  drawChapterLandmarks(ctx,game,game.cam,t,W,H);
  if(!['stitcho','chispin','cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(h))drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
  if(game.roomDef.fusionBoss)drawWorld1BossBackdrop(ctx,game,game.cam,t);
 }
 const w1Actors=new Map();
-function w1CineActor(c,hero,x,y,scale,acting=null){const form=acting?.form??1,key=hero+':'+form;let d=w1Actors.get(key);if(!d){const def=ROSTER.find(r=>r.id===hero);if(!def)throw Error('hero');d=w1MakeDummy(hero,form,def.color);d.facing=1;d.grounded=true;w1Actors.set(key,d);}d._poseOverride=acting?.pose||'idle';w1DrawDummy(c,d,x,y,Math.max(.2,scale)*60/Math.max(1,w1BaseHeight(hero,form)),reduceMotion?0:t);}
+function w1CineActor(c,hero,x,y,scale,acting=null){const form=acting?.form??1,key=hero+':'+form;let d=w1Actors.get(key);if(!d){const def=ROSTER.find(r=>r.id===hero);if(!def)throw Error('hero');d=w1MakeDummy(hero,form,def.color);d.facing=1;d.grounded=true;w1Actors.set(key,d);}d._poseOverride=acting?.pose||'idle';d._theatreHQ=true;w1DrawDummy(c,d,x,y,Math.max(.2,scale)*60/Math.max(1,w1BaseHeight(hero,form)),reduceMotion?0:t);}
 
 // B abre el álbum del Mundo 1 cuando estás en una de sus salas (un solo álbum).
 addEventListener("keydown",(e)=>{
@@ -3573,7 +3578,7 @@ if(bondFill){
 if (p.evo >= 4) {
 const sup = supremeOf(p.id);
 const sp = specialOf(p.id);
-DOM.hudEvo?.setAttribute("title", "Suprema U: " + sup.name + " · " + sp.name + " · " + sp.text);
+DOM.hudEvo?.setAttribute("title", "P · " + (powerStatus(game,5)?.def?.name||"Poder final") + " · Requiere 100 de carga causando daño. U · Compañero: " + sup.name + " · " + sp.name + " · " + sp.text);
 }
 const evoIdx = Math.max(0, Math.min(4, Number(p.evo) || 0));
 const col = p.color || "#7ee7ff";
@@ -3599,6 +3604,8 @@ for (let i = 0; i < pips.length; i++) {
 }
 }
 setText(DOM.combo, "Combo " + game.combo + " · Score " + game.score);
+const coach=combatCoach(game);
+setText(document.getElementById('combat-coach-a11y'),coach?coach.accessible+' '+coach.footer:'');
 const chip = DOM.comboChip;
 if (chip) {
 const show = game.combo >= 1 && game.comboT > 0 && !(game.finalGauntlet&&game.finalGauntlet.phase!=="complete");
@@ -3773,11 +3780,14 @@ try { DOM.pause?.classList.add("open"); } catch (_) {}
 }
 }
 
-let renderedTick = -1;
+let renderedTick = -1,cinemaResolution=false;
 function loop(now) {
 if (game.running && !document.hidden) {
+// Hold a stable sharp backing store throughout each film.
+const cinemaNow=world1CineActive(game);
+if(cinemaNow!==cinemaResolution){cinemaResolution=cinemaNow;fit();framePressure.reset();}
 // Only change drawing resolution, never simulation, hitboxes or input.
-if(!paused){
+if(!paused&&!cinemaNow){
   if (!adaptiveLowRes && framePressure.observe(now)) {
     adaptiveLowRes = true;
     resolutionRecovery.reducedAt(now);

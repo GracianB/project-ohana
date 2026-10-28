@@ -52,13 +52,13 @@ test('V459: all five feline shapes survive 10 gestures and reduced-motion contex
   assert.doesNotThrow(()=>cat.draw(c,pose(action,112,f,reduced),{}),f+'/'+action+'/'+reduced);
  }
 });
-test('V459: character lineage is cat->lunar lynx->cat-eared jelly->dragon->jelly-tail guardian',()=>{
+test('V459: character lineage is cat->lunar lynx->cat-eared jelly->moon hare->jelly-tail guardian',()=>{
  const src=readFileSync(new URL('../characters/art/cat.js',import.meta.url),'utf8');
  const name=ROSTER.find(x=>x.id==='cat');
  assert.equal(name.forms[1].name,'Hada Felina');
  assert.ok(name.forms[2].name.includes('Medusa'));
- assert.ok(!name.forms.some(x=>/Liebre|Conejo|Hare/.test(x.name)));
- for(const key of ['FAIRY CAT','Ears are inherited from F1','Crystal cat ears','Nine EXPLICIT jelly-tendrils']){
+ assert.equal(name.forms[3].name,'Conejornio Lunar');
+ for(const key of ['FAIRY CAT','Ears are inherited from F1','MOON HARE','Nine EXPLICIT jelly-tendrils']){
   assert.ok(src.includes(key),'missing anatomical continuity: '+key);
  }
  assert.ok(src.includes('drawMichicornioGesture(ctx,safe,r,f)'));

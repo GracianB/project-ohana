@@ -187,7 +187,7 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   W = Math.max(1, num(W, 1280)); H = Math.max(1, num(H, 720)); t = num(t);
   const k = clamp(c.t / Math.max(1, s.dur), 0, 1), fadeIn = Math.min(1, c.t / 18), fadeOut = Math.min(1, (s.dur - c.t) / 18), reduce = !!g.reduceMotion;
   const shake = s.shake && !reduce ? Math.sin(c.t * 1.7) * 6 * (1 - k) : 0;
-  ctx.save(); ctx.translate(shake, 0);
+  ctx.save(); ctx.globalAlpha=1;ctx.globalCompositeOperation="source-over";ctx.shadowBlur=0;ctx.filter="none";ctx.translate(shake, 0);
   ctx.fillStyle = s.bg || "#120d24"; ctx.fillRect(-10, 0, W + 20, H);
   if(s.layout==='arrival'){
    if(c.hero==='kilo')drawHarborWelcome(ctx,W,H,reduce?0:t,reduce);
@@ -227,10 +227,12 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
     drawQuimeraCreature(ctx,{x:-115,y:-290,w:230,h:290,phase:c.id==='bossDefeat'?4:1,hp:c.id==='bossDefeat'?0:1,_fusion:{mode:'rest'}},{x:0,y:0},t,reduce);ctx.restore();
   }
   if(['keeper','keepsake'].includes(s.layout)){
+   // Star/halo alpha must never leak into the two foreground actors.
+   ctx.globalAlpha=fadeIn*fadeOut;ctx.shadowBlur=0;ctx.filter='none';
    const hero=c.hero,data=KEEPSAKES[hero],height=Math.min(H*.37,W*.34),foot=H*.65;
    if(drawActor)drawActor(ctx,hero,W*.34,foot,height/60,{form:4,pose:s.layout==='keepsake'?'victory':'idle'});
    if(s.layout==='keeper'){
-    const e=g.finalGauntlet?.guardian;if(e){ctx.save();const k=Math.min(H*.4,W*.36)/e.h;ctx.translate(W*.67,foot);ctx.scale(k,k);drawChapterBossV2(ctx,{...e,x:-e.w/2,y:-e.h},{x:0,y:0},t,reduce);ctx.restore();}
+    const e=g.finalGauntlet?.guardian;if(e){ctx.save();const k=Math.min(H*.4,W*.36)/e.h;ctx.translate(W*.67,foot);ctx.scale(k,k);drawChapterBossV2(ctx,{...e,x:-e.w/2,y:-e.h,flash:0,invuln:0},{x:0,y:0},t,reduce);ctx.restore();}
     drawKeepsake(ctx,hero,W*.54,foot+14,Math.min(70,H*.12),{ghost:true});
    }else drawKeepsake(ctx,hero,W*.64,foot+12,Math.min(145,H*.28));
   }

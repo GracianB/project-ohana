@@ -770,7 +770,7 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
   assert.match(css, /V47A · CAROUSEL FIT \+ HOKU HERO GATE/);
   assert.match(titleFx, /kind:"volcano"/);
   assert.match(titleFx, /kind:"aurora"/);
-  assert.match(html, /<body data-theme="dark" class="intro-pending">/);
+  assert.match(html, /<body\b[^>]*data-theme="dark"[^>]*class="intro-pending"[^>]*>/);
   assert.match(html, /body\.intro-pending #char-select > :not\(#ohana-intro\)\{visibility:hidden!important/);
   assert.match(html, /data-opening-guard="true"/);
   assert.match(intro, /classList\.remove\("intro-playing", "intro-pending"\)/);

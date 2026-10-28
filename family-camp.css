@@ -159,3 +159,5 @@ body.playing #char-select.camp-on {display:none!important;}
 #family-camp[data-final=true] #camp-keepsake{display:none;}
 #char-select.camp-on #btn-coop[hidden]{display:none!important;}
 @media(max-width:760px){#camp-keepsake{grid-column:1/-1;}}
+/* Keep the observatory heading clear of the Canvas room label on narrow phones. */
+@media(max-width:760px){#family-camp .camp-scene-heading{max-width:calc(100% - 36px);}}

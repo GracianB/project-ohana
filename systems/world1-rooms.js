@@ -1,3 +1,4 @@
+import {openChapterPits} from './open-chapter-pits.js';
 import {authorKiloEncounters} from './kilo-encounters-v606.js';
 import {authorStitchoEncounters} from './stitcho-encounters-v607.js';
 import {authorChispinEncounters} from './chispin-encounters-v608.js';
@@ -226,13 +227,13 @@ export function buildWorld1HeroRoom(hero) {
   if(hero==='kilo') return authorKiloEncounters(composed);
   if(hero==='stitcho') return authorStitchoEncounters(composed);
   if(hero==='chispin') return authorChispinEncounters(composed);
-  if(hero==='cat') return authorCatEncounters(composed);
-  if(hero==='cuerno') return authorCuernoEncounters(composed);
-  if(hero==='dragon') return authorDragonEncounters(composed);
-  if(hero==='dino') return authorDinoEncounters(composed);
-  if(hero==='frita') return authorFritaEncounters(composed);
-  if(hero==='pizza') return authorPizzaEncounters(composed);
-  if(hero==='yomi') return authorYomiEncounters(composed);
+  if(hero==='cat') return openChapterPits(authorCatEncounters(composed));
+  if(hero==='cuerno') return openChapterPits(authorCuernoEncounters(composed));
+  if(hero==='dragon') return openChapterPits(authorDragonEncounters(composed));
+  if(hero==='dino') return openChapterPits(authorDinoEncounters(composed));
+  if(hero==='frita') return openChapterPits(authorFritaEncounters(composed));
+  if(hero==='pizza') return openChapterPits(authorPizzaEncounters(composed));
+  if(hero==='yomi') return openChapterPits(authorYomiEncounters(composed));
   return composed;
 }
 

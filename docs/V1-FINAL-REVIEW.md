@@ -1,3 +1,9 @@
+# Estado vigente: cierre V1.0 en V623
+
+El usuario ha solicitado cerrar la V1 jugable. El alcance vigente se documenta en [V1.0.0-CIERRE.md](V1.0.0-CIERRE.md) y sus pruebas/publicación en `V623-VALIDATION.json` y `V623-PUBLICATION.json`. La revisión que sigue es histórica; sus tablas V511–V513 no son una lista de pendientes actuales ni una nueva solicitud de aprobación. Se conservan para trazabilidad. No se atribuye una valoración manual de arte o dificultad al usuario a partir de tests.
+
+---
+
 # Estado actual: V2 / ohana-600
 
 La V514 de PR440 está integrada. Continuar con [V2-ADVENTURE.md](V2-ADVENTURE.md) y

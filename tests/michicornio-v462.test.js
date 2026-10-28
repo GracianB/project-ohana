@@ -59,11 +59,11 @@ test('V462 F1 is the Hada Felina: wings, antennae, flower crown, wand-tail — d
  assert.notEqual(wing(3),wing(8),'wings beat');
 });
 
-test('V462 dark cat (Dragón Astral, F3) has a real mouth that roars on attack',()=>{
+test('Fourth-form moon hare opens its mouth on attack',()=>{
  const idle=rec(),atk=rec();
  cat.draw(idle.c,pose('idle',30,3),{});cat.draw(atk.c,pose('attack',30,3),{});
  assert.ok(atk.log.fills.has('#2a0f2e')&&atk.log.fills.has('#ff7fae'),'open roar with tongue');
- assert.ok(src.includes('the dark cat finally has a real mouth'));
+
 });
 
 test('V462 every form x state renders gradient-free with articulated legs',()=>{
@@ -71,18 +71,14 @@ test('V462 every form x state renders gradient-free with articulated legs',()=>{
   const r=rec();assert.doesNotThrow(()=>cat.draw(r.c,pose(st,77,f,{reduceMotion}),{}),f+'/'+st);
   assert.equal(r.log.grad,0);
  }
- for(const f of [0,1,3,4])assert.ok(src.split('drawCatLeg(').length>=6,'legs use the two-bone kit');
+ assert.ok(src.split('drawCatLeg(').length>=4,'remaining feline forms retain articulated legs');
  assert.doesNotMatch(readFileSync(new URL('../characters/michi-anatomy.js',import.meta.url),'utf8'),/Math\.random|create(Linear|Radial)Gradient/);
 });
 
-test('V462 Dragón Astral filaments: barbels rooted at the muzzle, no belly stubs, clean tail tuft',()=>{
- const f3=src.slice(src.indexOf('ASTRAL DRAGON'),src.indexOf('NINE-TAIL GUARDIAN'));
- assert.doesNotMatch(f3,/quadraticCurveTo\(s\*\(41\+p\*2\)/,'V461 flat face-crossing strings are gone');
- assert.doesNotMatch(f3,/x:-20\+i\*10,y:-26/,'no stubby belly tentacles over the legs');
- assert.match(f3,/barbels are tapered golden whiskers/);
- // Barbels flow outward from the cheeks: every point stays outside the eye/mouth column.
- for(const s of [-1,1])for(const k of [0,1])for(let j=0;j<=6;j++){const u=j/6,x=s*17+s*u*(20+k*4);assert.ok(Math.abs(x)>=17);}
- const r=rec();cat.draw(r.c,pose('idle',30,3),{});assert.equal(r.log.grad,0);
+test('Moon hare replaces the serpent while preserving the fourth evolution slot',()=>{
+ assert.match(src,/if\(f===3\).*MOON HARE/);
+ assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Conejornio Lunar');
+ const a=rec();cat.draw(a.c,pose('run',30,3),{});assert.equal(a.log.grad,0);
 });
 
 test('V462 fairy wisp-lights are seeded and orbit the Hada Felina',()=>{
@@ -94,8 +90,7 @@ test('V462 fairy wisp-lights are seeded and orbit the Hada Felina',()=>{
 test('V462 polish: lilac cat legs — haunches over the body on F0/F3, dancer legs on F1, paws scale up',()=>{
  const f0=src.slice(src.indexOf('MOON KITTEN'),src.indexOf('FAIRY CAT'));
  assert.ok(f0.indexOf("oval(0,-21,21,18")<f0.indexOf('drawCatHaunch('),'F0 hind legs drawn over the body, not hidden behind it');
- const f3=src.slice(src.indexOf('ASTRAL DRAGON'),src.indexOf('NINE-TAIL GUARDIAN'));
- assert.ok(f3.includes('drawCatHaunch(')&&f3.split('drawCatLeg(').length>=2,'F3 has haunches + forelegs');
+ assert.match(src,/drawMoonHare\(ctx,pose\)/,'fourth form uses its own rabbit anatomy');
  assert.match(src.slice(src.indexOf('FAIRY CAT')),/pawS:1\.25/);
  for(const f of [0,1,3]){const a=rec(),b=rec();cat.draw(a.c,pose('run',10,f),{});cat.draw(b.c,pose('run',30,f),{});assert.equal(a.log.grad,0);}
 });
