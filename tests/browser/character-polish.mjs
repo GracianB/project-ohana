@@ -42,7 +42,7 @@ try{
   }document.body.append(board);
  });
  await page.locator('#silhouette-audit').screenshot({path:'test-results/polish/all-forms.png'});
- await page.locator('[data-hero="chispin"]').screenshot({path:'test-results/polish/chispa-forms.png'});
+ await page.locator('#silhouette-audit [data-hero="chispin"]').screenshot({path:'test-results/polish/chispa-forms.png'});
  await page.goto(base+'previews/u-companions.html');await page.waitForFunction(()=>window.previewReady);
  await page.selectOption('#hero','dragon');await page.selectOption('#ally','cat');
  for(const age of [66,180,240,330]){

@@ -1,3 +1,13 @@
+# V618 · ohana-618 · Corazón de Ohana: diez espejos y una sola luz (candidata)
+
+Esta rama reemplaza el dibujo genérico de caras de los diez espejos por el arte original de los diez personajes de `characters/draw.js` en sus formas finales. Los diez reflejos alimentan progresivamente una esfera de energía al avanzar por la sala final. El corazón distingue la luz de la familia del intento de robo de la Quimera y su restauración tras la victoria. No se modifican la física, la selección de héroe, el avance de historia, los sellos ni los guardados.
+
+Se corrige el selector ambiguo del test de retratos de Chispín y se comprueba la restricción de evolución por lecciones de Kilo antes de probar las notificaciones de desbloqueo en un entorno que permite evolución por XP. Se añaden contratos Node V618 y aceptación Chromium para los diez espejos, la esfera, móvil y movimiento reducido.
+
+**Publicación pendiente:** esta versión es una candidata en PR; requiere `npm test`, release gate, Quality completa, comprobación visual humana y Pages antes de afirmar que está publicada.
+
+---
+
 # V606 · ohana-606 · Claro de Kilo publicada y verificada
 
 Primera sala de la revisión por capítulos. Paisaje y héroe conservados; cinco especies con anatomía y roles propios, dieciocho criaturas repartidas en encuentros y Tambor al final del recorrido. Cuatro instrumentos distintos enseñan E/J, tres notas J, ataque aéreo y remate I; sus IDs anteriores conservan guardados. Crecimiento repartido por 14.400 unidades, sin salto de formas por gemas ni lista genérica de tres objetos después del guardián. La evolución conserva el daño recibido y los KO no curan automáticamente en esta sala. Boss con un controlador, aperturas sin recarga duplicada, tres patrones comprometidos y dificultades distintas. El resto de capítulos conserva sus reglas. Esta entrega revisa Claro; la aceptación humana del balance queda pendiente de jugarla.

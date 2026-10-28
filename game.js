@@ -3195,7 +3195,7 @@ drawNestArena(ctx,game,game.cam,t);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
 portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
-if(game.roomId==="w1-final")drawPortalMirrors(ctx, FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion);
+if(game.roomId==="w1-final")drawPortalMirrors(ctx, FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion, {bossActive:Boolean(game.boss?._fusionBoss)&&!game.world1Won, victory:Boolean(game.world1Won)});
 Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);

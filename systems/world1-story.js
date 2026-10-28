@@ -19,7 +19,7 @@ export const WORLD1_ROOM_STORY = Object.freeze({
 });
 
 export const FUSION_STORY = Object.freeze({
-  procession: "Diez estatuas. Diez sellos encendidos. Al fondo late algo que tiene la voz de toda la familia.",
+  procession: "En los diez espejos despiertan los héroes. Cada reflejo alimenta una misma esfera de luz. El Eco viene a arrebatársela.",
   intro: ["El Eco recoge las diez canciones robadas…", "…y las cose en un solo cuerpo.", "LA QUIMERA OHANA"],
   phases: {
     2: { name: "ECO DE LA FAMILIA", line: "La Quimera imita las voces de los diez. Ninguna suena a hogar." },

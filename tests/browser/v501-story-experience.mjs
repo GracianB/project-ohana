@@ -53,6 +53,17 @@ try{
  assert.equal(await page.evaluate(()=>document.activeElement?.id),'game');
  await page.keyboard.down('d');await page.evaluate(()=>window.__OHANA_E2E.step(20));await page.keyboard.up('d');
  assert.ok((await page.evaluate(()=>window.__OHANA_E2E.state().player.x))>before.player.x,'control returns after story');
+ // Kilo's new lesson progression is authored: XP cheats cannot bypass instruments.
+ await page.locator('#game').focus();
+ await page.keyboard.press('Control+z');
+ assert.equal(await page.evaluate(()=>window.__OHANA_E2E.state().evo),0,
+   'Kilo must finish the authored instruments before advancing');
+ // Validate generic evolution notifications on the legacy hub fixture, where
+ // the instrument gate is intentionally absent. This checks real evolution,
+ // not a fake class toggle or a fabricated notification.
+ const hub=await page.evaluate(()=>window.__OHANA_E2E.start('stitcho'));
+ assert.equal(hub.hero,'stitcho');
+ assert.equal(hub.evo,0);
  // Test the authored unlock message for each form using actual evolution code.
  for(const [evo,key,index] of [[1,'K',1],[2,'L',2],[3,'I',4],[4,'P',5]]){
   await page.locator('#game').focus();await page.keyboard.press('Control+z');

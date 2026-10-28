@@ -38,7 +38,7 @@ try{
  });
  assert.equal(audit.frames,400);assert.equal(audit.unchanged,30);
  await page.locator('#direction-board').screenshot({path:'test-results/direction/evolutions.png'});
- await page.locator('[data-hero="chispin"]').screenshot({path:'test-results/direction/chispa-evolution.png'});
+ await page.locator('#direction-board [data-hero="chispin"]').screenshot({path:'test-results/direction/chispa-evolution.png'});
  await page.evaluate(()=>{document.querySelector('#direction-board').remove();document.querySelector('#scenery-board').style.display='grid';});
  await page.locator('#scenery-board').screenshot({path:'test-results/direction/scenery.png'});
  await page.evaluate(()=>{document.querySelector('#scenery-board').remove();document.querySelector('#enemy-board').style.display='block';});
