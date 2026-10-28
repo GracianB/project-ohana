@@ -15,12 +15,12 @@ export function drawCatLeg(ctx,o){
  const {hip,paw,upper=10,lower=10,bend=1,width=8,fur,dark,ink='#25213e',pad='#f4a6c4',beans=true,lift=0,claws=false,toe='#fff7fb',pawS=1}=o;
  const knee=legJoint(hip,paw,upper,lower,bend);
  const pts=[hip,[(hip[0]+knee[0])/2,(hip[1]+knee[1])/2],knee,[(knee[0]+paw[0])/2,(knee[1]+paw[1])/2],paw];
- const ws=[width*1.25,width*1.05,width*.9,width*.78,width*.7];
+ const ws=[width*.98,width*.88,width*.72,width*.56,width*.48];
  ribbon(ctx,pts,ws,fur,ink,1.8);
  if(dark){ctx.save();ctx.globalAlpha=.35;ribbon(ctx,pts.map(p=>[p[0]-width*.18,p[1]]),ws.map(w=>w*.4),dark,null);ctx.restore();}
  // Paw: rounded mitten; when lifted it tilts and shows the pink beans.
- ctx.save();ctx.translate(paw[0],paw[1]);ctx.rotate(-lift*.9);ctx.scale(pawS,pawS);
- ctx.beginPath();ctx.ellipse(1,0,width*.78,width*.52,0,0,TAU);ctx.fillStyle=toe;ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.6;ctx.stroke();
+ ctx.save();ctx.translate(paw[0],paw[1]);ctx.rotate(-lift*.9);const footScale=Math.max(.8,Math.min(1.08,pawS));ctx.scale(footScale,footScale);
+ ctx.beginPath();ctx.ellipse(1,0,width*.65,width*.43,0,0,TAU);ctx.fillStyle=toe;ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.6;ctx.stroke();
  ctx.strokeStyle=ink;ctx.lineWidth=.9;ctx.globalAlpha=.7;
  for(const tx of [-.28,.12,.5]){ctx.beginPath();ctx.moveTo(tx*width,-width*.38);ctx.lineTo(tx*width+.6,-width*.05);ctx.stroke();}
  ctx.globalAlpha=1;

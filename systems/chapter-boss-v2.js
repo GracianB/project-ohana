@@ -23,7 +23,7 @@ export function prepareChapterBossV2(e,g){
    b[clockKey]=Math.max(28,Math.round((b[clockKey]||50)*d.windup));
   }
   if(b.phase==='rest'){
-   e.damageWindowRemaining=Math.round(125*(d.budget===1?1.35:1));
+   if(!e._growthChapter)e.damageWindowRemaining=Math.round(125*(d.budget===1?1.35:1));
    b[clockKey]=Math.max(30,Math.round((b[clockKey]||60)*d.cooldown));
   }
   if((b.phase==='attack'||b.phase==='strike')&&v.target&&v.turn>1){

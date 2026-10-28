@@ -597,8 +597,8 @@ function drawMichiMythic(ctx,pose,r,f){
    return [q[0]+nx/d*off,q[1]+ny/d*off];
   });
   ctx.save();ctx.globalAlpha=.58;ribbon(ctx,fin,widths.map(w=>w*.45+3),pal.glow,pal.ink,.8);ctx.restore();
-  ribbon(ctx,spine,widths,'#5b3f7c',ink,2.2);
-  ribbon(ctx,spine.map(q=>[q[0]+1.5,q[1]+1.5]),widths.map(w=>w*.42),'#a98ad3',null);
+  ribbon(ctx,spine,widths,pal.deep,ink,2.2);
+  ribbon(ctx,spine.map(q=>[q[0]+1.5,q[1]+1.5]),widths.map(w=>w*.42),pal.rim,null);
   ctx.save();ctx.strokeStyle='#e2c07a';ctx.lineWidth=1.3;ctx.globalAlpha=.85;
   for(let k=2;k<14;k+=2){
    const q=spine[k];ctx.beginPath();ctx.arc(q[0],q[1],widths[k]*.22,Math.PI*.1,Math.PI*.9);ctx.stroke();
@@ -615,8 +615,8 @@ function drawMichiMythic(ctx,pose,r,f){
 
   // Torso / body mass with breathing and stride squash/stretch
   const bodyBob=run?-Math.abs(step)*3:0;
-  oval(0,-28+bodyBob,23,25,'#573e7a');
-  oval(3,-24+bodyBob,12,15,'#b99ac9',null);
+  oval(0,-28+bodyBob,23,25,pal.bell);
+  oval(3,-24+bodyBob,12,15,pal.deep,null);
 
   // V462: digitigrade hind legs (thigh, hock, clawed paw) driven by the gait rig.
   // Full 4-legged feline gallop / walk locomotion: hind legs push off alternately.
@@ -630,12 +630,12 @@ function drawMichiMythic(ctx,pose,r,f){
     paw:[s*20+dx,0+dy],
     thigh:14,
     width:10,
-    fur:'#7b5b9b',
-    dark:'#4b3466',
+    fur:pal.bell,
+    dark:pal.deep,
     ink,
     lift:air||victory?.8:Math.min(1,-dy/7),
     claws:true,
-    toe:'#d8b17c',
+    toe:pal.rim,
     pad:'#e79bc0',
     pawS:1.2
    });
@@ -655,12 +655,12 @@ function drawMichiMythic(ctx,pose,r,f){
     lower:17,
     bend:1,
     width:8.5,
-    fur:'#8a68ab',
-    dark:'#4b3466',
+    fur:pal.bell,
+    dark:pal.deep,
     ink,
     lift:leadAtk||air||victory?.85:Math.min(1,-dy/7),
     claws:r.st==='attack'||r.st==='run',
-    toe:'#e2bd86',
+    toe:pal.rim,
     pad:'#e79bc0',
     pawS:1.15
    });
@@ -684,14 +684,14 @@ function drawMichiMythic(ctx,pose,r,f){
   // Head and muzzle
   const headBob=run?follow*.093:0;
   ctx.save();ctx.translate(0,headBob);
-  oval(0,-68,29,25,'#5a3878');oval(0,-56,19,9,'#b798bb',null);
+  oval(0,-68,29,25,pal.bell);oval(0,-56,19,9,pal.deep,null);
 
   // V462: the dark cat finally has a real mouth: nose, ω lips, fangs, tongue; the jaw opens to roar.
   {const roar=r.st==='attack'?.95:r.st==='cast'?.6:r.st==='victory'?.75:r.st==='hurt'?.4:Math.max(0,(r.motion?.jaw||0)*.5);
    drawCatMouth(ctx,{x:0,y:-61,s:1.35,open:roar,smile:r.st==='victory'?1:0,ink,nose:'#f2a3c6',inside:'#2a0f2e',tongue:'#ff7fae',fangs:true});}
 
-  ctx.save();ctx.globalAlpha=.35;oval(-10,-80,10,5,'#8f6db8',null);ctx.restore();
-  eye(-12,-73,'#ffa43b',5,6.5);eye(12,-73,'#ffa43b',5,6.5);
+  ctx.save();ctx.globalAlpha=.35;oval(-10,-80,10,5,pal.glow2,null);ctx.restore();
+  eye(-12,-73,'#7866bb',5,6.5);eye(12,-73,'#7866bb',5,6.5);
 
   // V462: dragon barbels are tapered golden whiskers rooted at the muzzle sides.
   // They flow OUT and down past the cheeks and never cross the face (V461 drew

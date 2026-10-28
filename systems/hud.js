@@ -26,14 +26,14 @@ export function syncHudStatus({ player, hp, xpPct, boss, evolutionLocked=false, 
   setAttribute(hud,"data-evolution-state",maximum?'maximum':waiting?'instrument':'growing');
   syncProgress(hud.querySelector(".bar.hp"), progressState(player.health, player.maxHealth, `${hp} de ${player.maxHealth} puntos de salud`));
   const xp=Math.max(0,Math.floor(Number(player.xp)||0)),need=XP_NEED[player.evo+1];
-  const xpDescription=maximum?'Evolución máxima':waiting?`${xp} de ${need} de experiencia. Despierta ${objective?.label||'el siguiente instrumento'} para evolucionar`:`${xp} de ${need} de experiencia; ${Math.round(xpPct)}% hasta la siguiente forma`;
+  const xpDescription=maximum?'Evolución máxima':waiting?`${xp} de ${need} de experiencia. ${player.id==='stitcho'?'Completa':'Despierta'} ${objective?.label||'el siguiente instrumento'} para evolucionar`:`${xp} de ${need} de experiencia; ${Math.round(xpPct)}% hasta la siguiente forma`;
   syncProgress(hud.querySelector(".bar.xp"), progressState(xpPct, 100, xpDescription));
   setAttribute(hud.querySelector('.bar.xp'),'title',xpDescription);
   const xpText=doc.getElementById('xp-text'),meta=doc.getElementById('hud-meta');
-  const visibleXP=maximum?'MÁXIMO':`${xp}/${need}${waiting?' · INSTR.':''}`;
+  const visibleXP=maximum?'MÁXIMO':`${xp}/${need}${waiting?(player.id==='stitcho'?' · REPARA':' · INSTR.'):''}`;
   if(xpText&&xpText.textContent!==visibleXP)xpText.textContent=visibleXP;
   const formName=player.evoNames?.[player.evo]||player.forms?.[player.evo]?.name;
-  const metaText=waiting?'XP lista · toca el instrumento':`Forma ${player.evo+1}/5${formName?' · '+formName:''}`;
+  const metaText=waiting?(player.id==='stitcho'?'XP lista · completa la reparación':'XP lista · toca el instrumento'):`Forma ${player.evo+1}/5${formName?' · '+formName:''}`;
   if(meta&&meta.textContent!==metaText)meta.textContent=metaText;
   if (boss) syncProgress(doc.querySelector(".bar.boss"), progressState(boss.hp, boss.max, `${Math.max(0, Math.ceil(boss.hp))} de ${boss.max} puntos de salud`));
   setAttribute(doc.getElementById("form-pips"), "aria-label", `Forma ${player.evo + 1} de 5`);

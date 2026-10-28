@@ -34,8 +34,8 @@ export function authorDinoEncounters(room) {
  const floor = [
   [0, FLOOR, 2150, 126],
   [2340, FLOOR, 2310, 126],
-  [4850, FLOOR, 2300, 126],
-  [7340, FLOOR, 2260, 126],
+  [4850, FLOOR, 2160, 126],
+  [7180, FLOOR, 2420, 126],
   [9600, FLOOR, 4800, 126] // Contrato de v2-adventure.test.js
  ];
 
@@ -43,7 +43,7 @@ export function authorDinoEncounters(room) {
  room.hazards = [
   { id: 'dino-mud-0', x: 2150, y: FLOOR - 20, w: 190, h: 380, type: 'death', label: 'ABISMO DE FANGO I',   color: '#3e2723', heroEscape: 'dino' },
   { id: 'dino-mud-1', x: 4650, y: FLOOR - 20, w: 200, h: 380, type: 'death', label: 'GÉISER DE BREA',      color: '#2e1c14', heroEscape: 'dino' },
-  { id: 'dino-mud-2', x: 7150, y: FLOOR - 20, w: 190, h: 380, type: 'death', label: 'FALLA GEOTÉRMICA',    color: '#4e342e', heroEscape: 'dino' }
+  { id: 'dino-mud-2', x: 7010, y: FLOOR - 20, w: 170, h: 380, type: 'death', label: 'FALLA GEOTÉRMICA',    color: '#4e342e', heroEscape: 'dino' }
  ];
 
  // Cornisas de basalto, peldaños de arenisca y monolitos de salto
@@ -83,13 +83,11 @@ export function authorDinoEncounters(room) {
  const expPlats = (room.plats || []).filter(p => p[0] >= 9600 && p[1] < FLOOR);
  room.plats = [...floor, ...expPlats, ...shelves.map(s => [...s, 22])];
 
- // Despejar plataformas bajas directamente encima de los fósiles para garantizar caídas limpias
- for (let i = room.plats.length - 1; i > 0; i--) {
-  const [px, py, pw] = room.plats[i];
-  if (py < FLOOR) {
-   const overPlate = room.seal.stations.some(st => px < st.x + 80 && px + pw > st.x - 80 && py > FLOOR - 60);
-   if (overPlate) room.plats.splice(i, 1);
-  }
+ // Preserve approach ledges but keep a clear fall shaft over each fossil.
+ // Shelves used to catch the plunge before it reached the actual plate.
+ for(const p of room.plats)if(p[3]<=40){
+  const plate=room.seal.stations.find(st=>p[0]<st.x+90&&p[0]+p[2]>st.x-90);
+  if(plate)p[0]=plate.x-p[2]-100;
  }
 
  // ── Fauna y Encuentros ───────────────────────────────────────────────────────

@@ -32,7 +32,7 @@ try{
   if(exerciseDive)target=near.x-130;
   const dx=target-p.x-p.w/2;let jumpHeld=false;
   if(Math.abs(dx)>24)await page.keyboard.down(dx>0?'d':'a');
-  if(station&&Math.abs(dx)<180&&(p.grounded||p.vy>=0&&p.jumps<p.maxJumps&&station.y-(data.dinoPeak??station.y)<station.dropHeight+20)){await page.keyboard.down('w');jumpHeld=true;}
+  if(station&&Math.abs(dx)<180&&(p.grounded?station.y-p.y-p.h<station.dropHeight+10:p.vy>=0&&p.jumps<p.maxJumps&&station.y-(data.dinoPeak??station.y)<station.dropHeight+20)){await page.keyboard.down('w');jumpHeld=true;}
   if(station&&s.evo>=1&&Math.abs(dx)<55&&!p.grounded&&p.vy>0&&station.y-(data.dinoPeak??station.y)>=station.dropHeight+10)await page.keyboard.press('k');
   if(exerciseDive&&Math.abs(dx)<80){if(p.grounded){await page.keyboard.down('w');jumpHeld=true;}else if(p.vy>=0)await page.keyboard.press('k');}
   if(near&&!exerciseDive&&(!near.chapterBoss||b?.phase==='rest')){
