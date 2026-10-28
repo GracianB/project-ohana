@@ -1,5 +1,6 @@
 // Stitcho's campaign progression belongs to the workshop, never to the hub.
 import {XP_NEED} from './xp.js';
+import {drawStitchoStarCruiser,drawStitchoMaintenanceRail} from './stitcho-chapter-art-v607.js';
 export const STITCHO_CHAPTER_BOSS_ID='w1-stitcho-glitch-v1';
 export const STITCHO_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134});
 export const STITCHO_RAIL=Object.freeze({id:'w1-stitcho-main-rail-v1',left:3000,right:3320,y:1134});
@@ -46,25 +47,13 @@ export function stitchoObjective(g){
 }
 export function drawStitchoChapter(ctx,g,cam){
  if(!stitchoChapter(g))return;
- const r=railOf(g),done=stitchoRailDone(g),x=r.left-cam.x,y=r.y-cam.y,railW=r.right-r.left;
- const shipX=shipXOf(g)-cam.x,shipY=1134-cam.y,parts=g.world1?.stations.filter(s=>s.done).length||0;
- ctx.save();ctx.translate(shipX,shipY-50);ctx.strokeStyle='#315d6b';ctx.lineWidth=2;
- ctx.fillStyle='#688b97';ctx.beginPath();ctx.ellipse(0,12,123,33,0,0,Math.PI*2);ctx.fill();ctx.stroke();
- ctx.fillStyle='#c5f1eb';ctx.beginPath();ctx.ellipse(-7,-16,61,47,-.1,Math.PI,Math.PI*2);ctx.fill();ctx.stroke();
- ctx.strokeStyle='#f4fbec';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(-14,-13,44,33,-.1,Math.PI*1.1,Math.PI*1.75);ctx.stroke();
- for(let i=0;i<3;i++){
-  const restored=g.world1?.stations[i]?.done,sx=(i-1)*70;
-  ctx.fillStyle=restored?['#92e3da','#f7cf9b','#d6b5e9'][i]:'#435f70';ctx.strokeStyle='#315d6b';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(sx,13,19,9,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-  if(restored){ctx.fillStyle='#e6fff1';ctx.beginPath();ctx.ellipse(sx,18,6,2,0,0,Math.PI*2);ctx.fill();}
- }
- ctx.fillStyle='#426274';ctx.fillRect(-73,32,14,18);ctx.fillRect(58,32,14,18);
- ctx.textAlign='center';ctx.fillStyle='#234c5b';ctx.font='bold 13px sans-serif';ctx.fillText(parts===3?'NAVE RESTAURADA · LISTA PARA VOLVER':'LA NAVE · MÓDULOS '+parts+'/3',0,-88);ctx.restore();
+ const r=railOf(g),done=stitchoRailDone(g);
+ const railScreen={left:r.left-cam.x,right:r.right-cam.x,y:r.y-cam.y};
+ const shipX=shipXOf(g)-cam.x,shipY=1134-cam.y;
+ const parts=g.world1?.stations.filter(s=>s.done).length||0;
+ const t=g.world1?.tick||0,reduced=!!g.reduceMotion;
+ const rolling=!!g.world1?.railStarted;
 
- ctx.save();ctx.strokeStyle=done?'#9cffcc':'#8cecff';ctx.lineWidth=5;
- ctx.beginPath();ctx.moveTo(x-60,y-4);ctx.lineTo(x+railW,y-4);ctx.stroke();
- ctx.lineWidth=2;for(let i=0;i<=railW;i+=32){ctx.beginPath();ctx.moveTo(x+i,y-12);ctx.lineTo(x+i+12,y-4);ctx.stroke();}
- ctx.fillStyle='#082d40';ctx.fillRect(x-115,y-95,270,49);ctx.fillStyle=done?'#9cffcc':'#e6faff';
- ctx.textAlign='center';ctx.font='bold 13px sans-serif';ctx.fillText(done?'RAÍL RESTAURADO':'ENTRADA → K · BOLA',x+20,y-74);
- ctx.font='12px sans-serif';ctx.fillText(done?'Circuito de mantenimiento listo':'Rueda sin parar hasta la luz final',x+20,y-56);
- ctx.fillStyle=done?'#9cffcc':'#ffe9a0';ctx.fillRect(x+railW-2,y-58,5,58);ctx.restore();
+ drawStitchoStarCruiser(ctx,shipX,shipY,parts,t,reduced);
+ drawStitchoMaintenanceRail(ctx,railScreen,done,t,rolling,reduced);
 }

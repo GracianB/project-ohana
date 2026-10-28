@@ -423,8 +423,8 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/stitcho-chapter-art-v607.js": "12b84dd9d4c97fa8509f3d57bc87d443e4fb655f",
-  "systems/stitcho-encounters-v607.js": "7c27e0e6ce5db5f8fe5db61f62de64c2176446cf",
+  "systems/stitcho-chapter-art-v607.js": "a8853e8d5fac6f19f2bfc4725a925ab1120f4423",
+  "systems/stitcho-encounters-v607.js": "16b33bb47fa48cd3bbfc0e067c1c12d892ca335f",
   "systems/hud-portrait-v606.js": "f05800678591f7c5b1cabd9b8f2f90de6ad9e6e6",
   "systems/kilo-encounters-v606.js": "c346bdd40b286c441996d4790433c8297cd52e2c",
   "systems/kilo-chapter-art-v606.js": "3bbcef81eaeb66ee4633c78d011aa4879761dbfd",
@@ -462,7 +462,7 @@ const PRECACHE_REVISIONS = {
   "systems/chapters-lunar-prism-embers.js": "f24c3b1c2e4688f99ea17dceea2d006b31887289",
   "worlds/ohana-crafted-scenes.js": "67c654f2ee9422a6bc1f62a08821f189a7a222c0",
   "systems/chispin-chapter.js": "4c8b4ef255cccf3336705ce113d1afcd92a49bc3",
-  "systems/stitcho-chapter.js": "9a96b68f3e8608cf1cbce9e163b01f03d544b91c",
+  "systems/stitcho-chapter.js": "5dcb4d885bf3c93a643aa5f971782fd4fd0bd75b",
   "worlds/ohana-environments.js": "665bd255ff2c6e5a0b8f265b6377e63694a8f903",
   "systems/kilo-chapter.js": "0feb0e79c051b3fa278c7d9190e1aa010d0baa37",
   "systems/power-status.js": "d9445661037ea150c321952929a282d91ac86811",
@@ -519,7 +519,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-rooms.js": "ba69e527a442f02032d076ccce5910112c2af7fc",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
   "worlds/chapter-stagecraft.js": "979021a3b2cd9fca0794d0fa70beb250a20845da",
-  "systems/world1-play.js": "cfef7e483d265a024c79bc2a500294ce52bfbf72",
+  "systems/world1-play.js": "2fd1f2484d947daf385758138cdcace740365361",
   "systems/yomi-trail.js": "d39306a5ada636f9c9b2dee5107e7990da01134c",
   "systems/yomi-boss.js": "686a49d7eafe5b1d4ba91349392f71c747ed8522",
   "worlds/yomi-observatory.js": "bbc3e453a487d67ec7ae8f51dde1b58d959cc2ce",

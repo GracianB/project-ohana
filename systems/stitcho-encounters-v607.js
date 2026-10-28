@@ -24,11 +24,11 @@ export const STITCHO_FOE_ROLES=CAST;
 
 export function authorStitchoEncounters(room){
  if(room.hero!=='stitcho')return room;
- room.stitchoEncounterVersion=607;room.width=14400;room.expedition=null;
+ room.stitchoEncounterVersion=607;room.width=14400;
 
  // Remap seal stations to authored workshops with transport targets
  room.seal.stations=STITCHO_WORKSHOPS.map(s=>({...s,kind:'part',target:{x:s.x+520,y:FLOOR}}));
- room.seal.altar={x:14200,y:FLOOR};
+ room.seal.altar={x:13920,y:FLOOR};
 
  // Store V607 rail and arena positions
  room.stitchoRail=STITCHO_RAIL_V607;
@@ -38,7 +38,7 @@ export function authorStitchoEncounters(room){
  // ── Terrain ────────────────────────────────────────────────────────────
  // Unbroken floor spanning the full 14400 length ensures carrying parts and
  // ball rolling (K) never collide with abrupt floor steps or trigger unintended wall-climb.
- const floor=[[0,FLOOR,room.width,126]];
+ const floor=[[0,FLOOR,9600,126],[9600,FLOOR,4800,126]];
 
  const banks=[
   [1020,260,52],[2680,240,70],[3600,280,88],[5100,260,78],[6100,280,95],
@@ -65,7 +65,8 @@ export function authorStitchoEncounters(room){
   // Sector 7 · Arena side perches
   [12600,974,180],[13600,974,180]
  ];
- room.plats=[...floor,...shelves.map(p=>[...p,22])];
+ const expPlats = (room.plats || []).filter(p => p[0] >= 9600 && p[1] < FLOOR);
+ room.plats=[...floor,...expPlats,...shelves.map(p=>[...p,22])];
 
  // Clear platforms directly above workshops and rail so deliveries/rolls work freely
  for(let i=room.plats.length-1;i>0;i--){
@@ -81,7 +82,7 @@ export function authorStitchoEncounters(room){
  // Species have anatomy-compatible roles, clear commitment and a home range.
  const cast=[
   // ─ Act 1: Dock & Workshop 0 ─
-  [900,'cucaracho',48,0],
+  [980,'cucaracho',48,0],
   [1560,'arana',54,0],
   [2160,'phosquito',52,0],
   [2760,'cucaracho',62,0],
@@ -110,7 +111,11 @@ export function authorStitchoEncounters(room){
   [12200,'arana',158,4]
  ];
 
- room.foes=cast.map(([x,kind,hp,stage],i)=>{
+ const expFoes = (room.foes || []).filter(f => f[4]?.expedition).map(f => {
+  const [x, y, kind, boss, data] = f;
+  return [x, y, kind, boss, { ...data, homeX: data.homeX ?? x, leash: data.leash ?? { left: Math.max(9000, x - 400), right: Math.min(14200, x + 400) } }];
+ });
+ const authored=cast.map(([x,kind,hp,stage],i)=>{
   const role=CAST[kind],air=role==='flyer'||role==='gunner';
   const support=FLOOR;
   const y=air?(stage===2?720:stage===3?810:support-220):support-40;
@@ -123,6 +128,7 @@ export function authorStitchoEncounters(room){
    flightBand:air?{top:y-150,bottom:y+220}:undefined
   }];
  });
+ room.foes=[...authored,...expFoes];
 
  // ── Collectibles ───────────────────────────────────────────────────────
  room.orbs=[];

@@ -1,4 +1,5 @@
 import {drawKiloResonator} from './kilo-chapter-art-v606.js';
+import {drawStitchoPart,drawStitchoPartStation} from './stitcho-chapter-art-v607.js';
 import {updateFinalGauntlet} from './final-gauntlet.js';
 import {KEEPSAKES} from './keepsakes.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
@@ -405,11 +406,15 @@ export function drawWorld1(ctx, g, cam, t) {
   // Lo que llevas encima (pieza o pizza).
   if (w.carry != null) {
     const p = g.player, px = cx(p) - cam.x, py = p.y - cam.y - 26;
-    ctx.fillStyle = w.carry === "pizza" ? "#ffcf5a" : PART_COLORS[w.carry % PART_COLORS.length]; ctx.strokeStyle = "#3a2a1a"; ctx.lineWidth = 2;
-    ctx.beginPath(); if (w.carry === "pizza") { ctx.moveTo(px - 14, py - 8); ctx.lineTo(px + 14, py - 8); ctx.lineTo(px, py + 14); } else { ctx.moveTo(px - 10, py - 10); ctx.lineTo(px + 10, py - 10); ctx.lineTo(px + 10, py + 10); ctx.lineTo(px - 10, py + 10); }
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    if (w.carry !== "pizza") {
-      ctx.fillStyle = "#102738";ctx.font = "900 13px Outfit, sans-serif";ctx.textAlign = "center";ctx.fillText(String(w.carry + 1),px,py + 5);
+    if (g.roomDef?.stitchoChapter && typeof w.carry === "number") {
+      drawStitchoPart(ctx, w.carry, px, py - 6, { carried: true, t, reduced: reduce });
+    } else {
+      ctx.fillStyle = w.carry === "pizza" ? "#ffcf5a" : PART_COLORS[w.carry % PART_COLORS.length]; ctx.strokeStyle = "#3a2a1a"; ctx.lineWidth = 2;
+      ctx.beginPath(); if (w.carry === "pizza") { ctx.moveTo(px - 14, py - 8); ctx.lineTo(px + 14, py - 8); ctx.lineTo(px, py + 14); } else { ctx.moveTo(px - 10, py - 10); ctx.lineTo(px + 10, py - 10); ctx.lineTo(px + 10, py + 10); ctx.lineTo(px - 10, py + 10); }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      if (w.carry !== "pizza") {
+        ctx.fillStyle = "#102738";ctx.font = "900 13px Outfit, sans-serif";ctx.textAlign = "center";ctx.fillText(String(w.carry + 1),px,py + 5);
+      }
     }
   }
   ctx.restore();
@@ -535,6 +540,10 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       ctx.fillStyle='#173d3b';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(done?'NOTA RECUPERADA ✓':s.threatened?'DESPEJA EL HIBISCO':'QUIETO · NOTA '+(s.note+1)+'/4 → CRECER',x,y-128);
       break; }
     case "part": {
+      if (g.roomDef?.stitchoChapter) {
+        drawStitchoPartStation(ctx, s, cam, t, reduce, w.carry);
+        break;
+      }
       const color=PART_COLORS[s.id%3];
       if(!done&&w.carry!==s.id){ctx.save();ctx.translate(x,y-35+pulse);ctx.fillStyle=color;ctx.strokeStyle='#294858';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,21,17,-.25,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#f1ffef';ctx.beginPath();ctx.arc(-4,-3,7,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#517b92';ctx.lineWidth=2;for(let j=-1;j<=1;j++){ctx.beginPath();ctx.moveTo(j*8,8);ctx.lineTo(j*8+3,16);ctx.stroke();}ctx.fillStyle='#173b4a';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(String(s.id+1),0,4);ctx.restore();}
       const tx=s.target.x-cam.x,ty=s.target.y-cam.y;
