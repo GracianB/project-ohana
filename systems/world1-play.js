@@ -12,6 +12,8 @@ import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjectiv
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
 import {catGrowth,updateCatChapter,catChapterReady,catObjective,drawCatChapter} from './cat-chapter.js';
 import {cuernoGrowth,updateCuernoChapter,cuernoChapterReady,cuernoObjective,drawCuernoChapter} from './cuerno-chapter.js';
+import {dragonGrowth,updateDragonChapter,dragonChapterReady,dragonObjective,drawDragonChapter} from './dragon-chapter.js';
+import {drawDragonBrazier} from './dragon-chapter-art-v611.js';
 import {drawCuernoPrism,drawCuernoDawnMirror} from './cuerno-chapter-art-v610.js';
 import {stitchoGrowth,updateStitchoChapter,stitchoChapterReady,stitchoObjective,drawStitchoChapter} from './stitcho-chapter.js';
 import {enterKiloAirTrail,updateKiloAirTrail,drawKiloAirTrail,kiloNoteGrowth,kiloGuardianRequired,kiloFlowerThreat,kiloInstrumentAction,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
@@ -51,7 +53,7 @@ export function enterWorld1(g) {
     } : null,
     statuesLit: r.statues ? r.statues.map((s) => g.world1Seals.includes(s.hero)) : null
   };
-  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);catGrowth(g);cuernoGrowth(g);nextChapterGrowth(g);enterKiloAirTrail(g);
+  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);catGrowth(g);cuernoGrowth(g);dragonGrowth(g);nextChapterGrowth(g);enterKiloAirTrail(g);
   enterExpedition(g);
   return g.world1;
 }
@@ -127,6 +129,7 @@ export function world1NextObjective(g) {
   if (!w || !p || !r) return null;
   const expedition=expeditionObjective(g);if(expedition)return expedition;
   if(r?.growthChapter==='cuerno'){const co=cuernoObjective(g);if(co)return co;}
+  if(r?.growthChapter==='dragon'){const dgo=dragonObjective(g);if(dgo)return dgo;}
   if (w.sealed) return { x: r.width - 80, y: r.seal?.altar?.y || 1134, label: "Salida del este", action: "Sigue hacia la siguiente sala" };
   if(kiloGuardianRequired(g)&&w.stations.every(s=>s.done))return {x:(KILO_CHAPTER_ARENA.left+KILO_CHAPTER_ARENA.right)/2,y:KILO_CHAPTER_ARENA.floor,label:'Tambor del Claro',action:'Las cuatro notas están listas · vence al guardián. Salta sus ondas y ataca cuando se recupere.'};
   const workshopGoal=stitchoObjective(g)||chispinObjective(g)||catObjective(g)||nextChapterObjective(g);if(workshopGoal)return workshopGoal;
@@ -192,7 +195,7 @@ function complete(g, s, label) {
   g.fx?.emit?.(s.x, s.y - 50, { color: WORLD1_THEMES[w.hero]?.color || "#fff", count: g.reduceMotion ? 6 : 20, size: 4, up: 2, star: true, life: 30 });
   // Each physical station grants score only once, including after a reload.
   if (!s._scored) { g.score = (g.score || 0) + 150; s._scored = true; }
-  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);catGrowth(g);cuernoGrowth(g);nextChapterGrowth(g);
+  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);catGrowth(g);cuernoGrowth(g);dragonGrowth(g);nextChapterGrowth(g);
   g.onWorld1Beat?.("station", w.hero);
   g.world1Stations = cleanWorld1Stations({ ...(g.world1Stations || {}),
     [w.room]: w.stations.filter(x => x.done && x.kind !== "oven").map(x => x.id) });
@@ -202,7 +205,7 @@ function complete(g, s, label) {
 
 export function awardSeal(g) {
   if(g.onlineAdventure&&g.coopAuthority===false)return false;
-  const w = g.world1; if (!w || w.sealed || !w.hero || !expeditionReady(g) || !stitchoChapterReady(g) || !chispinChapterReady(g) || !catChapterReady(g) || !cuernoChapterReady(g) || !nextChapterReady(g) || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
+  const w = g.world1; if (!w || w.sealed || !w.hero || !expeditionReady(g) || !stitchoChapterReady(g) || !chispinChapterReady(g) || !catChapterReady(g) || !cuernoChapterReady(g) || !dragonChapterReady(g) || !nextChapterReady(g) || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
   w.sealed = true; w.flash = 40;
   g.world1Seals = cleanWorld1Seals([...(g.world1Seals || []), w.hero]);
   const p = g.player;
@@ -222,7 +225,7 @@ export function updateWorld1(g,hurt) {
   if (w.flash > 0) w.flash--;
   for (const s of w.stations) if (s.glow > 0) s.glow--;
   if (r.fusionBoss) return updateFinalRoom(g, w, p, r);
-  updateKiloAirTrail(g);updateStitchoChapter(g);updateChispinChapter(g,hurt);updateCatChapter(g,hurt);updateCuernoChapter(g,hurt);updateNextChapter(g);updateDinoDive(g);
+  updateKiloAirTrail(g);updateStitchoChapter(g);updateChispinChapter(g,hurt);updateCatChapter(g,hurt);updateCuernoChapter(g,hurt);updateDragonChapter(g,hurt);updateNextChapter(g);updateDinoDive(g);
   if (w.sealed) {updateExpedition(g);if(r.dinoChapter){trackDinoAir(g);w.wasGrounded=!!p.grounded;}return;}
   updateExpedition(g);
   kiloNoteGrowth(g);
@@ -230,6 +233,7 @@ export function updateWorld1(g,hurt) {
   if(r.chispinChapter&&w.stations.every(s=>s.done)&&chispinChapterReady(g)){awardSeal(g);return;}
   if(r.growthChapter==='cat'&&w.stations.every(s=>s.done)&&catChapterReady(g)){awardSeal(g);return;}
   if(r.growthChapter==='cuerno'&&w.stations.every(s=>s.done)&&cuernoChapterReady(g)){awardSeal(g);return;}
+  if(r.growthChapter==='dragon'&&w.stations.every(s=>s.done)&&dragonChapterReady(g)){awardSeal(g);return;}
   if(r.stitchoChapter&&w.stations.every(s=>s.done)&&stitchoChapterReady(g)){awardSeal(g);return;}
   if(r.kiloChapter&&w.stations.every(s=>s.done)&&!kiloGuardianRequired(g)){awardSeal(g);return;}
   const airborne = !p.grounded;
@@ -390,7 +394,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawDragonChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -590,6 +594,10 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       if(done){ctx.strokeStyle=['#dfb5c5','#e5d69d','#b9d9c6'][s.order];ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+16,yy);ctx.bezierCurveTo(x+75,yy-37,x+98,yy+12,x+160,yy-23);ctx.stroke();}
       ctx.fillStyle='#31574c';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText('PRISMA '+['I','II','III'][s.order]+(done?' ✓':''),x,y-137);break; }
     case "brazier": {
+      if(g.roomDef?.growthChapter==='dragon'){
+        drawDragonBrazier(ctx,s,cam,t,reduce);
+        break;
+      }
       ctx.fillStyle='#81756b';ctx.strokeStyle='#514d4a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-27,y);ctx.lineTo(x-19,y-48);ctx.quadraticCurveTo(x,y-59,x+19,y-48);ctx.lineTo(x+27,y);ctx.fill();ctx.stroke();
       ctx.fillStyle='#b49271';ctx.beginPath();ctx.moveTo(x-40,y-64);ctx.bezierCurveTo(x-31,y-27,x+31,y-27,x+40,y-64);ctx.quadraticCurveTo(x,y-54,x-40,y-64);ctx.fill();ctx.stroke();
       ctx.strokeStyle='#edc29b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-26,y-38);ctx.quadraticCurveTo(x,y-28,x+26,y-38);ctx.stroke();

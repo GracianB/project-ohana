@@ -6,6 +6,9 @@ import {chapterBossStart,chapterBossFinish} from './chapters-lunar-prism-embers.
 export const CUERNO_BOSS_ID='hub-cuerno-boss-v1';
 export const CUERNO_BOSS=Object.freeze({hp:480,left:3120,right:3990,floor:1134});
 const PATTERNS=Object.freeze(['charge','prism_volley','aurora_slam','rainbow_eruption']);
+const TAU=Math.PI*2;
+
+function _rr(c,x,y,w,h,r=4){if(c.roundRect)c.roundRect(x,y,w,h,r);else c.rect(x,y,w,h);}
 
 export function createCuernoBoss(makeFoe,rng=()=>.5,options={}){
  const arena=Object.freeze({...CUERNO_BOSS,...options.arena}),roomId=options.roomId||'hub',x=options.x??3420;
@@ -17,7 +20,7 @@ export function createCuernoBoss(makeFoe,rng=()=>.5,options={}){
  e._campaignOriginal=true;e.spawnIndex=991;
  e._encounterSaveId=options.encounterId||CUERNO_BOSS_ID;
  e.roomId=roomId;e.color='#b39ddb';e.contactDmg=0;
- e._prismBeast={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false,rainbowAngle:0};
+ e._prismBeast={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false,rainbowAngle:0,columns:[]};
  return e;
 }
 
@@ -43,28 +46,66 @@ export function updateCuernoBoss(e,g,hurt){
   }
  }else if(b.phase==='rest'){
   b.exposed=true;
-  if((--b.clock<=0||e._growthChapter&&e.damageWindowRemaining<=0)&&visible&&Math.abs(dx)<950){b.aim=Math.sign(dx)||1;b.phase='warn';b.clock=b.tier===3?30:48;b.exposed=false;}
+  if((--b.clock<=0||e._growthChapter&&e.damageWindowRemaining<=0)&&visible&&Math.abs(dx)<950){
+   b.aim=Math.sign(dx)||1;b.phase='warn';b.clock=b.tier===3?30:48;b.exposed=false;
+   if(b.attack===2){
+    // Columnas de choque para aurora slam
+    b.columns=[-140,0,140].map(off=>Math.max(arena.left+40,Math.min(arena.right-40,p.x+p.w/2+off)));
+   }
+  }
  }else if(b.phase==='warn'){
   e.telegraph=true;e.wind=b.clock;
-  if((e.stun||0)>=24&&!e._growthChapter){b.phase='rest';b.clock=88;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡BESTIA ATURDIDA!','#e1d5ff',true);}
-  else if(--b.clock<=0){b.phase='attack';b.clock=b.attack===0?30:22;b.burst=0;}
+  if((e.stun||0)>=24&&!e._growthChapter){
+   b.phase='rest';b.clock=88;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡BESTIA ATURDIDA!','#e1d5ff',true);
+  }else if(--b.clock<=0){
+   b.phase='attack';b.clock=b.attack===0?32:24;b.burst=0;
+  }
  }else if(b.phase==='attack'){
   e.lunge=b.clock;
   const rainbow=['#ef5350','#ff9800','#fdd835','#66bb6a','#42a5f5','#7e57c2'];
   const fireShard=(vx,vy=-3.5,col)=>{
-   if((g.projectiles?.length||0)<130)
-    g.projectiles.push({x:e.x+e.w/2,y:e.y+40,w:18,h:18,vx,vy,life:150,dmg:b.tier===3?19:13,owner:'enemy',shape:'orb',color:col||rainbow[b.attack%6]});
+   if((g.projectiles?.length||0)<130){
+    g.projectiles.push({x:e.x+e.w/2,y:e.y+40,w:18,h:18,vx,vy,life:150,dmg:b.tier===3?20:14,owner:'enemy',shape:'orb',color:col||rainbow[b.attack%6]});
+   }
   };
   if(!b.burst){
-   if(b.attack===0){/* charge */}
-   if(b.attack===1){fireShard(b.aim*7,-3.5);if(b.tier>1)fireShard(-b.aim*5,-2,rainbow[2]);}
-   if(b.attack===2){for(let k=-1;k<=1;k++)fireShard(b.aim*(5+k*2),-3.2-Math.abs(k),rainbow[k+1]);}
-   if(b.attack===3&&b.tier===3){for(let a=0;a<6;a++){const ang=a*Math.PI/3;fireShard(Math.cos(ang)*5.5,Math.sin(ang)*5.5-3,rainbow[a]);}}
+   if(b.attack===0){
+    // Embestida potente con destellos
+    g.fx?.emit?.(e.x+e.w/2,e.y+e.h-20,{color:'#e040fb',count:12,size:3,life:25});
+   }
+   if(b.attack===1){
+    fireShard(b.aim*7,-3.5);
+    if(b.tier>1)fireShard(-b.aim*5,-2,rainbow[2]);
+    if(b.tier===3){fireShard(b.aim*6,-5,rainbow[4]);fireShard(b.aim*8,-1.5,rainbow[1]);}
+   }
+   if(b.attack===2){
+    // Aurora slam: ondas de choque a ras de suelo
+    for(let k=-1;k<=1;k++){
+     fireShard(b.aim*(5+k*2),-3.2-Math.abs(k),rainbow[k+1]);
+    }
+    g.fx?.emit?.(e.x+e.w/2,arena.floor-10,{color:'#ce93d8',count:16,size:4,life:30});
+   }
+   if(b.attack===3&&b.tier>=2){
+    const rays=b.tier===3?6:4;
+    for(let a=0;a<rays;a++){
+     const ang=a*TAU/rays+b.rainbowAngle;
+     fireShard(Math.cos(ang)*5.5,Math.sin(ang)*5.5-2.5,rainbow[a%6]);
+    }
+   }
    b.burst=1;
   }
-  if(b.attack===0){e.x+=b.aim*10;e.facing=b.aim;}
-  if(Math.abs(dx)<e.w*.55&&Math.abs(p.y+p.h/2-(e.y+e.h/2))<e.h*.6)hurt?.(b.tier===3?20:14,'cuerno-boss');
-  if(--b.clock<=0){b.phase='rest';b.clock=b.tier===3?30:55;b.attack=(b.attack+1)%PATTERNS.length;b.burst=0;}
+  if(b.attack===0){
+   e.x+=b.aim*11;e.facing=b.aim;
+   if(g.fx&&b.clock%3===0){
+    g.fx.emit(e.x+e.w/2,e.y+e.h-15,{color:'#ea80fc',count:3,size:2.5,life:18});
+   }
+  }
+  if(Math.abs(dx)<e.w*.58&&Math.abs(p.y+p.h/2-(e.y+e.h/2))<e.h*.65){
+   hurt?.(b.tier===3?22:15,'cuerno-boss');
+  }
+  if(--b.clock<=0){
+   b.phase='rest';b.clock=b.tier===3?32:56;b.attack=(b.attack+1)%PATTERNS.length;b.burst=0;
+  }
  }
  chapterBossFinish(e,g,b,previous);
  return true;
@@ -72,7 +113,7 @@ export function updateCuernoBoss(e,g,hurt){
 
 function _drawPrismBeast(ctx,e,t){
  const b=e._prismBeast,tier=b.tier;
- const crystal=tier===3?'rgba(100,60,200,0.85)':tier===2?'rgba(140,100,220,0.80)':'rgba(180,150,240,0.75)';
+ const crystal=tier===3?'rgba(100,60,200,0.88)':tier===2?'rgba(140,100,220,0.82)':'rgba(180,150,240,0.78)';
  const edge   =tier===3?'#ff4081':tier===2?'#e040fb':'#ce93d8';
  const glow   =tier===3?'#ea80fc':'#d1c4e9';
  const float  =Math.sin(t*.08)*4;
@@ -97,7 +138,7 @@ function _drawPrismBeast(ctx,e,t){
  ctx.closePath();ctx.fill();ctx.stroke();
 
  // Inner facet lines
- ctx.strokeStyle=`rgba(255,255,255,0.3)`;ctx.lineWidth=1;
+ ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=1.2;
  ctx.beginPath();ctx.moveTo(-20,-38);ctx.lineTo(0,36);ctx.lineTo(20,-38);ctx.stroke();
  ctx.beginPath();ctx.moveTo(-40,-8);ctx.lineTo(0,36);ctx.lineTo(40,-8);ctx.stroke();
 
@@ -108,8 +149,8 @@ function _drawPrismBeast(ctx,e,t){
  ctx.beginPath();ctx.moveTo(-14,-58);ctx.lineTo(0,-72);ctx.lineTo(30,-56);ctx.lineTo(24,-44);ctx.lineTo(-10,-48);ctx.closePath();ctx.fill();ctx.stroke();
  // Eyes
  ctx.fillStyle=tier===3?'#ff4081':'#e040fb';
- ctx.beginPath();ctx.arc(14,-58,5,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(16,-59,2,0,Math.PI*2);ctx.fill();
+ ctx.beginPath();ctx.arc(14,-58,5,0,TAU);ctx.fill();
+ ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(16,-59,2,0,TAU);ctx.fill();
 
  // ── Rainbow prism antlers ──
  const rainbow=['#ef5350','#ff9800','#fdd835','#66bb6a','#42a5f5','#7e57c2'];
@@ -137,10 +178,9 @@ function _drawPrismBeast(ctx,e,t){
  ctx.beginPath();ctx.moveTo(30,-4);ctx.lineTo(44,30);ctx.stroke();
 
  // ── Aurora tail ──
- const tColors=['#ff4081','#ff9800','#fdd835','#4caf50','#2196f3','#9c27b0'];
  for(let tc=0;tc<6;tc++){
   const tailOff=Math.sin(t*.14+tc*.5)*12;
-  ctx.strokeStyle=`rgba(${tc===0?'255,64,129':tc===1?'255,152,0':tc===2?'253,216,53':tc===3?'76,175,80':tc===4?'33,150,243':'156,39,176'},0.6)`;
+  ctx.strokeStyle=`rgba(${tc===0?'255,64,129':tc===1?'255,152,0':tc===2?'253,216,53':tc===3?'76,175,80':tc===4?'33,150,243':'156,39,176'},0.65)`;
   ctx.lineWidth=5-tc*.5;ctx.lineCap='round';
   ctx.beginPath();ctx.moveTo(-44,20+tc*3);ctx.quadraticCurveTo(-70,40+tailOff,-80+tc*5,50+tc*8+tailOff);ctx.stroke();
  }
@@ -149,11 +189,84 @@ function _drawPrismBeast(ctx,e,t){
  if(tier===3){
   for(let a=0;a<6;a++){
    const ang=b.rainbowAngle+a*(Math.PI/3);
-   ctx.strokeStyle=`rgba(${rainbow[a].slice(1)===rainbow[a].slice(1)?rainbow[a]:'200,100,255'},0.25)`;
-   ctx.strokeStyle=rainbow[a];ctx.globalAlpha=0.18+Math.sin(t*.1+a)*.08;ctx.lineWidth=3;
+   ctx.strokeStyle=rainbow[a];ctx.globalAlpha=0.2+Math.sin(t*.1+a)*.09;ctx.lineWidth=3.2;
    ctx.beginPath();ctx.arc(0,-14,55+a*4,ang,ang+Math.PI/3);ctx.stroke();
    ctx.globalAlpha=1;
   }
+ }
+
+ ctx.restore();
+}
+
+export function drawCuernoBossSignals(ctx,e,cam,t=0,reduced=false){
+ if(!e?._cuernoBoss)return;
+ const b=e._prismBeast,x=e.x-cam.x,y=e.y-cam.y,cx=x+e.w/2;
+ const panW=230,panH=62,px=cx-panW/2,py=Math.max(12,y-96);
+
+ ctx.save();
+ // Panel holográfico de cristal
+ ctx.fillStyle='rgba(16,10,32,0.85)';
+ ctx.strokeStyle='rgba(206,147,216,0.6)';ctx.lineWidth=1.5;
+ _rr(ctx,px,py,panW,panH,5);ctx.fill();ctx.stroke();
+
+ // Pips de tier
+ const TIER_COL=['#9575cd','#ba68c8','#ff4081'];
+ for(let i=0;i<3;i++){
+  ctx.fillStyle=i<b.tier?TIER_COL[i]:'#261c38';
+  ctx.beginPath();ctx.arc(px+14+i*14,py+11,4.5,0,TAU);ctx.fill();
+  if(i<b.tier){
+   ctx.strokeStyle='rgba(255,220,255,0.8)';ctx.lineWidth=1.2;
+   ctx.beginPath();ctx.arc(px+14+i*14,py+11,4.5,0,TAU);ctx.stroke();
+  }
+ }
+
+ // Nombre del mini-boss
+ ctx.fillStyle='#ede7f6';ctx.font='bold 11px monospace';ctx.textAlign='center';
+ ctx.fillText('BESTIA PRISMA',cx,py+14);
+
+ // Barra de vida segmentada
+ const barX=px+10,barY=py+24,barW=panW-20,barH=9;
+ const hpRatio=Math.max(0,e.hp/e.max);
+ ctx.fillStyle='rgba(8,4,18,0.9)';_rr(ctx,barX,barY,barW,barH,3);ctx.fill();
+
+ const gBar=ctx.createLinearGradient(barX,barY,barX+barW*hpRatio,barY);
+ gBar.addColorStop(0,b.tier===3?'#ff4081':b.tier===2?'#ab47bc':'#7e57c2');
+ gBar.addColorStop(1,b.tier===3?'#ff80ab':'#e1bee7');
+ ctx.fillStyle=gBar;_rr(ctx,barX,barY,barW*hpRatio,barH,3);ctx.fill();
+
+ ctx.strokeStyle='rgba(225,213,255,0.7)';ctx.lineWidth=1;_rr(ctx,barX,barY,barW,barH,3);ctx.stroke();
+
+ // Icono y texto táctico de aviso
+ const PHASE_INFO={
+  intro:{icon:'◎',col:'#ce93d8',txt:'DESPERTANDO BESTIA PRISMA'},
+  rest:{icon:'◉',col:'#80cbc4',txt:'¡CRISTAL EXPUESTO! ATACA EN RECUPERACIÓN'},
+  warn:{icon:'▲',col:'#ffb74d',txt:['¡EMBESTIDA DE CRISTAL! SALTA','VOLEA DE PRISMAS REFRACTADOS','GOLPE DE AURORA BOREAL · ONDA','ERUPCIÓN ARCOÍRIS TOTAL'][b.attack]},
+  attack:{icon:'✦',col:'#ff4081',txt:'DESCARGA PRISMÁTICA'}
+ };
+ const pi=PHASE_INFO[b.phase]||PHASE_INFO.intro;
+ ctx.fillStyle=pi.col;ctx.font='bold 12px monospace';ctx.textAlign='left';
+ ctx.fillText(pi.icon,px+10,py+49);
+ ctx.fillStyle='rgba(243,229,245,0.95)';ctx.font='10px monospace';
+ ctx.fillText(pi.txt,px+26,py+49);
+
+ // Telegraph direccional en el suelo
+ if(b.phase==='warn'){
+  const floor=e._chapterArena?.floor?e._chapterArena.floor-cam.y:1134-cam.y;
+  ctx.strokeStyle='rgba(224,64,251,0.75)';ctx.lineWidth=2.5;ctx.setLineDash([8,6]);
+  const dir=b.aim||1;
+  const tipX=cx+dir*(b.attack===0?320:250);
+  ctx.beginPath();ctx.moveTo(cx,floor-8);ctx.lineTo(tipX,floor-8);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(224,64,251,0.85)';
+  ctx.beginPath();ctx.moveTo(tipX,floor-8);ctx.lineTo(tipX-dir*14,floor-14);ctx.lineTo(tipX-dir*14,floor-2);ctx.closePath();ctx.fill();
+ }
+
+ // Anillo telegraph en el cuerpo
+ if(e.telegraph||b.exposed){
+  const tr=reduced?0:Math.sin(t*0.2)*5;
+  ctx.strokeStyle=b.exposed?'rgba(128,203,196,0.75)':'rgba(224,64,251,0.75)';
+  ctx.lineWidth=2.8;
+  ctx.beginPath();ctx.arc(cx,y+e.h/2,64+tr,0,TAU);ctx.stroke();
  }
 
  ctx.restore();
@@ -165,17 +278,9 @@ export function drawCuernoBoss(ctx,e,cam,t){
  ctx.save();
  ctx.translate(x+e.w/2,y+e.h-(e._growthChapter?70:0));ctx.scale(b.aim||1,1);
  _drawPrismBeast(ctx,e,t);
- if(e.telegraph){ctx.strokeStyle='#ce93d8';ctx.lineWidth=2.5;ctx.setLineDash([6,6]);ctx.strokeRect(-80,-120,160,130);ctx.setLineDash([]);}
  ctx.restore();
 
- if(e._growthChapter)return true;
- const barW=162,barH=10,bx=x+e.w/2-barW/2,by=y-32;
- ctx.fillStyle='rgba(8,4,18,0.88)';ctx.fillRect(bx-2,by-2,barW+4,barH+4);
- const ratio=Math.max(0,e.hp/e.max);
- ctx.fillStyle=b.tier===3?'#7e57c2':b.tier===2?'#ab47bc':'#ce93d8';
- ctx.fillRect(bx,by,barW*ratio,barH);
- ctx.strokeStyle='#e1d5ff';ctx.lineWidth=1.2;ctx.strokeRect(bx-2,by-2,barW+4,barH+4);
- ctx.fillStyle='#ede7f6';ctx.font='bold 10px sans-serif';ctx.textAlign='center';
- ctx.fillText(`BESTIA PRISMA · FASE ${b.tier} (${Math.ceil(e.hp)} PV)`,x+e.w/2,by-7);
+ // Dibujar siempre HUD táctico
+ drawCuernoBossSignals(ctx,e,cam,t);
  return true;
 }

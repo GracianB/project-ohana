@@ -3,6 +3,7 @@ import {authorStitchoEncounters} from './stitcho-encounters-v607.js';
 import {authorChispinEncounters} from './chispin-encounters-v608.js';
 import {authorCatEncounters} from './cat-encounters-v609.js';
 import {authorCuernoEncounters} from './cuerno-encounters-v610.js';
+import {authorDragonEncounters} from './dragon-encounters-v611.js';
 import {authorExpedition} from './chapter-expedition-v2.js';
 import {composeChapterRoom} from './chapter-room-composition.js';
 import {KILO_CHAPTER_BOSS_ID,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
@@ -223,6 +224,7 @@ export function buildWorld1HeroRoom(hero) {
   if(hero==='chispin') return authorChispinEncounters(composed);
   if(hero==='cat') return authorCatEncounters(composed);
   if(hero==='cuerno') return authorCuernoEncounters(composed);
+  if(hero==='dragon') return authorDragonEncounters(composed);
   return composed;
 }
 
