@@ -1,6 +1,6 @@
-# V621 · Espejos del Corazón con la familia visible
+# V622 · Espejos del Corazón con la familia visible
 
-Los diez portales del final muestran ahora los cuerpos completos de los héroes, dibujados con el arte canónico de Canvas en su forma final. La figura se anima dentro del cristal, se recorta al óvalo y aumenta suavemente al acercarse Kilo. Se mantiene la iluminación y la expresión de cada espejo. Caché offline: ohana-621.
+Los diez portales del final muestran los cuerpos completos con el arte canónico de cada héroe, formas finales, poses rotatorias propias y orientación hacia Kilo. Los actores del espejo conservan el estado entre fotogramas: la respiración, el ataque y el salto ya no se reinician cada frame. Cada cristal recibe luz y motivo gráfico de su personaje, doble marco y reflejo frontal sutil; el personaje sigue siendo el elemento legible. Movimiento reducido congela cuerpo y ambiente sin ocultar las figuras. Los muñecos se reutilizan para evitar crear diez actores en cada frame. Caché offline: ohana-622.
 
 # V606 · ohana-606 · Claro de Kilo publicada y verificada
 

@@ -20,6 +20,13 @@ const FAMILY = Object.freeze({
   yomi:     { name: 'Yomi',        base: '#ce93d8', eye: '#4a148c', accent: '#e1bee7', void: true }
 });
 
+const ACTING = Object.freeze({
+  kilo:['cast','victory'], stitcho:['attack','jump'], chispin:['cast','attack'],
+  cat:['glide','victory'], cuerno:['victory','cast'], dragon:['glide','attack'],
+  dino:['attack','victory'], frita:['run','victory'], pizza:['jump','attack'],
+  yomi:['cast','glide']
+});
+
 function hn(i) {
   const x = Math.sin(i * 127.1 + 11.7) * 43758.5453;
   return x - Math.floor(x);
@@ -102,31 +109,37 @@ export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false,
     ctx.save();
     ctx.translate(x, y);
 
-    const g = ctx.createLinearGradient(-p.rx, -p.ry, p.rx, p.ry);
-    g.addColorStop(0, 'rgba(180,210,255,0.12)');
-    g.addColorStop(0.5, 'rgba(220,240,255,0.22)');
-    g.addColorStop(1, 'rgba(140,180,220,0.10)');
+    const rx=p.rx||72, ry=p.ry||112;
+    const g = ctx.createLinearGradient(-rx, -ry, rx, ry);
+    g.addColorStop(0, 'rgba(180,210,255,0.08)');
+    g.addColorStop(0.48, 'rgba(220,240,255,0.12)');
+    g.addColorStop(1, 'rgba(140,180,220,0.06)');
     ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.ellipse(0, 0, p.rx || 72, p.ry || 112, 0, 0, TAU);
+    ctx.ellipse(0, 0, rx, ry, 0, 0, TAU);
     ctx.fill();
 
-    ctx.strokeStyle = near ? '#fff6c8' : 'rgba(255,255,255,0.45)';
+    // Two restrained rims make the oval read as a framed mirror, not a
+    // floating UI token. The warm edge wakes up when the player approaches.
+    ctx.strokeStyle = near ? '#fff6c8' : 'rgba(226,239,255,0.58)';
     ctx.lineWidth = near ? 4 : 2.5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(0,0,rx-6,ry-6,0,-Math.PI*.78,-Math.PI*.18);
+    ctx.strokeStyle=near?'rgba(255,255,230,.72)':'rgba(255,255,255,.24)';
+    ctx.lineWidth=1.25;
     ctx.stroke();
 
     if (!reduced) {
-      ctx.globalAlpha = 0.18;
-      ctx.strokeStyle = '#80deea';
-      ctx.lineWidth = 1;
-      for (let i = -4; i <= 4; i++) {
-        const yy = i * 18 + Math.sin(t * 0.12 + i) * 2;
-        ctx.beginPath();
-        ctx.moveTo(-p.rx * 0.7, yy);
-        ctx.lineTo(p.rx * 0.7, yy);
-        ctx.stroke();
+      const scan=ctx.createLinearGradient(-rx,0,rx,0);
+      scan.addColorStop(0,'rgba(255,255,255,0)');
+      scan.addColorStop(.5,'rgba(255,255,255,.08)');
+      scan.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=scan;
+      for (let i = -3; i <= 3; i++) {
+        const yy = i * 25 + Math.sin(t * 0.045 + i) * 2;
+        ctx.fillRect(-rx*.68,yy,rx*1.36,1);
       }
-      ctx.globalAlpha = 1;
     }
 
     // Show the actual family member inside the glass. The former floating
@@ -136,10 +149,38 @@ export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false,
     if (drawHero) {
       ctx.save();
       ctx.beginPath();
-      ctx.ellipse(0, 4, (p.rx || 72) * 0.78, (p.ry || 112) * 0.82, 0, 0, TAU);
+      ctx.ellipse(0, 4, rx * 0.78, ry * 0.82, 0, 0, TAU);
       ctx.clip();
+      // Character-tinted depth light sits behind the sprite; a different
+      // signature motif gives each mirror its own identity at a glance.
+      const halo=ctx.createRadialGradient(0,-20,8,0,-20,ry*.72);
+      halo.addColorStop(0,fam.base+'55');
+      halo.addColorStop(.58,fam.base+'20');
+      halo.addColorStop(1,'rgba(8,20,42,0)');
+      ctx.fillStyle=halo;
+      ctx.fillRect(-rx*.8,-ry*.8,rx*1.6,ry*1.7);
+      drawSignature(ctx,p.hero,fam,t,reduced);
       const bob = reduced ? 0 : Math.sin(t * 0.055 + p.x * 0.01) * 3;
-      drawHero(ctx, p.hero, 0, (p.ry || 112) * 0.72 + bob, near ? 1.12 : 1, t);
+      const faceDirection=player?Math.sign(player.x+player.w*.5-p.x)||-1:-1;
+      const posePair=ACTING[p.hero]||['idle','idle'];
+      drawHero(ctx,p.hero,0,ry*.72+bob,near?1.12:1,t,near,faceDirection,posePair,reduced,ry*1.64);
+
+      // A soft diagonal sheen belongs to the glass foreground, so the art
+      // stays readable while the family still feels reflected in the lens.
+      ctx.globalCompositeOperation='screen';
+      const sheen=ctx.createLinearGradient(-rx*.72,-ry*.7,rx*.34,ry*.68);
+      sheen.addColorStop(0,'rgba(255,255,255,.13)');
+      sheen.addColorStop(.22,'rgba(255,255,255,.035)');
+      sheen.addColorStop(.5,'rgba(255,255,255,0)');
+      sheen.addColorStop(1,'rgba(255,255,255,.025)');
+      ctx.fillStyle=sheen;
+      ctx.fillRect(-rx,-ry,rx*2,ry*2);
+      ctx.globalCompositeOperation='source-over';
+      ctx.strokeStyle='rgba(255,255,255,.18)';
+      ctx.lineWidth=1.1;
+      ctx.beginPath();
+      ctx.ellipse(-rx*.49,-ry*.13,rx*.1,ry*.43,-.33,-1.22,1.18);
+      ctx.stroke();
       ctx.restore();
     } else {
       const scale = near ? 1.08 : 1;
@@ -163,6 +204,25 @@ export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false,
 
     ctx.restore();
   }
+}
+
+function drawSignature(ctx,hero,fam,t,reduced){
+  const phase=reduced?0:t*.035, pulse=reduced?1:.88+Math.sin(t*.07)*.12;
+  ctx.save();ctx.globalAlpha=.58;ctx.strokeStyle=fam.accent;ctx.fillStyle=fam.accent;ctx.lineWidth=2.2;
+  const ellipse=(rx,ry,a=0,b=TAU)=>{ctx.beginPath();ctx.ellipse(0,0,rx,ry,phase*.12,a,b);ctx.stroke();};
+  switch(hero){
+    case 'kilo': ellipse(46,24,-.5,Math.PI*1.25);ellipse(39,33,Math.PI*.05,Math.PI*1.65);break; // hula
+    case 'stitcho': for(let i=0;i<3;i++){const a=phase+i*TAU/3;ctx.beginPath();ctx.arc(Math.cos(a)*42,Math.sin(a)*33,4+i,0,TAU);ctx.fill();}ellipse(48,38);break; // orbiting ship lights
+    case 'chispin': ctx.beginPath();ctx.moveTo(-48,14);ctx.lineTo(-20,-12);ctx.lineTo(-7,2);ctx.lineTo(14,-30);ctx.lineTo(3,0);ctx.lineTo(30,-5);ctx.lineTo(48,-28);ctx.stroke();break;
+    case 'cat': for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(-8+i*8,8,36+i*9,-1.3+phase*.15,1.1+phase*.15);ctx.stroke();}break; // lunar tails
+    case 'cuerno': ellipse(49,72,-.78,.42);ellipse(57,84,Math.PI-.42,Math.PI+.78);ctx.beginPath();ctx.moveTo(0,-84);ctx.lineTo(-8,-68);ctx.lineTo(0,-52);ctx.lineTo(8,-68);ctx.closePath();ctx.fill();break;
+    case 'dragon': for(const dir of [-1,1]){ctx.beginPath();ctx.moveTo(0,22);ctx.quadraticCurveTo(dir*20,-52,dir*60,-54);ctx.quadraticCurveTo(dir*39,0,0,22);ctx.stroke();}break; // wings
+    case 'dino': for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(-30+i*20,25+(i%2)*5,4,0,TAU);ctx.fill();}ellipse(53,40);break; // fossil track
+    case 'frita': ctx.beginPath();ctx.ellipse(0,0,48,36,0,phase,phase+Math.PI*1.6);ctx.stroke();for(let i=0;i<3;i++){const x=-30+i*30;ctx.beginPath();ctx.moveTo(x,56);ctx.quadraticCurveTo(x-8,42,x,30);ctx.quadraticCurveTo(x+8,18,x,7);ctx.stroke();}break; // steam and oil curl
+    case 'pizza': for(let i=0;i<4;i++){const a=phase+i*TAU/4;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,48,a,a+TAU/8);ctx.closePath();ctx.stroke();}break; // spinning slices
+    case 'yomi': for(let i=0;i<5;i++){const a=phase+i*TAU/5,x=Math.cos(a)*48,y=Math.sin(a)*54;ctx.beginPath();ctx.arc(x,y,2.5,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(Math.cos(a+TAU/5)*48,Math.sin(a+TAU/5)*54);ctx.stroke();}break; // constellation
+  }
+  ctx.globalAlpha*=pulse;ctx.restore();
 }
 
 // Posiciones alineadas con las estatuas de la procesión (world1-rooms.js)
