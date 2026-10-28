@@ -90,28 +90,60 @@ function drawMirror(ctx, p, cam, t, player, reduced, progress) {
 }
 
 function drawEnergyConduits(ctx, portals, cam, t, player, reduced) {
+  const width = ctx.canvas?.width || 1600;
+  const coreX = CORE.x - cam.x, coreY = CORE.y - cam.y;
   const px = Number(player?.x) + (Number(player?.w) || 0) / 2;
+
+  // Nearby mirrors release a short visible pulse. Persistent 5,000-pixel
+  // lines obscured the scenery, so the energy reconvenes AT the heart instead.
   for (const [i, p] of portals.entries()) {
     const progress = Number.isFinite(px) ? clamp((px - p.x + 130) / 330) : 0;
     if (progress <= 0) continue;
     const sx = p.x - cam.x, sy = p.y - cam.y;
-    const ex = CORE.x - cam.x, ey = CORE.y - cam.y;
-    const width = ctx.canvas?.width || 1600;
-    if (Math.max(sx, ex) < -240 || Math.min(sx, ex) > width + 240) continue;
-    const col = WORLD1_THEMES[p.hero]?.color || '#fff';
-    const arc = (i - (portals.length - 1) / 2) * 14;
-    ctx.save(); ctx.globalAlpha = 0.18 + 0.54 * progress;
-    ctx.lineWidth = 1.6 + progress * 1.4; ctx.strokeStyle = col;
-    ctx.beginPath(); ctx.moveTo(sx, sy);
-    ctx.quadraticCurveTo((sx + ex) / 2, Math.min(sy, ey) - 170 - arc, ex, ey);
-    ctx.stroke();
-    if (!reduced) {
-      const k = ((t * .004 + i * .083) % 1 + 1) % 1;
-      const oneMinus = 1 - k;
-      const bx = oneMinus * oneMinus * sx + 2 * k * oneMinus * ((sx + ex) / 2) + k * k * ex;
-      const by = oneMinus * oneMinus * sy + 2 * k * oneMinus * (Math.min(sy, ey) - 170 - arc) + k * k * ey;
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(bx, by, 3.5, 0, TAU); ctx.fill();
+    const color = WORLD1_THEMES[p.hero]?.color || '#fff';
+    if (sx > -180 && sx < width + 180) {
+      ctx.save();
+      ctx.strokeStyle = color; ctx.globalAlpha = .13 + .45 * progress;
+      ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.arc(sx, sy, 122 + 7 * progress, -1.1, 1.1); ctx.stroke();
+      if (!reduced) {
+        const a = t * .027 + i;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(sx + Math.cos(a) * 117, sy + Math.sin(a) * 107, 3.5, 0, TAU);
+        ctx.fill();
+      }
+      ctx.restore();
     }
+  }
+
+  // Ten light streams spiral inward only when the heart is onscreen.
+  // Each color belongs to its canonical hero; no laser-like horizontal wires.
+  if (coreX < -330 || coreX > width + 330) return;
+  for (const [i, p] of portals.entries()) {
+    const power = Number.isFinite(px) ? clamp((px - p.x + 130) / 330) : 0;
+    if (power <= 0) continue;
+    const a = (i / portals.length) * TAU - Math.PI / 2;
+    const outer = 178 + (i % 3) * 16;
+    const inner = 43;
+    const sx = coreX + Math.cos(a) * outer, sy = coreY + Math.sin(a) * outer * .73;
+    const ex = coreX + Math.cos(a + .30) * inner, ey = coreY + Math.sin(a + .30) * inner * .73;
+    const bendX = coreX + Math.cos(a + .42) * outer * .51;
+    const bendY = coreY + Math.sin(a + .42) * outer * .44;
+    const color = WORLD1_THEMES[p.hero]?.color || '#fff';
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = 2.2 + power;
+    ctx.globalAlpha = (.24 + power * .43);
+    ctx.shadowColor = color; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.moveTo(sx, sy);
+    ctx.quadraticCurveTo(bendX, bendY, ex, ey); ctx.stroke();
+    ctx.shadowBlur = 0;
+    const k = reduced ? .82 : ((t * .006 + i * .087) % 1 + 1) % 1;
+    const inv = 1-k;
+    const bx = inv*inv*sx + 2*k*inv*bendX + k*k*ex;
+    const by = inv*inv*sy + 2*k*inv*bendY + k*k*ey;
+    ctx.fillStyle = '#fff'; ctx.beginPath();
+    ctx.arc(bx, by, 2.8 + 2 * power, 0, TAU); ctx.fill();
     ctx.restore();
   }
 }
