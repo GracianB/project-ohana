@@ -482,7 +482,7 @@ const PRECACHE_REVISIONS = {
   "worlds/stitcho-archipelago.js": "ecda3b3d8b2af806078caa2351f5c77de68b761d",
   "systems/chispin-room.js": "c44226494a2ee44507da15670b8768e5ca82bf41",
   "systems/chispin-trail.js": "7ac148bc536fd02a2b7f722615ccc8291943daf2",
-  "systems/chispin-boss.js": "4cb7db5493ab4313b60c5351a42324fa6092df64",
+  "systems/chispin-boss.js": "3f9a4c5e9616ef268f1077325f94b9c832f9e4aa",
   "worlds/chispin-sanctuary.js": "db3550f2142f71a1809786237a9884ddc8e15685",
   "systems/michi-room.js": "9560352b5247d62ddc9d1aa7703c2e22779980a8",
   "systems/michicornio-foes.js": "e494944594c929ea0dfd5b7797d20d7a3b975c02",
