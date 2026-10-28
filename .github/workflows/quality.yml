@@ -67,6 +67,9 @@ jobs:
       - name: V500 constellation UI and persistence
         run: node tests/browser/v500-constellation.mjs
 
+      - name: V618 ten canonical mirrors and family-heart climax
+        run: npm run test:browser:final-mirrors
+
       # Check the chapter selector before the slow campaign and art matrix.
       - name: V410 family camp · ten heroes and fifty real forms
         run: node tests/browser/v410-family-camp.mjs
