@@ -56,10 +56,14 @@ export function drawTheatreStage(ctx,W,H,hero='kilo',t=0,{opening=false,reduceMo
  ctx.save();for(let i=0;i<13;i++){const at=reduceMotion?0:t;const x=((i*173+at*.11)%(W+80))-40,y=H*(.18+(i%5)*.11)+Math.sin(at*.012+i)*6;ctx.globalAlpha=.17;oval(ctx,x,y,3,1.2,i%3?'#fff0bf':'#b9f2d1',i*.7);}ctx.restore();
 }
 export function openingCastSpot(id,W,H,direction=null){
- const hero=direction?.hero||'kilo',partner=direction?.partner||'stitcho',compact=W<760;
- const slots={kilo:[.67,.83],stitcho:[.81,.81],chispin:[.90,.84],cat:[.43,.81],cuerno:[.88,.94],dragon:[.53,.80],dino:[.38,.94],frita:[.20,.87],pizza:[.12,.87],yomi:[.80,.94]};
- const mobile={kilo:[.62,.59],stitcho:[.80,.56],chispin:[.88,.64],cat:[.30,.55],cuerno:[.83,.70],dragon:[.44,.53],dino:[.19,.69],frita:[.13,.60],pizza:[.25,.62],yomi:[.68,.70]};
- let [x,y]=(compact?mobile:slots)[id]||[.5,.6];if(id===hero){x=compact?.62:.67;y=compact?.61:.85;}else if(id===partner){x=compact?.30:.46;y=compact?.65:.90;}
- return {x:x*W,foot:y*H,slotWidth:W*(id===hero?(compact?.49:.31):id===partner?(compact?.30:.20):compact?.16:.12),row:y<.6?0:y<.7?1:2};
+ const compact=W<760;
+ const slots={kilo:[.50,.83],stitcho:[.66,.81],chispin:[.80,.84],cat:[.34,.81],cuerno:[.88,.94],dragon:[.22,.80],dino:[.12,.94],frita:[.58,.87],pizza:[.74,.87],yomi:[.42,.94]};
+ const mobile={kilo:[.50,.59],stitcho:[.68,.56],chispin:[.84,.64],cat:[.32,.55],cuerno:[.18,.70],dragon:[.76,.53],dino:[.12,.69],frita:[.42,.60],pizza:[.58,.62],yomi:[.86,.70]};
+ let [x,y]=(compact?mobile:slots)[id]||[.5,.6];
+ const hero=direction?.hero,partner=direction?.partner;
+ if(hero&&id===hero){x=compact?.62:.50;y=compact?.61:.85;}
+ else if(partner&&id===partner){x=compact?.30:.66;y=compact?.65:.90;}
+ const isHero=hero&&id===hero,isPartner=partner&&id===partner;
+ return {x:x*W,foot:y*H,slotWidth:W*(isHero?(compact?.34:.22):isPartner?(compact?.26:.18):compact?.14:.11),row:y<.6?0:y<.7?1:2};
 }
-export function openingHeroHeight(id,base,direction=null){return base*(id===(direction?.hero||'kilo')?2:id===(direction?.partner||'stitcho')?1.05:.57);}
+export function openingHeroHeight(id,base,direction=null){if(!direction?.hero)return base*.92;return base*(id===direction.hero?1.85:id===direction.partner?1.15:.62);}
