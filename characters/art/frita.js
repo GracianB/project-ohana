@@ -120,10 +120,12 @@ for (let i = 0; i < nd; i++) {
   ctx.ellipse(p[0], p[1], r * 1.3, r, sp[0].a + i, 0, TAU);
   ctx.fill();
   if (opt.crisp && i % 2 === 0) {
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.fillStyle = "rgba(255,255,255,0.65)";
     ctx.beginPath();
     ctx.arc(p[0] - r, p[1] - r, r * 0.45, 0, TAU);
     ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.fillRect(p[0] - r * 0.4, p[1] - r * 0.4, 1.2, 1.2);
   }
 }
 if (opt.dipped > 0) {

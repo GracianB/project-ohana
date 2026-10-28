@@ -7,6 +7,7 @@ import {KEEPSAKES} from './keepsakes.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
 import {fritaVentState,noteFritaLaunch,yomiNodeState,drawFritaVent,drawYomiTerminal} from './frita-yomi-chapters.js';
 import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaChapter,drawPizzaOven,drawPizzaCustomer} from './pizza-chapter.js';
+import {drawPizzaOvenV615,drawPizzaGuestV615,drawPizzaAtmosphere} from './pizza-chapter-art-v615.js';
 import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact,dinoGrowth,updateDinoChapter,dinoChapterReady,dinoObjective,drawDinoChapter} from './dino-chapter.js';
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
@@ -396,7 +397,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawDragonChapter(ctx,g,cam);drawDinoChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawDragonChapter(ctx,g,cam);drawDinoChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);drawPizzaAtmosphere(ctx,g,cam,t,reduce);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -618,13 +619,13 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       if (!done) { const px = s.prize.x - cam.x, py = s.prize.y - cam.y + pulse; ctx.fillStyle = "#ffcf3a"; for (let k = -1; k <= 1; k++) ctx.fillRect(px - 4 + k * 9, py - 16 - Math.abs(k) * -4, 7, 32); ctx.strokeStyle = "#fff4c2"; ctx.strokeRect(px - 18, py - 18, 36, 36); }
       break; }
     case "oven": {
-      if(g.roomDef?.pizzaChapter){drawPizzaOven(ctx,s,cam);break;}
+      if(g.roomDef?.pizzaChapter){drawPizzaOvenV615(ctx,s,cam,s.id!==0&&s.id!=='0',t,reduce);break;}
       ctx.fillStyle = "#a8552e"; ctx.beginPath(); ctx.arc(x, y - 40, 60, Math.PI, 0); ctx.lineTo(x + 60, y); ctx.lineTo(x - 60, y); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.fillStyle = "#2a1208"; ctx.beginPath(); ctx.arc(x, y - 20, 26, Math.PI, 0); ctx.closePath(); ctx.fill();
       ctx.fillStyle = "#ff9d4a"; ctx.globalAlpha = .6 + (reduce ? 0 : Math.sin(t * .1) * .2); ctx.fillRect(x - 18, y - 30, 36, 10); ctx.globalAlpha = 1;
       ctx.fillStyle = "#fff"; ctx.font = "700 12px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText("HORNO · RECOGE", x, y - 112); break; }
     case "guest": {
-      if(g.roomDef?.pizzaChapter){drawPizzaCustomer(ctx,s,cam,done);break;}
+      if(g.roomDef?.pizzaChapter){drawPizzaGuestV615(ctx,s,cam,done,t,reduce);break;}
       ctx.fillStyle = done ? "#ffd36a" : "#7a8aa0"; ctx.beginPath(); ctx.arc(x, y - 58, 18, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(x - 14, y - 40, 28, 40);
       ctx.fillStyle = "#222"; ctx.beginPath(); ctx.arc(x - 6, y - 62, 2.5, 0, Math.PI * 2); ctx.arc(x + 6, y - 62, 2.5, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.beginPath(); if (done) ctx.arc(x, y - 54, 7, .2, Math.PI - .2); else { ctx.moveTo(x - 6, y - 50); ctx.lineTo(x + 6, y - 50); } ctx.stroke();

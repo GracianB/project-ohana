@@ -77,6 +77,10 @@ if (kind === "pep") {
     ctx.fill();
   }
   R.shine(ctx, x - r * 0.35, y - r * 0.4, r * 0.35, r * 0.18, 0.65);
+  ctx.fillStyle = "rgba(255, 245, 157, 0.75)";
+  ctx.beginPath();
+  ctx.arc(x - r * 0.25, y - r * 0.3, Math.max(0.8, r * 0.18), 0, TAU);
+  ctx.fill();
 } else if (kind === "olive") {
   ctx.beginPath();
   ctx.arc(x, y, r, 0, TAU);
