@@ -1,0 +1,132 @@
+{
+  "release": "ohana-621",
+  "site": "https://gracianb.github.io/project-ohana/?release=621",
+  "verified_at": "2026-10-28T16:25:38.085940+00:00",
+  "feature_branch": "fix/v620-integration-review",
+  "feature_commit": "f1cd9390069c224da0621142529a13d96bce9dd5",
+  "merged_source_commit": "80455af0e864c8dd57163b4658f0b1ffe084ac74",
+  "integration": "Ordinary non-fast-forward merge authorized by user; merged source tree identical to tested branch.",
+  "pull_request": {
+    "created": false,
+    "reason": "gh pr create returned GraphQL Forbidden. No PR number is claimed."
+  },
+  "pages": {
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/40725167992",
+    "result": "Success"
+  },
+  "public_source_verification": {
+    "checked": "2026-10-28T16:23:27.335515+00:00",
+    "site": "https://gracianb.github.io/project-ohana/",
+    "files": [
+      {
+        "path": "characters/art/cat.js",
+        "expected": "89f25b736118993fa1c25be4d1a9ed28220bd822",
+        "actual": "89f25b736118993fa1c25be4d1a9ed28220bd822",
+        "match": true
+      },
+      {
+        "path": "characters/michi-anatomy.js",
+        "expected": "3c4e6340f8a9cc3bc25282a112e70f6483837789",
+        "actual": "3c4e6340f8a9cc3bc25282a112e70f6483837789",
+        "match": true
+      },
+      {
+        "path": "game.js",
+        "expected": "cb086131ee9487f0554cbb7b28dadaa886007d60",
+        "actual": "cb086131ee9487f0554cbb7b28dadaa886007d60",
+        "match": true
+      },
+      {
+        "path": "index.html",
+        "expected": "d9641e8a2abdb92ccdd8ca1e46f4ec903d558fcd",
+        "actual": "d9641e8a2abdb92ccdd8ca1e46f4ec903d558fcd",
+        "match": true
+      },
+      {
+        "path": "sw.js",
+        "expected": "dc31c50134ba391d90f55b9edf38826a6216ec79",
+        "actual": "dc31c50134ba391d90f55b9edf38826a6216ec79",
+        "match": true
+      },
+      {
+        "path": "systems/campaign-enemies.js",
+        "expected": "bcdba65d9c98592c811cbc698d9d71c98b56db46",
+        "actual": "bcdba65d9c98592c811cbc698d9d71c98b56db46",
+        "match": true
+      },
+      {
+        "path": "systems/chapter-boss-v2.js",
+        "expected": "09b57402975f5eebbc0560103299d3b17deb46d4",
+        "actual": "09b57402975f5eebbc0560103299d3b17deb46d4",
+        "match": true
+      },
+      {
+        "path": "systems/dino-chapter.js",
+        "expected": "d3b26d8198fc0f513bdf17b8c0db9d03a771246c",
+        "actual": "d3b26d8198fc0f513bdf17b8c0db9d03a771246c",
+        "match": true
+      },
+      {
+        "path": "systems/dino-encounters-v613.js",
+        "expected": "cb284b5c2cf5280bbb956a5da68a26435e646f0e",
+        "actual": "cb284b5c2cf5280bbb956a5da68a26435e646f0e",
+        "match": true
+      },
+      {
+        "path": "systems/hud.js",
+        "expected": "2307e6fb19f5336e55f5fdeb2cde8fef2451549e",
+        "actual": "2307e6fb19f5336e55f5fdeb2cde8fef2451549e",
+        "match": true
+      },
+      {
+        "path": "systems/stitcho-encounters-v607.js",
+        "expected": "13e155a0147e6df281f750f58f08befd19da8255",
+        "actual": "13e155a0147e6df281f750f58f08befd19da8255",
+        "match": true
+      }
+    ],
+    "all_match": true
+  },
+  "public_browser_smoke": {
+    "result": "pass",
+    "scenarios": [
+      {
+        "name": "desktop",
+        "width": 1280,
+        "height": 900,
+        "hero": "kilo",
+        "health": "80 de 80 puntos de salud",
+        "xp": "0 de 55 de experiencia; 0% hasta la siguiente forma",
+        "portrait": 144,
+        "title": "Claro de Kilo",
+        "version": true,
+        "errors": [],
+        "backend": []
+      },
+      {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "hero": "kilo",
+        "health": "80 de 80 puntos de salud",
+        "xp": "0 de 55 de experiencia; 0% hasta la siguiente forma",
+        "portrait": 144,
+        "title": "Claro de Kilo",
+        "version": true,
+        "errors": [],
+        "backend": []
+      }
+    ],
+    "tls_note": "Chromium ignores execution-environment CA errors; independent Python urllib source verification uses default TLS validation. No claim of a site certificate defect.",
+    "initial_attempt": {
+      "result": "timeout",
+      "step": "Waiting for Kilo card after entering intro",
+      "resolution": "Repeated in fresh browser contexts with a 1.2 second transition wait and request/error diagnostics. Both desktop/mobile passed; no source change was made. Cause of first timeout not established."
+    }
+  },
+  "limits": [
+    "Netlify remains paused. Two-browser cooperative progression was tested against the local server.",
+    "Automated progression does not establish human difficulty balance or subjective art acceptance.",
+    "General visual matrix predates the Dino-only terrain corrections; final continuous campaign validates the updated route."
+  ]
+}
