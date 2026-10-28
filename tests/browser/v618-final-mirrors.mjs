@@ -24,7 +24,7 @@ try {
       canvas.id = 'v618-canvas';
       canvas.width = args.width;
       canvas.height = 680;
-      canvas.style.cssText = 'position:fixed;z-index:999999;left:0;top:0;max-width:100%;height:auto;pointer-events:none;';
+      canvas.style.cssText = 'position:fixed;z-index:999999;left:0;top:0;max-width:100%;height:auto;pointer-events:none;background:radial-gradient(ellipse at center,#17294a,#090e25 75%);';
       document.body.append(canvas);
       const ctx = canvas.getContext('2d', {willReadFrequently:true});
       const player = {x:args.playerX,y:1094,w:40,h:40};
