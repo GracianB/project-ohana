@@ -8,27 +8,27 @@
   <link rel="manifest" href="manifest.json">
   <link rel="preload" href="assets/fonts/fredoka-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="fonts.css?v=ohana-606">
-  <link rel="stylesheet" href="style.css?v=ohana-606">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-606">
-  <link rel="stylesheet" href="atrium-interact.css?v=ohana-606">
-  <link rel="stylesheet" href="hud.css?v=ohana-606">
-  <link rel="stylesheet" href="evo.css?v=ohana-606">
-  <link rel="stylesheet" href="ending.css?v=ohana-606">
-  <link rel="stylesheet" href="intro.css?v=ohana-606">
-  <link rel="stylesheet" href="coop-travel-v604.css?v=ohana-606">
-  <link rel="stylesheet" href="demo.css?v=ohana-606">
-  <link rel="stylesheet" href="experience.css?v=ohana-606">
-  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-606">
-  <link rel="stylesheet" href="supreme.css?v=ohana-606">
-  <link rel="stylesheet" href="world-map.css?v=ohana-606">
-  <link rel="stylesheet" href="mobile-v96.css?v=ohana-606">
-  <link rel="stylesheet" href="v100-special.css?v=ohana-606">
-  <link rel="stylesheet" href="v100-2.css?v=ohana-606">
-  <link rel="stylesheet" href="v101-milestones.css?v=ohana-606">
-  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-606">
-  <link rel="stylesheet" href="family-camp.css?v=ohana-606">
-  <link rel="stylesheet" href="play-interface.css?v=ohana-606">
+  <link rel="stylesheet" href="fonts.css?v=ohana-624">
+  <link rel="stylesheet" href="style.css?v=ohana-624">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-624">
+  <link rel="stylesheet" href="atrium-interact.css?v=ohana-624">
+  <link rel="stylesheet" href="hud.css?v=ohana-624">
+  <link rel="stylesheet" href="evo.css?v=ohana-624">
+  <link rel="stylesheet" href="ending.css?v=ohana-624">
+  <link rel="stylesheet" href="intro.css?v=ohana-624">
+  <link rel="stylesheet" href="coop-travel-v604.css?v=ohana-624">
+  <link rel="stylesheet" href="demo.css?v=ohana-624">
+  <link rel="stylesheet" href="experience.css?v=ohana-624">
+  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-624">
+  <link rel="stylesheet" href="supreme.css?v=ohana-624">
+  <link rel="stylesheet" href="world-map.css?v=ohana-624">
+  <link rel="stylesheet" href="mobile-v96.css?v=ohana-624">
+  <link rel="stylesheet" href="v100-special.css?v=ohana-624">
+  <link rel="stylesheet" href="v100-2.css?v=ohana-624">
+  <link rel="stylesheet" href="v101-milestones.css?v=ohana-624">
+  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-624">
+  <link rel="stylesheet" href="family-camp.css?v=ohana-624">
+  <link rel="stylesheet" href="play-interface.css?v=ohana-624">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -54,8 +54,8 @@
     body.intro-pending #char-select > :not(#ohana-intro){visibility:hidden!important;pointer-events:none!important}
     body.intro-pending #ohana-intro{display:block!important;position:fixed!important;inset:0!important;z-index:90!important;background:#02050c!important}
   </style>
-<link rel="stylesheet" href="./coop-role-v604.css?v=ohana-606">
-<link rel="stylesheet" href="caprichos.css?v=ohana-606">
+<link rel="stylesheet" href="./coop-role-v604.css?v=ohana-624">
+<link rel="stylesheet" href="caprichos.css?v=ohana-624">
 </head>
 <body data-theme="dark" class="intro-pending">
   <div id="fx-hurt" aria-hidden="true"></div>
@@ -316,17 +316,17 @@
         });
       })();
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js?v=ohana-606", { scope: "./" }).catch(function (error) {
+        navigator.serviceWorker.register("./sw.js?v=ohana-624", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
         });
       });
     }
   </script>
-  <script type="module" src="systems/cinema-loader.js?v=ohana-606"></script>
-  <script type="module" src="game.js?v=ohana-606"></script>
-  <script type="module" src="systems/title.js?v=ohana-606"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-606"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-606"></script>
-  <script type="module" src="systems/demo.js?v=ohana-606"></script>
+  <script type="module" src="systems/cinema-loader.js?v=ohana-624"></script>
+  <script type="module" src="game.js?v=ohana-624"></script>
+  <script type="module" src="systems/title.js?v=ohana-624"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-624"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-624"></script>
+  <script type="module" src="systems/demo.js?v=ohana-624"></script>
 </body>
 </html>

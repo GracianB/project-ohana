@@ -1078,7 +1078,7 @@ const fromEvo = p.evo;
 const fromName = p.evoNames?.[fromEvo] || p.forms?.[fromEvo]?.name || p.name || "Forma";
 if (reason !== "xp" && reason !== "manual") return;
 if (p.evo >= 4) { if (reason === "manual") showSystemMessage("MAX", "Ya eres GOD (forma 5)."); return; }
-if(kiloGrowthWaiting(game)){
+if(!game._e2eForceEvolution&&kiloGrowthWaiting(game)){
  if(reason==='manual')showObjectiveMessage('ESCUCHA EL CLARO',world1NextObjective(game)?.action||'Despierta el siguiente instrumento');
  return;
 }
@@ -3105,6 +3105,7 @@ function drawWorld1Backdrop(world,W,H){
  if(game.roomDef.fusionBoss)drawWorld1BossBackdrop(ctx,game,game.cam,t);
 }
 const w1Actors=new Map();
+const mirrorActors=new Map();
 function w1CineActor(c,hero,x,y,scale,acting=null){const form=acting?.form??1,key=hero+':'+form;let d=w1Actors.get(key);if(!d){const def=ROSTER.find(r=>r.id===hero);if(!def)throw Error('hero');d=w1MakeDummy(hero,form,def.color);d.facing=1;d.grounded=true;w1Actors.set(key,d);}d._poseOverride=acting?.pose||'idle';w1DrawDummy(c,d,x,y,Math.max(.2,scale)*60/Math.max(1,w1BaseHeight(hero,form)),reduceMotion?0:t);}
 
 // B abre el álbum del Mundo 1 cuando estás en una de sus salas (un solo álbum).
@@ -3195,7 +3196,22 @@ drawNestArena(ctx,game,game.cam,t);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
 portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
-if(game.roomId==="w1-final")drawPortalMirrors(ctx, FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion);
+if(game.roomId==="w1-final")drawPortalMirrors(ctx, FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion,
+  (mirrorCtx,hero,centerX,feetY,scale,frame,near,faceDirection,posePair,reduced,mirrorHeight)=>{
+    let reflection=mirrorActors.get(hero);
+    if(!reflection){
+      const def=ROSTER.find(r=>r.id===hero);
+      if(!def)return;
+      reflection=w1MakeDummy(hero,4,def.color);
+      mirrorActors.set(hero,reflection);
+    }
+    reflection.facing=faceDirection;
+    reflection.grounded=true;
+    const poses=posePair?.length?posePair:["idle","idle"];
+    reflection._poseOverride=poses[reduced?0:Math.floor(frame/150)%poses.length]||"idle";
+    const fitScale=Math.min(scale,(mirrorHeight*.9)/Math.max(1,w1BaseHeight(hero,4)));
+    w1DrawDummy(mirrorCtx,reflection,centerX,feetY,fitScale,reduced?0:frame);
+  });
 Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
@@ -4302,6 +4318,15 @@ setXp(value) {
   const state = this.step(1);
   dismissE2EOverlays();
   return state;
+},
+debugEvolve() {
+  const p=game.player;
+  if(!p||p.evo>=4)return this.state();
+  p.xp=Math.max(p.xp,XP_NEED[p.evo+1]||0);
+  const previous=game._e2eForceEvolution;
+  game._e2eForceEvolution=true;
+  try { evolve("xp"); } finally { game._e2eForceEvolution=previous; }
+  return this.state();
 },
 setEvo(value) {
   if (!game.player) return this.state();
