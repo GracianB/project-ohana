@@ -127,6 +127,24 @@ ctx.fillStyle = R.alpha(c.glow, final ? 0.55 : far ? 0.16 : 0.3);
 ctx.beginPath(); ctx.ellipse(W[0] * 0.6, W[1] * 0.75, L * 0.42, L * 0.3, rot || 0, 0, PI * 2); ctx.fill();
 ctx.fillStyle = R.alpha(c.glow, final ? 0.4 : far ? 0.1 : 0.2);
 ctx.beginPath(); ctx.ellipse(tips[1][0] * 0.7, tips[1][1] * 0.7, L * 0.2, L * 0.13, rot || 0, 0, PI * 2); ctx.fill();
+// Internal glowing heat veins (venas ígneas alares)
+if (L > 36) {
+  ctx.strokeStyle = R.alpha(c.glow, final ? 0.5 : far ? 0.18 : 0.36);
+  ctx.lineWidth = Math.max(1, L * 0.022);
+  ctx.beginPath();
+  for (let i = 0; i < 3; i++) {
+    const tp = tips[i];
+    const mx = (W[0] + tp[0]) * 0.5, my = (W[1] + tp[1]) * 0.5;
+    ctx.moveTo(W[0] * 0.88, W[1] * 0.88);
+    ctx.quadraticCurveTo(mx - (W[1] - tp[1]) * 0.12, my + (W[0] - tp[0]) * 0.12, tp[0] * 0.88, tp[1] * 0.88);
+    if (i > 0) {
+      const prev = tips[i - 1];
+      ctx.moveTo(mx, my);
+      ctx.lineTo((prev[0] + W[0]) * 0.5, (prev[1] + W[1]) * 0.5);
+    }
+  }
+  ctx.stroke();
+}
 ctx.restore();
 membrane();
 ctx.lineWidth = R.LINE;
@@ -149,7 +167,18 @@ ctx.beginPath();
 for (let i = 1; i < 3; i++) { ctx.moveTo(W[0], W[1]); ctx.lineTo(lerp(W[0], tips[i][0], 0.92), lerp(W[1], tips[i][1], 0.92)); }
 ctx.stroke();
 const cs = Math.max(3, L * 0.08);
+// Knuckle talon (esperón de nudillo alar)
 R.poly(ctx, [[W[0] - cs * 0.4, W[1]], [W[0] + cs * 0.7, W[1] - cs * 1.4], [W[0] + cs * 0.5, W[1] + cs * 0.3]], c.horn, { lw: 1.6 });
+// Leading wing-tip talon (garra del ápice alar)
+if (L > 42) {
+  const tcs = cs * 0.7;
+  const t0 = tips[0], ta = t0[2];
+  R.poly(ctx, [
+    [t0[0], t0[1]],
+    [t0[0] + Math.cos(ta + 0.35) * tcs * 1.5, t0[1] + Math.sin(ta + 0.35) * tcs * 1.5],
+    [t0[0] + Math.cos(ta - 0.45) * tcs * 0.75, t0[1] + Math.sin(ta - 0.45) * tcs * 0.75]
+  ], c.horn, { lw: 1.4 });
+}
 if (final) {
   for (let i = 0; i < 3; i++) flame(ctx, R, tips[i][0], tips[i][1], 3.4 + (i === 0 ? 1.2 : 0), tips[i][2], t, i + (far ? 5 : 0));
   for (let i = 1; i < 3; i++) {
@@ -162,6 +191,9 @@ if (final) {
   ctx.shadowBlur = 8;
   R.sparkle(ctx, tips[0][0], tips[0][1], 3, "#fffbe0");
   ctx.restore();
+} else if (L > 60) {
+  const fsp = Math.sin(t * 0.12) * 0.3 + 1.1;
+  R.shine(ctx, W[0] + 1, W[1] - 2, cs * 0.55 * fsp, cs * 0.4 * fsp, 0.75);
 }
 ctx.restore();
 }
@@ -496,6 +528,13 @@ if (f >= 3) {
 }
 const tip = tpts[tpts.length - 1];
 flame(ctx, R, tip[0], tip[1], 3 + f * 0.7, tip[2], t, 3, final ? { outer: "#ff8a1a", mid: "#ffe45a" } : {});
+if (f >= 2) {
+  // Flamas laterales danzantes en la cola látigo
+  const angT = tip[2];
+  const sideWob = Math.sin(t * 0.2 + 2) * 1.5;
+  flame(ctx, R, tip[0] - Math.cos(angT) * 4 + Math.sin(angT) * 5, tip[1] - Math.sin(angT) * 4 - Math.cos(angT) * 5, 2.2 + f * 0.4, angT - 0.35 + sideWob * 0.05, t, 5, { line: false, outer: final ? "#ffba34" : "#ff6a1a", mid: final ? "#fffbe0" : "#ffd450" });
+  flame(ctx, R, tip[0] - Math.cos(angT) * 4 - Math.sin(angT) * 5, tip[1] - Math.sin(angT) * 4 + Math.cos(angT) * 5, 2.2 + f * 0.4, angT + 0.35 - sideWob * 0.05, t, 7, { line: false, outer: final ? "#ffba34" : "#ff6a1a", mid: final ? "#fffbe0" : "#ffd450" });
+}
 ctx.restore();
 
 const legCol = dark;
@@ -645,6 +684,16 @@ for (let i = 2; i < pts.length - 1; i++) {
   ctx.beginPath(); ctx.moveTo(x - Math.cos(p[2]) * 0.2 + Math.cos(a) * 2, y + Math.sin(a) * 2);
   ctx.lineTo(x - Math.cos(a) * 2, y - Math.sin(a) * 2); ctx.stroke();
 }
+if (f >= 2) {
+  ctx.strokeStyle = R.alpha(c.glow, f === 4 ? 0.6 : 0.4); ctx.lineWidth = 1.3;
+  ctx.beginPath();
+  for (let i = 1; i < pts.length - 1; i++) {
+    const p = pts[i], a = p[2] + PI / 2, off = lerp(w0, w1, i / 8) * 0.16;
+    const x = p[0] + Math.cos(a) * off, y = p[1] + Math.sin(a) * off;
+    i === 1 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
 ctx.restore();
 // Dorsal ridge spines along the back of the neck.
 for (let i = 2; i < pts.length - 1; i += 2) {
@@ -652,6 +701,10 @@ for (let i = 2; i < pts.length - 1; i += 2) {
   const bx = p[0] + Math.cos(a) * off, by = p[1] + Math.sin(a) * off;
   const len = 3.5 + f * 0.8;
   R.poly(ctx, [[bx + Math.cos(p[2]) * 2.4, by + Math.sin(p[2]) * 2.4], [bx + Math.cos(a - 0.5) * len, by + Math.sin(a - 0.5) * len], [bx - Math.cos(p[2]) * 2.4, by - Math.sin(p[2]) * 2.4]], c.spine, { lw: 1.4 });
+  if (f >= 3) {
+    const tipSx = bx + Math.cos(a - 0.5) * len, tipSy = by + Math.sin(a - 0.5) * len;
+    R.shine(ctx, tipSx, tipSy, 1.2, 1.2, 0.6);
+  }
 }
 }
 
@@ -758,6 +811,8 @@ if (f === 3) {
 }
 
 const ex = r * 0.3, ey = -r * 0.12, er = r * (f === 0 ? 0.38 : 0.3);
+// Slit-pupil dragon eyes: pupila vertical que se estrecha en ataque/cast
+const slitK = (eyeMood === "angry") ? 0.18 : (eyeMood === "closed") ? 0 : f >= 3 ? 0.32 : 0.52;
 if (final) {
   ctx.save();
   ctx.shadowColor = "#fff080"; ctx.shadowBlur = 10;
@@ -770,6 +825,29 @@ if (hurtEyes) {
   ctx.beginPath();
   ctx.moveTo(ex - er * 0.6, ey - er * 0.6); ctx.lineTo(ex + er * 0.5, ey); ctx.lineTo(ex - er * 0.6, ey + er * 0.6);
   ctx.stroke();
+} else if (f >= 2 && eyeMood !== "closed") {
+  // Ojo con iris y pupila vertical (hendidura)
+  const irisCol = final ? "#ffb400" : c.iris;
+  const pupilCol = final ? "#8a3a00" : "#1a0a10";
+  ctx.save();
+  ctx.beginPath(); ctx.ellipse(ex, ey, er, er, 0, 0, PI * 2);
+  ctx.fillStyle = "#1a0a10"; ctx.fill();
+  ctx.beginPath(); ctx.ellipse(ex, ey, er * 0.88, er * 0.88, 0, 0, PI * 2);
+  ctx.fillStyle = irisCol; ctx.fill();
+  ctx.strokeStyle = R.INK; ctx.lineWidth = R.LINE; ctx.stroke();
+  // Pupila vertical en hendidura
+  ctx.beginPath(); ctx.ellipse(ex, ey, er * slitK, er * 0.74, 0, 0, PI * 2);
+  ctx.fillStyle = pupilCol; ctx.fill();
+  // Destello
+  ctx.fillStyle = "rgba(255,252,230,0.82)";
+  ctx.beginPath(); ctx.ellipse(ex - er * 0.24, ey - er * 0.28, er * 0.14, er * 0.1, -0.45, 0, PI * 2); ctx.fill();
+  if (final) {
+    ctx.save(); ctx.shadowColor = "#ffe060"; ctx.shadowBlur = 6;
+    ctx.strokeStyle = R.alpha("#ffe88a", 0.7); ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.ellipse(ex, ey, er * 0.92, er * 0.92, 0, 0, PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.restore();
 } else {
   R.eye(ctx, ex, ey, er, pose, { iris: final ? "#ffb400" : c.iris, pupil: final ? "#8a3a00" : "#1a0a10", mood: eyeMood });
 }
@@ -843,13 +921,42 @@ if (o.rings > 0) {
 const mouthX = tipX - r * 0.05, mouthY = snY + snRy * 0.95;
 if (o.breath > 0 || o.breathUp > 0) {
   const k = Math.max(o.breath, o.breathUp);
-  const n = 6;
+  const n = 8;
+  // Cono exterior: incandescencia de garganta (heat shimmer de la garganta)
+  if (k > 0.15) {
+    ctx.save();
+    ctx.globalAlpha *= k * 0.4;
+    ctx.strokeStyle = final ? "#fff8c0" : "#ff9a3a";
+    ctx.lineWidth = r * 0.9 * k;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(mouthX - r * 0.05, mouthY);
+    ctx.lineTo(mouthX + (22 + f * 5) * k, mouthY + (3 + f * 1.5) * k * 0.5);
+    ctx.stroke();
+    ctx.restore();
+  }
+  // Lenguas de fuego en espiral
   for (let i = n - 1; i >= 0; i--) {
-    const d = (i / (n - 1)) * (40 + f * 8) * k;
-    const s = (2.5 + i * 1.6 + f * 0.3) * (0.6 + 0.4 * k);
-    const wob = Math.sin(t * 0.6 + i * 1.9) * 2 * (i / n);
-    flame(ctx, R, mouthX + d, mouthY + wob + d * 0.12, s, 0.12 + wob * 0.04, t, i * 1.3,
-      final ? { outer: "#ff9a1a", mid: "#fff06a", ink: "#b0400a" } : {});
+    const d = (i / (n - 1)) * (52 + f * 12) * k;
+    const s = (2.2 + i * 1.8 + f * 0.5) * (0.55 + 0.45 * k);
+    const wob = Math.sin(t * 0.55 + i * 1.7 + (i % 2 ? 1.1 : 0)) * 2.5 * (i / n);
+    const ang = 0.08 + wob * 0.05 + (i % 3 === 0 ? Math.sin(t * 0.4 + i) * 0.08 : 0);
+    flame(ctx, R, mouthX + d, mouthY + wob + d * 0.1, s, ang, t, i * 1.3,
+      final ? { outer: "#ffc040", mid: "#fffae0", core: "#ffffff", ink: "#b0400a" } :
+      i < 2 ? { outer: "#ff4010", mid: "#ffce30", core: "#fff8c0" } : {});
+  }
+  // Brasas volando desde la boca (embers)
+  if (f >= 2 && k > 0.4) {
+    for (let e = 0; e < 4; e++) {
+      const life = ((t * 0.07 + e * 0.37 + k * 0.6) % 1 + 1) % 1;
+      const ex2 = mouthX + life * (45 + f * 8);
+      const ey2 = mouthY + Math.sin(t * 0.25 + e * 2.1) * (4 + e * 2) - life * 6;
+      ctx.save();
+      ctx.globalAlpha = k * (1 - life) * 0.8;
+      ctx.fillStyle = e % 2 ? "#ffe080" : "#ff7030";
+      ctx.beginPath(); ctx.ellipse(ex2, ey2, 1.1 + life, 1.7 + life, -0.3, 0, PI * 2); ctx.fill();
+      ctx.restore();
+    }
   }
 }
 if (o.roar > 0.2) {
@@ -1109,15 +1216,50 @@ if (!front) {
   // Polvo de brasas y contraviento siempre quedan detrás del cuerpo.
   dragonGroundAirflow(ctx, p, f, t, color);
   if (flight) {
-    const n = f >= 3 ? 5 : 3;
+    // Estela de vuelo: lenguas de brasa detrás del cuerpo
+    const n = f >= 3 ? 7 : 4;
     for (let i = 0; i < n; i++) {
       const k = (i + 1) / n;
-      const x = -16 - 15 * k - 3 * Math.sin(t * .08 + i);
-      const y = -23 + Math.sin(t * .11 + i * 1.5) * (4 + 7 * k);
-      ctx.globalAlpha = (.17 + .18 * (1-k)) * (f === 4 ? 1 : .75);
+      const x = -16 - 18 * k - 4 * Math.sin(t * .07 + i);
+      const y = -22 + Math.sin(t * .10 + i * 1.4) * (5 + 8 * k);
+      ctx.globalAlpha = (.18 + .2 * (1-k)) * (f === 4 ? 1 : .72);
       ctx.strokeStyle = i % 2 ? "#fa6b3c" : color;
-      ctx.lineWidth = 1.1 + (1-k)*1.6;
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x-9, y+5, x-14, y+2); ctx.stroke();
+      ctx.lineWidth = 1.2 + (1-k) * 1.8;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x-10, y+5, x-16, y+2); ctx.stroke();
+      if (f >= 3 && i % 2 === 0) {
+        ctx.globalAlpha = 0.55 * (1 - k);
+        ctx.fillStyle = f === 4 ? "#fff8c0" : "#ffc260";
+        ctx.beginPath(); ctx.ellipse(x - 2, y - 1, 1.2 + k, 2 + k * 1.2, -0.4, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    // Vórtice de aleteo (helix de brasas ascendentes) para formas 3-4
+    if (f >= 3) {
+      const count = f === 4 ? 9 : 6;
+      for (let i = 0; i < count; i++) {
+        const phase = t * .048 + i * 2.4;
+        const helR = 16 + f * 4;
+        const xe = Math.sin(phase) * helR;
+        const ye = -40 - Math.cos(phase * .62 + i) * 15 - i * 3.8;
+        ctx.globalAlpha = (.18 + .24 * Math.sin(phase) ** 2) * (1 - i / (count + 2));
+        ctx.fillStyle = i % 3 === 0 ? (f === 4 ? "#fff8c4" : "#ffd97c") : (f >= 4 ? "#ffb040" : "#ff8a3a");
+        ctx.beginPath(); ctx.ellipse(xe, ye, 1.5 + (i % 2) * 0.6, 2.6 + f * 0.3, phase * 0.5, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+  // Calor incandescente bajo las garras al correr (formas 2+)
+  if (f >= 2 && (state === "run")) {
+    const ph = Number(p.phase) || 0;
+    const beatF = Math.max(0, Math.sin(ph));
+    const beatB = Math.max(0, -Math.sin(ph));
+    if (beatF > 0.3) {
+      ctx.globalAlpha = beatF * 0.55;
+      ctx.fillStyle = f === 4 ? "#fff4a0" : "#ff9a3a";
+      ctx.beginPath(); ctx.ellipse(8, 1, beatF * 5, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    if (beatB > 0.3) {
+      ctx.globalAlpha = beatB * 0.45;
+      ctx.fillStyle = f === 4 ? "#ffe88a" : "#ff7020";
+      ctx.beginPath(); ctx.ellipse(-6, 1, beatB * 4, 1.4, 0, 0, Math.PI * 2); ctx.fill();
     }
   }
 } else {
@@ -1154,7 +1296,8 @@ if (!front) {
   }
   // Wingbeat vortex: ascending embers trace a restrained helix during flight.
   if (flight && f >= 2) {
-    const count = f === 4 ? 7 : 4;
+    const n = f >= 3 ? 5 : 3;
+    const count = f === 4 ? 7 : n + 1;
     for(let i=0;i<count;i++){
       const phase=t*.045+i*2.39996;
       const spread=13+f*3;
@@ -1166,10 +1309,26 @@ if (!front) {
     }
   }
   if (f===4 && (flight || striking || victorious)){
+    // Halo elíptico orbital del Dragón Celestial
     const beat=.5+.5*Math.sin(t*.035);
-    ctx.globalAlpha=.22+.13*beat;
-    ctx.strokeStyle="#ffe99a";ctx.lineWidth=1.6;
-    ctx.beginPath();ctx.ellipse(0,-51,48+beat*3,15+beat*2,-.11,0,Math.PI*2);ctx.stroke();
+    ctx.globalAlpha=.28+.16*beat;
+    ctx.strokeStyle="#ffe99a";ctx.lineWidth=2;
+    ctx.beginPath();ctx.ellipse(0,-51,50+beat*4,16+beat*3,-.11,0,Math.PI*2);ctx.stroke();
+    // Arco secundario (halo interior)
+    ctx.globalAlpha=(.18+.10*beat)*0.8;
+    ctx.strokeStyle="#fff4c0";ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.ellipse(0,-51,35+beat*3,11+beat*2,-.11,0,Math.PI*2);ctx.stroke();
+    // Destellos solares en el eje del halo
+    if (!p.reduceMotion) {
+      for (let si = 0; si < 4; si++) {
+        const sa = (t * .018 + si * PI * 0.5) % (PI * 2);
+        const sx2 = Math.cos(sa) * (50 + beat * 4);
+        const sy2 = Math.sin(sa) * (16 + beat * 3) - 51;
+        ctx.globalAlpha = (.55 + .35 * Math.sin(sa)) * (.28 + .16 * beat);
+        ctx.fillStyle = si % 2 ? "#fff8d0" : "#ffd060";
+        ctx.beginPath(); ctx.ellipse(sx2, sy2, 2 + beat, 1.3, sa, 0, PI * 2); ctx.fill();
+      }
+    }
   }
   if (victorious && f >= 2) {
     ctx.globalAlpha = .35+.2*Math.sin(t*.09)**2;
