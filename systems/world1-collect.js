@@ -1,4 +1,5 @@
 import {memoryBenefits,startMemoryCelebration,MEMORY_REWARDS} from './memory-rewards-v2.js';
+import {drawMemoryPickup,MEMORY_PICKUPS} from './memory-pickup-art.js';
 // OHANA V467 · MUNDO 1 · Coleccionables unificados (objetos + álbumes = UNO).
 // Antes había dos sistemas: "100 objetos por sala" (ohana-room-albums-v1) y
 // "100 álbumes personales" (ohana-hero-100-v1:<héroe>). Ahora cada sala grande
@@ -88,6 +89,23 @@ function persist(g, storage = g?.personalCollectionStorage || globalThis.localSt
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 function rng(seed) { let s = seed >>> 0 || 1; return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; }
 
+// New chapter terrain must not turn an old memory ID into a lethal pickup.
+function memoryPlacementSafe(room,x,y){
+  return !(room.hazards||[]).some(h=>x+14>h.x&&x-14<h.x+h.w&&y+18>h.y&&y-18<h.y+h.h)
+    && !room.plats.some(p=>p[3]>40&&x+10>p[0]&&x-10<p[0]+p[2]&&y+14>p[1]&&y-14<p[1]+p[3]);
+}
+function safeMemoryPlacement(room,item,band){
+  if(memoryPlacementSafe(room,item.x,item.y))return item;
+  const left=300+item.page*band,right=left+band;
+  const choices=room.plats.filter(p=>p[2]>=90).map(p=>{
+    const lo=Math.max(left+20,p[0]+26),hi=Math.min(right-20,p[0]+p[2]-26);
+    if(lo>hi)return null;
+    const x=Math.round(Math.max(lo,Math.min(hi,item.x))),y=p[1]-34;
+    return memoryPlacementSafe(room,x,y)?{x,y,cost:Math.abs(x-item.x)+Math.abs(y-item.y)*.8}:null;
+  }).filter(Boolean).sort((a,b)=>a.cost-b.cost);
+  return choices.length?{...item,x:choices[0].x,y:choices[0].y}:item;
+}
+
 // 100 objetos por sala: 10 por página; cada página vive en una franja de la sala.
 // 70 en el suelo / repisas bajas (camino), 30 "reto" (repisas, cerca de estaciones o en el aire a un salto).
 export function world1CollectPlacements(room) {
@@ -108,7 +126,7 @@ export function world1CollectPlacements(room) {
       else y = WORLD1_FLOOR - 170;
     }
     x = Math.round(Math.max(60, Math.min(W - 60, num(x, 300)))); y = Math.round(num(y, WORLD1_FLOOR - 34));
-    return { id, page, x, y, challenge };
+    return safeMemoryPlacement(room,{ id, page, x, y, challenge },band);
   });
 }
 
@@ -173,6 +191,7 @@ export function syncWorld1Album(g, doc = globalThis.document) {
   if(root.dataset.view === key)return;root.dataset.view = key;
   root.querySelector("h2").textContent = view.title;
   root.querySelector(".album-count").textContent = `${view.count}/100 recuerdos · colección opcional`;
+  root.querySelector('.album-purpose').textContent = `Busca ${MEMORY_PICKUPS[view.hero].plural}. Son recuerdos para tu álbum; los cristales dorados dan XP y los mecanismos de la sala completan su sello.`;
   root.querySelector(".album-page-title").textContent = view.heading + (view.complete ? " ✓" : "");
   root.querySelector(".album-reward").textContent = view.relic ? "Reliquia conseguida: " + view.relic + " · Firma permanente: " + MEMORY_REWARDS[view.hero][2] : "Cada página: +10 vida · 25: brújula en el mapa · 50: imán de recuerdos · 100: celebración propia y firma visual permanente.";
   let replay=root.querySelector('[data-memory-replay]');
@@ -182,7 +201,7 @@ export function syncWorld1Album(g, doc = globalThis.document) {
   grid.replaceChildren(...view.cards.map(card=>{
     const li=doc.createElement("li");li.className=card.found?"found":"pending";
     li.textContent=card.found?"✦ " + (card.id+1):"?";
-    li.setAttribute("aria-label","Recuerdo " + (card.id+1) + (card.found?" conseguido":" pendiente"));return li;
+    li.setAttribute("aria-label",MEMORY_PICKUPS[view.hero].name + " " + (card.id+1) + (card.found?" conseguido":" pendiente"));return li;
   }));
 }
 
@@ -194,7 +213,7 @@ export function drawWorld1Collect(ctx, g, cam, t = 0) {
   ctx.save(); ctx.fillStyle = c; ctx.strokeStyle = "#fff5dc"; ctx.lineWidth = 1.5;
   for (const it of g.world1CollectItems || []) {
     if (have.has(it.id)) continue;
-    const x = it.x - cx, y = it.y - cy + Math.sin(num(t) * 0.06 + it.id) * 3;
+    const x = it.x - cx, y = it.y - cy + (g.reduceMotion?0:Math.sin(num(t) * 0.06 + it.id) * 3);
     if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
     if(hero==='kilo'&&g.roomDef?.kiloEncounterVersion){
       // A little petal carries the tune; XP keeps its separate gold diamond.
@@ -206,11 +225,7 @@ export function drawWorld1Collect(ctx, g, cam, t = 0) {
       ctx.fillStyle='#fff5d8';ctx.beginPath();ctx.arc(2,-3,2,0,Math.PI*2);ctx.fill();
       ctx.restore();continue;
     }
-    // A small paper card reads as a memory, distinct from an XP crystal.
-    ctx.fillStyle = "#f6ecd8";ctx.strokeStyle = c;ctx.lineWidth = it.challenge ? 2.5 : 1.5;
-    ctx.beginPath();ctx.roundRect(x - 7,y - 10,14,20,3);ctx.fill();ctx.stroke();
-    ctx.fillStyle = c;ctx.fillRect(x - 4,y - 6,8,8);
-    ctx.fillStyle = "#4a3d55";ctx.fillRect(x - 3,y + 5,6,1.5);
+    drawMemoryPickup(ctx,hero,x,y,{phase:num(t)*.035+it.id,challenge:it.challenge,reduceMotion:g.reduceMotion});
   }
   ctx.restore();
 }

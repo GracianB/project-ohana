@@ -8,27 +8,28 @@
   <link rel="manifest" href="manifest.json">
   <link rel="preload" href="assets/fonts/fredoka-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="fonts.css?v=ohana-621">
-  <link rel="stylesheet" href="style.css?v=ohana-621">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-621">
-  <link rel="stylesheet" href="atrium-interact.css?v=ohana-621">
-  <link rel="stylesheet" href="hud.css?v=ohana-621">
-  <link rel="stylesheet" href="evo.css?v=ohana-621">
-  <link rel="stylesheet" href="ending.css?v=ohana-621">
-  <link rel="stylesheet" href="intro.css?v=ohana-621">
-  <link rel="stylesheet" href="coop-travel-v604.css?v=ohana-621">
-  <link rel="stylesheet" href="demo.css?v=ohana-621">
-  <link rel="stylesheet" href="experience.css?v=ohana-621">
-  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-621">
-  <link rel="stylesheet" href="supreme.css?v=ohana-621">
-  <link rel="stylesheet" href="world-map.css?v=ohana-621">
-  <link rel="stylesheet" href="mobile-v96.css?v=ohana-621">
-  <link rel="stylesheet" href="v100-special.css?v=ohana-621">
-  <link rel="stylesheet" href="v100-2.css?v=ohana-621">
-  <link rel="stylesheet" href="v101-milestones.css?v=ohana-621">
-  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-621">
-  <link rel="stylesheet" href="family-camp.css?v=ohana-621">
-  <link rel="stylesheet" href="play-interface.css?v=ohana-621">
+  <link rel="stylesheet" href="fonts.css?v=ohana-622">
+  <link rel="stylesheet" href="startup.css?v=ohana-622">
+  <link rel="stylesheet" href="style.css?v=ohana-622">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-622">
+  <link rel="stylesheet" href="atrium-interact.css?v=ohana-622">
+  <link rel="stylesheet" href="hud.css?v=ohana-622">
+  <link rel="stylesheet" href="evo.css?v=ohana-622">
+  <link rel="stylesheet" href="ending.css?v=ohana-622">
+  <link rel="stylesheet" href="intro.css?v=ohana-622">
+  <link rel="stylesheet" href="coop-travel-v604.css?v=ohana-622">
+  <link rel="stylesheet" href="demo.css?v=ohana-622">
+  <link rel="stylesheet" href="experience.css?v=ohana-622">
+  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-622">
+  <link rel="stylesheet" href="supreme.css?v=ohana-622">
+  <link rel="stylesheet" href="world-map.css?v=ohana-622">
+  <link rel="stylesheet" href="mobile-v96.css?v=ohana-622">
+  <link rel="stylesheet" href="v100-special.css?v=ohana-622">
+  <link rel="stylesheet" href="v100-2.css?v=ohana-622">
+  <link rel="stylesheet" href="v101-milestones.css?v=ohana-622">
+  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-622">
+  <link rel="stylesheet" href="family-camp.css?v=ohana-622">
+  <link rel="stylesheet" href="play-interface.css?v=ohana-622">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -50,14 +51,24 @@
   <style>
     html,body{height:100%;background:#071226;color:#f4f3ee}
     #game{display:block;width:100%;height:100%}
+    #startup-screen{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:24px;background-color:#102735;text-align:center}
     .hidden{visibility:hidden!important;pointer-events:none!important}
     body.intro-pending #char-select > :not(#ohana-intro){visibility:hidden!important;pointer-events:none!important}
     body.intro-pending #ohana-intro{display:block!important;position:fixed!important;inset:0!important;z-index:90!important;background:#02050c!important}
   </style>
-<link rel="stylesheet" href="./coop-role-v604.css?v=ohana-621">
-<link rel="stylesheet" href="caprichos.css?v=ohana-621">
+<link rel="stylesheet" href="./coop-role-v604.css?v=ohana-622">
+<link rel="stylesheet" href="caprichos.css?v=ohana-622">
 </head>
 <body data-theme="dark" class="intro-pending">
+  <section id="startup-screen" aria-label="Preparando OHANA">
+    <div class="startup-content">
+      <strong class="startup-brand">OHANA</strong>
+      <div class="startup-family" aria-hidden="true"><i style="--voice:#f4a89e;--order:0"></i><i style="--voice:#81b6ff;--order:1"></i><i style="--voice:#ffd972;--order:2"></i><i style="--voice:#d5b9f8;--order:3"></i><i style="--voice:#a9e4ca;--order:4"></i><i style="--voice:#ffa27c;--order:5"></i><i style="--voice:#b4cc8c;--order:6"></i><i style="--voice:#ffcb76;--order:7"></i><i style="--voice:#eea68b;--order:8"></i><i style="--voice:#9cdaef;--order:9"></i></div>
+      <p role="status" aria-live="polite">Reuniendo a la familia…</p>
+      <button type="button" hidden>Volver a intentarlo</button>
+      <noscript>Activa JavaScript en tu navegador para jugar a OHANA.</noscript>
+    </div>
+  </section>
   <div id="fx-hurt" aria-hidden="true"></div>
   <nav id="top-actions" aria-label="Acciones rápidas">
     <button id="btn-help" type="button" aria-label="Ver ayuda">Ayuda <kbd>º</kbd></button>
@@ -316,17 +327,65 @@
         });
       })();
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js?v=ohana-621", { scope: "./" }).catch(function (error) {
+        navigator.serviceWorker.register("./sw.js?v=ohana-622", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
         });
       });
     }
   </script>
-  <script type="module" src="systems/cinema-loader.js?v=ohana-621"></script>
-  <script type="module" src="game.js?v=ohana-621"></script>
-  <script type="module" src="systems/title.js?v=ohana-621"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-621"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-621"></script>
-  <script type="module" src="systems/demo.js?v=ohana-621"></script>
+  <script data-ohana-startup>
+    // Runs before the module graph: a failed download must not leave a blank title.
+    (() => {
+      const screen = document.getElementById('startup-screen');
+      if (!screen) return;
+      const status = screen.querySelector('[role="status"]');
+      const retry = screen.querySelector('button');
+      const roots = ['char-select', 'top-actions'].map(id => document.getElementById(id)).filter(Boolean);
+      const locked = roots.filter(el => !el.hasAttribute('inert'));
+      for (const el of locked) el.setAttribute('inert', '');
+      document.documentElement.dataset.ohanaBoot = 'loading';
+      let complete = false;
+      const slow = setTimeout(() => {
+        if (complete || screen.dataset.state === 'error') return;
+        screen.dataset.state = 'slow';
+        status.textContent = 'La familia está tardando en reunirse. Puedes esperar o volver a intentarlo.';
+        retry.hidden = false;
+      }, 15000);
+      function failed(event) {
+        const source = event.target?.src || '';
+        if (!/(?:\/game\.js|\/systems\/title\.js)(?:\?|$)/.test(source) && !event.message) return;
+        if (complete) return;
+        clearTimeout(slow);
+        screen.dataset.state = 'error';
+        document.documentElement.dataset.ohanaBoot = 'error';
+        status.textContent = 'No hemos podido preparar la aventura. Tu partida sigue guardada.';
+        retry.hidden = false;
+      }
+      function ready() {
+        if (complete) return;
+        complete = true;
+        clearTimeout(slow);
+        removeEventListener('error', failed, true);
+        removeEventListener('ohana-menu-ready', ready);
+        for (const el of locked) el.removeAttribute('inert');
+        screen.remove();
+        document.documentElement.dataset.ohanaBoot = 'ready';
+        const focus = document.body.classList.contains('playing')
+          ? document.getElementById('game')
+          : document.querySelector('#ohana-intro.show .oi-enter, #chars-grid .char-card.selected');
+        focus?.focus({preventScroll: true});
+      }
+      retry.addEventListener('click', () => location.reload());
+      addEventListener('error', failed, true);
+      addEventListener('ohana-menu-ready', ready);
+      if (document.documentElement.dataset.ohanaMenuReady === 'true') ready();
+    })();
+  </script>
+  <script type="module" src="systems/cinema-loader.js?v=ohana-622"></script>
+  <script type="module" src="game.js?v=ohana-622"></script>
+  <script type="module" src="systems/title.js?v=ohana-622"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-622"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-622"></script>
+  <script type="module" src="systems/demo.js?v=ohana-622"></script>
 </body>
 </html>

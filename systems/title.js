@@ -615,6 +615,8 @@ const mo = new MutationObserver(() => {
 });
 mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
 paintPortraits();
+document.documentElement.dataset.ohanaMenuReady = "true";
+dispatchEvent(new Event("ohana-menu-ready"));
 }
 document.addEventListener("visibilitychange", () => {
   if (menuPaintAllowedInDocument(document) && !raf) {
