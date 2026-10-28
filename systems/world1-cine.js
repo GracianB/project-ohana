@@ -58,7 +58,7 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
       ];
     }
     case "bossIntro": return [
-      { dur: 170, bg: "#12081f", color: "#ffd6f2", layout: "circle", heroes: ALL, lit: ALL, kicker: "Corazón de Ohana", title: "Diez estatuas, diez sellos", line: FUSION_STORY.procession },
+      { dur: 170, bg: "#12081f", color: "#ffd6f2", layout: "circle", heroes: ALL, lit: ALL, kicker: "Corazón de Ohana", title: "Diez espejos, una sola luz", line: FUSION_STORY.procession },
       { dur: 150, bg: "#0d0516", color: "#ff7ad0", layout: "converge", heroes: ALL, kicker: "El Eco", title: FUSION_STORY.intro[0], line: FUSION_STORY.intro[1] },
       { dur: 190, bg: "#0d0516", color: "#ff3a8a", layout: "fused", heroes: ALL, shake: true, kicker: "Jefe final del Mundo 1", title: FUSION_STORY.intro[2], line: "Tiene la voz de todos… pero ninguna suena a hogar. Esquiva sus ecos y golpéala entre ataques." }
     ];
