@@ -8,6 +8,7 @@ import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,dra
 import {fritaVentState,noteFritaLaunch,yomiNodeState,drawFritaVent,drawYomiTerminal} from './frita-yomi-chapters.js';
 import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaChapter,drawPizzaOven,drawPizzaCustomer} from './pizza-chapter.js';
 import {drawPizzaOvenV615,drawPizzaGuestV615,drawPizzaAtmosphere} from './pizza-chapter-art-v615.js';
+import {drawYomiTerminalV616,drawYomiAtmosphere} from './yomi-chapter-art-v616.js';
 import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact,dinoGrowth,updateDinoChapter,dinoChapterReady,dinoObjective,drawDinoChapter} from './dino-chapter.js';
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
@@ -397,7 +398,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawDragonChapter(ctx,g,cam);drawDinoChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);drawPizzaAtmosphere(ctx,g,cam,t,reduce);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawDragonChapter(ctx,g,cam);drawDinoChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);drawPizzaAtmosphere(ctx,g,cam,t,reduce);drawYomiAtmosphere(ctx,g,cam,t,reduce);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -631,7 +632,7 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.beginPath(); if (done) ctx.arc(x, y - 54, 7, .2, Math.PI - .2); else { ctx.moveTo(x - 6, y - 50); ctx.lineTo(x + 6, y - 50); } ctx.stroke();
       ctx.fillStyle = "#fff"; ctx.font = "700 12px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText(done ? "¡GRACIAS!" : "¡TENGO HAMBRE!", x, y - 88 + pulse); break; }
     case "node": {
-      if(g.roomDef?.yomiChapter){drawYomiTerminal(ctx,g,s,cam,done,t,reduce);break;}
+      if(g.roomDef?.yomiChapter){drawYomiTerminalV616(ctx,g,s,cam,done,t,reduce);break;}
       const live = nodeLive(w.tick, s) || done, phase = ((w.tick + (s.phase || 0)) % 120) / 120;
       const light = done ? "#8fe9ff" : live ? "#6dff9c" : "#ffcf8a";
       ctx.fillStyle = "#233646";ctx.fillRect(x - 26,y - 18,52,18);ctx.fillRect(x - 8,y - 58,16,40);

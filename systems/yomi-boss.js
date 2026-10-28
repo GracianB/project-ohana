@@ -142,6 +142,84 @@ function _drawSpirit(ctx,e,t){
  ctx.restore();
 }
 
+const TAU=Math.PI*2;
+function _rr(c,x,y,w,h,r=4){
+ if(c.roundRect)c.roundRect(x,y,w,h,r);else c.rect(x,y,w,h);
+}
+
+export function drawYomiBossSignals(ctx,e,cam,t=0,reduced=false){
+ if(!e?._spiritGuide)return;
+ const b=e._spiritGuide,x=e.x-cam.x,y=e.y-cam.y,cx=x+e.w/2;
+ const panW=250,panH=68,px=cx-panW/2,py=Math.max(12,y-105);
+
+ ctx.save();
+ ctx.strokeStyle='rgba(79,240,200,0.45)';ctx.lineWidth=1;
+ for(let vb=0;vb<6;vb++){
+  const vbx=px+vb*(panW/5);
+  ctx.beginPath();ctx.moveTo(vbx,py-4);ctx.lineTo(vbx+6,py);ctx.stroke();
+ }
+
+ ctx.fillStyle='rgba(13,20,48,0.92)';
+ ctx.strokeStyle='rgba(79,240,200,0.70)';ctx.lineWidth=1.5;
+ _rr(ctx,px,py,panW,panH,5);ctx.fill();ctx.stroke();
+
+ const TIER_COL=['#80deea','#ce93d8','#ff7f6e'];
+ for(let i=0;i<3;i++){
+  ctx.fillStyle=i<b.tier?TIER_COL[i]:'#0a1026';
+  ctx.beginPath();ctx.arc(px+14+i*14,py+12,4.5,0,TAU);ctx.fill();
+  if(i<b.tier){
+   ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=1.2;
+   ctx.beginPath();ctx.arc(px+14+i*14,py+12,4.5,0,TAU);ctx.stroke();
+  }
+ }
+
+ ctx.fillStyle='#e0f7fa';ctx.font='bold 11px monospace';ctx.textAlign='center';
+ ctx.fillText('CUSTODIO DEL OBSERVATORIO',cx,py+15);
+
+ const barX=px+10,barY=py+26,barW=panW-20,barH=9;
+ const hpRatio=Math.max(0,e.hp/e.max);
+ ctx.fillStyle='rgba(6,10,24,0.9)';_rr(ctx,barX,barY,barW,barH,3);ctx.fill();
+
+ const gBar=ctx.createLinearGradient(barX,barY,barX+barW*hpRatio,barY);
+ gBar.addColorStop(0,b.tier===3?'#7b1fa2':b.tier===2?'#ab47bc':'#00b4d8');
+ gBar.addColorStop(1,b.tier===3?'#ba68c8':'#4ff0c8');
+ ctx.fillStyle=gBar;_rr(ctx,barX,barY,barW*hpRatio,barH,3);ctx.fill();
+
+ ctx.strokeStyle='rgba(128,222,234,0.7)';ctx.lineWidth=1;_rr(ctx,barX,barY,barW,barH,3);ctx.stroke();
+
+ const PHASE_INFO={
+  intro:  {icon:'✦',col:'#80deea',txt:'INICIALIZANDO CUSTODIO DEL OBSERVATORIO'},
+  rest:   {icon:'◇',col:'#4ff0c8',txt:'¡CUSTODIO VULNERABLE! ATACA AHORA'},
+  warn:   {icon:'▲',col:'#ff7f6e',txt:['¡DERIVA ASTRAL! SALTA EL PASO','DESCARGA DE PULSOS ETÉREOS','ESTALLIDO DEL ALMA · BUSCA ALTURA','ERUPCIÓN DEL VACÍO CÓSMICO'][b.attack]||'¡PELIGRO ASTRAL!'},
+  attack: {icon:'■',col:'#ce93d8',txt:'DESCARGA ASTRAL CUÁNTICA'}
+ };
+ const pi=PHASE_INFO[b.phase]||PHASE_INFO.intro;
+ ctx.fillStyle=pi.col;ctx.font='bold 12px monospace';ctx.textAlign='left';
+ ctx.fillText(pi.icon,px+10,py+52);
+ ctx.fillStyle='rgba(224,247,250,0.95)';ctx.font='10px monospace';
+ ctx.fillText(pi.txt,px+26,py+52);
+
+ if(b.phase==='warn'){
+  const floor=e._chapterArena?.floor?e._chapterArena.floor-cam.y:1134-cam.y;
+  ctx.strokeStyle='rgba(79,240,200,0.85)';ctx.lineWidth=2.5;ctx.setLineDash([8,6]);
+  const dir=b.aim||1;
+  const tipX=cx+dir*(b.attack===0?330:260);
+  ctx.beginPath();ctx.moveTo(cx,floor-8);ctx.lineTo(tipX,floor-8);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(79,240,200,0.9)';
+  ctx.beginPath();ctx.moveTo(tipX,floor-8);ctx.lineTo(tipX-dir*14,floor-14);ctx.lineTo(tipX-dir*14,floor-2);ctx.closePath();ctx.fill();
+ }
+
+ if(e.telegraph||b.exposed){
+  const tr=reduced?0:Math.sin(t*0.2)*5;
+  ctx.strokeStyle=b.exposed?'rgba(79,240,200,0.85)':'rgba(255,127,110,0.85)';
+  ctx.lineWidth=2.8;
+  ctx.beginPath();ctx.arc(cx,y+e.h/2,70+tr,0,TAU);ctx.stroke();
+ }
+
+ ctx.restore();
+}
+
 export function drawYomiBoss(ctx,e,cam,t,reduceMotion=false){
  if(!e?._yomiBoss)return false;
  const b=e._spiritGuide,x=e.x-cam.x,y=e.y-cam.y;
@@ -151,14 +229,6 @@ export function drawYomiBoss(ctx,e,cam,t,reduceMotion=false){
  if(e.telegraph){ctx.strokeStyle='#ce93d8';ctx.lineWidth=2.5;ctx.setLineDash([5,5]);ctx.strokeRect(-60,-115,120,125);ctx.setLineDash([]);}
  ctx.restore();
 
- if(e._growthChapter)return true;
- const barW=158,barH=10,bx=x+e.w/2-barW/2,by=y-32;
- ctx.fillStyle='rgba(10,0,20,0.88)';ctx.fillRect(bx-2,by-2,barW+4,barH+4);
- const ratio=Math.max(0,e.hp/e.max);
- ctx.fillStyle=b.tier===3?'#7b1fa2':b.tier===2?'#ab47bc':'#ce93d8';
- ctx.fillRect(bx,by,barW*ratio,barH);
- ctx.strokeStyle='#e1bee7';ctx.lineWidth=1.2;ctx.strokeRect(bx-2,by-2,barW+4,barH+4);
- ctx.fillStyle='#f3e5f5';ctx.font='bold 10px sans-serif';ctx.textAlign='center';
- ctx.fillText(`GUÍA DEL MÁS ALLÁ · FASE ${b.tier} (${Math.ceil(e.hp)} PV)`,x+e.w/2,by-7);
+ drawYomiBossSignals(ctx,e,cam,t,reduceMotion);
  return true;
 }

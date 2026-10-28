@@ -7,6 +7,7 @@ import {drawDragonCreature} from './dragon-chapter-art-v611.js';
 import {drawDinoCreature} from './dino-chapter-art-v613.js';
 import {drawFritaCreature} from './frita-chapter-art-v614.js';
 import {drawPizzaCreature} from './pizza-chapter-art-v615.js';
+import {drawYomiCreature} from './yomi-chapter-art-v616.js';
 import {drawFaunaMorph} from './fauna-morphs.js';
 import {drawChapterSpecies,drawChapterSpeciesCue} from './chapter-species-v604.js';
 // Ten locally authored fauna families. Role equipment is drawn separately;
@@ -46,6 +47,7 @@ export function drawCampaignCreature(c,e,cam,t,reduced=false){
  if(drawDinoCreature(c,e,cam,t,reduced))return true;
  if(drawFritaCreature(c,e,cam,t,reduced))return true;
  if(drawPizzaCreature(c,e,cam,t,reduced))return true;
+ if(drawYomiCreature(c,e,cam,t,reduced))return true;
  const hero=String(e.roomId||'').replace('w1-',''),P=CHAPTER_FAUNA[hero];
  if(!P||!e.campaignRole||e.boss||e.miniBoss)return false;
  const a=e._campaign||{},time=reduced?0:t,phase=time*.19+(e.spawnIndex||0),run=Math.abs(e.vx||0)>.4,
