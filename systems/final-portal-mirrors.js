@@ -47,6 +47,9 @@ function drawMirror(ctx, p, cam, t, player, reduced, progress) {
   const hero = HEROES.get(p.hero), theme = WORLD1_THEMES[p.hero];
   if (!hero || !theme) return;
   const rx = p.rx || 73, ry = p.ry || 112;
+  // Avoid drawing nine expensive character rigs outside the viewport.
+  const width = ctx.canvas?.width || 1600;
+  if (x < -rx - 80 || x > width + rx + 80) return;
   const px = player ? Number(player.x) + (Number(player.w) || 0) / 2 : -Infinity;
   const near = Math.abs(px - p.x) < 210;
   const active = clamp((px - p.x + 130) / 330);
@@ -93,6 +96,8 @@ function drawEnergyConduits(ctx, portals, cam, t, player, reduced) {
     if (progress <= 0) continue;
     const sx = p.x - cam.x, sy = p.y - cam.y;
     const ex = CORE.x - cam.x, ey = CORE.y - cam.y;
+    const width = ctx.canvas?.width || 1600;
+    if (Math.max(sx, ex) < -240 || Math.min(sx, ex) > width + 240) continue;
     const col = WORLD1_THEMES[p.hero]?.color || '#fff';
     const arc = (i - (portals.length - 1) / 2) * 14;
     ctx.save(); ctx.globalAlpha = 0.18 + 0.54 * progress;
@@ -113,6 +118,7 @@ function drawEnergyConduits(ctx, portals, cam, t, player, reduced) {
 
 function drawHeart(ctx, cam, t, charge, reduced, state) {
   const x = CORE.x - cam.x, y = CORE.y - cam.y;
+  if (x < -340 || x > (ctx.canvas?.width || 1600) + 340) return;
   const full = state?.victory || charge >= .999;
   const corruption = !!state?.bossActive && !state?.victory;
   const r = CORE.radius * (0.55 + charge * .55);
