@@ -62,7 +62,7 @@ try{
  // the instrument gate is intentionally absent. This checks real evolution,
  // not a fake class toggle or a fabricated notification.
  const hub=await page.evaluate(()=>window.__OHANA_E2E.start('stitcho'));
- assert.equal(hub.player.id,'stitcho');
+ assert.equal(hub.hero,'stitcho');
  assert.equal(hub.evo,0);
  // Test the authored unlock message for each form using actual evolution code.
  for(const [evo,key,index] of [[1,'K',1],[2,'L',2],[3,'I',4],[4,'P',5]]){
