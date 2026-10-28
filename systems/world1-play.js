@@ -1,5 +1,6 @@
 import {drawKiloResonator} from './kilo-chapter-art-v606.js';
 import {drawStitchoPart,drawStitchoPartStation} from './stitcho-chapter-art-v607.js';
+import {drawChispinRod} from './chispin-chapter-art-v608.js';
 import {updateFinalGauntlet} from './final-gauntlet.js';
 import {KEEPSAKES} from './keepsakes.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
@@ -551,6 +552,10 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       ctx.fillStyle=done?'#c4f2dd':'#d7e3dc';ctx.beginPath();ctx.ellipse(tx,ty-68,25,14,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.strokeStyle=done?'#9aead4':color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(tx-32,ty-28);ctx.lineTo(tx+32,ty-28);ctx.stroke();
       ctx.fillStyle='#214752';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(done?'MÓDULO '+(s.id+1)+' RESTAURADO ✓':'LLEVA LA PIEZA '+(s.id+1),tx,ty-106);break; }
     case "rod": {
+      if(g.roomDef?.chispinChapter){
+        drawChispinRod(ctx, s, cam, t, reduce);
+        break;
+      }
       const active=done?'#f5d778':'#91b8c4';
       ctx.fillStyle='#698c99';ctx.strokeStyle='#294858';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-34,y);ctx.lineTo(x-26,y-36);ctx.quadraticCurveTo(x,y-47,x+26,y-36);ctx.lineTo(x+34,y);ctx.fill();ctx.stroke();
       ctx.fillStyle='#dfd6b8';ctx.fillRect(x-10,y-100,20,66);ctx.strokeRect(x-10,y-100,20,66);

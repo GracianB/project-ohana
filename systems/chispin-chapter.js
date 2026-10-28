@@ -1,4 +1,5 @@
 import {XP_NEED} from './xp.js';
+import {drawChispinArcGate} from './chispin-chapter-art-v608.js';
 export const CHISPIN_CHAPTER_BOSS_ID='w1-chispin-titan-v1';
 export const CHISPIN_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134,hp:640});
 export const CHISPIN_CHAPTER_GATES=Object.freeze([2860,4460,6260].map((x,i)=>Object.freeze({x,y:1134,w:56,h:180,offset:i*65})));
@@ -38,21 +39,11 @@ export function chispinObjective(g){
 }
 export function drawChispinChapter(ctx,g,cam){
  if(!chispinChapter(g))return;
- ctx.save();ctx.textAlign='center';
+ const t=g.world1?.tick||0,reduced=!!g.reduceMotion;
  for(const [i,gate] of CHISPIN_CHAPTER_GATES.entries()){
-  const x=gate.x-cam.x,y=gate.y-cam.y,state=chispinGateState(g,i);
+  const x=gate.x-cam.x;
   if(x<-280||x>(g.viewW||1280)+280)continue;
-  ctx.fillStyle='#23283f';ctx.strokeStyle='#ffe78a';ctx.lineWidth=2;
-  for(const side of [0,gate.w]){ctx.fillRect(x+side-9,y-gate.h,18,gate.h);ctx.strokeRect(x+side-9,y-gate.h,18,gate.h);}
-  ctx.fillStyle=state==='active'?'#ffd65a':state==='warn'?'#ffaf82':'#9aefd1';
-  ctx.beginPath();ctx.arc(x+gate.w/2,y-gate.h-12,9,0,Math.PI*2);ctx.fill();
-  if(state==='active'||state==='warn'){
-   ctx.strokeStyle=state==='active'?'#fff0a0':'#f6b879';ctx.lineWidth=state==='active'?4:2;
-   for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(x,y-gate.h*k/4);ctx.lineTo(x+18,y-gate.h*k/4-8);ctx.lineTo(x+38,y-gate.h*k/4+7);ctx.lineTo(x+gate.w,y-gate.h*k/4);ctx.stroke();}
-  }
-  ctx.fillStyle='#102a39';ctx.fillRect(x-110,y-gate.h-80,276,47);ctx.fillStyle='#fff8d8';ctx.font='bold 12px sans-serif';
-  ctx.fillText(state==='active'?'ARCO ACTIVO':state==='warn'?'AVISO · VA A CERRARSE':state==='silenced'?'ARCO CORTOCIRCUITADO':'PASO ABIERTO',x+gate.w/2,y-gate.h-61);
-  ctx.font='11px sans-serif';ctx.fillText('J corta · K cruza · puedes esperar',x+gate.w/2,y-gate.h-43);
+  const state=chispinGateState(g,i);
+  drawChispinArcGate(ctx,gate,state,cam,t,reduced);
  }
- ctx.restore();
 }
