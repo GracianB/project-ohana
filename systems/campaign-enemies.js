@@ -76,7 +76,7 @@ export function updateCampaignEnemy(e,g,hurt){
     e.telegraph=true;g.fx?.emit?.(cx(e),e.y,{color:'#fff1b5',count:3,size:2,life:12});}
  }
  e._shieldFacing=role==='shield'&&!a.active&&!a.wind&&!e._guardBreak?dir:0;
- const flying=role==='flyer',oldFeet=e.y+e.h;
+ const flying=role==='flyer'||!!e.roomPersona?.flightBand,oldFeet=e.y+e.h;
  if(flying){if(!a.active)e.vy=Math.max(-2,Math.min(2,(p.y-(e.aiAirPressure>.45?130:80)-e.y)*.02));}
  else e.vy=Math.min(14,(e.vy||0)+.5);
  // Raised chapter banks are real solids for creatures as well as the hero.

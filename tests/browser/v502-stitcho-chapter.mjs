@@ -25,7 +25,7 @@ try{
   let target;
   if(done===1&&!rail)target=s.player.x+s.player.w/2<2930?2940:3380;
   else if(done<3){const part=data.room.seal.stations[done];target=data.workshop.carry!=null?part.target.x:part.x;}
-  else target=8580;
+  else target=Math.round((data.room.stitchoArena.left+data.room.stitchoArena.right)/2)-170;
   const p=s.player,dx=target-(p.x+p.w/2);
   const foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast());
   const near=foes.filter(e=>e.hp>0&&Math.hypot(e.x+e.w/2-(p.x+p.w/2),e.y+e.h/2-(p.y+p.h/2))<450).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];

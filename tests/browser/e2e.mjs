@@ -48,7 +48,7 @@ async function auditPage(page, label) {
   assert.equal(new Set(castAudit.cast.map(hero=>hero.id)).size,10);
   assert.ok(castAudit.measured>=8,label+': visual calibration could not inspect most characters');
   const featuredCast=castAudit.cast.filter(hero=>hero.visible);
-  assert.ok(featuredCast.length>=1&&featuredCast.length<=2,'only the featured story pair may appear');
+  assert.equal(featuredCast.length,10,'V619 keeps the whole family visible around the featured story pair');
   assert.ok(featuredCast.every(hero=>hero.x-hero.paintedWidth/2>=-2&&hero.x+hero.paintedWidth/2<=castAudit.width+2),
     label+': character off the welcome stage');
   assert.ok(featuredCast.every(hero=>Number.isFinite(hero.paintedHeight)&&

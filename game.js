@@ -1,5 +1,6 @@
 import {drawHudPortrait} from './systems/hud-portrait-v606.js';
 import {kiloGrowthWaiting,kiloUnlockedForm} from './systems/kilo-encounters-v606.js';
+import {stitchoGrowthWaiting,stitchoUnlockedForm} from './systems/stitcho-encounters-v607.js';
 import {kiloChapterAbility,interactKiloInstrument} from './systems/world1-play.js';
 import {createAdventureStorage} from './multiplayer/adventure-progress.js';
 import {drawLivingRealm} from './worlds/living-realms.js';
@@ -411,6 +412,7 @@ if (n > 3) return "B";
 return "C";
 }
 
+function chapterGrowthWaiting(g){return kiloGrowthWaiting(g)||stitchoGrowthWaiting(g);}
 function canAct() { return game.running && !world1CineActive(game) && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
@@ -696,7 +698,7 @@ if (f[3]) applyElite(e);
 return scaleFoe(e);
 });
 game.enemies=game.enemies.filter(e=>!(r.world1&&game.world1?.sealed&&e.miniBoss)&&!(id==='hub'&&game.personalAdventureSolo&&(game.player?.id==='stitcho'||game.player?.id==='chispin'||game.player?.id==='cat'||game.player?.id==='dragon'||game.player?.id==='dino'||game.player?.id==='frita'||game.player?.id==='pizza'||game.player?.id==='yomi'||game.player?.id==='cuerno')&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
-if(r.stitchoChapter&&!game.world1?.sealed&&!game.clearedEncounters?.[id]?.includes(STITCHO_CHAPTER_BOSS_ID)){game.enemies.push(createStitchoBoss(makeFoe,game.rng,{roomId:id,encounterId:STITCHO_CHAPTER_BOSS_ID,x:8750,arena:STITCHO_CHAPTER_ARENA}));}
+if(r.stitchoChapter&&!game.world1?.sealed&&!game.clearedEncounters?.[id]?.includes(STITCHO_CHAPTER_BOSS_ID)){game.enemies.push(createStitchoBoss(makeFoe,game.rng,{roomId:id,encounterId:STITCHO_CHAPTER_BOSS_ID,x:Math.round(((r.stitchoArena||STITCHO_CHAPTER_ARENA).left+(r.stitchoArena||STITCHO_CHAPTER_ARENA).right)/2),arena:r.stitchoArena||STITCHO_CHAPTER_ARENA}));}
 game.spawnStitchoBoss=()=>{
   if(game.roomId!=='hub'||game.player?.id!=='stitcho'||!game.personalAdventureSolo)return false;
   if((game.clearedEncounters?.hub||[]).includes(STITCHO_BOSS_ID))return true;
@@ -1078,8 +1080,8 @@ const fromEvo = p.evo;
 const fromName = p.evoNames?.[fromEvo] || p.forms?.[fromEvo]?.name || p.name || "Forma";
 if (reason !== "xp" && reason !== "manual") return;
 if (p.evo >= 4) { if (reason === "manual") showSystemMessage("MAX", "Ya eres GOD (forma 5)."); return; }
-if(kiloGrowthWaiting(game)){
- if(reason==='manual')showObjectiveMessage('ESCUCHA EL CLARO',world1NextObjective(game)?.action||'Despierta el siguiente instrumento');
+if(chapterGrowthWaiting(game)){
+ if(reason==='manual')showObjectiveMessage(game.roomDef?.stitchoEncounterVersion?'REPARA EL ASTILLERO':'ESCUCHA EL CLARO',world1NextObjective(game)?.action||'Despierta el siguiente instrumento');
  return;
 }
 const need = XP_NEED[p.evo + 1];
@@ -2048,7 +2050,7 @@ else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abr
 else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
 else if (p.y < 90 && r.doors.up && nearUpDoor(p)) setPrompt("ARRIBA · salta al techo", true);
 else if (p.y > game.worldH - 160 && r.doors.down && inPitX(p)) setPrompt("ABAJO · cae por el hueco", true);
-else if (kiloGrowthWaiting(game) && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
+else if (chapterGrowthWaiting(game) && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
 const instrument = world1NextObjective(game);
 setPrompt(instrument ? instrument.label + " · " + instrument.action : "Devuelve su voz al siguiente instrumento", true);
 }
@@ -2057,7 +2059,7 @@ const nxt = p.forms && p.forms[p.evo + 1];
 setPrompt("Tu experiencia despierta" + (nxt ? " · " + nxt.name : " la siguiente forma"), true);
 }
 else setPrompt("", false);
-while (!game.relicScene && p.evo < kiloUnlockedForm(game) && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
+while (!game.relicScene && p.evo < Math.min(kiloUnlockedForm(game),stitchoUnlockedForm(game)) && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
 tickRam(p);
 }
 function tickRam(p) {
@@ -3663,7 +3665,7 @@ DOM.bossWrap?.setAttribute("aria-label", status.accessible + (voiceCue ? " Ataqu
 } else {
 setText(DOM.bossLabel, "REINA DEL NIDO");
 }
-syncHudStatus({player:p,hp,xpPct,boss,evolutionLocked:kiloGrowthWaiting(game),objective:goal,reduceMotion:game.reduceMotion||reduceMotion});
+syncHudStatus({player:p,hp,xpPct,boss,evolutionLocked:chapterGrowthWaiting(game),objective:goal,reduceMotion:game.reduceMotion||reduceMotion});
 for(const item of abilitySlots){
  const index=Number(item.slot.dataset.index),status=powerStatus(game,index,index===3?supremeOf(p.id):null);
  if(!status||!item.fill)continue;

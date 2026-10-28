@@ -62,7 +62,7 @@ export async function playChapter(page,{hero,state,step,films,onDeath=()=>page.e
    if(hero==='dragon'&&station&&Math.abs(dx)<240)await press('j');
    if(hero==='cat'&&station&&Math.abs(dx)<300&&(p.grounded||p.vy>=0&&p.jumps<p.maxJumps&&p.y+p.h>station.y+45))jump=true;
    if(hero==='dino'&&station){
-    if(Math.abs(dx)<180&&(p.grounded||p.vy>=0&&p.jumps<p.maxJumps&&station.y-(data.next.dinoPeak??station.y)<station.dropHeight+20))jump=true;
+    if(Math.abs(dx)<180&&(p.grounded?station.y-p.y-p.h<station.dropHeight+10:p.vy>=0&&p.jumps<p.maxJumps&&station.y-(data.next.dinoPeak??station.y)<station.dropHeight+20))jump=true;
     if(s.evo>=1&&Math.abs(dx)<55&&!p.grounded&&p.vy>0&&station.y-(data.next.dinoPeak??station.y)>=station.dropHeight+10)await press('k');
    }
    if(hero==='frita'&&station&&data.fryer.launched===station.id&&!p.grounded)await press('j');

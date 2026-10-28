@@ -59,7 +59,7 @@ test('V607 Stitcho fauna ecology: 5 species with structured roles and escalation
  }
 });
 
-test('V607 Stitcho unlocked form: derived cleanly from station count', () => {
+test('V607 Stitcho unlocked form: stations and earned rail unlock all five forms', () => {
  const g = {
   roomDef: {stitchoEncounterVersion: 607},
   player: {evo: 0},
@@ -72,11 +72,13 @@ test('V607 Stitcho unlocked form: derived cleanly from station count', () => {
  assert.equal(stitchoUnlockedForm(g), 1);
  assert.equal(stitchoGrowthWaiting(g), false, 'can now grow to form 1');
 
+ g.secrets={'w1-stitcho':[STITCHO_RAIL_V607.id]};
+ assert.equal(stitchoUnlockedForm(g),2,'the real rail unlocks the third form');
  g.world1.stations[1].done = true;
- assert.equal(stitchoUnlockedForm(g), 2);
+ assert.equal(stitchoUnlockedForm(g), 3);
 
  g.world1.stations[2].done = true;
- assert.equal(stitchoUnlockedForm(g), 3);
+ assert.equal(stitchoUnlockedForm(g), 4,'final form must be available BEFORE defeating the guardian');
 
  // Sealed chapter grants form 4
  g.world1.sealed = true;

@@ -118,26 +118,12 @@ export function updateDinoChapter(g, hurt) {
  const minRes = litCount * 20;
  if (w.dinoResonance > minRes) w.dinoResonance = Math.max(minRes, w.dinoResonance - 0.04);
 
- // Pisotón en las placas fósiles
- if (p.grounded && !w.wasGrounded) {
-  for (const s of w.stations) {
-   if (s.kind !== 'fossil' || s.done) continue;
-   const dx = Math.abs(s.x - (p.x + p.w / 2));
-   const dy = Math.abs(s.y - (p.y + p.h));
-   if (dx < 70 && dy < 25) {
-    const success = dinoLanding(g, s);
-    if (success) {
-     s.done = true;
-     w.dinoResonance = Math.min(100, (w.dinoResonance || 0) + 25);
-     g.score = (g.score || 0) + 150;
-     dinoGrowth(g);
-     g.nums?.add?.(s.x, s.y - 90, '¡FÓSIL ANCESTRAL DESPIERTO!', '#b9f6ca', true);
-     g.fx?.emit?.(s.x, s.y - 10, { color: '#69f0ae', count: 24, size: 4.5, life: 40 });
-     g.save?.();
-    }
-   }
-  }
- }
+ // Station completion belongs to updateWorld1's shared landing path. It
+ // records station IDs, rewards and save checkpoints exactly once.
+ const previous=w.dinoResonanceCount??litCount;
+ if(litCount>previous)w.dinoResonance=Math.min(100,(w.dinoResonance||0)+(litCount-previous)*25);
+ w.dinoResonanceCount=litCount;
+
 }
 
 export function dinoObjective(g) {

@@ -156,6 +156,9 @@ export function authorStitchoEncounters(room){
 
 export function stitchoUnlockedForm(g){
  if(!g?.roomDef?.stitchoEncounterVersion||g.world1?.sealed||g.world1Seals?.includes('stitcho'))return 4;
- return Math.min(4,g.world1?.stations?.filter(s=>s.done).length||0);
+ const s=g.world1?.stations;if(!s?.[0]?.done)return 0;
+ const rail=!!g.secrets?.['w1-stitcho']?.includes((g.roomDef.stitchoRail||STITCHO_RAIL).id);
+ if(!rail)return 1;
+ return s[1]?.done?(s[2]?.done?4:3):2;
 }
 export function stitchoGrowthWaiting(g){return !!g?.roomDef?.stitchoEncounterVersion&&g.player?.evo<4&&g.player.evo>=stitchoUnlockedForm(g);}
