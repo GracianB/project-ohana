@@ -1,12 +1,13 @@
 import {drawKiloGuardian} from './kilo-chapter-art-v606.js';
 import {chapterBossMind} from './chapter-boss-v2.js';
 const TAU=Math.PI*2,INK='#192a40';
-const PALETTES={kilo:['#987059','#f0d3a0','#4a7766'],stitcho:['#466d93','#b5ebeb','#977ae3'],chispin:['#8178ac','#fff0a1','#8bc4dc'],cat:['#967db0','#f0d6ec','#b8c5ee'],cuerno:['#668f88','#e4e9bc','#c2ace6'],dragon:['#92545e','#ffd092','#d78363'],dino:['#718971','#ebe0b7','#b7ce97'],frita:['#c19765','#fff0ba','#d28a7c'],pizza:['#bf805e','#f7deb0','#c6534f'],yomi:['#7a9daa','#ecedc9','#9edbd2']};
-function shape(c,col,fn,lw=2.6){if(typeof col==='string'&&/^#[0-9a-f]{6}$/i.test(col)&&col!==INK){const g=c.createLinearGradient(-60,-210,70,5);g.addColorStop(0,'#fff0cc');g.addColorStop(.20,col);g.addColorStop(1,'#26374e');c.fillStyle=g;}else c.fillStyle=col;c.strokeStyle=INK;c.lineWidth=lw;c.beginPath();fn();c.closePath();c.fill();c.stroke();}
-function oval(c,x,y,rx,ry,col,rot=0){const g=c.createLinearGradient(x-rx,y-ry,x+rx,y+ry);g.addColorStop(0,'#fff2d0');g.addColorStop(.22,col);g.addColorStop(1,col===INK?INK:'#384252');shape(c,g,()=>c.ellipse(x,y,rx,ry,rot,0,TAU));}
+const tint=(hex,k)=>'#'+[1,3,5].map(i=>Math.round(parseInt(hex.slice(i,i+2),16)*(1-k)+255*k).toString(16).padStart(2,'0')).join('');
+const PALETTES={kilo:['#987059','#f0d3a0','#4a7766'],stitcho:['#356db0','#8ee9f2','#ae7ef5'],chispin:['#6465b9','#ffe57b','#8bcfe8'],cat:['#9b65b9','#f9c8ef','#b6c2ff'],cuerno:['#399b88','#e7f5ac','#d3a1ef'],dragon:['#b9504e','#ffd38a','#f27e4b'],dino:['#4b9272','#f0dcb0','#a9d879'],frita:['#dc9540','#fff0ad','#df6859'],pizza:['#d48247','#ffe0a4','#d34848'],yomi:['#477e9c','#ccf3e9','#75e6d8']};
+function shape(c,col,fn,lw=2.6){if(typeof col==='string'&&/^#[0-9a-f]{6}$/i.test(col)&&col!==INK){const g=c.createLinearGradient(-60,-210,70,5);g.addColorStop(0,tint(col,.45));g.addColorStop(.20,col);g.addColorStop(1,'#26374e');c.fillStyle=g;}else c.fillStyle=col;c.strokeStyle=INK;c.lineWidth=lw;c.beginPath();fn();c.closePath();c.fill();c.stroke();}
+function oval(c,x,y,rx,ry,col,rot=0){const g=c.createLinearGradient(x-rx,y-ry,x+rx,y+ry);g.addColorStop(0,tint(col,.45));g.addColorStop(.22,col);g.addColorStop(1,col===INK?INK:'#384252');shape(c,g,()=>c.ellipse(x,y,rx,ry,rot,0,TAU));}
 function line(c,col,w,fn){c.strokeStyle=col;c.lineWidth=w;c.beginPath();fn();c.stroke();}
 function limb(c,x,y,ex,ey,hx,hy,col,w){line(c,INK,w+5,()=>{c.moveTo(x,y);c.quadraticCurveTo(ex,ey,hx,hy);});line(c,col,w,()=>{c.moveTo(x,y);c.quadraticCurveTo(ex,ey,hx,hy);});oval(c,ex,ey,w*.56,w*.52,col);}
-function eye(c,x,y,r,aim,angry){oval(c,x,y,r,r*1.18,'#fff8dc');c.fillStyle=INK;c.beginPath();c.ellipse(x+aim*r*.22,y+1,r*.4,r*.66,0,0,TAU);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(x-r*.18,y-r*.35,r*.2,0,TAU);c.fill();line(c,INK,3,()=>{c.moveTo(x-r,y-r*1.35+(angry?3:0));c.quadraticCurveTo(x,y-r*1.9,x+r,y-r*1.35-(angry?2:0));});}
+function eye(c,x,y,r,aim,angry){oval(c,x,y,r,r*1.18,'#fff8dc');c.fillStyle=INK;c.beginPath();c.ellipse(x+aim*r*.22,y+1,r*.46,r*.66,0,0,TAU);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(x-r*.18,y-r*.35,r*.2,0,TAU);c.fill();line(c,INK,3,()=>{c.moveTo(x-r,y-r*1.35+(angry?3:0));c.quadraticCurveTo(x,y-r*1.9,x+r,y-r*1.35-(angry?2:0));});}
 function face(c,x,y,w,aim,warn){eye(c,x-w*.22,y,Math.max(4,w*.105),aim,warn);eye(c,x+w*.22,y,Math.max(4,w*.105),aim,warn);line(c,INK,2.4,()=>{c.moveTo(x-w*.16,y+w*.25);c.quadraticCurveTo(x,y+w*(warn?.14:.35),x+w*.16,y+w*.25);});}
 function wing(c,x,y,side,span,lift,col){shape(c,col,()=>{c.moveTo(x,y);c.bezierCurveTo(x+side*span*.3,y-35-lift*30,x+side*span*.9,y-95-lift*35,x+side*span,y-85-lift*20);c.quadraticCurveTo(x+side*span*.86,y-25,x+side*span*.56,y+14);c.quadraticCurveTo(x+side*span*.22,y-15,x,y);});for(let k=1;k<=3;k++)line(c,'#fff2cc',1.5,()=>{c.moveTo(x,y);c.quadraticCurveTo(x+side*span*.4,y-15-k*13,x+side*span*(.45+k*.15),y-15-k*18-lift*20);});}
 export function drawChapterBossV2(c,e,cam,t,reduced=false){
@@ -16,6 +17,9 @@ export function drawChapterBossV2(c,e,cam,t,reduced=false){
  const time=reduced?0:t,warn=b.phase==='warn',attack=['attack','strike'].includes(b.phase),rest=b.phase==='rest',aim=b.aim||1,
   age=b.clock??b.timer??0,lift=warn?Math.max(0,Math.min(1,1-age/(b.rhythm?.warn||60))):attack?1:0,flap=reduced?0:Math.sin(time*.07),step=reduced?0:Math.sin(time*.15),scale=e.h/180;
  c.save();c.translate(e.x+e.w/2-cam.x,e.y+e.h-cam.y);c.scale(scale,scale);c.lineCap='round';c.lineJoin='round';
+ // Breath through the chest; brace before a strike and sag during recovery.
+ c.translate(aim*(attack?5:warn?-3:0),reduced?0:Math.sin(time*.045)*1.8+(rest?4:0));
+ c.rotate(reduced?0:aim*(warn?-.025:attack?.035:0));
  if(e.flash>0){c.globalAlpha=.9;c.translate(5,3);c.rotate(-.045);}
  if(e.evolved)drawEvolvedRear(c,id,P,time,reduced,warn);
  // Feet, real elbow joints, torso and face share the same state, not a
@@ -69,7 +73,7 @@ export function drawChapterBossV2(c,e,cam,t,reduced=false){
  }else if(id==='frita'){
   oval(c,0,-77,65,44,P[0]);oval(c,0,-91,51,25,P[1]);
   for(const side of [-1,1]){limb(c,side*46,-81,side*77,-94-lift*15,side*89,-99-lift*24,P[0],14);shape(c,P[1],()=>{const x=side*89,y=-99-lift*24;c.moveTo(x-15,y+15);c.bezierCurveTo(x-38,y-22,x-12,y-44,x,y-22);c.bezierCurveTo(x+20,y-47,x+40,y-4,x+14,y+16);});line(c,P[0],8,()=>{c.moveTo(side*22,-103);c.lineTo(side*29,-145);});eye(c,side*29,-147,13,aim,warn);}
-  shape(c,P[1],()=>{c.moveTo(-27,-150);c.lineTo(-32,-182);c.lineTo(-12,-170);c.lineTo(0,-198);c.lineTo(14,-170);c.lineTo(32,-182);c.lineTo(27,-150);});face(c,0,-89,55,aim,warn);
+  shape(c,P[1],()=>{c.moveTo(-27,-150);c.lineTo(-32,-182);c.lineTo(-12,-170);c.lineTo(0,-198);c.lineTo(14,-170);c.lineTo(32,-182);c.lineTo(27,-150);});line(c,INK,2.8,()=>{c.moveTo(-13,-82);c.quadraticCurveTo(0,warn?-78:-71,13,-82);});
  }else if(id==='pizza'){
   oval(c,0,-87,56,55,P[0]);shape(c,P[1],()=>{c.moveTo(-36,-108);c.quadraticCurveTo(0,-87,36,-108);c.lineTo(43,-28);c.quadraticCurveTo(0,-12,-43,-28);});
   oval(c,0,-143,36,30,P[0]);face(c,0,-147,56,aim,warn);
@@ -197,8 +201,9 @@ function drawEvolvedRear(c,id,P,t,reduce,warn){
  }
 }
 function drawEvolvedFront(c,id,P,t,reduce,warn){
- // Riveted/engraved collar joins the upgraded body to its original anatomy.
- for(const side of [-1,1])for(let k=0;k<3;k++){
+ // Upgrades follow anatomy. Riveted steel belongs to the alien machine;
+ // the woodland, lunar and fossil guardians never wear the same robot collar.
+ if(id==='stitcho')for(const side of [-1,1])for(let k=0;k<3;k++){
   const x=side*(30+k*13),y=-105-k*9;
   shape(c,P[k%2?0:1],()=>{c.moveTo(x-10,y-11);c.quadraticCurveTo(x+17,y-16,x+15,y+7);c.quadraticCurveTo(x-1,y+15,x-10,y+5);});oval(c,x+2,y,2.5,2.5,P[2]);
  }

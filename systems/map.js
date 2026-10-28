@@ -319,23 +319,13 @@ export function drawSigns(ctx, room, cam, t, evo) {
     }
     ctx.lineCap = "butt";
 
-    ctx.font = "900 16px Outfit, system-ui, sans-serif";
-    const tw = Math.max(110, ctx.measureText(label).width + 28);
-    const th = 28;
-    const lx = x - tw / 2;
-    const ly = y - 22;
-    ctx.shadowColor = "rgba(" + c + "," + (0.55 * pulse) + ")";
-    ctx.shadowBlur = 16;
-    ctx.fillStyle = "rgba(8,12,18,.9)";
-    rrect(ctx, lx, ly, tw, th, 9);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = "rgba(" + c + "," + (0.6 + pulse * 0.35) + ")";
-    ctx.lineWidth = 1.6;
-    rrect(ctx, lx + 0.5, ly + 0.5, tw - 1, th - 1, 8);
-    ctx.stroke();
-    ctx.fillStyle = deadly ? "#ffd0d8" : "#eafcff";
-    ctx.fillText(label, x, ly + th / 2 + 1);
+    const bankX=hazard.x-cam.x-34,bankY=hazard.y-cam.y+20;
+    ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.shadowBlur=0;
+    ctx.fillStyle='#644832';ctx.fillRect(bankX-3,bankY-75,7,79);
+    ctx.fillStyle='#ffdf70';ctx.strokeStyle='#302b26';ctx.lineWidth=2;
+    rrect(ctx,bankX-33,bankY-77,66,28,3);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#302b26';ctx.font='900 11px Outfit,system-ui,sans-serif';
+    ctx.fillText('DANGER',bankX,bankY-62);
 
     ctx.restore();
   }

@@ -508,14 +508,14 @@ const P = {
 const withFork = f >= 2;
 if (st === "run" && pose.move !== "slide") {
   const ph = pose.phase, s = Math.sin(ph);
-  P.a0 = 0.16 * pose.speed;
+  P.a0 = 0.23 * pose.speed;
   P.bend = Math.sin(ph * 2 + 0.8) * 0.28 + pose.sway * 0.35;
   // Clamp wig: a la velocidad máxima la punta solo se curva ligeramente hacia atrás
   // sin que el cuerpo se pliegue como un boomerang.
   P.wig = Math.max(-0.18, -0.20 * pose.speed + Math.sin(ph * 2) * 0.14);
-  P.lift = -Math.abs(Math.cos(ph)) * 4.5;
-  P.legF = [s * 1.12, 3 + Math.max(0, s) * 6];
-  P.legB = [-s * 1.12, 3 + Math.max(0, -s) * 6];
+  P.lift = -Math.abs(Math.cos(ph)) * 6;
+  P.legF = [s * 1.42, 3 + Math.max(0, s) * 9];
+  P.legB = [-s * 1.42, 3 + Math.max(0, -s) * 9];
   // El brazo delantero no cruza la silueta al ir hacia atrás: se queda al costado.
   P.armF = { ang: Math.max(-0.3, -s * 1.1), bend: 4 + Math.max(0, s) * 2 };
   P.armB = { ang: Math.min(0.5, s * 1.1), bend: -4 };

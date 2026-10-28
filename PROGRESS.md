@@ -1,3 +1,13 @@
+Validación local V623 aprobada: 1.772 pruebas Node, Release Gate, campaña continua Normal hasta Quimera y cierre, selector 1280/390/320, diez cine-guardianes opacos, diez escenarios Canvas, movimiento físico de Frita, pausa/guardado/Continue, arranque nativo y Versus local entre dos navegadores. Los mil recuerdos ganados en V622 se conservan al recargar. Pendiente la verificación pública; valoración humana de arte y dificultad no inferida.
+
+## V623 validada para publicación · revisión del jugador
+
+Selector completo y espejos con personajes reales; guardianes opacos y cine con resolución estable; Conejornio Lunar en forma 4 de Michi; zancada de Frita y saludos de bienvenida. Constelaciones/neón propios en diez salas, materiales/poses de guardianes, acabado de especies y ataques finales legibles. Pozos abiertos sin puentes bajos en siete capítulos y poste DANGER. Validación y publicación: docs/V623-VALIDATION.json y docs/V623-PUBLICATION.json.
+
+# V623 · ohana-623 · OHANA V1.0 jugable
+
+Cierre de la aventura individual solicitado por el usuario. Enlaces explicados desde el estado real de combate, I y P con sus requisitos y recuperación, libro con reglas por héroe, pausa con resumen de sellos/recuerdos y confirmación real del guardado. Se conserva el contenido integrado hasta V622. Validación integral y publicación en curso.
+
 # V622 · ohana-622 · arranque y recuerdos con identidad
 
 Carga visible antes de los módulos de juego; reintento manual tras fallos de descarga y recuperación al terminar una carga lenta. El selector se descubre cuando sus diez retratos y controles están preparados. Los recuerdos conservan IDs y guardados, salen de las grietas nuevas y adquieren una silueta Canvas propia de cada héroe. Kilo mantiene su pétalo. El álbum distingue recuerdos, XP y mecanismos del sello. Dieciséis posiciones corregidas; los otros 984 recuerdos conservan sus coordenadas. Validación: 1.764 pruebas Node, Release Gate, auditoría general, tres casos de arranque nativo y diez siluetas Canvas aprobados. Los mil recuerdos se han recogido físicamente desde el respaldo ganado de V621, con reanudaciones al corregir la guía de controles; diez reliquias y diez álbumes conservados al recargar. Evidencia: docs/V622-VALIDATION.json. Publicada mediante merge normal 33c9da0. Pages aprobado; siete archivos runtime públicos coinciden por hash Git. Entrada pública nativa a 1280/390 px, recogida del primer recuerdo, álbum legible, HUD y J táctil aprobados; sin hooks de prueba, errores ni peticiones al backend pausado. La API denegó crear el PR (Forbidden). Registro: docs/V622-PUBLICATION.json.

@@ -251,7 +251,11 @@ export function playTitleIntro(options = {}) {
     if (opts.alpha !== undefined) ctx.globalAlpha *= clamp(opts.alpha, 0, 1);
     if (opts.rotate) ctx.rotate(opts.rotate);
     const background=id!==activeDirection?.hero&&id!==activeDirection?.partner;
-    const actorTick=background?Math.floor((tf+ROSTER.findIndex(r=>r.id===id)*2)/12)*12:tf;
+    if(background&&!reduce&&p._poseOverride==='idle'){
+      const greeting=((tf/60+ROSTER.findIndex(r=>r.id===id)*1.31)%14+14)%14;
+      if(greeting>11.6&&greeting<12.8)p._poseOverride='victory';
+    }
+    const actorTick=tf+ROSTER.findIndex(r=>r.id===id)*2;
     drawDummy(ctx, p, 0, 0, fit.scale, actorTick);
     ctx.restore();
     // Labels travel with the character during comic beats.

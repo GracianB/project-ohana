@@ -59,7 +59,10 @@
     "test:browser:versus-match": "node tests/browser/v604-versus-match.mjs",
     "test:browser:living-realms": "node tests/browser/v605-living-realms.mjs",
     "test:browser:startup": "node tests/browser/v622-startup.mjs",
-    "test:browser:memory-art": "node tests/browser/v622-memories-art.mjs"
+    "test:browser:memory-art": "node tests/browser/v622-memories-art.mjs",
+    "test:browser:release-polish": "node tests/browser/v623-release-polish.mjs",
+    "test:browser:reported-visuals": "node tests/browser/v623-reported-visuals.mjs",
+    "test:browser:frita-motion": "node tests/browser/v623-frita-motion.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

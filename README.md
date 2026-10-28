@@ -1,25 +1,27 @@
 <div align="center">
 
-<img src="favicon.svg" alt="Símbolo de Project OHANA" width="76" />
+<img src="favicon.svg" width="96" alt="Emblema de OHANA" />
 
-# PROJECT OHANA
+# OHANA · V1.0
 
-### Diez héroes. Cincuenta formas. Una historia para toda la familia.
+**Diez historias. Una familia.**
 
-**Plataformas · exploración · combate · evolución · aventura narrativa en Canvas 2D**
-
-**10 héroes** · **50 formas** · **10 salas temáticas + final de Mundo 1**
-
-[**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
-
-<sub><strong>V501 en desarrollo · La aventura se entiende jugando.</strong> Parte de V500 integrada en <code>main</code> (`981526f`) e incorpora antenas persistentes, viajes voluntarios, objetivos concretos, historia con avance táctil, avisos de poderes por forma y un álbum accesible que detiene el combate. Conserva 10 héroes, 50 formas y 10 salas temáticas con su final. Los cambios locales no acreditan publicación; verifica GitHub Pages sobre el commit integrado. Multijugador remoto en pausa.</sub>
-
-V501 añade una bienvenida costera, diez ambientes y músicas propias, estrategias de sala y estados de poderes legibles. Corrige las plataformas que aparecían al llegar al borde y explica paso a paso el combo H → J → H de Kilo. Detalles y alcance de las pruebas en [la entrega V501](docs/V501-AVENTURA-CLARA.md).
-
-Plan de cierre: [V1 para un jugador](docs/V1-SOLO-ESTRATEGIA.md) · [estado por capítulo](docs/v1-solo-status.json) · [punto de reanudación](docs/HANDOFF-V1-SOLO.md).
-
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=623) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
+
+Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, más el Corazón de Ohana. Recupera sus sellos, rescata los diez recuerdos personales y enfréntate a Quimera. Los mil recuerdos del álbum son opcionales y conservan tu progreso entre partidas. Escenarios, héroes y efectos se dibujan en Canvas.
+
+- **Combate:** H de cerca, J a distancia y poderes distintos por héroe. El libro explica los enlaces, I, P y el compañero U.
+- **Continuidad:** pausa con confirmación del guardado y resumen de sellos/recuerdos; Continue retoma el héroe y la aventura guardada.
+- **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
+- **Multijugador:** Aventura y Versus locales disponibles para validación. El servidor público permanece pausado.
+
+Registro de entrega: `ohana-623` / V1.0.0 individual. [Validación](docs/V623-VALIDATION.json) · [Publicación](docs/V623-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+
+## Historial de desarrollo
+
+Los registros que siguen describen entregas anteriores. El estado vigente es el de los enlaces de arriba.
 
 ---
 

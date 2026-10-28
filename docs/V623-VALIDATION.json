@@ -1,0 +1,395 @@
+{
+  "release": "ohana-623",
+  "base": "869c4eb",
+  "recorded_at": "2026-10-28T20:29:25.689172+00:00",
+  "review": "docs/V1.0.0-CIERRE.md",
+  "checks": {
+    "node": {
+      "result": "pass",
+      "tests": 1772,
+      "failures": 0,
+      "command": "npm test"
+    },
+    "release_gate": {
+      "result": "pass",
+      "runtime_modules": 381,
+      "precache_resources": 443
+    },
+    "browser_audit": {
+      "result": "pass",
+      "command": "node tests/browser/e2e.mjs"
+    },
+    "continuous_normal_campaign": {
+      "difficulty": "normal",
+      "journal": [
+        {
+          "hero": "kilo",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 65.84,
+          "iterations": 253,
+          "sealCount": 1,
+          "discoveries": 0
+        },
+        {
+          "hero": "stitcho",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 77.74,
+          "iterations": 212,
+          "sealCount": 2,
+          "discoveries": 3
+        },
+        {
+          "hero": "chispin",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 47.74,
+          "iterations": 150,
+          "sealCount": 3,
+          "discoveries": 3
+        },
+        {
+          "hero": "cat",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 0.4999999999999858,
+          "iterations": 305,
+          "sealCount": 4,
+          "discoveries": 3
+        },
+        {
+          "hero": "cuerno",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 86,
+          "iterations": 208,
+          "sealCount": 5,
+          "discoveries": 3
+        },
+        {
+          "hero": "dragon",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 89.84,
+          "iterations": 247,
+          "sealCount": 6,
+          "discoveries": 3
+        },
+        {
+          "hero": "dino",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 140,
+          "iterations": 247,
+          "sealCount": 7,
+          "discoveries": 3
+        },
+        {
+          "hero": "frita",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 51.120000000000005,
+          "iterations": 239,
+          "sealCount": 8,
+          "discoveries": 3
+        },
+        {
+          "hero": "pizza",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 110,
+          "iterations": 201,
+          "sealCount": 9,
+          "discoveries": 3
+        },
+        {
+          "hero": "yomi",
+          "deaths": 0,
+          "forms": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "minHp": 74,
+          "iterations": 231,
+          "sealCount": 10,
+          "discoveries": 3
+        },
+        {
+          "gauntlet": {
+            "deaths": 0,
+            "rescued": [
+              "kilo",
+              "stitcho",
+              "chispin",
+              "cat",
+              "cuerno",
+              "dragon",
+              "dino",
+              "frita",
+              "pizza",
+              "yomi"
+            ],
+            "cinematics": [
+              "keepsakeIntro",
+              "keepsakeRescue",
+              "bossIntro"
+            ]
+          }
+        }
+      ],
+      "finalDeaths": 0,
+      "phases": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "films": [
+        "bossDefeat",
+        "ending"
+      ],
+      "won": true,
+      "combatReport": {
+        "hits": 138,
+        "damage": 1985.2599999999989
+      },
+      "errors": []
+    },
+    "pause_combat_help_and_continue": [
+      {
+        "width": 1280,
+        "height": 900,
+        "linkFromRealActions": true,
+        "saveConfirmed": true,
+        "continueRestoresHeroAndSeals": true,
+        "storageFailureTested": false,
+        "errors": []
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "linkFromRealActions": true,
+        "saveConfirmed": true,
+        "continueRestoresHeroAndSeals": true,
+        "storageFailureTested": false,
+        "errors": []
+      },
+      {
+        "width": 320,
+        "height": 568,
+        "linkFromRealActions": true,
+        "saveConfirmed": true,
+        "continueRestoresHeroAndSeals": true,
+        "storageFailureTested": true,
+        "errors": []
+      }
+    ],
+    "reported_visuals": {
+      "selection": [
+        {
+          "width": 1280,
+          "height": 900,
+          "finalPortalVisible": true,
+          "pointerSelectsFinal": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "finalPortalVisible": true,
+          "pointerSelectsFinal": true
+        },
+        {
+          "width": 320,
+          "height": 568,
+          "finalPortalVisible": true,
+          "pointerSelectsFinal": true
+        }
+      ],
+      "guardianFilmsRendered": 10,
+      "realmSignaturesRendered": 10,
+      "foregroundOpaque": true,
+      "fixtureOnly": true,
+      "errors": []
+    },
+    "frita_physical_movement": {
+      "hero": "frita",
+      "evo": 4,
+      "ticks": 20,
+      "distance": 166.8490913275868,
+      "earnedBackup": true,
+      "controls": "ArrowRight",
+      "errors": []
+    },
+    "native_startup": [
+      {
+        "scenario": "slow module resolves after visible waiting state",
+        "nativeEntry": true,
+        "earnedMemory": true,
+        "errors": []
+      },
+      {
+        "scenario": "failed game module and manual mobile retry",
+        "attempts": 2,
+        "earnedSavePreserved": true,
+        "errors": []
+      },
+      {
+        "scenario": "Enter before the first animation frame",
+        "singleInputReachesSelection": true,
+        "doesNotStartGame": true
+      }
+    ],
+    "earned_memory_save_reload": {
+      "total": 1000,
+      "relics": 10,
+      "albumPanels": 10,
+      "reloadPreserved": true,
+      "errors": []
+    },
+    "local_versus_two_browsers": {
+      "arena": "w1-kilo",
+      "forms": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "knockouts": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "respawns": [
+        0,
+        1,
+        2
+      ],
+      "result": "Dino: 3 eliminaciones · Chispín: 0 eliminaciones",
+      "actors": [
+        {
+          "hero": "dino",
+          "hp": 125,
+          "xp": 730,
+          "evo": 4,
+          "maxHp": 360,
+          "kills": 3,
+          "deaths": 0,
+          "enemyKills": 8,
+          "bossKills": 0,
+          "score": 730
+        },
+        {
+          "hero": "chispin",
+          "hp": 0,
+          "xp": 35,
+          "evo": 0,
+          "maxHp": 56,
+          "kills": 0,
+          "deaths": 5,
+          "enemyKills": 1,
+          "bossKills": 0,
+          "score": 35
+        }
+      ],
+      "returnsToFreshLobby": true,
+      "errors": []
+    }
+  },
+  "source_blobs": {
+    "caprichos.css": "5f7f569dde9552f4590af5e06d64e5445276fbc8",
+    "characters/art/cat.js": "e33c9a07490212b23c12c25a9674cdd09519999f",
+    "characters/art/frita.js": "4a9a91d10b5b6ccfba746c281e8fe5cb93a6d75b",
+    "characters/michi-moon-hare.js": "b925e2f5a3076a6e307f8af1c926d2add0cc9849",
+    "characters/roster.js": "9d18a8980cb558e384b6b96d26ac2d8a4894f8d1",
+    "engine/enemies.js": "b674d13551adc52a2d2884389d4893a07f04ccaa",
+    "engine/foes/creature-finish.js": "5eef8f7c348cfed6bd3739db70fa7ecea1ac6f5b",
+    "family-camp.css": "7f7676e2f553cf65884ebcdaabe8a10f30d46bdf",
+    "game.js": "a5b1ea5d13af2e14b9bb31380f4fd6e0bf5bcdea",
+    "index.html": "e408f4de1cfa106ffaff18d97d55c917b7261373",
+    "play-interface.css": "ae601c27f0939d8a12ef48d888a8ff1f0453ad1f",
+    "sw.js": "182d5f4025f151cc6498bf176873dd12e8468102",
+    "systems/adventure-guide-v2.js": "7c11251009eba6fa53a88778fe7fc4ca5d95db73",
+    "systems/chapter-boss-art-v2.js": "768305164e029dd0ef5c6520c76783b238416b6f",
+    "systems/combat-coach.js": "532f2e7c614c726c98f236d08a5da8868043a469",
+    "systems/family-camp.js": "3f14123bf10e861d38c924cf5ee232745aa92c2b",
+    "systems/field-guide.js": "6c7fdf60d69437cbe47dfa1a680f04490913ddf1",
+    "systems/final-gauntlet.js": "78ad8218ddd32e0a9de52e1d802ae71a9db2c968",
+    "systems/final-portal-mirrors.js": "a3802725ddfea1a16f682cabdeccd126528f43ca",
+    "systems/intro.js": "686a57f93d9649274b525ed440652a72bbd73c0e",
+    "systems/map.js": "a32c5c5441b0bf9b3b677bbf9be607c010104d12",
+    "systems/open-chapter-pits.js": "8fd5e84c153a57f168fc9f29987aa6c9fd50b0b5",
+    "systems/power-status.js": "e244148a206cc0cd8d456235ef7bab5a3d4ed6fe",
+    "systems/realm-signatures.js": "7b91d6b98c4738937c3c1cfe5ba525bc8a1b42e5",
+    "systems/world1-cine.js": "ea9e4bf6ab17c413ed8b17039f833d34e9ac9f34",
+    "systems/world1-rooms.js": "9e0a747acb1e474c1aba0122f1fea60bfb7593e8",
+    "systems/world1-select.js": "1f3d61cd715a9f46485f1509b00d8f4f10a51676"
+  },
+  "limits": [
+    "Human assessment of art, fun and Normal difficulty remains pending user play.",
+    "The 1000-memory backup was physically earned in V622; V623 verifies preservation and reload, not a new collection of all 1000 after opening pits.",
+    "Campaign exercised the final gameplay geometry; subsequent changes only adjust cinematic alpha and selector/constellation presentation, separately covered by browser fixtures.",
+    "Guardian/realm contact sheets are render fixtures, not combat wins.",
+    "Remote multiplayer backend remains paused; the reported match used a local server.",
+    "GitHub CI is not claimed approved before publication."
+  ]
+}

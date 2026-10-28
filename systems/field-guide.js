@@ -2,6 +2,7 @@ import {WORLD1_ORDER,WORLD1_ROOMS,WORLD1_THEMES} from './world1-rooms.js';
 import {drawLivingRealm} from '../worlds/living-realms.js';
 import {drawOhanaGarden} from '../worlds/ohana-garden.js';
 import {COMBO_GUIDES} from './adventure-guide-v2.js';
+import {combatRules} from './combat-coach.js';
 const TALES={
  kilo:['Donde canta el bosque','Sigue las copas, deja que el claro respire y busca altura. La música convierte la distancia en tu aliada.','Caracola: E o J. Bambú: tres J. Arpa del dosel: gana altura y toca J en el aire. Hibisco: prepara I con tres J sobre él o combatiendo, y remata con I. Cada instrumento despierta una forma.'],
  stitcho:['La noche tiene paredes','Una ciudad vertical espera a quien se atreva a abandonar el suelo. Cambia de pared antes de que te rodeen.','Abre con plasma J; usa la bola K para atravesar el grupo y la zarpa H al salir.'],
@@ -33,6 +34,12 @@ if(doc){
  new MutationObserver(()=>{if(help.closest("#help").classList.contains("open")){const hero=doc.body.classList.contains("playing")?doc.getElementById("hud")?.dataset.hero:doc.getElementById("family-camp")?.dataset.hero;if(hero&&TALES[hero])show(hero);}resume();}).observe(help.closest("#help"),{attributes:true,attributeFilter:["class"]});doc.addEventListener("visibilitychange",resume);
  function show(id){sceneHero=id;const page=guide.querySelector('#guide-page'),c=guideChapter(id);
  page.innerHTML=c?`<span class="fg-eyebrow">${c.hero} · ${c.name}</span><h4>${c.title}</h4><canvas class="fg-landscape" width="640" height="220" role="img" aria-label="Paisaje animado de ${c.name}"></canvas><p>${c.story}</p><div class="fg-mission"><b>Tu estrategia</b><p>${c.tactic}</p></div><h5>Prueba esta combinación</h5><p class="fg-combo">${c.combo[0]}</p><p>${c.combo[1]}</p><footer>Empiezas como bebé. Combate y explora para evolucionar. Los 100 recuerdos son opcionales: 25 brújula, 50 imán, 100 celebración. ${id==='kilo'?'El gran Tambor espera al final del recorrido; la ruta aérea es opcional.':'El guardián y la expedición forman tu capítulo.'}</footer>`:`<span class="fg-eyebrow">DOS FORMAS DE COMPARTIR OHANA</span><h4>Compañeros… o rivales.</h4><div class="fg-mission"><b>Aventura cooperativa</b><p>Recorred la campaña en la misma sala. Un jugador propone cruzar; el otro acepta antes de viajar. Coordinad vuestros poderes y revisad los resultados del capítulo juntos.</p></div><div class="fg-mission"><b>Versus</b><p>Elegid héroe y escenario. Combatid entre vosotros; los enemigos y el guardián permiten crecer durante el duelo. El resultado muestra las estadísticas y os devuelve a la elección.</p></div><footer>El servidor público está pausado. Las partidas entre dispositivos requieren un servidor activo; el multijugador se está verificando con el servidor local. U invoca un compañero del juego: no conecta a otra persona.</footer>`;
+ if(c){
+  const details=doc.createElement('details');details.className='fg-combat-rules';
+  const summary=doc.createElement('summary');summary.textContent='Enlaces y poderes, paso a paso';details.append(summary);
+  for(const rule of combatRules(id)){const heading=doc.createElement('h5'),text=doc.createElement('p');heading.textContent=rule.title;text.textContent=rule.text;details.append(heading,text);}
+  page.querySelector('footer').before(details);
+ }
  guide.style.setProperty('--chapter-color',c?.color||'#a5dfd2');lastPaint=-Infinity;resume();
  for(const b of guide.querySelectorAll('[data-guide]'))b.setAttribute('aria-pressed',String(b.dataset.guide===id));
  }

@@ -1,7 +1,6 @@
 import {WORLD1_ROOMS,WORLD1_ORDER,WORLD1_THEMES} from './world1-rooms.js';
 import {world1NextObjective} from './world1-play.js';
-import {kiloComboStatus} from './kilo-combo.js';
-import {finisherCharge} from './finisher.js';
+import {combatCoach} from './combat-coach.js';
 export const COMBO_GUIDES=Object.freeze({
  kilo:['H o J → H o J → H o J → I','Acierta tres lanzamientos H o J; los rebotes de una misma nota cuentan una vez. I conserva su carga.'],
  stitcho:['J plasma → K bola → H zarpa','Abre a distancia, cruza por otro ángulo y golpea de cerca. I da un rebote acrobático.'],
@@ -43,12 +42,14 @@ export function drawAdventureGuide(c,g,W,H,powers=[]){
  const p=g.player,guide=COMBO_GUIDES[p.id],small=W<600;
  c.save();c.textAlign='center';c.textBaseline='middle';
  if(guide){
-  const w=Math.min(W-28,small?330:440),x=(W-w)/2,y=H-(small?226:218),kilo=p.id==='kilo'?kiloComboStatus(g):null;
+  const w=Math.min(W-28,small?330:440),x=(W-w)/2,y=H-(small?226:218),coach=combatCoach(g);
+  if(coach){
   c.fillStyle='#112c3eed';c.strokeStyle='#afcbbd77';c.lineWidth=1;c.beginPath();c.roundRect(x,y,w,51,11);c.fill();c.stroke();
-  c.fillStyle='#f4e8c6';c.font=`bold ${small?10:12}px sans-serif`;
-  const line=kilo&&p.evo>=3?(kilo.ready?'REMATE PREPARADO · PULSA I':`ACIERTOS PARA I: ${'●'.repeat(kilo.step)}${'○'.repeat(3-kilo.step)} · H o J`):'PLAN: '+guide[0];
-  c.fillText(line,W/2,y+17,w-15);c.font=`${small?10:11}px sans-serif`;c.fillStyle='#bdddd2';
-  c.fillText(`I ${p.evo<3?'en forma 4':p.id==='kilo'?'tres aciertos':'sin secuencia'} · P ${Math.floor(finisherCharge(p))}/100 carga · U compañero`,W/2,y+36,w-15);
+  c.fillStyle='#f4e8c6';c.font=`bold ${small?11:13}px sans-serif`;
+  c.fillText(coach.title,W/2,y+17,w-15);c.font=`${small?11:12}px sans-serif`;c.fillStyle='#bdddd2';
+  c.fillText(coach.footer,W/2,y+35,w-15);
+  c.fillStyle=coach.mode==='kilo'?'#f1d498':'#94cfbe';c.fillRect(x+12,y+46,(w-24)*coach.progress,2);
+  }
  }
  const active=powers.find(q=>q.id==='star')||powers[0];
  if(active){
