@@ -3195,7 +3195,14 @@ drawNestArena(ctx,game,game.cam,t);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
 portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
-if(game.roomId==="w1-final")drawPortalMirrors(ctx, FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion);
+if(game.roomId==="w1-final")drawPortalMirrors(ctx, FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion,
+  (mirrorCtx,hero,centerX,feetY,scale,frame)=>{
+    const reflection=w1MakeDummy(hero,4);
+    reflection.facing=-1;
+    reflection.grounded=true;
+    reflection._poseOverride="idle";
+    w1DrawDummy(mirrorCtx,reflection,centerX,feetY,scale,frame);
+  });
 Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);

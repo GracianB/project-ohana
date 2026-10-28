@@ -1,4 +1,4 @@
-const VERSION = "ohana-606";
+const VERSION = "ohana-621";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/cat-chapter-art-v609.js?v=" + VERSION,
@@ -536,7 +536,7 @@ const PRECACHE_REVISIONS = {
   "systems/dragon-trail.js": "323221dcf00d9bb785aa2b3ed0e2f17f57cc31ec",
   "systems/dragon-boss.js": "213409a45060a320942e9c94c25737c662b6f106",
   "worlds/dragon-caldera.js": "a6c9d9e27a16c0eb8e190c1c480e240dc37ec272",
-  "systems/dino-room.js": "a7520e867de3034d528dfbb1b93495f102d089a4",
+  "systems/dino-room.js": "205e05765a82c462bfc3472d20a30b45a622382e",
   "systems/dino-trail.js": "b79b2662571b85d8b958e0657210d56846423845",
   "systems/dino-boss.js": "7e1c779f449f82b640b4ed9484bb00240d6e4e11",
   "systems/dino-chapter.js": "baa9700c6e3373cb940f7fa9d367613298e19091",
@@ -555,7 +555,7 @@ const PRECACHE_REVISIONS = {
   "worlds/pizza-ovens.js": "28440ea475b0e5499a04f91d396b1785355ce8e2",
   "systems/yomi-room.js": "0916aa8f05dd7b6dccfafe698f01d43c856bbe3a",
   "systems/world1-cine.js": "b41765d23083fa8c64d26364d23348a22e1e7430",
-  "systems/final-portal-mirrors.js": "411f8019f71066e5021ad7f48c94065e8b8ff911",
+  "systems/final-portal-mirrors.js": "a8c27e20ef59ea7757fa3bc835aa1a094c14387b",
   "systems/world1-select.js": "1a9f7a9c91e166d2993e1d87056e1dcec1ff0f9b",
   "systems/theatre-stage.js": "1824c8672997164ac18403f85fccd8ef7d87d50d",
   "systems/world1-progress.js": "52c9c5ded533dc649210fd913b737614b2bb67dc",
@@ -638,7 +638,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "8d6fdede46bede8c117f685cbde7a6ac11d6d6dd",
+  "index.html": "d9641e8a2abdb92ccdd8ca1e46f4ec903d558fcd",
   "multiplayer.html": "8700abcf3f860c504167facf1c37815debad59f9",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "b3178c951bec2a30bda0bb2b2d47763b24567189",
@@ -663,7 +663,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "bda52ccf19fa48a77d9688805056dac7f72034fb",
+  "game.js": "58b918c210278b961c3248e845221f18ea813894",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "e92148d6386f7ce1a9ece2ae12bbe81d2c6f78a1",
   "characters/ten-action-acting.js": "8c56db05f0625ebce31e10abbba5305be881d0ff",

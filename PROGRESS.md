@@ -1,3 +1,7 @@
+# V621 · Espejos del Corazón con la familia visible
+
+Los diez portales del final muestran ahora los cuerpos completos de los héroes, dibujados con el arte canónico de Canvas en su forma final. La figura se anima dentro del cristal, se recorta al óvalo y aumenta suavemente al acercarse Kilo. Se mantiene la iluminación y la expresión de cada espejo. Caché offline: ohana-621.
+
 # V606 · ohana-606 · Claro de Kilo publicada y verificada
 
 Primera sala de la revisión por capítulos. Paisaje y héroe conservados; cinco especies con anatomía y roles propios, dieciocho criaturas repartidas en encuentros y Tambor al final del recorrido. Cuatro instrumentos distintos enseñan E/J, tres notas J, ataque aéreo y remate I; sus IDs anteriores conservan guardados. Crecimiento repartido por 14.400 unidades, sin salto de formas por gemas ni lista genérica de tres objetos después del guardián. La evolución conserva el daño recibido y los KO no curan automáticamente en esta sala. Boss con un controlador, aperturas sin recarga duplicada, tres patrones comprometidos y dificultades distintas. El resto de capítulos conserva sus reglas. Esta entrega revisa Claro; la aceptación humana del balance queda pendiente de jugarla.

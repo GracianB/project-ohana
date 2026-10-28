@@ -88,7 +88,7 @@ function drawFace(ctx, fam, t, intensity, looking) {
   ctx.stroke();
 }
 
-export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false) {
+export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false, drawHero = null) {
   if (!portals?.length) return;
 
   for (const p of portals) {
@@ -129,11 +129,25 @@ export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false)
       ctx.globalAlpha = 1;
     }
 
-    const scale = near ? 1.08 : 1;
-    ctx.save();
-    ctx.scale(scale, scale);
-    drawFace(ctx, fam, t, intensity + (near ? 0.4 : 0), looking);
-    ctx.restore();
+    // Show the actual family member inside the glass. The former floating
+    // face read as an emoji because it omitted the body and canonical art.
+    // Clip the complete, animated Canvas character to the oval so the portal
+    // keeps its reflection treatment while the silhouette stays recognizable.
+    if (drawHero) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(0, 4, (p.rx || 72) * 0.78, (p.ry || 112) * 0.82, 0, 0, TAU);
+      ctx.clip();
+      const bob = reduced ? 0 : Math.sin(t * 0.055 + p.x * 0.01) * 3;
+      drawHero(ctx, p.hero, 0, (p.ry || 112) * 0.72 + bob, near ? 1.12 : 1, t);
+      ctx.restore();
+    } else {
+      const scale = near ? 1.08 : 1;
+      ctx.save();
+      ctx.scale(scale, scale);
+      drawFace(ctx, fam, t, intensity + (near ? 0.4 : 0), looking);
+      ctx.restore();
+    }
 
     if (near && !reduced) {
       ctx.globalAlpha = 0.55;
