@@ -8,6 +8,7 @@ import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,dra
 import {fritaVentState,noteFritaLaunch,yomiNodeState,drawFritaVent,drawYomiTerminal} from './frita-yomi-chapters.js';
 import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaChapter,drawPizzaOven,drawPizzaCustomer} from './pizza-chapter.js';
 import {drawPizzaOvenV615,drawPizzaGuestV615,drawPizzaAtmosphere} from './pizza-chapter-art-v615.js';
+import {drawFritaVentV614,drawFritaAtmosphere} from './frita-chapter-art-v614.js';
 import {drawYomiTerminalV616,drawYomiAtmosphere} from './yomi-chapter-art-v616.js';
 import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact,dinoGrowth,updateDinoChapter,dinoChapterReady,dinoObjective,drawDinoChapter} from './dino-chapter.js';
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
@@ -398,7 +399,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawDragonChapter(ctx,g,cam);drawDinoChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);drawPizzaAtmosphere(ctx,g,cam,t,reduce);drawYomiAtmosphere(ctx,g,cam,t,reduce);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawDragonChapter(ctx,g,cam);drawDinoChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);drawFritaAtmosphere(ctx,g,cam,t,reduce);drawPizzaAtmosphere(ctx,g,cam,t,reduce);drawYomiAtmosphere(ctx,g,cam,t,reduce);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -614,7 +615,7 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       if (!done) { ctx.fillStyle = "#fff"; ctx.font = "700 12px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText("↓ PISOTÓN", x, y - 34 + pulse); }
       break; }
     case "geyser": {
-      if(g.roomDef?.fritaChapter){drawFritaVent(ctx,g,s,cam,done,t,reduce);break;}
+      if(g.roomDef?.fritaChapter){drawFritaVentV614(ctx,g,s,cam,done,t,reduce);break;}
       ctx.fillStyle = "#5a3e1e"; ctx.fillRect(x - 40, y - 14, 80, 14);
       ctx.globalAlpha = .55; ctx.fillStyle = "#ffd65a"; const hh = 60 + (reduce ? 0 : (t * 3 + s.id * 40) % 50); ctx.fillRect(x - 12, y - 14 - hh, 24, hh); ctx.globalAlpha = 1;
       if (!done) { const px = s.prize.x - cam.x, py = s.prize.y - cam.y + pulse; ctx.fillStyle = "#ffcf3a"; for (let k = -1; k <= 1; k++) ctx.fillRect(px - 4 + k * 9, py - 16 - Math.abs(k) * -4, 7, 32); ctx.strokeStyle = "#fff4c2"; ctx.strokeRect(px - 18, py - 18, 36, 36); }
@@ -651,14 +652,115 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
   if (s.glow > 0) { ctx.globalAlpha = s.glow / 60; ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y - 60, 70 - s.glow * .5, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1; }
 }
 
+function _rr(c, x, y, w, h, r = 4) {
+  if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h);
+}
+
 function drawStatue(ctx, s, cam, lit, t, reduce) {
-  const x = s.x - cam.x, y = s.y - cam.y, theme = WORLD1_THEMES[s.hero];
-  ctx.fillStyle = "#3a3346"; ctx.fillRect(x - 70, y - 40, 140, 40);
-  ctx.fillStyle = lit ? theme.color : "#57506a"; ctx.globalAlpha = lit ? .9 : .7;
-  ctx.beginPath(); ctx.ellipse(x, y - 140, 52, 100, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
-  ctx.strokeStyle = "#fff4dc"; ctx.lineWidth = 2; ctx.stroke();
-  if (lit) { ctx.globalAlpha = .35 + (reduce ? 0 : Math.sin(t * .05 + s.x) * .15); ctx.strokeStyle = theme.color; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(x, y - 260, 26, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1; }
-  ctx.fillStyle = "#fff"; ctx.font = "800 15px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText(heroName(s.hero), x, y - 12);
+  const x = s.x - cam.x, y = s.y - cam.y, hero = s.hero, theme = WORLD1_THEMES[hero];
+  const col = theme?.color || "#ffd6f2";
+  const name = heroName(hero);
+
+  ctx.save();
+
+  // Rayo de luz celeste si el sello está encendido
+  if (lit && !reduce) {
+    const beamPulse = Math.sin(t * 0.06 + s.x * 0.01) * 0.15 + 0.35;
+    const beamGrad = ctx.createLinearGradient(x, y - 40, x, 0);
+    beamGrad.addColorStop(0, col);
+    beamGrad.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = beamGrad;
+    ctx.globalAlpha = beamPulse * 0.4;
+    ctx.beginPath();
+    ctx.moveTo(x - 45, y - 40);
+    ctx.lineTo(x + 45, y - 40);
+    ctx.lineTo(x + 75, 0);
+    ctx.lineTo(x - 75, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // ── Pedestal clásico de granito pulido ──
+  ctx.fillStyle = "#262030"; ctx.fillRect(x - 72, y - 16, 144, 16);
+  ctx.fillStyle = lit ? "#3d3248" : "#2e2738";
+  ctx.fillRect(x - 62, y - 56, 124, 40);
+  ctx.strokeStyle = lit ? col : "#57506a"; ctx.lineWidth = 1.8;
+  ctx.strokeRect(x - 62, y - 56, 124, 40);
+  ctx.fillStyle = "#4a3e59"; ctx.fillRect(x - 68, y - 62, 136, 8);
+
+  // Placa de bronce pulido con nombre y reliquia
+  ctx.fillStyle = lit ? "#ffe082" : "#8d7966";
+  ctx.strokeStyle = lit ? "#ffb300" : "#5d4e3f";
+  ctx.lineWidth = 1.2;
+  _rr(ctx, x - 52, y - 50, 104, 28, 4); ctx.fill(); ctx.stroke();
+
+  ctx.fillStyle = lit ? "#1a0f00" : "#241810";
+  ctx.font = "800 12px Outfit, sans-serif"; ctx.textAlign = "center";
+  ctx.fillText(name.toUpperCase(), x, y - 36);
+
+  ctx.fillStyle = lit ? "#b26a00" : "#4a3b30";
+  ctx.font = "700 8px monospace";
+  ctx.fillText(theme?.relic || "OHANA", x, y - 25);
+
+  // ── Escultura de piedra del héroe ──
+  const stoneBase = lit ? "#7e7090" : "#57506a";
+  const stoneHigh = lit ? col : "#8b7e9e";
+  const stoneRim  = lit ? "#ffffff" : "#c4b8d4";
+
+  ctx.fillStyle = stoneBase;
+  ctx.strokeStyle = stoneRim;
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+
+  ctx.beginPath();
+  ctx.ellipse(x, y - 140, 48, 76, 0, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  ctx.strokeStyle = stoneHigh; ctx.lineWidth = 2;
+  if (hero === 'kilo') {
+    ctx.beginPath(); ctx.ellipse(x, y - 135, 18, 26, 0.2, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 4, y - 160); ctx.lineTo(x + 4, y - 110); ctx.stroke();
+  } else if (hero === 'stitcho') {
+    ctx.beginPath(); ctx.moveTo(x - 30, y - 160); ctx.lineTo(x - 52, y - 190); ctx.lineTo(x - 22, y - 175); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 30, y - 160); ctx.lineTo(x + 52, y - 190); ctx.lineTo(x + 22, y - 175); ctx.stroke();
+  } else if (hero === 'chispin') {
+    ctx.beginPath(); ctx.moveTo(x, y - 180); ctx.lineTo(x - 12, y - 145); ctx.lineTo(x + 6, y - 145); ctx.lineTo(x - 6, y - 110); ctx.stroke();
+  } else if (hero === 'cat') {
+    ctx.beginPath(); ctx.arc(x, y - 140, 22, -0.6, 2.2); ctx.stroke();
+  } else if (hero === 'cuerno') {
+    ctx.beginPath(); ctx.moveTo(x, y - 175); ctx.quadraticCurveTo(x + 8, y - 215, x + 24, y - 225); ctx.stroke();
+  } else if (hero === 'dragon') {
+    ctx.beginPath(); ctx.moveTo(x - 20, y - 150); ctx.quadraticCurveTo(x - 55, y - 190, x - 45, y - 130); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 20, y - 150); ctx.quadraticCurveTo(x + 55, y - 190, x + 45, y - 130); ctx.stroke();
+  } else if (hero === 'dino') {
+    for (let p = -2; p <= 2; p++) {
+      ctx.beginPath(); ctx.arc(x + p * 12, y - 180 + Math.abs(p) * 6, 6, 0, Math.PI * 2); ctx.stroke();
+    }
+  } else if (hero === 'frita') {
+    ctx.beginPath(); ctx.moveTo(x - 25, y - 160); ctx.quadraticCurveTo(x - 45, y - 120, x - 35, y - 90); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 25, y - 160); ctx.quadraticCurveTo(x + 45, y - 120, x + 35, y - 90); ctx.stroke();
+  } else if (hero === 'pizza') {
+    ctx.beginPath(); ctx.rect(x - 16, y - 195, 32, 16); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y - 195, 16, Math.PI, 0); ctx.stroke();
+  } else if (hero === 'yomi') {
+    ctx.beginPath(); ctx.arc(x, y - 190, 8, -Math.PI * 0.4, Math.PI * 0.8); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y - 140, 28, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  if (lit) {
+    const haloGlow = 0.4 + (reduce ? 0 : Math.sin(t * 0.08 + s.x) * 0.2);
+    ctx.fillStyle = col;
+    ctx.globalAlpha = haloGlow;
+    ctx.beginPath(); ctx.arc(x, y - 230, 24, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#fffde7"; ctx.lineWidth = 2.5; ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath(); ctx.arc(x, y - 230, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
 }
 
 // Capa de pantalla: barra de sello y cinemática de sala con bandas negras.
