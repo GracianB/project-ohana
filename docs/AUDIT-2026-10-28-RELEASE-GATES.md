@@ -9,7 +9,7 @@ Baseline: main at `6c23e0aa6f1df139744ed7ba8c2cddd52c5598ad`.
 - PR #442 (Yomi V617) at `96ba737`: OHANA CI, quality and V500/V501 acceptance runs failed. Do not merge or publish.
 
 ## Blocking PR #442 issues discovered by source review
-1. `systems/yomi-encounters-v617.js` imports `./yomi-boss.js`, but the proposed PR adds `yomi-boss-v617.js`. This is an unresolved module path.
+1. `systems/yomi-encounters-v617.js` imports `./yomi-boss.js`, but the proposed PR adds `yomi-boss-v617.js`. The imported path exists, but points to the legacy boss and yields the wrong boss ID and arena for V617; it must be aligned before integration.
 2. `systems/yomi-trail-v617.js` contains a stub update function, so bit collection, resonance and trap removal are not implemented.
 3. Its README explicitly requests wiring render/update functions and chapter imports. Merely adding files is **not** playable integration.
 4. The replacement room terrain changes three gaps, hazards and enemy placements. Test real traversal, recovery, seal progression, boss encounter and existing save keys before enabling it.
