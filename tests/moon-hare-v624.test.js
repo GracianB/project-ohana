@@ -6,8 +6,8 @@ import cat from '../characters/art/cat.js';
 import {ROSTER} from '../characters/roster.js';
 
 function record(p){
- const ops=[];const c=new Proxy({},{get:(_,k)=>(...args)=>{for(const a of args)if(typeof a==='number')assert.ok(Number.isFinite(a),k);ops.push([k,...args]);},set:(_,k,v)=>{ops.push(['set',k,v]);return true;}});
- drawMoonHare(c,p);return ops;
+ const ops=[];const c=new Proxy({},{get:(_,k)=>k==='createLinearGradient'?((...args)=>{ops.push([k,...args]);return{addColorStop(...stops){ops.push(['addColorStop',...stops]);}};}):(...args)=>{for(const a of args)if(typeof a==='number')assert.ok(Number.isFinite(a),k);ops.push([k,...args]);},set:(_,k,v)=>{ops.push(['set',k,v]);return true;}});
+ drawMoonHare(c,p);return JSON.parse(JSON.stringify(ops));
 }
 test('rabbit hock preserves both bones at valid reaches and never yields nonfinite joints',()=>{
  for(const paw of[{x:0,y:7},{x:-15,y:2},{x:8,y:-12}]){
@@ -31,7 +31,7 @@ test('reduced motion freezes every action and malformed clocks never reach Canva
   assert.doesNotThrow(()=>record({state,t:Infinity,phase:NaN,atk:NaN,cast:Infinity,land:NaN,look:{x:Infinity}}));
  }
 });
-test('rabbit renderer is pure and uses no gradients, blur, raster assets or world mutations',()=>{
+test('rabbit renderer keeps body vectors pure; its eyes use the shared hero iris renderer',()=>{
  const pose=Object.freeze({state:'run',t:44,phase:1,speed:1,look:Object.freeze({x:1,y:0})});assert.doesNotThrow(()=>record(pose));
  const src=fs.readFileSync(new URL('../characters/michi-moon-hare.js',import.meta.url),'utf8');assert.doesNotMatch(src,/create(?:Linear|Radial)Gradient|shadowBlur|drawImage|Math\.random|localStorage/);
  const def=ROSTER.find(x=>x.id==='cat');assert.equal(def.forms[3].name,'Conejornio Lunar');assert.equal(def.forms[3].w,36);assert.equal(def.forms[3].h,34);

@@ -1,0 +1,98 @@
+{
+  "release": "ohana-626",
+  "base": "19db0a959fb5f3aa69c78b0df9c1b16b4949f27e",
+  "recorded_at": "2026-10-29T03:31:37.723707+00:00",
+  "review": "docs/V626-MICHI-EYES.md",
+  "checks": {
+    "node": {
+      "result": "pass",
+      "command": "npm test",
+      "tests": 1807,
+      "failures": 0
+    },
+    "release_gate": {
+      "result": "pass",
+      "cache": "ohana-626",
+      "runtime_modules": 384,
+      "precache_resources": 446
+    },
+    "shared_eyes": {
+      "result": "pass",
+      "source": "characters/michi-eyes.js",
+      "existing_renderer": "characters/rig.js R.eye, unmodified",
+      "reference_heroes": [
+        "kilo",
+        "chispin",
+        "dino",
+        "cuerno"
+      ],
+      "runtime_tests": "tests/michi-eyes-v626.test.js",
+      "exact_drawing_trace_comparisons": "4 sizes x 5 moods against R.eye",
+      "all_five_actual_forms_have_two_shared_eyes": true,
+      "blink_happy_closed_corrupt_inputs_and_frozen_pose": true
+    },
+    "browser_art": {
+      "result": "pass",
+      "command": "OHANA_ART_RELEASE=626 npm run test:browser:michi-art",
+      "drawing_cases": 255,
+      "reduced_motion_cases": 85,
+      "physical_hitbox_cases": 60,
+      "selection": [
+        {
+          "width": 1280,
+          "height": 900,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        },
+        {
+          "width": 320,
+          "height": 568,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        }
+      ],
+      "chapter_hud": [
+        {
+          "width": 1280,
+          "height": 900,
+          "freshBaby": true,
+          "directChapterAccessFixture": true,
+          "hudLivingCanvas": true,
+          "healthVisible": true,
+          "noOverflow": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "freshBaby": true,
+          "directChapterAccessFixture": true,
+          "hudLivingCanvas": true,
+          "healthVisible": true,
+          "noOverflow": true
+        }
+      ],
+      "errors": []
+    }
+  },
+  "source_blobs": {
+    "characters/art/cat.js": "d1439fc3e3a4a31d241adf52a5d1f648f4b08d9d",
+    "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
+    "characters/michi-kitten.js": "9cde42417809f14a2ee2dfdea77eb78f2eb830fa",
+    "characters/michi-moon-hare.js": "7d6aaf74b00e2dcf2b54f498871c1cf05616ef88",
+    "index.html": "83d29d5e9b2d38bdaad3c40d87220899c7c42b2f",
+    "sw.js": "06654c9bce391f94f6db0ac17f33d3840fa74d1c"
+  },
+  "limits": [
+    "The user explicitly rejected V625 eyes; this release uses the existing hero eye renderer instead of another original eye shape.",
+    "All other hero artwork and the shared R.eye implementation are unchanged.",
+    "This changes the eyes only; no new campaign, balance, flight or remote-multiplayer validation is claimed.",
+    "Shared-eye iris gradients remain live Canvas; historical gradient-free assertions now permit only those two iris gradients.",
+    "Human acceptance of the revised face remains pending user play. Public publication is recorded separately."
+  ]
+}

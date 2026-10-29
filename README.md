@@ -6,19 +6,19 @@
 
 **Diez historias. Una familia.**
 
-[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=625) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=626) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
 
 Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, más el Corazón de Ohana. Recupera sus sellos, rescata los diez recuerdos personales y enfréntate a Quimera. Los mil recuerdos del álbum son opcionales y conservan tu progreso entre partidas. Escenarios, héroes y efectos se dibujan en Canvas.
 
-- **Michi:** sus cinco formas estrenan rostros y anatomías coherentes, con patas curvas y contornos más finos; Hada y Eclipse ganan altura manteniendo salto. Eclipse mantiene el vuelo, suelta para planear y abajo para descender.
+- **Michi:** sus cinco formas usan los mismos ojos de Kilo, Chispín, Dino y Cuerno; Hada y Eclipse ganan altura manteniendo salto. Eclipse mantiene el vuelo, suelta para planear y abajo para descender.
 - **Combate:** H de cerca, J a distancia y poderes distintos por héroe. El libro explica los enlaces, I, P y el compañero U.
 - **Continuidad:** pausa con confirmación del guardado y resumen de sellos/recuerdos; Continue retoma el héroe y la aventura guardada.
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus locales disponibles para validación. El servidor público permanece pausado.
 
-Registro de entrega: `ohana-625` / V1.0.0 individual. [Validación](docs/V625-VALIDATION.json) · [Publicación](docs/V625-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+Registro de entrega: `ohana-626` / V1.0.0 individual. [Validación](docs/V626-VALIDATION.json) · [Publicación](docs/V626-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
 
 ## Historial de desarrollo
 

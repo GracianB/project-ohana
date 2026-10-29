@@ -26,7 +26,7 @@ test('all ten realm signatures have their own authored silhouette and bounded co
  const paths=new Set();for(const id of WORLD1_ORDER){const s=REALM_SIGNATURES[id];assert.ok(s.points.length>=8);for(const p of s.points)assert.ok(p.every(v=>Number.isFinite(v)&&Math.abs(v)<60));paths.add(JSON.stringify(s.points));}assert.equal(paths.size,10);
 });
 test('moon hare articulates across running frames and freezes in reduced motion',()=>{
- const record=(t,reduced)=>{const ops=[];const c=new Proxy({},{get:(_,k)=>(...v)=>{assert.ok(v.every(n=>typeof n!=='number'||Number.isFinite(n)));ops.push([k,...v]);},set:()=>true});drawMoonHare(c,{t,phase:t*.2,state:'run',reduceMotion:reduced});return ops;};
+ const record=(t,reduced)=>{const ops=[];const c=new Proxy({},{get:(_,k)=>k==='createLinearGradient'?((...v)=>{ops.push([k,...v]);return{addColorStop(...stops){ops.push(['addColorStop',...stops]);}};}):(...v)=>{assert.ok(v.every(n=>typeof n!=='number'||Number.isFinite(n)));ops.push([k,...v]);},set:()=>true});drawMoonHare(c,{t,phase:t*.2,state:'run',reduceMotion:reduced});return ops;};
  assert.notDeepEqual(record(10,false),record(20,false));
  // Reduced motion must ignore the incoming phase as well as clock.
  assert.deepEqual(record(10,true),record(20,true));
