@@ -1,3 +1,5 @@
+V624 publicada: merge 99065e2; Pages aprobado con pruebas e integridad. Los once archivos cambiados de ejecución coinciden por hash con la web. Entrada pública nativa, primer recuerdo, álbum, HUD y J táctil aprobados en escritorio y móvil, sin hooks, errores ni peticiones al backend pausado. Ojos suavizados en bebé y conejo; Hada/Medusa/Eclipse conservadas y formas aladas con vuelo. La API denegó crear el PR (Forbidden). Registro: docs/V624-PUBLICATION.json.
+
 V624 validada localmente: 1.782 pruebas Node, Release Gate, tres tamaños de selección, dieciséis poses propias, tres medusas y forma 4 ganadas por controles, aleteo de Hada, vuelo sostenido/planeo/descenso de Eclipse con teclado y táctil y cámara sin tapar al personaje. Auditoría de navegador y Versus local aprobados. Se conservan 27 trazas de Hada/Medusa/Eclipse. Pendiente verificación pública.
 
 ## V624 · revisión final de ojos y vuelo

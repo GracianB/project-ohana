@@ -3,9 +3,9 @@
   "updated_on": "2026-10-29",
   "release": "ohana-624",
   "repository": "GracianB/project-ohana",
-  "published": false,
+  "published": true,
   "v1_ready": false,
-  "next_task": "publish_and_verify_V624_michi_art_and_flight",
+  "next_task": "user_play_review_of_V624_michi_eyes_anatomy_and_flight",
   "validation": "docs/V624-VALIDATION.json",
   "publication": "docs/V624-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
@@ -13,6 +13,6 @@
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
-  "source_commit": "ae920905e12650182b762f685f19425c7da0212d",
+  "source_commit": "99065e23aa6e3fc5c23addc13fa80c022df9da24",
   "previous_verified_campaign": "docs/V623-VALIDATION.json"
 }
