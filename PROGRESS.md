@@ -1,3 +1,5 @@
+V625 publicada y comprobada: merge ec1cbaf; Pages aprobado (1.803 pruebas Node e integridad incluidas). Los seis archivos runtime cambiados coinciden por hash con la web pública. Arranque nativo, cinco formas de Michi, primer recuerdo, álbum, HUD y J táctil aprobados en escritorio/móvil, sin hooks de prueba, errores ni llamadas al backend pausado. La revisión visual del jugador queda pendiente. No existe PR nuevo: la API devolvió Forbidden. Registro: docs/V625-PUBLICATION.json.
+
 V625 validada localmente: 1.803 pruebas Node, Release Gate (383 módulos / 445 recursos), 255 casos de arte, 85 comparaciones de movimiento reducido, selección 1280/390/320, HUD escritorio/móvil, evolución ganada hasta Conejornio y vuelo de Hada/Eclipse mediante controles. Pendiente la publicación; la aprobación visual del jugador no se infiere.
 
 # ohana-625 · Michi: revisión completa de las cinco formas

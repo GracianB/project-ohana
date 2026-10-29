@@ -3,9 +3,9 @@
   "updated_on": "2026-10-29",
   "release": "ohana-625",
   "repository": "GracianB/project-ohana",
-  "published": false,
+  "published": true,
   "v1_ready": false,
-  "next_task": "publish_and_verify_V625",
+  "next_task": "user_play_review_of_V625_five_michi_forms_and_anatomy",
   "validation": "docs/V625-VALIDATION.json",
   "publication": "docs/V625-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
@@ -13,5 +13,6 @@
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
-  "previous_verified_campaign": "docs/V623-VALIDATION.json"
+  "previous_verified_campaign": "docs/V623-VALIDATION.json",
+  "source_commit": "ec1cbaff5fd78b976c07680e09990e1fd72d2ea9"
 }
