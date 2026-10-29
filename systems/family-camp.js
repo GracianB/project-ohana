@@ -64,7 +64,18 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  const w1opts=()=>{let counts={};try{const g={};loadWorld1Collect(g);counts=countsByHero(g);}catch(_){}return {seals:readWorld1Seals(),counts,keepsakes:readKeepsakes()};};
  let w1sel=null;try{w1sel=createWorld1Select({...w1opts(),start:selected});}catch(_){w1sel=null;}
  if(w1sel){host.querySelector('.camp-scene-heading span').textContent='EL OBSERVATORIO DE LAS DIEZ VOCES';host.querySelector('.camp-scene-heading strong').textContent='Elige tu historia';host.querySelector('.camp-instructions').textContent='Elige un capítulo · cada héroe comienza como bebé · reúne diez sellos';menu.dataset.selectorMode='world1-rooms';host.dataset.world='1';const caption=menu.querySelector('.family-grid-caption');if(caption)caption.textContent='ACCESO DIRECTO A LOS CAPÍTULOS';canvas.setAttribute('aria-label','Mundo 1: diez salas, una por héroe, y el Corazón de Ohana. Flechas para elegir, Intro para entrar.');}
- const w1enter=(r)=>{if(!r)return;if(r.card?.final){host.dataset.final='true';$('camp-name').textContent='El Corazón';$('camp-role').textContent='Diez guardianes · diez recuerdos · Quimera';$('camp-line').textContent=r.card.tagline;$('camp-start').textContent='Entrar en el Corazón →';}if(r.card?.hero&&r.card.hero!==selected)selectHero(r.card.hero);if(r.action==='enter'){globalThis.__ohanaWorld1Start=r.room;onBegin();}else if(r.action==='locked'&&r.message)$('camp-line').textContent=r.message;};
+ const w1enter=(r)=>{
+  if(!r)return;
+  if(r.card?.final){
+   stopFilm();
+   host.dataset.final='true';$('camp-name').textContent='El Corazón';$('camp-role').textContent='Diez guardianes · diez recuerdos · Quimera';$('camp-line').textContent=r.card.tagline;$('camp-start').textContent='Entrar en el Corazón →';
+  }else if(r.card?.hero){
+   if(r.card.hero!==selected)selectHero(r.card.hero);
+   else if(host.dataset.final==='true')update();
+  }
+  if(r.action==='enter'){globalThis.__ohanaWorld1Start=r.room;onBegin();}
+  else if(r.action==='locked'&&r.message)$('camp-line').textContent=r.message;
+ };
  if(w1sel){
   canvas.addEventListener('pointerdown',e=>{const b=canvas.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;canvas.focus({preventScroll:true});e.stopImmediatePropagation();const m=world1SelectPointer(w1sel,x,y,false);if(!m)return;const again=m.card.final||m.card.hero===selected;w1enter(again?world1SelectPointer(w1sel,x,y,true):m);},true);
   canvas.addEventListener('pointermove',e=>{const b=canvas.getBoundingClientRect(),index=w1sel.index;world1SelectPointer(w1sel,e.clientX-b.left,e.clientY-b.top,false);w1sel.index=index;});
@@ -86,7 +97,8 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  for(const b of host.querySelectorAll('[data-camp-form]'))b.setAttribute('aria-pressed',String(Number(b.dataset.campForm)===form));
  $('camp-line').textContent=HERO_IDENTITY[selected].strength+' · '+HERO_IDENTITY[selected].weakness;host.dataset.hero=selected;host.dataset.form=String(form);
  }
- function choose(id,walk=false){if(!CAMP_HEROES[id])return;selected=id;form=0;film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;
+ function stopFilm(){film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;}
+ function choose(id,walk=false){if(!CAMP_HEROES[id])return;selected=id;form=0;stopFilm();
  // Keep keyboard focus and the Canvas portal selection in sync with the HTML hero cards.
  // V468 replaced paired islands with eleven cards; the old selector index could
  // still point at Dino after the player clicked Kilo, breaking ArrowRight.
@@ -99,10 +111,10 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
   walkSelectionLatched=false;
  }update();}
  const selectHero=(id,walk=false)=>{choose(id,walk);select(id);};
- addEventListener('ohana-title-hero',e=>{if(e.detail.id!==selected)choose(e.detail.id);});
+ addEventListener('ohana-title-hero',e=>{if(e.detail.id!==selected||host.dataset.final==='true')choose(e.detail.id);});
  host.querySelector('.camp-forms').addEventListener('click',e=>{const b=e.target.closest('[data-camp-form]');if(b){form=Number(b.dataset.campForm);update();}});
  $('camp-film').onclick=()=>{film={id:selected,start:time};$('camp-line').textContent=campPresentation(selected,0).line;$('camp-film-stop').hidden=false;$('camp-film').hidden=true;};
- $('camp-film-stop').onclick=()=>{film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;$('camp-line').textContent=CAMP_HEROES[selected].lines[0];};
+ $('camp-film-stop').onclick=()=>{stopFilm();$('camp-line').textContent=CAMP_HEROES[selected].lines[0];};
  $('camp-start').onclick=()=>w1sel?w1enter(world1SelectKey(w1sel,'Enter')):onBegin();
  function position(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/view.scale+view.x,y:(e.clientY-r.top)/view.scale};}
  canvas.addEventListener('pointerdown',e=>{canvas.focus({preventScroll:true});const p=position(e),id=campNearest(p.x,p.y+35,100);if(id)selectHero(id);else target={x:Math.max(140,Math.min(1230,p.x)),y:Math.max(190,Math.min(540,p.y))};});

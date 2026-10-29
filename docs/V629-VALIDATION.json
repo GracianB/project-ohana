@@ -1,0 +1,1277 @@
+{
+  "release": "ohana-629",
+  "base": "2b8ad64e67f72ef785adccec7a28700dcc897ebf",
+  "recorded_at": "2026-10-29T13:01:41.657732+00:00",
+  "review": "docs/V629-SELECCION.md",
+  "confirmed_baseline_defects": {
+    "keyboard": "Native Yomi -> ArrowRight -> final -> ArrowLeft: canvas paints Yomi but final dossier remains active at 1280 and 390 px.",
+    "pointer_touch": [
+      {
+        "width": 1280,
+        "touch": false,
+        "input": "pointer",
+        "hero": "yomi",
+        "before": {
+          "final": "false",
+          "hero": "yomi",
+          "painted": "yomi",
+          "title": "Yomi",
+          "start": "Entrar en su capítulo →",
+          "formsDisplay": "flex"
+        },
+        "final": {
+          "final": "true",
+          "hero": "yomi",
+          "painted": "final",
+          "title": "El Corazón",
+          "start": "Entrar en el Corazón →",
+          "formsDisplay": "none"
+        },
+        "after": {
+          "final": "true",
+          "hero": "yomi",
+          "painted": "final",
+          "title": "El Corazón",
+          "start": "Entrar en el Corazón →",
+          "formsDisplay": "none"
+        }
+      },
+      {
+        "width": 1280,
+        "touch": false,
+        "input": "pointer",
+        "hero": "cat",
+        "before": {
+          "final": "false",
+          "hero": "cat",
+          "painted": "cat",
+          "title": "Michicornio",
+          "start": "Entrar en su capítulo →",
+          "formsDisplay": "flex"
+        },
+        "final": {
+          "final": "true",
+          "hero": "cat",
+          "painted": "final",
+          "title": "El Corazón",
+          "start": "Entrar en el Corazón →",
+          "formsDisplay": "none"
+        },
+        "after": {
+          "final": "true",
+          "hero": "cat",
+          "painted": "final",
+          "title": "El Corazón",
+          "start": "Entrar en el Corazón →",
+          "formsDisplay": "none"
+        }
+      },
+      {
+        "width": 390,
+        "touch": true,
+        "input": "touch",
+        "hero": "yomi",
+        "before": {
+          "final": "false",
+          "hero": "yomi",
+          "painted": "yomi",
+          "title": "Yomi",
+          "start": "Entrar en su capítulo →",
+          "formsDisplay": "flex"
+        },
+        "final": {
+          "final": "true",
+          "hero": "yomi",
+          "painted": "final",
+          "title": "El Corazón",
+          "start": "Entrar en el Corazón →",
+          "formsDisplay": "none"
+        },
+        "after": {
+          "final": "true",
+          "hero": "yomi",
+          "painted": "final",
+          "title": "El Corazón",
+          "start": "Entrar en el Corazón →",
+          "formsDisplay": "none"
+        }
+      },
+      {
+        "width": 390,
+        "touch": true,
+        "input": "touch",
+        "hero": "cat",
+        "before": {
+          "final": "false",
+          "hero": "cat",
+          "painted": "cat",
+          "title": "Michicornio",
+          "start": "Entrar en su capítulo →",
+          "formsDisplay": "flex"
+        },
+        "final": {
+          "final": "true",
+          "hero": "cat",
+          "painted": "final",
+          "title": "El Corazón",
+          "start": "Entrar en el Corazón →",
+          "formsDisplay": "none"
+        },
+        "after": {
+          "final": "true",
+          "hero": "cat",
+          "painted": "final",
+          "title": "El Corazón",
+          "start": "Entrar en el Corazón →",
+          "formsDisplay": "none"
+        }
+      }
+    ],
+    "film": [
+      {
+        "width": 1280,
+        "touch": false,
+        "before": {
+          "final": "false",
+          "painted": "yomi",
+          "title": "Yomi",
+          "line": "Nadie me verá coger una galleta.",
+          "filmHidden": true,
+          "stopHidden": false
+        },
+        "immediate": {
+          "final": "true",
+          "painted": "final",
+          "title": "El Corazón",
+          "line": "Nadie me verá coger una galleta.",
+          "filmHidden": true,
+          "stopHidden": false
+        },
+        "after300": {
+          "final": "true",
+          "painted": "final",
+          "title": "El Corazón",
+          "line": "Nadie me verá coger una galleta.",
+          "filmHidden": true,
+          "stopHidden": false
+        },
+        "after4600": {
+          "final": "true",
+          "painted": "final",
+          "title": "El Corazón",
+          "line": "Nadie me verá coger una galleta.",
+          "filmHidden": true,
+          "stopHidden": false
+        }
+      },
+      {
+        "width": 390,
+        "touch": true,
+        "before": {
+          "final": "false",
+          "painted": "yomi",
+          "title": "Yomi",
+          "line": "Nadie me verá coger una galleta.",
+          "filmHidden": true,
+          "stopHidden": false
+        },
+        "immediate": {
+          "final": "true",
+          "painted": "final",
+          "title": "El Corazón",
+          "line": "Nadie me verá coger una galleta.",
+          "filmHidden": true,
+          "stopHidden": false
+        },
+        "after300": {
+          "final": "true",
+          "painted": "final",
+          "title": "El Corazón",
+          "line": "Nadie me verá coger una galleta.",
+          "filmHidden": true,
+          "stopHidden": false
+        },
+        "after4600": {
+          "final": "true",
+          "painted": "final",
+          "title": "El Corazón",
+          "line": "¿Por qué la galleta también es fantasma?",
+          "filmHidden": true,
+          "stopHidden": false
+        }
+      }
+    ]
+  },
+  "checks": {
+    "node": {
+      "result": "pass",
+      "tests": 1815,
+      "failures": 0,
+      "command": "npm test"
+    },
+    "release_gate": {
+      "result": "pass",
+      "cache": "ohana-629",
+      "runtime_modules": 385,
+      "precache_resources": 447
+    },
+    "quality_yaml": {
+      "result": "pass",
+      "steps": 77,
+      "native_selection_regression_included": true
+    },
+    "native_selector": {
+      "result": "pass",
+      "command": "npm run test:browser:selection-return",
+      "report": {
+        "environment": "local build",
+        "scope": "Native keyboard, HTML pointer/touch cards and final portal inputs; no hooks or save injection. Selection progress is checked unchanged before the separate desktop/mobile new-game CTA checks.",
+        "reports": [
+          {
+            "width": 1280,
+            "height": 900,
+            "touch": false,
+            "cases": [
+              {
+                "id": "yomi-keyboard-return",
+                "preservedPreview": 4,
+                "before": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "4",
+                  "paintedHero": "yomi",
+                  "paintedForm": "4",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "180",
+                    "5.3",
+                    "14.8",
+                    "3",
+                    "30"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "4",
+                  "paintedHero": "yomi",
+                  "paintedForm": "4",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "180",
+                    "5.3",
+                    "14.8",
+                    "3",
+                    "30"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "kilo-keyboard-wrap",
+                "before": {
+                  "final": "false",
+                  "hero": "kilo",
+                  "form": "0",
+                  "paintedHero": "kilo",
+                  "paintedForm": "0",
+                  "title": "Kilo",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Control, apoyo y vuelo musical · Necesita ritmo y preparación",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "80",
+                    "3.6",
+                    "11.4",
+                    "1",
+                    "14"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "kilo",
+                  "form": "0",
+                  "paintedHero": "kilo",
+                  "paintedForm": "0",
+                  "title": "Kilo",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Control, apoyo y vuelo musical · Necesita ritmo y preparación",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "80",
+                    "3.6",
+                    "11.4",
+                    "1",
+                    "14"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "yomi-pointer-return",
+                "restoredPreview": 0,
+                "before": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "0",
+                  "paintedHero": "yomi",
+                  "paintedForm": "0",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "74",
+                    "3.4",
+                    "12",
+                    "2",
+                    "18"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "final": {
+                  "final": "true",
+                  "hero": "yomi",
+                  "form": "4",
+                  "paintedHero": "final",
+                  "paintedForm": "4",
+                  "title": "El Corazón",
+                  "start": "Entrar en el Corazón →",
+                  "line": "Faltan sellos por despertar.",
+                  "formsDisplay": "none",
+                  "statsDisplay": "none",
+                  "stats": [
+                    "180",
+                    "5.3",
+                    "14.8",
+                    "3",
+                    "30"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "0",
+                  "paintedHero": "yomi",
+                  "paintedForm": "0",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "74",
+                    "3.4",
+                    "12",
+                    "2",
+                    "18"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "cat-pointer-return",
+                "restoredPreview": 0,
+                "before": {
+                  "final": "false",
+                  "hero": "cat",
+                  "form": "0",
+                  "paintedHero": "cat",
+                  "paintedForm": "0",
+                  "title": "Michicornio",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Salto alto y control de grupos · Frágil a corta distancia",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "62",
+                    "4.8",
+                    "13",
+                    "2",
+                    "27"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "final": {
+                  "final": "true",
+                  "hero": "cat",
+                  "form": "4",
+                  "paintedHero": "final",
+                  "paintedForm": "4",
+                  "title": "El Corazón",
+                  "start": "Entrar en el Corazón →",
+                  "line": "Faltan sellos por despertar.",
+                  "formsDisplay": "none",
+                  "statsDisplay": "none",
+                  "stats": [
+                    "155",
+                    "7.6",
+                    "17",
+                    "4",
+                    "45"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "cat",
+                  "form": "0",
+                  "paintedHero": "cat",
+                  "paintedForm": "0",
+                  "title": "Michicornio",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Salto alto y control de grupos · Frágil a corta distancia",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "62",
+                    "4.8",
+                    "13",
+                    "2",
+                    "27"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "casting-scene-final-message",
+                "filmStopped": true,
+                "taglineStable": true,
+                "lockedMessageStable": true,
+                "final": {
+                  "final": "true",
+                  "hero": "yomi",
+                  "form": "0",
+                  "paintedHero": "final",
+                  "paintedForm": "0",
+                  "title": "El Corazón",
+                  "start": "Entrar en el Corazón →",
+                  "line": "Faltan sellos por despertar.",
+                  "formsDisplay": "none",
+                  "statsDisplay": "none",
+                  "stats": [
+                    "74",
+                    "3.4",
+                    "12",
+                    "2",
+                    "18"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              }
+            ],
+            "selectionProgressUnchanged": true,
+            "noTestHooks": true,
+            "noGameplayDuringSelection": true,
+            "restoredStart": {
+              "playing": true,
+              "hero": "kilo",
+              "hooks": false
+            },
+            "errors": [],
+            "backend": []
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "touch": true,
+            "cases": [
+              {
+                "id": "yomi-keyboard-return",
+                "preservedPreview": 4,
+                "before": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "4",
+                  "paintedHero": "yomi",
+                  "paintedForm": "4",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "180",
+                    "5.3",
+                    "14.8",
+                    "3",
+                    "30"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "4",
+                  "paintedHero": "yomi",
+                  "paintedForm": "4",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "180",
+                    "5.3",
+                    "14.8",
+                    "3",
+                    "30"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "kilo-keyboard-wrap",
+                "before": {
+                  "final": "false",
+                  "hero": "kilo",
+                  "form": "0",
+                  "paintedHero": "kilo",
+                  "paintedForm": "0",
+                  "title": "Kilo",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Control, apoyo y vuelo musical · Necesita ritmo y preparación",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "80",
+                    "3.6",
+                    "11.4",
+                    "1",
+                    "14"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "kilo",
+                  "form": "0",
+                  "paintedHero": "kilo",
+                  "paintedForm": "0",
+                  "title": "Kilo",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Control, apoyo y vuelo musical · Necesita ritmo y preparación",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "80",
+                    "3.6",
+                    "11.4",
+                    "1",
+                    "14"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "yomi-touch-return",
+                "restoredPreview": 0,
+                "before": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "0",
+                  "paintedHero": "yomi",
+                  "paintedForm": "0",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "74",
+                    "3.4",
+                    "12",
+                    "2",
+                    "18"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "final": {
+                  "final": "true",
+                  "hero": "yomi",
+                  "form": "4",
+                  "paintedHero": "final",
+                  "paintedForm": "4",
+                  "title": "El Corazón",
+                  "start": "Entrar en el Corazón →",
+                  "line": "Faltan sellos por despertar.",
+                  "formsDisplay": "none",
+                  "statsDisplay": "none",
+                  "stats": [
+                    "180",
+                    "5.3",
+                    "14.8",
+                    "3",
+                    "30"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "0",
+                  "paintedHero": "yomi",
+                  "paintedForm": "0",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "74",
+                    "3.4",
+                    "12",
+                    "2",
+                    "18"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "cat-touch-return",
+                "restoredPreview": 0,
+                "before": {
+                  "final": "false",
+                  "hero": "cat",
+                  "form": "0",
+                  "paintedHero": "cat",
+                  "paintedForm": "0",
+                  "title": "Michicornio",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Salto alto y control de grupos · Frágil a corta distancia",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "62",
+                    "4.8",
+                    "13",
+                    "2",
+                    "27"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "final": {
+                  "final": "true",
+                  "hero": "cat",
+                  "form": "4",
+                  "paintedHero": "final",
+                  "paintedForm": "4",
+                  "title": "El Corazón",
+                  "start": "Entrar en el Corazón →",
+                  "line": "Faltan sellos por despertar.",
+                  "formsDisplay": "none",
+                  "statsDisplay": "none",
+                  "stats": [
+                    "155",
+                    "7.6",
+                    "17",
+                    "4",
+                    "45"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "cat",
+                  "form": "0",
+                  "paintedHero": "cat",
+                  "paintedForm": "0",
+                  "title": "Michicornio",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Salto alto y control de grupos · Frágil a corta distancia",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "62",
+                    "4.8",
+                    "13",
+                    "2",
+                    "27"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "casting-scene-final-message",
+                "filmStopped": true,
+                "taglineStable": true,
+                "lockedMessageStable": true,
+                "final": {
+                  "final": "true",
+                  "hero": "yomi",
+                  "form": "0",
+                  "paintedHero": "final",
+                  "paintedForm": "0",
+                  "title": "El Corazón",
+                  "start": "Entrar en el Corazón →",
+                  "line": "Faltan sellos por despertar.",
+                  "formsDisplay": "none",
+                  "statsDisplay": "none",
+                  "stats": [
+                    "74",
+                    "3.4",
+                    "12",
+                    "2",
+                    "18"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              }
+            ],
+            "selectionProgressUnchanged": true,
+            "noTestHooks": true,
+            "noGameplayDuringSelection": true,
+            "restoredStart": {
+              "playing": true,
+              "hero": "kilo",
+              "hooks": false
+            },
+            "errors": [],
+            "backend": []
+          },
+          {
+            "width": 320,
+            "height": 568,
+            "touch": true,
+            "cases": [
+              {
+                "id": "yomi-keyboard-return",
+                "preservedPreview": 4,
+                "before": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "4",
+                  "paintedHero": "yomi",
+                  "paintedForm": "4",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "180",
+                    "5.3",
+                    "14.8",
+                    "3",
+                    "30"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "4",
+                  "paintedHero": "yomi",
+                  "paintedForm": "4",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "180",
+                    "5.3",
+                    "14.8",
+                    "3",
+                    "30"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "kilo-keyboard-wrap",
+                "before": {
+                  "final": "false",
+                  "hero": "kilo",
+                  "form": "0",
+                  "paintedHero": "kilo",
+                  "paintedForm": "0",
+                  "title": "Kilo",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Control, apoyo y vuelo musical · Necesita ritmo y preparación",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "80",
+                    "3.6",
+                    "11.4",
+                    "1",
+                    "14"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "kilo",
+                  "form": "0",
+                  "paintedHero": "kilo",
+                  "paintedForm": "0",
+                  "title": "Kilo",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Control, apoyo y vuelo musical · Necesita ritmo y preparación",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "80",
+                    "3.6",
+                    "11.4",
+                    "1",
+                    "14"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "yomi-touch-return",
+                "restoredPreview": 0,
+                "before": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "0",
+                  "paintedHero": "yomi",
+                  "paintedForm": "0",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "74",
+                    "3.4",
+                    "12",
+                    "2",
+                    "18"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "final": {
+                  "final": "true",
+                  "hero": "yomi",
+                  "form": "4",
+                  "paintedHero": "final",
+                  "paintedForm": "4",
+                  "title": "El Corazón",
+                  "start": "Entrar en el Corazón →",
+                  "line": "Faltan sellos por despertar.",
+                  "formsDisplay": "none",
+                  "statsDisplay": "none",
+                  "stats": [
+                    "180",
+                    "5.3",
+                    "14.8",
+                    "3",
+                    "30"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "yomi",
+                  "form": "0",
+                  "paintedHero": "yomi",
+                  "paintedForm": "0",
+                  "title": "Yomi",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Analiza, contiene y sintetiza · Menos velocidad; exige leer ventanas",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "74",
+                    "3.4",
+                    "12",
+                    "2",
+                    "18"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "cat-touch-return",
+                "restoredPreview": 0,
+                "before": {
+                  "final": "false",
+                  "hero": "cat",
+                  "form": "0",
+                  "paintedHero": "cat",
+                  "paintedForm": "0",
+                  "title": "Michicornio",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Salto alto y control de grupos · Frágil a corta distancia",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "62",
+                    "4.8",
+                    "13",
+                    "2",
+                    "27"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "final": {
+                  "final": "true",
+                  "hero": "cat",
+                  "form": "4",
+                  "paintedHero": "final",
+                  "paintedForm": "4",
+                  "title": "El Corazón",
+                  "start": "Entrar en el Corazón →",
+                  "line": "Faltan sellos por despertar.",
+                  "formsDisplay": "none",
+                  "statsDisplay": "none",
+                  "stats": [
+                    "155",
+                    "7.6",
+                    "17",
+                    "4",
+                    "45"
+                  ],
+                  "pressed": [
+                    "4"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                },
+                "after": {
+                  "final": "false",
+                  "hero": "cat",
+                  "form": "0",
+                  "paintedHero": "cat",
+                  "paintedForm": "0",
+                  "title": "Michicornio",
+                  "start": "Entrar en su capítulo →",
+                  "line": "Salto alto y control de grupos · Frágil a corta distancia",
+                  "formsDisplay": "flex",
+                  "statsDisplay": "grid",
+                  "stats": [
+                    "62",
+                    "4.8",
+                    "13",
+                    "2",
+                    "27"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              },
+              {
+                "id": "casting-scene-final-message",
+                "filmStopped": true,
+                "taglineStable": true,
+                "lockedMessageStable": true,
+                "final": {
+                  "final": "true",
+                  "hero": "yomi",
+                  "form": "0",
+                  "paintedHero": "final",
+                  "paintedForm": "0",
+                  "title": "El Corazón",
+                  "start": "Entrar en el Corazón →",
+                  "line": "Faltan sellos por despertar.",
+                  "formsDisplay": "none",
+                  "statsDisplay": "none",
+                  "stats": [
+                    "74",
+                    "3.4",
+                    "12",
+                    "2",
+                    "18"
+                  ],
+                  "pressed": [
+                    "0"
+                  ],
+                  "filmHidden": false,
+                  "stopHidden": true,
+                  "playing": false,
+                  "overflow": false
+                }
+              }
+            ],
+            "selectionProgressUnchanged": true,
+            "noTestHooks": true,
+            "noGameplayDuringSelection": true,
+            "restoredStart": null,
+            "errors": [],
+            "backend": []
+          }
+        ]
+      },
+      "screenshots": [
+        "test-results/v629/selection-restored-390.png",
+        "test-results/v629/selection-final-390.png"
+      ]
+    },
+    "michi_five_forms": {
+      "result": "pass",
+      "command": "OHANA_ART_RELEASE=629 npm run test:browser:michi-art",
+      "native_menu": [
+        {
+          "width": 1280,
+          "height": 900,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        },
+        {
+          "width": 320,
+          "height": 568,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        }
+      ],
+      "rendered_samples": 255,
+      "scale_samples": [
+        0.7,
+        1.5,
+        3
+      ],
+      "all_frozen_input_preserved": true,
+      "reduced_motion_samples_stable": 85,
+      "hitbox_samples_unchanged": 60,
+      "fresh_baby_hud": [
+        {
+          "width": 1280,
+          "height": 900,
+          "freshBaby": true,
+          "directChapterAccessFixture": true,
+          "hudLivingCanvas": true,
+          "healthVisible": true,
+          "noOverflow": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "freshBaby": true,
+          "directChapterAccessFixture": true,
+          "hudLivingCanvas": true,
+          "healthVisible": true,
+          "noOverflow": true
+        }
+      ],
+      "errors": [],
+      "report": "test-results/v629/michi-art.json"
+    },
+    "independent_static_review": {
+      "result": "no_actionable_findings",
+      "scope": "Same-hero state transitions, form preservation, selector index, event recursion and film ownership."
+    }
+  },
+  "source_blobs": {
+    "systems/family-camp.js": "dbfcd14cb7677a872b7da74d2bba5b081a297b13",
+    "index.html": "6182705082f5222a9efa7593c895cacf81d1ae9f",
+    "sw.js": "204e3fed209a7e0fc412913b18a40c0549d8d21d"
+  },
+  "limits": [
+    "Native selection checks run without game test hooks, injected saves or granted progress. Storage equality is checked before separate legitimate new-game entry checks.",
+    "Michi pose sheets are artwork fixtures. Baby HUD checks use direct chapter access and do not claim campaign progression.",
+    "No new campaign completion, physical gamepad test or human aesthetic acceptance is claimed.",
+    "Hero artwork, shared Michi eyes, actual final mirrors, combat rules, Kilo balance and save IDs remain unchanged.",
+    "Remote multiplayer backend is paused. Public source and native selection checks are recorded after deployment."
+  ]
+}
