@@ -1,5 +1,91 @@
 {
   "release": "ohana-629",
-  "published": false,
-  "status": "local_validation_passed_pending_publication"
+  "published": true,
+  "site": "https://gracianb.github.io/project-ohana/?release=629",
+  "verified_at": "2026-10-29T19:51:11.654241+00:00",
+  "feature_branch": "fix/v629-selection-return",
+  "feature_commit": "993717bc8bd902d60dd6cc3c1b0069e07cd5ea58",
+  "merged_source_commit": "a6fcefe0a2c527f234575162fecc8c8d5d14f914",
+  "integration": "Ordinary non-fast-forward merge authorized by user. Merged source tree verified identical to the tested feature tree.",
+  "pull_request": {
+    "created": false,
+    "reason": "gh pr create returned GitHub GraphQL Forbidden. No PR number is claimed."
+  },
+  "pages": {
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/40878337877",
+    "result": "Success",
+    "workflow": "pages",
+    "duration": "1m 2s",
+    "source_commit": "a6fcefe0a2c527f234575162fecc8c8d5d14f914",
+    "checks": "Unit tests and offline release integrity required by the successful Pages deployment."
+  },
+  "public_source_verification": {
+    "checked": "2026-10-29T13:03:44.405841+00:00",
+    "site": "https://gracianb.github.io/project-ohana/",
+    "files": [
+      {
+        "path": "systems/family-camp.js",
+        "expected": "dbfcd14cb7677a872b7da74d2bba5b081a297b13",
+        "actual": "dbfcd14cb7677a872b7da74d2bba5b081a297b13",
+        "match": true
+      },
+      {
+        "path": "index.html",
+        "expected": "6182705082f5222a9efa7593c895cacf81d1ae9f",
+        "actual": "6182705082f5222a9efa7593c895cacf81d1ae9f",
+        "match": true
+      },
+      {
+        "path": "sw.js",
+        "expected": "204e3fed209a7e0fc412913b18a40c0549d8d21d",
+        "actual": "204e3fed209a7e0fc412913b18a40c0549d8d21d",
+        "match": true
+      }
+    ],
+    "all_match": true
+  },
+  "public_native_selection": {
+    "command": "OHANA_TEST_BASE_URL=https://gracianb.github.io/project-ohana/ npm run test:browser:selection-return",
+    "result": "partial_public_matrix",
+    "fully_reported_cases": 5,
+    "viewports": [
+      {
+        "width": 390,
+        "height": 844,
+        "touch": true,
+        "passed_cases": [
+          "yomi-keyboard-return",
+          "kilo-keyboard-wrap",
+          "yomi-touch-return",
+          "cat-touch-return",
+          "casting-scene-final-message"
+        ],
+        "selection_progress_unchanged": true,
+        "no_test_hooks": true,
+        "restored_start": {
+          "playing": true,
+          "hero": "kilo",
+          "hooks": false
+        },
+        "errors": [],
+        "backend_requests": []
+      }
+    ],
+    "desktop_prefix": {
+      "width": 1280,
+      "height": 900,
+      "five_selection_cases_and_native_start": "passed before the later mobile-case timeout",
+      "evidence_log": "/workspace/ohana629-public-selection.log",
+      "screenshot": "test-results/v629/public-selection-restored-start-1280.png"
+    },
+    "uncompleted_public_batch": "The first full batch timed out on a later mobile tap; the independent 390 px rerun passed all cases and game entry. A subsequent batch timed out during startup. Public 320 px is not claimed. All three sizes passed locally.",
+    "harness_followup": "Scroll the Canvas into view before measuring the final portal and wait for its backing size to match the CSS size. The full local native matrix passes with this measurement guard.",
+    "scope": "Native keyboard, HTML pointer/touch cards and final portal inputs; no hooks or save injection. Selection progress is checked unchanged before the separate desktop/mobile new-game CTA checks.",
+    "local_artifact": "test-results/v629/public-selection-return.json"
+  },
+  "local_validation": "docs/V629-VALIDATION.json",
+  "human_art_acceptance": "pending_user_play",
+  "remote_multiplayer_backend": "paused",
+  "stable_v1_tag_created": false,
+  "limits": "Native selection and legitimate first-chapter entry checks do not claim a new campaign completion or physical gamepad validation. Selection storage equality is checked before legitimate new-game entry."
 }

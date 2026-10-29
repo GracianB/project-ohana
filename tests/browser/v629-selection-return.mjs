@@ -69,6 +69,13 @@ try{
    return current;
   }
   async function finalPointer(){
+   // Form buttons can scroll the canvas out of view. Settle its position
+   // before measuring the portal, rather than measuring before tap scrolls.
+   await canvas.scrollIntoViewIfNeeded();
+   await page.waitForFunction(()=>{
+    const canvas=document.querySelector('#camp-canvas'),dpr=Math.min(devicePixelRatio||1,1.5);
+    return canvas.width===Math.round(canvas.clientWidth*dpr)&&canvas.height===Math.round(canvas.clientHeight*dpr);
+   });
    // Read the same exported layout geometry used by Canvas and pointer input.
    // This imports data/functions only; it never changes live selection state.
    const position=await page.evaluate(async base=>{

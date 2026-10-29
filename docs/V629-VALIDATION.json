@@ -1273,5 +1273,6 @@
     "No new campaign completion, physical gamepad test or human aesthetic acceptance is claimed.",
     "Hero artwork, shared Michi eyes, actual final mirrors, combat rules, Kilo balance and save IDs remain unchanged.",
     "Remote multiplayer backend is paused. Public source and native selection checks are recorded after deployment."
-  ]
+  ],
+  "validation_harness_followup": "After a public mobile tap timeout, the pointer fixture now scrolls the Canvas into view before measuring and waits for its backing size to match CSS. The full native local matrix passed again. This changes test positioning, not runtime behavior."
 }
