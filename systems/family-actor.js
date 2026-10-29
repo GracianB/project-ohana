@@ -1,0 +1,23 @@
+// Default adapter for the actual playable family, including standalone previews.
+// A missing external adapter must never replace a hero with a geometric emblem.
+import {drawCharacter} from '../characters/draw.js';
+import {findRoster} from '../characters/roster.js';
+import {heroHeightTarget} from '../characters/visual-size.js';
+
+export function createFamilyActor(hero,{form=0,pose='idle',facing=1,visualScale=1}={}){
+ const def=findRoster(hero),evo=Math.max(0,Math.min(4,Math.round(Number(form)||0))),f=def?.forms?.[evo];
+ if(!f)return null;
+ return {id:hero,evo,color:f.color||def.color,w:f.w,h:f.h,x:-f.w/2,y:-f.h,
+  facing,grounded:true,vx:0,vy:0,speed:f.speed,health:f.hp,maxHealth:f.hp,
+  visualScale,invuln:0,michiSeed:0,_poseOverride:pose,
+  _introForceCanvas:true,_duetActor:true,_theatreHQ:true};
+}
+export function drawFamilyActor(ctx,hero,x,y,scale=1,t=0,acting={},reduced=false){
+ const form=Math.max(0,Math.min(4,Math.round(Number(acting.form)||0)));
+ const actor=createFamilyActor(hero,{form,pose:acting.pose||'idle',
+  visualScale:Math.max(.1,Number(scale)||1)*60/heroHeightTarget(hero,form)});
+ if(!actor)return false;
+ if(hero==='kilo'&&acting.performance)actor._kiloPerformance={kind:acting.performance,time:reduced?3.5:t/60};
+ ctx.save();ctx.translate(x,y);drawCharacter(ctx,actor,{x:0,y:0},reduced?0:t,{reduceMotion:reduced});ctx.restore();
+ return true;
+}

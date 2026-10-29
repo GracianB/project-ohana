@@ -1,18 +1,17 @@
 {
   "schema_version": 2,
   "updated_on": "2026-10-29",
-  "release": "ohana-626",
+  "release": "ohana-627",
   "repository": "GracianB/project-ohana",
-  "published": true,
+  "published": false,
   "v1_ready": false,
-  "next_task": "user_play_review_of_V626_shared_michi_eyes",
-  "validation": "docs/V626-VALIDATION.json",
-  "publication": "docs/V626-PUBLICATION.json",
+  "next_task": "verify_and_publish_V627_real_mirror_characters",
+  "validation": "docs/V627-VALIDATION.json",
+  "publication": "docs/V627-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
   "remote_multiplayer": "paused_backend",
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
-  "previous_verified_campaign": "docs/V623-VALIDATION.json",
-  "source_commit": "8e0f60cd06e0cae475faf0337ab613c96d0cea3e"
+  "previous_verified_campaign": "docs/V623-VALIDATION.json"
 }

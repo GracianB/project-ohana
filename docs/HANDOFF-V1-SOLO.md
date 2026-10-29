@@ -1,3 +1,7 @@
+# Última revisión: V627 · Espejos con la familia real
+
+Se retiran esculturas geométricas superpuestas y se encuadran actores reales dentro de los diez cristales. Selección y cinemáticas usan actores canónicos si falta o falla su adaptador. Los ojos compartidos de V626 se conservan. Ver [alcance](V627-ESPEJOS.md), [validación](V627-VALIDATION.json) y [publicación](V627-PUBLICATION.json).
+
 # Última revisión: V626 · Ojos compartidos con los demás héroes
 
 El usuario rechaza los ojos de V625. Michi usa ahora `R.eye` sin modificarlo, igual que Kilo/Chispín/Dino/Cuerno. Ver [alcance](V626-MICHI-EYES.md), [validación](V626-VALIDATION.json) y [publicación](V626-PUBLICATION.json).

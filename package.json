@@ -64,7 +64,8 @@
     "test:browser:reported-visuals": "node tests/browser/v623-reported-visuals.mjs",
     "test:browser:frita-motion": "node tests/browser/v623-frita-motion.mjs",
     "test:browser:michi-v624": "node tests/browser/v624-moon-hare.mjs",
-    "test:browser:michi-art": "node tests/browser/v625-michi-art.mjs"
+    "test:browser:michi-art": "node tests/browser/v625-michi-art.mjs",
+    "test:browser:final-mirrors": "node tests/browser/v627-final-mirrors.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

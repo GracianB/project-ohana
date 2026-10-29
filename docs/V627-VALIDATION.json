@@ -1,0 +1,422 @@
+{
+  "release": "ohana-627",
+  "base": "44d5978095d50f0bee9ee97aaebb82cd6ea5de6b",
+  "recorded_at": "2026-10-29T05:37:24.026272+00:00",
+  "review": "docs/V627-ESPEJOS.md",
+  "checks": {
+    "node": {
+      "result": "pass",
+      "tests": 1811,
+      "failures": 0,
+      "command": "npm test"
+    },
+    "release_gate": {
+      "result": "pass",
+      "runtime_modules": 385,
+      "precache_resources": 447,
+      "cache": "ohana-627"
+    },
+    "final_mirror_room": {
+      "result": "pass",
+      "command": "npm run test:browser:final-mirrors",
+      "actual_room": {
+        "actualRoom": [
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "kilo",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "stitcho",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "chispin",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "cat",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "cuerno",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "dragon",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "dino",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "frita",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "pizza",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "yomi",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "kilo",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "stitcho",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "chispin",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "cat",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "cuerno",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "dragon",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "dino",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "frita",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "pizza",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "yomi",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          }
+        ],
+        "errors": [],
+        "scope": "Previously earned campaign backup, direct final-room and camera-position art fixtures; no XP/health/seal grants and no new campaign completion claim."
+      },
+      "portraits_and_fallbacks": {
+        "portraits": [
+          {
+            "hero": "kilo",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 8476,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 686
+          },
+          {
+            "hero": "stitcho",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 5535,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 596
+          },
+          {
+            "hero": "chispin",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 7219,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 783
+          },
+          {
+            "hero": "cat",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 6514,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 555
+          },
+          {
+            "hero": "cuerno",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 8205,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 652
+          },
+          {
+            "hero": "dragon",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 4304,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 447
+          },
+          {
+            "hero": "dino",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 4754,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 396
+          },
+          {
+            "hero": "frita",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 5519,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 522
+          },
+          {
+            "hero": "pizza",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 8074,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 757
+          },
+          {
+            "hero": "yomi",
+            "actualActorCanvasDraws": 1,
+            "actorPixels": 5199,
+            "completeSilhouetteInsideGlass": true,
+            "opaqueInteriorPixels": 22499,
+            "quantizedInteriorColors": 597
+          }
+        ],
+        "pedestal": {
+          "oldGenericBodies": 0,
+          "firstPlaqueTextPixels": 234,
+          "fills": [
+            "#262030",
+            "#3d3248",
+            "#4a3e59",
+            "#ffe3a0",
+            "#251a22",
+            "#262030",
+            "#3d3248",
+            "#4a3e59",
+            "#ffe3a0",
+            "#251a22"
+          ]
+        },
+        "fallbackFilms": [
+          {
+            "callback": "missing",
+            "actualActorCanvasDraws": 10
+          },
+          {
+            "callback": "throwing",
+            "actualActorCanvasDraws": 10
+          }
+        ],
+        "defaultSelection": {
+          "actualActorCanvasDraws": 21
+        }
+      },
+      "gallery": "test-results/v627/all-ten-mirrors.png"
+    },
+    "michi_five_forms": {
+      "result": "pass",
+      "command": "OHANA_ART_RELEASE=627 npm run test:browser:michi-art",
+      "drawing_cases": 255,
+      "reduced_motion_checks": 85,
+      "physical_hitbox_checks": 60,
+      "selection": [
+        {
+          "width": 1280,
+          "height": 900,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        },
+        {
+          "width": 320,
+          "height": 568,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        }
+      ],
+      "chapter_hud": [
+        {
+          "width": 1280,
+          "height": 900,
+          "freshBaby": true,
+          "directChapterAccessFixture": true,
+          "hudLivingCanvas": true,
+          "healthVisible": true,
+          "noOverflow": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "freshBaby": true,
+          "directChapterAccessFixture": true,
+          "hudLivingCanvas": true,
+          "healthVisible": true,
+          "noOverflow": true
+        }
+      ],
+      "errors": [],
+      "shared_eyes": "Exact existing R.eye implementation from V626 retained without changes."
+    },
+    "final_selection_and_guardian_cinemas": {
+      "result": "pass",
+      "command": "npm run test:browser:reported-visuals",
+      "report": {
+        "selection": [
+          {
+            "width": 1280,
+            "height": 900,
+            "finalPortalVisible": true,
+            "pointerSelectsFinal": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "finalPortalVisible": true,
+            "pointerSelectsFinal": true
+          },
+          {
+            "width": 320,
+            "height": 568,
+            "finalPortalVisible": true,
+            "pointerSelectsFinal": true
+          }
+        ],
+        "guardianFilmsRendered": 10,
+        "realmSignaturesRendered": 10,
+        "foregroundOpaque": true,
+        "fixtureOnly": true,
+        "errors": []
+      }
+    }
+  },
+  "source_blobs": {
+    "index.html": "b97dd4c228df2d746b0bbba70159846248941c6f",
+    "sw.js": "7b3c3514c4312b6708681682109f5f6128c73506",
+    "systems/family-actor.js": "71cb9d7aea8ae4d3967dc36ee4e7fbe46e318b22",
+    "systems/final-portal-mirrors.js": "77f0bf9641ee93229855d637d02291903461ccae",
+    "systems/world1-cine.js": "b16fd74f3e18ff278285b9e63ec0c1e1727cee4d",
+    "systems/world1-play.js": "27dd7c1334369057cb79935b4926f353de7d72bf",
+    "systems/world1-rooms.js": "f72888087937c71ab500d247538580af4e3eb8d8",
+    "systems/world1-select.js": "370d5ca9c06a41e48e8d753143db2c509071dbe4"
+  },
+  "limits": [
+    "The final room already painted real actors before this change. The old generic stone figures underneath them were removed; this is not a claim that every old mirror was empty.",
+    "Inspection of all ten room locations uses a previously earned campaign backup and explicit position fixtures. No new full campaign, combat victory or collection is claimed.",
+    "The isolated portrait checks compare visible character pixels against an empty-glass control and validate the measured silhouette inside the oval.",
+    "XP crystals were moved away from the glass without changing their count or value.",
+    "The V626 shared-eye artwork is preserved; no new Michi or other-hero redesign is claimed.",
+    "Human aesthetic acceptance remains pending user play. Remote multiplayer backend is paused. Public deployment is recorded separately."
+  ]
+}

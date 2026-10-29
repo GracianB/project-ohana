@@ -1,82 +1,81 @@
 import {drawCharacter} from '../characters/draw.js';
-import {findRoster} from '../characters/roster.js';
-import {heroHeightTarget} from '../characters/visual-size.js';
-// systems/final-portal-mirrors.js
-// V618 — Portales/Espejos de la Sala Final EXTREMO
-// The actual family actors live inside clipped oval glass. Offscreen mirrors
-// are culled before their animated Canvas portraits are rendered.
-// Posiciones alineadas con las estatuas de world1-rooms.js (900 + i*560).
+import {createFamilyActor} from './family-actor.js';
 
-const TAU = Math.PI * 2;
+// One live family portrait inside each glass. Bounds come from the same actor
+// renderer used in play, rather than physical hitboxes or substitute sculptures.
+const TAU=Math.PI*2,SIZE=512,FOOT=400,portraits=new Map();
+let measuring=null;
+const finite=(n,d=0)=>Number.isFinite(n)?n:d;
 
-export function drawPortalMirrors(ctx, portals, cam, t, player, reduced = false) {
-  if (!portals?.length) return;
-
-  for (const p of portals) {
-    const x = p.x - cam.x;
-    const y = p.y - cam.y;
-    const viewport=ctx.canvas?.width/Math.max(.01,Math.abs(ctx.getTransform?.().a||1));
-    if(Number.isFinite(viewport)&&(x+(p.rx||72)<0||x-(p.rx||72)>viewport))continue;
-    const near = player ? Math.hypot(player.x + player.w / 2 - p.x, player.y + player.h / 2 - p.y) < 220 : false;
-    const looking = near ? Math.sign(player.x + player.w / 2 - p.x) : Math.sin(t * 0.08 + p.x) * 0.6;
-
-    ctx.save();
-    ctx.translate(x, y);
-
-    const g = ctx.createLinearGradient(-p.rx, -p.ry, p.rx, p.ry);
-    g.addColorStop(0, 'rgba(180,210,255,0.12)');
-    g.addColorStop(0.5, 'rgba(220,240,255,0.22)');
-    g.addColorStop(1, 'rgba(140,180,220,0.10)');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, p.rx || 72, p.ry || 112, 0, 0, TAU);
-    ctx.fill();
-
-    ctx.strokeStyle = near ? '#fff6c8' : 'rgba(255,255,255,0.45)';
-    ctx.lineWidth = near ? 4 : 2.5;
-    ctx.stroke();
-
-    if (!reduced) {
-      ctx.globalAlpha = 0.18;
-      ctx.strokeStyle = '#80deea';
-      ctx.lineWidth = 1;
-      for (let i = -4; i <= 4; i++) {
-        const yy = i * 18 + Math.sin(t * 0.12 + i) * 2;
-        ctx.beginPath();
-        ctx.moveTo(-p.rx * 0.7, yy);
-        ctx.lineTo(p.rx * 0.7, yy);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    // Render the actual vector actor, clipped INSIDE the glass. No proxy faces.
-    const def=findRoster(p.hero),form=def?.forms?.[1];
-    if(form){
-      ctx.save();ctx.beginPath();ctx.ellipse(0,0,p.rx||72,p.ry||112,0,0,TAU);ctx.clip();
-      ctx.translate(0,(p.ry||112)*.72);ctx.shadowBlur=0;ctx.filter='none';ctx.globalAlpha=1;
-      const actor={id:p.hero,evo:1,color:form.color||def.color,w:form.w,h:form.h,x:-form.w/2,y:-form.h,
-        facing:looking<0?-1:1,grounded:true,vx:0,vy:0,health:form.hp,maxHealth:form.hp,
-        visualScale:(p.ry||112)*(['dragon','dino','cuerno','yomi'].includes(p.hero)?1.15:1.5)/heroHeightTarget(p.hero,1),invuln:0,
-        _poseOverride:near?'victory':'idle',_introForceCanvas:true,_duetActor:true,_theatreHQ:true};
-      drawCharacter(ctx,actor,{x:0,y:0},reduced?0:t,{reduceMotion:reduced});ctx.restore();
-    }
-
-    ctx.restore();
-  }
+function mirrorActor(hero,state='idle',facing=1){
+ return createFamilyActor(hero,{form:1,pose:state,facing});
+}
+function portraitBounds(ctx,hero){
+ if(portraits.has(hero))return portraits.get(hero);
+ const doc=ctx.canvas?.ownerDocument||globalThis.document;
+ if(!doc?.createElement)return {left:-60,top:-120,right:60,bottom:8};
+ if(!measuring){const canvas=doc.createElement('canvas');canvas.width=canvas.height=SIZE;measuring=canvas.getContext('2d',{willReadFrequently:true});}
+ let left=SIZE,top=SIZE,right=0,bottom=0;
+ for(const state of['idle','victory'])for(const time of[0,45,90,135]){
+  measuring.setTransform(1,0,0,1,0,0);measuring.clearRect(0,0,SIZE,SIZE);
+  measuring.save();measuring.translate(SIZE/2,FOOT);
+  drawCharacter(measuring,mirrorActor(hero,state),{x:0,y:0},time);measuring.restore();
+  const data=measuring.getImageData(0,0,SIZE,SIZE).data;
+  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(data[(y*SIZE+x)*4+3]>24){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+ }
+ const pad=6,bounds={left:left-SIZE/2-pad,top:top-FOOT-pad,right:right-SIZE/2+pad,bottom:bottom-FOOT+pad};
+ portraits.set(hero,bounds);return bounds;
 }
 
-// Posiciones alineadas con las estatuas de la procesión (world1-rooms.js)
-// x = 900 + i * 560, y centrado sobre el suelo (WORLD1_FLOOR = 1134)
-export const FINAL_PORTALS = Object.freeze([
-  { hero: 'kilo',     x: 900,  y: 990, rx: 70, ry: 110 },
-  { hero: 'stitcho',  x: 1460, y: 990, rx: 72, ry: 112 },
-  { hero: 'chispin',  x: 2020, y: 990, rx: 68, ry: 108 },
-  { hero: 'cat',      x: 2580, y: 990, rx: 70, ry: 110 },
-  { hero: 'cuerno',   x: 3140, y: 990, rx: 72, ry: 112 },
-  { hero: 'dragon',   x: 3700, y: 990, rx: 74, ry: 114 },
-  { hero: 'dino',     x: 4260, y: 990, rx: 70, ry: 110 },
-  { hero: 'frita',    x: 4820, y: 990, rx: 68, ry: 108 },
-  { hero: 'pizza',    x: 5380, y: 990, rx: 70, ry: 110 },
-  { hero: 'yomi',     x: 5940, y: 990, rx: 72, ry: 112 }
-]);
+// Fit the complete animated silhouette into a rectangle inscribed in the oval.
+// This keeps ears, horns, wings and paws inside the glass in either direction.
+export function mirrorPortraitLayout(bounds,rx=108,ry=132){
+ rx=Math.max(1,finite(rx,108));ry=Math.max(1,finite(ry,132));
+ const left=finite(bounds?.left,-60),top=finite(bounds?.top,-120);
+ const right=Math.max(left+1,finite(bounds?.right,60)),bottom=Math.max(top+1,finite(bounds?.bottom,8));
+ const scale=Math.min(rx*1.36/(right-left),ry*1.36/(bottom-top));
+ const x=-(left+right)*.5*scale,y=ry*.025-(top+bottom)*.5*scale;
+ return {scale,x,y,painted:{x:left*scale+x,y:top*scale+y,w:(right-left)*scale,h:(bottom-top)*scale}};
+}
+
+export function drawMirrorPortrait(ctx,hero,rx,ry,t=0,{near=false,reduced=false,facing=1}={}){
+ const actor=mirrorActor(hero,near?'victory':'idle',facing);if(!actor)return null;
+ const bounds=portraitBounds(ctx,hero),fit=mirrorPortraitLayout(bounds,rx,ry);
+ ctx.save();ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TAU);ctx.clip();
+ ctx.shadowBlur=0;ctx.filter='none';ctx.globalAlpha=1;
+ ctx.translate(fit.x*facing,fit.y);ctx.scale(fit.scale,fit.scale);
+ drawCharacter(ctx,actor,{x:0,y:0},reduced?0:finite(t),{reduceMotion:reduced});
+ ctx.restore();return {hero,form:1,bounds,fit};
+}
+
+export function drawPortalMirrors(ctx,portals,cam,t=0,player,reduced=false){
+ const rendered=[];if(!portals?.length)return rendered;
+ const camera={x:finite(cam?.x),y:finite(cam?.y)};
+ const viewport=ctx.canvas?.width/Math.max(.01,Math.abs(ctx.getTransform?.().a||1));
+ for(const p of portals){
+  const rx=Math.max(1,finite(p.rx,108)),ry=Math.max(1,finite(p.ry,132));
+  const x=finite(p.x)-camera.x,y=finite(p.y)-camera.y;
+  if(Number.isFinite(viewport)&&(x+rx<0||x-rx>viewport))continue;
+  const dx=player?player.x+player.w/2-p.x:0;
+  const near=!!player&&Math.hypot(dx,player.y+player.h/2-p.y)<240;
+  ctx.save();ctx.translate(x,y);
+  // Dark, quiet glass separates the actual coat/face from the bright observatory.
+  const glass=ctx.createLinearGradient(0,-ry,0,ry);
+  glass.addColorStop(0,'#13283d');glass.addColorStop(.6,'#243b50');glass.addColorStop(1,'#304957');
+  ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TAU);ctx.fillStyle=glass;ctx.fill();
+  const portrait=drawMirrorPortrait(ctx,p.hero,rx-5,ry-5,t,{near,reduced,facing:near&&dx<0?-1:1});
+  if(portrait)rendered.push(portrait);
+  ctx.strokeStyle=near?'#fff1bf':'#c7d8df';ctx.lineWidth=near?4:2.5;
+  ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TAU);ctx.stroke();
+  // Rim reflections stay at the edge, away from the face.
+  ctx.strokeStyle='#e5f4ef99';ctx.lineWidth=2;
+  ctx.beginPath();ctx.ellipse(-rx*.02,-ry*.02,rx*.91,ry*.91,0,Math.PI*1.08,Math.PI*1.46);ctx.stroke();
+  ctx.restore();
+ }
+ return rendered;
+}
+
+// All glass rests above the named plinth, leaving its plaque unobstructed.
+export const FINAL_PORTALS=Object.freeze([
+ 'kilo','stitcho','chispin','cat','cuerno','dragon','dino','frita','pizza','yomi'
+].map((hero,i)=>Object.freeze({hero,x:900+i*560,y:934,rx:108,ry:132})));
