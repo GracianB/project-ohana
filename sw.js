@@ -1,6 +1,7 @@
-const VERSION = "ohana-626";
+const VERSION = "ohana-627";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/family-actor.js?v=" + VERSION,
   "./characters/michi-eyes.js?v=" + VERSION,
   "./characters/michi-flight.js?v=" + VERSION,
   "./characters/michi-kitten.js?v=" + VERSION,
@@ -457,6 +458,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/family-actor.js": "71cb9d7aea8ae4d3967dc36ee4e7fbe46e318b22",
   "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
   "characters/michi-flight.js": "f76733588d2d43bfc6b8d696e5faffb027cf3a22",
   "characters/michi-kitten.js": "9cde42417809f14a2ee2dfdea77eb78f2eb830fa",
@@ -574,9 +576,9 @@ const PRECACHE_REVISIONS = {
   "systems/pizza-chapter.js": "328fb0f36e5e8bb8e6f7fd18c0aba0d7a059a268",
   "worlds/pizza-ovens.js": "28440ea475b0e5499a04f91d396b1785355ce8e2",
   "systems/yomi-room.js": "0916aa8f05dd7b6dccfafe698f01d43c856bbe3a",
-  "systems/world1-cine.js": "ea9e4bf6ab17c413ed8b17039f833d34e9ac9f34",
-  "systems/final-portal-mirrors.js": "a3802725ddfea1a16f682cabdeccd126528f43ca",
-  "systems/world1-select.js": "1f3d61cd715a9f46485f1509b00d8f4f10a51676",
+  "systems/world1-cine.js": "b16fd74f3e18ff278285b9e63ec0c1e1727cee4d",
+  "systems/final-portal-mirrors.js": "77f0bf9641ee93229855d637d02291903461ccae",
+  "systems/world1-select.js": "370d5ca9c06a41e48e8d753143db2c509071dbe4",
   "systems/theatre-stage.js": "1824c8672997164ac18403f85fccd8ef7d87d50d",
   "systems/world1-progress.js": "52c9c5ded533dc649210fd913b737614b2bb67dc",
   "systems/world1-collect.js": "cc3223c710bddeb8f1587dd462292f8fb60956eb",
@@ -584,10 +586,10 @@ const PRECACHE_REVISIONS = {
   "systems/fusion-boss.js": "ed5b248a1e33315cb063b92b049e64d479393242",
   "systems/quimera-art.js": "b320aeff3660c6aa859dc545acd2778bc4fdf80a",
   "systems/world1-story.js": "dc635eb6dced1378e8831f5a825ceff9111e401a",
-  "systems/world1-rooms.js": "9e0a747acb1e474c1aba0122f1fea60bfb7593e8",
+  "systems/world1-rooms.js": "f72888087937c71ab500d247538580af4e3eb8d8",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
   "worlds/chapter-stagecraft.js": "979021a3b2cd9fca0794d0fa70beb250a20845da",
-  "systems/world1-play.js": "97ae2fe161ff815195e5baf7487d0ef261caa224",
+  "systems/world1-play.js": "27dd7c1334369057cb79935b4926f353de7d72bf",
   "systems/yomi-trail.js": "d39306a5ada636f9c9b2dee5107e7990da01134c",
   "systems/yomi-boss.js": "d92183bb60f4193a0a66875e4ff57f78b2189042",
   "worlds/yomi-observatory.js": "bbc3e453a487d67ec7ae8f51dde1b58d959cc2ce",
@@ -658,7 +660,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "83d29d5e9b2d38bdaad3c40d87220899c7c42b2f",
+  "index.html": "b97dd4c228df2d746b0bbba70159846248941c6f",
   "multiplayer.html": "8700abcf3f860c504167facf1c37815debad59f9",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "b3178c951bec2a30bda0bb2b2d47763b24567189",

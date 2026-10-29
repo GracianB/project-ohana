@@ -275,7 +275,7 @@ export function buildWorld1FinalRoom() {
     width: W, height: WORLD1_ROOM_H,
     doors: { left: "w1-yomi", right: "hub", up: null, down: null },
     hint: "Recorre la procesión de los diez. Al final te espera la Quimera Ohana, hecha con los ecos de toda la familia.",
-    plats, foes: [], orbs: statues.map((s) => [s.x, 980]), sectors, checkpoints, hazards: [], upExit: null,
+    plats, foes: [], orbs: statues.map((s) => [s.x + 180, 1090]), sectors, checkpoints, hazards: [], upExit: null,
     boss: true, fusionBoss: true, arena: { ...A }, statues,
     portals: []
   };

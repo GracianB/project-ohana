@@ -1,3 +1,4 @@
+import {drawFamilyActor} from './family-actor.js';
 import {holdAdventureFinalScene} from '../multiplayer/adventure-finale.js';
 import {KEEPSAKES,drawKeepsake} from './keepsakes.js';
 import {drawChapterBossV2} from './chapter-boss-art-v2.js';
@@ -25,7 +26,7 @@ import {drawHarborWelcome} from '../worlds/ohana-environments.js';
 // Sin degradados por fotograma, sin Math.random, geometría finita, textos en español.
 import { WORLD1_ORDER, WORLD1_THEMES, WORLD1_SEALS } from "./world1-rooms.js";
 import { WORLD1_ROOM_STORY, FUSION_STORY, WORLD1_ENDING, WORLD1_TITLE, WORLD1_PREMISE } from "./world1-story.js";
-import { drawHeroEmblem, heroDisplayName } from "./world1-select.js";
+import { heroDisplayName } from "./world1-select.js";
 
 const num = (v, d = 0) => (Number.isFinite(v) ? v : d);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -198,28 +199,23 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   // Halo plano del color del plano (círculos concéntricos, sin degradado).
   ctx.fillStyle = s.color; for (let i = 3; i >= 1; i--) { ctx.globalAlpha = (s.burst ? 0.09 : 0.05) * i * fadeIn; ctx.beginPath(); ctx.arc(W / 2, H * 0.5, Math.min(W, H) * (0.12 + 0.1 * (4 - i)) * (s.burst ? 0.8 + k * 0.5 : 1), 0, Math.PI * 2); ctx.fill(); }
   if (s.layout === "portal") { ctx.globalAlpha = fadeIn; ctx.strokeStyle = "#8fe9ff"; ctx.lineWidth = 8; const r = Math.min(W, H) * 0.2; ctx.beginPath(); ctx.ellipse(W * 0.82, H * 0.5, r * 0.7, r * (0.9 + 0.05 * Math.sin(t * 0.06)), 0, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "#2a1f4a"; ctx.fill(); ctx.fillStyle = "#8fe9ff"; ctx.font = `bold ${Math.round(H * 0.035)}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("MUNDO 2", W * 0.82, H * 0.48); ctx.font = `bold ${Math.round(H * 0.022)}px sans-serif`; ctx.fillText("en construcción", W * 0.82, H * 0.54); }
-  // Héroes.
+  const actor=(...args)=>{
+    if(drawActor){ctx.save();try{return drawActor(...args);}catch(_){}finally{ctx.restore();}}
+    return drawFamilyActor(...args.slice(0,5),reduce?0:t,args[5]||{},reduce);
+  };
+  // Héroes: el adaptador por defecto dibuja los mismos actores de la partida.
   const lit = new Set(s.lit || (["one","arrival"].includes(s.layout) ? s.heroes : [])), n = s.heroes.length;
   (["fused","keeper","keepsake"].includes(s.layout)?[]:s.heroes).forEach((h, i) => {
     const [x, y, sc] = heroPos(s.layout, i, n, W, H, k, reduce ? 0 : t), on = lit.has(h) && !s.dim;
-    const col = s.layout === "fused" ? "#ff3a8a" : on ? WORLD1_THEMES[h].color : "#4a3f72";
     const size = Math.min(W, H) * 0.12 * num(sc, 1);
     ctx.globalAlpha = fadeIn * fadeOut * (s.layout === "fused" ? 0.85 : 1);
     const hop = s.dance && !reduce ? Math.abs(Math.sin(t * 0.09 + i)) * 14 : 0;
-    // Layouts que siempre intentan drawActor (iluminados o no)
-    const alwaysActor = ['circle','scatter','line','burst','converge'].includes(s.layout);
-    if (drawActor && (on || alwaysActor) && s.layout !== 'fused') {
-      try {
-        if (!on && alwaysActor) ctx.globalAlpha *= 0.45;
-        drawActor(ctx, h, x, y + size * .5 - hop, size / 60,
-          s.layout === 'arrival'
-            ? { pose: reduce ? 'idle' : k < .45 ? 'run' : k < .7 ? 'cast' : 'victory', form: 0 }
-            : { pose: on ? (s.dance ? 'victory' : 'idle') : 'idle', form: 0 });
-        ctx.globalAlpha = fadeIn * fadeOut;
-        return;
-      } catch (_) {}
-    }
-    drawHeroEmblem(ctx, h, x, y - hop, size, col, reduce ? 0 : t);
+    if(!on)ctx.globalAlpha*=.45;
+    actor(ctx,h,x,y+size*.5-hop,size/60,
+      s.layout==='arrival'
+        ? {pose:reduce?'idle':k<.45?'run':k<.7?'cast':'victory',form:0}
+        : {pose:on?(s.dance?'victory':'idle'):'idle',form:0});
+    ctx.globalAlpha=fadeIn*fadeOut;
     if (s.dim && s.layout === "one") { ctx.globalAlpha = 0.5 * fadeIn; ctx.fillStyle = s.bg; ctx.fillRect(x - size, y - size * 0.8 + size * 1.6 * k * 0.6, size * 2, size * 1.6 * (1 - k * 0.6)); }
   });
   if(s.layout==='fused'){
@@ -230,7 +226,7 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
    // Star/halo alpha must never leak into the two foreground actors.
    ctx.globalAlpha=fadeIn*fadeOut;ctx.shadowBlur=0;ctx.filter='none';
    const hero=c.hero,data=KEEPSAKES[hero],height=Math.min(H*.37,W*.34),foot=H*.65;
-   if(drawActor)drawActor(ctx,hero,W*.34,foot,height/60,{form:4,pose:s.layout==='keepsake'?'victory':'idle'});
+   actor(ctx,hero,W*.34,foot,height/60,{form:4,pose:s.layout==='keepsake'?'victory':'idle'});
    if(s.layout==='keeper'){
     const e=g.finalGauntlet?.guardian;if(e){ctx.save();const k=Math.min(H*.4,W*.36)/e.h;ctx.translate(W*.67,foot);ctx.scale(k,k);drawChapterBossV2(ctx,{...e,x:-e.w/2,y:-e.h,flash:0,invuln:0},{x:0,y:0},t,reduce);ctx.restore();}
     drawKeepsake(ctx,hero,W*.54,foot+14,Math.min(70,H*.12),{ghost:true});

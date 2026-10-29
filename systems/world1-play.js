@@ -396,7 +396,7 @@ export function drawWorld1(ctx, g, cam, t) {
   const vis = (x) => x - cam.x > -200 && x - cam.x < (g.viewW || 1600) + 200;
   ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
   if (r.fusionBoss) {
-    r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
+    r.statues.forEach((s, i) => { if (vis(s.x)) drawMirrorPedestal(ctx, s, cam, w.statuesLit[i]); });
     ctx.restore(); return;
   }
   drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawDragonChapter(ctx,g,cam);drawDinoChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);drawFritaAtmosphere(ctx,g,cam,t,reduce);drawPizzaAtmosphere(ctx,g,cam,t,reduce);drawYomiAtmosphere(ctx,g,cam,t,reduce);
@@ -656,111 +656,21 @@ function _rr(c, x, y, w, h, r = 4) {
   if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h);
 }
 
-function drawStatue(ctx, s, cam, lit, t, reduce) {
-  const x = s.x - cam.x, y = s.y - cam.y, hero = s.hero, theme = WORLD1_THEMES[hero];
-  const col = theme?.color || "#ffd6f2";
-  const name = heroName(hero);
-
-  ctx.save();
-
-  // Rayo de luz celeste si el sello está encendido
-  if (lit && !reduce) {
-    const beamPulse = Math.sin(t * 0.06 + s.x * 0.01) * 0.15 + 0.35;
-    const beamGrad = ctx.createLinearGradient(x, y - 40, x, 0);
-    beamGrad.addColorStop(0, col);
-    beamGrad.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = beamGrad;
-    ctx.globalAlpha = beamPulse * 0.4;
-    ctx.beginPath();
-    ctx.moveTo(x - 45, y - 40);
-    ctx.lineTo(x + 45, y - 40);
-    ctx.lineTo(x + 75, 0);
-    ctx.lineTo(x - 75, 0);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-
-  // ── Pedestal clásico de granito pulido ──
-  ctx.fillStyle = "#262030"; ctx.fillRect(x - 72, y - 16, 144, 16);
-  ctx.fillStyle = lit ? "#3d3248" : "#2e2738";
-  ctx.fillRect(x - 62, y - 56, 124, 40);
-  ctx.strokeStyle = lit ? col : "#57506a"; ctx.lineWidth = 1.8;
-  ctx.strokeRect(x - 62, y - 56, 124, 40);
-  ctx.fillStyle = "#4a3e59"; ctx.fillRect(x - 68, y - 62, 136, 8);
-
-  // Placa de bronce pulido con nombre y reliquia
-  ctx.fillStyle = lit ? "#ffe082" : "#8d7966";
-  ctx.strokeStyle = lit ? "#ffb300" : "#5d4e3f";
-  ctx.lineWidth = 1.2;
-  _rr(ctx, x - 52, y - 50, 104, 28, 4); ctx.fill(); ctx.stroke();
-
-  ctx.fillStyle = lit ? "#1a0f00" : "#241810";
-  ctx.font = "800 12px Outfit, sans-serif"; ctx.textAlign = "center";
-  ctx.fillText(name.toUpperCase(), x, y - 36);
-
-  ctx.fillStyle = lit ? "#b26a00" : "#4a3b30";
-  ctx.font = "700 8px monospace";
-  ctx.fillText(theme?.relic || "OHANA", x, y - 25);
-
-  // ── Escultura de piedra del héroe ──
-  const stoneBase = lit ? "#7e7090" : "#57506a";
-  const stoneHigh = lit ? col : "#8b7e9e";
-  const stoneRim  = lit ? "#ffffff" : "#c4b8d4";
-
-  ctx.fillStyle = stoneBase;
-  ctx.strokeStyle = stoneRim;
-  ctx.lineWidth = 2.2;
-  ctx.lineCap = "round"; ctx.lineJoin = "round";
-
-  ctx.beginPath();
-  ctx.ellipse(x, y - 140, 48, 76, 0, 0, Math.PI * 2);
-  ctx.fill(); ctx.stroke();
-
-  ctx.strokeStyle = stoneHigh; ctx.lineWidth = 2;
-  if (hero === 'kilo') {
-    ctx.beginPath(); ctx.ellipse(x, y - 135, 18, 26, 0.2, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x - 4, y - 160); ctx.lineTo(x + 4, y - 110); ctx.stroke();
-  } else if (hero === 'stitcho') {
-    ctx.beginPath(); ctx.moveTo(x - 30, y - 160); ctx.lineTo(x - 52, y - 190); ctx.lineTo(x - 22, y - 175); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + 30, y - 160); ctx.lineTo(x + 52, y - 190); ctx.lineTo(x + 22, y - 175); ctx.stroke();
-  } else if (hero === 'chispin') {
-    ctx.beginPath(); ctx.moveTo(x, y - 180); ctx.lineTo(x - 12, y - 145); ctx.lineTo(x + 6, y - 145); ctx.lineTo(x - 6, y - 110); ctx.stroke();
-  } else if (hero === 'cat') {
-    ctx.beginPath(); ctx.arc(x, y - 140, 22, -0.6, 2.2); ctx.stroke();
-  } else if (hero === 'cuerno') {
-    ctx.beginPath(); ctx.moveTo(x, y - 175); ctx.quadraticCurveTo(x + 8, y - 215, x + 24, y - 225); ctx.stroke();
-  } else if (hero === 'dragon') {
-    ctx.beginPath(); ctx.moveTo(x - 20, y - 150); ctx.quadraticCurveTo(x - 55, y - 190, x - 45, y - 130); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + 20, y - 150); ctx.quadraticCurveTo(x + 55, y - 190, x + 45, y - 130); ctx.stroke();
-  } else if (hero === 'dino') {
-    for (let p = -2; p <= 2; p++) {
-      ctx.beginPath(); ctx.arc(x + p * 12, y - 180 + Math.abs(p) * 6, 6, 0, Math.PI * 2); ctx.stroke();
-    }
-  } else if (hero === 'frita') {
-    ctx.beginPath(); ctx.moveTo(x - 25, y - 160); ctx.quadraticCurveTo(x - 45, y - 120, x - 35, y - 90); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + 25, y - 160); ctx.quadraticCurveTo(x + 45, y - 120, x + 35, y - 90); ctx.stroke();
-  } else if (hero === 'pizza') {
-    ctx.beginPath(); ctx.rect(x - 16, y - 195, 32, 16); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x, y - 195, 16, Math.PI, 0); ctx.stroke();
-  } else if (hero === 'yomi') {
-    ctx.beginPath(); ctx.arc(x, y - 190, 8, -Math.PI * 0.4, Math.PI * 0.8); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x, y - 140, 28, 0, Math.PI * 2); ctx.stroke();
-  }
-
-  if (lit) {
-    const haloGlow = 0.4 + (reduce ? 0 : Math.sin(t * 0.08 + s.x) * 0.2);
-    ctx.fillStyle = col;
-    ctx.globalAlpha = haloGlow;
-    ctx.beginPath(); ctx.arc(x, y - 230, 24, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = "#fffde7"; ctx.lineWidth = 2.5; ctx.stroke();
-
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath(); ctx.arc(x, y - 230, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-
-  ctx.restore();
+// The named plinth belongs to the room. The character lives exclusively in
+// final-portal-mirrors.js; no second oval body, emblem or beam behind its face.
+function drawMirrorPedestal(ctx,s,cam,lit){
+ const x=s.x-cam.x,y=s.y-cam.y,theme=WORLD1_THEMES[s.hero],col=theme?.color||'#ffd6f2';
+ ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.shadowBlur=0;ctx.filter='none';ctx.textBaseline='alphabetic';
+ ctx.fillStyle='#262030';ctx.fillRect(x-100,y-16,200,16);
+ ctx.fillStyle=lit?'#3d3248':'#2e2738';ctx.fillRect(x-90,y-56,180,40);
+ ctx.strokeStyle=lit?col:'#57506a';ctx.lineWidth=1.8;ctx.strokeRect(x-90,y-56,180,40);
+ ctx.fillStyle='#4a3e59';ctx.fillRect(x-98,y-62,196,8);
+ ctx.fillStyle=lit?'#ffe3a0':'#c3b09b';ctx.strokeStyle='#8d6f51';ctx.lineWidth=1.2;
+ ctx.beginPath();_rr(ctx,x-80,y-50,160,30,4);ctx.fill();ctx.stroke();
+ ctx.fillStyle='#251a22';ctx.textAlign='center';ctx.font='800 12px Outfit, sans-serif';
+ ctx.fillText(heroName(s.hero).toUpperCase(),x,y-36,152);
+ ctx.font='700 9px Outfit, sans-serif';ctx.fillText(theme?.relic||'OHANA',x,y-24,152);
+ ctx.restore();
 }
 
 // Capa de pantalla: barra de sello y cinemática de sala con bandas negras.

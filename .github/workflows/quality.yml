@@ -317,6 +317,8 @@ jobs:
         run: npm run test:browser:michi-v624
       - name: V625 Michi · five forms, anatomical bounds and responsive presentation
         run: npm run test:browser:michi-art
+      - name: V627 final mirrors · real family actors in room, selection and films
+        run: npm run test:browser:final-mirrors
 
       # Full continuous Normal play runs after fast regressions; it is also
       # checked independently by the V514 workflow on every PR.

@@ -1,3 +1,5 @@
+import {drawFamilyActor} from './family-actor.js';
+import {drawMirrorPortrait} from './final-portal-mirrors.js';
 import {cleanKeepsakes,drawKeepsake,KEEPSAKES} from './keepsakes.js';
 import {drawTheatreStage} from './theatre-stage.js';
 import {drawQuimeraCreature} from './quimera-art.js';
@@ -140,6 +142,11 @@ function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); 
 const STARS = Array.from({ length: 60 }, (_, i) => [((i * 7919) % 997) / 997, ((i * 104729) % 991) / 991, 1 + (i % 3)]);
 
 export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=false,previewForm=0}={}){
+ const actor=(...args)=>{
+  if(drawActor){ctx.save();try{return drawActor(...args);}catch(_){}finally{ctx.restore();}}
+  return drawFamilyActor(...args.slice(0,5),reduceMotion?0:t,args[5]||{},reduceMotion);
+ };
+
  W=Math.max(1,num(W,1280));H=Math.max(1,num(H,720));const compact=W<600,cur=sel.cards[sel.index]||sel.cards[0],rects=layout(sel,W,H),time=reduceMotion?0:t;
  if(sel.pulse>0)sel.pulse--;if(sel.deny>0)sel.deny--;
  ctx.save();drawTheatreStage(ctx,W,H,cur.hero||'yomi',time,{reduceMotion});
@@ -147,16 +154,16 @@ export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=fals
  const foot=rects[0].y-18,base=Math.min(foot-H*.24,W*(compact?.78:.52));
  const ratio=cur.hero?Math.min(1.1,heroHeightTarget(cur.hero,previewForm)/180):1;
  const height=base*(.48+ratio*.52),cx=W*.50;
- if(cur.hero&&drawActor)drawActor(ctx,cur.hero,cx,foot,height/64,{form:previewForm,pose:reduceMotion?'idle':({kilo:'idle',stitcho:'wall',chispin:'jump',cat:'idle',cuerno:'victory',dragon:'glide',dino:'victory',frita:'victory',pizza:'victory',yomi:'cast'}[cur.hero]),performance:cur.hero==='kilo'?'dance':null});
+ if(cur.hero)actor(ctx,cur.hero,cx,foot,height/64,{form:previewForm,pose:reduceMotion?'idle':({kilo:'idle',stitcho:'wall',chispin:'jump',cat:'idle',cuerno:'victory',dragon:'glide',dino:'victory',frita:'victory',pizza:'victory',yomi:'cast'}[cur.hero]),performance:cur.hero==='kilo'?'dance':null});
  if(cur.hero&&cur.keepsakeRecovered){drawKeepsake(ctx,cur.hero,cx+Math.min(W*.17,160),foot,Math.min(100,base*.30));ctx.textAlign='center';ctx.fillStyle='#fff0c8';ctx.font='11px Outfit,sans-serif';ctx.fillText(KEEPSAKES[cur.hero].name,cx+Math.min(W*.17,160),foot+17,Math.min(150,W*.3));}
- if(!cur.hero&&drawActor){
+ if(!cur.hero){
   // The finale preview shows the ten imprisoned actors, not empty ovals.
   for(let i=0;i<10;i++){
    const side=i<5?-1:1,row=i%5,rx=Math.min(26,W*.052),ry=rx*1.35;
    const mx=cx+side*W*.38,my=foot-base*.92+row*base*.19;
    ctx.save();ctx.beginPath();ctx.ellipse(mx,my,rx,ry,0,0,Math.PI*2);
    ctx.fillStyle='#193046';ctx.fill();ctx.strokeStyle=sel.cards[i].color;ctx.lineWidth=1.5;ctx.stroke();ctx.clip();
-   drawActor(ctx,sel.cards[i].hero,mx,my+ry*.8,ry*1.5/64,{form:1,pose:'idle',miniature:true});ctx.restore();
+   ctx.translate(mx,my);drawMirrorPortrait(ctx,sel.cards[i].hero,rx-1,ry-1,time,{reduced:reduceMotion});ctx.restore();
   }
  }
  if(!cur.hero) {ctx.save();ctx.translate(cx,foot);const k=base/590;ctx.scale(k,k);drawQuimeraCreature(ctx,{x:-115,y:-290,w:230,h:290,hp:100,phase:4,_fusion:{mode:'rest'}},{x:0,y:0},time,reduceMotion);ctx.restore();}
@@ -188,7 +195,7 @@ export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=fals
   const r=rects[i],focus=i===sel.index,hover=i===sel.hover,x=r.x+r.w/2,y=r.y+r.h*.72;
   ctx.save();ctx.fillStyle=focus?'#e8d5a7':hover?'#324d60f2':'#102433e8';roundRect(ctx,r.x,r.y,r.w,r.h,compact?9:12);ctx.fill();ctx.strokeStyle=focus?'#fff0c7':hover?card.color:'#a7c4bb44';ctx.lineWidth=focus?2:1;ctx.stroke();
   ctx.globalAlpha=card.unlocked?1:.55;
-  if(drawActor)drawActor(ctx,card.hero,x,y-4,Math.min(r.h*.62,r.w*.7)/64,{miniature:true,animationOffset:i*2,form:card.sealed?1:0,pose:reduceMotion?'idle':((time+i*19)%300>250?'victory':'idle'),performance:card.hero==='kilo'?'dance':null});
+  actor(ctx,card.hero,x,y-4,Math.min(r.h*.62,r.w*.7)/64,{miniature:true,animationOffset:i*2,form:card.sealed?1:0,pose:reduceMotion?'idle':((time+i*19)%300>250?'victory':'idle'),performance:card.hero==='kilo'?'dance':null});
   ctx.fillStyle=focus?'#233c49':'#f4e6c7';ctx.font=`600 ${compact?9:12}px Outfit,sans-serif`;ctx.fillText(card.name,x,r.y+r.h-10,r.w-8);
   ctx.font=`700 ${compact?9:11}px sans-serif`;ctx.fillStyle=focus?'#345657':'#d2c59f';ctx.textAlign='right';ctx.fillText(card.sealed?'✓':card.unlocked?'':'◇',r.x+r.w-7,r.y+12);ctx.textAlign='center';ctx.restore();
  });

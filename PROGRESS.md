@@ -1,3 +1,7 @@
+V627 validada: 1.811 pruebas, Release Gate (385 módulos / 447 recursos), los diez espejos de w1-final en escritorio/móvil sin modificar el progreso ganado, veinte capturas de sala, retratos reales frente a control de cristal vacío, placas legibles y selección/cinemáticas con adaptador ausente o fallido. Michi y su mirada compartida de V626 conservan 255 casos de arte aprobados. Pendiente la publicación.
+
+ohana-627 · Diez espejos con los actores reales: se retiran las figuras antiguas, se mide cada silueta para encuadrarla y se garantiza el actor canónico en selección/cinemáticas. Alcance y resultados efectivos: docs/V627-ESPEJOS.md, docs/V627-VALIDATION.json y docs/V627-PUBLICATION.json.
+
 V626 publicada y comprobada: merge 8e0f60c; Pages aprobado (1.807 pruebas Node e integridad incluidas). Los seis archivos runtime cambiados coinciden por hash con la web pública. Arranque nativo, cinco formas de Michi, primer recuerdo, álbum, HUD y J táctil aprobados en escritorio/móvil, sin hooks de prueba, errores ni llamadas al backend pausado. La revisión visual del jugador queda pendiente. No existe PR nuevo: la API devolvió Forbidden. Registro: docs/V626-PUBLICATION.json.
 
 V626 validada: 1.807 pruebas, comparación exacta con R.eye, cinco formas y revisión de selección/HUD en escritorio y móvil. Pendiente la comprobación pública.
