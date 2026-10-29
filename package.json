@@ -65,7 +65,10 @@
     "test:browser:frita-motion": "node tests/browser/v623-frita-motion.mjs",
     "test:browser:michi-v624": "node tests/browser/v624-moon-hare.mjs",
     "test:browser:michi-art": "node tests/browser/v625-michi-art.mjs",
-    "test:browser:final-mirrors": "node tests/browser/v627-final-mirrors.mjs"
+    "test:browser:final-mirrors": "node tests/browser/v627-final-mirrors.mjs",
+    "test:browser:finale-flow": "node tests/browser/v627-finale-flow.mjs",
+    "test:browser:actor-adapter": "node tests/browser/v628-actor-adapter.mjs",
+    "test:browser:final-retry": "node tests/browser/v628-final-retry.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

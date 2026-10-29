@@ -1,3 +1,7 @@
+# Última revisión: V628 · Cierre y recuperación de actores
+
+Se corrigen el estado Canvas filtrado por adaptadores fallidos y el caso false; se limpia el resumen final. Revancha de Quimera y cierre sin solapamientos, selector y recuerdos se verifican con controles. Ver [alcance](V628-CIERRE.md), [validación](V628-VALIDATION.json), [publicación](V628-PUBLICATION.json).
+
 # Última revisión: V627 · Espejos con la familia real
 
 Se retiran esculturas geométricas superpuestas y se encuadran actores reales dentro de los diez cristales. Selección y cinemáticas usan actores canónicos si falta o falla su adaptador. Los ojos compartidos de V626 se conservan. Ver [alcance](V627-ESPEJOS.md), [validación](V627-VALIDATION.json) y [publicación](V627-PUBLICATION.json).

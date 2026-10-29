@@ -39,7 +39,7 @@ function buildLayer(){
       '<p class="win-jun">HOKU VUELVE A RESPIRAR</p>'+
       '<p class="win-sub">La Reina cae. El Nido se abre. La familia regresa junta al Claro.</p>'+
       '<div class="win-actions">'+
-        '<button type="button" data-open-constellation hidden>✦ Un lugar para ti · V500</button>'+
+        '<button type="button" data-open-constellation hidden>✦ Un lugar para ti</button>'+
         '<button type="button" id="win-continue">Continuar en este mundo</button>'+
         '<button type="button" id="win-repeat" class="ghost">Repetir el nido</button>'+
         '<button type="button" id="win-roster" class="ghost">Elegir personaje</button>'+
@@ -124,8 +124,9 @@ function showEnding(detail={}){
   const rep=layer.querySelector("#win-repeat");if(rep){rep.textContent=w1?"Repetir la Quimera":"Repetir el nido";rep.hidden=coop;}const roster=layer.querySelector("#win-roster");if(roster)roster.hidden=coop;
   layer.dataset.world=w1?"1":"2";
   const score=layer.querySelector(".win-score");
-  layer.querySelector(".win-hero").textContent=(detail.hero||hero.name)+" · "+(detail.form||"forma final");
-  score.textContent=(coop?"Cooperativo · ":detail.rank?"Claro "+detail.rank+" · ":"")+(detail.time?detail.time+" · ":"")+(Number(detail.kills)||0)+" bajas"+(detail.best&&detail.best!==detail.time?" · mejor "+detail.best:"");
+  const heroLabel=detail.hero||hero.name,formLabel=detail.form||"forma final";
+  layer.querySelector(".win-hero").textContent=heroLabel===formLabel?heroLabel:heroLabel+" · "+formLabel;
+  score.textContent=(coop?"Cooperativo · ":detail.rank?"Rango "+detail.rank+" · ":"")+(detail.time?detail.time+" · ":"")+(Number(detail.kills)||0)+" bajas"+(detail.best&&detail.best!==detail.time?" · mejor "+detail.best:"");
   duckMusic(true);try{sfx("victory");}catch(_){}
 
   const earnedKeepsakes=new Set(mergeKeepsakes(readKeepsakes(),detail.keepsakes));

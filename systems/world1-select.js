@@ -1,4 +1,4 @@
-import {drawFamilyActor} from './family-actor.js';
+import {drawFamilyActor,tryFamilyActorAdapter} from './family-actor.js';
 import {drawMirrorPortrait} from './final-portal-mirrors.js';
 import {cleanKeepsakes,drawKeepsake,KEEPSAKES} from './keepsakes.js';
 import {drawTheatreStage} from './theatre-stage.js';
@@ -143,7 +143,7 @@ const STARS = Array.from({ length: 60 }, (_, i) => [((i * 7919) % 997) / 997, ((
 
 export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=false,previewForm=0}={}){
  const actor=(...args)=>{
-  if(drawActor){ctx.save();try{return drawActor(...args);}catch(_){}finally{ctx.restore();}}
+  if(tryFamilyActorAdapter(args[0],drawActor,...args.slice(1)))return;
   return drawFamilyActor(...args.slice(0,5),reduceMotion?0:t,args[5]||{},reduceMotion);
  };
 

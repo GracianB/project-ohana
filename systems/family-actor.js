@@ -4,6 +4,29 @@ import {drawCharacter} from '../characters/draw.js';
 import {findRoster} from '../characters/roster.js';
 import {heroHeightTarget} from '../characters/visual-size.js';
 
+// External painters may throw after save/clip/transform, or explicitly decline.
+// Contain their Canvas stack so the canonical fallback uses the caller's frame.
+export function tryFamilyActorAdapter(ctx,paint,...args){
+ if(typeof paint!=='function')return false;
+ const save=ctx.save,restore=ctx.restore;
+ const descriptors={save:Object.getOwnPropertyDescriptor(ctx,'save'),restore:Object.getOwnPropertyDescriptor(ctx,'restore')};
+ let depth=0,barrier=false;
+ try{
+  save.call(ctx);barrier=true;
+  Object.defineProperty(ctx,'save',{configurable:true,writable:true,value(){save.call(ctx);depth++;}});
+  Object.defineProperty(ctx,'restore',{configurable:true,writable:true,value(){if(depth>0){restore.call(ctx);depth--;}}});
+  return paint(ctx,...args)!==false;
+ }catch(_){return false;}
+ finally{
+  while(depth>0){restore.call(ctx);depth--;}
+  if(barrier)restore.call(ctx);
+  for(const name of['save','restore']){
+   if(descriptors[name])Object.defineProperty(ctx,name,descriptors[name]);
+   else delete ctx[name];
+  }
+ }
+}
+
 export function createFamilyActor(hero,{form=0,pose='idle',facing=1,visualScale=1}={}){
  const def=findRoster(hero),evo=Math.max(0,Math.min(4,Math.round(Number(form)||0))),f=def?.forms?.[evo];
  if(!f)return null;

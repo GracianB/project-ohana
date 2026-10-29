@@ -64,6 +64,9 @@ jobs:
             fi
           fi
 
+      - name: Resolve installed Chromium for all browser checks
+        run: node --input-type=module -e 'import fs from "node:fs"; import {chromium} from "playwright"; fs.appendFileSync(process.env.GITHUB_ENV, "CHROMIUM_BIN=" + chromium.executablePath() + "\n");'
+
       - name: V622 native startup recovery and Canvas memory silhouettes
         run: npm run test:browser:startup && npm run test:browser:memory-art
 
@@ -319,6 +322,11 @@ jobs:
         run: npm run test:browser:michi-art
       - name: V627 final mirrors · real family actors in room, selection and films
         run: npm run test:browser:final-mirrors
+      - name: V628 safe actor adapters and final encounter replay
+        run: |
+          npm run test:browser:actor-adapter
+          npm run test:browser:final-retry
+          OHANA_FINALE_RELEASE=628 npm run test:browser:finale-flow
 
       # Full continuous Normal play runs after fast regressions; it is also
       # checked independently by the V514 workflow on every PR.

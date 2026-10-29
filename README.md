@@ -6,7 +6,7 @@
 
 **Diez historias. Una familia.**
 
-[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=627) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=628) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
 
@@ -15,11 +15,11 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Michi:** sus cinco formas usan los mismos ojos de Kilo, Chispín, Dino y Cuerno; Hada y Eclipse ganan altura manteniendo salto. Eclipse mantiene el vuelo, suelta para planear y abajo para descender.
 - **Espejos:** diez personajes reales y animados dentro del cristal, con encuadre propio y nombres visibles.
 - **Combate:** H de cerca, J a distancia y poderes distintos por héroe. El libro explica los enlaces, I, P y el compañero U.
-- **Continuidad:** pausa con confirmación del guardado y resumen de sellos/recuerdos; Continue retoma el héroe y la aventura guardada.
+- **Continuidad:** pausa con confirmación del guardado y resumen de sellos/recuerdos; Continue retoma la aventura. Reintentar Quimera descarta el jefe y su barra anteriores.
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus locales disponibles para validación. El servidor público permanece pausado.
 
-Registro de entrega: `ohana-627` / V1.0.0 individual. [Validación](docs/V627-VALIDATION.json) · [Publicación](docs/V627-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+Registro de entrega: `ohana-628` / V1.0.0 individual. [Validación](docs/V628-VALIDATION.json) · [Publicación](docs/V628-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
 
 ## Historial de desarrollo
 

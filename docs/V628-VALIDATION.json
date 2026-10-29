@@ -1,0 +1,1125 @@
+{
+  "release": "ohana-628",
+  "base": "315426c0f75a8d8ee38df05e5af924a7466248cf",
+  "recorded_at": "2026-10-29T12:27:59.874118+00:00",
+  "review": "docs/V628-CIERRE.md",
+  "checks": {
+    "node": {
+      "result": "pass",
+      "tests": 1815,
+      "failures": 0,
+      "command": "npm test"
+    },
+    "release_gate": {
+      "result": "pass",
+      "cache": "ohana-628",
+      "runtime_modules": 385,
+      "precache_resources": 447
+    },
+    "actor_adapter_recovery": {
+      "result": "pass",
+      "command": "npm run test:browser:actor-adapter",
+      "report": {
+        "reports": [
+          {
+            "scene": "film",
+            "name": "missing",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "film",
+            "name": "canonical",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "film",
+            "name": "throwing",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "film",
+            "name": "declined",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "film",
+            "name": "translated",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "film",
+            "name": "saved",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "film",
+            "name": "nestedClip",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "film",
+            "name": "excessRestore",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "selection",
+            "name": "missing",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "selection",
+            "name": "canonical",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "selection",
+            "name": "throwing",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "selection",
+            "name": "declined",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "selection",
+            "name": "translated",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "selection",
+            "name": "saved",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "selection",
+            "name": "nestedClip",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          },
+          {
+            "scene": "selection",
+            "name": "excessRestore",
+            "before": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "after": [
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              0.949999988079071,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              9,
+              11,
+              0,
+              1
+            ],
+            "saveDepth": 0,
+            "minimumDepth": 0,
+            "changedPixelsAgainstCanonical": 0
+          }
+        ],
+        "environment": "local build",
+        "scope": "Isolated actual Canvas adapter failure fixtures; no gameplay or progress changes."
+      }
+    },
+    "final_room_retry": {
+      "result": "pass",
+      "command": "npm run test:browser:final-retry",
+      "report": {
+        "reports": [
+          {
+            "width": 1280,
+            "height": 900,
+            "retry": "native keyboard R",
+            "initialArenaPositionFixture": true,
+            "oldBossRemoved": true,
+            "staleCanvasHUD": false,
+            "staleAccessibleHUD": false,
+            "sealsAndKeepsakesPreserved": true,
+            "evolutionAndExperiencePreservedOnRetry": true,
+            "walkBack": {
+              "from": 182,
+              "to": 8600,
+              "frames": 1080,
+              "freshBossPhase": 1
+            },
+            "naturalDeath": {
+              "deathEvents": [
+                {
+                  "reason": "hurt",
+                  "id": "kilo",
+                  "hero": "Kilo Flor Solar"
+                }
+              ],
+              "minHp": 0,
+              "frames": 3000,
+              "restarted": true,
+              "restartMode": "procession",
+              "checkpoint": "w1-final-3",
+              "restartX": 6182,
+              "staleBossHUD": false
+            }
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "retry": "native keyboard R",
+            "initialArenaPositionFixture": true,
+            "oldBossRemoved": true,
+            "staleCanvasHUD": false,
+            "staleAccessibleHUD": false,
+            "sealsAndKeepsakesPreserved": true,
+            "evolutionAndExperiencePreservedOnRetry": true,
+            "walkBack": {
+              "from": 182,
+              "to": 8600,
+              "frames": 1080,
+              "freshBossPhase": 1
+            },
+            "naturalDeath": null
+          }
+        ],
+        "errors": [],
+        "scope": "Earned campaign backup and one initial arena position fixture; keyboard retry, real movement and optional ordinary enemy-caused death, no resource or victory grants."
+      }
+    },
+    "normal_final_encounter_and_ending": {
+      "result": "pass",
+      "command": "OHANA_FINALE_RELEASE=628 npm run test:browser:finale-flow",
+      "report": [
+        {
+          "width": 1280,
+          "height": 900,
+          "startingFromEarnedBackup": true,
+          "replayAction": true,
+          "ordinaryCombat": true,
+          "deaths": 0,
+          "phases": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "films": [
+            "bossIntro",
+            "bossDefeat",
+            "ending"
+          ],
+          "won": true,
+          "noCinematicOverlap": true,
+          "returnToRoster": true,
+          "preservedSeals": true,
+          "errors": []
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "startingFromEarnedBackup": true,
+          "replayAction": true,
+          "ordinaryCombat": true,
+          "deaths": 0,
+          "phases": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "films": [
+            "bossIntro",
+            "bossDefeat",
+            "ending"
+          ],
+          "won": true,
+          "noCinematicOverlap": true,
+          "returnToRoster": true,
+          "preservedSeals": true,
+          "errors": []
+        }
+      ],
+      "closing_caption_checks": [
+        "No duplicate hero/form label",
+        "Rango label for rank",
+        "No build number in constellation invitation"
+      ]
+    },
+    "ten_earned_reward_replays": {
+      "result": "pass",
+      "command": "CHROMIUM_BIN=/usr/bin/chromium npm run test:browser:reward-replays",
+      "report": {
+        "report": [
+          {
+            "hero": "kilo",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          },
+          {
+            "hero": "stitcho",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          },
+          {
+            "hero": "chispin",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          },
+          {
+            "hero": "cat",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          },
+          {
+            "hero": "cuerno",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          },
+          {
+            "hero": "dragon",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          },
+          {
+            "hero": "dino",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          },
+          {
+            "hero": "frita",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          },
+          {
+            "hero": "pizza",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          },
+          {
+            "hero": "yomi",
+            "earned": 100,
+            "scene": true,
+            "clearStage": true,
+            "escapeReturns": true
+          }
+        ],
+        "mobileTap": true,
+        "errors": []
+      }
+    },
+    "ten_real_mirror_regression": {
+      "result": "pass",
+      "command": "npm run test:browser:final-mirrors",
+      "report": {
+        "actualRoom": [
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "kilo",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "stitcho",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "chispin",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "cat",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "cuerno",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "dragon",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "dino",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "frita",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "pizza",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 1280,
+            "height": 900,
+            "hero": "yomi",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "kilo",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "stitcho",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "chispin",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "cat",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "cuerno",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "dragon",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "dino",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "frita",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "pizza",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          },
+          {
+            "width": 390,
+            "height": 844,
+            "hero": "yomi",
+            "room": "w1-final",
+            "physicalMirrorInView": true,
+            "unchangedEarnedSeals": true,
+            "unchangedExperienceAndHealth": true
+          }
+        ],
+        "errors": [],
+        "scope": "Previously earned campaign backup, direct final-room and camera-position art fixtures; no XP/health/seal grants and no new campaign completion claim."
+      }
+    }
+  },
+  "source_blobs": {
+    "game.js": "b8a7944bfd678200395e09b9788533095760357e",
+    "index.html": "c023ec38afe666438e2b68ae0d9aecb27ebc6adb",
+    "sw.js": "93e68a788ce72bde8f6e90c250ef4ea398b44a17",
+    "systems/ending.js": "a577e44172436fbcfc840a60ee7734f08c4fa7cb",
+    "systems/family-actor.js": "782f8cad723e7eea0398c55ffa8fd9e05342b967",
+    "systems/world1-cine.js": "3d0843abccaa4b37939909564dfb487d845813ab",
+    "systems/world1-select.js": "41af950a91dc58a4e6605514792a5f40db9b27c2"
+  },
+  "limits": [
+    "Final combat replays start from a previously earned campaign backup. No new ten-chapter campaign or thousand-memory collection is claimed.",
+    "Retry coverage uses one initial arena-position fixture; native R, return walking and ordinary enemy-caused death use production actions without HP/XP/victory grants.",
+    "The Canvas guard restores context state and selects a canonical fallback. It does not undo pixels already painted by a failing external callback.",
+    "Kilo controls, damage, health, difficulty and accepted artwork remain unchanged. Shared Michi eyes and actual mirror heroes are retained.",
+    "Remote multiplayer backend remains paused; no remote match is claimed.",
+    "Human visual/difficulty acceptance remains pending. Public source, startup and adapter checks are recorded separately after deployment."
+  ]
+}
