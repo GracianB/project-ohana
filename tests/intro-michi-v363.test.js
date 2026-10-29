@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {michiWelcomeBeat,MICHI_FAMILY_REACTIONS} from "../systems/intro-michi-stage.js";
-import {michiWelcomeRig,michiFootwork} from "../characters/art/cat.js";
+import cat,{michiWelcomeRig,michiFootwork} from "../characters/art/cat.js";
 import {poseFingerprint} from "../characters/draw.js";
 const pose=(t,form=0)=>({state:"idle",form,michiWelcome:michiWelcomeBeat(t)});
 const FAMILY=[["melody",1.0],["spark",2.08],["chase",6.0],["yomi",8.45],["dino",12.2]];
@@ -50,8 +50,14 @@ test("V457 five distinct mythic silhouettes retain the welcome rig and game coll
  assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/);
  for(const form of [0,1,2,3,4])
    assert.match(src,new RegExp("if\\(f==="+form+"\\)\\{"),"Michi F"+form+" must have its own drawing path");
- for(const signature of ["MOON KITTEN","FAIRY CAT","DREAM MEDUSA","MOON HARE","NINE-TAIL GUARDIAN"])
-   assert.ok(src.includes(signature),"Missing original silhouette "+signature);
+ // V625 reauthors the drawings; identity is checked from their real geometry,
+ // rather than frozen English comments about the removed renderer.
+ const signatures=[];
+ for(let form=0;form<5;form++){
+  const ops=[],ctx=new Proxy({globalAlpha:1},{get:(o,k)=>k in o?o[k]:(...a)=>ops.push([k,...a]),set:(o,k,v)=>(o[k]=v,true)});
+  cat.draw(ctx,{form,state:'idle',t:73,look:{x:.3,y:0}},{});signatures.push(JSON.stringify(ops));
+ }
+ assert.equal(new Set(signatures).size,5,'five anatomical silhouettes');
  assert.doesNotMatch(src,/if \(f===0\) drawMichiPortrait/,"F0 must not fall back to the previous cat art");
  assert.match(src,/const welcome=michiWelcomeRig\(safe,f\)/);
  assert.match(src,/if\(welcome\.active\)ctx\.scale/);

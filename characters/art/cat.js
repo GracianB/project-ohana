@@ -1,21 +1,11 @@
 import {drawMoonKitten} from '../michi-kitten.js';
 import {drawMoonHare} from '../michi-moon-hare.js';
 import {michiMotion} from "../michi-motion.js";
-import {michiGenome,jellyPulse,drawJellyBell,drawTentacle,halo,motes,ribbon} from "../michi-jelly.js";
-import {michiLaunchKick,michiLaunchFrame,drawCatLeg,drawCatHaunch,drawCatTail,tailPoints,drawFairyWing,drawCatMouth} from "../michi-anatomy.js";
-const PI2h=Math.PI/2;
-// Michicornio: 5-stage lunar CAT lineage (baby, lynx, ear-jelly, dragon, nine-tentacle guardian).
+import {michiGenome,jellyPulse,drawJellyBell,drawTentacle} from "../michi-jelly.js";
+import {michiLaunchKick,michiLaunchFrame,drawCatTail,drawFairyWing} from "../michi-anatomy.js";
+// Michicornio: kitten → fairy cat → moon jelly → lunar hare → winged nine-tail guardian.
 export const MICHI_VISUAL_H=[60,72,84,94,106];
-const INK = "#3a2416";
 const TAU = Math.PI * 2;
-
-const PAL = [
-  { fur: "#ffe3b8", dark: "#e7b56a", belly: "#fff8ee", ear: "#ffb7c8", nose: "#ff8aa0", eye: "#3aa0e8", accent: "#7ec8ff" },
-  { fur: "#ffc4e6", dark: "#d978b4", belly: "#fff2fa", ear: "#ff8fbf", nose: "#ff5c8a", eye: "#2d6fe0", accent: "#ffd24a" },
-  { fur: "#ffd0e8", dark: "#e888c0", belly: "#fff", ear: "#ffb3d9", nose: "#ff5c8a", eye: "#3f8ef0", accent: "#fff4a8" },
-  { fur: "#c9b4ff", dark: "#7052bb", belly: "#f4eeff", ear: "#a88cff", nose: "#ff7aa8", eye: "#f0d060", accent: "#ffe27a" },
-  { fur: "#ffb3dc", dark: "#b8508f", belly: "#fff0f8", ear: "#ff7ac0", nose: "#ff3f7f", eye: "#7a4ae0", accent: "#4a2f8a" },
-];
 
 // V353 · Five-act facial/ear/tail/paw direction, exclusively for the
 // welcome duplicate. Body proportions and each canonical form stay intact.
@@ -33,7 +23,7 @@ export function michiWelcomeRig(pose={},form=0){
  const f=Number.isFinite(form)?Math.max(0,Math.min(4,Math.round(form))):0;
  const baby=f===0?.65:f===2?.74:1;
  // F0 has a soft oval belly. F2 is a cloud (no invented cat boots).
- // F3 retains its moon silhouette. F4 has the ONLY feathered wings.
+ // F3 keeps the moon hare silhouette. F1 has moth wings; F4 has feathered wings.
  const expansion=[.072,.059,.042,.037,.034][f];
  return {
   active:true,
@@ -96,112 +86,6 @@ function solve(pose) {
   };
 }
 
-// V51 · Michi Moon Soul Pass. Local Canvas-only animation, no timers or global particles.
-function moonSoul(ctx, pose, form, front) {
-  const t = pose.reduceMotion ? 0 : (Number.isFinite(pose.t) ? pose.t : 0);
-  const state = pose.state || "idle";
-  const attack = state === "attack" || state === "cast";
-  const airborne = state === "jump" || state === "glide" || state === "fall";
-  const victory = state === "victory";
-  const flourish = state === "idle" && pose.flourish > 0;
-  const gag = flourish && (pose.flourishN % 4) === 3;
-  const intensity = attack ? .9 : victory ? .7 : airborne ? .44 : gag ? .6 : .16;
-  const shadowStep = state === "cast" && pose.castSlot === 1;
-  const y = [-32,-44,-53,-64,-61][form];
-  const moon = form >= 3 ? "#ffe7a6" : "#ffb6e4";
-  const shadow = form >= 3 ? "#9076e8" : "#cb8cf4";
-  ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
-  if (!front) {
-    if (attack || airborne || victory) {
-      ctx.globalAlpha = .13 + intensity * .22;
-      ctx.fillStyle = shadow;
-      ctx.beginPath(); ctx.ellipse(-3, -2, 20 + form * 3, 4, 0, 0, TAU); ctx.fill();
-    }
-    if (form >= 2) {
-      ctx.globalAlpha = .12 + intensity * .25;
-      ctx.strokeStyle = moon; ctx.lineWidth = 1.5;
-      const radius = 25 + form * 4;
-      ctx.beginPath(); ctx.arc(0, y, radius, -2.3, .85); ctx.stroke();
-      if (form === 4) {
-        ctx.globalAlpha = .30 + intensity * .26;
-        ctx.beginPath(); ctx.arc(0, y, radius + 6, -2.55, -.52); ctx.stroke();
-      }
-    }
-  } else {
-    if (attack || airborne || victory) {
-      for (let i = 0; i < (form >= 3 ? 6 : 4); i++) {
-        const a = t * .027 + i * TAU / (form >= 3 ? 6 : 4);
-        const rad = 25 + form * 4;
-        const x = Math.cos(a) * rad, yy = y + Math.sin(a) * rad * .78;
-        ctx.globalAlpha = (.22 + intensity * .40) * (.65 + Math.sin(t * .12 + i) ** 2 * .35);
-        ctx.strokeStyle = i % 2 ? shadow : moon;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(x - 2.5, yy); ctx.lineTo(x + 2.5, yy);
-        ctx.moveTo(x, yy - 2.5); ctx.lineTo(x, yy + 2.5); ctx.stroke();
-      }
-    }
-    // The moon is a toy: Michi bats at it, misses, pretends nothing happened.
-    if (gag) {
-      const k = Math.sin(Math.PI * Math.max(0, Math.min(1, pose.flourish)));
-      const x = 30 - k * 9, yy = y - 23 - Math.sin(t * .14) * 3;
-      ctx.globalAlpha = .35 + .55 * k;
-      ctx.fillStyle = moon;
-      ctx.beginPath(); ctx.arc(x, yy, 6, 0, TAU); ctx.fill();
-      ctx.fillStyle = shadow;
-      ctx.beginPath(); ctx.arc(x + 3, yy - 2, 5, 0, TAU); ctx.fill();
-      ctx.strokeStyle = moon; ctx.lineWidth = 1.8;
-      ctx.beginPath(); ctx.moveTo(17, y + 4); ctx.lineTo(23 - k * 6, y - 13); ctx.stroke();
-    }
-    if (shadowStep) {
-      const k = Math.max(0, Math.min(1, pose.cast || 0));
-      ctx.strokeStyle = shadow;
-      ctx.lineWidth = 1.5;
-      for (let i = 0; i < 3; i++) {
-        const x = -21 - i * 11 - k * 9, yy = y + 13 + i * 3;
-        ctx.globalAlpha = (.30 - i * .075) * Math.sin(Math.PI * k);
-        ctx.beginPath();
-        ctx.arc(x, yy, 5 + i, Math.PI * 1.05, Math.PI * 1.95);
-        ctx.moveTo(x - 4, yy - 3); ctx.lineTo(x - 6, yy - 8);
-        ctx.moveTo(x + 4, yy - 3); ctx.lineTo(x + 6, yy - 8);
-        ctx.stroke();
-      }
-    }
-    // Three readable claw trails.
-    if (state === "attack") {
-      const atk = Math.max(0, Math.min(1, pose.atk || 0));
-      const sweep = Math.sin(Math.PI * atk);
-      ctx.globalAlpha = .62 * sweep;
-      ctx.strokeStyle = form >= 3 ? "#ffe5b0" : "#f6b9ed";
-      ctx.lineWidth = 2.1;
-      for (let i=0;i<3;i++) {
-        const shift = i * 7;
-        ctx.beginPath();
-        ctx.moveTo(18 + shift, y - 8);
-        ctx.quadraticCurveTo(38 + shift, y + 6, 24 + shift, y + 23);
-        ctx.stroke();
-      }
-    }
-    // Victory reads as a feline leap with a compact crescent crown.
-    if (victory) {
-      ctx.globalAlpha = .4 + .2*Math.sin(t*.085);
-      ctx.strokeStyle = moon;
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.arc(0, y-11, 25 + form*3, Math.PI*1.14, Math.PI*1.86);
-      ctx.stroke();
-    }
-    if (state === "wall") {
-      ctx.globalAlpha = .45; ctx.strokeStyle = shadow; ctx.lineWidth = 1.5;
-      for (let i=0; i<3; i++) {
-        const yy = -14 - i * 13;
-        ctx.beginPath(); ctx.moveTo(21, yy); ctx.lineTo(29, yy - 5); ctx.lineTo(26, yy - 9); ctx.stroke();
-      }
-    }
-  }
-  ctx.restore();
-}
-
-
 const MICHI_MOTION_MEDIA=typeof window!=='undefined'&&typeof window.matchMedia==='function'?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
 export function michiFootwork(pose={}){
  if(pose.reduceMotion||MICHI_MOTION_MEDIA?.matches||pose.air||Number.isFinite(pose.michiDuetAge)||!['idle','run'].includes(pose.state||'idle'))return null;
@@ -219,525 +103,243 @@ function drawMichiFootwork(ctx,pose,f,t){
 }
 
 
-// Shared silhouette: raised plumes behind the hips; two short, separate feet.
-function drawMichiPortrait(ctx,R,pose,r,c,f){
- const H=[72,88,94,108,116][f],headY=-H+33,bodyY=-30-f*2;
- const oval=(x,y,rx,ry,col,line=true)=>{ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=col;ctx.fill();if(line){ctx.strokeStyle=INK;ctx.lineWidth=2;ctx.stroke();}};
- const stroke=(col,w)=>{ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();};
- const motion=r.motion;
- const sway=pose.reduceMotion?0:Math.sin(r.t*.065)*2+r.tail+(motion?.tail||0)*18;
- const count=f===4?3:f===3?2:1;
- for(let i=0;i<count;i++){
-  const tipX=-36-i*15,tipY=bodyY-19-i*14+sway;
-  ctx.beginPath();ctx.moveTo(-15,bodyY+2);ctx.bezierCurveTo(-42,bodyY+1,-57-i*8,tipY-13,tipX,tipY);stroke(INK,12-i);
-  ctx.beginPath();ctx.moveTo(-15,bodyY+2);ctx.bezierCurveTo(-42,bodyY+1,-57-i*8,tipY-13,tipX,tipY);stroke(c.dark,8-i);
-  oval(tipX,tipY,5-i*.5,6,c.belly);
- }
- if(f===4){for(const side of [-1,1]){ctx.save();ctx.translate(side*14,bodyY-13);ctx.scale(side,1);ctx.rotate(pose.reduceMotion?0:(motion?.wing||0));ctx.beginPath();ctx.moveTo(0,3);ctx.bezierCurveTo(19,-7,28,-40,39,-35);ctx.quadraticCurveTo(44,-21,33,-12);ctx.quadraticCurveTo(28,-4,19,-4);ctx.quadraticCurveTo(12,7,0,3);ctx.fillStyle=c.belly;ctx.fill();stroke(INK,2);for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(5+i*7,-2-i*4);ctx.quadraticCurveTo(23,-11-i*6,31+i*3,-24-i*3);stroke('#cbb2ea',1.3);}ctx.restore();}}
- oval(0,headY+22,10,Math.max(9,(bodyY-headY)/2),c.fur);
- const step=!motion&&r.st==='run'?r.run*4:0;
- if(f!==2)for(const side of [-1,1]){const x=side*10,dx=motion?(side<0?motion.backX:motion.frontX):side*step,dy=motion?(side<0?motion.backY:motion.frontY):0;ctx.save();ctx.translate(dx,dy);ctx.beginPath();ctx.moveTo(x,bodyY+12);ctx.lineTo(x+side*step,-7);stroke(INK,11);ctx.beginPath();ctx.moveTo(x,bodyY+12);ctx.lineTo(x+side*step,-7);stroke(side<0?c.dark:c.fur,7);oval(x+side*step,-4,8,5,c.belly);for(const toe of [-2,2]){ctx.beginPath();ctx.moveTo(x+side*step+toe,-5);ctx.lineTo(x+side*step+toe,-2);stroke(c.dark,.8);}ctx.restore();}
- if(f===2){
-  ctx.beginPath();ctx.moveTo(-27,bodyY+2);ctx.bezierCurveTo(-43,bodyY-1,-37,bodyY-19,-23,bodyY-17);ctx.bezierCurveTo(-24,bodyY-33,-3,bodyY-35,2,bodyY-22);ctx.bezierCurveTo(15,bodyY-35,34,bodyY-23,28,bodyY-12);ctx.bezierCurveTo(46,bodyY-11,43,bodyY+9,29,bodyY+10);ctx.bezierCurveTo(24,bodyY+24,6,bodyY+24,0,bodyY+17);ctx.bezierCurveTo(-10,bodyY+28,-31,bodyY+17,-27,bodyY+2);ctx.closePath();ctx.fillStyle=c.belly;ctx.fill();stroke('#929dbc',1.7);
-  oval(2,bodyY+5,18,10,'#e4effa',false);
-  ctx.save();ctx.globalAlpha=.45;ctx.beginPath();ctx.ellipse(0,-2,24,3,0,0,TAU);stroke(c.accent,1.5);ctx.restore();
- }else{oval(0,bodyY,19,22,c.fur);oval(3,bodyY+3,11,14,c.belly,false);}
- ctx.save();ctx.translate(-15,bodyY-12);ctx.rotate(motion?.rearPaw||0);ctx.translate(15,-bodyY+12);ctx.beginPath();ctx.moveTo(-15,bodyY-12);ctx.quadraticCurveTo(-24,bodyY-3,-18,bodyY+5);stroke(INK,10);ctx.beginPath();ctx.moveTo(-15,bodyY-12);ctx.quadraticCurveTo(-24,bodyY-3,-18,bodyY+5);stroke(c.dark,6);ctx.restore();
- const reach=motion?motion.frontPaw*10+(r.michiPaw||0)*12+Math.sin(r.arm)*3:r.st==='attack'?Math.sin(Math.PI*r.atk)*16:r.slot>=0?10:(r.michiPaw||0)*12+Math.sin(r.arm)*3;
- ctx.beginPath();ctx.moveTo(15,bodyY-12);ctx.quadraticCurveTo(23+reach,bodyY-6-reach,19+reach,bodyY+4-reach);stroke(INK,10);ctx.beginPath();ctx.moveTo(15,bodyY-12);ctx.quadraticCurveTo(23+reach,bodyY-6-reach,19+reach,bodyY+4-reach);stroke(c.fur,6);oval(19+reach,bodyY+4-reach,5,5,c.belly);
- ctx.save();ctx.translate(2,headY);if(r.mood==='angry'){ctx.rotate(-.06);}ctx.rotate((r.michiHead||0)+(motion?.head||0));
- for(const side of [-1,1]){ctx.save();ctx.translate(side*17,-12);ctx.rotate(side*(r.michiEar||motion?.ear||0));ctx.translate(-side*17,12);ctx.beginPath();ctx.moveTo(side*9,-14);ctx.quadraticCurveTo(side*23,-33,side*23,-19);ctx.lineTo(side*25,-1);ctx.closePath();ctx.fillStyle=c.fur;ctx.fill();stroke(INK,2);ctx.beginPath();ctx.moveTo(side*14,-13);ctx.lineTo(side*20,-24);ctx.lineTo(side*21,-8);ctx.fillStyle=c.ear;ctx.fill();ctx.restore();}
- oval(0,0,25,23,c.fur);oval(-11,10,9,7,c.belly,false);oval(11,10,9,7,c.belly,false);
-
- for(const side of [-1,1]){
-  const ex=side*10,ey=-2;
-  const closed=r.mood==='closed'||r.mood==='happy'||(!pose.reduceMotion&&r.t%170<5);
-  ctx.save();ctx.translate(ex,ey);
-  if(closed){
-   ctx.beginPath();ctx.moveTo(-6,2);ctx.quadraticCurveTo(0,r.mood==='happy'?-5:6,6,2);stroke('#49304e',1.8);
-  }else{
-   // Soft almond whites and a single upper lid, without spectacle-like rings.
-   ctx.beginPath();ctx.moveTo(-7,1);ctx.bezierCurveTo(-7,-10,6,-11,7,0);ctx.bezierCurveTo(7,10,-6,10,-7,1);ctx.fillStyle='#fff8ff';ctx.fill();
-   const gaze=Math.max(-1.2,Math.min(1.2,(pose.look?.x||0)*.8));
-   oval(gaze,.4,5.2,7.3,c.eye,false);oval(gaze,3,4.2,3.2,f>=3?'#d4a9ee':'#a5d8f6',false);
-   oval(gaze,-.2,2.7,5.5,'#38223f',false);
-   oval(gaze-1.8,-3.3,2.1,2.3,'#fff',false);oval(gaze+2,3.8,.9,.9,'#fff',false);
-   ctx.beginPath();ctx.moveTo(-7,0);ctx.bezierCurveTo(-7,-10,6,-11,7,0);stroke('#49304e',1.7);
-   ctx.beginPath();ctx.moveTo(side*6,-4);ctx.lineTo(side*8,-6);stroke('#49304e',1.2);
-   if(r.mood==='angry'){ctx.beginPath();ctx.moveTo(-6,-10-side*1.8);ctx.lineTo(6,-10+side*1.8);stroke(c.dark,1.8);}
-  }
-  ctx.restore();
-  oval(side*18,10,4,2.2,c.ear,false);
-  for(const dy of [8,12]){ctx.beginPath();ctx.moveTo(side*18,dy);ctx.lineTo(side*29,dy-2);stroke(c.dark,1);}
- }
-
- ctx.beginPath();ctx.moveTo(-3,8);ctx.quadraticCurveTo(0,5,3,8);ctx.lineTo(0,11);ctx.closePath();ctx.fillStyle=c.nose;ctx.fill();ctx.beginPath();ctx.moveTo(0,11);ctx.lineTo(0,14);ctx.quadraticCurveTo(-4,18,-6,14);ctx.moveTo(0,14);ctx.quadraticCurveTo(4,18,6,14);stroke(INK,1.3);
- for(const x of [-5,0,5]){ctx.beginPath();ctx.moveTo(x,-20);ctx.lineTo(x*.8,-14);stroke(c.dark,2);}
- if(f>=3){ctx.beginPath();ctx.arc(0,-29,6,.5,5.8);stroke('#ffe5a1',2.5);}ctx.restore();
- if(f>0){const collarY=Math.max(bodyY-14,headY+25);ctx.beginPath();ctx.moveTo(-12,collarY);ctx.quadraticCurveTo(0,collarY+3,12,collarY);stroke(f===4?'#6c458f':c.ear,4);oval(0,collarY+5,3.3,4,'#ffe3a0');}
-}
-
-// V459 · Mythic Michicornio: five feline forms with shared ear/horn/tentacle genealogy.
-// Canvas-only. Feet/pose origin, hitboxes, input, Moon Soul FX and timing are unchanged.
-// Michicornio: five independent luminous silhouettes with a shared moon-horn crest.
+// V625 · The three magical morphologies keep a front-facing facial plane.
+// Sculpted contours, planted paws and attached materials replace doll-like discs.
 function drawMichiMythic(ctx,pose,r,f){
- const t=pose.reduceMotion?0:(Number.isFinite(pose.t)?pose.t:0);
- const still=!!pose.reduceMotion;
- const wave=(phase=0,speed=.055)=>still?0:Math.sin(t*speed+phase);
- const ink='#25213e';
- const oval=(x,y,rx,ry,color,outline=ink,width=2)=>{
-  ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);
-  ctx.fillStyle=color;ctx.fill();
-  if(outline){ctx.strokeStyle=outline;ctx.lineWidth=width;ctx.stroke();}
- };
- const stroke=(color,width=2)=>{
-  ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
- };
- const gem=(x,y,color,size=5)=>{
-  ctx.beginPath();ctx.moveTo(x,y-size);ctx.lineTo(x+size*.73,y);
-  ctx.lineTo(x,y+size);ctx.lineTo(x-size*.73,y);ctx.closePath();
-  ctx.fillStyle=color;ctx.fill();stroke(ink,1);
- };
- const eye=(x,y,color,rx=5,ry=7)=>{
-  if(r.mood==='closed'||r.mood==='happy'||r.motion?.blink){
-   ctx.beginPath();ctx.moveTo(x-rx,y);ctx.quadraticCurveTo(x,y-ry*.6,x+rx,y);
-   stroke(ink,2.4);return;
+ const finite=(v,d=0)=>Number.isFinite(v)?v:d,unit=v=>Math.max(0,Math.min(1,finite(v)));
+ const still=!!pose.reduceMotion,t=still?0:finite(pose.t),state=r.st;
+ const wave=(offset=0,rate=.055)=>still?0:Math.sin(t*rate+offset);
+ const run=state==='run',air=['jump','fall','glide'].includes(state),hurt=state==='hurt',dead=state==='dead',victory=state==='victory';
+ const phase=still?0:finite(pose.phase,t*.24),step=run?Math.sin(phase):0,follow=run?Math.sin(phase-.8):0;
+ const atkK=state==='attack'?Math.sin(Math.PI*(still?.5:unit(pose.atk))):0,castK=state==='cast'?Math.sin(Math.PI*(still?.5:unit(pose.cast))):0;
+ const power=Number.isInteger(pose.michiPowerIndex)?pose.michiPowerIndex:r.slot;
+ const g=michiGenome(pose.michiSeed),pal=g.palette,ink='#49394f',fur='#efe4ff',shade='#bca7d5',white='#fff8ff';
+ const stroke=(col,w=1.4)=>{ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();};
+ const shape=(col,fn,w=1.4,colInk=ink)=>{ctx.beginPath();fn();ctx.closePath();ctx.fillStyle=col;ctx.fill();if(w)stroke(colInk,w);};
+ const oval=(x,y,rx,ry,col,w=0)=>shape(col,()=>ctx.ellipse(x,y,rx,ry,0,0,TAU),w);
+ const line=(col,w,fn)=>{ctx.beginPath();fn();stroke(col,w);};
+ const crescent=(x,y,s,col)=>shape(col,()=>{ctx.moveTo(x+s*.5,y-s);ctx.bezierCurveTo(x-s*1.1,y-s*1.25,x-s*1.2,y+s*1.2,x+s*.5,y+s);ctx.bezierCurveTo(x-s*.35,y+s*.3,x-s*.35,y-s*.3,x+s*.5,y-s);},.65);
+ const sparkle=(x,y,s,col)=>{line(col,1,()=>{ctx.moveTo(x-s,y);ctx.quadraticCurveTo(x,y-s*.15,x,y-s*1.4);ctx.quadraticCurveTo(x,y-s*.15,x+s,y);ctx.quadraticCurveTo(x,y+s*.15,x,y+s*1.4);ctx.quadraticCurveTo(x,y+s*.15,x-s,y);});};
+ function horn(x,y,len,width=5){
+  shape('#fff0c6',()=>{ctx.moveTo(x-width,y);ctx.quadraticCurveTo(x-width*.7,y-len*.6,x+1,y-len);ctx.quadraticCurveTo(x+width*.85,y-len*.35,x+width,y);},1.15);
+  shape('#d8b17a',()=>{ctx.moveTo(x+1,y-len);ctx.quadraticCurveTo(x+width*.85,y-len*.35,x+width,y);ctx.lineTo(x+1,y);ctx.quadraticCurveTo(x+width*.25,y-len*.35,x+1,y-len);},0);
+  for(let k=0;k<4;k++){const yy=y-3-k*len*.19;line('#ad855e',.7,()=>{ctx.moveTo(x-width*(1-k*.15),yy);ctx.quadraticCurveTo(x,yy+1,x+width*(1-k*.15),yy-2);});}
+  line('#fffdf1',1.1,()=>{ctx.moveTo(x-width*.5,y-3);ctx.quadraticCurveTo(x-width*.6,y-len*.5,x+.5,y-len+5);});
+ }
+ function eye(x,y,rx,ry,col='#8e729f',side=1){
+  const closed=dead||hurt||r.mood==='closed'||r.mood==='happy'||!!r.motion?.blink;
+  if(closed){line(ink,1.5,()=>{ctx.moveTo(x-rx,y);ctx.quadraticCurveTo(x,y+(hurt?2.7:-2.5),x+rx,y-.25);});return;}
+  const gaze=Math.max(-1,Math.min(1,finite(pose.look?.x)*.5+finite(r.motion?.lookX)*.3));
+  const lid=()=>{ctx.moveTo(x-rx,y+.25);ctx.bezierCurveTo(x-rx*.65,y-ry,x+rx*.65,y-ry,x+rx,y-.4);ctx.bezierCurveTo(x+rx*.68,y+ry*.8,x-rx*.73,y+ry*.82,x-rx,y+.25);};
+  ctx.save();ctx.beginPath();lid();ctx.closePath();ctx.clip();ctx.fillStyle='#f4e7ef';ctx.fillRect(x-rx-1,y-ry-1,rx*2+2,ry*2+2);
+  oval(x+gaze,y,rx*1.02,ry*1.1,col);oval(x+gaze,y-.2,rx*.56,ry*.78,'#47374e');
+  // A quiet reflected sky edge is underneath the pupil, never a white target ring.
+  line('#dcb8d7',.8,()=>{ctx.moveTo(x-rx*.65,y+ry*.42);ctx.quadraticCurveTo(x,y+ry*.8,x+rx*.62,y+ry*.36);});
+  oval(x+gaze-rx*.24,y-ry*.35,Math.max(.7,rx*.16),Math.max(.9,ry*.2),'#fff5e3');ctx.restore();
+  line(ink,1.55,()=>{ctx.moveTo(x-rx,y+.25);ctx.bezierCurveTo(x-rx*.65,y-ry,x+rx*.65,y-ry,x+rx,y-.4);});
+  line('#ae91b2',.75,()=>{ctx.moveTo(x-rx*.94,y+.7);ctx.quadraticCurveTo(x,y+ry*.95,x+rx*.95,y+.2);});
+  // Soft brow grows from the skull and follows expression rather than masking it.
+  if(atkK>.3)line(shade,.9,()=>{ctx.moveTo(x-rx*.8,y-ry-1+side);ctx.quadraticCurveTo(x,y-ry-2,x+rx*.7,y-ry-1-side);});
+ }
+ function catHead({x=0,y=0,size=1,coat=fur,shadow=shade,muzzle=white,iris='#97759d',earLength=35,crown=false}={}){
+  ctx.save();ctx.translate(x,y);ctx.scale(size,size);ctx.rotate(finite(r.michiHead)*.22+finite(r.motion?.head)*.4+(hurt?-.1:0));
+  // Curved ears fold from the same roots as the skull; the far inner surface is shaded.
+  for(const side of[-1,1]){
+   const flick=(still?0:wave(side,.075)*2)+finite(r.michiEar)*4+finite(r.motion?.ear)*5-(hurt?5:0);
+   shape(coat,()=>{ctx.moveTo(side*12,-15);ctx.bezierCurveTo(side*18,-28,side*26,-earLength+flick,side*29,-earLength-2+flick);ctx.quadraticCurveTo(side*35,-24,side*27,-5);ctx.quadraticCurveTo(side*21,-9,side*12,-15);},1.45);
+   shape('#eab7cf',()=>{ctx.moveTo(side*18,-17);ctx.quadraticCurveTo(side*24,-29,side*28,-earLength+6+flick);ctx.quadraticCurveTo(side*30,-22,side*26,-12);ctx.closePath();},0);
+   line('#fff7ed',1.35,()=>{ctx.moveTo(side*16,-18);ctx.quadraticCurveTo(side*22,-29,side*27,-earLength+2+flick);});
+   line(shadow,.8,()=>{ctx.moveTo(side*28,-earLength+2+flick);ctx.quadraticCurveTo(side*30,-earLength+1+flick,side*31,-earLength-2+flick);});
   }
-  oval(x,y,rx+3,ry+3,'#fff',ink,1.7);
-  const gaze=(pose.look?.x||0)*1.2+(r.motion?.lookX||0)*1.4;
-  oval(x+gaze,y,rx,ry,color,null);
-  oval(x+gaze,y+ry*.1,rx*.52,ry*.56,ink,null);
-  ctx.beginPath();ctx.moveTo(x-rx-1,y-ry*.62);ctx.quadraticCurveTo(x,y-ry*.95,x+rx+1,y-ry*.62);stroke(ink,1.3);
-  oval(x-1.6,y-ry*.42,1.8,2.2,'#fff',null);
- };
- const angry=r.mood==='angry'||r.st==='attack'||r.slot===2;
- const lift=(r.st==='jump'||r.st==='glide')?-4:0;
- if(f===1){ // FAIRY CAT (Hada Felina): a floating moon-fairy, NOT a second kitten.
-  // V462: hovers on four translucent wings, dangling two-bone legs with toe beans,
-  // a wand-tail that writes stardust, flower crown, antennae and pixie dust.
-  // Lineage: kitten ears + moon horn → fairy wings/glow → F2 jelly bell.
-  const g=michiGenome(pose.michiSeed),pal=g.palette;
-  const unit=v=>Math.max(0,Math.min(1,Number(v)||0));
-  const air=r.st==='jump'||r.st==='fall'||r.st==='glide',hurt=r.st==='hurt',victory=r.st==='victory';
-  const atkK=r.st==='attack'?Math.sin(Math.PI*unit(r.atk)):0,castK=r.st==='cast'?Math.sin(Math.PI*unit(r.cast)):0;
-  const flapRate=air||r.st==='run'?.46:r.st==='cast'||r.st==='attack'?.34:.17;
-  const flap=still?0:Math.sin(t*flapRate+g.pulsePhase*6);
-  const hover=still?8:9+Math.sin(t*.05)*3+(r.st==='jump'?4:0)-(r.st==='fall'?2:0);
-  const twirl=r.st==='idle'&&r.fl>0?Math.sin(Math.PI*unit(r.fl)):0;
-  const fur='#efe4ff',furDark='#b9a2ea',ink2='#3b2f5e';
-  ctx.save();ctx.scale(.67,.67); // V462 polish: a touch bigger at portrait size, still inside the 76px band
-  ctx.save();ctx.globalAlpha=Math.max(.08,.26-hover*.01);oval(0,-1,22-hover*.5,4.5,'#2a2450',null);ctx.restore();
-  ctx.translate(0,lift-hover-(r.motion?.bounce||0)*.2);
-  if(!still)ctx.rotate((victory?Math.sin(t*.09)*.09:0)+twirl*.12+atkK*.08);
-  // Pixie dust drifting down from the wings.
-  ctx.save();
-  for(let i=0;i<9;i++){const s=g.moteSeeds[i%10],u=still?s:((t*.007*(1+s*.6)+s)%1);
-   const px=(s-.5)*70+(still?0:Math.sin(t*.04+i)*6),py=-66+u*72;
-   ctx.globalAlpha=(1-u)*.85*(.6+castK*.4);gem(px,py,i%2?pal.bead:pal.glow,1.4+s*1.2);}
+  shape(coat,()=>{ctx.moveTo(-27,-5);ctx.bezierCurveTo(-29,-23,-12,-30,2,-28);ctx.bezierCurveTo(20,-28,31,-18,28,-3);ctx.quadraticCurveTo(29,2,33,5);ctx.lineTo(27,6);ctx.lineTo(31,10);ctx.quadraticCurveTo(23,11,22,17);ctx.bezierCurveTo(11,28,-12,24,-23,16);ctx.lineTo(-30,10);ctx.lineTo(-26,6);ctx.lineTo(-32,4);ctx.quadraticCurveTo(-27,0,-27,-5);},1.55);
+  shape(shadow,()=>{ctx.moveTo(-27,2);ctx.bezierCurveTo(-14,15,9,21,27,7);ctx.quadraticCurveTo(27,21,7,23);ctx.quadraticCurveTo(-15,25,-27,9);},0);
+  // A single joined cheek/muzzle surface reads frontally around a centered nose.
+  shape(muzzle,()=>{ctx.moveTo(-17,7);ctx.quadraticCurveTo(-10,-1,-1,8);ctx.quadraticCurveTo(8,0,19,7);ctx.bezierCurveTo(24,17,14,23,2,22);ctx.bezierCurveTo(-11,22,-22,18,-17,7);},0);
+  shape('#fff8f3',()=>{ctx.moveTo(-21,-11);ctx.quadraticCurveTo(-14,-25,1,-25);ctx.quadraticCurveTo(-8,-19,-12,-10);ctx.closePath();},0);
+  eye(-12,-1.5,6.1,6.4,iris,-1);eye(12,-1.5,6.1,6.4,iris,1);
+  oval(-20,10,3.5,1.45,'#efbbd4');oval(20,10,3.5,1.45,'#efbbd4');
+  shape('#d995b0',()=>{ctx.moveTo(-2,9);ctx.quadraticCurveTo(1,7,5,9);ctx.quadraticCurveTo(4,12,1,12);ctx.closePath();},.75);
+  line(ink,1.1,()=>{ctx.moveTo(1,12);ctx.lineTo(1,14);ctx.quadraticCurveTo(-2,18,-5,15);ctx.moveTo(1,14);ctx.quadraticCurveTo(5,18,8,14);});
+  const open=Math.max(atkK*.65,castK*(power===5?.6:.25),victory?.55:0);
+  if(open>.1){shape('#71485e',()=>{ctx.moveTo(-3,15);ctx.quadraticCurveTo(1,17,6,14);ctx.quadraticCurveTo(6,19+open*3,1,19+open*3);ctx.quadraticCurveTo(-3,18+open*2,-3,15);},.7);oval(2,19+open,2.7,1.2,'#efb4cb');}
+  for(const side of[-1,1])for(let k=0;k<2;k++)line('#a990b3',.65,()=>{ctx.moveTo(side*18,11+k*3);ctx.quadraticCurveTo(side*26,10+k*3,side*34,8+k*5);});
+  // Three fur strokes frame the forehead. The horn is rooted between them.
+  for(const [x0,y0,x1,y1]of[[-8,-24,-5,-17],[0,-25,1,-18],[8,-24,6,-17]])line(shadow,1,()=>{ctx.moveTo(x0,y0);ctx.quadraticCurveTo(x0,y1-2,x1,y1);});
+  horn(1,-23,crown?29:24,crown?4.7:4);
+  if(crown){crescent(1,-16,3.4,'#d4b481');for(const side of[-1,1])line('#d9c5a0',.95,()=>{ctx.moveTo(side*8,-21);ctx.quadraticCurveTo(side*15,-16,side*20,-19);});}
   ctx.restore();
-  // Four wings: lower pair first, then the large upper pair (both behind the body).
-  const open=hurt?.4:Math.min(1,.86+castK*.25+(victory?.2:0)),wsize=60+castK*8+(victory?5:0);
-  halo(ctx,0,-62,60,36,pal.glow,1.35+castK);
-  for(const side of [-1,1]){
-   drawFairyWing(ctx,{x:side*6,y:-48,side,size:wsize*.9,open,flap:flap*.8,lower:true,fill:pal.glow2,rim:pal.rim,vein:pal.ink,spot:null,alpha:.9,ink:pal.ink,accent:pal.gonad,outline:ink2,glow:pal.glow});
-   drawFairyWing(ctx,{x:side*8,y:-58,side,size:wsize,open,flap,fill:pal.glow,rim:pal.rim,vein:pal.ink,spot:pal.gonad,alpha:.92,ink:pal.ink,accent:pal.glow2,outline:ink2,glow:pal.glow2});
-  }
-  // Wand-tail: thin, elegant S with a star tip that leaves a stardust trail.
-  const tailO={x:-12,y:-32,len:52,t,still,swish:1+atkK*1.6+(r.st==='run'?.6:0),curl:.95,dir:-2.75,phase:g.phases[0],root:6.5,tip:2.2,fur,dark:furDark,ink:ink2,fluff:false};
-  const tip=drawCatTail(ctx,tailO);
-  if(!still)for(let k=1;k<=4;k++){const old=tailPoints({...tailO,t:t-k*5}).at(-1);ctx.save();ctx.globalAlpha=.55-k*.11;gem(old[0],old[1],pal.bead,2.6-k*.35);ctx.restore();}
-  halo(ctx,tip[0],tip[1],8+castK*6,8+castK*6,pal.glow,1.6);
-  ctx.save();ctx.translate(tip[0],tip[1]);ctx.rotate(still?0:t*.05);ctx.beginPath();
-  for(let k=0;k<10;k++){const a=k*Math.PI/5,rr=k%2?2.2:5.6+castK*2;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}
-  ctx.closePath();ctx.fillStyle='#fff2b8';ctx.fill();stroke(ink2,1.2);ctx.restore();
-  // Dangling back legs: toes pointed, beans visible, kicking softly while flying.
-  for(const side of [-1,1]){
-   // V462 polish: dancer's legs — knees bend forward, toes point, the pair flutter-kicks
-   // in opposite phase (much stronger while running/flying) and paws read at panel size.
-   const kick=still?0:Math.sin(t*.09+side*1.3)*3+(r.st==='run'||air?Math.sin(t*.3+(side>0?Math.PI:0))*7:0);
-   drawCatLeg(ctx,{hip:[side*9,-30],paw:[side*8+kick*.6-(r.st==='run'?5:0),-6+Math.abs(kick)*.35],upper:12,lower:12,bend:side>0?1:-1,width:8.2,fur,dark:furDark,ink:ink2,lift:.75,toe:'#fff8ff',pawS:1.25});
-  }
-  // Slender fairy body with a petal collar.
-  oval(0,-44,16,22,fur,ink2,2.2);oval(1,-41,10,15,'#fffaff',null);
-  for(let k=0;k<7;k++){const a=Math.PI*(.12+k*.127);ctx.save();ctx.translate(Math.cos(a)*15,-60+Math.sin(a)*5);ctx.rotate(a-Math.PI/2);
-   ctx.beginPath();ctx.ellipse(0,4,4,7,0,0,TAU);ctx.fillStyle=k%2?pal.gonad:pal.glow;ctx.fill();stroke(ink2,1);ctx.restore();}
-  // Arms: idle paws folded at the chest; cast raises the paw; attack swipes forward.
-  for(const side of [-1,1]){
-   const lead=side>0;
-   let paw=[side*9,-42+(still?0:Math.sin(t*.07+side)*1.5)];
-   if(castK&&lead)paw=[16+castK*6,-76-castK*8];
-   if(atkK&&lead)paw=[18+atkK*20,-56+atkK*4];
-   if(victory)paw=[side*20,-84+(still?0:Math.sin(t*.12+side)*3)];
-   if(hurt)paw=[side*(10+8*r.recoil),-57-10*r.recoil];
-   drawCatLeg(ctx,{hip:[side*11,-56],paw,upper:10,lower:10,bend:side>0?1:-1,width:6.2,fur,dark:furDark,ink:ink2,lift:lead&&(castK||atkK)?.8:0,claws:lead&&atkK>.3,toe:'#fff8ff'});
-  }
-  ctx.save();ctx.translate(0,-82);
-  ctx.rotate((r.michiHead||0)*.24+(r.motion?.head||0)*.7+wave(0,.05)*.03-twirl*.1);
-  // Antennae curls with glowing orbs (fairy) — they bob with the wing beat.
-  for(const side of [-1,1]){const bob=still?0:Math.sin(t*.11+side)*2+flap*2;
-   ctx.beginPath();ctx.moveTo(side*5,-22);ctx.bezierCurveTo(side*8,-36,side*18,-34+bob,side*15,-42+bob);stroke(ink2,1.6);
-   halo(ctx,side*15,-43+bob,4,4,pal.glow,1.8);oval(side*15,-43+bob,2.4,2.4,pal.bead,ink2,1);}
-  // Tall tufted cat ears, inner fur in the dream colour.
-  for(const side of [-1,1]){
-   const ear=still?0:wave(side,.083)*3+(r.motion?.ear||0)*6-(hurt?6:0);
-   ctx.beginPath();ctx.moveTo(side*10,-14);ctx.quadraticCurveTo(side*24,-30,side*30,-42+ear);ctx.quadraticCurveTo(side*35,-20,side*29,-4);ctx.closePath();
-   ctx.fillStyle=fur;ctx.fill();stroke(ink2,2.4);
-   ctx.beginPath();ctx.moveTo(side*16,-13);ctx.quadraticCurveTo(side*25,-26,side*28,-34+ear);ctx.lineTo(side*27,-9);ctx.closePath();ctx.fillStyle=pal.gonad;ctx.globalAlpha=.75;ctx.fill();ctx.globalAlpha=1;
-   ctx.beginPath();ctx.moveTo(side*30,-42+ear);ctx.quadraticCurveTo(side*37,-48+ear,side*34,-54+ear);stroke(ink2,1.4);
-  }
-  oval(0,0,30,26,fur,ink2,2.4);
-  oval(0,10,19,12,'#fffaff',null);
-  eye(-12,-3,'#7a63e0',6.2,8.2);eye(12,-3,'#7a63e0',6.2,8.2);
-  if(!(r.mood==='closed'||r.mood==='happy'||r.motion?.blink))for(const sx of [-1,1])gem(sx*12+2,-7,'#ffffff',2.2);
-  ctx.save();ctx.globalAlpha=.8;oval(-20,8,5,2.6,'#f6a6cf',null);oval(20,8,5,2.6,'#f6a6cf',null);ctx.restore();
-  for(const s of [-1,1])gem(s*22,3,pal.bead,1.6);
-  drawCatMouth(ctx,{x:0,y:11,s:.95,open:Math.max(castK*.6,atkK*.8,victory?.55+(still?0:Math.sin(t*.16)*.2):0,r.motion?.jaw?r.motion.jaw*.4:0),smile:victory||r.mood==='happy'?1:0,ink:ink2,fangs:atkK>.2});
-  for(const side of [-1,1])for(const dy of [9,14]){ctx.beginPath();ctx.moveTo(side*17,dy);ctx.quadraticCurveTo(side*27,dy-2,side*35,dy-5+(still?0:Math.sin(t*.08+side)*1.5));stroke('#8f7bc0',1.3);}
-  // Flower crown with the moon horn rising from its centre.
-  ctx.beginPath();ctx.moveTo(-5,-20);ctx.lineTo(0,-40-castK*4);ctx.lineTo(5,-20);ctx.closePath();ctx.fillStyle='#ffe5a9';ctx.fill();stroke(ink2,1.8);
-  for(const [fx,fy,k] of [[-15,-20,0],[0,-24,1],[15,-20,2]]){
-   for(let p=0;p<5;p++){const a=p*TAU/5+(still?0:t*.01*(k-1));oval(fx+Math.cos(a)*3.4,fy+Math.sin(a)*3.4,2.8,2.8,k===1?pal.gonad:pal.glow2,ink2,.8);}
-   oval(fx,fy,2,2,'#fff2a8',null);
-  }
+ }
+ function limb({hip,paw,width=5,coat=fur,shadow=shade,far=false,bend=1,pads=false}){
+  const hx=hip[0],hy=hip[1],px=paw[0],py=paw[1],ex=(hx+px)*.5+bend*5,ey=(hy+py)*.5;
+  shape(coat,()=>{ctx.moveTo(hx-width,hy);ctx.quadraticCurveTo(ex-width*.9,ey,px-width*.9,py-4);ctx.bezierCurveTo(px-width*1.7,py-3,px-width*1.6,py+2,px-width*.4,py+2);ctx.quadraticCurveTo(px+width*2,py+3,px+width*1.9,py-1);ctx.quadraticCurveTo(px+width*1.8,py-5,px+width*.8,py-5);ctx.quadraticCurveTo(ex+width*.7,ey,hx+width,hy);},far?1:1.3);
+  shape(shadow,()=>{ctx.moveTo(hx-width*.7,hy+1);ctx.quadraticCurveTo(ex-width*.75,ey,px-width*.55,py-3);ctx.quadraticCurveTo(px,py-1,px+width*.6,py);ctx.quadraticCurveTo(px-width*.3,py+1,px-width*.8,py);ctx.quadraticCurveTo(ex-width*.9,ey,hx-width*.7,hy+1);},0);
+  if(!far){line('#fffaf1',1,()=>{ctx.moveTo(hx+width*.35,hy+4);ctx.quadraticCurveTo(ex+width*.4,ey,px+width*.7,py-5);});for(const dx of[.5,1.05])line('#ae92b5',.65,()=>{ctx.moveTo(px+width*dx,py-1.4);ctx.lineTo(px+width*dx,py+1.3);});if(pads)oval(px+1,py-1,width*.48,width*.29,'#e7bad5');}
+ }
+ function spellAccents(x,y){
+  if(still||castK<.05||power===1)return;
+  const col=power===4?'#ecc5f0':'#ffe9b3';ctx.save();ctx.globalAlpha=.7*castK;
+  if(power===0)crescent(x+9,y,5+castK*3,col);
+  else if(power===2)for(let k=0;k<3;k++)sparkle(x+7+k*5,y-7+k*6,1.7,col);
+  else if(power===3)line(col,1.7,()=>{ctx.moveTo(x-4,y+8);ctx.bezierCurveTo(x+8,y-13,x+24,y-6,x+16,y+13);});
+  else if(power===4)crescent(x+3,y-7,9,col);
+  else if(power===5)for(const side of[-1,1])sparkle(x+side*13,y-6,2.5,col);
   ctx.restore();
-  // Wisp-lights: three seeded fairy fireflies orbit the hada; they swarm the paw when casting
-  // and scatter outward on a hit, so the form reads as magical even at rest.
-  for(let k=0;k<3;k++){const s=g.moteSeeds[(k*3+1)%10],a=(still?s*TAU:t*(.035+s*.02))+k*TAU/3;
-   const rx=34+s*8+atkK*14,ry=12+s*5,cx=castK?30*castK:0,cy=-58-castK*24;
-   const wx=cx+Math.cos(a)*rx*(1-castK*.5),wy=cy+Math.sin(a)*ry-(still?0:Math.sin(t*.09+k)*4);
-   ctx.save();ctx.globalAlpha=Math.sin(a)>0?1:.65;halo(ctx,wx,wy,9,9,k%2?pal.glow2:pal.glow,2);gem(wx,wy,'#fffbe0',2.8+s*1.2);ctx.restore();}
-  // Magic: cast draws a rune circle from the raised paw; attack throws a wing gust.
-  if(castK>0){ctx.save();ctx.globalAlpha=.75*castK;ctx.strokeStyle=pal.glow;ctx.lineWidth=2;
-   ctx.beginPath();ctx.ellipse(30,-86,16+castK*8,9+castK*4,0,0,TAU);ctx.stroke();
-   for(let k=0;k<6;k++){const a=k*TAU/6+(still?0:t*.06);gem(30+Math.cos(a)*(16+castK*8),-86+Math.sin(a)*(9+castK*4),pal.bead,2.4);}ctx.restore();}
-  if(atkK>0){ctx.save();ctx.strokeStyle=pal.rim;ctx.lineWidth=2.2;
-   for(let k=0;k<3;k++){ctx.globalAlpha=atkK*(.7-k*.18);ctx.beginPath();ctx.arc(28+k*9,-56,12+k*6,-1,1);ctx.stroke();}ctx.restore();}
-  if(hurt){ctx.save();ctx.globalAlpha=.8;for(const s of [-1,1])gem(s*26,-104,'#ffd3e6',3);ctx.restore();}
+ }
+ if(f===1){ // HADA FELINA · petal moth wings, soft dancer's limbs, alert moon-cat face.
+  const flutter=still?0:Math.sin(t*(air?.42:run?.34:.16)+g.pulsePhase*6),hover=still?8:8+wave(0,.055)*2;
+  ctx.save();ctx.scale(.72,.72);ctx.translate(0,-hover+(hurt?3:0));
+  const fold=hurt?.42:state==='glide'?.98:Math.min(1,.83+castK*.14),wingSize=56+(air?6:0)+(victory?3:0);
+  for(const side of[-1,1]){
+   drawFairyWing(ctx,{x:side*6,y:-44,side,size:wingSize*.82,open:fold,flap:flutter*.7,lower:true,fill:pal.glow2,rim:'#d9b9dc',vein:pal.ink,alpha:.68,accent:pal.rim,outline:ink});
+   drawFairyWing(ctx,{x:side*7,y:-56,side,size:wingSize,open:fold,flap:flutter,fill:pal.glow,rim:'#ebd8ec',vein:pal.ink,spot:pal.gonad,alpha:.78,accent:pal.glow2,outline:ink});
+  }
+  // One rooted plume follows its hips; the gold tip is a marking, not an orbiting toy.
+  const tailO={x:-9,y:-31,len:47,t,still,swish:1+atkK+(run?.5:0),curl:1.0,dir:-2.6,phase:g.phases[0],root:5.5,tip:2.5,fur,dark:shade,ink,fluff:true,tipColor:'#f4ddb0'};
+  drawCatTail(ctx,tailO);
+  for(const side of[-1,1]){
+   const kick=still?0:wave(side*1.4,air?.24:.08)*(air?6:2.3);
+   limb({hip:[side*7,-31],paw:[side*9+kick*.5-(air?3:0),-7-Math.abs(kick)*.5-(state==='jump'?7:0)],width:4,far:side<0,bend:side,pads:air});
+  }
+  shape(fur,()=>{ctx.moveTo(-11,-62);ctx.bezierCurveTo(-20,-55,-14,-36,-10,-29);ctx.quadraticCurveTo(0,-23,11,-30);ctx.bezierCurveTo(17,-39,19,-53,11,-63);ctx.quadraticCurveTo(0,-68,-11,-62);},1.45);
+  shape(white,()=>{ctx.moveTo(-7,-57);ctx.quadraticCurveTo(0,-61,8,-56);ctx.quadraticCurveTo(11,-40,4,-33);ctx.quadraticCurveTo(-6,-33,-7,-57);},0);
+  // The collar is six attached curled petals, with space around the face.
+  for(const side of[-1,1])for(let k=0;k<3;k++)shape(k===1?'#ebc4d9':'#d3c6ed',()=>{ctx.moveTo(side*(3+k*3),-61);ctx.quadraticCurveTo(side*(13+k*3),-59+k*2,side*(10+k*2),-54+k*2);ctx.quadraticCurveTo(side*(5+k*2),-53+k*2,side*(3+k*3),-61);},.65);
+  for(const side of[-1,1]){
+   let paw=[side*10,-43+wave(side,.07)];
+   if(air)paw=[side*15,-47];if(state==='wall')paw=[side>0?29:-10,side>0?-69:-43];
+   if(castK){if(power===1)paw=[side*(8+castK*3),-40];else if(power===3)paw=[side*14+castK*13,-46-castK*12];else if(power===4)paw=[side*21,-70-castK*9];else if(power===5)paw=[side*(15+castK*8),-59-wave(side,.2)*3];else if(side>0)paw=[20+castK*6,-67-castK*(power===2?15:4)];}
+   if(atkK&&side>0)paw=[21+atkK*18,-54+atkK*3];if(victory)paw=[side*23,-76+wave(side,.1)*2];if(hurt)paw=[side*12,-56];
+   limb({hip:[side*10,-58],paw,width:3.7,far:side<0,bend:side,pads:air||castK>.2});
+   if(side>0)spellAccents(paw[0],paw[1]);
+  }
+  catHead({y:-83,size:.91,iris:'#94789f',earLength:32});
+  // A small botanical wreath stays attached to the brow, above the eyes.
+  for(const [x,y,col]of[[-11,-105,'#e8c6df'],[12,-105,'#d6cce9']]){for(let k=0;k<5;k++){const a=k*TAU/5;shape(col,()=>{ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.cos(a-.5)*5,y+Math.sin(a-.5)*5,x+Math.cos(a)*5,y+Math.sin(a)*5);ctx.quadraticCurveTo(x+Math.cos(a+.5)*5,y+Math.sin(a+.5)*5,x,y);},.45);}oval(x,y,1.5,1.5,'#f2daac');}
+  // One pair of quiet stamens grows from behind the ears; no lens rings on the eyes.
+  for(const side of[-1,1]){const bend=wave(side,.08)*2;line('#b193b5',.85,()=>{ctx.moveTo(side*9,-109);ctx.bezierCurveTo(side*10,-120,side*18,-119+bend,side*18,-124+bend);});oval(side*18,-124+bend,1.6,2,'#f4e3b9');}
+  if(!still){for(let k=0;k<3;k++){const s=g.moteSeeds[k],u=(t*.005+s)%1;ctx.save();ctx.globalAlpha=(1-u)*.5;sparkle((s-.5)*65,-61+u*47,1.2,pal.bead);ctx.restore();}}
   ctx.restore();return;
  }
- if(f===2){ // DREAM MEDUSA: a real moon jelly (Aurelia) that kept its cat face, ears and horn.
-  // V461: translucent umbrella, four horseshoe gonads, seven marginal tentacles with
-  // travelling waves, two frilled oral arms, fast-contract/slow-relax swim pulse.
-  const g=michiGenome(pose.michiSeed),pal=g.palette,cast=r.st==='cast',attack=angry||r.st==='attack';
-  const unit=v=>Math.max(0,Math.min(1,Number(v)||0));
-  let c=jellyPulse(t,g,still).c;
-  if(r.st==='jump')c=Math.max(c,.85);else if(r.st==='fall'||r.st==='glide')c*=.2;else if(r.st==='hurt')c=.55;
-  const atkK=r.st==='attack'?Math.sin(Math.PI*unit(r.atk)):0,castK=cast?Math.sin(Math.PI*unit(r.cast)):0;
-  const victory=r.st==='victory',sweep=r.motion?.ribbon||0;
-  const trail=r.st==='run'?-10:r.st==='glide'?-4:0,float=r.st==='fall'||r.st==='glide'?1:0;
-  ctx.save();ctx.scale(.68,.68);
-  ctx.translate(0,-5+lift-c*5+wave(0,.064)*1.6-(r.motion?.bounce||0)*.32);
-  const rimY=-62,bellH=58,bellW=40;
-  // V462: on L every tentacle coils back and whips forward in a ripple, one after
-  // another, exactly when its own projectile leaves (shared michiLaunchKick timing).
-  const Lcast=r.st==='cast'&&r.slot===2;
+ if(f===2){ // MEDUSA ONÍRICA · Aurelia bell, seven real tentacles and two oral frills.
+  let contraction=jellyPulse(t,g,still).c;if(state==='jump')contraction=Math.max(contraction,.85);else if(state==='fall'||state==='glide')contraction*=.2;else if(hurt)contraction=.55;
+  const float=air?1:0,trail=run?-11:state==='glide'?-6:0,Lcast=state==='cast'&&power===2;
+  ctx.save();ctx.scale(.72,.72);ctx.translate(0,-5-contraction*5+wave(0,.06));
+  const rimY=-57,bellH=57,bellW=40;
   const tent=(i,front)=>{
-   const lane=i-3,ax=lane*bellW*.27*(1-.1*c)*(1+castK*.25);
-   const lash=front&&lane>0?atkK:0,kick=Lcast&&!still?michiLaunchKick(i,7,r.cast):0;
-   const tip=drawTentacle(ctx,{x:ax,y:rimY+3,len:(54+(i%3)*4)*g.lengths[i]*(1-float*.12),
-    phase:g.phases[i],t,still,amp:4.5+c*2.5+float*3+(victory?3:0)+castK*2,
-    sway:trail+sweep*(i%2?4:-5)+lash*34+lane*castK*(Lcast?3:7)+kick*36,lift:c*.8+float*.6+Math.max(0,kick)*.5,
-    curl:(victory?(i%2?.55:-.55):0)+lash*.6+(r.st==='hurt'?-.4:0)+kick*.8,
-    dir:Math.PI/2-lash*.75-kick*.7,width:front?4.6:5.4,alpha:front?.88:.78,
-    fill:i%2?pal.glow:pal.arm,edge:pal.ink,edgeWidth:.9,core:'#ffffff',beads:pal.bead});
-   if(Lcast&&r.cast*26<michiLaunchFrame(i,7)){halo(ctx,tip[0],tip[1],7,7,pal.glow,1.8);gem(tip[0],tip[1],'#fffaf0',2.4);}
-   return tip;
+   const lane=i-3,kick=Lcast&&!still?michiLaunchKick(i,7,pose.cast):0,lash=front&&lane>0?atkK:0;
+   const end=drawTentacle(ctx,{x:lane*bellW*.27*(1-.1*contraction),y:rimY+3,len:(50+i%3*4)*g.lengths[i]*(1-float*.14),phase:g.phases[i],t,still,
+    amp:3.8+contraction*2+float*2+(victory?2:0),sway:trail+lash*29+lane*castK*(power===4?7:power===1?1:4)+kick*35,
+    lift:contraction*.8+float*.7+Math.max(0,kick)*.4,curl:(hurt?-.4:0)+lash*.6+kick*.8+(power===5?lane*castK*.12:0),
+    dir:Math.PI/2-lash*.65-kick*.7,width:front?4.2:4.8,alpha:front?.86:.72,fill:i%2?pal.glow:pal.arm,edge:pal.ink,edgeWidth:.75,core:'#fff9fa',beads:pal.bead});
+   if(Lcast&&pose.cast*26<michiLaunchFrame(i,7))oval(end[0],end[1],2.1,2.1,'#fff3d7');
   };
-  halo(ctx,0,-70,50,44,pal.glow2,.7+castK+(victory?.4:0));
-  // Behind the umbrella: frilled oral arms + even tentacles, seen through the glass.
-  for(const side of [-1,1])for(const layer of [0,1])drawTentacle(ctx,{x:side*7,y:rimY-4,len:40+layer*6,
-   phase:g.phases[7+(side>0)]+layer*1.9,t,still,amp:3.2+c*1.5,sway:trail*.6+side*(3+castK*6),lift:c,
-   curl:side*.25,width:11-layer*3,alpha:.72,fill:layer?pal.gonad:pal.arm,edge:pal.ink,edgeWidth:.7,core:pal.rim});
+  for(const side of[-1,1])for(let layer=0;layer<2;layer++)drawTentacle(ctx,{x:side*7,y:rimY-3,len:39+layer*6,phase:g.phases[7+(side>0)]+layer*1.9,t,still,amp:3+contraction,sway:trail*.5+side*(3+castK*5),lift:contraction,curl:side*.25,width:10-layer*3,alpha:.64,fill:layer?pal.gonad:pal.arm,edge:pal.ink,edgeWidth:.55,core:pal.rim});
   for(let i=0;i<7;i+=2)tent(i,false);
-  const B=drawJellyBell(ctx,{x:0,y:rimY,w:bellW,h:bellH,pal,t,c,still,ink:pal.ink,spots:g.spots,
-   glow:.8+castK,flash:r.st==='hurt'?1:0});
+  const bell=drawJellyBell(ctx,{x:0,y:rimY,w:bellW,h:bellH,pal,t,c:contraction,still,ink:pal.ink,spots:g.spots,alpha:.88,glow:0,flash:0});
   for(let i=1;i<7;i+=2)tent(i,true);
-  // Ears are inherited from F1 (fairy cat), now crystal-cat fins on the glass bell.
-  // They are attached to the crown, so the medusa remains unmistakably feline.
-  const top=B.top;
-  for(const side of [-1,1]){
-   const flick=wave(side*1.5,.092)*4+(r.motion?.ear||0)*8-c*3;
-   ctx.save();ctx.globalAlpha=.92;
-   ctx.beginPath();ctx.moveTo(side*13,top+9);
-   ctx.quadraticCurveTo(side*24,top-1,side*30,top-14+flick);
-   ctx.quadraticCurveTo(side*37,top+6,side*33,top+20);ctx.closePath();
-   ctx.fillStyle=pal.bell;ctx.fill();stroke(pal.ink,2.4);
-   ctx.beginPath();ctx.moveTo(side*20,top+9);ctx.lineTo(side*29,top-8+flick);
-   ctx.lineTo(side*31,top+14);ctx.closePath();ctx.fillStyle=pal.gonad;ctx.globalAlpha=.7;ctx.fill();
-   ctx.restore();gem(side*30,top-9+flick,pal.bead,2.6);
+  // The head is the umbrella itself. The face follows that front surface without a mask.
+  for(const side of[-1,1]){
+   const flick=wave(side,.085)*3+finite(r.motion?.ear)*5;
+   shape(pal.bell,()=>{ctx.moveTo(side*13,bell.top+10);ctx.quadraticCurveTo(side*23,bell.top-3,side*29,bell.top-14+flick);ctx.quadraticCurveTo(side*36,bell.top+4,side*32,bell.top+19);ctx.quadraticCurveTo(side*24,bell.top+15,side*13,bell.top+10);},1.2,pal.ink);
+   shape(pal.gonad,()=>{ctx.moveTo(side*21,bell.top+9);ctx.quadraticCurveTo(side*26,bell.top-2,side*29,bell.top-6+flick);ctx.quadraticCurveTo(side*31,bell.top+6,side*29,bell.top+12);},0);
+   line('#fff7fa',1,()=>{ctx.moveTo(side*18,bell.top+8);ctx.quadraticCurveTo(side*24,bell.top-4,side*29,bell.top-11+flick);});
   }
-  // A paired whisker signature follows all five forms.
-  for(const side of [-1,1])for(const dy of [-1,6]){
-   ctx.beginPath();ctx.moveTo(side*22,-80+dy);
-   ctx.quadraticCurveTo(side*36,-81+dy,side*48,-86+dy+wave(side,.08)*2);
-   stroke(pal.ink,1.3);
+  horn(0,bell.top+3,22,4);
+  eye(-13,-83,5.3,5.9,pal.ink==='#33335e'?'#8c8eaf':'#ac83ab',-1);eye(13,-83,5.3,5.9,pal.ink==='#33335e'?'#8c8eaf':'#ac83ab',1);
+  shape('#db9ab4',()=>{ctx.moveTo(-2,-73);ctx.quadraticCurveTo(0,-75,3,-73);ctx.lineTo(0,-70);},.6,pal.ink);
+  line(pal.ink,1.1,()=>{ctx.moveTo(0,-70);ctx.quadraticCurveTo(-3,-66,-6,-69);ctx.moveTo(0,-70);ctx.quadraticCurveTo(3,-66,6,-69);});
+  for(const side of[-1,1]){oval(side*22,-73,3.6,1.4,pal.gonad);for(let k=0;k<2;k++)line('#a08eb1',.7,()=>{ctx.moveTo(side*24,-73+k*4);ctx.quadraticCurveTo(side*34,-73+k*4,side*42,-77+k*6+wave(side,.08));});}
+  if(castK>0)spellAccents(31,-74);
+  ctx.restore();return;
+ }
+ if(f===4){ // ECLIPSE · feathered white moon guardian, nine rooted luminous plumes.
+  const bodyY=run?-Math.abs(step)*2.5:0,wingBeat=still?0:Math.sin(t*(air?.3:.09))*.26;
+  ctx.save();ctx.scale(.96,.96);ctx.translate(atkK*2,hurt?3:bodyY);
+  // Nine full moon-plumes grow from the pelvis. Their pale nerve stripe inherits
+  // the Medusa's bioluminescence, while the outer coat is deep soft guardian fur.
+  // The fan is below the wings and outside the face, each taper has its own lag.
+  const Lcast=state==='cast'&&power===2;
+  const plumeEnds=[[-82,-45],[-86,-22],[-76,-1],[-55,11],[-43,-79],[55,11],[76,-1],[86,-22],[82,-45]];
+  for(let i=0;i<9;i++){
+   const [endX,endY]=plumeEnds[i],side=endX<0?-1:1,kick=Lcast&&!still?michiLaunchKick(i,9,pose.cast):0;
+   const lag=wave(g.phases[i],.047)*(run?5:2.8),root=[side*11,-24],end=[endX+kick*15,endY+lag-(air?4:0)];
+   const ctrl1=[side*(24+(i%3)*3),-36+lag],ctrl2=[endX*.82,endY+(i<4?18:-18)+lag];
+   const points=[],edges=[[],[]];
+   for(let k=0;k<=14;k++){
+    const u=k/14,v=1-u,x=v*v*v*root[0]+3*v*v*u*ctrl1[0]+3*v*u*u*ctrl2[0]+u*u*u*end[0],y=v*v*v*root[1]+3*v*v*u*ctrl1[1]+3*v*u*u*ctrl2[1]+u*u*u*end[1];
+    const dx=3*v*v*(ctrl1[0]-root[0])+6*v*u*(ctrl2[0]-ctrl1[0])+3*u*u*(end[0]-ctrl2[0]),dy=3*v*v*(ctrl1[1]-root[1])+6*v*u*(ctrl2[1]-ctrl1[1])+3*u*u*(end[1]-ctrl2[1]),d=Math.hypot(dx,dy)||1;
+    const w=(5.5+Math.sin(u*Math.PI)*3.5)*(1-u*u*.97);points.push([x,y]);
+    edges[0].push([x-dy/d*w,y+dx/d*w]);edges[1].push([x+dy/d*w,y-dx/d*w]);
+   }
+   const followEdge=(pts,first=false)=>{if(first)ctx.moveTo(...pts[0]);for(let k=1;k<pts.length-1;k++)ctx.quadraticCurveTo(...pts[k],(pts[k][0]+pts[k+1][0])/2,(pts[k][1]+pts[k+1][1])/2);ctx.lineTo(...pts.at(-1));};
+   shape(i%3===0?'#e2cce5':i%3===1?'#f7e7d2':'#e9dff2',()=>{followEdge(edges[0],true);followEdge([...edges[1]].reverse());},1.05);
+   line('#fff8e7',2.1,()=>{followEdge(points,true);});
+   // Fine guard-hairs stay in the coat, rather than another free particle halo.
+   const tip=points[11],near=points[9];line(i%2?'#bba2c7':'#d4b3c3',.65,()=>{ctx.moveTo(near[0],near[1]+2);ctx.quadraticCurveTo(tip[0],tip[1]+3,end[0]-side*3,end[1]+1);});
+   if(!still&&castK>.2)sparkle(end[0],end[1],1.8,'#f8e2af');
   }
-  // The horn is part of the body, not an oversized detached particle.
-  ctx.beginPath();ctx.moveTo(-5.5,top+3);ctx.lineTo(0,top-19-castK*3);ctx.lineTo(5.5,top+3);ctx.closePath();
-  ctx.fillStyle='#ffe2a8';ctx.fill();stroke(pal.ink,1.8);
-  ctx.beginPath();ctx.moveTo(-3,top-3);ctx.lineTo(3,top-6);ctx.moveTo(-2,top-10);ctx.lineTo(2,top-12);stroke('#c99a52',1.1);
-  if(cast)halo(ctx,0,top-12,9+castK*6,9+castK*6,'#fff3b8',1.5);
-  eye(-15,-88,pal.ink==='#33335e'?'#5f7fe8':'#c56ad0',4.4,6.2);eye(15,-88,pal.ink==='#33335e'?'#5f7fe8':'#c56ad0',4.4,6.2);
-  ctx.beginPath();ctx.moveTo(-1.8,-79);ctx.lineTo(1.8,-79);ctx.lineTo(0,-77);ctx.closePath();ctx.fillStyle='#f08fb0';ctx.fill();
-  ctx.beginPath();ctx.moveTo(0,-77);ctx.quadraticCurveTo(-3.5,-72-(r.motion?.jaw||0)*3,-6,-75);
-  ctx.moveTo(0,-77);ctx.quadraticCurveTo(3.5,-72-(r.motion?.jaw||0)*3,6,-75);stroke(pal.ink,1.5);
-  ctx.save();ctx.globalAlpha=.55;for(const s of [-1,1])oval(s*26,-77,5,2.6,pal.gonad,null);ctx.restore();
-  motes(ctx,t,g,{x:0,y:-30,spread:44,height:100,count:cast||victory?9:6,color:pal.bead,size:1.7,strength:.7+castK*.6,still});
-  if(cast||attack){
-   ctx.save();ctx.globalAlpha=.5*(cast?castK:atkK)+.1;ctx.strokeStyle=pal.rim;ctx.lineWidth=2;
-   ctx.beginPath();ctx.ellipse(0,-88,46+castK*8,36+castK*4,0,0,TAU);ctx.stroke();
-   for(let j=0;j<4;j++){const angle=j*TAU/4+t*.023;gem(Math.cos(angle)*48,-88+Math.sin(angle)*38,pal.bead,3);}
+  // The wings have individual long primaries, not another jelly umbrella on its back.
+  for(const side of[-1,1]){
+   ctx.save();ctx.translate(side*13,-54);ctx.scale(side,1);ctx.rotate((air?-.13:.18)+wingBeat);
+   shape('#e6d7ec',()=>{ctx.moveTo(0,2);ctx.bezierCurveTo(8,-15,35,-45,57,-43);ctx.bezierCurveTo(63,-39,45,-12,25,0);ctx.quadraticCurveTo(10,9,0,2);},1.25);
+   for(let k=5;k>=0;k--){const x=12+k*7,y=-7-k*5;shape(k%2?'#fff4dc':'#fffaf1',()=>{ctx.moveTo(x-8,y+6);ctx.quadraticCurveTo(x+3,y-15,x+14,y-24-k*.5);ctx.bezierCurveTo(x+18,y-22,x+8,y+1,x+1,y+9);ctx.quadraticCurveTo(x-4,y+12,x-8,y+6);},.7);line('#d9bdd7',.65,()=>{ctx.moveTo(x-3,y+6);ctx.quadraticCurveTo(x+4,y-5,x+11,y-18);});}
+   shape('#fff4e1',()=>{ctx.moveTo(-2,1);ctx.bezierCurveTo(4,-18,18,-23,27,-24);ctx.quadraticCurveTo(16,-4,3,7);ctx.closePath();},.8);
    ctx.restore();
   }
-  ctx.restore();return;
- }
- if(f===4){ // NINE-TAIL GUARDIAN: nine countable, independently moving tails.
-  const p=wave(0,.06),sweep=r.motion?.ribbon||0;
-  const run=r.st==='run'&&!still;
-  const phase=Number.isFinite(pose.phase)?pose.phase:(t*0.24);
-  const step=run?Math.sin(phase):0,cosStep=run?Math.cos(phase):0;
-  const follow=run?Math.sin(phase-.87):0;
-  const air=r.st==='jump'||r.st==='fall'||r.st==='glide';
-  const unitK=v=>Math.max(0,Math.min(1,Number(v)||0));
-  const atkK=r.st==='attack'?Math.sin(Math.PI*unitK(r.atk)):0;
-  const castK=r.st==='cast'?Math.sin(Math.PI*unitK(r.cast)):0;
-  const victory=r.st==='victory';
-
-  ctx.save();ctx.scale(.99,.99);
-  ctx.translate(0,lift-(r.motion?.bounce||0)*.16);
-
-  // Nine EXPLICIT jelly-tendrils: the F2 medusa grows into a crown of
-  // independent luminous ribbons with shared nerve/glow anatomy.
-  // Each has its own seeded phase, length and dynamic lag responding to locomotion.
-  const g=michiGenome(pose.michiSeed),pal=g.palette;
-  let c=jellyPulse(t,g,still).c;if(r.st==='jump')c=Math.max(c,.8);
-  halo(ctx,0,-86,64,54,pal.glow2,.7+castK);
-  const M=drawJellyBell(ctx,{x:0,y:-58,w:56,h:56,pal,t,c,still,ink:pal.ink,spots:g.spots,alpha:.38,glow:.6+castK,lobes:9});
-  const Lcast=r.st==='cast'&&r.slot===2;
-
-  // The 9 Tails sway gracefully, streaming back when running like a comet
-  for(let i=0;i<9;i++){
-   const fan=Math.PI*(.84-i*.085)+(i-4)*c*-.03+(run?-.35:0);
-   const lash=i>=6?atkK:0,kick=Lcast&&!still?michiLaunchKick(i,9,r.cast):0;
-   const stream=run?-step*16:0;
-   const e=drawTentacle(ctx,{
-    x:M.anchors[i][0]*.92,
-    y:M.anchors[i][1]-2,
-    len:58*g.lengths[i]*(1+castK*.1)+(run?6:0),
-    phase:g.phases[i],
-    t,still,
-    amp:5+c*3+castK*2+(run?2:0),
-    sway:sweep*(i%2?4:-5)+lash*26+kick*30+stream,
-    lift:c*.7+Math.max(0,kick)*.4+(run?.3:0),
-    curl:(i<4?.35:i>4?-.35:0)+lash*.5+kick*.7+(run?-.2:0),
-    dir:fan-lash*.5-kick*.55,
-    width:7,alpha:.88,
-    fill:i%3===0?pal.glow:i%2?pal.arm:pal.gonad,
-    edge:ink,edgeWidth:1.1,core:'#ffffff',beads:pal.bead
-   });
-   gem(e[0],e[1],i%2?'#ffde9e':pal.bead,3.3);
-   if(Lcast&&r.cast*26<michiLaunchFrame(i,9)){halo(ctx,e[0],e[1],8,8,pal.glow,1.8);gem(e[0],e[1],'#fffaf0',2.6);}
-  }
-  motes(ctx,t,g,{x:0,y:-20,spread:70,height:120,count:r.st==='victory'||r.st==='cast'?10:7,color:pal.bead,size:1.8,strength:.8+castK*.5,still});
-
-  // Celestial Wings of the Deity: majestic feathered wings folded at rest, soaring in air
-  for(const side of [-1,1]){
-   const wingFlap=still?0:Math.sin(t*(air?.32:.12)+side)*0.35+(run?step*.2:0);
-   drawFairyWing(ctx,{
-    x:side*12,
-    y:-64,
-    side,
-    size:56+(air?10:0)+(victory?6:0),
-    open:air?1:(run?.88:.72),
-    flap:wingFlap,
-    fill:'#fff3d9',
-    rim:'#ffe49e',
-    vein:'#d9b8ea',
-    spot:'#f6c586',
-    alpha:.85,
-    ink,
-    accent:pal.glow,
-    outline:ink,
-    glow:'#fff5b8'
-   });
-  }
-
-  // Majestic cat body: ivory fur, regal posture with breathing & stride reaction
-  const bodyBob=run?-Math.abs(step)*3.2:0;
-  oval(0,-26+bodyBob,21,26,'#fff3d9');
-  oval(2,-24+bodyBob,14,17,'#ffffff',null);
-
-  // FULL 4-LEGGED GAIT RIG FOR THE SUPREME NINE-TAIL GUARDIAN
-  // Two muscular hind haunches for powerful gallop and majestic stance
-  for(const s of [-1,1]){
-   const lead=s>0;
-   const dx=run?(lead?step*16:-step*16):(air?-7:(victory?s*5:0));
-   const dy=run?(lead?-Math.max(0,-cosStep)*11:-Math.max(0,cosStep)*11):(air?-12:(victory?-6:0));
-   drawCatHaunch(ctx,{
-    side:s,
-    hip:[s*14,-18+bodyBob],
-    paw:[s*18+dx,0+dy],
-    thigh:13,
-    width:9.5,
-    fur:'#f7dfb4',
-    dark:'#d9b57e',
-    ink,
-    lift:air||victory?.8:Math.min(1,-dy/7),
-    claws:true,
-    toe:'#fff9e9',
-    pad:'#f1b4d0',
-    pawS:1.2
-   });
-  }
-
-  // Two noble forelegs with defined shoulders, paw pads and claws
-  for(const s of [-1,1]){
-   const lead=s>0;
-   const leadAtk=lead&&atkK>0;
-   const dx=leadAtk?28+atkK*22:(run?(lead?-step*18:step*18):(air?8:(victory?s*8:0)));
-   const dy=leadAtk?-24-atkK*10:(run?(lead?-Math.max(0,cosStep)*12:-Math.max(0,-cosStep)*12):(air?-10:(victory?-20:0)));
-   const px=s*9+dx,py=0+dy;
-   drawCatLeg(ctx,{
-    hip:[s*9,-34+bodyBob],
-    paw:[px,py],
-    upper:16,
-    lower:16,
-    bend:1,
-    width:8.5,
-    fur:'#fff3d9',
-    dark:'#deb57c',
-    ink,
-    lift:leadAtk||air||victory?.85:Math.min(1,-dy/7),
-    claws:r.st==='attack'||r.st==='run',
-    toe:'#fffbf2',
-    pad:'#f1b4d0',
-    pawS:1.15
-   });
-   if(leadAtk){
-    // Divine astral light burst from the slashing claws
-    for(const k of [-4,0,4]){
-     ctx.beginPath();ctx.moveTo(px+4,py+k);ctx.lineTo(px+15+atkK*16,py+k-2);
-     stroke('#fce07c',1.9);
-    }
-   }
-  }
-
-  // Noble head with tiara and expressive ears
-  const headBob=run?follow*.08:0;
-  ctx.save();ctx.translate(0,headBob);
-  for(const s of [-1,1]){
-   const earFlick=still?0:(r.motion?.ear||0)*5+(run?Math.sin(phase)*2:0);
-   ctx.beginPath();ctx.moveTo(s*17,-77);ctx.lineTo(s*39,-111+earFlick);
-   ctx.lineTo(s*33,-61);ctx.closePath();ctx.fillStyle='#fff5d4';ctx.fill();stroke(ink,2);
-   ctx.beginPath();ctx.moveTo(s*23,-77);ctx.lineTo(s*33,-98+earFlick*.6);ctx.lineTo(s*29,-73);
-   ctx.closePath();ctx.fillStyle='#efbad6';ctx.fill();
-  }
-
-  // Eyes, mouth, expressive cat ears connected to F0 lineage
-  oval(0,-69,33,27,'#fff7df');oval(0,-59,21,12,'#fff',null);
-  eye(-14,-72,'#d04f99',6,8);eye(14,-72,'#d04f99',6,8);
-  drawCatMouth(ctx,{x:0,y:-58,s:1.15,open:r.st==='victory'?.6:r.st==='attack'?.75:r.st==='cast'?.45:0,smile:r.st==='victory'?1:0,ink,nose:'#e897a9',fangs:r.st==='attack'});
-  gem(0,-86,'#f1c65e',6);
-  ctx.beginPath();ctx.moveTo(-6,-83);ctx.lineTo(0,-116-(castK?4:0));ctx.lineTo(6,-83);ctx.closePath();ctx.fillStyle='#fff1a9';ctx.fill();stroke(ink,2.2);
-
-  if(!still){
-   for(let j=0;j<3;j++){
-    const aa=t*.035+j*TAU/3;
-    gem(Math.cos(aa)*21,-112+Math.sin(aa)*7,'#f9dcff',2.4);
-   }
-  }
-
-  ctx.globalAlpha=.66;ctx.beginPath();ctx.arc(0,-72,42,Math.PI*1.1,Math.PI*1.9);
-  stroke('#f2d479',3);ctx.globalAlpha=1;
-
-  // Playful tail flick, not another damaging hitbox
-  if(r.fl>.22&&r.st==='idle'){gem(36,-109-4*p,'#fbd59a',4);}
-  ctx.restore();
-
+  // A long feline back and asymmetric hock establish three-quarter body depth.
+  // The near shoulder, ankle and paw form one changing contour, never a pair of rods.
+  const feet=(near,front)=>{
+   const shift=run?step*(front?13:-12)*(near?1:-1):air?(front?9:-8):0;
+   const lift=run?-Math.max(0,Math.cos(phase+(near?0:Math.PI)+(front?0:Math.PI)))*10:state==='jump'?-13:state==='glide'?-17:state==='fall'?-4:0;
+   return [(front?(near?22:8):(near?-16:-27))+shift,lift+(near?0:-2)];
+  };
+  limb({hip:[-25,-25],paw:feet(false,false),width:6,coat:'#ded0d9',shadow:'#c3afc5',far:true,bend:-1});
+  limb({hip:[9,-40],paw:feet(false,true),width:4.9,coat:'#f1e2da',shadow:'#d2bbc9',far:true,bend:-1});
+  shape('#fff0dd',()=>{ctx.moveTo(-31,-27);ctx.bezierCurveTo(-37,-49,-13,-54,7,-48);ctx.bezierCurveTo(22,-56,31,-39,23,-24);ctx.quadraticCurveTo(19,-12,4,-12);ctx.bezierCurveTo(-11,-7,-29,-11,-31,-27);},1.55);
+  shape('#d8c4d4',()=>{ctx.moveTo(-32,-24);ctx.quadraticCurveTo(-15,-8,10,-15);ctx.quadraticCurveTo(19,-18,23,-28);ctx.quadraticCurveTo(24,-15,10,-10);ctx.quadraticCurveTo(-25,1,-32,-24);},0);
+  shape('#fff9ef',()=>{ctx.moveTo(-28,-36);ctx.bezierCurveTo(-21,-48,-5,-49,8,-43);ctx.quadraticCurveTo(-10,-45,-25,-31);},0);
+  // Near thigh is carved into the flank; its curved fold is not a circular joint.
+  shape('#f8e7d8',()=>{ctx.moveTo(-28,-32);ctx.bezierCurveTo(-37,-22,-27,-7,-13,-11);ctx.quadraticCurveTo(-4,-18,-12,-29);ctx.quadraticCurveTo(-18,-37,-28,-32);},1.05);
+  line('#fffaf1',1.5,()=>{ctx.moveTo(-26,-29);ctx.quadraticCurveTo(-17,-34,-12,-24);});
+  limb({hip:[-19,-16],paw:feet(true,false),width:6.5,coat:'#f7e5d6',shadow:'#d8bdcc',bend:-1,pads:air});
+  // Fine chest fur follows the throat down over the shoulders, leaving leg space.
+  shape('#fff9ed',()=>{ctx.moveTo(-5,-63);ctx.bezierCurveTo(9,-67,27,-59,27,-45);ctx.quadraticCurveTo(26,-34,20,-27);ctx.lineTo(18,-32);ctx.quadraticCurveTo(13,-27,9,-25);ctx.lineTo(8,-31);ctx.lineTo(2,-28);ctx.lineTo(3,-35);ctx.quadraticCurveTo(-6,-31,-5,-41);ctx.quadraticCurveTo(-11,-39,-9,-47);ctx.quadraticCurveTo(-13,-52,-5,-63);},1.1);
+  line('#dcc7da',.85,()=>{ctx.moveTo(-1,-54);ctx.quadraticCurveTo(-3,-42,5,-36);ctx.moveTo(18,-54);ctx.quadraticCurveTo(22,-44,16,-37);});
+  let leadPaw=feet(true,true);
+  if(atkK>0)leadPaw=[30+atkK*23,-31-atkK*7];
+  if(castK>0){if(power===1)leadPaw=[22,-24];else if(power===3)leadPaw=[31+castK*10,-23-castK*8];else if(power===4)leadPaw=[34,-60-castK*8];else if(power===5)leadPaw=[31,-48];else leadPaw=[30,-38-castK*(power===2?19:6)];}
+  if(hurt)leadPaw=[21,-32];if(state==='wall')leadPaw=[39,-68];if(victory)leadPaw=[28,-27];
+  // Foreleg's broad shoulder narrows toward a forward-facing rounded toe.
+  const elbow=[19+atkK*12,-22+(leadPaw[1]+1)*.24];
+  shape('#fff4e2',()=>{ctx.moveTo(15,-44);ctx.bezierCurveTo(7,-37,elbow[0]-7,elbow[1],leadPaw[0]-4,leadPaw[1]-5);ctx.bezierCurveTo(leadPaw[0]-10,leadPaw[1]-4,leadPaw[0]-8,leadPaw[1]+2,leadPaw[0]-1,leadPaw[1]+2);ctx.quadraticCurveTo(leadPaw[0]+13,leadPaw[1]+3,leadPaw[0]+12,leadPaw[1]-2);ctx.quadraticCurveTo(leadPaw[0]+11,leadPaw[1]-7,leadPaw[0]+5,leadPaw[1]-6);ctx.quadraticCurveTo(elbow[0]+5,elbow[1],24,-42);ctx.quadraticCurveTo(20,-48,15,-44);},1.35);
+  shape('#dcc4d5',()=>{ctx.moveTo(15,-39);ctx.quadraticCurveTo(elbow[0]-5,elbow[1],leadPaw[0]-3,leadPaw[1]-4);ctx.quadraticCurveTo(leadPaw[0]+1,leadPaw[1]-1,leadPaw[0]+8,leadPaw[1]);ctx.lineTo(leadPaw[0]-1,leadPaw[1]+1);ctx.quadraticCurveTo(elbow[0]-7,elbow[1],15,-39);},0);
+  line('#fffaf1',1.3,()=>{ctx.moveTo(21,-36);ctx.quadraticCurveTo(elbow[0]+3,elbow[1],leadPaw[0]+4,leadPaw[1]-7);});
+  for(const dx of[4,8])line('#ae90aa',.7,()=>{ctx.moveTo(leadPaw[0]+dx,leadPaw[1]-2);ctx.lineTo(leadPaw[0]+dx,leadPaw[1]+1);});
+  catHead({x:8,y:-77,size:1.01,coat:'#fff4df',shadow:'#dcc8d3',muzzle:'#fffaf2',iris:'#a47c93',earLength:35,crown:true});
+  spellAccents(leadPaw[0],leadPaw[1]);
   ctx.restore();return;
  }
 }
 
 
-/* Ten distinct Michicornio acting beats, in character-space. These are physical
-   gestures with tiny readable accents, not a second generic particle cloud.
-   F0→F4 keep moon horn/ears and increasingly articulate jelly ribbons. */
+// Public action vocabulary is also consumed by welcome/cinema validation.
 export const MICHICORNIO_ACTIONS=Object.freeze(['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);
-function drawMichicornioGesture(ctx,pose,r,form){
- const state=pose.state||'idle';
- if(!MICHICORNIO_ACTIONS.includes(state))return;
- const reduced=!!pose.reduceMotion,t=reduced?0:(Number(pose.t)||0);
- const beat=reduced?0:Math.sin(t*.13),kin=reduced?0:Math.sin(t*.08);
- const y=[-64,-87,-91,-75,-72][form];
- const scale=[.76,.83,.93,1.06,1.15][form];
- ctx.save();ctx.scale(scale,scale);
- ctx.strokeStyle=form>=3?'#ffe7b3':'#e8c1fa';
- ctx.lineWidth=1.9;ctx.lineCap='round';ctx.lineJoin='round';
- const curl=(x,yy,spread,alpha)=>{
-  ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(x-spread,yy+8);
-  ctx.quadraticCurveTo(x,yy-spread/2+kin*3,x+spread,yy+6);
-  ctx.stroke();
- };
- const diamond=(x,yy,rr,color)=>{
-  ctx.beginPath();ctx.moveTo(x,yy-rr);ctx.lineTo(x+rr*.65,yy);
-  ctx.lineTo(x,yy+rr);ctx.lineTo(x-rr*.65,yy);ctx.closePath();
-  ctx.fillStyle=color;ctx.fill();
- };
- switch(state){
-  case 'idle': // Antennae listen; the heartbeat is tethered to the moon horn.
-   curl(0,y-13,8,.16+Math.abs(kin)*.12);
-   break;
-  case 'run': // Displaced paw scratches and elastic nine-tail follow-through.
-   for(let i=0;i<3;i++){ctx.globalAlpha=.23+i*.07;
-    ctx.beginPath();ctx.moveTo(-20-i*9,-4-i*3+beat*3);ctx.lineTo(-33-i*9,-4-i*3);ctx.stroke();}
-   break;
-  case 'jump': // Claw tuck and vertical lunar crescent.
-   ctx.globalAlpha=.6;ctx.beginPath();ctx.arc(-21,y+16,10,1.2,5.1);ctx.stroke();break;
-  case 'fall': // Opposed forepaw wings, spread tentacles.
-   ctx.globalAlpha=.48;curl(0,y+28,40,.48);curl(0,y+36,31,.31);break;
-  case 'glide': // Gliding makes the jelly veil lift rather than stretch into feet.
-   ctx.globalAlpha=.44;ctx.beginPath();ctx.ellipse(0,y+16,36+beat*2,11,0,.1,Math.PI-.1);ctx.stroke();break;
-  case 'wall': // Three planted claw strokes, attached to the reaching paw.
-   for(let i=0;i<3;i++){ctx.globalAlpha=.58-i*.1;
-    ctx.beginPath();ctx.moveTo(25+i*4,y-2+i*8);
-    ctx.lineTo(32+i*4,y-8+i*8);ctx.stroke();}
-   break;
-  case 'attack': { // A three-beat swipe tied to attack progress, not world time.
-   const swing=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.atk)||.5)));
-   for(let i=0;i<3;i++){ctx.globalAlpha=swing*(.72-i*.11);
-    ctx.beginPath();ctx.moveTo(20+i*7,y-19);
-    ctx.quadraticCurveTo(46+i*6,y-5,29+i*8,y+17);ctx.stroke();}
-   break;
-  }
-  case 'cast':{ // Horn charges first; one ring releases after the body recoil.
-   const energy=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.cast)||.5)));
-   ctx.globalAlpha=energy*.55;ctx.beginPath();ctx.ellipse(0,y-20,18+energy*13,10+energy*6,0,0,TAU);ctx.stroke();
-   for(let i=0;i<3;i++){const a=t*.045+i*TAU/3;diamond(Math.cos(a)*27,y-20+Math.sin(a)*16,3,'#fff1b6');}
-   break;
-  }
-  case 'hurt': // Temporarily folds the moon aura inward.
-   ctx.globalAlpha=.35;ctx.beginPath();ctx.arc(0,y+3,18,2.3,5.9);ctx.stroke();break;
-  case 'victory': // Crowning animation traces the medusa-to-nine-tail genealogy.
-   for(let i=0;i<5;i++){
-    const a=i*TAU/5+(reduced?0:t*.027);
-    ctx.globalAlpha=.45+i*.06;diamond(Math.cos(a)*29,y-21+Math.sin(a)*17,3.2,'#fff8cb');
-   }
-   break;
- }
- ctx.restore();
-}
 
 function draw(ctx, pose, R) {
-  const src = pose || {};
-  const safe = src.look ? src : Object.assign({ look: { x: 1, y: 0 } }, src);
-  const f = Math.max(0, Math.min(4, Math.round(Number(safe.form) || 0)));
+  const src = pose || {},finite=(v,d=0)=>Number.isFinite(v)?v:d;
+  // Rendering never repairs the live actor. Malformed replay clocks are bounded
+  // in this local pose; reduced motion freezes the complete performance, not
+  // only the sine waves (including tentacle launch progress and landing squash).
+  const safe={...src,look:{x:finite(src.look?.x,1),y:finite(src.look?.y)}};
+  for(const key of ['t','phase','speed','atk','cast','flourish','flourishN','hurt','bounce','land','turnPulse','brake','bodyTilt','michiSeed'])safe[key]=finite(src[key]);
+  if(safe.reduceMotion){safe.t=0;safe.phase=0;safe.atk=safe.state==='attack'?.5:0;safe.cast=safe.state==='cast'?.5:0;safe.land=0;safe.bounce=0;safe.bodyTilt=0;safe.flourish=0;safe.hurt=.5;}
+  const f = Math.max(0, Math.min(4, Math.round(finite(Number(safe.form)))));
   if(f===0){ // MOON KITTEN: its own connected, soft kitten anatomy.
     drawMoonKitten(ctx,safe);return;
   }
   if(f===3){ // MOON HARE: its own rabbit rig replaces feline overlays.
     drawMoonHare(ctx,safe);return;
   }
-  const c = f===2?{...PAL[f],fur:'#f8f6ff',dark:'#a9badf',belly:'#ffffff',ear:'#d0c6f0',eye:'#549fd3',accent:'#a8e5f6'}:PAL[f];
   const r = solve(safe);
   if(!Number.isFinite(safe.michiDuetAge)){
     r.motion=michiMotion(safe,f);
@@ -754,14 +356,14 @@ function draw(ctx, pose, R) {
   }
   ctx.save();
   drawMichiFootwork(ctx,safe,f,safe.t||0);
-  moonSoul(ctx, safe, f, false);
+  // Each form owns its accents; no shared halo obscures the face.
   ctx.translate(0, r.bob + (safe.bounce || 0) * 2);
   // One connected original cat silhouette per form: tail, feet, shoulder
   // roots, ears and (F4 only) feathered wings expand together from the paws.
   if(welcome.active)ctx.scale(welcome.torsoX,welcome.torsoY);
   if(r.motion){ctx.translate(0,r.motion.lift+r.motion.crouch);ctx.rotate(r.motion.lean);ctx.scale(r.motion.sx,r.motion.sy);}
   if (r.st === "dead") {
-    ctx.rotate(1.05);
+    ctx.rotate(.60);
     ctx.translate(8, -10);
   } else if (r.st === "hurt") ctx.rotate(-0.18);
   else if (r.st === "jump") ctx.scale(0.94, 1.08);
@@ -769,8 +371,7 @@ function draw(ctx, pose, R) {
   else if (r.slot === 1) ctx.scale(1.08, 0.9);
   else if (safe.bodyTilt) ctx.rotate(safe.bodyTilt * 0.8);
   drawMichiMythic(ctx,safe,r,f);
-  drawMichicornioGesture(ctx,safe,r,f);
-  moonSoul(ctx, safe, f, true);
+  // The articulated body already performs the action; avoid doubled gesture FX.
   ctx.restore();
 }
 

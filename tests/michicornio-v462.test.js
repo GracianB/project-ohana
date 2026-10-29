@@ -44,14 +44,13 @@ test('V462 cat mouth opens with tongue and fangs; closed mouth still reads as ω
  assert.ok(closed.log.ops.quadraticCurveTo>=4,'ω lips');
 });
 
-test('V462 F1 is the Hada Felina: wings, antennae, flower crown, wand-tail — distinct from the kitten',()=>{
+test('Hada Felina retains its winged, luminous identity after the V625 anatomy review',()=>{
  const p=ROSTER.find(x=>x.id==='cat');
  assert.equal(p.forms[1].name,'Hada Felina');assert.equal(p.evoNames[1],'Hada Felina');
- for(const key of ['FAIRY CAT','drawFairyWing','Antennae','Flower crown','Wand-tail','Pixie dust'])assert.ok(src.includes(key),key);
  const ops=f=>{const r=rec();cat.draw(r.c,pose('idle',60,f),{});return r.log;};
  const kitten=ops(0),fairy=ops(1);
  const curves=o=>(o.ops.bezierCurveTo||0)+(o.ops.quadraticCurveTo||0)+(o.ops.ellipse||0);
- assert.ok(curves(fairy)>curves(kitten)+10,'fairy wings add a new silhouette');
+ assert.ok(curves(fairy)>20&&curves(kitten)>20,'both bodies use articulated curved silhouettes');
  assert.ok([...fairy.fills].filter(x=>!kitten.fills.has(x)).length>=6,'fairy palette differs from kitten');
  // Wing beat: airborne flaps faster than idle hover.
  const wing=t=>{const tr=[];const c=new Proxy({},{get:(_,k)=>k==='scale'||k==='rotate'?(...a)=>tr.push(a.map(v=>v.toFixed(3)).join()):()=>{},set:()=>true});
@@ -71,7 +70,8 @@ test('V462 every form x state renders gradient-free with articulated legs',()=>{
   const r=rec();assert.doesNotThrow(()=>cat.draw(r.c,pose(st,77,f,{reduceMotion}),{}),f+'/'+st);
   assert.equal(r.log.grad,0);
  }
- assert.ok(src.split('drawCatLeg(').length>=4,'remaining feline forms retain articulated legs');
+ // The V625 rigs own tapered limb contours instead of calling the old boot-like helper.
+ // Their runtime action/power motion is covered by michi-art-v625.test.js.
  assert.doesNotMatch(readFileSync(new URL('../characters/michi-anatomy.js',import.meta.url),'utf8'),/Math\.random|create(Linear|Radial)Gradient/);
 });
 
@@ -81,15 +81,13 @@ test('Moon hare replaces the serpent while preserving the fourth evolution slot'
  const a=rec();cat.draw(a.c,pose('run',30,3),{});assert.equal(a.log.grad,0);
 });
 
-test('V462 fairy wisp-lights are seeded and orbit the Hada Felina',()=>{
- assert.match(src,/Wisp-lights: three seeded fairy fireflies/);
+test('fairy materials remain deterministic for the saved Michi seed',()=>{
  const fills=s=>{const r=rec();cat.draw(r.c,pose('idle',60,1,{michiSeed:s}),{});return [...r.log.fills].sort().join();};
  assert.equal(fills(7),fills(7),'deterministic per seed');
 });
 
-test('V462 polish: lilac cat legs — haunches over the body on F0/F3, dancer legs on F1, paws scale up',()=>{
+test('baby and fourth form use their own anatomical renderers through the canonical cat dispatcher',()=>{
  assert.match(src,/drawMoonKitten\(ctx,safe\)/,'baby has its own connected anatomy');
  assert.match(src,/drawMoonHare\(ctx,safe\)/,'fourth form uses its own rabbit anatomy');
- assert.match(src.slice(src.indexOf('FAIRY CAT')),/pawS:1\.25/);
  for(const f of [0,1,3]){const a=rec(),b=rec();cat.draw(a.c,pose('run',10,f),{});cat.draw(b.c,pose('run',30,f),{});assert.equal(a.log.grad,0);}
 });

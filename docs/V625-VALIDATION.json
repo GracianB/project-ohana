@@ -1,0 +1,185 @@
+{
+  "release": "ohana-625",
+  "base": "2e82d5f00cf1f079aa2e036cf1115954120b44a3",
+  "recorded_at": "2026-10-29T03:20:42.047190+00:00",
+  "review": "docs/V625-MICHI.md",
+  "checks": {
+    "node": {
+      "result": "pass",
+      "tests": 1803,
+      "failures": 0,
+      "command": "npm test"
+    },
+    "release_gate": {
+      "result": "pass",
+      "cache": "ohana-625",
+      "runtime_modules": 383,
+      "precache_resources": 445
+    },
+    "five_forms_art": {
+      "result": "pass",
+      "command": "npm run test:browser:michi-art",
+      "action_and_power_cases": 255,
+      "scales": [
+        0.7,
+        1.5,
+        3
+      ],
+      "frozen_input_checks": 255,
+      "reduced_motion_checks": 85,
+      "physical_hitbox_checks": 60,
+      "texture_envelope": {
+        "left": -140,
+        "right": 140,
+        "top": -218.4,
+        "bottom": 61.6
+      },
+      "all_art_within_outline_margin": true,
+      "per_form_bounds": [
+        {
+          "form": 0,
+          "left": -55.714285714285694,
+          "top": -94.28571428571428,
+          "right": 64.33333333333331,
+          "bottom": 2.3333333333333144
+        },
+        {
+          "form": 1,
+          "left": -51.428571428571416,
+          "top": -117.14285714285714,
+          "right": 90,
+          "bottom": -0.6666666666666856
+        },
+        {
+          "form": 2,
+          "left": -41.428571428571416,
+          "top": -127.14285714285714,
+          "right": 86.66666666666669,
+          "bottom": 2.3333333333333144
+        },
+        {
+          "form": 3,
+          "left": -57.33333333333334,
+          "top": -135.7142857142857,
+          "right": 82.66666666666669,
+          "bottom": 4
+        },
+        {
+          "form": 4,
+          "left": -98.66666666666667,
+          "top": -146.33333333333334,
+          "right": 132.66666666666669,
+          "bottom": 39.333333333333314
+        }
+      ],
+      "selection": [
+        {
+          "width": 1280,
+          "height": 900,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        },
+        {
+          "width": 320,
+          "height": 568,
+          "allFiveRealButtons": true,
+          "noOverflow": true
+        }
+      ],
+      "chapter_hud": [
+        {
+          "width": 1280,
+          "height": 900,
+          "freshBaby": true,
+          "directChapterAccessFixture": true,
+          "hudLivingCanvas": true,
+          "healthVisible": true,
+          "noOverflow": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "freshBaby": true,
+          "directChapterAccessFixture": true,
+          "hudLivingCanvas": true,
+          "healthVisible": true,
+          "noOverflow": true
+        }
+      ],
+      "errors": []
+    },
+    "michi_earned_growth_and_flight": {
+      "result": "pass",
+      "command": "npm run test:browser:michi-v624",
+      "chapter": {
+        "room": "w1-cat",
+        "formsEarned": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "stations": 3,
+        "deaths": 0,
+        "physicalControls": true,
+        "directChapterAccessFixture": true,
+        "fairyFlight": {
+          "from": 915.701,
+          "to": 637.8333345218047,
+          "remaining": 50
+        }
+      },
+      "eclipse_flight": [
+        {
+          "input": "Space hold",
+          "from": 1092,
+          "ascentY": 541.4999999999973,
+          "sustainedFrames": 100,
+          "heroClearOfObjective": true,
+          "glide": true,
+          "controlledDescent": true,
+          "earnedBackup": true
+        },
+        {
+          "input": "touch hold",
+          "from": 1092,
+          "ascentY": 541.4999999999973,
+          "sustainedFrames": 100,
+          "heroClearOfObjective": true,
+          "glide": true,
+          "controlledDescent": true,
+          "earnedBackup": true
+        }
+      ],
+      "errors": []
+    },
+    "art_review": {
+      "method": "Actual Canvas output, raw five-form lineup, both facing directions and actual responsive menu/HUD screenshots.",
+      "preview": "test-results/v625/final-lineup.png",
+      "change_requested": "User explicitly reopened all five forms after rejecting V624 rabbit perspective and overall quality.",
+      "human_acceptance": "pending_user_play"
+    }
+  },
+  "source_blobs": {
+    "characters/art/cat.js": "74981cc4f20388400c27b97d384d694c55351989",
+    "characters/draw.js": "96bff356e48c3d3dd2a1ab37ea75075b213f7d73",
+    "characters/michi-kitten.js": "e0ab550cf72579b3031ba50f2e252dddb1e629d7",
+    "characters/michi-moon-hare.js": "8a16e0af8faee599a9173292f4f5d3605f5f1cd3",
+    "index.html": "7db80f637b84f16447a283d41d8ee0145a0fec0e",
+    "sw.js": "a4648e32fea5b0911ec30b715ebc60d9abe28193"
+  },
+  "limits": [
+    "Artwork fixtures demonstrate rendering and technical integration, not a subjective quality approval.",
+    "The growth test uses direct chapter access as a baby, then physically earns forms 0 through 3. It is not a campaign replay from Kilo.",
+    "Eclipse keyboard and touch flight use a previously legitimately earned campaign backup. No fresh full-campaign completion is claimed for this art-only change.",
+    "This release changes no physics, stats, progression, enemies or room geometry. Prior complete campaign evidence is docs/V623-VALIDATION.json.",
+    "Remote multiplayer backend remains paused. No new remote match or stable V1 tag is claimed.",
+    "Public deployment and CI results are recorded separately after publication."
+  ]
+}
