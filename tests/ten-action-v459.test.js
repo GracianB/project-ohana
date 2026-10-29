@@ -58,8 +58,9 @@ test('V459: character lineage is cat->lunar lynx->cat-eared jelly->moon hare->je
  assert.equal(name.forms[1].name,'Hada Felina');
  assert.ok(name.forms[2].name.includes('Medusa'));
  assert.equal(name.forms[3].name,'Conejornio Lunar');
- for(const key of ['FAIRY CAT','Ears are inherited from F1','MOON HARE','Nine EXPLICIT jelly-tendrils']){
-  assert.ok(src.includes(key),'missing anatomical continuity: '+key);
- }
- assert.ok(src.includes('drawMichicornioGesture(ctx,safe,r,f)'));
+ assert.equal(name.forms[4].name,'Michicornio Eclipse');
+ assert.equal(name.forms[0].name,'Michicornio Bebé');
+ // Each evolution has a dedicated anatomical rendering path after V625.
+ for(const form of [0,1,2,3,4])assert.match(src,new RegExp('if\\(f==='+form+'\\)\\{'));
+ assert.deepEqual(MICHICORNIO_ACTIONS,['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);
 });

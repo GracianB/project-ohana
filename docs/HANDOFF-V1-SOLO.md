@@ -1,3 +1,7 @@
+# Última revisión: V625 · Las cinco formas de Michi
+
+El usuario reabre toda la familia visual. Se corrige la perspectiva imposible del conejo y se revisan las cinco anatomías, las caras y las poses. El vuelo ganado en V624 se conserva. Alcance: [V625-MICHI.md](V625-MICHI.md). Resultados efectivos: [validación](V625-VALIDATION.json) y [publicación](V625-PUBLICATION.json). No equivale a aceptación humana del arte.
+
 # Última entrega: V624 · Michicornio
 
 Bebé y Conejornio Lunar con anatomía propia, ojos suaves y animaciones diferenciadas. Hada, Medusa y Eclipse conservan el dibujo aceptado; Hada gana aleteo limitado y Eclipse vuelo sostenido mediante salto mantenido, con teclado y táctil. Cámara y guía acompañan el vuelo. Alcance exacto: [V624-MICHICORNIO.md](V624-MICHICORNIO.md). Verificación y publicación: V624-VALIDATION.json y V624-PUBLICATION.json. El informe V623 inferior conserva la base de la campaña completa.

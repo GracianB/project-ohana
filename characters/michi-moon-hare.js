@@ -67,19 +67,24 @@ export function hareLegJoint(hip,paw,upper,lower,bend=-1){
 }
 function leg(c,{hip,paw,rear=false,far=false,fold=0}){
  const joint=hareLegJoint(hip,paw,rear?18:23,rear?20:26,rear?-1:1),fur=far?P.shadow:P.ivory;
- // Tapered muscle contours replace cylindrical tubes and round hip discs.
- const width=rear?5:3;
- path(c,fur,()=>{c.moveTo(hip.x-width,hip.y-2);c.quadraticCurveTo(joint.x-width,joint.y,paw.x-6,paw.y-3);c.lineTo(paw.x+3,paw.y-3);c.quadraticCurveTo(joint.x+width,joint.y,hip.x+width,hip.y-2);},1.15);
- if(rear){
-  path(c,fur,()=>{c.moveTo(hip.x-10,hip.y-7);c.bezierCurveTo(hip.x-17,hip.y+2,hip.x-12,hip.y+17,hip.x+1,hip.y+17);c.quadraticCurveTo(hip.x+17,hip.y+12,hip.x+9,hip.y-7);c.quadraticCurveTo(hip.x,hip.y-14,hip.x-10,hip.y-7);},.9);
-  line(c,far?P.deep:P.light,far?.65:1.5,()=>{c.moveTo(hip.x-8,hip.y-5);c.quadraticCurveTo(hip.x+1,hip.y-11,hip.x+7,hip.y-1);});
+ // The thigh flows into the hock. Its root is covered by the torso, not a disc.
+ const w=rear?8:4.2;
+ path(c,fur,()=>{
+  c.moveTo(hip.x-w,hip.y-5);
+  c.bezierCurveTo(hip.x-w-6,hip.y+5,joint.x-w*.8,joint.y+4,paw.x-7,paw.y-4);
+  c.bezierCurveTo(paw.x-13,paw.y-4,paw.x-13,paw.y+2,paw.x-5,paw.y+2);
+  c.quadraticCurveTo(paw.x+11,paw.y+3,paw.x+14,paw.y-1);
+  c.quadraticCurveTo(paw.x+15,paw.y-5,paw.x+6,paw.y-6);
+  c.lineTo(paw.x+2,paw.y-6);
+  c.quadraticCurveTo(joint.x+w*.6,joint.y-2,hip.x+w,hip.y-4);
+  c.quadraticCurveTo(hip.x,hip.y-11,hip.x-w,hip.y-5);
+ },1.15);
+ if(!far){
+  path(c,P.light,()=>{c.moveTo(paw.x-7,paw.y-3);c.quadraticCurveTo(paw.x+4,paw.y-8,paw.x+12,paw.y-2);c.quadraticCurveTo(paw.x+5,paw.y+1,paw.x-6,paw.y);},0);
+  for(const dx of[5,9])line(c,P.deep,.65,()=>{c.moveTo(paw.x+dx,paw.y-2);c.quadraticCurveTo(paw.x+dx+1,paw.y,paw.x+dx,paw.y+1);});
+  if(rear)line(c,P.deep,.8,()=>{c.moveTo(hip.x-3,hip.y+1);c.bezierCurveTo(hip.x+9,hip.y+5,hip.x+9,hip.y+16,hip.x+1,hip.y+18);});
+  else line(c,P.light,1.2,()=>{c.moveTo(hip.x,hip.y+2);c.quadraticCurveTo(joint.x,joint.y,paw.x-4,paw.y-7);});
  }
- c.save();c.translate(paw.x,paw.y);c.rotate(fold*.3);
- // Soft long rabbit toes; no flat boots or detached oval feet.
- path(c,fur,()=>{c.moveTo(-10,-4);c.bezierCurveTo(-6,-8,8,-7,14,-3);c.quadraticCurveTo(16,1,9,2);c.lineTo(-9,2);c.quadraticCurveTo(-13,0,-10,-4);},1.2);
- if(!far){for(const x of [6,10])line(c,P.deep,.65,()=>{c.moveTo(x,-3);c.quadraticCurveTo(x+1,-1,x,1);});
-  line(c,P.light,1.6,()=>{c.moveTo(-6,-4);c.quadraticCurveTo(2,-6,7,-4);});}
- c.restore();
 }
 function tail(c,r){
  c.save();c.translate(-36,-27);c.rotate(r.tail);
@@ -98,48 +103,66 @@ function ear(c,x,y,angle,far,r){
   line(c,P.deep,.7,()=>{c.moveTo(5,-30);c.lineTo(2,-28);});}
  c.restore();
 }
+// A slight three-quarter face: both eyes share one curved face plane, and the
+// short nose sits BETWEEN them. No profile snout with a second frontal eye.
+export function moonHareFace(pose={}){
+ const r=moonHarePose(pose);
+ return {near:{x:10,y:-2,rx:5.2,ry:5.1},far:{x:-8,y:-3,rx:4.2,ry:4.7},nose:{x:3,y:7},closed:!!r.blink};
+}
 function eye(c,x,y,far,r){
- c.save();c.translate(x,y);c.scale(far?.58:1,1);
- if(r.blink){line(c,P.ink,1.15,()=>{c.moveTo(-5,-.5);c.quadraticCurveTo(0,r.dead?.8:2.2,5,-.5);});}
+ const rx=far?4.2:5.2,ry=far?4.7:5.1;
+ c.save();c.translate(x,y);
+ if(r.blink){line(c,P.ink,1.15,()=>{c.moveTo(-rx,0);c.quadraticCurveTo(0,r.dead?1:-2.1,rx,0);});}
  else{
-  // Animal almond: little sclera, a generous warm iris and one soft catchlight.
-  // The upper lid overlaps the iris; no concentric white/black target rings.
-  c.save();c.beginPath();c.moveTo(-5.8,.2);c.bezierCurveTo(-4.5,-5.7,3.5,-6.5,5.7,-.8);c.bezierCurveTo(4.4,5.4,-3.8,5.6,-5.8,.2);c.closePath();c.clip();
-  c.fillStyle='#f5e9ef';c.fillRect(-7,-8,14,16);
-  oval(c,r.look*.5,-.1,5.8,6.5,'#9b7eab',0,0);
-  oval(c,r.look*.6,-.2,3.5,4.7,'#4a3c58',0,0);
-  oval(c,r.look*.6-1.2,-2,1.05,1.35,'#fff5e6',0,0);
-  c.restore();
-  line(c,P.ink,1.25,()=>{c.moveTo(-5.8,.2);c.bezierCurveTo(-4.5,-5.7,3.5,-6.5,5.7,-.8);});
-  line(c,'#a18aad',.75,()=>{c.moveTo(-5.5,1);c.quadraticCurveTo(0,6.2,5.4,.5);});
+  c.save();c.beginPath();c.moveTo(-rx,.1);c.bezierCurveTo(-rx*.85,-ry*1.2,rx*.66,-ry*1.2,rx,-.5);c.bezierCurveTo(rx*.8,ry*.9,-rx*.7,ry,-rx,.1);c.closePath();c.clip();
+  c.fillStyle='#f5e5ed';c.fillRect(-rx-1,-ry-2,rx*2+2,ry*2+4);
+  oval(c,r.look*.45,.2,rx*.95,ry*1.12,'#9474a6',0,0);
+  path(c,'#c6a1ca',()=>{c.moveTo(-rx*.6,1);c.quadraticCurveTo(0,ry,rx*.75,1.4);c.quadraticCurveTo(rx*.2,ry*1.35,-rx*.6,1);},0);
+  oval(c,r.look*.5,-.3,rx*.58,ry*.84,'#3e314d',0,0);
+  oval(c,r.look*.5-1.15,-1.8,.9,1.05,'#fff8ed',0,0);c.restore();
+  line(c,P.ink,1.05,()=>{c.moveTo(-rx,.1);c.bezierCurveTo(-rx*.85,-ry*1.2,rx*.66,-ry*1.2,rx,-.5);});
+  line(c,'#aa8da8',.6,()=>{c.moveTo(-rx*.92,1);c.quadraticCurveTo(0,ry*1.2,rx*.92,.5);});
  }
  c.restore();
 }
 function head(c,r){
- c.save();c.translate(20+r.headX,-48+r.headY);c.rotate(r.headTilt);
- ear(c,-8,-12,r.earFar-.18,true,r);
- // Forehead, cheek and tapered muzzle are one continuous silhouette.
- path(c,P.ivory,()=>{c.moveTo(-18,-7);c.bezierCurveTo(-21,-23,0,-26,12,-16);c.quadraticCurveTo(17,-9,15,-3);c.bezierCurveTo(23,-3,28,3,24,10);c.bezierCurveTo(18,19,0,18,-12,10);c.quadraticCurveTo(-22,4,-18,-7);});
- path(c,P.shadow,()=>{c.moveTo(-18,2);c.quadraticCurveTo(-5,13,14,10);c.quadraticCurveTo(22,10,25,7);c.quadraticCurveTo(23,18,7,17);c.quadraticCurveTo(-13,17,-18,2);},0);
- path(c,P.light,()=>{c.moveTo(-14,-10);c.bezierCurveTo(-10,-23,3,-23,11,-13);c.quadraticCurveTo(0,-18,-6,-9);c.closePath();},0);
- eye(c,-10,-2.5,true,r);eye(c,5,-2,false,r);
- // Warm cheeks leave both eyes readable at gameplay size.
- oval(c,-13,6,3,1.7,P.rose,0,0);oval(c,11,7,3.5,1.8,P.rose,0,0);
- path(c,P.rose,()=>{c.moveTo(19,5+r.nose);c.quadraticCurveTo(24,3,23,7);c.lineTo(21,9);c.closePath();},.8);
- line(c,P.ink,1,()=>{c.moveTo(21,9);c.lineTo(20,12);c.quadraticCurveTo(15,15,12,11);});
- if(r.attack>.15||r.smile){oval(c,15,13,4.1,2.7,'#2a0f2e',0,.8);oval(c,16,14,2.7,1.1,'#ff7fae',0,0);
-  path(c,P.light,()=>{c.moveTo(13,11);c.lineTo(17,11);c.lineTo(16.5,13);c.lineTo(13.5,13);},0);}
- // Whiskers follow the muzzle, rather than crossing its face.
- for(let i=0;i<2;i++)line(c,P.deep,.55,()=>{c.moveTo(17,9+i*2);c.quadraticCurveTo(27,9+i*3,32,7+i*5);});
- ear(c,-1,-16,r.earNear+.12,false,r);
- // A carved ivory spiral grows from the forehead between the ears.
- c.save();c.translate(8,-18);c.rotate(.19);
- path(c,P.goldLight,()=>{c.moveTo(-4,3);c.quadraticCurveTo(-4,-14,1,-31);c.quadraticCurveTo(6,-13,5,3);c.closePath();},1.05);
- path(c,P.gold,()=>{c.moveTo(2,-25);c.quadraticCurveTo(7,-7,5,3);c.lineTo(1,3);c.quadraticCurveTo(4,-12,2,-25);},0);
- for(let i=0;i<4;i++)line(c,'#b78c55',.8,()=>{const y=-2-i*5;c.moveTo(-3+i*.7,y);c.quadraticCurveTo(1,y+1,4-i*.15,y-2);});
- line(c,P.light,1,()=>{c.moveTo(-2,-2);c.quadraticCurveTo(-3,-12,1,-27);});c.restore();
- // Forehead marking is attached to skin: no hovering halo or orbiting baubles.
- crescent(c,0,-15,2.4,P.gold);c.restore();
+ const face=moonHareFace({state:r.state,t:r.t,reduceMotion:r.reduced});
+ c.save();c.translate(21+r.headX,-53+r.headY);c.rotate(r.headTilt);
+ ear(c,-11,-16,r.earFar-.14,true,r);
+ // Heart-shaped rabbit skull, cheek tufts and rounded jaw are one silhouette.
+ path(c,P.ivory,()=>{
+  c.moveTo(-20,-7);c.bezierCurveTo(-21,-27,6,-31,19,-18);
+  c.quadraticCurveTo(25,-12,23,-1);c.quadraticCurveTo(25,4,28,5);
+  c.lineTo(24,7);c.lineTo(26,9);c.lineTo(21,10);
+  c.bezierCurveTo(20,22,-4,24,-15,15);c.quadraticCurveTo(-23,12,-23,7);
+  c.lineTo(-27,5);c.lineTo(-23,3);c.lineTo(-26,1);c.quadraticCurveTo(-21,-1,-20,-7);
+ },1.3);
+ path(c,'#eadbeb',()=>{c.moveTo(-22,5);c.quadraticCurveTo(-13,18,3,17);c.quadraticCurveTo(18,16,23,6);c.quadraticCurveTo(23,21,4,21);c.quadraticCurveTo(-13,21,-22,5);},0);
+ // The light plane follows the brow/bridge rather than drawing another mask.
+ path(c,P.light,()=>{c.moveTo(-16,-12);c.bezierCurveTo(-9,-25,7,-24,16,-16);c.quadraticCurveTo(6,-21,1,-13);c.quadraticCurveTo(-5,-19,-16,-12);},0);
+ path(c,'#fffaf0',()=>{c.moveTo(-11,7);c.quadraticCurveTo(-5,1,3,7);c.quadraticCurveTo(12,2,17,8);c.bezierCurveTo(18,16,12,19,3,18);c.quadraticCurveTo(-9,19,-11,7);},0);
+ eye(c,face.far.x,face.far.y,true,r);eye(c,face.near.x,face.near.y,false,r);
+ oval(c,-15,7.5,3.5,1.5,'#e8b9cf',-.1,0);oval(c,17,8,3.9,1.6,'#edbfd1',.1,0);
+ c.save();c.translate(face.nose.x-3,face.nose.y-7);
+ path(c,'#ce91ac',()=>{c.moveTo(-.8,7+r.nose);c.quadraticCurveTo(3,5.2,6.8,7+r.nose);c.quadraticCurveTo(5,10,3,10.3);c.quadraticCurveTo(1,9.7,-.8,7+r.nose);},.65);
+ line(c,P.ink,.85,()=>{c.moveTo(3,10.3);c.lineTo(3,12.7);c.quadraticCurveTo(-1,16,-4,12.8);c.moveTo(3,12.7);c.quadraticCurveTo(7,16,10,12.8);});
+ if(r.attack>.15||r.smile){
+  path(c,'#2a0f2e',()=>{c.moveTo(-1,13);c.quadraticCurveTo(3,15,8,13);c.quadraticCurveTo(8,20,3,20);c.quadraticCurveTo(-1,19,-1,13);},.6);
+  oval(c,4,18,2.8,1.2,'#ff7fae',0,0);
+  path(c,P.light,()=>{c.moveTo(1,13.5);c.lineTo(5.5,13.5);c.lineTo(5,16);c.lineTo(1.4,16);},.25);
+ }
+ c.restore();
+ for(const side of[-1,1])for(let i=0;i<2;i++)line(c,'#a28ca9',.6,()=>{const x=side<0?-16:18;c.moveTo(x,10+i*3);c.quadraticCurveTo(x+side*9,9+i*4,x+side*15,7+i*6);});
+ // Near ear grows behind the brow. The horn occupies the shared centreline.
+ ear(c,6,-20,r.earNear+.09,false,r);
+ c.save();c.translate(-1,-24);c.rotate(.08);
+ path(c,P.goldLight,()=>{c.moveTo(-3.3,3);c.quadraticCurveTo(-4,-10,0,-25);c.quadraticCurveTo(5,-10,4,3);},.9);
+ path(c,P.gold,()=>{c.moveTo(1,-22);c.quadraticCurveTo(5,-7,4,3);c.lineTo(.9,3);c.quadraticCurveTo(3,-11,1,-22);},0);
+ for(let i=0;i<4;i++)line(c,'#b68c60',.65,()=>{const y=-1-i*4.4;c.moveTo(-2.7+i*.5,y);c.quadraticCurveTo(.2,y+1,3.5-i*.3,y-1.7);});
+ line(c,P.light,.9,()=>{c.moveTo(-2,-1);c.quadraticCurveTo(-2.5,-12,0,-23);});c.restore();
+ // Three locks of brow fur carry the crescent into the same facial plane.
+ path(c,P.light,()=>{c.moveTo(-12,-17);c.quadraticCurveTo(-5,-24,4,-20);c.lineTo(1,-15);c.lineTo(-2,-17);c.lineTo(-5,-13);c.lineTo(-6,-17);c.quadraticCurveTo(-9,-15,-12,-17);},.5);
+ crescent(c,2,-13,2.2,P.gold);c.restore();
 }
 function magic(c,r){
  if(r.dead||r.reduced)return;
@@ -163,22 +186,26 @@ export function drawMoonHare(c,pose={}){
  magic(c,{...r,charge:0,attack:0});tail(c,r);
  leg(c,{hip:{x:rearHip.x-5,y:rearHip.y},paw:{x:r.backX-5+r.farOffset,y:r.backY-1},rear:true,far:true,fold:r.air?-.25:0});
  leg(c,{hip:{x:frontHip.x-5,y:frontHip.y},paw:{x:r.frontX-7,y:r.frontY-r.pawLift-2},far:true});
- // Sculpted pear-shaped torso: one contour, a shaded underside and a light spine.
- path(c,P.ivory,()=>{c.moveTo(-34,-29);c.bezierCurveTo(-39,-48,-13,r.sit?-68:-55,6,-43+r.chest);c.bezierCurveTo(24,-45+r.chest,30,-29,24,-19);c.bezierCurveTo(9,-7,-29,-7,-34,-29);});
- path(c,P.shadow,()=>{c.moveTo(-32,-23);c.bezierCurveTo(-13,-10,12,-13,25,-25);c.quadraticCurveTo(27,-14,9,-12);c.bezierCurveTo(-10,-6,-29,-12,-32,-23);},0);
- path(c,P.light,()=>{c.moveTo(-30,-37);c.bezierCurveTo(-19,-49,-1,-48,9,-39+r.chest);c.quadraticCurveTo(-12,-44,-27,-32);},0);
- // Moon-dappled fur, not a costume: constellated marks follow the back.
- crescent(c,-17,-36,5,P.lavender);
- for(const [x,y,radius] of [[-27,-35,1.6],[-7,-39,1.5],[-2,-34,1]])oval(c,x,y,radius,radius,P.gold,0,0);
- // Three satin guard hairs carry a little of the former medusa's translucency.
- for(let i=0;i<3;i++){
-  const lag=r.reduced?0:Math.sin(r.t*.055-i*.6)*(r.state==='run'?2:1);
-  path(c,i%2?'#e9dff5':'#f7ebff',()=>{c.moveTo(5-i*4,-44-i%2);c.bezierCurveTo(-2-i*8,-53+lag,-19-i*5,-50+lag,-30-i*2,-44+lag);c.quadraticCurveTo(-12-i*4,-47,5-i*4,-44-i%2);},.45);
- }
+ // Long, soft flank and upright chest; the near haunch has an open contour.
+ path(c,P.ivory,()=>{
+  c.moveTo(-35,-24);c.bezierCurveTo(-43,-44,-23,r.sit?-68:-56,-4,-48);
+  c.quadraticCurveTo(7,-45+r.chest,13,-51+r.chest);
+  c.quadraticCurveTo(24,-53,25,-39);c.bezierCurveTo(30,-27,27,-15,16,-12);
+  c.bezierCurveTo(1,-6,-27,-6,-35,-24);
+ },1.3);
+ path(c,'#e5d4e8',()=>{c.moveTo(-35,-23);c.bezierCurveTo(-24,-13,-2,-12,17,-20);c.quadraticCurveTo(25,-25,26,-32);c.quadraticCurveTo(30,-16,14,-11);c.bezierCurveTo(-5,-5,-28,-10,-35,-23);},0);
+ path(c,P.light,()=>{c.moveTo(-32,-36);c.bezierCurveTo(-28,-49,-12,-51,-3,-45);c.quadraticCurveTo(-18,-46,-28,-31,-32,-36);},0);
+ // Fur markings follow the flank, with a small crescent rather than costume trim.
+ crescent(c,-18,-35,4.4,'#b59bcf');
+ for(const[x,y,radius]of[[-28,-32,1.2],[-8,-39,1.2],[-4,-34,.8]])oval(c,x,y,radius,radius,'#dfbe89',0,0);
+ for(let i=0;i<3;i++)line(c,i%2?P.light:'#dac7e3',.85,()=>{
+  const lag=r.reduced?0:Math.sin(r.t*.055-i*.6)*.8;
+  c.moveTo(-29+i*5,-40-i%2);c.quadraticCurveTo(-20+i*5,-47+lag,-12+i*4,-44+lag);
+ });
  leg(c,{hip:rearHip,paw:{x:r.backX,y:r.backY},rear:true,fold:r.state==='jump'?-.3:0});
- // A fluffy bib joins the neck to the chest; it is fur, not a cape.
- path(c,P.light,()=>{c.moveTo(8,-44+r.chest);c.lineTo(17,-48+r.chest);c.quadraticCurveTo(26,-39,27,-29);c.lineTo(24,-29);c.lineTo(23,-22);c.lineTo(19,-26);c.lineTo(16,-20);c.lineTo(14,-25);c.lineTo(10,-23);c.quadraticCurveTo(7,-34,8,-44+r.chest);},1.1);
- crescent(c,20,-35+r.chest,3.5,P.goldLight);
+ // Soft neck ruff joins skull, shoulder and sternum in the same coat.
+ path(c,P.light,()=>{c.moveTo(8,-46+r.chest);c.quadraticCurveTo(19,-52,26,-40);c.quadraticCurveTo(29,-32,24,-26);c.lineTo(24,-22);c.lineTo(20,-25);c.quadraticCurveTo(18,-19,16,-20);c.lineTo(15,-24);c.lineTo(11,-22);c.quadraticCurveTo(8,-29,8,-46+r.chest);},.8);
+ line(c,'#e5d3e2',.7,()=>{c.moveTo(16,-39);c.quadraticCurveTo(13,-32,16,-27);});
  leg(c,{hip:frontHip,paw:{x:r.frontX,y:r.frontY-r.pawLift},fold:r.air?-.35:0});
  head(c,r);magic(c,{...r,mantle:0});c.restore();
 }

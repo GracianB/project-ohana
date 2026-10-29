@@ -1,8 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import crypto from 'node:crypto';
 import fs from 'node:fs';
-import {moonHarePose,hareLegJoint,drawMoonHare} from '../characters/michi-moon-hare.js';
+import {moonHarePose,hareLegJoint,drawMoonHare,moonHareFace} from '../characters/michi-moon-hare.js';
 import cat from '../characters/art/cat.js';
 import {ROSTER} from '../characters/roster.js';
 
@@ -37,11 +36,15 @@ test('rabbit renderer is pure and uses no gradients, blur, raster assets or worl
  const src=fs.readFileSync(new URL('../characters/michi-moon-hare.js',import.meta.url),'utf8');assert.doesNotMatch(src,/create(?:Linear|Radial)Gradient|shadowBlur|drawImage|Math\.random|localStorage/);
  const def=ROSTER.find(x=>x.id==='cat');assert.equal(def.forms[3].name,'Conejornio Lunar');assert.equal(def.forms[3].w,36);assert.equal(def.forms[3].h,34);
 });
-test('the three accepted fairy, medusa and Eclipse forms retain the exact V623 Canvas drawing traces',()=>{
- const baseline=JSON.parse(fs.readFileSync(new URL('./fixtures/michi-other-forms-v623.json',import.meta.url),'utf8'));
- for(const [key,expected]of Object.entries(baseline).filter(([key])=>!key.startsWith("0/"))){
-  const [f,state]=key.split('/'),ops=[];const c=new Proxy({},{get:(_,k)=>(...a)=>ops.push([k,...a]),set:(_,k,v)=>{ops.push(['set',k,v]);return true;}});
-  cat.draw(c,{form:Number(f),state,t:73,phase:2.3,speed:1,cast:.45,atk:.5,castSlot:1,look:{x:.3,y:0},michiSeed:42},{});
-  assert.equal(crypto.createHash('sha256').update(JSON.stringify(ops)).digest('hex'),expected,key);
+// V625 explicitly reopens the artwork of all five forms. The old trace hashes
+// are retained as historical evidence, not as a freeze on the user's redesign.
+test('the rabbit nose belongs between two eyes on the same facial plane',()=>{
+ for(const state of ['idle','run','jump','attack','cast','hurt','victory']){
+  const face=moonHareFace({state,t:73});
+  assert.ok(face.far.x<face.nose.x&&face.nose.x<face.near.x,'a frontal pair must not accompany a profile snout');
+  assert.ok(Math.abs(face.far.y-face.near.y)<2,'eyes follow one brow plane');
+  assert.ok(face.nose.y>face.near.y&&face.nose.y>face.far.y,'nose belongs below the brow');
+  assert.ok(face.far.rx<face.near.rx,'far eye foreshortens in a three-quarter view');
  }
+ assert.equal(moonHareFace({state:'hurt'}).closed,true);
 });
