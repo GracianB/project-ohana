@@ -1,4 +1,4 @@
-import {drawFamilyActor} from './family-actor.js';
+import {drawFamilyActor,tryFamilyActorAdapter} from './family-actor.js';
 import {holdAdventureFinalScene} from '../multiplayer/adventure-finale.js';
 import {KEEPSAKES,drawKeepsake} from './keepsakes.js';
 import {drawChapterBossV2} from './chapter-boss-art-v2.js';
@@ -200,7 +200,7 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   ctx.fillStyle = s.color; for (let i = 3; i >= 1; i--) { ctx.globalAlpha = (s.burst ? 0.09 : 0.05) * i * fadeIn; ctx.beginPath(); ctx.arc(W / 2, H * 0.5, Math.min(W, H) * (0.12 + 0.1 * (4 - i)) * (s.burst ? 0.8 + k * 0.5 : 1), 0, Math.PI * 2); ctx.fill(); }
   if (s.layout === "portal") { ctx.globalAlpha = fadeIn; ctx.strokeStyle = "#8fe9ff"; ctx.lineWidth = 8; const r = Math.min(W, H) * 0.2; ctx.beginPath(); ctx.ellipse(W * 0.82, H * 0.5, r * 0.7, r * (0.9 + 0.05 * Math.sin(t * 0.06)), 0, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "#2a1f4a"; ctx.fill(); ctx.fillStyle = "#8fe9ff"; ctx.font = `bold ${Math.round(H * 0.035)}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("MUNDO 2", W * 0.82, H * 0.48); ctx.font = `bold ${Math.round(H * 0.022)}px sans-serif`; ctx.fillText("en construcción", W * 0.82, H * 0.54); }
   const actor=(...args)=>{
-    if(drawActor){ctx.save();try{return drawActor(...args);}catch(_){}finally{ctx.restore();}}
+    if(tryFamilyActorAdapter(args[0],drawActor,...args.slice(1)))return;
     return drawFamilyActor(...args.slice(0,5),reduce?0:t,args[5]||{},reduce);
   };
   // Héroes: el adaptador por defecto dibuja los mismos actores de la partida.

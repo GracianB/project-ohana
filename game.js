@@ -661,7 +661,9 @@ if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();
 game.renderDirty = true;
 game.roomDef = r;
-game.finalGauntlet=null;
+// A retry reloads this room too: the previous boss director must not survive
+// after its boss/enemies have been discarded. A new encounter creates its own.
+game.finalGauntlet=null;game.world1Boss=null;
 game._defeatedThisVisit=new Set();
 game.finale = null;
 game.visited[id] = true;
@@ -683,7 +685,6 @@ if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4){
  applyForm(game.player,{silent:true});renderAbilityBar();
 }
 if(game.world1?.cinema&&!r.fusionBoss){game.world1.cinema=null;playWorld1Cine(game,"roomEnter",r.hero);}
-if(!r.fusionBoss)game.world1Boss=null;
 game.onHeroAbility=(p,index)=>{kiloChapterAbility(game,p,index);expeditionAbility(game,p,index);groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);chispinChapterAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);nextChapterAbility(game,p,index);dinoChapterAbility(game,p,index);fryerAstralAbility(game,p,index);};
 game.onDinoLandingHit=(e,dmg)=>hitArenaEnemy(game,e,dmg,{color:'#deedbc',stun:25,ky:-4,kx:Math.sign(e.x-game.player.x)*4,shake:2,parts:6});
 // Never carry a previous room's one-way ledge into the next room.

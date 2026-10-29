@@ -1,4 +1,4 @@
-const VERSION = "ohana-627";
+const VERSION = "ohana-628";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/family-actor.js?v=" + VERSION,
@@ -458,7 +458,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/family-actor.js": "71cb9d7aea8ae4d3967dc36ee4e7fbe46e318b22",
+  "systems/family-actor.js": "782f8cad723e7eea0398c55ffa8fd9e05342b967",
   "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
   "characters/michi-flight.js": "f76733588d2d43bfc6b8d696e5faffb027cf3a22",
   "characters/michi-kitten.js": "9cde42417809f14a2ee2dfdea77eb78f2eb830fa",
@@ -576,9 +576,9 @@ const PRECACHE_REVISIONS = {
   "systems/pizza-chapter.js": "328fb0f36e5e8bb8e6f7fd18c0aba0d7a059a268",
   "worlds/pizza-ovens.js": "28440ea475b0e5499a04f91d396b1785355ce8e2",
   "systems/yomi-room.js": "0916aa8f05dd7b6dccfafe698f01d43c856bbe3a",
-  "systems/world1-cine.js": "b16fd74f3e18ff278285b9e63ec0c1e1727cee4d",
+  "systems/world1-cine.js": "3d0843abccaa4b37939909564dfb487d845813ab",
   "systems/final-portal-mirrors.js": "77f0bf9641ee93229855d637d02291903461ccae",
-  "systems/world1-select.js": "370d5ca9c06a41e48e8d753143db2c509071dbe4",
+  "systems/world1-select.js": "41af950a91dc58a4e6605514792a5f40db9b27c2",
   "systems/theatre-stage.js": "1824c8672997164ac18403f85fccd8ef7d87d50d",
   "systems/world1-progress.js": "52c9c5ded533dc649210fd913b737614b2bb67dc",
   "systems/world1-collect.js": "cc3223c710bddeb8f1587dd462292f8fb60956eb",
@@ -660,7 +660,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "b97dd4c228df2d746b0bbba70159846248941c6f",
+  "index.html": "c023ec38afe666438e2b68ae0d9aecb27ebc6adb",
   "multiplayer.html": "8700abcf3f860c504167facf1c37815debad59f9",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "b3178c951bec2a30bda0bb2b2d47763b24567189",
@@ -685,7 +685,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "8e80e2b547248228a567da3f731098cbf281e4a9",
+  "game.js": "b8a7944bfd678200395e09b9788533095760357e",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "d1439fc3e3a4a31d241adf52a5d1f648f4b08d9d",
   "characters/ten-action-acting.js": "8c56db05f0625ebce31e10abbba5305be881d0ff",
@@ -796,7 +796,7 @@ const PRECACHE_REVISIONS = {
   "systems/death-fx.js": "b373412bd245f196d6d484007814301d773fc145",
   "systems/demo.js": "aace64289d8aa541de43639c4cb476b5d09d5059",
   "systems/dialogs.js": "734efae04b14a525bf69117adc9c5c779ea01d21",
-  "systems/ending.js": "2b6e8a12741ce4c1cfd6dd295407d4abdd891063",
+  "systems/ending.js": "a577e44172436fbcfc840a60ee7734f08c4fa7cb",
   "systems/ending-duo.js": "9d08ce9aef45f9f13350a893ab427432fdeffe1a",
   "systems/v100-family-choreography.js": "4f8ac04fa38f03b397d3ece1474e5504be69196b",
   "systems/v1002-festival.js": "65dbf3063f7baefd733d1ef492e8ee3b0596fd9a",
