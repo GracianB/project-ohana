@@ -322,6 +322,9 @@ jobs:
         run: npm run test:browser:michi-art
       - name: V627 final mirrors · real family actors in room, selection and films
         run: npm run test:browser:final-mirrors
+      - name: V629 final portal return and native hero selection
+        run: npm run test:browser:selection-return
+
       - name: V628 safe actor adapters and final encounter replay
         run: |
           npm run test:browser:actor-adapter

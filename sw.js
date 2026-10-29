@@ -1,4 +1,4 @@
-const VERSION = "ohana-628";
+const VERSION = "ohana-629";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/family-actor.js?v=" + VERSION,
@@ -654,13 +654,13 @@ const PRECACHE_REVISIONS = {
   "engine/camera.js": "b21bd3aa6c6f3984184f404046d6bbecb5b09c3c",
   "systems/welcome-story.js": "c45fcfb2e3d8894b8e77519ee01755534b82b433",
   "family-camp.css": "7f7676e2f553cf65884ebcdaabe8a10f30d46bdf",
-  "systems/family-camp.js": "3f14123bf10e861d38c924cf5ee232745aa92c2b",
+  "systems/family-camp.js": "dbfcd14cb7677a872b7da74d2bba5b081a297b13",
   "systems/family-camp-model.js": "d49f1bf31d2d8bbca5a797da20abcc2b1e972c60",
   "systems/evo-cine/real-actor.js": "fcdecf739d6fef4c266d66be67a6da9edec4531e",
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "c023ec38afe666438e2b68ae0d9aecb27ebc6adb",
+  "index.html": "6182705082f5222a9efa7593c895cacf81d1ae9f",
   "multiplayer.html": "8700abcf3f860c504167facf1c37815debad59f9",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "b3178c951bec2a30bda0bb2b2d47763b24567189",

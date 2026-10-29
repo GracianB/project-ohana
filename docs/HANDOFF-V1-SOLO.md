@@ -1,3 +1,7 @@
+# Última revisión: V629 · Volver del Corazón al héroe
+
+Al salir del portal final se restituyen la ficha y el escenario del mismo héroe con flechas, clic o táctil. Entrar en el Corazón termina la travesura para que sus frases no oculten el aviso de los sellos pendientes. Ver [alcance](V629-SELECCION.md), [validación](V629-VALIDATION.json) y [publicación](V629-PUBLICATION.json).
+
 # Última revisión: V628 · Cierre y recuperación de actores
 
 Se corrigen el estado Canvas filtrado por adaptadores fallidos y el caso false; se limpia el resumen final. Revancha de Quimera y cierre sin solapamientos, selector y recuerdos se verifican con controles. Ver [alcance](V628-CIERRE.md), [validación](V628-VALIDATION.json), [publicación](V628-PUBLICATION.json).

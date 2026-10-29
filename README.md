@@ -6,7 +6,7 @@
 
 **Diez historias. Una familia.**
 
-[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=628) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=629) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
 
@@ -19,7 +19,7 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus locales disponibles para validación. El servidor público permanece pausado.
 
-Registro de entrega: `ohana-628` / V1.0.0 individual. [Validación](docs/V628-VALIDATION.json) · [Publicación](docs/V628-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+Registro de entrega: `ohana-629` / V1.0.0 individual. [Validación](docs/V629-VALIDATION.json) · [Publicación](docs/V629-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
 
 ## Historial de desarrollo
 
