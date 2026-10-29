@@ -3,9 +3,9 @@
   "updated_on": "2026-10-29",
   "release": "ohana-626",
   "repository": "GracianB/project-ohana",
-  "published": false,
+  "published": true,
   "v1_ready": false,
-  "next_task": "validate_and_publish_V626_shared_hero_eyes",
+  "next_task": "user_play_review_of_V626_shared_michi_eyes",
   "validation": "docs/V626-VALIDATION.json",
   "publication": "docs/V626-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
@@ -13,5 +13,6 @@
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
-  "previous_verified_campaign": "docs/V623-VALIDATION.json"
+  "previous_verified_campaign": "docs/V623-VALIDATION.json",
+  "source_commit": "8e0f60cd06e0cae475faf0337ab613c96d0cea3e"
 }

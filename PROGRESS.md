@@ -1,3 +1,5 @@
+V626 publicada y comprobada: merge 8e0f60c; Pages aprobado (1.807 pruebas Node e integridad incluidas). Los seis archivos runtime cambiados coinciden por hash con la web pública. Arranque nativo, cinco formas de Michi, primer recuerdo, álbum, HUD y J táctil aprobados en escritorio/móvil, sin hooks de prueba, errores ni llamadas al backend pausado. La revisión visual del jugador queda pendiente. No existe PR nuevo: la API devolvió Forbidden. Registro: docs/V626-PUBLICATION.json.
+
 V626 validada: 1.807 pruebas, comparación exacta con R.eye, cinco formas y revisión de selección/HUD en escritorio y móvil. Pendiente la comprobación pública.
 
 ohana-626 · Se sustituyen los ojos particulares de Michi por el dibujador común R.eye en sus cinco formas. Alcance y resultados efectivos: docs/V626-MICHI-EYES.md, docs/V626-VALIDATION.json y docs/V626-PUBLICATION.json.

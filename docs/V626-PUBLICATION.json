@@ -1,5 +1,102 @@
 {
   "release": "ohana-626",
-  "published": false,
-  "status": "local_validation_passed_pending_publication"
+  "published": true,
+  "site": "https://gracianb.github.io/project-ohana/?release=626",
+  "verified_at": "2026-10-29T03:34:10.268229+00:00",
+  "feature_branch": "fix/v626-michi-shared-eyes",
+  "feature_commit": "ffe5b20003770671ebb3405acba699ca7e3c288a",
+  "merged_source_commit": "8e0f60cd06e0cae475faf0337ab613c96d0cea3e",
+  "integration": "Ordinary non-fast-forward merge authorized by user. Merged source tree verified identical to tested feature tree.",
+  "pull_request": {
+    "created": false,
+    "reason": "gh pr create returned GraphQL Forbidden; no PR number is claimed."
+  },
+  "pages": {
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/40812675814",
+    "result": "Success",
+    "workflow": "pages",
+    "duration": "1m 7s",
+    "source_commit": "8e0f60cd06e0cae475faf0337ab613c96d0cea3e",
+    "checks": "Unit tests and offline release integrity are required by the successful Pages deployment."
+  },
+  "public_source_verification": {
+    "checked": "2026-10-29T03:33:25.699447+00:00",
+    "site": "https://gracianb.github.io/project-ohana/",
+    "files": [
+      {
+        "path": "characters/art/cat.js",
+        "expected": "d1439fc3e3a4a31d241adf52a5d1f648f4b08d9d",
+        "actual": "d1439fc3e3a4a31d241adf52a5d1f648f4b08d9d",
+        "match": true
+      },
+      {
+        "path": "characters/michi-eyes.js",
+        "expected": "806709c1946861637fa89430483312c6542257ba",
+        "actual": "806709c1946861637fa89430483312c6542257ba",
+        "match": true
+      },
+      {
+        "path": "characters/michi-kitten.js",
+        "expected": "9cde42417809f14a2ee2dfdea77eb78f2eb830fa",
+        "actual": "9cde42417809f14a2ee2dfdea77eb78f2eb830fa",
+        "match": true
+      },
+      {
+        "path": "characters/michi-moon-hare.js",
+        "expected": "7d6aaf74b00e2dcf2b54f498871c1cf05616ef88",
+        "actual": "7d6aaf74b00e2dcf2b54f498871c1cf05616ef88",
+        "match": true
+      },
+      {
+        "path": "index.html",
+        "expected": "83d29d5e9b2d38bdaad3c40d87220899c7c42b2f",
+        "actual": "83d29d5e9b2d38bdaad3c40d87220899c7c42b2f",
+        "match": true
+      },
+      {
+        "path": "sw.js",
+        "expected": "06654c9bce391f94f6db0ac17f33d3840fa74d1c",
+        "actual": "06654c9bce391f94f6db0ac17f33d3840fa74d1c",
+        "match": true
+      }
+    ],
+    "all_match": true
+  },
+  "public_native_smoke": [
+    {
+      "name": "desktop",
+      "width": 1280,
+      "height": 900,
+      "boot": "ready",
+      "michiFiveFormsNativeSelection": true,
+      "portrait": 144,
+      "health": "80 de 80 puntos de salud",
+      "xp": "0 de 55 de experiencia; 0% hasta la siguiente forma",
+      "hero": "kilo",
+      "overflow": false,
+      "memories": 1,
+      "purpose": "Busca pétalos de canción. Son recuerdos para tu álbum; los cristales dorados dan XP y los mecanismos de la sala completan su sello.",
+      "errors": [],
+      "backend": []
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "boot": "ready",
+      "michiFiveFormsNativeSelection": true,
+      "portrait": 144,
+      "health": "80 de 80 puntos de salud",
+      "xp": "0 de 55 de experiencia; 0% hasta la siguiente forma",
+      "hero": "kilo",
+      "overflow": false,
+      "memories": 1,
+      "purpose": "Busca pétalos de canción. Son recuerdos para tu álbum; los cristales dorados dan XP y los mecanismos de la sala completan su sello.",
+      "errors": [],
+      "backend": []
+    }
+  ],
+  "human_art_and_difficulty_acceptance": "pending_user_play",
+  "remote_multiplayer_backend": "paused",
+  "stable_v1_tag_created": false
 }
