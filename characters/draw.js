@@ -1170,13 +1170,13 @@ ig.setTransform(1, 0, 0, 1, 0, 0);
 ig.clearRect(0, 0, W, W);
 ig.drawImage(color, 0, 0);
 ig.globalCompositeOperation = "source-in";
-ig.fillStyle = "#1a1022";
+ig.fillStyle = charId==="cat"&&(pose.form===0||pose.form===3)?"#443451":"#1a1022";
 ig.fillRect(0, 0, W, W);
 ig.globalCompositeOperation = "source-over";
 const pg = presentCanvas.getContext("2d");
 pg.setTransform(1, 0, 0, 1, 0, 0);
 pg.clearRect(0, 0, W, W);
-const o = 3.4 * ps;
+const o = (charId==="cat"&&(pose.form===0||pose.form===3)?1.45:3.4) * ps;
 const dirs = [[o, 0], [-o, 0], [0, o], [0, -o]];
 for (let i = 0; i < dirs.length; i++) pg.drawImage(ink, dirs[i][0], dirs[i][1]);
 pg.drawImage(color, 0, 0);
@@ -1244,6 +1244,7 @@ ctx.restore();
 
 export function drawCharacter(ctx, p, cam, t, options={}) {
 const evo = Math.max(0, Math.min(4, Math.round(Number(p.evo) || 0)));
+const moonHare=p.id==="cat"&&evo===3;
 const facing = p.facing || 1;
 const footX = p.x + p.w / 2 - cam.x;
 const footY = p.y + p.h - cam.y;
@@ -1266,7 +1267,7 @@ if(p.id==="kilo"&&p._introForceCanvas&&p._introKilo)pose.kiloWelcome=p._introKil
 if(p.id==="stitcho"&&p._introForceCanvas&&p._introStitcho)pose.stitchoWelcome=p._introStitcho;
 if(p.id==="chispin"&&p._introForceCanvas&&p._introChispin)pose.chispinWelcome=p._introChispin;
 if(p.id==="cat"&&p._introForceCanvas&&p._introMichi)pose.michiWelcome=p._introMichi;
-if(p.id==='cat'&&!pose.reduceMotion)pose.michicornioFrame=Math.floor(t/3);
+if(p.id==='cat'&&!pose.reduceMotion)pose.michicornioFrame=Math.floor(t/(moonHare?2:3));
 if(p.id==='cat')pose.michiSeed=Number.isFinite(p.michiSeed)?p.michiSeed:0;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
@@ -1359,7 +1360,7 @@ if (p._land > 0) p._land--;
 const stageLean = Number(evoVis.stance) || 0;
 const dynamicLean = moving ? 0.05 : air ? ((p.vy || 0) < -1.2 ? -0.04 : 0.05) : 0;
 const tilt = dynamicLean + (pose.bodyTilt || 0) * 0.35 + stageLean * (moving ? 1.35 : 0.92);
-const lunge = atk * H * 0.08 + (pose.impact || 0) * H * 0.03;
+const lunge = moonHare?0:atk * H * 0.08 + (pose.impact || 0) * H * 0.03;
 const recoilX = hurtFresh ? -H * 0.08 : 0;
 const formLift = air ? (evoVis.lift || 0) * H * 0.35 : (pose.state === "idle" || pose.state === "cast" ? (evoVis.lift || 0) * H * 0.55 : 0);
 const color = p.color || "#ffffff";
@@ -1372,9 +1373,9 @@ drawShadow(ctx, 0, 2 + (air ? 3 : 0), H * 0.3 * airK * sx, H * 0.06 * airK);
 ctx.scale(facing, 1);
 ctx.translate(recoilX + lunge, -formLift-(pose.powerLift||0)*H);
 
-if (p.id!=="chispin" && evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
-if(p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, false);
-if (moving) drawDust(ctx, H, t, speed);
+if (!moonHare && p.id!=="chispin" && evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
+if(!moonHare&&p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, false);
+if (moving&&!moonHare) drawDust(ctx, H, t, speed);
 
 const s = H / 100;
 let flashCol = null, flashA = 0;
@@ -1384,16 +1385,16 @@ if (burstK > 0.35) {
   const intensity = Math.max(0, (burstK - 0.35) / 0.65);
   flashCol = p.id === "cuerno" ? "#bba8f5" : "#ffffff";
   flashA = intensity * (p.id === "cuerno" ? 0.075 : 0.9);
-  if(p.id==="kilo")flashA=Math.min(.12,flashA);
+  if(p.id==="kilo"||moonHare)flashA=Math.min(.12,flashA);
 }
-else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; if (p.id === "frita") flashA = hurtFresh ? 0.3 : 0.18; }
+else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; if (p.id === "frita") flashA = hurtFresh ? 0.3 : 0.18; if(moonHare)flashA=hurtFresh?.22:.12; }
 const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
 drawKiloFlightTrail(ctx,p,H,t,options.reduceMotion===true);
 ctx.save();
 ctx.rotate(tilt * 0.5);
 // Per-hero ten-channel acting: exclusively stage-space transform, hitbox-safe.
 // Real movement/attack timing remains owned by the physics and character rig.
-applyTenActionPose(ctx,pose,p.id,evo);
+if(!moonHare)applyTenActionPose(ctx,pose,p.id,evo);
 ctx.save();ctx.scale(sx,sy);
 drawHulaDepth(ctx,p,H,t,false,options.reduceMotion===true);
 ctx.restore();
@@ -1416,11 +1417,15 @@ ctx.scale(sx,sy);
 drawHulaDepth(ctx,p,H,t,true,options.reduceMotion===true);
 ctx.restore();
 
-if(p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, true);
-if(p.id!=="chispin")drawEvolutionSignatureFX(ctx, p, H, pose, t);
-drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);
+if(!moonHare&&p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, true);
+if(!moonHare&&p.id!=="chispin")drawEvolutionSignatureFX(ctx, p, H, pose, t);
+if(!moonHare)drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);
 if (burstK > 0) {
-drawBurst(ctx, H, color, burstK);
+if(moonHare){
+ ctx.save();ctx.globalAlpha=.42*Math.sin(Math.PI*burstK);ctx.strokeStyle='#fff0c8';ctx.lineWidth=1.4;
+ for(let i=0;i<3;i++){const x=-H*(.30+i*.08),y=-H*(.31+i*.08);ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x-H*.10,y-H*.18,x+H*.04,y-H*.30);ctx.stroke();}
+ ctx.restore();
+}else drawBurst(ctx, H, color, burstK);
 p.evoBurst--;
 }
 ctx.restore();

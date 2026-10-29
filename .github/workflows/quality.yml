@@ -313,6 +313,9 @@ jobs:
           npm run test:browser:reported-visuals
           npm run test:browser:frita-motion
 
+      - name: V624 Michicornio · anatomy, earned fourth form and winged flight
+        run: npm run test:browser:michi-v624
+
       # Full continuous Normal play runs after fast regressions; it is also
       # checked independently by the V514 workflow on every PR.
       - name: Release gate

@@ -1,3 +1,4 @@
+import{steerMichiFlight}from'../../characters/michi-flight.js';
 // Server-owned arena simulation. Clients submit controls, never hits, XP or winners.
 import{findRoster}from'../../characters/roster.js';
 import{WORLD1_THEMES,WORLD1_ARENA,WORLD1_FLOOR}from'../../systems/world1-rooms.js';
@@ -77,7 +78,8 @@ function physics(a){
   if(input.jump&&!a.lastJump&&a.jumps<f.jumps&&!a.flight){a.vy=-f.jump;a.jumps++;a.grounded=false;}
   if(a.flight>0){a.flight--;a.grounded=false;a.vy=input.y*6;a.vx=input.x*6;}
  }else a.vx*=.8;
- a.lastJump=input.jump;a.previousFeet=a.y+a.h;if(!a.flight)a.vy=Math.min(14,a.vy+.5);a.x=clamp(a.x+a.vx,LEFT,RIGHT-a.w);a.y=Math.max(300,a.y+a.vy);
+ const wingFlight=steerMichiFlight(a,{jump:input.jump,drop:input.y>0});
+ a.lastJump=input.jump;a.previousFeet=a.y+a.h;if(!a.flight&&!wingFlight)a.vy=Math.min(14,a.vy+.5);a.x=clamp(a.x+a.vx,LEFT,RIGHT-a.w);a.y=Math.max(300,a.y+a.vy);
  if(a.y+a.h>=FLOOR){a.y=FLOOR-a.h;a.vy=0;a.grounded=true;a.jumps=0;}
 }
 function updateFoe(v,e){

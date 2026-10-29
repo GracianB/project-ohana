@@ -1,3 +1,4 @@
+import {drawMoonKitten} from '../michi-kitten.js';
 import {drawMoonHare} from '../michi-moon-hare.js';
 import {michiMotion} from "../michi-motion.js";
 import {michiGenome,jellyPulse,drawJellyBell,drawTentacle,halo,motes,ribbon} from "../michi-jelly.js";
@@ -311,75 +312,6 @@ function drawMichiMythic(ctx,pose,r,f){
  };
  const angry=r.mood==='angry'||r.st==='attack'||r.slot===2;
  const lift=(r.st==='jump'||r.st==='glide')?-4:0;
- if(f===0){ // MOON KITTEN: V468 redesign — a chibi baby Michicornio (big head, loaf body, stubby paws, horn bud).
-  // Reads as the same lineage as the later forms: lilac fur, moon mark, golden horn bud and the
-  // seeded dream-tip on the tail that later becomes the fairy wand-tail and the jelly tentacles.
-  const sway=wave(0,.075),g0=michiGenome(pose.michiSeed),dream=g0.palette;
-  const fur='#d6c4f6',furLight='#e9dffc',furDark='#ac94e0',cream='#fff7ec';
-  const run=r.st==='run',atk=r.st==='attack',hurt=r.st==='hurt',victory=r.st==='victory';
-  ctx.save();ctx.scale(.72,.72);ctx.translate(0,lift);
-  // Soft contact shadow.
-  ctx.save();ctx.globalAlpha=.22;oval(0,-1,24,4.5,'#2a2450',null);ctx.restore();
-  // Short, fluffy curled tail behind the body with the seeded dream bead on its tip.
-  const kTail=drawCatTail(ctx,{x:-15,y:-16,len:34,t,still,swish:1+(run?.7:0)+(atk?.8:0),lag:(r.motion?.tail||0)*2,
-   curl:1.05,dir:-2.7,phase:g0.phases[0],root:8.5,tip:5,fur,dark:furDark,ink,fluff:false});
-  halo(ctx,kTail[0],kTail[1],6,6,dream.glow,1.4+(still?0:Math.sin(t*.06)*.4));
-  oval(kTail[0],kTail[1],4,4,dream.tip,ink,1.3);gem(kTail[0],kTail[1],dream.bead,2.2);
-  const runK=run&&!still?Math.sin(t*.32):0;
-  // Round loaf body: one clean oval + cream bib, nothing floating on it.
-  oval(0,-21,21,18,fur,ink,2.2);
-  oval(3,-19,11,12,cream,null);
-  // Near hind haunch sits OVER the body so the kitten clearly has back legs.
-  for(const side of [-1,1]){
-   const dy=(side>0?r.motion?.frontY:r.motion?.backY)||0,dx=((side>0?r.motion?.frontX:r.motion?.backX)||0)*.35;
-   drawCatHaunch(ctx,{side,hip:[side*13,-13],paw:[side*15+dx,-2+dy*.8],thigh:8,width:7,fur:furLight,dark:furDark,ink,lift:Math.min(1,-dy/6),toe:'#f4eaff',pawS:1.05});
-  }
-  // Near front stubby paws straight down under the chest (they lift for attack / victory).
-  for(const side of [-1,1]){
-   const bend=(side>0?r.motion?.frontPaw:r.motion?.rearPaw)||0;
-   let px=side*6+(run?runK*side*4:0),py=-4-bend*6;
-   if(atk&&side>0){px=20;py=-24;}
-   if(victory){px=side*17;py=-36+(still?0:Math.sin(t*.14+side)*2);}
-   if(hurt){px=side*(8+8*r.recoil);py=-9-8*r.recoil;}
-   drawCatLeg(ctx,{hip:[side*6,-20],paw:[px,py],upper:9,lower:9,bend:side>0?1:-1,width:8,fur:furLight,dark:furDark,ink,lift:(atk&&side>0)||victory?.8:0,claws:false,toe:'#fff3f9',pawS:1.1});
-   if(atk&&side>0)for(const k of [-3,0,3]){ctx.beginPath();ctx.moveTo(px+5,py+k);ctx.lineTo(px+9,py+k-1);stroke(ink,1.3);}
-  }
-  // Big baby head: overlaps the body top, tilts with the rig.
-  ctx.save();ctx.translate(0,-54);
-  ctx.rotate((r.michiHead||0)*.30+(r.motion?.head||0)+sway*.035);
-  // Rounded kitten ears (no star spikes), pink inner fur.
-  for(const side of [-1,1]){
-   const ear=(side===1?sway:0)*1.5+(r.motion?.ear||0)*6-(hurt?5:0);
-   ctx.beginPath();ctx.moveTo(side*10,-18);
-   ctx.quadraticCurveTo(side*19,-38+ear,side*25,-36+ear);
-   ctx.quadraticCurveTo(side*30,-24,side*27,-8);ctx.closePath();
-   ctx.fillStyle=fur;ctx.fill();stroke(ink,2.3);
-   ctx.beginPath();ctx.moveTo(side*14,-17);ctx.quadraticCurveTo(side*20,-31+ear,side*23.5,-30+ear);
-   ctx.quadraticCurveTo(side*25.5,-21,side*24,-12);ctx.closePath();ctx.fillStyle='#f5b6d8';ctx.fill();
-  }
-  // Tiny golden horn bud (the "cornio"), short and rounded — it grows in later forms.
-  ctx.beginPath();ctx.moveTo(-4.5,-23);ctx.quadraticCurveTo(-1.5,-31,0,-36);ctx.quadraticCurveTo(1.5,-31,4.5,-23);ctx.closePath();
-  ctx.fillStyle='#ffe3ab';ctx.fill();stroke(ink,1.9);
-  ctx.beginPath();ctx.moveTo(-2.6,-27);ctx.lineTo(2.2,-25.5);ctx.moveTo(-1.6,-31);ctx.lineTo(1.6,-29.5);stroke('#d9a64a',1.1);
-  // Head.
-  oval(0,0,30,25,furLight,ink,2.4);
-  // Fluffy tuft between the ears.
-  ctx.beginPath();ctx.moveTo(-7,-23);ctx.quadraticCurveTo(-3,-30,0,-24);ctx.quadraticCurveTo(3,-30,7,-23);stroke(ink,1.6);
-  // Crescent moon mark on the forehead (lineage sign shared by every form).
-  oval(0,-14,4.6,4.6,'#ffd98a',null);oval(2.2,-15.4,4,4,furLight,null);
-  // Muzzle + huge sparkly eyes (baby proportions: eyes low and wide).
-  oval(0,11,15,9,cream,null);
-  const ex=12,ey=1;
-  eye(-ex,ey,'#6d68d9',6.6,8.6);eye(ex,ey,'#6d68d9',6.6,8.6);
-  if(!(r.mood==='closed'||r.mood==='happy'||r.motion?.blink))for(const sx of [-1,1])oval(sx*ex+2.6,ey+3.5,1.2,1.2,'#fff',null);
-  if(atk){for(const sx of [-1,1]){ctx.beginPath();ctx.moveTo(sx*(ex+7),-10);ctx.lineTo(sx*(ex-4),-7);stroke(ink,2);}}
-  ctx.save();ctx.globalAlpha=.8;oval(-20,9,4.6,2.6,'#f6a6c8',null);oval(20,9,4.6,2.6,'#f6a6c8',null);ctx.restore();
-  drawCatMouth(ctx,{x:0,y:11,s:.95,open:victory?.6:atk?.7:hurt?.35:(r.motion?.jaw||0)*.3,smile:r.mood==='happy'||victory?1:0,ink,nose:'#e995b6',fangs:atk});
-  for(const side of [-1,1])for(const y of [10,14]){
-   ctx.beginPath();ctx.moveTo(side*17,y);ctx.lineTo(side*30,y-2+(y-12));stroke('#8e77bd',1.2);
-  }
-  ctx.restore();ctx.restore();return;
- }
  if(f===1){ // FAIRY CAT (Hada Felina): a floating moon-fairy, NOT a second kitten.
   // V462: hovers on four translucent wings, dangling two-bone legs with toe beans,
   // a wand-tail that writes stardust, flower crown, antennae and pixie dust.
@@ -558,9 +490,6 @@ function drawMichiMythic(ctx,pose,r,f){
    ctx.restore();
   }
   ctx.restore();return;
- }
- if(f===3){ // MOON HARE: a conejornio, not another cat.
-  ctx.save();ctx.translate(0,lift);drawMoonHare(ctx,pose);ctx.restore();return;
  }
  if(f===4){ // NINE-TAIL GUARDIAN: nine countable, independently moving tails.
   const p=wave(0,.06),sweep=r.motion?.ribbon||0;
@@ -802,6 +731,12 @@ function draw(ctx, pose, R) {
   const src = pose || {};
   const safe = src.look ? src : Object.assign({ look: { x: 1, y: 0 } }, src);
   const f = Math.max(0, Math.min(4, Math.round(Number(safe.form) || 0)));
+  if(f===0){ // MOON KITTEN: its own connected, soft kitten anatomy.
+    drawMoonKitten(ctx,safe);return;
+  }
+  if(f===3){ // MOON HARE: its own rabbit rig replaces feline overlays.
+    drawMoonHare(ctx,safe);return;
+  }
   const c = f===2?{...PAL[f],fur:'#f8f6ff',dark:'#a9badf',belly:'#ffffff',ear:'#d0c6f0',eye:'#549fd3',accent:'#a8e5f6'}:PAL[f];
   const r = solve(safe);
   if(!Number.isFinite(safe.michiDuetAge)){

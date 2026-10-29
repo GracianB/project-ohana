@@ -1,3 +1,9 @@
+# Última entrega: V624 · Michicornio
+
+Bebé y Conejornio Lunar con anatomía propia, ojos suaves y animaciones diferenciadas. Hada, Medusa y Eclipse conservan el dibujo aceptado; Hada gana aleteo limitado y Eclipse vuelo sostenido mediante salto mantenido, con teclado y táctil. Cámara y guía acompañan el vuelo. Alcance exacto: [V624-MICHICORNIO.md](V624-MICHICORNIO.md). Verificación y publicación: V624-VALIDATION.json y V624-PUBLICATION.json. El informe V623 inferior conserva la base de la campaña completa.
+
+---
+
 # OHANA · V1.0 · aventura individual
 
 Cierre solicitado por el usuario el 28 de octubre de 2026. Build de entrega: `ohana-623`. Estado verificable: [v1-solo-status.json](v1-solo-status.json). Alcance y criterios: [V1.0.0-CIERRE.md](V1.0.0-CIERRE.md). Evidencia de esta entrega: `V623-VALIDATION.json`; publicación: `V623-PUBLICATION.json`.

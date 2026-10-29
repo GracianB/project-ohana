@@ -1,3 +1,13 @@
+V624 validada localmente: 1.782 pruebas Node, Release Gate, tres tamaños de selección, dieciséis poses propias, tres medusas y forma 4 ganadas por controles, aleteo de Hada, vuelo sostenido/planeo/descenso de Eclipse con teclado y táctil y cámara sin tapar al personaje. Auditoría de navegador y Versus local aprobados. Se conservan 27 trazas de Hada/Medusa/Eclipse. Pendiente verificación pública.
+
+## V624 · revisión final de ojos y vuelo
+
+Bebé y Conejornio con siluetas curvas, patas conectadas, mirada almendrada y sin anillos de blanco; tres formas aceptadas preservadas. Hada aletea y Eclipse vuela con salto mantenido. Cámara de vuelo móvil mantiene el cuerpo visible y los controles explican el gesto. Alcance: docs/V624-MICHICORNIO.md. Validación y publicación pendientes de los registros V624.
+
+# V624 · Michicornio: anatomía y vuelo
+
+Revisión en curso del bebé y del Conejornio Lunar. Se conservan como referencia Hada, Medusa y Eclipse, por indicación del usuario. Hada y Eclipse incorporan vuelo mediante salto mantenido, con aleteo corto para Hada y vuelo sostenido para Eclipse. Caché ohana-624. Validación pendiente.
+
 V623 publicada y comprobada: merge ae92090; Pages aprobado (pruebas Node e integridad incluidas). Los 27 archivos runtime cambiados coinciden por hash con el origen publicado. Arranque nativo público, primer recuerdo, álbum, HUD y J táctil aprobados en escritorio/móvil, sin hooks de prueba, errores ni llamadas al backend pausado. No se ha creado etiqueta de cierre definitivo ni atribuido al jugador una aceptación visual. La API denegó crear el PR (Forbidden). Registro: docs/V623-PUBLICATION.json.
 
 Validación local V623 aprobada: 1.772 pruebas Node, Release Gate, campaña continua Normal hasta Quimera y cierre, selector 1280/390/320, diez cine-guardianes opacos, diez escenarios Canvas, movimiento físico de Frita, pausa/guardado/Continue, arranque nativo y Versus local entre dos navegadores. Los mil recuerdos ganados en V622 se conservan al recargar. Pendiente la verificación pública; valoración humana de arte y dificultad no inferida.
