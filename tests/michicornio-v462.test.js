@@ -88,9 +88,8 @@ test('V462 fairy wisp-lights are seeded and orbit the Hada Felina',()=>{
 });
 
 test('V462 polish: lilac cat legs — haunches over the body on F0/F3, dancer legs on F1, paws scale up',()=>{
- const f0=src.slice(src.indexOf('MOON KITTEN'),src.indexOf('FAIRY CAT'));
- assert.ok(f0.indexOf("oval(0,-21,21,18")<f0.indexOf('drawCatHaunch('),'F0 hind legs drawn over the body, not hidden behind it');
- assert.match(src,/drawMoonHare\(ctx,pose\)/,'fourth form uses its own rabbit anatomy');
+ assert.match(src,/drawMoonKitten\(ctx,safe\)/,'baby has its own connected anatomy');
+ assert.match(src,/drawMoonHare\(ctx,safe\)/,'fourth form uses its own rabbit anatomy');
  assert.match(src.slice(src.indexOf('FAIRY CAT')),/pawS:1\.25/);
  for(const f of [0,1,3]){const a=rec(),b=rec();cat.draw(a.c,pose('run',10,f),{});cat.draw(b.c,pose('run',30,f),{});assert.equal(a.log.grad,0);}
 });

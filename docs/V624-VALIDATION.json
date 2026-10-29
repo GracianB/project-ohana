@@ -1,0 +1,300 @@
+{
+  "release": "ohana-624",
+  "base_commit": "014deb3",
+  "recorded_at": "2026-10-29T00:31:33.624601+00:00",
+  "review": "docs/V624-MICHICORNIO.md",
+  "checks": {
+    "node": {
+      "result": "pass",
+      "tests": 1782,
+      "failures": 0
+    },
+    "release_gate": {
+      "result": "pass",
+      "runtime_modules": 383,
+      "precache_resources": 445
+    },
+    "michi_browser": {
+      "selection": [
+        {
+          "width": 1280,
+          "height": 900,
+          "realFourthFormPreview": true,
+          "noOverflow": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "realFourthFormPreview": true,
+          "noOverflow": true
+        },
+        {
+          "width": 320,
+          "height": 568,
+          "realFourthFormPreview": true,
+          "noOverflow": true
+        }
+      ],
+      "artwork": [
+        {
+          "state": "idle",
+          "minX": 61,
+          "minY": 86,
+          "maxX": 238,
+          "maxY": 279,
+          "count": 16837
+        },
+        {
+          "state": "run",
+          "minX": 61,
+          "minY": 82,
+          "maxX": 239,
+          "maxY": 269,
+          "count": 16167
+        },
+        {
+          "state": "jump",
+          "minX": 59,
+          "minY": 85,
+          "maxX": 234,
+          "maxY": 273,
+          "count": 15438
+        },
+        {
+          "state": "fall",
+          "minX": 61,
+          "minY": 91,
+          "maxX": 238,
+          "maxY": 289,
+          "count": 16674
+        },
+        {
+          "state": "glide",
+          "minX": 55,
+          "minY": 108,
+          "maxX": 259,
+          "maxY": 269,
+          "count": 16163
+        },
+        {
+          "state": "wall",
+          "minX": 61,
+          "minY": 86,
+          "maxX": 240,
+          "maxY": 279,
+          "count": 16094
+        },
+        {
+          "state": "attack",
+          "minX": 65,
+          "minY": 84,
+          "maxX": 274,
+          "maxY": 281,
+          "count": 17759
+        },
+        {
+          "state": "hurt",
+          "minX": 53,
+          "minY": 109,
+          "maxX": 225,
+          "maxY": 283,
+          "count": 15645
+        },
+        {
+          "state": "victory",
+          "minX": 61,
+          "minY": 67,
+          "maxX": 239,
+          "maxY": 279,
+          "count": 17293
+        },
+        {
+          "state": "dead",
+          "minX": 111,
+          "minY": 96,
+          "maxX": 303,
+          "maxY": 288,
+          "count": 16573
+        },
+        {
+          "state": "cast",
+          "power": 0,
+          "minX": 61,
+          "minY": 86,
+          "maxX": 245,
+          "maxY": 279,
+          "count": 16675
+        },
+        {
+          "state": "cast",
+          "power": 1,
+          "minX": 61,
+          "minY": 106,
+          "maxX": 238,
+          "maxY": 284,
+          "count": 15494
+        },
+        {
+          "state": "cast",
+          "power": 2,
+          "minX": 52,
+          "minY": 81,
+          "maxX": 248,
+          "maxY": 279,
+          "count": 17629
+        },
+        {
+          "state": "cast",
+          "power": 3,
+          "minX": 69,
+          "minY": 101,
+          "maxX": 250,
+          "maxY": 279,
+          "count": 16968
+        },
+        {
+          "state": "cast",
+          "power": 4,
+          "minX": 52,
+          "minY": 92,
+          "maxX": 250,
+          "maxY": 274,
+          "count": 16955
+        },
+        {
+          "state": "cast",
+          "power": 5,
+          "minX": 61,
+          "minY": 86,
+          "maxX": 240,
+          "maxY": 279,
+          "count": 16548
+        }
+      ],
+      "eclipseFlight": [
+        {
+          "input": "Space hold",
+          "from": 1092,
+          "ascentY": 541.4999999999973,
+          "sustainedFrames": 100,
+          "heroClearOfObjective": true,
+          "glide": true,
+          "controlledDescent": true,
+          "earnedBackup": true
+        },
+        {
+          "input": "touch hold",
+          "from": 1092,
+          "ascentY": 541.4999999999973,
+          "sustainedFrames": 100,
+          "heroClearOfObjective": true,
+          "glide": true,
+          "controlledDescent": true,
+          "earnedBackup": true
+        }
+      ],
+      "chapter": {
+        "room": "w1-cat",
+        "formsEarned": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "stations": 3,
+        "deaths": 0,
+        "physicalControls": true,
+        "directChapterAccessFixture": true,
+        "fairyFlight": {
+          "from": 915.701,
+          "to": 637.8333345218047,
+          "remaining": 50
+        }
+      },
+      "errors": []
+    },
+    "browser_audit": {
+      "result": "pass",
+      "command": "node tests/browser/e2e.mjs"
+    },
+    "local_versus_regression": {
+      "arena": "w1-kilo",
+      "forms": [
+        0,
+        2,
+        3
+      ],
+      "knockouts": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "respawns": [
+        0,
+        1,
+        2
+      ],
+      "result": "Dino: 3 eliminaciones · Chispín: 0 eliminaciones",
+      "actors": [
+        {
+          "hero": "dino",
+          "hp": 174,
+          "xp": 555,
+          "evo": 4,
+          "maxHp": 360,
+          "kills": 3,
+          "deaths": 0,
+          "enemyKills": 3,
+          "bossKills": 0,
+          "score": 555
+        },
+        {
+          "hero": "chispin",
+          "hp": 0,
+          "xp": 35,
+          "evo": 0,
+          "maxHp": 56,
+          "kills": 0,
+          "deaths": 4,
+          "enemyKills": 1,
+          "bossKills": 0,
+          "score": 35
+        }
+      ],
+      "returnsToFreshLobby": true,
+      "errors": []
+    },
+    "accepted_art_regression": {
+      "result": "pass",
+      "forms": [
+        1,
+        2,
+        4
+      ],
+      "exact_drawing_traces": 27,
+      "baseline": "tests/fixtures/michi-other-forms-v623.json"
+    }
+  },
+  "source_blobs": {
+    "characters/art/cat.js": "4d74442b363b064fec4e55a97c605b7809f8a789",
+    "characters/draw.js": "5c83bb78ece058b2c1678febe04b9e2ea8f4c953",
+    "characters/michi-flight.js": "f76733588d2d43bfc6b8d696e5faffb027cf3a22",
+    "characters/michi-kitten.js": "a5ab2608b30af41ea884164c25cd86b8388f7f08",
+    "characters/michi-moon-hare.js": "696c6ae71760bcf1a991b0033ca23ee3039d9cd2",
+    "characters/roster.js": "a0f195a779f1b07296a6c77d5897d9f0da2565ea",
+    "game.js": "8e80e2b547248228a567da3f731098cbf281e4a9",
+    "index.html": "0eb656627d97a5a2e432cdfc94dadf4de4791c27",
+    "netlify/lib/versus.mjs": "23f886b12c0b211fb3ed0356f167942abd8ad450",
+    "sw.js": "ff7019837f8d21d7ab00142e9ee71ee839d039e4",
+    "systems/field-guide.js": "92edbadfe783b8361b88699194298a417a147e32"
+  },
+  "limits": [
+    "The chapter fixture starts directly in Michi as a baby; three medusas and four forms were earned with ordinary controls. This is not a fresh full-campaign run from Kilo.",
+    "Eclipse flight uses the legitimately earned V623 campaign backup, with keyboard and a held emulated touch event.",
+    "Pose contact sheets test artwork, not combat victories.",
+    "Versus browser regression used Dino and Chispin on a local server; the shared Michi flight controller is covered separately by unit tests.",
+    "The remote Netlify backend remains paused.",
+    "Art quality and Normal difficulty await the player’s assessment; tests do not imply approval."
+  ]
+}

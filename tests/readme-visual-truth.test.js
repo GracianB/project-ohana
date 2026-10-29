@@ -39,10 +39,11 @@ test('README local source and docs links resolve to existing repository paths',a
   }
 });
 
-test('README truthfully distinguishes World 1 candidate, deployment and paused multiplayer',()=>{
-  assert.match(readme,/ohana-623/);
-  assert.match(readme,/V623-VALIDATION.json/);
-  assert.match(readme,/V623-PUBLICATION.json/);
+test('README truthfully distinguishes World 1 candidate, deployment and paused multiplayer',async()=>{
+  const version=(await readFile(path.join(root,'sw.js'),'utf8')).match(/const VERSION = "ohana-(\d+)"/)[1];
+  assert.ok(readme.includes('ohana-'+version));
+  assert.ok(readme.includes('V'+version+'-VALIDATION.json'));
+  assert.ok(readme.includes('V'+version+'-PUBLICATION.json'));
   assert.match(readme,/Mundo 2[^\n]*en construcción/i);
   assert.match(readme,/multijugador remoto[^\n]*en pausa/i);
   assert.match(readme,/No confundimos tres cosas/i);

@@ -1,3 +1,4 @@
+import {steerMichiFlight,michiFlightState} from './characters/michi-flight.js';
 import {drawRealmSignatures} from './systems/realm-signatures.js';
 import {drawHudPortrait} from './systems/hud-portrait-v606.js';
 import {combatCoach} from './systems/combat-coach.js';
@@ -1922,10 +1923,11 @@ Passives.update(game, inputState);
 const kiloStep=game._evolutionAttacks?.moves?.find(m=>m.id==='kilo'&&m.index===4&&m.life>0);
 if(p.id==='kilo'&&kiloStep&&!(p._dashGo>0)){inputState.kiloBurst=kiloStep.face*(kiloStep.age<6?3:kiloStep.speed);p.vx=inputState.kiloBurst;p.facing=kiloStep.face;}
 const kiloFlight=steerKiloFlight(p,inputState);
+const michiFlight=steerMichiFlight(p,inputState);
 const wasGrounded = !!p.grounded;
 const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
 const incoming = p.vy;
-p.vy = Math.min(14, p.vy + (kiloFlight?0:p._dashGo > 0 ? 0.14 : 0.5));
+p.vy = Math.min(14, p.vy + (kiloFlight||michiFlight?0:p._dashGo > 0 ? 0.14 : 0.5));
 p.grounded = false;
 const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 8));
 let wall = 0;
@@ -3014,16 +3016,17 @@ let tx = p.x + p.w / 2 + look - vw / 2;
 // re-centres only when the hero lands on a new height or leaves the vertical
 // dead zone (top 28% / bottom 30% of the view), so normal jumps don't bob the view.
 const pcY = p.y + p.h / 2;
+const wingCamera=p.id==="cat"&&!p.dead&&!p.grounded&&!!p._michiWingAir;
 const cs = game._camCalm || (game._camCalm = { anchor: pcY });
 if (!Number.isFinite(cs.anchor) || p.dead) cs.anchor = pcY;
-if (p.grounded) cs.anchor = pcY;
+if (p.grounded||wingCamera) cs.anchor = pcY;
 else {
   const top = game.cam.y + vh * 0.28, bottom = game.cam.y + vh * 0.70;
   if (pcY < top) cs.anchor = Math.min(cs.anchor, pcY + vh * 0.14);
   else if (pcY > bottom) cs.anchor = Math.max(cs.anchor, pcY - vh * 0.06);
 }
 let ty = cs.anchor - vh * 0.56;
-let lerpY = 0.075;
+let lerpY = wingCamera?.13:.075;
 const boss = game.enemies.find((e) => e.boss && !e.fell);
 const fin = game.finale && game.finale.t > 0 ? game.finale : null;
 if (fin) {
@@ -3048,7 +3051,7 @@ game.cam.x += (tx - game.cam.x) * lerp;
 }
 if (game.camPunch > 0) game.camPunch *= 0.82;
 game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - vw)));
-game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - vh + 80)));
+game.cam.y = Math.max(wingCamera?-vh*.56:-40, Math.min(game.cam.y, Math.max(-40, game.worldH - vh + 80)));
 if (game.shake > 0) game.shake *= 0.86;
 if (game.comboT > 0) game.comboT--; else game.combo = 0;
 if (game.fading > 0) game.fading--;
@@ -3503,6 +3506,12 @@ drawHudPortrait(cv,p,t,{reduceMotion:game.reduceMotion||reduceMotion});
 
 function updateHUD() {
 const p = game.player; if (!p) return;
+const jumpHint=p.id==='cat'&&p.evo===1?'saltar · mantener: aletear':p.id==='cat'&&p.evo===4?'mantener: volar':'saltar';
+if(game._jumpHint!==jumpHint){
+ game._jumpHint=jumpHint;const caption=document.getElementById('jump-control-caption');if(caption)caption.textContent=jumpHint;
+ const touchJump=document.querySelector('.touch-btn.jump');if(touchJump){const label=jumpHint==='saltar'?'Saltar':p.evo===1?'Saltar; mantener para aletear':'Mantener para volar; soltar para planear';touchJump.setAttribute('aria-label',label);touchJump.title=label;}
+}
+
 const goal = world1NextObjective(game);
 if (goal) {
   const progress = world1Snapshot(game);
@@ -4242,6 +4251,7 @@ state() {
       ecology: game.enemyDirector.ecology || "",
       formation: game.enemyDirector.formation || "",
     } : null,
+    michiFlight:michiFlightState(p),
     kiloFlight:p?{mode:p._kiloFlightMode||null,aim:{x:p._kiloAimX||0,y:p._kiloAimY||0},remaining:p._kiloFlightT||0,ohana:p._kiloOhanaT||0}:null,
     roomAlbum:roomAlbumSnapshot(game),heroCollection:heroCollectionSnapshot(game),stitchoTrail:stitchoTrailSnapshot(game),chispinTrail:chispinTrailSnapshot(game),michiTrail:michiTrailSnapshot(game),dragonTrail:dragonTrailSnapshot(game),dinoTrail:dinoTrailSnapshot(game),fritaTrail:fritaTrailSnapshot(game),pizzaTrail:pizzaTrailSnapshot(game),yomiTrail:yomiTrailSnapshot(game),cuernoTrail:cuernoTrailSnapshot(game),roomName:game.roomDef?.name,grove:groveSnapshot(game),terrainStats:game.terrainStats,
     adventure: adventureSnapshot(game),
