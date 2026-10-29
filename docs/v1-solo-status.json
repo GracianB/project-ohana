@@ -3,9 +3,9 @@
   "updated_on": "2026-10-29",
   "release": "ohana-627",
   "repository": "GracianB/project-ohana",
-  "published": false,
+  "published": true,
   "v1_ready": false,
-  "next_task": "verify_and_publish_V627_real_mirror_characters",
+  "next_task": "user_play_review_of_V627_real_mirror_characters",
   "validation": "docs/V627-VALIDATION.json",
   "publication": "docs/V627-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
@@ -13,5 +13,6 @@
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
-  "previous_verified_campaign": "docs/V623-VALIDATION.json"
+  "previous_verified_campaign": "docs/V623-VALIDATION.json",
+  "source_commit": "f8f34e8c6193b9c07a63388f7431c2553d0d9764"
 }
