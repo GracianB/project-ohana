@@ -3,9 +3,9 @@
   "updated_on": "2026-10-29",
   "release": "ohana-628",
   "repository": "GracianB/project-ohana",
-  "published": false,
+  "published": true,
   "v1_ready": false,
-  "next_task": "validate_finale_recovery_and_publish_V628",
+  "next_task": "user_play_review_of_V628_finale_and_retry",
   "validation": "docs/V628-VALIDATION.json",
   "publication": "docs/V628-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
@@ -13,5 +13,6 @@
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
-  "previous_verified_campaign": "docs/V623-VALIDATION.json"
+  "previous_verified_campaign": "docs/V623-VALIDATION.json",
+  "source_commit": "03f6532efbfe50470268108ce74ab838c0d75e63"
 }
