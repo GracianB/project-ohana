@@ -54,7 +54,7 @@ test("V457 five distinct mythic silhouettes retain the welcome rig and game coll
  // rather than frozen English comments about the removed renderer.
  const signatures=[];
  for(let form=0;form<5;form++){
-  const ops=[],ctx=new Proxy({globalAlpha:1},{get:(o,k)=>k in o?o[k]:(...a)=>ops.push([k,...a]),set:(o,k,v)=>(o[k]=v,true)});
+  const ops=[],ctx=new Proxy({globalAlpha:1},{get:(o,k)=>k in o?o[k]:k==='createLinearGradient'?((...a)=>{ops.push([k,...a]);return{addColorStop(...stops){ops.push(['addColorStop',...stops]);}};}):(...a)=>ops.push([k,...a]),set:(o,k,v)=>(o[k]=v,true)});
   cat.draw(ctx,{form,state:'idle',t:73,look:{x:.3,y:0}},{});signatures.push(JSON.stringify(ops));
  }
  assert.equal(new Set(signatures).size,5,'five anatomical silhouettes');

@@ -1,3 +1,4 @@
+import {drawMichiEye} from '../michi-eyes.js';
 import {drawMoonKitten} from '../michi-kitten.js';
 import {drawMoonHare} from '../michi-moon-hare.js';
 import {michiMotion} from "../michi-motion.js";
@@ -126,22 +127,15 @@ function drawMichiMythic(ctx,pose,r,f){
   for(let k=0;k<4;k++){const yy=y-3-k*len*.19;line('#ad855e',.7,()=>{ctx.moveTo(x-width*(1-k*.15),yy);ctx.quadraticCurveTo(x,yy+1,x+width*(1-k*.15),yy-2);});}
   line('#fffdf1',1.1,()=>{ctx.moveTo(x-width*.5,y-3);ctx.quadraticCurveTo(x-width*.6,y-len*.5,x+.5,y-len+5);});
  }
- function eye(x,y,rx,ry,col='#8e729f',side=1){
-  const closed=dead||hurt||r.mood==='closed'||r.mood==='happy'||!!r.motion?.blink;
-  if(closed){line(ink,1.5,()=>{ctx.moveTo(x-rx,y);ctx.quadraticCurveTo(x,y+(hurt?2.7:-2.5),x+rx,y-.25);});return;}
-  const gaze=Math.max(-1,Math.min(1,finite(pose.look?.x)*.5+finite(r.motion?.lookX)*.3));
-  const lid=()=>{ctx.moveTo(x-rx,y+.25);ctx.bezierCurveTo(x-rx*.65,y-ry,x+rx*.65,y-ry,x+rx,y-.4);ctx.bezierCurveTo(x+rx*.68,y+ry*.8,x-rx*.73,y+ry*.82,x-rx,y+.25);};
-  ctx.save();ctx.beginPath();lid();ctx.closePath();ctx.clip();ctx.fillStyle='#f4e7ef';ctx.fillRect(x-rx-1,y-ry-1,rx*2+2,ry*2+2);
-  oval(x+gaze,y,rx*1.02,ry*1.1,col);oval(x+gaze,y-.2,rx*.56,ry*.78,'#47374e');
-  // A quiet reflected sky edge is underneath the pupil, never a white target ring.
-  line('#dcb8d7',.8,()=>{ctx.moveTo(x-rx*.65,y+ry*.42);ctx.quadraticCurveTo(x,y+ry*.8,x+rx*.62,y+ry*.36);});
-  oval(x+gaze-rx*.24,y-ry*.35,Math.max(.7,rx*.16),Math.max(.9,ry*.2),'#fff5e3');ctx.restore();
-  line(ink,1.55,()=>{ctx.moveTo(x-rx,y+.25);ctx.bezierCurveTo(x-rx*.65,y-ry,x+rx*.65,y-ry,x+rx,y-.4);});
-  line('#ae91b2',.75,()=>{ctx.moveTo(x-rx*.94,y+.7);ctx.quadraticCurveTo(x,y+ry*.95,x+rx*.95,y+.2);});
-  // Soft brow grows from the skull and follows expression rather than masking it.
-  if(atkK>.3)line(shade,.9,()=>{ctx.moveTo(x-rx*.8,y-ry-1+side);ctx.quadraticCurveTo(x,y-ry-2,x+rx*.7,y-ry-1-side);});
+ function eye(x,y,radius){
+  drawMichiEye(ctx,x,y,radius,{
+   closed:dead||hurt||r.mood==='closed',
+   happy:r.mood==='happy',blink:finite(r.motion?.blink),
+   mood:atkK>.3?'angry':'normal',
+   look:{x:Math.max(-1,Math.min(1,finite(pose.look?.x)+finite(r.motion?.lookX)*.3)),y:finite(pose.look?.y)}
+  });
  }
- function catHead({x=0,y=0,size=1,coat=fur,shadow=shade,muzzle=white,iris='#97759d',earLength=35,crown=false}={}){
+ function catHead({x=0,y=0,size=1,coat=fur,shadow=shade,muzzle=white,earLength=35,crown=false}={}){
   ctx.save();ctx.translate(x,y);ctx.scale(size,size);ctx.rotate(finite(r.michiHead)*.22+finite(r.motion?.head)*.4+(hurt?-.1:0));
   // Curved ears fold from the same roots as the skull; the far inner surface is shaded.
   for(const side of[-1,1]){
@@ -156,7 +150,7 @@ function drawMichiMythic(ctx,pose,r,f){
   // A single joined cheek/muzzle surface reads frontally around a centered nose.
   shape(muzzle,()=>{ctx.moveTo(-17,7);ctx.quadraticCurveTo(-10,-1,-1,8);ctx.quadraticCurveTo(8,0,19,7);ctx.bezierCurveTo(24,17,14,23,2,22);ctx.bezierCurveTo(-11,22,-22,18,-17,7);},0);
   shape('#fff8f3',()=>{ctx.moveTo(-21,-11);ctx.quadraticCurveTo(-14,-25,1,-25);ctx.quadraticCurveTo(-8,-19,-12,-10);ctx.closePath();},0);
-  eye(-12,-1.5,6.1,6.4,iris,-1);eye(12,-1.5,6.1,6.4,iris,1);
+  eye(-12,-3.5,8);eye(12,-3.5,8);
   oval(-20,10,3.5,1.45,'#efbbd4');oval(20,10,3.5,1.45,'#efbbd4');
   shape('#d995b0',()=>{ctx.moveTo(-2,9);ctx.quadraticCurveTo(1,7,5,9);ctx.quadraticCurveTo(4,12,1,12);ctx.closePath();},.75);
   line(ink,1.1,()=>{ctx.moveTo(1,12);ctx.lineTo(1,14);ctx.quadraticCurveTo(-2,18,-5,15);ctx.moveTo(1,14);ctx.quadraticCurveTo(5,18,8,14);});
@@ -212,7 +206,7 @@ function drawMichiMythic(ctx,pose,r,f){
    limb({hip:[side*10,-58],paw,width:3.7,far:side<0,bend:side,pads:air||castK>.2});
    if(side>0)spellAccents(paw[0],paw[1]);
   }
-  catHead({y:-83,size:.91,iris:'#94789f',earLength:32});
+  catHead({y:-83,size:.91,earLength:32});
   // A small botanical wreath stays attached to the brow, above the eyes.
   for(const [x,y,col]of[[-11,-105,'#e8c6df'],[12,-105,'#d6cce9']]){for(let k=0;k<5;k++){const a=k*TAU/5;shape(col,()=>{ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.cos(a-.5)*5,y+Math.sin(a-.5)*5,x+Math.cos(a)*5,y+Math.sin(a)*5);ctx.quadraticCurveTo(x+Math.cos(a+.5)*5,y+Math.sin(a+.5)*5,x,y);},.45);}oval(x,y,1.5,1.5,'#f2daac');}
   // One pair of quiet stamens grows from behind the ears; no lens rings on the eyes.
@@ -245,7 +239,7 @@ function drawMichiMythic(ctx,pose,r,f){
    line('#fff7fa',1,()=>{ctx.moveTo(side*18,bell.top+8);ctx.quadraticCurveTo(side*24,bell.top-4,side*29,bell.top-11+flick);});
   }
   horn(0,bell.top+3,22,4);
-  eye(-13,-83,5.3,5.9,pal.ink==='#33335e'?'#8c8eaf':'#ac83ab',-1);eye(13,-83,5.3,5.9,pal.ink==='#33335e'?'#8c8eaf':'#ac83ab',1);
+  eye(-13,-84,7.2);eye(13,-84,7.2);
   shape('#db9ab4',()=>{ctx.moveTo(-2,-73);ctx.quadraticCurveTo(0,-75,3,-73);ctx.lineTo(0,-70);},.6,pal.ink);
   line(pal.ink,1.1,()=>{ctx.moveTo(0,-70);ctx.quadraticCurveTo(-3,-66,-6,-69);ctx.moveTo(0,-70);ctx.quadraticCurveTo(3,-66,6,-69);});
   for(const side of[-1,1]){oval(side*22,-73,3.6,1.4,pal.gonad);for(let k=0;k<2;k++)line('#a08eb1',.7,()=>{ctx.moveTo(side*24,-73+k*4);ctx.quadraticCurveTo(side*34,-73+k*4,side*42,-77+k*6+wave(side,.08));});}
@@ -315,7 +309,7 @@ function drawMichiMythic(ctx,pose,r,f){
   shape('#dcc4d5',()=>{ctx.moveTo(15,-39);ctx.quadraticCurveTo(elbow[0]-5,elbow[1],leadPaw[0]-3,leadPaw[1]-4);ctx.quadraticCurveTo(leadPaw[0]+1,leadPaw[1]-1,leadPaw[0]+8,leadPaw[1]);ctx.lineTo(leadPaw[0]-1,leadPaw[1]+1);ctx.quadraticCurveTo(elbow[0]-7,elbow[1],15,-39);},0);
   line('#fffaf1',1.3,()=>{ctx.moveTo(21,-36);ctx.quadraticCurveTo(elbow[0]+3,elbow[1],leadPaw[0]+4,leadPaw[1]-7);});
   for(const dx of[4,8])line('#ae90aa',.7,()=>{ctx.moveTo(leadPaw[0]+dx,leadPaw[1]-2);ctx.lineTo(leadPaw[0]+dx,leadPaw[1]+1);});
-  catHead({x:8,y:-77,size:1.01,coat:'#fff4df',shadow:'#dcc8d3',muzzle:'#fffaf2',iris:'#a47c93',earLength:35,crown:true});
+  catHead({x:8,y:-77,size:1.01,coat:'#fff4df',shadow:'#dcc8d3',muzzle:'#fffaf2',earLength:35,crown:true});
   spellAccents(leadPaw[0],leadPaw[1]);
   ctx.restore();return;
  }

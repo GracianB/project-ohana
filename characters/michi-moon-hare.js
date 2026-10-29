@@ -1,3 +1,4 @@
+import {drawMichiEye} from './michi-eyes.js';
 // Conejornio Lunar · F4 (zero-based form 3). Self-contained vector anatomy.
 // The rig owns its ears, hocks, paws and expression; no feline pose overlays.
 // Positions, hitboxes, resources and combat timers belong to the simulation.
@@ -107,23 +108,10 @@ function ear(c,x,y,angle,far,r){
 // short nose sits BETWEEN them. No profile snout with a second frontal eye.
 export function moonHareFace(pose={}){
  const r=moonHarePose(pose);
- return {near:{x:10,y:-2,rx:5.2,ry:5.1},far:{x:-8,y:-3,rx:4.2,ry:4.7},nose:{x:3,y:7},closed:!!r.blink};
+ return {near:{x:10,y:-4.5,rx:6.02,ry:7.84},far:{x:-8,y:-5.5,rx:5.33,ry:6.94},nose:{x:3,y:7},closed:!!r.blink};
 }
 function eye(c,x,y,far,r){
- const rx=far?4.2:5.2,ry=far?4.7:5.1;
- c.save();c.translate(x,y);
- if(r.blink){line(c,P.ink,1.15,()=>{c.moveTo(-rx,0);c.quadraticCurveTo(0,r.dead?1:-2.1,rx,0);});}
- else{
-  c.save();c.beginPath();c.moveTo(-rx,.1);c.bezierCurveTo(-rx*.85,-ry*1.2,rx*.66,-ry*1.2,rx,-.5);c.bezierCurveTo(rx*.8,ry*.9,-rx*.7,ry,-rx,.1);c.closePath();c.clip();
-  c.fillStyle='#f5e5ed';c.fillRect(-rx-1,-ry-2,rx*2+2,ry*2+4);
-  oval(c,r.look*.45,.2,rx*.95,ry*1.12,'#9474a6',0,0);
-  path(c,'#c6a1ca',()=>{c.moveTo(-rx*.6,1);c.quadraticCurveTo(0,ry,rx*.75,1.4);c.quadraticCurveTo(rx*.2,ry*1.35,-rx*.6,1);},0);
-  oval(c,r.look*.5,-.3,rx*.58,ry*.84,'#3e314d',0,0);
-  oval(c,r.look*.5-1.15,-1.8,.9,1.05,'#fff8ed',0,0);c.restore();
-  line(c,P.ink,1.05,()=>{c.moveTo(-rx,.1);c.bezierCurveTo(-rx*.85,-ry*1.2,rx*.66,-ry*1.2,rx,-.5);});
-  line(c,'#aa8da8',.6,()=>{c.moveTo(-rx*.92,1);c.quadraticCurveTo(0,ry*1.2,rx*.92,.5);});
- }
- c.restore();
+ drawMichiEye(c,x,y,far?6.2:7,{closed:!!r.blink,happy:r.smile,look:{x:r.look,y:0}});
 }
 function head(c,r){
  const face=moonHareFace({state:r.state,t:r.t,reduceMotion:r.reduced});

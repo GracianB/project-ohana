@@ -15,6 +15,11 @@ function render(pose) {
   const ctx = new Proxy({}, {
     get: (_, key) => {
       if (key in state) return state[key];
+      if(key==='createLinearGradient'||key==='createRadialGradient')return (...args)=>{
+        for(const n of args)assert.ok(Number.isFinite(n),'finite eye gradient');
+        const gradient={type:key,stops:[]};ops.push([key,...args]);
+        return {addColorStop(offset,color){assert.ok(Number.isFinite(offset)&&offset>=0&&offset<=1);gradient.stops.push([offset,color]);ops.push(['addColorStop',offset,color]);}};
+      };
       return (...args) => {
         for (const n of args) if (typeof n === 'number') assert.ok(Number.isFinite(n), `${key} received ${n}`);
         if (key === 'ellipse') assert.ok(args[2] >= 0 && args[3] >= 0, 'ellipse radii');

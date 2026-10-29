@@ -1,10 +1,10 @@
+import {drawMichiEye} from './michi-eyes.js';
 // Michicornio bebé · a moon kitten sculpted from connected fur contours.
 // Character-space only: fixed foot origin, simulation-owned resources and clocks.
 const TAU = Math.PI * 2;
 const P = Object.freeze({
   ink: '#51425f', coat: '#f5eafa', shade: '#cdb8dc', deep: '#aa8cbd',
-  light: '#fff9ef', rose: '#e9b6ce', ear: '#d591bb', gold: '#e5bb75',
-  iris: '#80618e', pupil: '#42344f', eyeLight: '#b895bd'
+  light: '#fff9ef', rose: '#e9b6ce', ear: '#d591bb', gold: '#e5bb75'
 });
 const finite = (v, fallback = 0) => Number.isFinite(v) ? v : fallback;
 const unit = v => Math.max(0, Math.min(1, finite(v)));
@@ -67,35 +67,8 @@ function ear(c, x, y, turn, far) {
   }, 0);
   c.restore();
 }
-function eye(c, x, y, scale, r) {
-  c.save(); c.translate(x, y); c.scale(scale, 1);
-  const rx = 6.1, ry = 5.8;
-  if (r.closed) {
-    line(c, P.ink, 1.15, () => {
-      c.moveTo(-rx, .6); c.quadraticCurveTo(0, r.happy ? -3.6 : 3.2, rx, .4);
-    });
-  } else {
-    // The iris fills the soft almond: no white target ring, no detached eyeball.
-    c.save(); c.beginPath(); c.moveTo(-rx, .5);
-    c.bezierCurveTo(-4.8, -ry, 3.8, -ry - .3, rx, -.1);
-    c.bezierCurveTo(4.7, 5.9, -4.7, 5.5, -rx, .5); c.closePath(); c.clip();
-    c.fillStyle = P.iris; c.fillRect(-8, -8, 16, 16);
-    oval(c, .4 + r.gaze * .6, 3.1, 5.7, 3.6, P.eyeLight);
-    oval(c, r.gaze * .8, -.5, 3.6, 5.7, P.pupil);
-    oval(c, -1.5 + r.gaze * .8, -2.1, 1.15, 1.4, P.light);
-    c.restore();
-    line(c, P.ink, 1.25, () => {
-      c.moveTo(-rx - .3, .6); c.bezierCurveTo(-4.8, -ry, 3.8, -ry - .3, rx, -.1);
-    });
-    line(c, '#ad8eb6', .65, () => {
-      c.moveTo(-rx + .5, 1.3); c.quadraticCurveTo(0, 6.3, rx - .4, .8);
-    });
-    // Eyebrow is a short fur fold, relaxed even while looking at the player.
-    line(c, P.deep, .65, () => {
-      c.moveTo(-3.7, -8.7 + r.focus); c.quadraticCurveTo(.3, -10, 3.4, -8.8 - r.focus);
-    });
-  }
-  c.restore();
+function eye(c,x,y,scale,r){
+ drawMichiEye(c,x,y,7.2*scale,{closed:r.closed,happy:r.happy,look:{x:r.gaze,y:0}});
 }
 function face(c, r) {
   c.save(); c.translate(7 + r.reach * 2.4, -44 + r.headY); c.rotate(r.headTilt);
@@ -127,7 +100,7 @@ function face(c, r) {
     c.quadraticCurveTo(2, 8, 6, 6); c.quadraticCurveTo(13, 0, 20, 7);
     c.quadraticCurveTo(20, 16, 5, 17); c.quadraticCurveTo(-9, 19, -16, 6);
   }, 0);
-  eye(c, -10, -2, .94, r); eye(c, 11, -2.4, 1, r);
+  eye(c, -10, -3.5, .94, r); eye(c, 11, -3.5, 1, r);
   oval(c, -17, 7.4, 3.9, 1.8, P.rose); oval(c, 19, 7.2, 3.7, 1.8, P.rose);
   // Nose, philtrum and paired muzzle lobes are one centered construction.
   shape(c, '#d697ae', () => {

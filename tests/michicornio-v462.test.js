@@ -6,9 +6,9 @@ import {ROSTER} from '../characters/roster.js';
 import cat from '../characters/art/cat.js';
 
 function rec(){
- const log={grad:0,ops:{},fills:new Set()};
+ const log={grad:0,radial:0,ops:{},fills:new Set()};
  const c=new Proxy({globalAlpha:1,lineWidth:1},{get(t,k){
-  if(k==='createLinearGradient'||k==='createRadialGradient')return()=>{log.grad++;return{addColorStop(){}};};
+  if(k==='createLinearGradient'||k==='createRadialGradient')return()=>{log.grad++;if(k==='createRadialGradient')log.radial++;return{addColorStop(){}};};
   if(k in t)return t[k];
   return(...a)=>{log.ops[k]=(log.ops[k]||0)+1;};
  },set(t,k,v){if(k==='fillStyle')log.fills.add(String(v));t[k]=v;return true;}});
@@ -65,10 +65,10 @@ test('Fourth-form moon hare opens its mouth on attack',()=>{
 
 });
 
-test('V462 every form x state renders gradient-free with articulated legs',()=>{
+test('every form x state retains articulated vectors and permits only shared eye iris gradients',()=>{
  for(let f=0;f<5;f++)for(const st of ['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory','dead'])for(const reduceMotion of [false,true]){
   const r=rec();assert.doesNotThrow(()=>cat.draw(r.c,pose(st,77,f,{reduceMotion}),{}),f+'/'+st);
-  assert.equal(r.log.grad,0);
+  assert.ok(r.log.grad<=2);assert.equal(r.log.radial,0);
  }
  // The V625 rigs own tapered limb contours instead of calling the old boot-like helper.
  // Their runtime action/power motion is covered by michi-art-v625.test.js.
@@ -78,7 +78,7 @@ test('V462 every form x state renders gradient-free with articulated legs',()=>{
 test('Moon hare replaces the serpent while preserving the fourth evolution slot',()=>{
  assert.match(src,/if\(f===3\).*MOON HARE/);
  assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Conejornio Lunar');
- const a=rec();cat.draw(a.c,pose('run',30,3),{});assert.equal(a.log.grad,0);
+ const a=rec();cat.draw(a.c,pose('run',30,3),{});assert.ok(a.log.grad<=2);assert.equal(a.log.radial,0);
 });
 
 test('fairy materials remain deterministic for the saved Michi seed',()=>{
@@ -89,5 +89,5 @@ test('fairy materials remain deterministic for the saved Michi seed',()=>{
 test('baby and fourth form use their own anatomical renderers through the canonical cat dispatcher',()=>{
  assert.match(src,/drawMoonKitten\(ctx,safe\)/,'baby has its own connected anatomy');
  assert.match(src,/drawMoonHare\(ctx,safe\)/,'fourth form uses its own rabbit anatomy');
- for(const f of [0,1,3]){const a=rec(),b=rec();cat.draw(a.c,pose('run',10,f),{});cat.draw(b.c,pose('run',30,f),{});assert.equal(a.log.grad,0);}
+ for(const f of [0,1,3]){const a=rec(),b=rec();cat.draw(a.c,pose('run',10,f),{});cat.draw(b.c,pose('run',30,f),{});assert.ok(a.log.grad<=2);assert.equal(a.log.radial,0);}
 });

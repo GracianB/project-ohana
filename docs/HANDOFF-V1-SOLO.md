@@ -1,3 +1,7 @@
+# Última revisión: V626 · Ojos compartidos con los demás héroes
+
+El usuario rechaza los ojos de V625. Michi usa ahora `R.eye` sin modificarlo, igual que Kilo/Chispín/Dino/Cuerno. Ver [alcance](V626-MICHI-EYES.md), [validación](V626-VALIDATION.json) y [publicación](V626-PUBLICATION.json).
+
 # Última revisión: V625 · Las cinco formas de Michi
 
 El usuario reabre toda la familia visual. Se corrige la perspectiva imposible del conejo y se revisan las cinco anatomías, las caras y las poses. El vuelo ganado en V624 se conserva. Alcance: [V625-MICHI.md](V625-MICHI.md). Resultados efectivos: [validación](V625-VALIDATION.json) y [publicación](V625-PUBLICATION.json). No equivale a aceptación humana del arte.

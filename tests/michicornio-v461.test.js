@@ -7,10 +7,10 @@ import {drawEvoCine,michicornioEvoBeat,MICHI_BLOOM_AT,EVO_CINE_DURATION} from '.
 
 // Recording Canvas mock: counts gradients, collects colours and draw ops.
 function rec(){
- const log={grad:0,fills:new Set(),ops:0,text:[]};
+ const log={grad:0,radial:0,fills:new Set(),ops:0,text:[]};
  const o={globalAlpha:1,lineWidth:1};
  const c=new Proxy(o,{get(t,k){
-  if(k==='createLinearGradient'||k==='createRadialGradient')return()=>{log.grad++;return{addColorStop(){}};};
+  if(k==='createLinearGradient'||k==='createRadialGradient')return()=>{log.grad++;if(k==='createRadialGradient')log.radial++;return{addColorStop(){}};};
   if(k==='fillText'||k==='strokeText')return s=>log.text.push(String(s));
   if(k==='measureText')return()=>({width:10});
   if(k in t)return t[k];
@@ -51,11 +51,11 @@ test('V461 jelly swim pulse: bounded, fast contraction, slow relaxation, frozen 
  assert.deepEqual(a[0],b[0],'tentacle root stays attached');assert.notDeepEqual(a.at(-1),b.at(-1),'tentacle tip swims');
 });
 
-test('V461 five forms x eleven states x eight seeds render gradient-free and finite',()=>{
+test('five forms x eleven states x eight seeds keep finite vectors with only the two shared iris gradients',()=>{
  for(const seed of SEEDS)for(let f=0;f<5;f++)for(const st of STATES)for(const reduced of [false,true]){
   const {c,log}=rec();
   assert.doesNotThrow(()=>cat.draw(c,pose(st,77,f,seed,reduced),{}),seed+'/'+f+'/'+st);
-  assert.equal(log.grad,0,'no per-frame gradients F'+f+' '+st);
+  assert.ok(log.grad<=2,'at most the two shared hero irises F'+f+' '+st);assert.equal(log.radial,0,'no radial blur or body glow');
   assert.ok(log.ops>40,'form '+f+' must draw real anatomy');
  }
 });

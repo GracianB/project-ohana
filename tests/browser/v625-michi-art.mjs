@@ -4,7 +4,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {startServer} from './server.mjs';
-const dir='test-results/v625',server=await startServer(0);
+const release=process.env.OHANA_ART_RELEASE||'625';
+assert.match(release,/^\d+$/,'numeric artwork release directory');
+const dir=`test-results/v${release}`,server=await startServer(0);
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
 try{
  await fs.mkdir(dir,{recursive:true});
