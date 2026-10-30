@@ -521,6 +521,14 @@
         "Heart guide focus return restoring Yomi instead of final selection"
       ],
       "regressions_verified": "Native 1280/390 menu/book/final entry, touch choice; keyboard Space/Enter and touch choice at 320; canonical shared Michi eyes unchanged."
+    },
+    "node22_clean_delivery_followup": {
+      "result": "pass",
+      "tests": 1825,
+      "failures": 0,
+      "command": "node@22 --test tests/*.js",
+      "reason": "First Pages run failed because the final documentation rewrite omitted the literal ohana-630 marker required in PROGRESS.md. Reproduced in the clean release worktree, restored the marker, and reran the entire suite with Node 22.23.4. Runtime files unchanged.",
+      "initial_failed_run": "https://github.com/GracianB/project-ohana/actions/runs/41073101349"
     }
   },
   "source_blobs": {
