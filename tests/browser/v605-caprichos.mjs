@@ -33,7 +33,7 @@ try{
   for(const hero of ['kilo','stitcho','chispin','cat','cuerno','dragon','dino','frita','pizza','yomi']){
    await page.locator(`[data-guide="${hero}"]`).click();assert.match(await page.locator('#guide-page').textContent(),/Tu estrategia/);
   }
-  await page.locator('[data-guide="together"]').click();assert.match(await page.locator('#guide-page').textContent(),/servidor público está pausado/);
+  await page.locator('[data-guide="together"]').click();assert.match(await page.locator('#guide-page').textContent(),/sala online: uno crea la sala/);
   await page.locator('[data-guide="kilo"]').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator('[data-guide="stitcho"]').getAttribute('aria-pressed'),'true');
   if(!await page.locator('.fg-comfort').evaluate(e=>e.open)){await page.locator('[data-guide="together"]').focus();await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement.tagName),'SUMMARY');await page.keyboard.press('Space');}
   for(const key of ['readable','contrast','quiet','controls'])await page.locator(`[data-comfort="${key}"]`).check();
