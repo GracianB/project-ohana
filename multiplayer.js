@@ -27,6 +27,9 @@ const state = {
   serverOffset: 0, selectedCharacterId: "",
 };
 const $ = (id) => document.getElementById(id);
+// Read-only hooks for multiplayer/lobby-ux.js (status pill, share link).
+window.__ohanaNet = () => (typeof navigator !== "undefined" && navigator.onLine === false) ? "offline" : state.networkState;
+window.__ohanaRoom = () => state.roomId;
 const entry = $("entry"), lobby = $("lobby"), gamePanel = $("game-panel");
 
 function showError(id, message = "") { $(id).textContent = message; }
@@ -162,6 +165,47 @@ function drawPortrait(canvas, definition) {
   }, { x: 0, y: 0 }, 1, { forceVector: true });
 }
 
+// Animated lobby preview: cycles the real rig through idle, run, jump, attack and victory.
+const PREVIEW_POSES = ["idle", "run", "jump", "attack", "victory"];
+let previewRaf = 0;
+function previewFrame(now) {
+  previewRaf = 0;
+  const canvas = $("lobby-portrait");
+  const definition = ROSTER.find((item) => item.id === state.selectedCharacterId);
+  if (!canvas || !definition || lobby.hidden || document.hidden) return;
+  const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  const pose = reduce ? "idle" : PREVIEW_POSES[Math.floor(now / 1500) % PREVIEW_POSES.length];
+  const t = now / 16.67;
+  const form = definition.forms?.[1] || definition;
+  const p = { ...definition, ...form, id: definition.id, evo: 1, color: form.color, w: form.w, h: form.h, vx: 0, vy: 0, grounded: true, facing: 1, melee: 0, invuln: 0, speed: form.speed };
+  p._rig = { sway: 0, swayV: 0, bounce: 0, bounceV: 0, blinkAt: 999, blinkT: 0, idleT: 0, flourishT: -1, flourishN: 0, atkMax: 0, phase: 0, land: 0, wasAir: false, lastT: t };
+  if (pose === "run") { p.vx = form.speed; p._rig.phase = t * 0.32; p._rig.sway = -0.6; }
+  if (pose === "jump") { p.grounded = false; p.vy = -9; p._rig.bounce = -0.6; }
+  if (pose === "attack") { p.melee = 5; p._rig.atkMax = 12; }
+  if (pose === "victory") { p._poseOverride = "victory"; p._evoT = 0.8; }
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  const glow = ctx.createRadialGradient(W / 2, H * 0.55, 4, W / 2, H * 0.55, W * 0.48);
+  glow.addColorStop(0, `${definition.color}66`);
+  glow.addColorStop(1, "rgba(8,20,35,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+  const lift = pose === "jump" ? -10 - Math.sin(now / 240) * 4 : 0;
+  const scale = Math.min(2.6, (H * 0.62) / Math.max(form.h || 34, 24));
+  ctx.save();
+  ctx.translate(W / 2, H * 0.86 + lift);
+  ctx.scale(scale, scale);
+  ctx.fillStyle = "rgba(0,0,0,.25)";
+  ctx.beginPath(); ctx.ellipse(0, -lift / scale, (form.w || 26) * 0.8, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+  p.x = -(form.w || 26) / 2; p.y = -(form.h || 34);
+  try { drawCharacter(ctx, p, { x: 0, y: 0 }, t, { forceVector: true }); } catch { ctx.restore(); drawPortrait(canvas, definition); return; }
+  ctx.restore();
+  canvas.dataset.pose = pose;
+  previewRaf = requestAnimationFrame(previewFrame);
+}
+function startPreview() { if (!previewRaf) previewRaf = requestAnimationFrame(previewFrame); }
+
 function labelForAbility(id) {
   return String(id || "Habilidad").replace(/[-_]/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
@@ -173,6 +217,7 @@ function enterLobby(snapshot) {
   state.networkState = "connected";
   state.pollDelay = 250;
   persistSession();
+  try { const url = new URL(location.href); if (url.searchParams.get("room") !== state.roomId) { url.searchParams.set("room", state.roomId); history.replaceState(null, "", url); } } catch {}
   entry.hidden = true;
   lobby.hidden = false;
   gamePanel.hidden = true;
@@ -231,6 +276,7 @@ function renderLobby() {
   const preview = ROSTER.find((character) => character.id === state.selectedCharacterId);
   if (preview) {
     drawPortrait($("lobby-portrait"), preview);
+    startPreview();
     $("lobby-character-name").textContent = preview.name;
     $("lobby-character-detail").textContent = `${preview.role} · ${preview.tag} · ${preview.evoNames?.[1] || preview.name}`;
   } else {
@@ -1169,8 +1215,19 @@ $("join-room").addEventListener("click", async () => {
   finally { state.entrySubmitting = false; $("create-room").disabled = false; $("join-room").disabled = false; }
 });
 $("confirm-character").addEventListener("click", () => void confirmCharacter());
+function copyText(text) {
+  if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
+  return new Promise((resolve, reject) => {
+    const area = document.createElement("textarea");
+    area.value = text; area.setAttribute("readonly", ""); area.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.append(area); area.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch {}
+    area.remove(); ok ? resolve() : reject(new Error("copy"));
+  });
+}
+window.__ohanaCopy = copyText;
 $("copy-code").addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText(state.roomId); $("copy-code").textContent = "Copiado"; }
+  try { await copyText(state.roomId); $("copy-code").textContent = "Copiado"; setTimeout(() => { $("copy-code").textContent = "Copiar"; }, 1800); }
   catch { showError("lobby-error", "No se pudo copiar el código."); }
 });
 $("return-home").addEventListener("click", () => { window.location.href = "./index.html"; });

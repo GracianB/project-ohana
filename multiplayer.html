@@ -6,18 +6,32 @@
   <meta name="theme-color" content="#071226">
   <meta name="description" content="La aventura original de Isla Hoku, con dos jugadores compartiendo los mismos mundos.">
   <title>OHANA · La misma aventura para dos</title>
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Project OHANA">
+  <meta property="og:title" content="Project OHANA · Isla Hoku, 2 jugadores online">
+  <meta property="og:description" content="Aventura cooperativa y versus para dos jugadores en el navegador: crea una sala, comparte el código y juega desde cualquier móvil u ordenador. 2-player online co-op &amp; versus.">
+  <meta property="og:url" content="https://project-ohana-multiplayer.netlify.app/multiplayer">
+  <meta property="og:image" content="https://project-ohana-multiplayer.netlify.app/assets/og/ohana-og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Kilo y Stitcho en la playa de Isla Hoku con el título Project OHANA y un código de sala">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Project OHANA · Isla Hoku, 2-player online">
+  <meta name="twitter:description" content="Co-op adventure and versus for two players in the browser. One room code, any phone or laptop.">
+  <meta name="twitter:image" content="https://project-ohana-multiplayer.netlify.app/assets/og/ohana-og.jpg">
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="style.css?v=ohana-coop-3">
-  <link rel="stylesheet" href="multiplayer.css?v=ohana-coop-3">
+  <link rel="stylesheet" href="style.css?v=ohana-coop-4">
+  <link rel="stylesheet" href="multiplayer.css?v=ohana-coop-4">
 </head>
 <body>
   <main class="coop-shell">
     <header class="coop-head">
       <h1>PROJECT <span>OHANA</span> · DOS EN LA MISMA ISLA</h1>
-      <a href="./index.html">Volver a OHANA</a>
+      <div class="coop-head-actions"><button id="lang-toggle" class="lang-toggle" type="button" aria-label="Switch to English">English</button><a href="./index.html">Volver a OHANA</a></div>
     </header>
 
     <section id="entry" class="coop-panel entry-panel">
+      <p id="invite-banner" class="invite-banner" role="status" hidden></p>
       <p class="eyebrow">DOS JUGADORES · LA MISMA AVENTURA</p>
       <h2>La misma Isla Hoku, ahora juntos</h2>
       <p>Elegid personajes distintos y un modo. Versus enfrenta a dos héroes con criaturas y un guardián; Aventura permite explorar juntos y votar el cambio de sala. Crea una sala, comparte el código y juega con un amigo desde otro dispositivo.</p>
@@ -52,6 +66,8 @@
         <div>
           <span class="sub-label">CÓDIGO DE SALA</span>
           <div class="room-code"><span id="room-code"></span><button id="copy-code" class="coop-button secondary" type="button">Copiar</button></div>
+          <div class="share-row"><button id="share-link" class="coop-button" type="button">Compartir enlace</button><span id="net-pill" class="net-pill" data-state="connected" role="status"><i aria-hidden="true"></i>Conectado</span></div>
+          <input id="share-url" class="share-url" readonly aria-label="Enlace de invitación / Invite link" value="" hidden>
         </div>
         <div id="player-slots" class="player-slots"></div>
       </div>
@@ -116,6 +132,7 @@
       </div>
     </section>
   </main>
-  <script type="module" src="multiplayer.js?v=ohana-coop-3"></script>
+  <script type="module" src="multiplayer.js?v=ohana-coop-4"></script>
+  <script type="module" src="multiplayer/lobby-ux.js?v=ohana-coop-4"></script>
 </body>
 </html>
