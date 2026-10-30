@@ -1,0 +1,552 @@
+{
+  "release": "ohana-630",
+  "base": "135c515b757dfb4f382766c6d3543af964aa4ccd",
+  "recorded_at": "2026-10-30T14:35:28.863900+00:00",
+  "review": "docs/V630-RITUAL.md",
+  "checks": {
+    "node": {
+      "result": "pass",
+      "tests": 1825,
+      "failures": 0,
+      "command": "npm test"
+    },
+    "release_gate": {
+      "result": "pass",
+      "cache": "ohana-630",
+      "runtime_modules": 389,
+      "precache_resources": 452
+    },
+    "quality_workflow": {
+      "new_checks": [
+        "ritual-relics",
+        "ritual-native",
+        "guardian-art",
+        "gauntlet"
+      ],
+      "retry_and_finale_release": 630
+    },
+    "floor_ritual_and_choice": {
+      "result": "pass",
+      "report": [
+        {
+          "width": 1280,
+          "height": 900,
+          "earnedSealBackup": true,
+          "priorRescuesRemovedForFixture": true,
+          "physicalFloorPickups": [
+            0,
+            1,
+            2
+          ],
+          "movement": "ordinary keyboard controls",
+          "choiceInput": "native keyboard Space/Enter and E",
+          "noNewXpOrSeals": true,
+          "healthFractionPreserved": true,
+          "cancelReopensWithE": true,
+          "noOpeningGestureConfirmation": true,
+          "mapAndHelpBlockedDuringChoice": true,
+          "fighter": "dino",
+          "guardian": "kilo",
+          "noMidFightSwap": true,
+          "cinemasSeparate": true
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "earnedSealBackup": true,
+          "priorRescuesRemovedForFixture": true,
+          "physicalFloorPickups": [
+            0,
+            1,
+            2
+          ],
+          "movement": "ordinary keyboard controls",
+          "choiceInput": "native touch taps and E button",
+          "noNewXpOrSeals": true,
+          "healthFractionPreserved": true,
+          "cancelReopensWithE": true,
+          "noOpeningGestureConfirmation": true,
+          "mapAndHelpBlockedDuringChoice": true,
+          "fighter": "dino",
+          "guardian": "kilo",
+          "noMidFightSwap": true,
+          "cinemasSeparate": true
+        },
+        {
+          "width": 320,
+          "height": 568,
+          "earnedSealBackup": true,
+          "priorRescuesRemovedForFixture": true,
+          "physicalFloorPickups": [
+            0,
+            1,
+            2
+          ],
+          "movement": "ordinary keyboard controls",
+          "choiceInput": "native touch taps and E button",
+          "noNewXpOrSeals": true,
+          "healthFractionPreserved": true,
+          "cancelReopensWithE": true,
+          "noOpeningGestureConfirmation": true,
+          "mapAndHelpBlockedDuringChoice": true,
+          "fighter": "dino",
+          "guardian": "kilo",
+          "noMidFightSwap": true,
+          "cinemasSeparate": true
+        }
+      ],
+      "errors": [],
+      "scope": "First final ritual replay from earned seals with earlier final rescues removed in an isolated fixture; actual floor pickup movement and native fighter choice. Artwork contact sheet is a rendering fixture.",
+      "artifact": "test-results/v630/ritual-relics.json"
+    },
+    "native_menu_book_movement_and_choice": {
+      "result": "pass",
+      "environment": "local build",
+      "rows": [
+        {
+          "width": 1280,
+          "height": 900,
+          "noTestHooks": true,
+          "nativeMenuAndHeartBook": true,
+          "heroOnEntry": "yomi",
+          "physicalKeyboardMovement": true,
+          "earnedFloorResonances": [
+            0,
+            1,
+            2
+          ],
+          "deliberateChoice": "native pointer",
+          "fighter": "dino",
+          "guardian": "Tambor de la marea",
+          "noOpeningGestureConfirmation": true,
+          "noCinematicOverlap": true,
+          "errors": [],
+          "backend": []
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "noTestHooks": true,
+          "nativeMenuAndHeartBook": true,
+          "heroOnEntry": "yomi",
+          "physicalKeyboardMovement": true,
+          "earnedFloorResonances": [
+            0,
+            1,
+            2
+          ],
+          "deliberateChoice": "native touch",
+          "fighter": "dino",
+          "guardian": "Tambor de la marea",
+          "noOpeningGestureConfirmation": true,
+          "noCinematicOverlap": true,
+          "errors": [],
+          "backend": []
+        }
+      ],
+      "scope": "Native first final ritual replay from earned chapter seals with prior final rescues removed. Ordinary keyboard movement and native menu/picker/touch E controls; no hooks, position, health, XP or victory grants.",
+      "artifact": "test-results/v630/ritual-native.json"
+    },
+    "guardian_art": {
+      "result": "pass",
+      "bodies": [
+        {
+          "hero": "kilo",
+          "guardian": "Tambor de la marea",
+          "entityUnchanged": true
+        },
+        {
+          "hero": "stitcho",
+          "guardian": "Aracne de los remiendos",
+          "entityUnchanged": true
+        },
+        {
+          "hero": "chispin",
+          "guardian": "Titán del cielo partido",
+          "entityUnchanged": true
+        },
+        {
+          "hero": "cat",
+          "guardian": "León del eclipse",
+          "entityUnchanged": true
+        },
+        {
+          "hero": "cuerno",
+          "guardian": "Ciervo de la aurora",
+          "entityUnchanged": true
+        },
+        {
+          "hero": "dragon",
+          "guardian": "Wyvern de la brasa antigua",
+          "entityUnchanged": true
+        },
+        {
+          "hero": "dino",
+          "guardian": "Coloso del cascarón",
+          "entityUnchanged": true
+        },
+        {
+          "hero": "frita",
+          "guardian": "Rey del mercado dorado",
+          "entityUnchanged": true
+        },
+        {
+          "hero": "pizza",
+          "guardian": "Chef de la medianoche",
+          "entityUnchanged": true
+        },
+        {
+          "hero": "yomi",
+          "guardian": "Custodio del último archivo",
+          "entityUnchanged": true
+        }
+      ],
+      "shots": [
+        {
+          "kind": "lightning",
+          "hero": "chispin",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 23780,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "geysers",
+          "hero": "frita",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 27840,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "prism",
+          "hero": "yomi",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 19500,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "wave",
+          "hero": "kilo",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 658,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "disc",
+          "hero": "pizza",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 1175,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "orb",
+          "hero": "kilo",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 98,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "orb",
+          "hero": "stitcho",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 194,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "orb",
+          "hero": "chispin",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 112,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "orb",
+          "hero": "cat",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 136,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "orb",
+          "hero": "cuerno",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 211,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "orb",
+          "hero": "dragon",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 168,
+          "outsideDangerBandPlus2px": 0
+        },
+        {
+          "kind": "orb",
+          "hero": "yomi",
+          "entityUnchanged": true,
+          "reducedMotionStable": true,
+          "opaquePixels": 264,
+          "outsideDangerBandPlus2px": 0
+        }
+      ],
+      "cinematicActors": [
+        "dino"
+      ],
+      "scope": "Actual Canvas render fixtures, unchanged entities, reduced-motion and physical shot-band checks; no gameplay progression.",
+      "artifact": "test-results/v630/guardian-art.json"
+    },
+    "ten_actual_guardian_duels": {
+      "result": "pass",
+      "difficulty": "normal",
+      "combat": {
+        "deaths": 0,
+        "rescued": [
+          "kilo",
+          "stitcho",
+          "chispin",
+          "cat",
+          "cuerno",
+          "dragon",
+          "dino",
+          "frita",
+          "pizza",
+          "yomi"
+        ],
+        "duels": [
+          "kilo",
+          "stitcho",
+          "chispin",
+          "cat",
+          "cuerno",
+          "dragon",
+          "dino",
+          "frita",
+          "pizza",
+          "yomi"
+        ],
+        "fighterChoices": [
+          {
+            "guardian": "kilo",
+            "fighter": "kilo"
+          },
+          {
+            "guardian": "stitcho",
+            "fighter": "stitcho"
+          },
+          {
+            "guardian": "chispin",
+            "fighter": "chispin"
+          },
+          {
+            "guardian": "cat",
+            "fighter": "cat"
+          },
+          {
+            "guardian": "cuerno",
+            "fighter": "cuerno"
+          },
+          {
+            "guardian": "dragon",
+            "fighter": "dragon"
+          },
+          {
+            "guardian": "dino",
+            "fighter": "dino"
+          },
+          {
+            "guardian": "frita",
+            "fighter": "frita"
+          },
+          {
+            "guardian": "pizza",
+            "fighter": "pizza"
+          },
+          {
+            "guardian": "yomi",
+            "fighter": "yomi"
+          },
+          {
+            "guardian": "quimera",
+            "fighter": "kilo"
+          }
+        ],
+        "cinematics": [
+          "keepsakeIntro",
+          "keepsakeRescue",
+          "bossIntro"
+        ]
+      },
+      "scope": "Earned chapter-seal backup with prior final rescues removed for this isolated replay; native ritual choices and physical combat. No new full campaign claim.",
+      "artifact": "test-results/v603/normal-gauntlet-results.json"
+    },
+    "quimera_and_ending": {
+      "result": "pass",
+      "viewports": [
+        {
+          "width": 1280,
+          "height": 900,
+          "startingFromEarnedBackup": true,
+          "replayAction": true,
+          "ordinaryCombat": true,
+          "deaths": 0,
+          "phases": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "films": [
+            "bossIntro",
+            "bossDefeat",
+            "ending"
+          ],
+          "won": true,
+          "noCinematicOverlap": true,
+          "returnToRoster": true,
+          "preservedSeals": true,
+          "errors": []
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "startingFromEarnedBackup": true,
+          "replayAction": true,
+          "ordinaryCombat": true,
+          "deaths": 0,
+          "phases": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "films": [
+            "bossIntro",
+            "bossDefeat",
+            "ending"
+          ],
+          "won": true,
+          "noCinematicOverlap": true,
+          "returnToRoster": true,
+          "preservedSeals": true,
+          "errors": []
+        }
+      ],
+      "scope": "Replay from earned campaign backup, not a new full campaign.",
+      "artifact": "test-results/v630/finale-flow/report.json"
+    },
+    "retry_and_natural_death": {
+      "result": "pass",
+      "reports": [
+        {
+          "width": 1280,
+          "height": 900,
+          "retry": "native keyboard R",
+          "initialArenaPositionFixture": true,
+          "oldBossRemoved": true,
+          "staleCanvasHUD": false,
+          "staleAccessibleHUD": false,
+          "sealsAndKeepsakesPreserved": true,
+          "evolutionAndExperiencePreservedOnRetry": true,
+          "arenaReentry": {
+            "method": "native fighter choice and ritual invocation",
+            "from": 6727,
+            "to": 8600,
+            "frames": 60,
+            "freshBossPhase": 1
+          },
+          "naturalDeath": {
+            "deathEvents": [
+              {
+                "reason": "hurt",
+                "id": "kilo",
+                "hero": "Kilo Flor Solar"
+              }
+            ],
+            "minHp": 0,
+            "frames": 3000,
+            "restarted": true,
+            "restartMode": "procession",
+            "checkpoint": null,
+            "restartX": 6727,
+            "staleBossHUD": false
+          }
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "retry": "native keyboard R",
+          "initialArenaPositionFixture": true,
+          "oldBossRemoved": true,
+          "staleCanvasHUD": false,
+          "staleAccessibleHUD": false,
+          "sealsAndKeepsakesPreserved": true,
+          "evolutionAndExperiencePreservedOnRetry": true,
+          "arenaReentry": {
+            "method": "native fighter choice and ritual invocation",
+            "from": 6727,
+            "to": 8600,
+            "frames": 60,
+            "freshBossPhase": 1
+          },
+          "naturalDeath": null
+        }
+      ],
+      "errors": [],
+      "scope": "Earned campaign backup and one initial arena position fixture; keyboard retry, real movement and optional ordinary enemy-caused death, no resource or victory grants.",
+      "artifact": "test-results/v630/final-retry.json"
+    },
+    "twenty_actual_core_views": {
+      "result": "pass",
+      "room_views": 20,
+      "rendering": "earned ritual cores and three floor trophies",
+      "unchanged_progress": true,
+      "scope": "Previously earned campaign backup, direct final-room and camera-position art fixtures; no XP/health/seal grants and no new campaign completion claim.",
+      "canonical_standalone_portraits": "Default selector/cinematic portrait fixtures retained.",
+      "artifact": "test-results/v627/final-mirrors.json"
+    },
+    "independent_review": {
+      "confirmed_and_fixed": [
+        "M and help shortcuts opening under fighter choice",
+        "Touch E opening gesture accidentally confirming dialog",
+        "Heart guide focus return restoring Yomi instead of final selection"
+      ],
+      "regressions_verified": "Native 1280/390 menu/book/final entry, touch choice; keyboard Space/Enter and touch choice at 320; canonical shared Michi eyes unchanged."
+    }
+  },
+  "source_blobs": {
+    "game.js": "64d112c4df920022896542262d4088537ea5e397",
+    "index.html": "ba86d5e75d5529e35c22e8534ba0d0b80b4117b7",
+    "sw.js": "ed8af854e513f79e56cc7671c88d838c948edca4",
+    "final-ritual.css": "cb3fa260f55cd948ce875311f33f0adffcdfb16a",
+    "systems/chapter-expedition-v2.js": "029124d1032e429df2fdab6e791f19d54003905e",
+    "systems/expedition-art-v630.js": "96ed88a7a897c8a90d84e7e31e98e99b62aec340",
+    "systems/final-ritual.js": "c5c1f7f38aea3261834fded45c620b2d6cf1a533",
+    "systems/final-ritual-art.js": "cc8d6924daadfcb6ce5b8bbe3ea5cd6a1143867a",
+    "systems/final-hero-choice.js": "feea8845ef0c866e2d46350bcd54fe795a2ca698",
+    "systems/final-gauntlet.js": "73f2708315ae224a9cd72fc77dfd8d477eda16db",
+    "systems/final-portal-mirrors.js": "cc2edd3946079121e2bc60395570a8a35a817528",
+    "systems/world1-play.js": "45ed3b6bc0197222dd4a341e552e6689e68e6faa",
+    "systems/chapter-boss-art-v2.js": "1367233553735fae35dd532b642bf7357bb3f628",
+    "systems/field-guide.js": "e4e41e0fd91cf43de5c5e709dd8a77cea76d9fcb",
+    "systems/world1-cine.js": "735b9717b9d6a7c3dcc6bc744d65ab9671675ad3",
+    "systems/world1-story.js": "e1324becee767e794b86580bc3b5534c7a647e87"
+  },
+  "scope_limits": [
+    "No new full campaign completion is claimed; final replays use previously earned chapter seals with prior rescues removed only inside isolated test profiles.",
+    "Rendering fixtures do not grant gameplay progress.",
+    "Human art, fun and perceived Normal difficulty acceptance remains pending.",
+    "No physical gamepad validation in this release.",
+    "Remote multiplayer backend remains paused; new ritual is solo only.",
+    "Primary chapter objective models are retained; the thirty Act II discovery objects use the new ten-theme artwork."
+  ]
+}

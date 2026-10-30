@@ -69,7 +69,11 @@
     "test:browser:finale-flow": "node tests/browser/v627-finale-flow.mjs",
     "test:browser:actor-adapter": "node tests/browser/v628-actor-adapter.mjs",
     "test:browser:final-retry": "node tests/browser/v628-final-retry.mjs",
-    "test:browser:selection-return": "node tests/browser/v629-selection-return.mjs"
+    "test:browser:selection-return": "node tests/browser/v629-selection-return.mjs",
+    "test:browser:ritual-relics": "node tests/browser/v630-ritual-relics.mjs",
+    "test:browser:gauntlet": "node tests/browser/v603-gauntlet.mjs",
+    "test:browser:guardian-art": "node tests/browser/v630-guardian-art.mjs",
+    "test:browser:ritual-native": "node tests/browser/v630-ritual-native.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

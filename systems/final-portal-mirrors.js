@@ -1,5 +1,6 @@
 import {drawCharacter} from '../characters/draw.js';
 import {createFamilyActor} from './family-actor.js';
+import {drawRitualCore} from './final-ritual-art.js';
 
 // One live family portrait inside each glass. Bounds come from the same actor
 // renderer used in play, rather than physical hitboxes or substitute sculptures.
@@ -48,7 +49,7 @@ export function drawMirrorPortrait(ctx,hero,rx,ry,t=0,{near=false,reduced=false,
  ctx.restore();return {hero,form:1,bounds,fit};
 }
 
-export function drawPortalMirrors(ctx,portals,cam,t=0,player,reduced=false){
+export function drawPortalMirrors(ctx,portals,cam,t=0,player,reduced=false,ritual=null){
  const rendered=[];if(!portals?.length)return rendered;
  const camera={x:finite(cam?.x),y:finite(cam?.y)};
  const viewport=ctx.canvas?.width/Math.max(.01,Math.abs(ctx.getTransform?.().a||1));
@@ -63,7 +64,7 @@ export function drawPortalMirrors(ctx,portals,cam,t=0,player,reduced=false){
   const glass=ctx.createLinearGradient(0,-ry,0,ry);
   glass.addColorStop(0,'#13283d');glass.addColorStop(.6,'#243b50');glass.addColorStop(1,'#304957');
   ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TAU);ctx.fillStyle=glass;ctx.fill();
-  const portrait=drawMirrorPortrait(ctx,p.hero,rx-5,ry-5,t,{near,reduced,facing:near&&dx<0?-1:1});
+  const portrait=ritual?.finalRitualEnabled?drawRitualCore(ctx,{...p,rx,ry},ritual,t,reduced):drawMirrorPortrait(ctx,p.hero,rx-5,ry-5,t,{near,reduced,facing:near&&dx<0?-1:1});
   if(portrait)rendered.push(portrait);
   ctx.strokeStyle=near?'#fff1bf':'#c7d8df';ctx.lineWidth=near?4:2.5;
   ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TAU);ctx.stroke();

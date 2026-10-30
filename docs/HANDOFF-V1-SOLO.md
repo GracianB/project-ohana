@@ -1,3 +1,7 @@
+# Última revisión: V630 · Objetos, núcleos y elección de combatiente
+
+El Acto II de las diez salas recibe objetos propios. En el Corazón, tres piezas físicas alimentan cada núcleo; el jugador elige quién se enfrenta a cada guardián y a Quimera. Se conservan los rescates ganados. Guardianes con gestos propios, corrección de los ojos de Dino, ataques más legibles y contador de pruebas separado del sello. Estado efectivo: [alcance](V630-RITUAL.md), [validación](V630-VALIDATION.json), [publicación](V630-PUBLICATION.json).
+
 # Última revisión: V629 · Volver del Corazón al héroe
 
 Al salir del portal final se restituyen la ficha y el escenario del mismo héroe con flechas, clic o táctil. Entrar en el Corazón termina la travesura para que sus frases no oculten el aviso de los sellos pendientes. Ver [alcance](V629-SELECCION.md), [validación](V629-VALIDATION.json) y [publicación](V629-PUBLICATION.json).

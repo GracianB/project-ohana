@@ -8,6 +8,8 @@ import {kiloChapterAbility,interactKiloInstrument} from './systems/world1-play.j
 import {createAdventureStorage} from './multiplayer/adventure-progress.js';
 import {drawLivingRealm} from './worlds/living-realms.js';
 import {drawPortalMirrors, FINAL_PORTALS} from './systems/final-portal-mirrors.js';
+import {interactFinalRitual,FINAL_RITUAL_PORTALS} from './systems/final-ritual.js';
+import {openFinalHeroChoice,closeFinalHeroChoice} from './systems/final-hero-choice.js';
 import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
 import {KEEPSAKES,readKeepsakes,mergeKeepsakes,persistKeepsakes} from './systems/keepsakes.js';
 import {chapterAtlasHTML,chapterMapDetail,drawAdventureGuide} from './systems/adventure-guide-v2.js';
@@ -327,6 +329,7 @@ addEventListener("resize", fit); fit();
 
 function overlayOpen() {
 return !!(
+game.finalHeroChoiceOpen ||
 game.world1CollectUI?.open ||
 document.getElementById("family-constellation")?.classList.contains("open") ||
 DOM.help?.classList.contains("open") ||
@@ -395,6 +398,7 @@ pauseLayer.classList.toggle("open", paused);
 pauseLayer.setAttribute("aria-hidden", paused ? "false" : "true");
 }
 }function closeOverlays() {
+closeFinalHeroChoice(game);
 DOM.help?.classList.remove("open");
 DOM.map?.classList.remove("open");
 Festival.close();
@@ -421,9 +425,12 @@ function chapterGrowthWaiting(g){return kiloGrowthWaiting(g)||stitchoGrowthWaiti
 function canAct() { return game.running && !world1CineActive(game) && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
+if(game.finalRitualEnabled&&game.finalGauntlet?.phase==='summoning')return;
+if(interactFinalRitual(game))return;
 if (!interactKiloInstrument(game) && !interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
+if(game.finalHeroChoiceOpen){closeFinalHeroChoice(game);return;}
 if(game.relicScene?.kind==='memory-v2'&&game.relicScene.age>90){game.relicScene=null;game.onRelicEnd?.();game.resetInput?.();return;}
 if(game.world1CollectUI?.open){toggleWorld1Album(game,false);return;}
 const constellation=document.getElementById("family-constellation");
@@ -447,6 +454,7 @@ clock.reset();
 if (document.hidden) suspend();
 });
 function toggleHelp() {
+if(game.finalHeroChoiceOpen)return;
 const help = DOM.help;
 if (!help) return;
 const open = !help.classList.contains("open");
@@ -478,6 +486,7 @@ game.onRelicBeat=beat=>game.relicScene?.kind==='memory-v2'?relicMemoryPhrase(gam
 canvas.addEventListener('pointerdown',event=>{if(game.relicScene?.kind==='memory-v2'&&game.relicScene.age>90){escape();event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
 game.onRoomAlbumChange=()=>Festival.setCounter();
 function returnToMenu() {
+closeFinalHeroChoice(game);
 save();
 if(game.world1CollectUI)toggleWorld1Album(game,false);
 if(game.relicScene){game.relicScene=null;document.body.classList.remove('relic-cinema');duckMusic(false);}
@@ -628,7 +637,7 @@ return false;
 }
 if(game.personalAdventureSolo&&!game._e2eLegacyStart){
  const finalEntry=id==="w1-final"&&world1SealsComplete(game.world1Seals);
- const chapter=finalEntry?{hero:"kilo",reset:game.roomId!==id||game.player?.id!=="kilo"}:world1ChapterEntry(id,{hero:game.player?.id,previousRoom:game.roomId,resume:!!game._resumeCheckpoint});
+ const chapter=finalEntry?{hero:game.finalRitualEnabled?(game.player?.id||'kilo'):'kilo',reset:game.finalRitualEnabled?game.player?.evo<4:game.roomId!==id||game.player?.id!=="kilo"}:world1ChapterEntry(id,{hero:game.player?.id,previousRoom:game.roomId,resume:!!game._resumeCheckpoint});
  if(chapter?.reset){
   const def=ROSTER.find(h=>h.id===chapter.hero);
   game.player=makePlayer(def);
@@ -664,6 +673,7 @@ game.roomDef = r;
 // A retry reloads this room too: the previous boss director must not survive
 // after its boss/enemies have been discarded. A new encounter creates its own.
 game.finalGauntlet=null;game.world1Boss=null;
+closeFinalHeroChoice(game);
 game._defeatedThisVisit=new Set();
 game.finale = null;
 game.visited[id] = true;
@@ -832,6 +842,7 @@ Festival.onEnterRoom(game);
 Passives.onRoom(game);
 Magic.onRoom(game, id);
 save();
+if(r.fusionBoss)updateHUD();
 dispatchEvent(new CustomEvent("ohana-room", { detail: {
 id,
 name: r.name,
@@ -844,6 +855,7 @@ evo: game.player ? game.player.evo : 0
 return true;
 }
 function showMap() {
+if(game.finalHeroChoiceOpen)return;
 const overlay = DOM.map;
 const grid = DOM.mapGrid;
 if (!overlay || !grid) {
@@ -967,12 +979,23 @@ game.world1Seals = onlineMode?[]:readWorld1Seals(); game.world1Won = false; game
 game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){if(!game.onlineAdventure)storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='album-ceremony'){setMusicOverride(themeForRoom('w1-'+hero));}else if(kind==='album-page'||kind==='album-unlock'){beep('win');}else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
 game.canWorld1CineStart=()=>!game.relicScene&&!document.querySelector('#evo-stage.show,#supreme-cinema[aria-hidden="false"],#win-cinema.show');
 game.playWorld1Cine=(id,hero)=>playWorld1Cine(game,id,hero);
+game.finalRitualEnabled=!onlineMode;
+game.requestFinalHero=request=>{updateHUD();return openFinalHeroChoice(game,request);};
+game.onGauntletBeat=(kind,hero)=>{if(kind==='resonance')beep('windChime'+Math.min(3,game.finalGauntlet?.resonances?.[hero]?.length||1));else if(kind==='summon')beep('boss');};
+game.onFinalRitualReturn=portal=>{
+ if(!game.finalRitualEnabled||game.roomId!=='w1-final'||!portal||!game.player)return;
+ const p=game.player;p.x=portal.x-155-p.w/2;p.y=1134-p.h;p.vx=0;p.vy=0;p.grounded=true;p.jumps=0;
+ game.enemies=(game.enemies||[]).filter(e=>!e.gauntletBoss);game.projectiles=[];game.resetInput?.();
+ game.cam.x=Math.max(0,Math.min(game.worldW-camW(),portal.x-camW()/2));game.cam.y=Math.max(0,1134-camH()*.78);game.renderDirty=true;
+};
 game.onGauntletHero=(hero)=>{
  clearPersistentObjective();dismissNotifications();
- if(game.onlineAdventure||!world1SealsComplete(game.world1Seals))return;const def=ROSTER.find(r=>r.id===hero);if(!def)return;
- game.player=makePlayer(def);const p=game.player;p.evo=4;p.xp=420;applyForm(p,{silent:true});paintFit(p);p.x=8600;p.y=1134-p.h;p.grounded=true;p.invuln=90;
+ if(game.onlineAdventure||!world1SealsComplete(game.world1Seals))return false;const def=ROSTER.find(r=>r.id===hero);if(!def)return false;
+ const previous=game.player,healthRatio=previous?Math.max(0,Math.min(1,previous.health/previous.maxHealth)):1;
+ if(!game.finalRitualEnabled||previous?.id!==hero){game.player=makePlayer(def);game.player.evo=4;game.player.xp=game.finalRitualEnabled?Math.max(420,previous?.xp||420):420;applyForm(game.player,{silent:true});paintFit(game.player);if(game.finalRitualEnabled){game.player.health=game.player.maxHealth*healthRatio;game.player.finisherCharge=Math.min(100,previous?.finisherCharge||0);}}
+ const p=game.player;p.x=8600;p.y=1134-p.h;p.vx=0;p.vy=0;p.grounded=true;p.jumps=0;p.invuln=90;
  p.uPartner=loadUPartnerChoice(localStorage,hero);p.uBonds=readStoredUBonds(localStorage,hero);p.uExp=bondXP(p);p.uSurprise=!e2eEnabled;
- game._signatureLink=null;game._combatFlow=null;game._assist=null;game._supremeFlow=null;game._evolutionAttacks=null;game.ult=null;game.bolts=[];game.slashes=[];game.projectiles=[];game.resetInput?.();renderAbilityBar();playMusic("w1-"+hero);game.renderDirty=true;
+ game._signatureLink=null;game._combatFlow=null;game._assist=null;game._supremeFlow=null;game._evolutionAttacks=null;game.ult=null;game.bolts=[];game.slashes=[];game.projectiles=[];game.resetInput?.();renderAbilityBar();updateHUD();playMusic("w1-"+hero);game.renderDirty=true;return true;
 };
 game.placeCoopEntry=me=>{
  if(!game.onlineAdventure||!game.player||!me||me.worldRoomId!==game.roomId)return;
@@ -1169,7 +1192,7 @@ if(checkpoint){p.x=checkpoint.x-p.w/2;p.y=checkpoint.y-p.h;p.grounded=true;p.jum
 game.cam.x=Math.max(0,p.x-camW()/2);game.cam.y=Math.max(0,p.y-camH()/2);
 }
 function dash() {
-if(game.relicScene)return;
+if(game.relicScene||game.finalHeroChoiceOpen||game.finalRitualEnabled&&game.finalGauntlet?.phase==='summoning')return;
 const p = game.player;
 if (!p || p.dead) return;
 if (p.dash > 0) { p.dashBuf = 8; return; }
@@ -1393,7 +1416,7 @@ markHit(p, e, s.dmg, s.kb);
 }
 
 function attack() {
-if(game.relicScene)return;
+if(game.relicScene||game.finalHeroChoiceOpen||game.finalRitualEnabled&&game.finalGauntlet?.phase==='summoning')return;
 const p = game.player;
 if (!p || p.dead) return;
 if (p.melee > 0) { p.meleeBuf = 8; return; }
@@ -1799,6 +1822,7 @@ else if (dir === "up") p.y = Math.max(p.y, 6);
 }
 function updatePlayer() {
 const p = game.player; if (p.dead) return;
+if(game.finalHeroChoiceOpen||game.finalRitualEnabled&&game.finalGauntlet?.phase==='summoning'){p.vx=0;p.vy=0;return;}
 if (game.doorWait) {
 p.vx = 0;
 p.vy = 0;
@@ -3206,7 +3230,7 @@ drawNestArena(ctx,game,game.cam,t);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
 portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
-if(game.roomId==="w1-final")drawPortalMirrors(ctx, FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion);
+if(game.roomId==="w1-final")drawPortalMirrors(ctx, game.finalRitualEnabled?FINAL_RITUAL_PORTALS:FINAL_PORTALS, game.cam, t, game.player, game.reduceMotion||reduceMotion,game.finalRitualEnabled?game:null);
 Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
@@ -3279,8 +3303,8 @@ Passives.draw(ctx, game, t);
 // Network freshness is stable for this paint; asking it for each bolt also
 // touches performance.now() repeatedly, without changing synchronization.
 const peerCombatFresh=onlineCoop.hasFreshCombat(game);
-if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')for(const shot of game.coopFinalShots||[])if(shot.life>0)drawGauntletProjectile(ctx,shot,game.cam,t);
-for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t))drawProjectile(ctx, pr, game.cam, t);}
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')for(const shot of game.coopFinalShots||[])if(shot.life>0)drawGauntletProjectile(ctx,shot,game.cam,t,game.reduceMotion||reduceMotion);
+for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t,game.reduceMotion||reduceMotion))drawProjectile(ctx, pr, game.cam, t);}
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
@@ -3443,7 +3467,7 @@ if(world1CineActive(game))drawWorld1Cine(ctx,game,viewW,viewH,t,{drawActor:w1Cin
 drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
 }
 function castPower(index) {
-if(game.relicScene || world1CineActive(game))return;
+if(game.relicScene || world1CineActive(game)||game.finalHeroChoiceOpen||game.finalRitualEnabled&&game.finalGauntlet?.phase==='summoning')return;
 const p = game.player;
 if (!p) return;
 const status=powerStatus(game,index,index===3?supremeOf(p.id):null);
@@ -3517,7 +3541,8 @@ const goal = world1NextObjective(game);
 if (goal) {
   const progress = world1Snapshot(game);
   const direction = world1ObjectiveDirection(game, goal);
-  const text = (progress.sealed ? "Sello recuperado" : "Sello " + progress.done + "/" + progress.total) + " · " + direction + " · " + goal.label + ": " + goal.action;
+  const progressLabel=game.roomDef?.fusionBoss?'Corazón · Recuerdos '+(game.finalGauntlet?.found.length??game.keepsakes?.length??0)+'/10':progress.sealed?'Sello recuperado':'Pruebas '+progress.done+'/'+progress.total;
+  const text = progressLabel + " · " + direction + " · " + goal.label + ": " + goal.action;
   // A dismissed/expired toast can leave its DOM slot empty while the
   // persistent objective model is still correct. Restore the actual card
   // whenever no higher-priority message owns the slot; never overwrite a

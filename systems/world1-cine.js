@@ -38,7 +38,10 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
   const th = hero ? WORLD1_THEMES[hero] : null, name = hero ? heroDisplayName(hero) : "", seals = new Set(ctx.seals || []);
   const restored = ALL.filter((h) => seals.has(h));
   switch (id) {
-    case "keepsakeIntro": return [{dur:230,bg:'#132239',color:th.color,layout:'keeper',heroes:[hero],lit:[hero],kicker:'EL ECO GUARDÓ ALGO TUYO',title:KEEPSAKES[hero].guardian,line:KEEPSAKES[hero].name+'. El guardián ha evolucionado. Espera su apertura y recupéralo.'}];
+    case "keepsakeIntro": {
+      const fighter=ALL.includes(ctx.fighter)?ctx.fighter:hero;
+      return [{dur:230,bg:'#132239',color:th.color,layout:'keeper',heroes:[fighter],lit:[fighter],fighter,owner:hero,kicker:fighter===hero?'EL ECO GUARDÓ ALGO TUYO':heroDisplayName(fighter)+' RESPONDE A LA LLAMADA',title:KEEPSAKES[hero].guardian,line:KEEPSAKES[hero].name+'. El guardián ha evolucionado. Espera su apertura y recupéralo.'}];
+    }
     case "keepsakeRescue": return [{dur:250,bg:'#183448',color:th.color,layout:'keepsake',heroes:[hero],lit:[hero],dance:true,kicker:'ESTO NO ERA UN TESORO CUALQUIERA',title:KEEPSAKES[hero].name,line:KEEPSAKES[hero].memory}];
     case "intro": return [
       { dur: 200, bg: "#1a1030", color: "#ffd6f2", layout: "circle", heroes: ALL, lit: ALL, kicker: "Ohana · la familia", title: "Diez héroes, una canción", line: "En Ohana cada héroe guardaba una nota. Juntas sonaban a hogar." },
@@ -59,7 +62,7 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
       ];
     }
     case "bossIntro": return [
-      { dur: 170, bg: "#12081f", color: "#ffd6f2", layout: "circle", heroes: ALL, lit: ALL, kicker: "Corazón de Ohana", title: "Diez estatuas, diez sellos", line: FUSION_STORY.procession },
+      { dur: 170, bg: "#12081f", color: "#ffd6f2", layout: "circle", heroes: ALL, lit: ALL, kicker: "Corazón de Ohana", title: "Diez núcleos, diez sellos", line: FUSION_STORY.procession },
       { dur: 150, bg: "#0d0516", color: "#ff7ad0", layout: "converge", heroes: ALL, kicker: "El Eco", title: FUSION_STORY.intro[0], line: FUSION_STORY.intro[1] },
       { dur: 190, bg: "#0d0516", color: "#ff3a8a", layout: "fused", heroes: ALL, shake: true, kicker: "Jefe final del Mundo 1", title: FUSION_STORY.intro[2], line: "Tiene la voz de todos… pero ninguna suena a hogar. Esquiva sus ecos y golpéala entre ataques." }
     ];
@@ -81,7 +84,7 @@ export function playWorld1Cine(g, id, hero = null) {
     g._pendingWorld1Cine={id,hero};g.resetInput?.();return true;
   }
   g._pendingWorld1Cine=null;
-  const shots = buildWorld1Scene(id, hero, { seals: g?.world1Seals });
+  const shots = buildWorld1Scene(id, hero, { seals: g?.world1Seals,fighter:g?.finalRitualEnabled&&id==='keepsakeIntro'?g.finalGauntlet?.fighter:null });
   if (!shots.length) return false;
   if (g.reduceMotion) for (const s of shots) s.dur = Math.round(s.dur * 0.7);
   g.world1Cine = { id, hero, shots, i: 0, t: 0, total: 0, fade: 0 };
@@ -226,7 +229,7 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
    // Star/halo alpha must never leak into the two foreground actors.
    ctx.globalAlpha=fadeIn*fadeOut;ctx.shadowBlur=0;ctx.filter='none';
    const hero=c.hero,data=KEEPSAKES[hero],height=Math.min(H*.37,W*.34),foot=H*.65;
-   actor(ctx,hero,W*.34,foot,height/60,{form:4,pose:s.layout==='keepsake'?'victory':'idle'});
+   actor(ctx,s.layout==='keeper'?(s.fighter||hero):hero,W*.34,foot,height/60,{form:4,pose:s.layout==='keepsake'?'victory':'idle'});
    if(s.layout==='keeper'){
     const e=g.finalGauntlet?.guardian;if(e){ctx.save();const k=Math.min(H*.4,W*.36)/e.h;ctx.translate(W*.67,foot);ctx.scale(k,k);drawChapterBossV2(ctx,{...e,x:-e.w/2,y:-e.h,flash:0,invuln:0},{x:0,y:0},t,reduce);ctx.restore();}
     drawKeepsake(ctx,hero,W*.54,foot+14,Math.min(70,H*.12),{ghost:true});

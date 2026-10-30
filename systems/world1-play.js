@@ -3,6 +3,7 @@ import {drawStitchoPart,drawStitchoPartStation} from './stitcho-chapter-art-v607
 import {drawChispinRod} from './chispin-chapter-art-v608.js';
 import {drawCatMoonJelly,drawCatCrystalBridge} from './cat-chapter-art-v609.js';
 import {updateFinalGauntlet} from './final-gauntlet.js';
+import {finalRitualObjective} from './final-ritual.js';
 import {KEEPSAKES} from './keepsakes.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
 import {fritaVentState,noteFritaLaunch,yomiNodeState,drawFritaVent,drawYomiTerminal} from './frita-yomi-chapters.js';
@@ -118,6 +119,7 @@ export function world1Snapshot(g) {
 // Map users must never see "end of route" while a guardian or object remains.
 export function world1FinalObjective(g) {
   const p=g?.player,r=g?.roomDef;if(!p||!r?.fusionBoss||g.world1Won)return null;
+  const ritual=finalRitualObjective(g);if(ritual)return ritual;
   const v=g.finalGauntlet,e=v?.guardian,d=KEEPSAKES[v?.hero];
   if((v?.phase==='released'||v?.phase==='fight'&&e?.hp<=0)&&v.object)return {x:v.object.x,y:v.object.y,label:d?.name||'Recuerdo personal',action:'Acércate al relicario y toca el objeto para recuperarlo'};
   if(v?.phase!=='complete'&&e?.hp>0)return {x:cx(e),y:cy(e),label:d?.guardian||'Guardián evolucionado',action:'Acércate al guardián. Lee su aviso y aprovecha la apertura'};
@@ -317,7 +319,7 @@ function updateFinalRoom(g, w, p, r) {
   // Las estatuas se encienden al pasar; la arena despierta a la Quimera.
   r.statues.forEach((s, i) => { if (!w.statuesLit[i] && Math.abs(cx(p) - s.x) < 120 && g.world1Seals.includes(s.hero)) { w.statuesLit[i] = true; g.fx?.emit?.(s.x, s.y - 200, { color: WORLD1_THEMES[s.hero].color, count: g.reduceMotion ? 4 : 14, size: 4, up: 2, star: true, life: 28 }); } });
   const won = !!g.world1Won;
-  if (!won && !g.boss && cx(p) > WORLD1_ARENA.start && updateFinalGauntlet(g)) g.spawnFusionBoss?.();
+  if (!won && !g.boss && (g.finalRitualEnabled||cx(p)>WORLD1_ARENA.start) && updateFinalGauntlet(g)) g.spawnFusionBoss?.();
   if (g.boss?._fusionBoss && !won && !g.finale) {
     // Una vez dentro, la arena se cierra por detrás (como el Nido).
     if (p.x < WORLD1_ARENA.left - 120) { p.x = WORLD1_ARENA.left - 120; p.vx = Math.max(0, p.vx || 0); }
@@ -412,7 +414,7 @@ export function drawWorld1(ctx, g, cam, t) {
     ctx.beginPath();ctx.moveTo(ax - 105,ay - 140);ctx.lineTo(ax + 85,ay - 140);
     ctx.lineTo(ax + 120,ay - 112);ctx.lineTo(ax + 85,ay - 84);ctx.lineTo(ax - 105,ay - 84);ctx.closePath();ctx.fill();
     ctx.fillStyle = w.sealed ? "#101c2b" : "#fff";ctx.font = "800 13px Outfit, sans-serif";ctx.textAlign = "center";
-    ctx.fillText(w.sealed ? "SALIDA ABIERTA →" : kiloGuardianRequired(g)&&w.stations.every(s=>s.done)?"VENCE AL TAMBOR":g.roomDef?.chispinChapter&&w.stations.every(s=>s.done)?"VENCE AL TITÁN":g.roomDef?.stitchoChapter&&w.stations.every(s=>s.done)?"VENCE AL NÚCLEO":"SELLO " + world1Snapshot(g).done + "/" + world1Snapshot(g).total,ax,ay - 108);
+    ctx.fillText(w.sealed ? "SALIDA ABIERTA →" : expeditionObjective(g)?"RESONANCIAS "+(g.expedition?.done.length||0)+"/3":kiloGuardianRequired(g)&&w.stations.every(s=>s.done)?"VENCE AL TAMBOR":g.roomDef?.chispinChapter&&w.stations.every(s=>s.done)?"VENCE AL TITÁN":g.roomDef?.stitchoChapter&&w.stations.every(s=>s.done)?"VENCE AL NÚCLEO":"PRUEBAS " + world1Snapshot(g).done + "/" + world1Snapshot(g).total,ax,ay - 108);
   }
   const objective = world1NextObjective(g);
   if (objective && vis(objective.x)) {

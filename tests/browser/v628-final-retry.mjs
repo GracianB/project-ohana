@@ -1,11 +1,12 @@
 // A previously earned campaign grants access. Only the initial arena position
-// is a fixture; retries and the return walk use production keyboard controls.
+// is a fixture; retry and the new fighter choice use production controls.
 // No health, XP, boss life, seals, keepsakes or victory are injected.
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {startServer} from './server.mjs';
-const dir='test-results/v628',server=await startServer(0),browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
+import {selectFinalFighter} from './final-ritual-controls.mjs';
+const release=process.env.OHANA_RETRY_RELEASE||'628',dir=`test-results/v${release}`,server=await startServer(0),browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
 try{
  await fs.mkdir(dir,{recursive:true});
  const storage=JSON.parse(await fs.readFile(process.env.OHANA_EARNED_STORAGE||'test-results/v600/earned-campaign-storage.json','utf8'));
@@ -31,6 +32,7 @@ try{
   const keepsakes=()=>page.evaluate(async()=>(await import('/systems/keepsakes.js')).readKeepsakes());
   async function films(){
    for(let i=0;i<20;i++){
+    if(await selectFinalFighter(page,'kilo')){await tick(55);continue;}
     const s=await state();if(!s.world1Cine&&!s.pendingWorld1Cine)break;
     await page.keyboard.press('Enter');await tick(100);
    }
@@ -39,15 +41,17 @@ try{
   await films();let before=await tick(3);const savedKeepsakes=await keepsakes();
   assert.equal(before.roomId,'w1-final');assert.equal(before.world1Seals.length,10);assert.equal(savedKeepsakes.length,10);assert.ok(before.boss?.hp>0);
   assert.match(await page.locator('#world1-quimera-a11y').innerText(),/Quimera Ohana.*Fase 1/);
-  await page.evaluate(()=>{window.__retryBossPaint=[];});await page.keyboard.press('r');let retried=await tick(30);
-  assert.equal(retried.roomId,'w1-final');assert.equal(retried.boss,null);assert.ok(retried.player.x<6000,'retry returns before the arena');
+  await page.evaluate(()=>{window.__retryBossPaint=[];});await page.keyboard.press('r');
+  assert.equal(await page.locator('#world1-quimera-a11y').innerText(),'','native retry clears stale accessibility before any test step refreshes the HUD');
+  let retried=await tick(30);
+  assert.equal(retried.roomId,'w1-final');assert.equal(retried.boss,null);assert.ok(retried.player.x<7000,'retry returns before the arena and offers a new fighter choice');
   assert.deepEqual(retried.world1Seals,before.world1Seals);assert.deepEqual(await keepsakes(),savedKeepsakes);assert.equal(retried.evo,before.evo);assert.equal(retried.xp,before.xp);
   assert.equal(retried.runtimeFaults,0);assert.equal(await page.locator('#world1-quimera-a11y').innerText(),'');
   assert.deepEqual(await page.evaluate(()=>window.__retryBossPaint),[],'the old boss HUD cannot survive its room reload');
   await page.screenshot({path:`${dir}/retry-no-ghost-${width}.png`});
-  const from=retried.player.x;await page.keyboard.down('d');let fresh=retried,walkFrames=0;
-  for(let i=0;i<150&&!fresh.boss;i++){fresh=await tick(30);walkFrames+=30;assert.equal(fresh.runtimeFaults,0);}
-  await page.keyboard.up('d');assert.ok(fresh.boss,'normal movement re-enters the final arena');assert.ok(fresh.player.x>from+1000);
+  const from=retried.player.x;await page.keyboard.down('d');let fresh=retried,walkFrames=0,chosenAgain=false;
+  for(let i=0;i<150&&!fresh.boss;i++){if(await selectFinalFighter(page,'kilo'))chosenAgain=true;fresh=await tick(30);walkFrames+=30;assert.equal(fresh.runtimeFaults,0);}
+  await page.keyboard.up('d');assert.ok(fresh.boss,'a native fighter choice starts a new final encounter');assert.equal(chosenAgain,true);
   await films();fresh=await tick(3);assert.equal(fresh.boss.phase,1);assert.equal(fresh.boss.hp,fresh.boss.max);
   assert.deepEqual(fresh.world1Seals,before.world1Seals);assert.deepEqual(await keepsakes(),savedKeepsakes);
   assert.match(await page.locator('#world1-quimera-a11y').innerText(),/Quimera Ohana.*Fase 1/);
@@ -92,9 +96,9 @@ try{
    naturalDeath={deathEvents,minHp,frames,restarted:true,restartMode,checkpoint,restartX,staleBossHUD:false};
    await page.screenshot({path:`${dir}/natural-retry-${width}.png`});
   }
-  reports.push({width,height,retry:'native keyboard R',initialArenaPositionFixture:true,oldBossRemoved:true,staleCanvasHUD:false,staleAccessibleHUD:false,sealsAndKeepsakesPreserved:true,evolutionAndExperiencePreservedOnRetry:true,walkBack:{from,to:fresh.player.x,frames:walkFrames,freshBossPhase:fresh.boss.phase},naturalDeath});
+  reports.push({width,height,retry:'native keyboard R',initialArenaPositionFixture:true,oldBossRemoved:true,staleCanvasHUD:false,staleAccessibleHUD:false,sealsAndKeepsakesPreserved:true,evolutionAndExperiencePreservedOnRetry:true,arenaReentry:{method:'native fighter choice and ritual invocation',from,to:fresh.player.x,frames:walkFrames,freshBossPhase:fresh.boss.phase},naturalDeath});
   await context.close();
  }
- assert.deepEqual(errors,[]);await fs.writeFile(`${dir}/final-retry.json`,JSON.stringify({reports,errors,scope:'Earned campaign backup and one initial arena position fixture; keyboard retry, real movement and optional ordinary enemy-caused death, no resource or victory grants.'},null,2));
- console.log('PASS final retry: R clears the old Quimera HUD, keeps earned progress and ordinary movement starts a fresh fight at desktop/mobile; ordinary death retry also checked on desktop');
+ assert.deepEqual(errors,[]);await fs.writeFile(`${dir}/final-retry.json`,JSON.stringify({reports,errors,scope:'Earned campaign backup and one initial arena position fixture; keyboard retry, native fighter choice and optional ordinary enemy-caused death, no resource or victory grants.'},null,2));
+ console.log('PASS final retry: R clears the old Quimera HUD synchronously, keeps earned progress and native fighter choice starts a fresh fight at desktop/mobile; ordinary death retry also checked on desktop');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
