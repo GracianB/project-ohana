@@ -32,4 +32,4 @@ function draw(){requestAnimationFrame(draw);frame++;const rect=canvas.getBoundin
  for(const p of v.shots)drawGauntletProjectile(c,{...p,gauntlet:p.gauntlet||'orb',gauntletHero:p.hero},cam,frame);
  if(performance.now()-lastEventAt>2600)$('#announcement').textContent='';
 }
-if(!['localhost','127.0.0.1'].includes(location.hostname)){$('#connection').textContent='Multijugador en preparación. Puedes jugar la campaña individual.';}else if(!session){$('#connection').textContent='Entra en una sala desde el vestíbulo.';}else{void pump();}requestAnimationFrame(draw);
+if(!(['localhost','127.0.0.1'].includes(location.hostname)||/^(?:[a-z0-9-]+--)?project-ohana-multiplayer\.netlify\.app$/i.test(location.hostname))){$('#connection').textContent='Multijugador en preparación. Puedes jugar la campaña individual.';}else if(!session){$('#connection').textContent='Entra en una sala desde el vestíbulo.';}else{void pump();}requestAnimationFrame(draw);

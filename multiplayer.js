@@ -8,7 +8,8 @@ import { CAMPAIGN } from "./multiplayer/mission.js";
 
 // Until the external signaling/Netlify budget is restored, public clients must
 // never create rooms or poll paid endpoints. Loopback is kept for local tests.
-const LIVE_COOP_PAUSED = !['localhost','127.0.0.1'].includes(location.hostname);
+const LIVE_COOP_HOST = /^(?:[a-z0-9-]+--)?project-ohana-multiplayer\.netlify\.app$/i;
+const LIVE_COOP_PAUSED = !(['localhost','127.0.0.1'].includes(location.hostname) || LIVE_COOP_HOST.test(location.hostname));
 const endpoint = "/.netlify/functions/game";
 const ARENA = { left: 48, right: 1232, top: 450, floor: 572, exit: 1125 };
 const MAX_QUEUED_ACTIONS = 8;
