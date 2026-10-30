@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OHANA · Portada</title>
+<link rel="stylesheet" href="./fonts.css">
+<style>
+  /* Composición de portada: ?w=1280&h=720 (o 1200x630). Héroes dibujados con el rig real de characters/draw.js. */
+  *{box-sizing:border-box;margin:0}
+  html,body{width:var(--w);height:var(--h);overflow:hidden;background:#071226}
+  #stage{position:relative;width:var(--w);height:var(--h);overflow:hidden;font-family:Outfit,system-ui,sans-serif;color:#fff}
+  #bg{position:absolute;inset:0;background:url(./assets/worlds/beach-bg.jpg) center 62%/cover;filter:saturate(1.15)}
+  #shade{position:absolute;inset:0;background:
+    linear-gradient(90deg,rgba(5,14,34,.94) 0%,rgba(5,14,34,.78) 34%,rgba(5,14,34,.18) 62%,rgba(5,14,34,0) 80%),
+    linear-gradient(0deg,rgba(5,14,34,.85) 0%,rgba(5,14,34,0) 34%)}
+  /* queen */ #queen{position:absolute;right:-2%;top:-6%;height:78%;opacity:.28;filter:drop-shadow(0 0 30px #ff4d6d) saturate(1.3);mix-blend-mode:screen}
+  canvas{position:absolute;inset:0}
+  .copy{position:absolute;left:calc(var(--u)*56px);top:calc(var(--u)*58px);width:calc(var(--u)*560px)}
+  .eyebrow{font:700 calc(var(--u)*17px)/1 Outfit;letter-spacing:.22em;color:#8ff0c4;text-transform:uppercase}
+  h1{font:700 calc(var(--u)*104px)/.92 Fredoka,system-ui;letter-spacing:-.01em;margin-top:calc(var(--u)*14px);text-shadow:0 6px 28px rgba(0,0,0,.45)}
+  h1 b{color:#8ff0c4;font-weight:700;display:block}
+  .sub{font:600 calc(var(--u)*29px)/1.2 Fredoka;margin-top:calc(var(--u)*18px)}
+  .sub2{font:500 calc(var(--u)*21px)/1.3 Outfit;color:#c6d7ee;margin-top:calc(var(--u)*6px)}
+  .room{position:absolute;left:calc(var(--u)*56px);bottom:calc(var(--u)*52px);display:flex;align-items:center;gap:calc(var(--u)*14px);
+    padding:calc(var(--u)*14px) calc(var(--u)*20px);border-radius:calc(var(--u)*20px);background:rgba(8,22,48,.82);border:2px solid rgba(143,240,196,.55);box-shadow:0 10px 40px rgba(0,0,0,.4)}
+  .room small{font:700 calc(var(--u)*13px)/1.2 Outfit;letter-spacing:.18em;color:#8ff0c4;text-transform:uppercase;display:block}
+  .room .lbl{font:500 calc(var(--u)*15px)/1.3 Outfit;color:#c6d7ee}
+  .chips{display:flex;gap:calc(var(--u)*7px)}
+  .chips span{width:calc(var(--u)*44px);height:calc(var(--u)*54px);display:grid;place-items:center;border-radius:calc(var(--u)*10px);
+    background:#0f2a52;border:2px solid rgba(255,255,255,.18);font:700 calc(var(--u)*30px)/1 Fredoka;color:#fff}
+  .chips span:nth-child(-n+3){border-color:#8ff0c4}
+  .badge{position:absolute;right:calc(var(--u)*40px);top:calc(var(--u)*38px);padding:calc(var(--u)*10px) calc(var(--u)*18px);border-radius:999px;
+    background:#8ff0c4;color:#06213a;font:700 calc(var(--u)*18px)/1 Fredoka;letter-spacing:.04em;box-shadow:0 6px 24px rgba(143,240,196,.35)}
+  .badge i{display:inline-block;width:calc(var(--u)*11px);height:calc(var(--u)*11px);border-radius:50%;background:#14a36b;margin-right:calc(var(--u)*8px);box-shadow:0 0 0 4px rgba(20,163,107,.25)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"></div>
+    <div id="shade"></div>
+  <canvas id="c"></canvas>
+  <div class="copy">
+    <div class="eyebrow">Isla Hoku · Online co-op &amp; versus</div>
+    <h1>Project<b>OHANA</b></h1>
+    <div class="sub">Isla Hoku · 2 jugadores online</div>
+    <div class="sub2">2-player online · one room code · any phone or laptop</div>
+  </div>
+  <div class="room">
+    <div><small>Sala · Room</small><div class="lbl">Comparte el código<br>Share the code</div></div>
+    <div class="chips"><span>H</span><span>O</span><span>K</span><span>U</span><span>2</span><span>P</span></div>
+  </div>
+  <div class="badge"><i></i>2 jugadores · Conectados</div>
+</div>
+<script type="module">
+  import { ROSTER } from "./characters/roster.js";
+  import { drawCharacter } from "./characters/draw.js";
+  const q=new URLSearchParams(location.search);
+  const W=+(q.get("w")||1280), H=+(q.get("h")||720), U=Math.min(W/1280,H/720);
+  const root=document.documentElement.style; root.setProperty("--w",W+"px"); root.setProperty("--h",H+"px"); root.setProperty("--u",U);
+  const c=document.getElementById("c"); c.width=W; c.height=H; const ctx=c.getContext("2d");
+  const T=+(q.get("t")||40);
+  function mk(id,evo,st,facing){
+    const r=ROSTER.find(x=>x.id===id), f=r.forms[evo];
+    const p={id,evo,color:f.color,w:f.w,h:f.h,vx:0,vy:0,grounded:true,facing,melee:0,invuln:0,speed:f.speed};
+    p._rig={sway:0,swayV:0,bounce:0,bounceV:0,blinkAt:999,blinkT:0,idleT:0,flourishT:-1,flourishN:0,atkMax:0,phase:0,land:0,wasAir:false,lastT:T};
+    if(st==="attack"){p.melee=5;p._rig.atkMax=12;}
+    if(st==="victory"){p._poseOverride="victory";p._evoT=.8;}
+    if(st==="jump"){p.grounded=false;p.vy=-9;p._rig.bounce=-.6;}
+    if(st==="flourish"){p._rig.flourishT=.45;}
+    if(st.startsWith("run")){p.vx=f.speed;p._rig.phase=(+st[3])*Math.PI/2-.3;p._rig.sway=-.6;}
+    return {p,f};
+  }
+  function hero(id,evo,st,cx,gy,scale,facing=1){
+    const {p,f}=mk(id,evo,st,facing);
+    ctx.save(); ctx.translate(cx,gy); ctx.scale(scale,scale);
+    // sombra
+    ctx.fillStyle="rgba(0,0,0,.28)"; ctx.beginPath(); ctx.ellipse(0,0,f.w*.9,4,0,0,Math.PI*2); ctx.fill();
+    p.x=-f.w/2; p.y=-f.h; drawCharacter(ctx,p,{x:0,y:0},T); ctx.restore();
+  }
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    const gy=H*.84, s=U*(+(q.get("s")||2.7));
+    // elenco en segundo plano
+    const crew=[["dino",1,"idle",1,.545],["cat",1,"idle",-1,.765],["dragon",1,"idle",-1,.955]];
+    crew.forEach(([id,evo,st,fc,x])=>{ try{hero(id,evo,st,W*x,gy-H*.15,U*1.3,fc);}catch(e){console.log(id,e.message);} });
+    hero("kilo",3,"victory",W*.66,gy,s,1);
+    hero("stitcho",3,"attack",W*.86,gy,s,-1);
+    document.body.dataset.ready="1";
+  }
+  document.fonts.ready.then(()=>setTimeout(frame,250));
+</script>
+</body>
+</html>
