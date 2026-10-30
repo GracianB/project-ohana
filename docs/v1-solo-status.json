@@ -3,9 +3,9 @@
   "updated_on": "2026-10-30",
   "release": "ohana-630",
   "repository": "GracianB/project-ohana",
-  "published": false,
+  "published": true,
   "v1_ready": false,
-  "next_task": "publish_and_verify_V630_ritual_and_fighter_choice",
+  "next_task": "user_play_V630_objects_ritual_and_fighter_choice",
   "validation": "docs/V630-VALIDATION.json",
   "publication": "docs/V630-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
@@ -13,5 +13,6 @@
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
-  "previous_verified_campaign": "docs/V623-VALIDATION.json"
+  "previous_verified_campaign": "docs/V623-VALIDATION.json",
+  "source_commit": "7b5d197df92a68095ae291f708fce517ae321654"
 }

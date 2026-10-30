@@ -1,6 +1,185 @@
 {
   "release": "ohana-630",
-  "published": false,
-  "status": "local_validation_passed_pending_integration_and_public_verification",
-  "local_validation": "docs/V630-VALIDATION.json"
+  "published": true,
+  "site": "https://gracianb.github.io/project-ohana/?release=630",
+  "verified_at": "2026-10-30T14:42:56.471166+00:00",
+  "feature_branch": "feat/v630-ritual-and-relics",
+  "feature_commit": "9e3c47d267caa710b96eb2c3bbaa86a1843eef9a",
+  "merged_source_commit": "7b5d197df92a68095ae291f708fce517ae321654",
+  "integration": "Ordinary non-fast-forward merge authorized by user. Merged source tree verified identical to the tested feature tree.",
+  "pull_request": {
+    "created": false,
+    "reason": "gh pr create returned GitHub GraphQL Forbidden. No PR number is claimed."
+  },
+  "pages": {
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/41073641524",
+    "result": "Success",
+    "workflow": "pages",
+    "duration": "1m 8s",
+    "source_commit": "7b5d197df92a68095ae291f708fce517ae321654",
+    "checks": "Unit tests and offline release integrity required by the successful Pages deployment."
+  },
+  "public_source_verification": {
+    "checked": "2026-10-30T14:41:55.053767+00:00",
+    "site": "https://gracianb.github.io/project-ohana/",
+    "files": [
+      {
+        "path": "game.js",
+        "expected": "64d112c4df920022896542262d4088537ea5e397",
+        "actual": "64d112c4df920022896542262d4088537ea5e397",
+        "match": true
+      },
+      {
+        "path": "index.html",
+        "expected": "ba86d5e75d5529e35c22e8534ba0d0b80b4117b7",
+        "actual": "ba86d5e75d5529e35c22e8534ba0d0b80b4117b7",
+        "match": true
+      },
+      {
+        "path": "sw.js",
+        "expected": "ed8af854e513f79e56cc7671c88d838c948edca4",
+        "actual": "ed8af854e513f79e56cc7671c88d838c948edca4",
+        "match": true
+      },
+      {
+        "path": "final-ritual.css",
+        "expected": "cb3fa260f55cd948ce875311f33f0adffcdfb16a",
+        "actual": "cb3fa260f55cd948ce875311f33f0adffcdfb16a",
+        "match": true
+      },
+      {
+        "path": "systems/chapter-expedition-v2.js",
+        "expected": "029124d1032e429df2fdab6e791f19d54003905e",
+        "actual": "029124d1032e429df2fdab6e791f19d54003905e",
+        "match": true
+      },
+      {
+        "path": "systems/expedition-art-v630.js",
+        "expected": "96ed88a7a897c8a90d84e7e31e98e99b62aec340",
+        "actual": "96ed88a7a897c8a90d84e7e31e98e99b62aec340",
+        "match": true
+      },
+      {
+        "path": "systems/final-ritual.js",
+        "expected": "c5c1f7f38aea3261834fded45c620b2d6cf1a533",
+        "actual": "c5c1f7f38aea3261834fded45c620b2d6cf1a533",
+        "match": true
+      },
+      {
+        "path": "systems/final-ritual-art.js",
+        "expected": "cc8d6924daadfcb6ce5b8bbe3ea5cd6a1143867a",
+        "actual": "cc8d6924daadfcb6ce5b8bbe3ea5cd6a1143867a",
+        "match": true
+      },
+      {
+        "path": "systems/final-hero-choice.js",
+        "expected": "feea8845ef0c866e2d46350bcd54fe795a2ca698",
+        "actual": "feea8845ef0c866e2d46350bcd54fe795a2ca698",
+        "match": true
+      },
+      {
+        "path": "systems/final-gauntlet.js",
+        "expected": "73f2708315ae224a9cd72fc77dfd8d477eda16db",
+        "actual": "73f2708315ae224a9cd72fc77dfd8d477eda16db",
+        "match": true
+      },
+      {
+        "path": "systems/final-portal-mirrors.js",
+        "expected": "cc2edd3946079121e2bc60395570a8a35a817528",
+        "actual": "cc2edd3946079121e2bc60395570a8a35a817528",
+        "match": true
+      },
+      {
+        "path": "systems/world1-play.js",
+        "expected": "45ed3b6bc0197222dd4a341e552e6689e68e6faa",
+        "actual": "45ed3b6bc0197222dd4a341e552e6689e68e6faa",
+        "match": true
+      },
+      {
+        "path": "systems/chapter-boss-art-v2.js",
+        "expected": "1367233553735fae35dd532b642bf7357bb3f628",
+        "actual": "1367233553735fae35dd532b642bf7357bb3f628",
+        "match": true
+      },
+      {
+        "path": "systems/field-guide.js",
+        "expected": "e4e41e0fd91cf43de5c5e709dd8a77cea76d9fcb",
+        "actual": "e4e41e0fd91cf43de5c5e709dd8a77cea76d9fcb",
+        "match": true
+      },
+      {
+        "path": "systems/world1-cine.js",
+        "expected": "735b9717b9d6a7c3dcc6bc744d65ab9671675ad3",
+        "actual": "735b9717b9d6a7c3dcc6bc744d65ab9671675ad3",
+        "match": true
+      },
+      {
+        "path": "systems/world1-story.js",
+        "expected": "e1324becee767e794b86580bc3b5534c7a647e87",
+        "actual": "e1324becee767e794b86580bc3b5534c7a647e87",
+        "match": true
+      }
+    ],
+    "all_match": true
+  },
+  "public_native_ritual": {
+    "result": "pass",
+    "command": "OHANA_TEST_BASE_URL=https://gracianb.github.io/project-ohana/ npm run test:browser:ritual-native",
+    "environment": "public deployment",
+    "rows": [
+      {
+        "width": 1280,
+        "height": 900,
+        "noTestHooks": true,
+        "nativeMenuAndHeartBook": true,
+        "heroOnEntry": "yomi",
+        "physicalKeyboardMovement": true,
+        "earnedFloorResonances": [
+          0,
+          1,
+          2
+        ],
+        "deliberateChoice": "native pointer",
+        "fighter": "dino",
+        "guardian": "Tambor de la marea",
+        "noOpeningGestureConfirmation": true,
+        "noCinematicOverlap": true,
+        "errors": [],
+        "backend": []
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "noTestHooks": true,
+        "nativeMenuAndHeartBook": true,
+        "heroOnEntry": "yomi",
+        "physicalKeyboardMovement": true,
+        "earnedFloorResonances": [
+          0,
+          1,
+          2
+        ],
+        "deliberateChoice": "native touch",
+        "fighter": "dino",
+        "guardian": "Tambor de la marea",
+        "noOpeningGestureConfirmation": true,
+        "noCinematicOverlap": true,
+        "errors": [],
+        "backend": []
+      }
+    ],
+    "scope": "Native first final ritual replay from earned chapter seals with prior final rescues removed. Ordinary keyboard movement and native menu/picker/touch E controls; no hooks, position, health, XP or victory grants.",
+    "artifact": "test-results/v630/public-ritual-native.json",
+    "scope_note": "Isolated replay of the first ritual from earned chapter seals. Real welcome, final selection, Heart book, game entry, keyboard walking, floor pickups, cancel/E, native pointer or touch choice, invocation and guardian combat entry. No E2E hooks or resource grants; not a fresh full campaign."
+  },
+  "deployment_followup": {
+    "initial_run": "https://github.com/GracianB/project-ohana/actions/runs/41073101349",
+    "initial_failure": "Release ledger omitted the exact ohana-630 marker after final documentation rewrite.",
+    "fix": "Restored the marker, passed all 1825 tests on Node 22.23.4, then deployed the corrected merge."
+  },
+  "local_validation": "docs/V630-VALIDATION.json",
+  "human_art_and_difficulty_acceptance": "pending_user_play",
+  "remote_multiplayer_backend": "paused",
+  "stable_v1_tag_created": false,
+  "limits": "Ten actual guardian duels and four-phase Quimera/ending checks are local earned-save replays. Public verification covers the first ritual on desktop/mobile. Physical gamepad and remote multiplayer are not claimed."
 }
