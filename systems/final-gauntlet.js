@@ -5,9 +5,10 @@ import {KEEPSAKES,KEEPSAKE_ORDER,readKeepsakes,mergeKeepsakes,persistKeepsakes,d
 import {WORLD1_ARENA,WORLD1_FLOOR} from './world1-rooms.js';
 import {readCombatDifficulty} from './combat-difficulty.js';
 import {guardianRhythm,guardianTechnique} from './guardian-techniques.js';
+import {updateSoloFinalRitual} from './final-ritual.js';
 const TAU=Math.PI*2,A=WORLD1_ARENA,F=WORLD1_FLOOR,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const tips={tide:'Salta las ondas. En el aire, esquiva la nota que apunta a tu posición.',crossfire:'La descarga apunta una vez: cambia de altura después del aviso.',lightning:'Las columnas marcan dónde caerá el rayo. Busca el hueco y usa tu rapidez.',moons:'Las lunas se abren en abanico. Pasa entre ellas y acércate al descansar.',charge:'Provoca la embestida y sal de su trayectoria. Castiga la frenada.',fire:'El suelo arde, pero las brasas también buscan el cielo. Cambia de altura.',quake:'Despega cuando caiga el coloso. Sus placas se abren después del aterrizaje.',geysers:'Lee las bocas del suelo. Salta hacia el espacio libre.',discs:'Las ruedas pasan a dos alturas. Salta la baja y deja pasar la alta.',prism:'La línea recuerda tu altura al avisar. Cambia de altura antes del destello.'};
-export function gauntletReady(g){return (g.finalGauntlet?.found||mergeKeepsakes(g.keepsakes,readKeepsakes(g.keepsakeStorage))).length===10;}
+export function gauntletReady(g){return (g.finalGauntlet?.found||mergeKeepsakes(g.keepsakes,readKeepsakes(g.keepsakeStorage))).length===10&&(!g.finalRitualEnabled||g.finalGauntlet?.phase==='complete');}
 function makeGuardian(hero,g){
  const d=KEEPSAKES[hero],rhythm=guardianRhythm(readCombatDifficulty(g?.roomId)),hp=Math.round((hero==='dino'?940:hero==='cuerno'?740:820)*rhythm.health);
  return {x:9270,y:F-224,w:184,h:224,hp,max:hp,kind:'keeper',roomId:'w1-final',miniBoss:true,gauntletBoss:hero,evolved:true,
@@ -15,16 +16,23 @@ function makeGuardian(hero,g){
  _encounterSaveId:'keepsake-'+hero,[d.key]:{phase:'idle',clock:65,aim:-1,turn:0,attack:0,tick:0,target:null}};
 }
 function beginDuel(g,v){
- const hero=KEEPSAKE_ORDER.find(h=>!v.found.includes(h));if(!hero){v.phase='complete';g.onGauntletHero?.('kilo');return;}
- v.hero=hero;v.phase='intro';v.guardian=makeGuardian(hero,g);v.object={x:9360,y:F-15};g.enemies=(g.enemies||[]).filter(e=>!e.gauntletBoss);g.enemies.push(v.guardian);g.projectiles=[];g.onGauntletHero?.(hero);const requested=g.playWorld1Cine?.('keepsakeIntro',hero);
+ const hero=KEEPSAKE_ORDER.find(h=>!v.found.includes(h));if(!hero){v.phase='complete';if(!g.finalRitualEnabled)g.onGauntletHero?.('kilo');return;}
+ v.hero=hero;v.phase='intro';v.guardian=makeGuardian(hero,g);v.object={x:9360,y:F-15};g.enemies=(g.enemies||[]).filter(e=>!e.gauntletBoss);g.enemies.push(v.guardian);g.projectiles=[];g.onGauntletHero?.(g.finalRitualEnabled?v.fighter:hero);const requested=g.playWorld1Cine?.('keepsakeIntro',hero);
  if(!requested&&!g.world1Cine)v.phase='fight';
 }
 export function updateFinalGauntlet(g){
  if(g.roomId!=='w1-final'||!g.player||g.player.dead||g.world1Won||g.onlineAdventure&&g.coopAuthority===false)return false;
  if(!KEEPSAKE_ORDER.every(h=>g.world1Seals?.includes(h)))return false;
  let v=g.finalGauntlet;if(!v)v=g.finalGauntlet={found:mergeKeepsakes(g.keepsakes,readKeepsakes(g.keepsakeStorage)),phase:'dormant',hero:null,guardian:null,object:null,tick:0};
- if(v.found.length===10){if(v.phase!=='complete'){v.phase='complete';g.onGauntletHero?.('kilo');}return true;}
- v.tick++;if(v.phase==='dormant')beginDuel(g,v);
+ v.tick++;
+ if(g.finalRitualEnabled){
+  const ritual=updateSoloFinalRitual(g,v);
+  if(ritual==='complete')return true;
+  if(ritual==='duel')beginDuel(g,v);
+ }else{
+  if(v.found.length===10){if(v.phase!=='complete'){v.phase='complete';g.onGauntletHero?.('kilo');}return true;}
+  if(v.phase==='dormant')beginDuel(g,v);
+ }
  const p=g.player;if(v.phase==='fight'){
   p.x=clamp(p.x,A.left+550,A.right-550-p.w);
   if(v.guardian?.hp<=0){v.phase='released';g.projectiles=(g.projectiles||[]).filter(pr=>!pr.gauntlet);v.guardian.telegraph=false;g.onGauntletBeat?.('released',v.hero);}
@@ -102,7 +110,7 @@ export function updateGauntletGuardian(e,g,hurt){
  e.telegraph=b.phase==='warn';e.damageTakenScale=b.phase==='rest'&&e.damageWindowRemaining>0?1:0;
  return true;
 }
-export function gauntletSnapshot(g){const v=g.finalGauntlet;if(!v)return null;const e=v.guardian,b=e?e[KEEPSAKES[v.hero]?.key]:null;return {phase:v.phase,hero:v.hero,found:[...v.found],object:v.object?{...v.object}:null,savePending:!!g.keepsakeSavePending,guardian:e?{x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,phase:b?.phase,clock:b?.clock,target:b?.target?{...b.target}:null,marks:b?.marks?[...b.marks]:[],pattern:KEEPSAKES[v.hero].pattern,technique:b?.technique?{...b.technique}:null,beamYs:b?.beamYs?[...b.beamYs]:[],chargePath:b?.chargePath?{...b.chargePath}:null,columnWidth:b?.columnWidth,windowRemaining:e.damageWindowRemaining}:null};}
+export function gauntletSnapshot(g){const v=g.finalGauntlet;if(!v)return null;const e=v.guardian,b=e?e[KEEPSAKES[v.hero]?.key]:null;return {phase:v.phase,hero:v.hero,fighter:v.fighter||null,resonances:v.resonances?Object.fromEntries(Object.entries(v.resonances).map(([hero,items])=>[hero,[...items]])):null,summonTicks:v.summonTicks||0,found:[...v.found],object:v.object?{...v.object}:null,savePending:!!g.keepsakeSavePending,guardian:e?{x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,phase:b?.phase,clock:b?.clock,target:b?.target?{...b.target}:null,marks:b?.marks?[...b.marks]:[],pattern:KEEPSAKES[v.hero].pattern,technique:b?.technique?{...b.technique}:null,beamYs:b?.beamYs?[...b.beamYs]:[],chargePath:b?.chargePath?{...b.chargePath}:null,columnWidth:b?.columnWidth,windowRemaining:e.damageWindowRemaining}:null};}
 // World geometry follows the exact camera transform used by bodies and shots.
 export function drawGauntletWorld(c,g,cam,t=0){
  const v=g.finalGauntlet;if(!v||v.phase==='complete'||g.world1Cine||g._pendingWorld1Cine)return;const d=KEEPSAKES[v.hero];if(!d)return;
@@ -157,21 +165,46 @@ export function gauntletAccessibleText(g){
 }
 // Kept for art fixtures and integrations that draw without a separate camera.
 export function drawFinalGauntlet(c,g,cam,W,H,t=0){drawGauntletWorld(c,g,cam,t);drawGauntletHud(c,g,W,H);}
-export function drawGauntletProjectile(c,pr,cam,t=0){if(!pr.gauntlet)return false;const x=pr.x-cam.x,y=pr.y-cam.y;c.save();c.fillStyle=pr.color;c.strokeStyle='#fff0c7';c.lineWidth=2;
+export function drawGauntletProjectile(c,pr,cam,t=0,reduced=false){
+ if(!pr.gauntlet)return false;const x=pr.x-cam.x,y=pr.y-cam.y,clock=reduced?0:t;
+ c.save();c.fillStyle=pr.color;c.strokeStyle='#fff0c7';c.lineWidth=2;c.lineJoin='round';c.lineCap='round';
  if(['prism','lightning','geysers'].includes(pr.gauntlet)){
-  // A stable dark edge identifies the exact hit band; the translucent interior
-  // leaves the hero visible. Lightning, crystal and steam have distinct bodies.
-  c.fillStyle='#152b40';c.fillRect(x-1,y-1,pr.w+2,pr.h+2);
-  c.globalAlpha=.82;c.fillStyle=pr.color;c.fillRect(x,y,pr.w,pr.h);
-  c.globalAlpha=1;c.strokeStyle='#fff3cd';c.lineWidth=2;c.beginPath();
-  if(pr.gauntlet==='lightning'){c.moveTo(x+pr.w*.7,y);for(let i=1;i<=8;i++)c.lineTo(x+pr.w*(i%2?.25:.7),y+pr.h*i/8);}
-  else if(pr.gauntlet==='prism'){c.moveTo(x+pr.w/2,y);c.lineTo(x+pr.w*.8,y+pr.h*.5);c.lineTo(x+pr.w/2,y+pr.h);c.lineTo(x+pr.w*.2,y+pr.h*.5);c.closePath();}
-  else{c.moveTo(x+pr.w*.3,y+pr.h);c.bezierCurveTo(x,y+pr.h*.65,x+pr.w,y+pr.h*.35,x+pr.w*.5,y);}
-  c.stroke();
+  // The faint enclosure still marks the complete authoritative danger band.
+  // Material, branching and volume replace a solid yellow rectangle.
+  c.fillStyle='#102b3ce0';c.fillRect(x,y,pr.w,pr.h);
+  const gradient=c.createLinearGradient(x,y,x+(pr.gauntlet==='prism'?0:pr.w),y+(pr.gauntlet==='prism'?pr.h:0));
+  gradient.addColorStop(0,pr.color+'44');gradient.addColorStop(.46,pr.color+'bb');gradient.addColorStop(.55,'#fff6d6dd');gradient.addColorStop(1,pr.color+'44');c.fillStyle=gradient;c.fillRect(x,y,pr.w,pr.h);
+  c.beginPath();c.rect(x,y,pr.w,pr.h);c.clip();
+  if(pr.gauntlet==='lightning'){
+   for(let branch=0;branch<3;branch++){
+    c.strokeStyle=branch===1?'#fff8df':pr.color;c.lineWidth=branch===1?3.2:1.8;c.beginPath();
+    for(let k=0;k<=12;k++){const xx=x+pr.w*(.2+branch*.28)+Math.sin(k*2.3+clock*.16+branch)*pr.w*.13,yy=y+k*pr.h/12;k?c.lineTo(xx,yy):c.moveTo(xx,yy);}c.stroke();
+   }
+  }else if(pr.gauntlet==='prism'){
+   for(let k=0;k<Math.min(40,Math.ceil(pr.w/85));k++){
+    const xx=x+28+k*85,half=pr.h*.43;c.beginPath();c.moveTo(xx,y+2);c.lineTo(xx+24,y+pr.h/2);c.lineTo(xx,y+pr.h-2);c.lineTo(xx-24,y+pr.h/2);c.closePath();c.fillStyle=k%2?pr.color+'aa':'#f0ffe88c';c.fill();
+    c.strokeStyle='#fff8e0';c.lineWidth=1;c.beginPath();c.moveTo(xx-half,y+pr.h/2);c.lineTo(xx+half,y+pr.h/2);c.stroke();
+   }
+  }else{
+   for(let k=0;k<6;k++){
+    const u=reduced?(k+.5)/6:(clock*.015+k/6)%1,yy=y+pr.h*(1-u),radius=pr.w*(.21+u*.12);
+    c.beginPath();c.ellipse(x+pr.w*(.5+Math.sin(u*8+k)*.12),yy,radius,pr.h*.09,Math.sin(u*5)*.3,0,TAU);c.fillStyle=k%2?'#fff1c8aa':pr.color+'bb';c.fill();c.strokeStyle='#fff7dd99';c.lineWidth=1.2;c.stroke();
+   }
+  }
+ }else if(pr.gauntlet==='orb'&&pr.gauntletHero){drawGuardianNote(c,pr,x,y,clock);}
+ else if(pr.gauntlet==='wave'){
+  c.translate(x+pr.w/2,y+pr.h/2);c.scale((pr.vx<0?-1:1)*pr.w/2,pr.h/2);c.lineWidth=.1;
+  c.beginPath();c.moveTo(-.95,.8);c.bezierCurveTo(-.4,.56,-.5,-.8,.12,-.88);c.bezierCurveTo(.86,-1,.95,-.22,.45,.02);c.quadraticCurveTo(.59,-.54,.19,-.52);c.bezierCurveTo(-.1,-.5,.07,.58,.97,.77);c.closePath();c.fillStyle=pr.color;c.fill();c.strokeStyle='#fff5d4';c.stroke();
+  c.beginPath();c.moveTo(-.73,.65);c.bezierCurveTo(-.2,.37,-.2,-.62,.28,-.65);c.strokeStyle='#fff9e5';c.lineWidth=.13;c.stroke();
+ }else{
+  c.translate(x+pr.w/2,y+pr.h/2);c.scale(pr.w/2,pr.h/2);c.beginPath();c.ellipse(0,0,.96,.96,0,0,TAU);c.fillStyle=pr.gauntlet==='disc'?'#c88c53':pr.color;c.fill();c.strokeStyle='#fff0c7';c.lineWidth=.1;c.stroke();
+  if(pr.gauntlet==='disc'){
+   c.beginPath();c.ellipse(0,0,.77,.77,0,0,TAU);c.fillStyle='#f4d187';c.fill();c.save();c.rotate(clock*.14);
+   for(let k=0;k<4;k++){c.beginPath();c.ellipse(Math.cos(k*TAU/4)*.43,Math.sin(k*TAU/4)*.43,.16,.16,0,0,TAU);c.fillStyle='#b85c58';c.fill();c.beginPath();c.ellipse(Math.cos(k*TAU/4+.6)*.57,Math.sin(k*TAU/4+.6)*.57,.09,.13,.4,0,TAU);c.fillStyle='#779864';c.fill();}c.restore();
+  }
  }
- else if(pr.gauntlet==='orb'&&pr.gauntletHero){drawGuardianNote(c,pr,x,y,t);}
- else{c.translate(x+pr.w/2,y+pr.h/2);if(pr.gauntlet==='disc')c.rotate(t*.14);c.beginPath();c.ellipse(0,0,pr.w/2,pr.h/2,0,0,TAU);c.fill();c.stroke();if(pr.gauntlet==='disc'){c.fillStyle='#a85f66';for(let k=0;k<3;k++){c.beginPath();c.arc(Math.cos(k*TAU/3)*10,Math.sin(k*TAU/3)*7,4,0,TAU);c.fill();}}}
- c.restore();return true;}
+ c.restore();return true;
+}
 
 // Compact, readable shot anatomy stays within its physical projectile box.
 function drawGuardianNote(c,pr,x,y,t){
@@ -188,7 +221,7 @@ function drawGuardianNote(c,pr,x,y,t){
  }else if(hero==='cuerno'){
   c.rotate(t*.035);const colors=['#edaccb','#a8d9b8','#f8df9c','#bac9ed'];for(let i=0;i<4;i++){c.fillStyle=colors[i];c.beginPath();c.moveTo(0,0);c.lineTo(Math.cos(i*TAU/4)*.94,Math.sin(i*TAU/4)*.94);c.lineTo(Math.cos((i+1)*TAU/4)*.94,Math.sin((i+1)*TAU/4)*.94);c.closePath();c.fill();}c.beginPath();c.moveTo(0,-.94);c.lineTo(.94,0);c.lineTo(0,.94);c.lineTo(-.94,0);c.closePath();c.stroke();
  }else if(hero==='yomi'){
-  c.rotate(Math.atan2(pr.vy,pr.vx));c.beginPath();c.moveTo(.95,0);c.lineTo(-.75,-.8);c.lineTo(-.35,0);c.lineTo(-.75,.8);c.closePath();c.fill();c.stroke();c.beginPath();c.moveTo(-.35,0);c.lineTo(.95,0);c.stroke();
+  c.rotate(Math.sin(t*.06)*.12);c.beginPath();c.moveTo(-.85,-.65);c.quadraticCurveTo(-.25,-.95,0,-.55);c.quadraticCurveTo(.3,-.95,.85,-.65);c.lineTo(.85,.7);c.quadraticCurveTo(.25,.4,0,.8);c.quadraticCurveTo(-.3,.4,-.85,.7);c.closePath();c.fill();c.stroke();c.strokeStyle='#fff6d3';c.beginPath();c.moveTo(0,-.55);c.lineTo(0,.75);c.moveTo(-.65,-.25);c.lineTo(-.2,-.2);c.moveTo(.2,-.2);c.lineTo(.65,-.25);c.moveTo(-.65,.2);c.lineTo(-.2,.25);c.moveTo(.2,.25);c.lineTo(.65,.2);c.stroke();
  }else{
   c.beginPath();c.moveTo(.15,-.95);c.lineTo(-.6,.12);c.lineTo(-.02,.08);c.lineTo(-.25,.95);c.lineTo(.68,-.22);c.lineTo(.13,-.17);c.closePath();c.fill();c.stroke();
  }

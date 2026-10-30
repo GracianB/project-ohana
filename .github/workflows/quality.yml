@@ -322,14 +322,21 @@ jobs:
         run: npm run test:browser:michi-art
       - name: V627 final mirrors · real family actors in room, selection and films
         run: npm run test:browser:final-mirrors
+      - name: V630 chapter relics, ritual and ten earned guardian rematches
+        run: |
+          npm run test:browser:ritual-relics
+          npm run test:browser:ritual-native
+          npm run test:browser:guardian-art
+          OHANA_TEST_DIFFICULTY=normal npm run test:browser:gauntlet
+
       - name: V629 final portal return and native hero selection
         run: npm run test:browser:selection-return
 
       - name: V628 safe actor adapters and final encounter replay
         run: |
           npm run test:browser:actor-adapter
-          npm run test:browser:final-retry
-          OHANA_FINALE_RELEASE=628 npm run test:browser:finale-flow
+          OHANA_RETRY_RELEASE=630 npm run test:browser:final-retry
+          OHANA_FINALE_RELEASE=630 npm run test:browser:finale-flow
 
       # Full continuous Normal play runs after fast regressions; it is also
       # checked independently by the V514 workflow on every PR.

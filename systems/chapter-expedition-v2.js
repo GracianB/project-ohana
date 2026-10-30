@@ -1,6 +1,7 @@
+import {drawExpeditionArtifact,drawExpeditionSupport} from './expedition-art-v630.js';
 // Act II uses the fully earned kit. It extends physical space, not enemy HP or
 // the time spent waiting. Its three independent discoveries survive retries.
-const FLOOR=1134,TAU=Math.PI*2;
+const FLOOR=1134;
 export const EXPEDITION_WIDTH=14400;
 export const EXPEDITIONS=Object.freeze({
  kilo:{name:'Jardines sobre las nubes',verb:'Vuela con K y toca J junto a cada carillón',kind:'bell',ys:[760,590,430]},
@@ -104,41 +105,28 @@ export function expeditionObjective(g){
  return {x:source?n.x-700:n.x,y:source?FLOOR:n.y,label:`Acto II · ${g.roomDef.expedition.name} · ${g.expedition.done.length}/3`,action:source?'Recoge la cena en el horno encendido':g.roomDef.expedition.verb};
 }
 export function drawExpedition(c,g,cam,t){
- if(!g.roomDef?.expedition)return;const active=expeditionUnlocked(g),a=g.expedition,def=g.roomDef.expedition;
+ if(!g.roomDef?.expedition)return;
+ const active=expeditionUnlocked(g),a=g.expedition,def=g.roomDef.expedition,hero=g.roomDef.hero;
  c.save();c.lineCap='round';c.lineJoin='round';
  for(const [i,n] of def.nodes.entries()){
   const x=n.x-cam.x,y=n.y-cam.y;if(x<-750||x>(g.viewW||1440)+150)continue;
-  const done=a?.done.includes(n.id),col=done?'#b7f0c0':active?'#ffe7a0':'#8e9caa';
-  c.strokeStyle='#324958';c.lineWidth=3;c.fillStyle=col;
-  if(n.kind==='arch'){
-   c.beginPath();c.moveTo(x-80,y+40);c.bezierCurveTo(x-120,y-160,x+120,y-160,x+80,y+40);c.stroke();
-   for(let k=0;k<5;k++){c.fillStyle=['#eaa8ca','#f2d39b','#d6eab1','#ade3de','#d9c4ed'][k];c.beginPath();c.arc(x,y-40,70+k*4,Math.PI,Math.PI*2);c.strokeStyle=c.fillStyle;c.stroke();}
-  }else if(n.kind==='plate'){
-   c.beginPath();c.ellipse(x,y-5,70,15,0,0,TAU);c.fill();c.stroke();c.beginPath();c.moveTo(x-35,y-10);c.lineTo(x,y-45);c.lineTo(x+35,y-10);c.stroke();
-  }else if(n.kind==='moon'){
-   c.beginPath();c.arc(x,y,34,0,TAU);c.fill();c.stroke();c.fillStyle='#515478';c.beginPath();c.arc(x+13,y-9,27,0,TAU);c.fill();
-  }else if(n.kind==='nest'){
-   c.fillStyle='#6d4a50';c.beginPath();c.ellipse(x,y+18,43,16,0,0,TAU);c.fill();c.stroke();
-   c.fillStyle=done?'#ffe9bd':'#d48264';c.beginPath();c.moveTo(x-16,y+12);c.bezierCurveTo(x-31,y-18,x+2,y-26,x,y-53);c.bezierCurveTo(x+30,y-26,x+25,y+8,x+16,y+12);c.fill();c.stroke();
+  const done=!!a?.done.includes(n.id),windowOpen=expeditionWindow(g,i),col=done?'#b7f0c0':active?'#ffe7a0':'#a9bac8';
+  if(n.kind==='nest'){
    const vx=x-190,base=FLOOR-cam.y,height=FLOOR-n.y+80;
-   c.fillStyle='#6a6064';c.beginPath();c.ellipse(vx,base-6,63,14,0,0,TAU);c.fill();c.stroke();
-   for(let k=0;k<5;k++){const u=g.reduceMotion?k/5:(t*.006+k/5)%1,yy=base-u*height;c.globalAlpha=.55*(1-u);c.strokeStyle='#ffd8aa';c.lineWidth=2;c.beginPath();c.moveTo(vx-48,yy);c.bezierCurveTo(vx-18,yy-20,vx+18,yy+20,vx+48,yy);c.stroke();}c.globalAlpha=1;c.fillStyle='#ffe4b7';c.font='bold 12px sans-serif';c.textAlign='center';c.fillText('TÉRMICA · SALTA',vx,base-43);
-  }else if(n.kind==='bell'){
-   c.beginPath();c.moveTo(x-24,y+20);c.bezierCurveTo(x-12,y-8,x-22,y-40,x,y-42);c.bezierCurveTo(x+22,y-40,x+12,y-8,x+24,y+20);c.closePath();c.fill();c.stroke();c.beginPath();c.arc(x,y+25,6,0,TAU);c.fill();
-  }else if(n.kind==='supper'){
-   c.fillStyle='#d7c399';c.beginPath();c.roundRect(x-35,y-35,70,65,12);c.fill();c.stroke();c.fillStyle='#423c51';c.fillRect(x-20,y-20,40,25);c.fillStyle=col;c.beginPath();c.arc(x,y-55,17,0,TAU);c.fill();
-   const sx=x-700,sy=FLOOR-cam.y;c.fillStyle='#965d5b';c.beginPath();c.roundRect(sx-45,sy-66,90,65,16);c.fill();c.stroke();c.fillStyle='#f0bc77';c.beginPath();c.arc(sx,sy-22,22,Math.PI,TAU);c.fill();
-  }else if(n.kind==='spice'){
-   c.beginPath();c.moveTo(x,y-26);c.bezierCurveTo(x-45,y-10,x-35,y+28,x,y+25);c.bezierCurveTo(x+35,y+28,x+45,y-10,x,y-26);c.fill();c.stroke();
-   c.fillStyle='#c6b18a';c.beginPath();c.ellipse(x-230,FLOOR-cam.y-8,55,13,0,0,TAU);c.fill();c.stroke();
-  }else{
-   c.beginPath();c.roundRect(x-28,y-38,56,76,15);c.fill();c.stroke();c.fillStyle='#24384f';c.beginPath();c.roundRect(x-20,y-25,40,40,8);c.fill();
-   c.fillStyle=n.kind==='archive'&&!expeditionWindow(g,i)?'#d18aa1':'#a1ebc5';c.beginPath();c.arc(x,y-5,10,0,TAU);c.fill();
+   drawExpeditionSupport(c,hero,vx,base,{t,reduced:!!g.reduceMotion});
+   for(let k=0;k<4;k++){
+    const u=g.reduceMotion?(k+.5)/4:(t*.004+k/4)%1;
+    c.save();c.globalAlpha=.45*(1-u);c.strokeStyle='#ffe1ad';c.lineWidth=2;
+    c.beginPath();c.moveTo(vx-32,base-30-u*height);c.bezierCurveTo(vx-10,base-48-u*height,vx+10,base-12-u*height,vx+32,base-30-u*height);c.stroke();c.restore();
+   }
   }
-  c.textAlign='center';c.font='bold 13px sans-serif';c.fillStyle=col;
-  const label=done?'DESCUBIERTO':!active?'VENCE AL GUARDIÁN':n.kind==='archive'?(expeditionWindow(g,i)?'AHORA · J':'ESPERA LA VOZ'):n.kind==='arch'?'CRUZA CORRIENDO':n.kind==='plate'?'CAÍDA POTENTE':n.kind==='moon'?'SALTA HACIA LA LUNA':n.kind==='spice'?'FUELLE → ESPECIA':n.kind==='supper'?'CENA DEL FARERO':'ACÉRCATE · J';
-  c.fillText(label,x,y-65);
+  if(n.kind==='spice')drawExpeditionSupport(c,hero,x-230,FLOOR-cam.y,{t,reduced:!!g.reduceMotion});
+  if(n.kind==='supper')drawExpeditionSupport(c,hero,x-700,FLOOR-cam.y,{t,reduced:!!g.reduceMotion,source:true});
+  drawExpeditionArtifact(c,hero,x,y,n.kind==='arch'?100:92,{index:i,active,done,windowOpen,t,reduced:!!g.reduceMotion});
+  c.textAlign='center';c.font='bold 13px Outfit,sans-serif';c.fillStyle=col;
+  const label=done?'RESONANCIA '+(i+1)+'/3':!active?'VENCE AL GUARDIÁN':n.kind==='archive'?(windowOpen?'AHORA · J':'ESPERA LA VOZ'):n.kind==='arch'?'CRUZA CORRIENDO':n.kind==='plate'?'CAÍDA POTENTE':n.kind==='moon'?'SALTA HACIA LA LUNA':n.kind==='spice'?'FUELLE → ESPECIA':n.kind==='supper'?'CENA DEL FARERO':'ACÉRCATE · J';
+  c.fillText(label,x,y-(n.kind==='arch'?135:98));
  }
- if(a?.carry){const p=g.player;c.fillStyle='#ffdda3';c.beginPath();c.ellipse(p.x+p.w/2-cam.x,p.y-cam.y-15,18,8,0,0,TAU);c.fill();}
+ if(a?.carry){const p=g.player;drawExpeditionArtifact(c,'pizza',p.x+p.w/2-cam.x,p.y-cam.y-20,38,{active:true,t,reduced:!!g.reduceMotion});}
  c.restore();
 }

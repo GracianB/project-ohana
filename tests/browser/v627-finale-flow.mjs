@@ -5,6 +5,7 @@ import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {startServer} from './server.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
+import {selectFinalFighter} from './final-ritual-controls.mjs';
 const release=process.env.OHANA_FINALE_RELEASE||'627',dir=`test-results/v${release}/finale-flow`,server=await startServer(0);
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
 try{
@@ -23,6 +24,7 @@ try{
   const initialSeals=[...s.world1Seals];assert.equal(initialSeals.length,10);assert.equal(s.evo,4);
   async function films(){
    for(let i=0;i<30;i++){
+    if(await selectFinalFighter(page,'kilo')){await step(55);continue;}
     const s=await state();if(!s.world1Cine)break;filmsSeen.add(s.world1Cine);
     assert.notEqual(await page.locator('#win-cinema').getAttribute('aria-hidden'),'false','story and reunion cannot share the screen');
     assert.equal(await page.locator('#evo-stage.show').count(),0);
@@ -32,6 +34,7 @@ try{
   }
   await films();s=await state();
   for(let i=0;i<11000&&!s.world1Won;i++){
+   if(await selectFinalFighter(page,'kilo')){s=await step(55);continue;}
    if(s.world1Cine){await films();s=await state();}
    if(s.hp<=0){assert.ok(++deaths<=35,'production retry limit');await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();s=await state();}
    if(!s.boss){await page.keyboard.down('d');s=await step(24);await page.keyboard.up('d');continue;}

@@ -1,18 +1,17 @@
 {
   "schema_version": 2,
-  "updated_on": "2026-10-29",
-  "release": "ohana-629",
+  "updated_on": "2026-10-30",
+  "release": "ohana-630",
   "repository": "GracianB/project-ohana",
-  "published": true,
+  "published": false,
   "v1_ready": false,
-  "next_task": "V630_chapter_object_art_and_user_chosen_final_ritual",
-  "validation": "docs/V629-VALIDATION.json",
-  "publication": "docs/V629-PUBLICATION.json",
+  "next_task": "publish_and_verify_V630_ritual_and_fighter_choice",
+  "validation": "docs/V630-VALIDATION.json",
+  "publication": "docs/V630-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
   "remote_multiplayer": "paused_backend",
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
-  "previous_verified_campaign": "docs/V623-VALIDATION.json",
-  "source_commit": "a6fcefe0a2c527f234575162fecc8c8d5d14f914"
+  "previous_verified_campaign": "docs/V623-VALIDATION.json"
 }

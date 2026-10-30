@@ -1,0 +1,6 @@
+{
+  "release": "ohana-630",
+  "published": false,
+  "status": "local_validation_passed_pending_integration_and_public_verification",
+  "local_validation": "docs/V630-VALIDATION.json"
+}

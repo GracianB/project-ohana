@@ -20,6 +20,9 @@ try{
   const tick=async n=>{await page.evaluate(n=>window.__OHANA_E2E.step(n),n);await page.clock.runFor(16);};
   for(let i=0;i<30;i++){const s=await page.evaluate(()=>window.__OHANA_E2E.state());if(!s.world1Cine&&!s.pendingWorld1Cine)break;await page.keyboard.press('Enter');await tick(100);}
   await tick(320);
+  // V630's earned-save visit offers a fighter before Quimera. Cancel via
+  // the real button to inspect the ten cores without starting a battle.
+  if(await page.locator('#final-hero-choice').count())await page.locator('.fr-choice-back').click();
   const before=await page.evaluate(()=>window.__OHANA_E2E.state());assert.equal(before.roomId,'w1-final');assert.equal(before.world1Seals.length,10);assert.equal(before.evo,4);
   const portals=await page.evaluate(async()=>(await import('/systems/final-portal-mirrors.js')).FINAL_PORTALS);
   for(const portal of portals){
@@ -28,7 +31,7 @@ try{
    assert.equal(state.roomId,'w1-final');assert.equal(state.runtimeFaults,0);assert.deepEqual(state.world1Seals,before.world1Seals);assert.equal(state.evo,before.evo);assert.equal(state.xp,before.xp);assert.equal(state.hp,before.hp);
    assert.ok(portal.x-state.camera.x>portal.rx&&portal.x-state.camera.x<width-portal.rx,'the inspected mirror must be fully inside the viewport');
    await page.screenshot({path:`${dir}/room-${portal.hero}-${width}.png`});
-   rooms.push({width,height,hero:portal.hero,room:state.roomId,physicalMirrorInView:true,unchangedEarnedSeals:true,unchangedExperienceAndHealth:true});
+   rooms.push({width,height,hero:portal.hero,room:state.roomId,physicalMirrorInView:true,rendering:'earned ritual core with its three floor objects',unchangedEarnedSeals:true,unchangedExperienceAndHealth:true});
   }
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   if(width===1280){
@@ -94,5 +97,5 @@ try{
  }
  assert.deepEqual(errors,[]);
  await fs.writeFile(`${dir}/final-mirrors.json`,JSON.stringify({actualRoom:rooms,errors,scope:'Previously earned campaign backup, direct final-room and camera-position art fixtures; no XP/health/seal grants and no new campaign completion claim.'},null,2));
- console.log('PASS final mirrors: all ten canonical actors in actual w1-final desktop/mobile; real Canvas interiors; no old stone proxy bodies; real-actor selection/cinematic fallbacks');
+ console.log('PASS final mirrors: ten earned ritual cores in actual w1-final desktop/mobile; canonical actor preview fixtures; no old stone proxy bodies; real-actor selection/cinematic fallbacks');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

@@ -82,7 +82,7 @@ try {
  assert.equal(await page.locator('#evo-stage.show').count(),0,'all earned evolution cinematics must finish before HUD acceptance');
  // Do not dismiss the notification before testing it: dismiss() clears
  // transient messages and races the persistent objective fallback.
- await page.waitForFunction(() => document.querySelector('#notification-container')?.textContent?.includes('Sello 1/4'),
+ await page.waitForFunction(() => document.querySelector('#notification-container')?.textContent?.includes('Pruebas 1/4'),
    null,{timeout:10000});
  const notice=await page.evaluate(async()=>{
    const {messageManager}=await import('/systems/notify.js');
@@ -93,9 +93,9 @@ try {
      cardDisplay:card?getComputedStyle(card).display:null,cardVisibility:card?getComputedStyle(card).visibility:null,
      bodyClass:document.body.className,modals:[...document.querySelectorAll('.show')].slice(0,5).map(x=>x.id)};
  });
- assert.match(notice.objective,/Sello 1\/4.*Antena/s,'persistent objective model must survive: '+JSON.stringify(notice));
- assert.match(notice.htmlText,/Sello 1\/4.*Antena/s,'DOM must render objective: '+JSON.stringify(notice));
- assert.ok(notice.renderedText.includes('Sello 1/4'),'objective card must be visibly rendered: '+JSON.stringify(notice));
+ assert.match(notice.objective,/Pruebas 1\/4.*Antena/s,'persistent objective model must survive: '+JSON.stringify(notice));
+ assert.match(notice.htmlText,/Pruebas 1\/4.*Antena/s,'DOM must render objective: '+JSON.stringify(notice));
+ assert.ok(notice.renderedText.includes('Pruebas 1/4'),'objective card must be visibly rendered: '+JSON.stringify(notice));
  assert.equal(notice.cardCount,1);
  // Teach the actual equipped power, and explain a locked power without listing every key.
  await page.keyboard.press('l');
