@@ -10,7 +10,7 @@ import{WORLD1_ARENA,WORLD1_FLOOR}from'../systems/world1-rooms.js';
 //    and your own hero is predicted from your keys, so motion is 60 fps.
 const canvas=document.querySelector('#arena'),c=canvas.getContext('2d',{alpha:false}),$=s=>document.querySelector(s),keys=new Set(),pending=[];
 const LEFT=WORLD1_ARENA.left+550,RIGHT=WORLD1_ARENA.right-550,FLOOR=WORLD1_FLOOR,STEP=1000/60;
-const MOVE_INTERVAL=120,IDLE_GAP=80,MAX_MOVES_IN_FLIGHT=2;
+const MOVE_INTERVAL=120,IDLE_GAP=80,MAX_MOVES_IN_FLIGHT=1;
 const reduceMQ=matchMedia('(prefers-reduced-motion: reduce)'),coarseMQ=matchMedia('(pointer: coarse)');
 let session;try{session=JSON.parse(sessionStorage.getItem('ohana-coop-session')||'null');}catch{}
 let snapshot=null,snapshotAt=0,sequence=0,stopped=false,lastEvent=0,lastEventAt=0,retries=0,frame=0,W=0,H=0,cam={x:8000,y:450};const models=new Map();

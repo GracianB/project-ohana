@@ -513,7 +513,7 @@ const PRECACHE_REVISIONS = {
   "worlds/living-realms.js": "60ca12726eb92819858a45da8de8ff02c8551ac3",
   "versus.html": "07ca0c60b047821a638b7c376918087c9ada96e3",
   "versus.css": "1342f8b77b943437a13eba326cb3d0f0dd948991",
-  "multiplayer/versus-client.js": "3c3dcd1aab5d9a4ab09b971056663627423f2d14",
+  "multiplayer/versus-client.js": "b330e4e74d0f4a124708666e45e8a27fc7e7cef7",
   "multiplayer/match-rules-v604.js": "22e0ec2591bf777b323edbd5b854aae0fa10f6e1",
   "multiplayer/adventure-progress.js": "a7a5269f535a27a0e914376af8fb8181ca11bdf9",
   "multiplayer/adventure-finale.js": "e887dd378bdbce18259543dd239712c6081ad510",
