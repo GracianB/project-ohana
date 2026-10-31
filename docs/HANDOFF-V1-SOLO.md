@@ -51,7 +51,7 @@ Desde la raíz del repositorio, instalar dependencias con `npm ci`. Usar Chromiu
 
 ## Multijugador
 
-Netlify sigue pausado. Aventura y Versus se verifican con el servidor local; esto no acredita conexión entre dispositivos por el servidor público. No reactivar servicios de pago ni declarar validado el transporte remoto sin una prueba real. La V1 de aventura individual no depende de ese servicio.
+Netlify está reactivado, confirmado por el usuario el 31 de octubre de 2026. `main` incorpora la habilitación del host público y sus previews (3cf1f83), la retirada del aviso antiguo (5fcf0fd) y las mejoras posteriores del vestíbulo. Las pruebas locales anteriores no acreditan conexión entre dispositivos por el servidor público. La comprobación remota desde este entorno queda bloqueada por un 403 de su acceso de red; ese bloqueo no demuestra una pausa de Netlify. No cambiar facturación ni dar por probado el transporte sin una partida remota real. Estado y evidencia: [MULTIPLAYER-STATUS-2026-10-31.json](MULTIPLAYER-STATUS-2026-10-31.json). La V1 de aventura individual no depende de ese servicio.
 
 ## Mantenimiento
 

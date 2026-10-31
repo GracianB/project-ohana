@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "updated_on": "2026-10-30",
+  "updated_on": "2026-10-31",
   "release": "ohana-630",
   "repository": "GracianB/project-ohana",
   "published": true,
@@ -9,10 +9,11 @@
   "validation": "docs/V630-VALIDATION.json",
   "publication": "docs/V630-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
-  "remote_multiplayer": "paused_backend",
+  "remote_multiplayer": "active_remote_validation_pending",
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
   "previous_verified_campaign": "docs/V623-VALIDATION.json",
-  "source_commit": "7b5d197df92a68095ae291f708fce517ae321654"
+  "source_commit": "7b5d197df92a68095ae291f708fce517ae321654",
+  "remote_multiplayer_evidence": "docs/MULTIPLAYER-STATUS-2026-10-31.json"
 }

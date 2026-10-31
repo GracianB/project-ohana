@@ -1,0 +1,35 @@
+{
+  "updated_on": "2026-10-31",
+  "repository": "GracianB/project-ohana",
+  "host": "https://project-ohana-multiplayer.netlify.app/",
+  "availability": "active_user_confirmed",
+  "user_confirmation": "netlify no esta pausado",
+  "reviewed_main_commit": "3d869479e0b1d2ecf85e0a11fbe0e71e5437df90",
+  "repository_evidence": {
+    "reactivation_commit": "3cf1f83c9d14ce2695e3da76bc3519e1f44b9cf3",
+    "stale_pause_notice_removed": "5fcf0fd",
+    "later_lobby_changes": [
+      "7874d67",
+      "3d86947"
+    ],
+    "scope": "Public Netlify host and deploy previews enabled in client allowlist; lobby and field guide pause notices already removed on main. Existing user changes preserved."
+  },
+  "remote_checks": {
+    "checked_at": "2026-10-31T00:47:44.608076+00:00",
+    "result": "blocked_environment_network_access",
+    "attempts": [
+      {
+        "url": "https://project-ohana-multiplayer.netlify.app/",
+        "error": "Tunnel connection failed: 403 Forbidden"
+      },
+      {
+        "url": "https://project-ohana-multiplayer.netlify.app/multiplayer",
+        "error": "Tunnel connection failed: 403 Forbidden"
+      }
+    ],
+    "interpretation": "The execution environment cannot reach this destination. This does not establish that Netlify is paused or down. No remote transport success is claimed."
+  },
+  "public_multiplayer_validation": "pending_real_two_client_session",
+  "historical_records": "V630 and earlier validation/publication reports retain their original dated scope; current service status is recorded here.",
+  "changes": "Current README, handoff, closure reference and machine-readable status corrected. No runtime, billing, service configuration or deployment settings changed."
+}
