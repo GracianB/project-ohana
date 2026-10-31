@@ -20,37 +20,50 @@
   <meta name="twitter:description" content="Co-op adventure and versus for two players in the browser. One room code, any phone or laptop.">
   <meta name="twitter:image" content="https://project-ohana-multiplayer.netlify.app/assets/og/ohana-og.jpg">
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="style.css?v=ohana-coop-4">
-  <link rel="stylesheet" href="multiplayer.css?v=ohana-coop-4">
+  <link rel="stylesheet" href="style.css?v=ohana-coop-5">
+  <link rel="stylesheet" href="multiplayer.css?v=ohana-coop-5">
 </head>
 <body>
   <main class="coop-shell">
     <header class="coop-head">
-      <h1>PROJECT <span>OHANA</span> · DOS EN LA MISMA ISLA</h1>
-      <div class="coop-head-actions"><button id="lang-toggle" class="lang-toggle" type="button" aria-label="Switch to English">English</button><a href="./index.html">Volver a OHANA</a></div>
+      <h1>PROJECT <span>OHANA</span><small class="header-tagline">· DOS EN LA MISMA ISLA</small></h1>
+      <div class="coop-head-actions">
+        <div class="language-switch" role="group" aria-label="Idioma / Language">
+          <button id="lang-es" type="button" lang="es" aria-label="Cambiar a español" aria-pressed="true">ES</button>
+          <button id="lang-en" type="button" lang="en" aria-label="Switch to English" aria-pressed="false">EN</button>
+        </div>
+        <a href="./index.html">Volver a OHANA</a>
+      </div>
     </header>
 
     <section id="entry" class="coop-panel entry-panel">
       <p id="invite-banner" class="invite-banner" role="status" hidden></p>
-      <p class="eyebrow">DOS JUGADORES · LA MISMA AVENTURA</p>
-      <h2>La misma Isla Hoku, ahora juntos</h2>
-      <p>Elegid personajes distintos y un modo. Versus enfrenta a dos héroes con criaturas y un guardián; Aventura permite explorar juntos y votar el cambio de sala. Crea una sala, comparte el código y juega con un amigo desde otro dispositivo.</p>
-      <div class="campaign-teaser" aria-label="Recorrido de la misión">
-        <span>Diez héroes</span><i aria-hidden="true">→</i><span>Aventura o Versus</span><i aria-hidden="true">→</i><strong>Una partida juntos</strong>
+      <p class="eyebrow">DOS JUGADORES · UNA SOLA ISLA</p>
+      <h2>La aventura cambia cuando la compartes.</h2>
+      <p class="entry-intro">Invita a alguien a Isla Hoku. Elegid un modo, escoged héroes distintos y empezad en unos segundos.</p>
+      <div class="mode-picker" role="radiogroup" aria-label="Modo de partida">
+        <button class="mode-card is-selected" type="button" role="radio" aria-checked="true" data-mode="adventure">
+          <span class="mode-icon" aria-hidden="true">✦</span><span class="mode-copy"><strong>Aventura cooperativa</strong><small>Explorad juntos y enfrentaos a los guardianes de la isla.</small></span><span class="mode-check" aria-hidden="true">✓</span>
+        </button>
+        <button class="mode-card" type="button" role="radio" aria-checked="false" data-mode="versus">
+          <span class="mode-icon versus-icon" aria-hidden="true">⚔</span><span class="mode-copy"><strong>Versus</strong><small>Dos héroes, una arena y tres eliminaciones para ganar.</small></span><span class="mode-check" aria-hidden="true">✓</span>
+        </button>
       </div>
+      <select id="room-mode" class="visually-hidden" tabindex="-1" aria-hidden="true"><option value="adventure">Aventura juntos</option><option value="versus">Versus · tres eliminaciones</option></select>
+      <label id="arena-choice" class="arena-choice" hidden>Arena <select id="room-arena"></select></label>
       <div class="coop-actions">
-        <article class="coop-card">
-          <h3>Crear una sala</h3>
-          <label>Modo <select id="room-mode"><option value="adventure">Aventura juntos</option><option value="versus">Versus · tres eliminaciones</option></select></label>
-          <label id="arena-choice" hidden>Arena <select id="room-arena"></select></label>
-          <p>Crea vuestra isla compartida y pasa el código a la otra persona.</p>
-          <button id="create-room" class="coop-button" type="button">Crear sala</button>
+        <article class="coop-card create-card">
+          <div class="action-card-top"><span class="action-icon" aria-hidden="true">＋</span><span class="card-kicker">ANFITRIÓN</span></div>
+          <h3>Crear sala</h3>
+          <p>Abre una partida y comparte el código con tu compañero.</p>
+          <button id="create-room" class="coop-button" type="button"><span>Crear sala</span><span aria-hidden="true">→</span></button>
         </article>
-        <article class="coop-card">
-          <h3>Unirse a una sala</h3>
-          <p>Introduce el código del jugador que ha creado la sala.</p>
+        <article class="coop-card join-card">
+          <div class="action-card-top"><span class="action-icon join-icon" aria-hidden="true">↗</span><span class="card-kicker">INVITADO</span></div>
+          <h3>Unirse con código</h3>
+          <p>Pega el código que te ha enviado quien creó la sala.</p>
           <div class="join-row">
-            <input id="room-input" maxlength="6" aria-label="Código de sala" placeholder="ABC123" autocomplete="off">
+            <input id="room-input" maxlength="6" aria-label="Código de sala" placeholder="ABC · 123" autocomplete="off" autocapitalize="characters" spellcheck="false">
             <button id="join-room" class="coop-button secondary" type="button">Unirse</button>
           </div>
         </article>
@@ -64,7 +77,7 @@
       <p>La cuadrícula muestra el elenco dibujado de OHANA. Cada persona elige y confirma su personaje cuando esté preparada.</p>
       <div class="room-row">
         <div>
-          <span class="sub-label">CÓDIGO DE SALA</span>
+          <span class="sub-label">CÓDIGO PARA INVITAR</span>
           <div class="room-code"><span id="room-code"></span><button id="copy-code" class="coop-button secondary" type="button">Copiar</button></div>
           <div class="share-row"><button id="share-link" class="coop-button" type="button">Compartir enlace</button><span id="net-pill" class="net-pill" data-state="connected" role="status"><i aria-hidden="true"></i>Conectado</span></div>
           <input id="share-url" class="share-url" readonly aria-label="Enlace de invitación / Invite link" value="" hidden>
@@ -80,7 +93,8 @@
           <canvas id="lobby-portrait" width="160" height="160" aria-hidden="true"></canvas>
           <h3 id="lobby-character-name">Elige tu personaje</h3>
           <p id="lobby-character-detail">El elenco y sus formas vienen del OHANA original.</p>
-          <button id="confirm-character" class="coop-button" type="button" disabled>Confirmar personaje</button>
+          <button id="confirm-character" class="coop-button" type="button" disabled>Listo · confirmar héroe</button>
+          <button id="change-character" class="coop-button secondary change-character" type="button" hidden>Volver y cambiar héroe</button>
         </aside>
       </div>
       <p id="lobby-status" role="status">Esperando a los dos jugadores.</p>

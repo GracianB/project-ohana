@@ -45,9 +45,22 @@ try {
   const guestCtx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   await wire(hostCtx); await wire(guestCtx);
   const host = await hostCtx.newPage(), guest = await guestCtx.newPage();
+  const langCtx = await browser.newContext();
+  const langPage = await langCtx.newPage();
+  await langPage.goto(origin + "/multiplayer.html?lang=en");
+  assert.equal(await langPage.evaluate(() => document.documentElement.lang), "en", "?lang=en selects English");
+  assert.equal(await langPage.evaluate(() => localStorage.getItem("ohana-lobby-lang")), "en", "language choice is remembered");
+  await langCtx.close();
   const errors = []; for (const p of [host, guest]) p.on("pageerror", (e) => errors.push(e.message));
 
   await host.goto(origin + "/multiplayer.html");
+  if (shots) await host.screenshot({ path: shots + "/entrada-1280-es.png", fullPage: true });
+  await host.locator('.mode-card[data-mode="versus"]').click();
+  assert.equal(await host.locator("#room-mode").inputValue(), "versus", "Versus card selects the existing room mode control");
+  assert.equal(await host.locator("#arena-choice").isVisible(), true, "Versus exposes arena selection");
+  if (shots) await host.screenshot({ path: shots + "/entrada-1280-versus.png", fullPage: true });
+  await host.locator('.mode-card[data-mode="adventure"]').click();
+  assert.equal(await host.locator("#room-mode").inputValue(), "adventure");
   await host.getByRole("button", { name: "Crear sala" }).click();
   await host.locator("#room-code").waitFor();
   const code = (await host.locator("#room-code").innerText()).trim();
@@ -61,9 +74,11 @@ try {
   await host.waitForFunction(() => document.getElementById("lobby-portrait").dataset.pose, null, { timeout: 4000 });
   const poses = new Set(); for (let i = 0; i < 8; i++) { poses.add(await host.locator("#lobby-portrait").getAttribute("data-pose")); await host.waitForTimeout(450); }
   assert.ok(poses.size >= 2, "animated preview cycles poses: " + [...poses]);
-  if (shots) await host.screenshot({ path: shots + "/lobby-host.png" });
+  if (shots) await host.screenshot({ path: shots + "/seleccion-1280-kilo.png", fullPage: true });
 
   // Guest opens the invite link on a phone-sized screen.
+  await guest.goto(origin + "/multiplayer.html");
+  if (shots) await guest.screenshot({ path: shots + "/entrada-390-es.png", fullPage: true });
   await guest.goto(link);
   await guest.locator("#invite-banner").waitFor({ state: "visible" });
   assert.equal(await guest.locator("#room-input").inputValue(), code, "invite auto-fills the code");
@@ -83,7 +98,13 @@ try {
   assert.equal((await guest.locator("#net-pill").innerText()).trim(), "Connected");
   assert.equal(await guest.evaluate(() => document.documentElement.lang), "en");
   assert.ok((await guest.locator("#share-url").inputValue()).includes("lang=en"));
-  if (shots) await guest.screenshot({ path: shots + "/lobby-mobile-en.png", fullPage: true });
+  await guest.getByRole("button", { name: "Seleccionar a Stitcho", exact: true }).click();
+  await guest.waitForFunction(() => document.getElementById("lobby-portrait").dataset.pose, null, { timeout: 4000 });
+  if (shots) await guest.screenshot({ path: shots + "/seleccion-390-stitcho-en.png", fullPage: true });
+  await guest.locator("#confirm-character").click();
+  await guest.locator("#change-character").waitFor({ state: "visible", timeout: 4000 });
+  await guest.locator("#change-character").click();
+  await guest.locator("#confirm-character").waitFor({ state: "visible", timeout: 4000 });
   await guest.getByRole("button", { name: "Cambiar a español" }).click();
   await guest.waitForFunction(() => /Sala \d\/2/.test(document.getElementById("lobby-status").textContent), null, { timeout: 4000 });
 
