@@ -437,3 +437,10 @@ html[lang="en"] .character-card.partner-picked::before { content:"YOUR TEAMMATE"
 @media (max-width:360px) {
   .coop-head-actions>a { display:none; }
 }
+
+/* V633 · keep the mobile ready bar clear of Netlify's fixed bottom-right badge (64px). */
+@media (max-width:650px) {
+  .coop-shell { padding-bottom:calc(88px + env(safe-area-inset-bottom)); }
+  .selection-preview { bottom:calc(72px + env(safe-area-inset-bottom)); }
+  .character-grid { padding-bottom:8px; }
+}
