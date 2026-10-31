@@ -20,8 +20,8 @@
   <meta name="twitter:description" content="Co-op adventure and versus for two players in the browser. One room code, any phone or laptop.">
   <meta name="twitter:image" content="https://project-ohana-multiplayer.netlify.app/assets/og/ohana-og.jpg">
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="style.css?v=ohana-coop-5">
-  <link rel="stylesheet" href="multiplayer.css?v=ohana-coop-5">
+  <link rel="stylesheet" href="style.css?v=ohana-coop-6">
+  <link rel="stylesheet" href="multiplayer.css?v=ohana-coop-6">
 </head>
 <body>
   <main class="coop-shell">
@@ -72,6 +72,7 @@
     </section>
 
     <section id="lobby" class="coop-panel" hidden>
+      <button id="leave-room" class="coop-button secondary leave-room" type="button" aria-label="Volver al inicio y salir de la sala"><span aria-hidden="true">←</span><span class="leave-label">Volver al inicio</span></button>
       <p class="eyebrow">ANTES DE PARTIR</p>
       <h2>Elegid a vuestros héroes</h2>
       <p>La cuadrícula muestra el elenco dibujado de OHANA. Cada persona elige y confirma su personaje cuando esté preparada.</p>
@@ -93,7 +94,7 @@
           <canvas id="lobby-portrait" width="160" height="160" aria-hidden="true"></canvas>
           <h3 id="lobby-character-name">Elige tu personaje</h3>
           <p id="lobby-character-detail">El elenco y sus formas vienen del OHANA original.</p>
-          <button id="confirm-character" class="coop-button" type="button" disabled>Listo · confirmar héroe</button>
+          <button id="confirm-character" class="coop-button" type="button" disabled>Listo</button>
           <button id="change-character" class="coop-button secondary change-character" type="button" hidden>Volver y cambiar héroe</button>
         </aside>
       </div>
@@ -146,7 +147,7 @@
       </div>
     </section>
   </main>
-  <script type="module" src="multiplayer.js?v=ohana-coop-4"></script>
-  <script type="module" src="multiplayer/lobby-ux.js?v=ohana-coop-4"></script>
+  <script type="module" src="multiplayer.js?v=ohana-coop-6"></script>
+  <script type="module" src="multiplayer/lobby-ux.js?v=ohana-coop-6"></script>
 </body>
 </html>

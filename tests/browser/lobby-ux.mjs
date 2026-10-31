@@ -91,6 +91,18 @@ try {
   assert.ok(overflowLobby <= 1, "no horizontal overflow at 390px (lobby): " + overflowLobby);
   await host.waitForFunction(() => /2\/2/.test(document.getElementById("lobby-status").textContent), null, { timeout: 6000 });
 
+  // The partner's pick shows live, before they confirm, and that hero is blocked.
+  assert.equal((await host.locator("#confirm-character").innerText()).trim(), "Listo", "confirm button reads Listo");
+  await guest.waitForFunction(() => document.querySelector('[aria-label="Seleccionar a Kilo"]')?.classList.contains("taken"), null, { timeout: 6000 });
+  assert.equal(await guest.getByRole("button", { name: "Seleccionar a Kilo", exact: true }).isDisabled(), true, "partner's hero is blocked");
+  assert.match(await guest.locator("#player-slots").innerText(), /Kilo · Eligiendo/, "partner choice is visible before Listo");
+  // Mobile keeps the preview + Listo pinned while browsing the roster.
+  await guest.getByRole("button", { name: "Seleccionar a Dino", exact: true }).click();
+  await host.waitForFunction(() => document.querySelector('[aria-label="Seleccionar a Dino"]')?.classList.contains("taken"), null, { timeout: 6000 });
+  await guest.evaluate(() => document.getElementById("character-grid").scrollIntoView({ block: "start" }));
+  const bar = await guest.locator("#confirm-character").boundingBox();
+  assert.ok(bar && bar.y >= 0 && bar.y + bar.height <= 844, "Listo stays on screen at 390px: " + JSON.stringify(bar));
+
   // English toggle translates static and live lobby text.
   await guest.getByRole("button", { name: "Switch to English" }).click();
   await guest.waitForFunction(() => /Room \d\/2/.test(document.getElementById("lobby-status").textContent), null, { timeout: 4000 });
@@ -113,6 +125,20 @@ try {
   await host.waitForFunction(() => document.getElementById("net-pill").dataset.state === "reconnecting", null, { timeout: 12000 });
   offline = false;
   await host.waitForFunction(() => document.getElementById("net-pill").dataset.state === "connected", null, { timeout: 15000 });
+
+  // "Volver al inicio" leaves the room cleanly and returns to the mode/room choice.
+  await guest.getByRole("button", { name: "Volver al inicio y salir de la sala" }).click();
+  await guest.locator("#entry").waitFor({ state: "visible" });
+  assert.equal(await guest.locator("#lobby").isHidden(), true);
+  assert.doesNotMatch(guest.url(), /[?&]room=/, "room param removed after leaving");
+  assert.equal(await guest.evaluate(() => sessionStorage.getItem("ohana-coop-session")), null, "saved session cleared");
+  await host.waitForFunction(() => /Esperando conexión/.test(document.getElementById("player-slots").textContent), null, { timeout: 8000 });
+  await host.waitForFunction(() => !document.querySelector('[aria-label="Seleccionar a Dino"]')?.classList.contains("taken"), null, { timeout: 8000 });
+  await guest.getByRole("button", { name: "Crear sala" }).click();
+  await guest.locator("#lobby").waitFor({ state: "visible" });
+  assert.notEqual((await guest.locator("#room-code").innerText()).trim(), code, "a fresh room can be created after leaving");
+  assert.equal(await host.locator(".coop-head-actions > a").isVisible(), true, "Volver a OHANA visible on desktop");
+  assert.equal(await guest.locator(".coop-head-actions > a").isVisible(), true, "Volver a OHANA visible at 390px");
 
   assert.deepEqual(errors, []);
   console.log("PASS · lobby UX: invite link, share, status pill, ES/EN, animated preview, 390px layout");

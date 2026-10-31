@@ -34,11 +34,14 @@ const STATIC = {
   "#share-link": ["Compartir enlace", "Share invite link"],
   "#copy-code": ["Copiar", "Copy code"],
   "#change-character": ["Volver y cambiar héroe", "Back and change hero"],
+  "#leave-room .leave-label": ["Volver al inicio", "Back to start"],
   "#room-mode option[value='adventure']": ["Aventura juntos", "Co-op adventure"],
   "#room-mode option[value='versus']": ["Versus · tres eliminaciones", "Versus · three knockouts"],
 };
 const DYNAMIC = [
   [/^Copiar$/, "Copy"], [/^Copiado$/, "Copied"], [/^Enlace copiado$/, "Link copied"], [/^Compartir enlace$/, "Share invite link"],
+  [/^Listo$/, "Ready"], [/^Tu compañero ya eligió a (.+)\. Elige otro héroe\.$/, "Your teammate already picked $1. Choose another hero."],
+  [/^Ese héroe ya lo eligió tu compañero\. Elige otro\.$/, "Your teammate already picked that hero. Choose another."],
   [/^Confirmar personaje$/, "Ready · confirm hero"], [/^Retirar preparación$/, "Not ready"], [/^Listo · confirmar héroe$/, "Ready · confirm hero"],
   [/^Elige tu personaje$/, "Choose your hero"], [/^El elenco y sus formas vienen del OHANA original\.$/, "Meet the original OHANA cast."],
   [/^Esperando a los dos jugadores\.$/, "Waiting for both players."],
@@ -80,6 +83,8 @@ function applyStatic() {
   document.querySelector(".language-switch")?.setAttribute("aria-label", lang === "en" ? "Language" : "Idioma");
   document.querySelector(".mode-picker")?.setAttribute("aria-label", lang === "en" ? "Game mode" : "Modo de partida");
   if ($("room-input")) $("room-input").setAttribute("aria-label", lang === "en" ? "Room code" : "Código de sala");
+  $("leave-room")?.setAttribute("aria-label", lang === "en" ? "Back to start and leave the room" : "Volver al inicio y salir de la sala");
+  if (lang === "es" && $("confirm-character")?.textContent.trim() === "Ready") $("confirm-character").textContent = "Listo";
 }
 
 function translateNode(element) {
@@ -183,16 +188,7 @@ function decorateHeroCards() {
       card.append(ability);
     }
   }
-  const otherChoice = [...($("player-slots")?.children || [])].find((slot) => {
-    const label = slot.querySelector("b")?.textContent || "";
-    return !/·\s*(Tú|You)/.test(label);
-  })?.querySelector("small")?.textContent || "";
-  const otherHero = ROSTER.find((hero) => otherChoice.startsWith(hero.name));
-  for (const card of grid.querySelectorAll(".character-card")) {
-    const chosen = card.querySelector("span")?.textContent.trim() === otherHero?.name;
-    card.classList.toggle("partner-picked", !!chosen);
-    card.setAttribute("data-partner-picked", String(!!chosen));
-  }
+  // Partner picks and taken heroes are marked by multiplayer.js from the room snapshot.
 }
 
 $("lang-es")?.addEventListener("click", () => setLang("es"));

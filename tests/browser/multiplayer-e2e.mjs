@@ -114,6 +114,9 @@ try {
   const guestContext = await browser.newContext(); contexts.push(guestContext);
   await installLateIce(hostContext);await installLateIce(guestContext);
   await installFakeNetlify(hostContext); await installFakeNetlify(guestContext);
+  // Mirror sessions (same hero on both sides) are an engine test, not a player flow:
+  // the lobby blocks a partner's hero unless this test-only flag is present.
+  if (hostCharacter === guestCharacter) for (const ctx of [hostContext, guestContext]) await ctx.addInitScript(() => { window.__ohanaAllowMirror = true; });
   const hostPage = await hostContext.newPage();
   const guestPage = await guestContext.newPage();
   const errors = [];
@@ -125,13 +128,13 @@ try {
   await hostPage.locator("#room-code").waitFor();
   roomId = await hostPage.locator("#room-code").innerText();
   await hostPage.getByRole("button", { name: selection(hostCharacter), exact: true }).click();
-  await hostPage.getByRole("button", { name: "Confirmar personaje" }).click();
+  await hostPage.getByRole("button", { name: "Listo", exact: true }).click();
 
   await guestPage.goto(origin+"/multiplayer.html");
   await guestPage.locator("#room-input").fill(roomId);
   await guestPage.getByRole("button", { name: "Unirse" }).click();
   await guestPage.getByRole("button", { name: selection(guestCharacter), exact: true }).click();
-  await guestPage.getByRole("button", { name: "Confirmar personaje" }).click();
+  await guestPage.getByRole("button", { name: "Listo", exact: true }).click();
 
   await hostPage.waitForURL(/index\.html\?online=1/, { waitUntil:"domcontentloaded",timeout:15000 });
   await guestPage.waitForURL(/index\.html\?online=1/, { waitUntil:"domcontentloaded",timeout:15000 });

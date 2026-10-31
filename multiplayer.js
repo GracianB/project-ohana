@@ -25,7 +25,13 @@ const state = {
   damageTexts: [], hurtAt: new Map(), combatEffects: [], bossVisualX: 640,
   queenForeshadowCanvas: null,
   serverOffset: 0, selectedCharacterId: "",
+  // Lobby-only UI bookkeeping: live hero choice queue and a generation counter
+  // so a room that was left can never repaint the next one.
+  chooseChain: Promise.resolve(), lobbyGen: 0,
 };
+// Mirror picks (both players on the same hero) stay possible for automated
+// engine tests; real players get distinct heroes, as the lobby copy promises.
+const ALLOW_MIRROR = typeof window !== "undefined" && (window.__ohanaAllowMirror === true || new URLSearchParams(location.search).has("mirror"));
 const $ = (id) => document.getElementById(id);
 // Read-only hooks for multiplayer/lobby-ux.js (status pill, share link).
 window.__ohanaNet = () => (typeof navigator !== "undefined" && navigator.onLine === false) ? "offline" : state.networkState;
@@ -229,9 +235,31 @@ function enterLobby(snapshot) {
   void pollLoop();
 }
 
+function partnerOf(snap) {
+  return snap?.players?.find((player) => !player.isYou && player.connected) || null;
+}
+// A hero is taken when the connected partner holds it on the server, unless
+// you hold it too with priority (you confirmed first, or you are player 1 and
+// the partner has not confirmed yet). Server protocol is unchanged.
+function heroTakenByPartner(snap, characterId) {
+  if (ALLOW_MIRROR || !characterId) return false;
+  const you = snap?.players?.find((player) => player.isYou);
+  const partner = partnerOf(snap);
+  if (!partner || partner.characterId !== characterId) return false;
+  if (you?.characterId === characterId && !partner.ready && (you.ready || you.slot < partner.slot)) return false;
+  return true;
+}
+
 function renderLobby() {
   const snap = state.snapshot;
+  if (!snap) return;
   const you = snap.players.find((player) => player.isYou);
+  const partner = partnerOf(snap);
+  if (!you?.ready && heroTakenByPartner(snap, state.selectedCharacterId)) {
+    const lost = ROSTER.find((item) => item.id === state.selectedCharacterId);
+    state.selectedCharacterId = "";
+    if (lost) showError("lobby-error", `Tu compañero ya eligió a ${lost.name}. Elige otro héroe.`);
+  }
   const slots = $("player-slots");
   slots.replaceChildren();
   for (let slot = 0; slot < 2; slot++) {
@@ -252,10 +280,14 @@ function renderLobby() {
   for (const character of ROSTER) {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = `character-card${state.selectedCharacterId === character.id ? " selected" : ""}`;
+    const partnerPick = !!partner?.characterId && partner.characterId === character.id;
+    const taken = heroTakenByPartner(snap, character.id);
+    button.className = `character-card${state.selectedCharacterId === character.id ? " selected" : ""}${partnerPick ? " partner-picked" : ""}${taken ? " taken" : ""}`;
     button.setAttribute("aria-label", `Seleccionar a ${character.name}`);
     button.setAttribute("aria-pressed", String(state.selectedCharacterId === character.id));
-    button.disabled = !!you?.ready || snap.phase !== "lobby";
+    button.dataset.partnerPicked = String(partnerPick);
+    if (taken) button.title = "Elegido por tu compañero";
+    button.disabled = !!you?.ready || snap.phase !== "lobby" || taken;
     const portrait = document.createElement("canvas");
     portrait.width = 120;
     portrait.height = 112;
@@ -267,8 +299,11 @@ function renderLobby() {
     role.textContent = character.role;
     button.append(portrait, label, role);
     button.addEventListener("click", () => {
+      if (heroTakenByPartner(state.snapshot, character.id)) return;
       state.selectedCharacterId = character.id;
+      showError("lobby-error");
       renderLobby();
+      sendLiveChoice();
     });
     grid.append(button);
   }
@@ -278,7 +313,8 @@ function renderLobby() {
     drawPortrait($("lobby-portrait"), preview);
     startPreview();
     $("lobby-character-name").textContent = preview.name;
-    $("lobby-character-detail").textContent = `${preview.role} · ${preview.tag} · ${preview.evoNames?.[1] || preview.name}`;
+    const evoName = preview.evoNames?.[1];
+    $("lobby-character-detail").textContent = [preview.role, preview.tag, evoName && evoName !== preview.name ? evoName : ""].filter(Boolean).join(" · ");
   } else {
     $("lobby-character-name").textContent = "Elige tu personaje";
     $("lobby-character-detail").textContent = "El elenco y sus formas vienen del OHANA original.";
@@ -286,8 +322,8 @@ function renderLobby() {
   }
 
   const confirm = $("confirm-character");
-  confirm.disabled = !state.selectedCharacterId || snap.phase !== "lobby" || state.lobbySubmitting;
-  confirm.textContent = you?.ready ? "Retirar preparación" : "Confirmar personaje";
+  confirm.disabled = !state.selectedCharacterId || snap.phase !== "lobby" || state.lobbySubmitting || (!you?.ready && heroTakenByPartner(snap, state.selectedCharacterId));
+  confirm.textContent = you?.ready ? "Retirar preparación" : "Listo";
   const bothReady = snap.players.length === 2 && snap.players.every((player) => player.connected && player.characterId && player.ready);
   $("lobby-status").textContent = bothReady
     ? "Los dos están preparados. La introducción empieza al confirmar la segunda selección."
@@ -295,42 +331,75 @@ function renderLobby() {
   if (["playing", "won", "lost"].includes(snap.phase)) enterGame();
 }
 
+// Publish the highlighted hero right away (existing "choose" action) so the
+// partner sees it live. Calls are serialized; only the latest pick is sent.
+function sendLiveChoice() {
+  const gen = state.lobbyGen;
+  state.chooseChain = state.chooseChain.then(async () => {
+    if (gen !== state.lobbyGen || !state.roomId || state.snapshot?.phase !== "lobby") return;
+    const you = state.snapshot.players.find((player) => player.isYou);
+    const characterId = state.selectedCharacterId;
+    if (!characterId || you?.ready || you?.characterId === characterId) return;
+    try {
+      const snapshot = await api("choose", { characterId });
+      if (gen !== state.lobbyGen) return;
+      acceptSnapshot(snapshot);
+      renderLobby();
+    } catch {
+      // Confirming retries the choice; polling reports connection problems.
+    }
+  });
+}
+
 async function confirmCharacter() {
   if (state.lobbySubmitting) return;
+  const gen = state.lobbyGen;
   state.lobbySubmitting = true;
   renderLobby();
+  try { await state.chooseChain; } catch {}
+  if (gen !== state.lobbyGen) { state.lobbySubmitting = false; return; }
   const you = state.snapshot.players.find((player) => player.isYou);
   try {
+    if (!you?.ready && heroTakenByPartner(state.snapshot, state.selectedCharacterId)) {
+      throw new Error("Ese héroe ya lo eligió tu compañero. Elige otro.");
+    }
     if (!you?.ready && you?.characterId !== state.selectedCharacterId) {
       acceptSnapshot(await api("choose", { characterId: state.selectedCharacterId }));
     }
-    acceptSnapshot(await api("ready", { ready: !you?.ready }));
+    const readySnapshot = await api("ready", { ready: !you?.ready });
+    if (gen !== state.lobbyGen) return;
+    acceptSnapshot(readySnapshot);
     renderLobby();
   } catch (error) {
+    if (gen !== state.lobbyGen) return;
     if (error.code === "STALE_SESSION") {
       state.networkState = "session-conflict";
       showError("lobby-error", "Esta sala se reanudó desde otra pestaña. Recarga esta página para recuperar la sesión.");
     } else showError("lobby-error", error.message);
   } finally {
     state.lobbySubmitting = false;
-    renderLobby();
+    if (gen === state.lobbyGen) renderLobby();
   }
 }
 
 async function pollLoop() {
   if (state.running || !state.roomId || state.lobbyPolling) return;
   state.lobbyPolling = true;
+  const gen = state.lobbyGen;
   let delay = 600;
   try {
-    while (!state.running && state.roomId) {
+    while (!state.running && state.roomId && gen === state.lobbyGen) {
       try {
-        acceptSnapshot(await api("poll"));
+        const polled = await api("poll");
+        if (gen !== state.lobbyGen) break;
+        acceptSnapshot(polled);
         state.networkState = "connected";
         state.pollDelay = 250;
         if (["playing", "won", "lost"].includes(state.snapshot.phase)) enterGame();
         else renderLobby();
         delay = 600;
       } catch (error) {
+        if (gen !== state.lobbyGen) break;
         if (error.code === "DISCONNECTED" && await reconnectSession()) continue;
         if (error.code === "STALE_SESSION") {
           state.networkState = "session-conflict";
@@ -344,8 +413,36 @@ async function pollLoop() {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   } finally {
-    state.lobbyPolling = false;
+    if (gen === state.lobbyGen) state.lobbyPolling = false;
   }
+}
+
+// "Volver al inicio": leave the room (same disconnect action as closing the
+// tab), forget the saved session and show the mode/room choice again.
+function leaveRoom() {
+  const roomId = state.roomId, identity = state.identity;
+  state.lobbyGen++;
+  state.roomId = ""; state.identity = null; state.snapshot = null;
+  state.selectedCharacterId = ""; state.sequence = 0; state.localPose = null;
+  state.lobbyPolling = false; state.lobbySubmitting = false; state.reconnecting = false;
+  state.chooseChain = Promise.resolve(); state.networkState = "connected";
+  try { sessionStorage.removeItem("ohana-coop-session"); } catch {}
+  try { const url = new URL(location.href); url.searchParams.delete("room"); history.replaceState(null, "", url); } catch {}
+  if (roomId && identity) {
+    void fetch(endpoint, {
+      method: "POST", keepalive: true, headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "disconnect", roomId, identity }),
+    }).catch(() => {});
+  }
+  showError("lobby-error"); showError("entry-error");
+  $("room-code").textContent = "";
+  $("room-input").value = "";
+  if ($("share-url")) { $("share-url").value = ""; $("share-url").hidden = true; }
+  if ($("invite-banner")) $("invite-banner").hidden = true;
+  document.querySelector(".join-card")?.classList.remove("invited");
+  lobby.hidden = true; gamePanel.hidden = true; entry.hidden = false;
+  window.scrollTo({ top: 0 });
+  $("create-room")?.focus({ preventScroll: true });
 }
 
 async function reconnectSession() {
@@ -1215,6 +1312,7 @@ $("join-room").addEventListener("click", async () => {
   finally { state.entrySubmitting = false; $("create-room").disabled = false; $("join-room").disabled = false; }
 });
 $("confirm-character").addEventListener("click", () => void confirmCharacter());
+$("leave-room")?.addEventListener("click", leaveRoom);
 function copyText(text) {
   if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
   return new Promise((resolve, reject) => {
