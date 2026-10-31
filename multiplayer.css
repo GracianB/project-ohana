@@ -444,3 +444,24 @@ html[lang="en"] .character-card.partner-picked::before { content:"YOUR TEAMMATE"
   .selection-preview { bottom:calc(72px + env(safe-area-inset-bottom)); }
   .character-grid { padding-bottom:8px; }
 }
+/* V634: resume a running match from the lobby page without a redirect trap. */
+.resume-room{display:flex;align-items:center;gap:.4em;margin:0 0 14px;width:max-content;max-width:100%}
+.resume-room[hidden]{display:none}
+.resume-room [data-room]{font-family:ui-monospace,monospace;letter-spacing:.08em}
+/* V634 photobooth: 8-frame strips rendered from the real rig, played on hover,
+   keyboard focus and selection; static first frame for reduced motion. */
+.character-card .hero-frame { position:relative;display:block;width:min(100%,108px);aspect-ratio:1;margin:0 auto 6px;border:1px solid rgba(206,240,225,.09);border-radius:17px;overflow:hidden;background:radial-gradient(ellipse at 50% 65%,rgba(67,124,126,.42),rgba(11,35,51,.24) 68%); }
+.character-card .hero-frame canvas { width:100%;height:100%;margin:0;border:0;border-radius:0;background:none; }
+.character-card .photobooth { position:absolute;inset:4% 2% 0;display:block;background-repeat:no-repeat;background-size:800% 100%;background-position:0 0;opacity:0;transition:opacity .18s ease; }
+.character-card .hero-frame.has-booth canvas { opacity:0; }
+.character-card .hero-frame.has-booth .photobooth { opacity:1; }
+.character-card .hero-name { display:block; }
+@keyframes ohana-photobooth { from { background-position:0 0; } to { background-position:100% 0; } }
+.character-card:hover:not(:disabled) .photobooth,
+.character-card:focus-visible .photobooth,
+.character-card.selected .photobooth { animation:ohana-photobooth 1.6s steps(8,jump-none) infinite; }
+.character-card.selected .hero-frame { border-color:rgba(255,226,154,.45); }
+@media (prefers-reduced-motion: reduce) {
+  .character-card .photobooth { animation:none !important;transition:none; }
+}
+@media (max-width:650px) { .character-card .hero-frame { width:min(100%,96px); } }

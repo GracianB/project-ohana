@@ -275,37 +275,58 @@ function renderLobby() {
     slots.append(card);
   }
 
+  // V634: cards are built once and then only updated, so polling never
+  // restarts the photobooth animation, steals focus or re-paints portraits.
   const grid = $("character-grid");
-  grid.replaceChildren();
-  for (const character of ROSTER) {
-    const button = document.createElement("button");
-    button.type = "button";
-    const partnerPick = !!partner?.characterId && partner.characterId === character.id;
-    const taken = heroTakenByPartner(snap, character.id);
-    button.className = `character-card${state.selectedCharacterId === character.id ? " selected" : ""}${partnerPick ? " partner-picked" : ""}${taken ? " taken" : ""}`;
-    button.setAttribute("aria-label", `Seleccionar a ${character.name}`);
-    button.setAttribute("aria-pressed", String(state.selectedCharacterId === character.id));
+  if (grid.children.length !== ROSTER.length || grid.dataset.built !== "1") {
+    grid.replaceChildren();
+    grid.dataset.built = "1";
+    for (const character of ROSTER) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.hero = character.id;
+      button.setAttribute("aria-label", `Seleccionar a ${character.name}`);
+      const frame = document.createElement("span");
+      frame.className = "hero-frame";
+      frame.setAttribute("aria-hidden", "true");
+      const portrait = document.createElement("canvas");
+      portrait.width = 120;
+      portrait.height = 112;
+      drawPortrait(portrait, character);
+      // Photobooth strip rendered from the real rig (tools/render-photobooth.mjs).
+      const booth = document.createElement("span");
+      booth.className = "photobooth";
+      const strip = new Image();
+      strip.decoding = "async";
+      strip.onload = () => { booth.style.backgroundImage = `url("${strip.src}")`; frame.classList.add("has-booth"); };
+      strip.src = `assets/photobooth/${character.id}.webp?v=ohana-634`;
+      frame.append(portrait, booth);
+      const label = document.createElement("span");
+      label.className = "hero-name";
+      label.textContent = character.name;
+      const role = document.createElement("small");
+      role.textContent = character.role;
+      button.append(frame, label, role);
+      button.addEventListener("click", () => {
+        if (heroTakenByPartner(state.snapshot, character.id)) return;
+        state.selectedCharacterId = character.id;
+        showError("lobby-error");
+        renderLobby();
+        sendLiveChoice();
+      });
+      grid.append(button);
+    }
+  }
+  for (const button of grid.children) {
+    const id = button.dataset.hero;
+    const partnerPick = !!partner?.characterId && partner.characterId === id;
+    const taken = heroTakenByPartner(snap, id);
+    const selected = state.selectedCharacterId === id;
+    button.className = `character-card${selected ? " selected" : ""}${partnerPick ? " partner-picked" : ""}${taken ? " taken" : ""}`;
+    button.setAttribute("aria-pressed", String(selected));
     button.dataset.partnerPicked = String(partnerPick);
-    if (taken) button.title = "Elegido por tu compañero";
+    if (taken) button.title = "Elegido por tu compañero"; else button.removeAttribute("title");
     button.disabled = !!you?.ready || snap.phase !== "lobby" || taken;
-    const portrait = document.createElement("canvas");
-    portrait.width = 120;
-    portrait.height = 112;
-    portrait.setAttribute("aria-hidden", "true");
-    drawPortrait(portrait, character);
-    const label = document.createElement("span");
-    label.textContent = character.name;
-    const role = document.createElement("small");
-    role.textContent = character.role;
-    button.append(portrait, label, role);
-    button.addEventListener("click", () => {
-      if (heroTakenByPartner(state.snapshot, character.id)) return;
-      state.selectedCharacterId = character.id;
-      showError("lobby-error");
-      renderLobby();
-      sendLiveChoice();
-    });
-    grid.append(button);
   }
 
   const preview = ROSTER.find((character) => character.id === state.selectedCharacterId);
@@ -1296,6 +1317,7 @@ $("create-room").addEventListener("click", async () => {
   $("create-room").disabled = true;
   $("join-room").disabled = true;
   showError("entry-error");
+  forgetSavedSession(); state.identity = null; state.roomId = ""; state.lobbyGen++;
   try { enterLobby(await api("create",{mode:$("room-mode")?.value||"adventure",arenaId:$("room-arena")?.value||"w1-kilo"})); }
   catch (error) { showError("entry-error", error.message); }
   finally { state.entrySubmitting = false; $("create-room").disabled = false; $("join-room").disabled = false; }
@@ -1306,7 +1328,13 @@ $("join-room").addEventListener("click", async () => {
   $("create-room").disabled = true;
   $("join-room").disabled = true;
   showError("entry-error");
-  state.roomId = $("room-input").value.trim().toUpperCase();
+  const code = normalizeRoomCode($("room-input").value);
+  // A typed/linked code is a brand-new seat: never send a previous room's
+  // credentials (the server answers INVALID_SESSION) and never let a pending
+  // tab-restore pull this player back into the old room.
+  if (code !== state.roomId) { forgetSavedSession(); state.identity = null; }
+  state.lobbyGen++;
+  state.roomId = code;
   try { enterLobby(await api("join")); }
   catch (error) { showError("entry-error", error.message); }
   finally { state.entrySubmitting = false; $("create-room").disabled = false; $("join-room").disabled = false; }
@@ -1378,20 +1406,66 @@ window.addEventListener("pagehide", () => {
   }
 });
 
-try {
-  const saved = JSON.parse(sessionStorage.getItem("ohana-coop-session") || "null");
-  if (saved?.roomId && saved?.identity?.playerId && saved?.identity?.token) {
-    state.roomId = saved.roomId;
-    state.identity = saved.identity;
-    void api("join", { identity: state.identity })
-      .then(enterLobby)
-      .catch(() => {
-        sessionStorage.removeItem("ohana-coop-session");
-        state.roomId = "";
-        state.identity = null;
-      });
+function normalizeRoomCode(value) {
+  return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+}
+function readSavedSession() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem("ohana-coop-session") || "null");
+    return saved?.roomId && saved?.identity?.playerId && saved?.identity?.token ? saved : null;
+  } catch { return null; }
+}
+// Drop the previous room of this tab (after a match, or when a new invite is
+// opened in the same tab) and politely release that old seat.
+function forgetSavedSession() {
+  const saved = readSavedSession();
+  try { sessionStorage.removeItem("ohana-coop-session"); } catch {}
+  $("resume-room")?.setAttribute("hidden", "");
+  if (saved && saved.roomId !== state.roomId) {
+    try { void fetch(endpoint, { method: "POST", keepalive: true, headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "disconnect", roomId: saved.roomId, identity: saved.identity }) }); } catch {}
   }
-} catch {}
+}
+// V634: the second player used to get stuck when opening an invite in a tab
+// that had played before. The old session was restored blindly: the player
+// was re-joined to the OLD room (ignoring ?room=NEW) and, as that room was
+// already "playing", bounced into index.html?online=1 with a dead session,
+// while the host of the new room waited forever.
+function restoreSavedSession() {
+  const saved = readSavedSession();
+  if (!saved) return;
+  const linked = normalizeRoomCode(new URLSearchParams(location.search).get("room"));
+  if (linked && linked !== saved.roomId) { forgetSavedSession(); return; }
+  const gen = state.lobbyGen;
+  state.roomId = saved.roomId;
+  state.identity = saved.identity;
+  void api("join", { identity: saved.identity })
+    .then((snapshot) => {
+      if (gen !== state.lobbyGen || state.entrySubmitting) return;
+      if (["playing", "won", "lost", "complete"].includes(snapshot?.phase)) {
+        // Coming back to the lobby page from a running match must not trap the
+        // player in a redirect loop: offer to resume, otherwise start fresh.
+        state.identity = snapshot.identity || saved.identity;
+        try { sessionStorage.setItem("ohana-coop-session", JSON.stringify({ ...saved, identity: state.identity })); } catch {}
+        state.roomId = "";
+        const resume = $("resume-room");
+        if (resume) {
+          resume.querySelector("[data-room]").textContent = snapshot.roomId;
+          resume.removeAttribute("hidden");
+          resume.onclick = () => { state.lobbyGen++; enterLobby(snapshot); };
+        }
+        state.identity = null;
+        return;
+      }
+      enterLobby(snapshot);
+    })
+    .catch(() => {
+      if (gen !== state.lobbyGen) return;
+      try { sessionStorage.removeItem("ohana-coop-session"); } catch {}
+      state.roomId = "";
+      state.identity = null;
+    });
+}
+restoreSavedSession();
 
 // Keep the archived cooperative page informative, not a paid-service trap.
 if (LIVE_COOP_PAUSED) {

@@ -25,6 +25,7 @@ const STATIC = {
   ".join-card h3": ["Unirse con código", "Join with a code"],
   ".join-card > p": ["Pega el código que te ha enviado quien creó la sala.", "Enter the code sent by the person who created the room."],
   "#join-room": ["Unirse", "Join room"],
+  "#resume-room .resume-label": ["Volver a tu partida en curso", "Back to your match in progress"],
   "#room-input": ["ABC · 123", "ABC · 123"],
   "#lobby > .eyebrow": ["ANTES DE PARTIR", "BEFORE YOU SET OFF"],
   "#lobby > h2": ["Elegid a vuestros héroes", "Choose your heroes"],
@@ -179,8 +180,8 @@ function inviteInit() {
 function decorateHeroCards() {
   const grid = $("character-grid"); if (!grid) return;
   for (const card of grid.querySelectorAll(".character-card")) {
-    const name = card.querySelector("span")?.textContent.trim();
-    const hero = ROSTER.find((item) => item.name === name);
+    const name = card.querySelector(".hero-name")?.textContent.trim();
+    const hero = ROSTER.find((item) => item.id === card.dataset.hero) || ROSTER.find((item) => item.name === name);
     if (hero && !card.querySelector(".hero-ability")) {
       const ability = document.createElement("small");
       ability.className = "hero-ability";
