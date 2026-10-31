@@ -677,7 +677,7 @@ const PRECACHE_REVISIONS = {
   "multiplayer.js": "310e14b30c850c69526c1a921da00f50f59f5e20",
   "multiplayer/mission.js": "e94f85833c4c66f3ac8e2e51d1162d7e6db1cdd1",
   "multiplayer/duo-altars.js": "29aafd8ca96cd1320d75cbd2b7be6bd107a569b0",
-  "multiplayer/lobby-ux.js": "1dbb72a918238c88c38d0c9c388cc96d3fd0234a",
+  "multiplayer/lobby-ux.js": "739da6485cbaefed75b2ebeae9ca6f47e9fdf505",
   "manifest.json": "3e910803d5c4ea7d158370d0b5becb462c23d77b",
   "favicon.svg": "0abf301dd591cf61ff22025c55d3308d6a61c8d7",
   "style.css": "6769861d61e32ff7f4e6bacd4259f4b890c775f0",

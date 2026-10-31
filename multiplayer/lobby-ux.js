@@ -10,7 +10,7 @@ if (params.has("lang")) localStorage.setItem(LANG_KEY, lang);
 
 const STATIC = {
   ".coop-head h1": ["PROJECT <span>OHANA</span><small class=\"header-tagline\">· DOS EN LA MISMA ISLA</small>", "PROJECT <span>OHANA</span><small class=\"header-tagline\">· TWO ON ONE ISLAND</small>"],
-  ".coop-head a[href='./index.html']": ["Volver a OHANA", "Back to OHANA"],
+  ".coop-head-actions > a": ["Volver a OHANA", "Back to OHANA"],
   "#entry > .eyebrow": ["DOS JUGADORES · UNA SOLA ISLA", "TWO PLAYERS · ONE ISLAND"],
   "#entry > h2": ["La aventura cambia cuando la compartes.", "The adventure changes when you share it."],
   ".entry-intro": ["Invita a alguien a Isla Hoku. Elegid un modo, escoged héroes distintos y empezad en unos segundos.", "Invite someone to Isla Hoku. Pick a mode, choose different heroes and start playing in seconds."],
