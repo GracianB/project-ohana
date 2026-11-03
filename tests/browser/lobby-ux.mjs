@@ -38,7 +38,7 @@ async function wire(context) {
 }
 const server = await startServer(0);
 const origin = `http://127.0.0.1:${server.address().port}`;
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_BIN || undefined });
 const shots = process.env.OHANA_SHOTS || "";
 try {
   const hostCtx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -48,6 +48,7 @@ try {
   const langCtx = await browser.newContext();
   const langPage = await langCtx.newPage();
   await langPage.goto(origin + "/multiplayer.html?lang=en");
+  await langPage.waitForFunction(() => document.body.dataset.lobbyReady === 'true');
   assert.equal(await langPage.evaluate(() => document.documentElement.lang), "en", "?lang=en selects English");
   assert.equal(await langPage.evaluate(() => localStorage.getItem("ohana-lobby-lang")), "en", "language choice is remembered");
   await langCtx.close();

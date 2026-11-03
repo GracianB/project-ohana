@@ -1,19 +1,19 @@
 {
   "schema_version": 2,
-  "updated_on": "2026-10-31",
-  "release": "ohana-630",
+  "updated_on": "2026-11-03",
+  "release": "ohana-635",
   "repository": "GracianB/project-ohana",
-  "published": true,
+  "published": false,
   "v1_ready": false,
-  "next_task": "user_play_V630_objects_ritual_and_fighter_choice",
-  "validation": "docs/V630-VALIDATION.json",
-  "publication": "docs/V630-PUBLICATION.json",
+  "next_task": "publish_and_verify_GitHub_multiplayer_entry_and_obtain_Handshake_URL",
+  "validation": "docs/V635-VALIDATION.json",
+  "publication": "docs/V635-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
   "remote_multiplayer": "active_remote_validation_pending",
   "human_acceptance": "pending_user_play",
   "functional_release_ready": true,
   "campaign_complete_verified": true,
   "previous_verified_campaign": "docs/V623-VALIDATION.json",
-  "source_commit": "7b5d197df92a68095ae291f708fce517ae321654",
-  "remote_multiplayer_evidence": "docs/MULTIPLAYER-STATUS-2026-10-31.json"
+  "remote_multiplayer_evidence": "docs/MULTIPLAYER-STATUS-2026-10-31.json",
+  "contest_submission": "unverified_account_and_submitted_URL_not_accessible"
 }

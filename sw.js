@@ -1,6 +1,8 @@
-const VERSION = "ohana-630";
+const VERSION = "ohana-635";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./multiplayer/entry.js",
+  "./multiplayer/entry-route.js",
   "./final-ritual.css?v=" + VERSION,
   "./systems/expedition-art-v630.js?v=" + VERSION,
   "./systems/final-ritual.js?v=" + VERSION,
@@ -464,6 +466,8 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
+  "multiplayer/entry-route.js": "41d98a5b44ec9d397c4677de0c83f6017f373b5d",
   "final-ritual.css": "cb3fa260f55cd948ce875311f33f0adffcdfb16a",
   "systems/expedition-art-v630.js": "96ed88a7a897c8a90d84e7e31e98e99b62aec340",
   "systems/final-ritual.js": "c5c1f7f38aea3261834fded45c620b2d6cf1a533",
@@ -671,8 +675,8 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "97daa011fee4616e15717b33e0284b2a452c4b65",
-  "multiplayer.html": "69133d83043b6d13943f16f2457928425650a0df",
+  "index.html": "41b22949a1033d5ad18bfbb436c34706e5cd4a96",
+  "multiplayer.html": "778d4e60ca9b94799d52206d48c7e8827c72510b",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
   "multiplayer/mission.js": "e94f85833c4c66f3ac8e2e51d1162d7e6db1cdd1",
@@ -686,7 +690,7 @@ const PRECACHE_REVISIONS = {
   "hud.css": "8a068d897af1860c0e5066be81b0c6ffb2d89c7f",
   "evo.css": "132220ace77530b5c4e976e03f43addfef22d343",
   "ending.css": "ffc8a6dd5e296d52514e2b275ae6d472115bc164",
-  "intro.css": "7d9f7e09b1d5c0decc36df1b0e349c7fc8980a1e",
+  "intro.css": "a1a10c693c8b80f3eb9106c481c02a9bc8cbc13d",
   "demo.css": "44b745dbace004886fc317f8c9ea0a654cd37de2",
   "experience.css": "b091139825feb6be1a678f3ba5ebd77f2bb29306",
   "cinematic-ui.css": "7ad72aeca6bf6df8270ca865972fb098f2f450a1",
@@ -860,7 +864,7 @@ const PRECACHE_REVISIONS = {
   "systems/frame-pressure.js": "0386d6604ecfaa482a482eb9216962bf7413c720",
   "systems/hero-mastery.js": "830da8e6a6b2eb2352024b22b2b10cd69373c020",
   "systems/hazards.js": "c7e540b2c7b725405064887b53c46f01baf7759a",
-  "systems/intro.js": "686a57f93d9649274b525ed440652a72bbd73c0e",
+  "systems/intro.js": "6498c9cbed7ad2c168b692333a4b94a65ee0b8f8",
   "systems/intro-cast-fit.js": "e23ad877d1deadb5769d639d5fa2200fb69573c6",
   "systems/welcome-spotlight.js": "bde0b1deb3a2f1fc80eb182dd761fc09c93014bc",
   "systems/intro-dragon-stage.js": "d7a0d895dc6406011b408fc16c4ae6a0a9566eed",

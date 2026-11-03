@@ -535,7 +535,7 @@ test('phase 42: offline precache no tiene duplicados y mantiene cobertura total'
 
 test('phase 43: el grafo ESM local resuelve todas las importaciones relativas', () => {
   const runtimeDirs = ['./characters', './engine', './systems', './worlds', './multiplayer'];
-  const files = ['./game.js'];
+  const files = ['./game.js', './multiplayer.js'];
   const walk = (dir) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const path = dir + '/' + entry.name;

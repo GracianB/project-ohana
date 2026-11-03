@@ -1,0 +1,137 @@
+{
+  "release": "ohana-635",
+  "recorded_at": "2026-11-03T19:21:08.504897+00:00",
+  "base_commit": "6857a101f80c1aadd7a171c7df12c85ef6ce489b",
+  "scope": "docs/V635-ONLINE.md",
+  "baseline": {
+    "public_Pages_files_already_matched_latest_main": {
+      "index.html": {
+        "baseline_sha256": "72e28230674bba02273c0f57408667eb76188f1c6b67af8b99d26592caf6c6ac",
+        "public_sha256": "72e28230674bba02273c0f57408667eb76188f1c6b67af8b99d26592caf6c6ac",
+        "match": true
+      },
+      "multiplayer.html": {
+        "baseline_sha256": "256215c36351b138e237e8fdedde88b4e1f11ad55cbaebb6d955965134cee7f7",
+        "public_sha256": "256215c36351b138e237e8fdedde88b4e1f11ad55cbaebb6d955965134cee7f7",
+        "match": true
+      }
+    },
+    "Pages_run": "https://github.com/GracianB/project-ohana/actions/runs/41158017710",
+    "confirmed_problem": "The main build was published, but online entry was hidden/disabled and direct Pages lobby attempted the disabled static-origin client.",
+    "secondary_repository": {
+      "name": "GracianB/project-ohana-multiplayer",
+      "remote_main": "ba313b2b33ca5ab59cf10e6a948b14559cc8dbd7",
+      "scope": "Read-only git ls-remote. This does not establish which repository Netlify currently deploys."
+    }
+  },
+  "checks": {
+    "node22": {
+      "result": "pass",
+      "tests": 1831,
+      "failures": 0,
+      "command": "node@22 --test tests/*.js"
+    },
+    "offline_integrity": {
+      "result": "pass",
+      "cache": "ohana-635",
+      "runtime_modules_reported_by_gate": 389,
+      "precache_resources": 455
+    },
+    "native_entry_and_bootstrap": {
+      "result": "pass",
+      "environment": "local source and Pages-shaped routing fixture",
+      "reports": [
+        {
+          "width": 1280,
+          "height": 900,
+          "welcomeInput": "native Tab/Enter",
+          "visibleWelcomeAndMenuLinks": true,
+          "noOverlap": true,
+          "noTestHooks": true,
+          "destination": "https://project-ohana-multiplayer.netlify.app/multiplayer",
+          "apiRequests": [],
+          "errors": []
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "welcomeInput": "native touch",
+          "visibleWelcomeAndMenuLinks": true,
+          "noOverlap": true,
+          "noTestHooks": true,
+          "destination": "https://project-ohana-multiplayer.netlify.app/multiplayer",
+          "apiRequests": [],
+          "errors": []
+        },
+        {
+          "width": 320,
+          "height": 568,
+          "welcomeInput": "native touch",
+          "visibleWelcomeAndMenuLinks": true,
+          "noOverlap": true,
+          "noTestHooks": true,
+          "destination": "https://project-ohana-multiplayer.netlify.app/multiplayer",
+          "apiRequests": [],
+          "errors": []
+        },
+        {
+          "localLobbyBoot": true,
+          "downloadFailureRecoverable": true,
+          "controlsInertUntilReady": true,
+          "retryPreservesInvitation": true,
+          "englishReady": true,
+          "noAutomaticApiRequests": true
+        },
+        {
+          "directPagesLobby": true,
+          "source": "Pages-shaped local source fixture",
+          "destination": "https://project-ohana-multiplayer.netlify.app/multiplayer?room=ABC234&lang=en#invite",
+          "invitationPreserved": true,
+          "noPagesApiRequests": true,
+          "noLobbyClientsInitialized": true
+        }
+      ],
+      "limits": "Netlify navigation is deliberately intercepted; these checks verify visible entry, native keyboard/touch and the invitation redirect, not remote backend availability or a two-device match.",
+      "artifact": "test-results/v635/public-entry.json"
+    },
+    "lobby_ux_regression": {
+      "result": "pass",
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/lobby-ux.mjs",
+      "checks": "Invite link, share, status pill, ES/EN, animated preview, mobile390. Uses intercepted local room service."
+    },
+    "V634_invite_and_session_regression": {
+      "result": "pass",
+      "command": "CHROMIUM_BIN=/usr/bin/chromium node tests/browser/v634-rejoin-invite.mjs",
+      "checks": "First round, new invite overrides old session, second round, explicit resume and fresh room. Uses local room-service fixtures and engine-entry stubs."
+    },
+    "workflow_yaml": {
+      "result": "pass",
+      "steps": 84,
+      "new_entry_and_two_lobby_regressions_included": true
+    },
+    "independent_audit": {
+      "result": "confirmed_and_fixed",
+      "findings": [
+        "Hidden disabled entry button and stale pause expectations",
+        "Pages cannot run same-origin Netlify Functions; redirect before clients",
+        "Native keyboard focus must include the welcome anchor",
+        "Dynamic lobby bootstrap must expose readiness before interaction"
+      ],
+      "no_CORS_or_paid_service_changes": true
+    }
+  },
+  "source_blobs": {
+    "index.html": "41b22949a1033d5ad18bfbb436c34706e5cd4a96",
+    "sw.js": "852bc3d870102165220df19284dde7c8205a8a2d",
+    "intro.css": "a1a10c693c8b80f3eb9106c481c02a9bc8cbc13d",
+    "systems/intro.js": "6498c9cbed7ad2c168b692333a4b94a65ee0b8f8",
+    "multiplayer.html": "778d4e60ca9b94799d52206d48c7e8827c72510b",
+    "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
+    "multiplayer/entry-route.js": "41d98a5b44ec9d397c4677de0c83f6017f373b5d"
+  },
+  "remote_and_submission_limits": {
+    "Netlify": "Current access attempt returned Tunnel connection failed: 403 Forbidden. This is an environment network restriction, not evidence that Netlify is paused. Navigation interception is not a remote match.",
+    "Handshake_SME": "Account and submitted URL could not be read; requested the URL from the user. No submission status, deadline or submitted URL is inferred.",
+    "gameplay": "No rules, balance, hero art, saves, backend configuration or billing changed. No new campaign completion or physical gamepad claim."
+  }
+}

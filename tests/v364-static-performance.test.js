@@ -86,11 +86,11 @@ test("V364 leaves dynamic backends untouched and never caches external origins",
   assert.equal(h.networkCalls(), 0);
 });
 
-test("V364 static distribution and UI do not point players to exhausted Netlify", () => {
+test("static distribution links to the reactivated lobby without caching its backend", () => {
   assert.ok(currentVersion && Number(currentVersion.slice(6)) >= 364);
   assert.ok([...home.matchAll(/ohana-\d+/g)].every(x => x[0] === currentVersion));
-  assert.match(home, /id="btn-coop"[^>]+disabled/);
-  assert.doesNotMatch(home, /netlify\.app/);
+  assert.match(home, /<a id="btn-coop"[^>]+href="https:\/\/project-ohana-multiplayer\.netlify\.app\/multiplayer"/);
+  assert.doesNotMatch(home, /id="btn-coop"[^>]+(?:disabled|hidden)/);
   assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
   const precachedScripts = [...sw.matchAll(/"\.\/[^"]+\.js\?v=" \+ VERSION/g)];
   assert.ok(precachedScripts.length > 100, "preserve full offline module graph");
