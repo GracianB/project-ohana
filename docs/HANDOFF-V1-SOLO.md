@@ -1,3 +1,7 @@
+# Última revisión: V635 · Entrada al multijugador desde GitHub
+
+La bienvenida y el selector muestran el acceso online; el vestíbulo de GitHub lleva al host de Netlify conservando invitaciones. Se conservan los cambios del usuario hasta V634 y 6857a10. Ver [alcance y límites](V635-ONLINE.md), [validación](V635-VALIDATION.json) y [publicación](V635-PUBLICATION.json). El acceso remoto desde este entorno y la URL entregada en Handshake siguen pendientes de comprobación.
+
 # Última revisión: V630 · Objetos, núcleos y elección de combatiente
 
 El Acto II de las diez salas recibe objetos propios. En el Corazón, tres piezas físicas alimentan cada núcleo; el jugador elige quién se enfrenta a cada guardián y a Quimera. Se conservan los rescates ganados. Guardianes con gestos propios, corrección de los ojos de Dino, ataques más legibles y contador de pruebas separado del sello. Estado efectivo: [alcance](V630-RITUAL.md), [validación](V630-VALIDATION.json), [publicación](V630-PUBLICATION.json).

@@ -38,7 +38,7 @@ async function wire(context) {
 }
 const server = await startServer(0);
 const origin = `http://127.0.0.1:${server.address().port}`;
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_BIN || undefined });
 const joins = [];
 async function ctx(options = {}) {
   const context = await browser.newContext(options);

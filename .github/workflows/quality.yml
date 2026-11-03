@@ -322,6 +322,12 @@ jobs:
         run: npm run test:browser:michi-art
       - name: V627 final mirrors · real family actors in room, selection and films
         run: npm run test:browser:final-mirrors
+      - name: V635 visible online entry and Pages invitation routing
+        run: |
+          npm run test:browser:public-entry
+          node tests/browser/lobby-ux.mjs
+          node tests/browser/v634-rejoin-invite.mjs
+
       - name: V630 chapter relics, ritual and ten earned guardian rematches
         run: |
           npm run test:browser:ritual-relics

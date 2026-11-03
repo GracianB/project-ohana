@@ -20,11 +20,17 @@
   <meta name="twitter:description" content="Co-op adventure and versus for two players in the browser. One room code, any phone or laptop.">
   <meta name="twitter:image" content="https://project-ohana-multiplayer.netlify.app/assets/og/ohana-og.jpg">
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="style.css?v=ohana-coop-8">
-  <link rel="stylesheet" href="multiplayer.css?v=ohana-coop-8">
+  <link rel="stylesheet" href="style.css?v=ohana-coop-9">
+  <link rel="stylesheet" href="multiplayer.css?v=ohana-coop-9">
 </head>
-<body>
-  <main class="coop-shell">
+<body data-lobby-ready="loading">
+  <section id="lobby-startup" class="coop-shell" role="status" aria-live="polite" aria-atomic="true">
+    <div class="coop-panel">
+      <p id="lobby-startup-message">Preparando el vestíbulo…</p>
+      <button id="lobby-startup-retry" class="coop-button secondary" type="button" hidden>Reintentar</button>
+    </div>
+  </section>
+  <main id="lobby-main" class="coop-shell" inert aria-busy="true">
     <header class="coop-head">
       <h1>PROJECT <span>OHANA</span><small class="header-tagline">· DOS EN LA MISMA ISLA</small></h1>
       <div class="coop-head-actions">
@@ -148,7 +154,6 @@
       </div>
     </section>
   </main>
-  <script type="module" src="multiplayer.js?v=ohana-coop-8"></script>
-  <script type="module" src="multiplayer/lobby-ux.js?v=ohana-coop-8"></script>
+  <script type="module" src="multiplayer/entry.js?v=ohana-coop-9"></script>
 </body>
 </html>

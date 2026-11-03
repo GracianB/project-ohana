@@ -73,7 +73,8 @@
     "test:browser:ritual-relics": "node tests/browser/v630-ritual-relics.mjs",
     "test:browser:gauntlet": "node tests/browser/v603-gauntlet.mjs",
     "test:browser:guardian-art": "node tests/browser/v630-guardian-art.mjs",
-    "test:browser:ritual-native": "node tests/browser/v630-ritual-native.mjs"
+    "test:browser:ritual-native": "node tests/browser/v630-ritual-native.mjs",
+    "test:browser:public-entry": "node tests/browser/v635-public-entry.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

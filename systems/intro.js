@@ -83,7 +83,7 @@ export function playTitleIntro(options = {}) {
     '<canvas aria-hidden="true"></canvas>' +
     '<div class="oi-welcome" aria-hidden="true"><span>DIEZ VOCES. UNA FAMILIA.</span><strong class="ohana-wordmark" aria-label="Ohana"><i>O</i><i>H</i><i>A</i><i>N</i><i>A</i></strong><small>Un mundo que despierta cuando jugamos juntos.</small></div>' +
     '<div class="oi-story-dialogue" aria-live="polite" aria-atomic="true"><span class="oi-story-chapter"></span><strong class="oi-story-speaker"></strong><p class="oi-story-line"></p></div>' +
-    '<div class="oi-story-controls"><button type="button" class="oi-pause" aria-pressed="false">Pausar</button></div>' +
+    '<div class="oi-story-controls"><button type="button" class="oi-pause" aria-pressed="false">Pausar</button><a class="oi-online" href="https://project-ohana-multiplayer.netlify.app/multiplayer">2 jugadores · Online ↗</a></div>' +
     '<button class="oi-enter" type="button">EMPEZAR LA AVENTURA →</button>';
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
@@ -189,7 +189,7 @@ export function playTitleIntro(options = {}) {
   pauseButton.onclick = () => { storyPaused = !storyPaused; duckMusic(storyPaused); pauseButton.textContent = storyPaused ? "Continuar" : "Pausar"; pauseButton.setAttribute("aria-pressed",String(storyPaused)); };
   // The family performs continuously. No sentence picker between the player and the scene.
   el.addEventListener("pointerdown", e => {
-    if(e.target.closest("button,.oi-story-dialogue"))return;
+    if(e.target.closest("button,a[href],.oi-story-dialogue"))return;
     if(reduce)return;
     const b=el.getBoundingClientRect();
     stageTouch={x:e.clientX-b.left,y:e.clientY-b.top,at:performance.now()/1000};
@@ -832,10 +832,10 @@ export function playTitleIntro(options = {}) {
 
   function storyKeys(e){
     if(e.key==="Tab"){
-      const buttons=[...el.querySelectorAll("button")].filter(b=>!b.hidden);const i=buttons.indexOf(document.activeElement);
+      const buttons=[...el.querySelectorAll("button,a[href]")].filter(b=>!b.hidden);const i=buttons.indexOf(document.activeElement);
       e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();return;
     }
-    if(e.key===" "&&!e.target?.closest?.("button")){e.preventDefault();e.stopImmediatePropagation();pauseButton.click();}
+    if(e.key===" "&&!e.target?.closest?.("button,a[href]")){e.preventDefault();e.stopImmediatePropagation();pauseButton.click();}
   }
 
   function onResize(){fc.resize();}

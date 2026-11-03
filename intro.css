@@ -66,6 +66,8 @@ body.intro-complete #start-intro,body.intro-complete #ohana-intro,body.playing #
 .oi-story-line {margin:5px 0 0;color:#f2f2e4;font:500 16px/1.45 Outfit,sans-serif;min-height:24px;}
 #ohana-intro .oi-story-controls {position:absolute;z-index:8;bottom:30px;left:24px;display:flex;gap:8px;}
 #ohana-intro .oi-story-controls button {min-height:42px;padding:9px 13px;border:1px solid #add7d34d;border-radius:10px;color:#def0e6;background:#12313c;font:700 11px Outfit,sans-serif;cursor:pointer;}
+#ohana-intro .oi-story-controls .oi-online {display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 16px;border:1px solid #e2c985;border-radius:10px;color:#fff1c5;background:#153b4e;font:700 11px Outfit,sans-serif;text-decoration:none;}
+#ohana-intro .oi-story-controls .oi-online:hover,#ohana-intro .oi-story-controls .oi-online:focus-visible {background:#245b6c;outline:3px solid #ffe4a9;outline-offset:4px;}
 #ohana-intro .oi-story-controls button[aria-pressed=true] {background:#d9c99e;color:#163240;}
 #ohana-intro .oi-story-controls button:focus-visible,#ohana-intro .oi-enter:focus-visible {outline:3px solid #ffe4a9;outline-offset:4px;}
 #ohana-intro .oi-enter {right:24px!important;left:auto!important;transform:none!important;bottom:30px!important;min-height:42px!important;}
