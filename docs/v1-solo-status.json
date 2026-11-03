@@ -3,9 +3,9 @@
   "updated_on": "2026-11-03",
   "release": "ohana-635",
   "repository": "GracianB/project-ohana",
-  "published": false,
+  "published": true,
   "v1_ready": false,
-  "next_task": "publish_and_verify_GitHub_multiplayer_entry_and_obtain_Handshake_URL",
+  "next_task": "obtain_Handshake_submitted_URL_and_verify_Netlify_remote_session_when_accessible",
   "validation": "docs/V635-VALIDATION.json",
   "publication": "docs/V635-PUBLICATION.json",
   "historical_status": "docs/v1-solo-status-v603.json",
@@ -15,5 +15,6 @@
   "campaign_complete_verified": true,
   "previous_verified_campaign": "docs/V623-VALIDATION.json",
   "remote_multiplayer_evidence": "docs/MULTIPLAYER-STATUS-2026-10-31.json",
-  "contest_submission": "unverified_account_and_submitted_URL_not_accessible"
+  "contest_submission": "unverified_account_and_submitted_URL_not_accessible",
+  "source_commit": "c8034468bcbb3bcb5844d6391b7cbff0caeefaf6"
 }

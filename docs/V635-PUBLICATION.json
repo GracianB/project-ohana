@@ -1,6 +1,153 @@
 {
   "release": "ohana-635",
-  "published": false,
-  "status": "local_checks_passed_pending_publication",
-  "validation": "docs/V635-VALIDATION.json"
+  "published": true,
+  "site": "https://gracianb.github.io/project-ohana/?release=635",
+  "multiplayer_entry": "https://project-ohana-multiplayer.netlify.app/multiplayer",
+  "verified_at": "2026-11-03T19:25:50.296084+00:00",
+  "feature_branch": "fix/v635-multiplayer-entry",
+  "feature_commit": "c94b298ba93c88ba99540268ae1f8ce7932159e6",
+  "merged_source_commit": "c8034468bcbb3bcb5844d6391b7cbff0caeefaf6",
+  "integration": "Authorized ordinary non-fast-forward Git merge. Merged tree verified identical to tested feature.",
+  "pull_request": {
+    "created": false,
+    "reason": "GitHub GraphQL Forbidden when gh pr create attempted. No PR number is claimed."
+  },
+  "pages": {
+    "result": "Success",
+    "url": "https://github.com/GracianB/project-ohana/actions/runs/41702690640",
+    "duration": "1m 41s",
+    "source_commit": "c8034468bcbb3bcb5844d6391b7cbff0caeefaf6",
+    "required_checks": "Node tests and offline release integrity"
+  },
+  "public_source_verification": {
+    "checked": "2026-11-03T19:24:46.520132+00:00",
+    "site": "https://gracianb.github.io/project-ohana/",
+    "files": [
+      {
+        "path": "index.html",
+        "expected": "41b22949a1033d5ad18bfbb436c34706e5cd4a96",
+        "actual": "41b22949a1033d5ad18bfbb436c34706e5cd4a96",
+        "match": true
+      },
+      {
+        "path": "sw.js",
+        "expected": "852bc3d870102165220df19284dde7c8205a8a2d",
+        "actual": "852bc3d870102165220df19284dde7c8205a8a2d",
+        "match": true
+      },
+      {
+        "path": "intro.css",
+        "expected": "a1a10c693c8b80f3eb9106c481c02a9bc8cbc13d",
+        "actual": "a1a10c693c8b80f3eb9106c481c02a9bc8cbc13d",
+        "match": true
+      },
+      {
+        "path": "systems/intro.js",
+        "expected": "6498c9cbed7ad2c168b692333a4b94a65ee0b8f8",
+        "actual": "6498c9cbed7ad2c168b692333a4b94a65ee0b8f8",
+        "match": true
+      },
+      {
+        "path": "multiplayer.html",
+        "expected": "778d4e60ca9b94799d52206d48c7e8827c72510b",
+        "actual": "778d4e60ca9b94799d52206d48c7e8827c72510b",
+        "match": true
+      },
+      {
+        "path": "multiplayer/entry.js",
+        "expected": "96a9506a1342f646eaa461dc1e627c141c90457b",
+        "actual": "96a9506a1342f646eaa461dc1e627c141c90457b",
+        "match": true
+      },
+      {
+        "path": "multiplayer/entry-route.js",
+        "expected": "41d98a5b44ec9d397c4677de0c83f6017f373b5d",
+        "actual": "41d98a5b44ec9d397c4677de0c83f6017f373b5d",
+        "match": true
+      }
+    ],
+    "all_match": true
+  },
+  "public_entry_navigation": {
+    "result": "pass_navigation_only",
+    "environment": "public Pages with intercepted Netlify destination",
+    "reports": [
+      {
+        "width": 1280,
+        "height": 900,
+        "welcomeInput": "native Tab/Enter",
+        "visibleWelcomeAndMenuLinks": true,
+        "noOverlap": true,
+        "noTestHooks": true,
+        "destination": "https://project-ohana-multiplayer.netlify.app/multiplayer",
+        "apiRequests": [],
+        "errors": []
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "welcomeInput": "native touch",
+        "visibleWelcomeAndMenuLinks": true,
+        "noOverlap": true,
+        "noTestHooks": true,
+        "destination": "https://project-ohana-multiplayer.netlify.app/multiplayer",
+        "apiRequests": [],
+        "errors": []
+      },
+      {
+        "width": 320,
+        "height": 568,
+        "welcomeInput": "native touch",
+        "visibleWelcomeAndMenuLinks": true,
+        "noOverlap": true,
+        "noTestHooks": true,
+        "destination": "https://project-ohana-multiplayer.netlify.app/multiplayer",
+        "apiRequests": [],
+        "errors": []
+      },
+      {
+        "directPagesLobby": true,
+        "source": "actual public Pages",
+        "destination": "https://project-ohana-multiplayer.netlify.app/multiplayer?room=ABC234&lang=en#invite",
+        "invitationPreserved": true,
+        "noPagesApiRequests": true,
+        "noLobbyClientsInitialized": true
+      }
+    ],
+    "limits": "Netlify navigation is deliberately intercepted; these checks verify visible entry, native keyboard/touch and the invitation redirect, not remote backend availability or a two-device match.",
+    "artifact": "test-results/v635/public-public-entry.json"
+  },
+  "legacy_public_site_review": {
+    "checked": "2026-11-03T19:24:24.023502+00:00",
+    "secondary_repository_main": "ba313b2b33ca5ab59cf10e6a948b14559cc8dbd7",
+    "files": [
+      {
+        "url": "https://gracianb.github.io/project-ohana-multiplayer/",
+        "status": 200,
+        "bytes": 12410,
+        "sha256": "891ddfb028c6d18cea7670dd3cc00d069a7ae06d08dfb51ec8af6304f98f4aa2",
+        "cache_versions": [
+          "ohana-223"
+        ]
+      },
+      {
+        "url": "https://gracianb.github.io/project-ohana-multiplayer/sw.js",
+        "status": 200,
+        "bytes": 6501,
+        "sha256": "595bd81a7a1993a6294cbafc41f40e75637ef251f80fa64ca8d9070a27c69025",
+        "cache_versions": [
+          "ohana-223"
+        ]
+      }
+    ],
+    "scope": "Read-only legacy-site inspection. This is not proof of what Netlify or the authenticated Handshake submission currently serves."
+  },
+  "local_validation": "docs/V635-VALIDATION.json",
+  "limitations": {
+    "Netlify": "Destination navigation was deliberately intercepted. Environment access to Netlify is blocked by tunnel403; no remote match or current Netlify deployed-source equivalence is claimed.",
+    "SME_Handshake": "Submitted URL and authenticated submission status could not be read. User was asked for the URL; no delivery, withdrawal or change was performed.",
+    "gameplay": "Existing V634 user work preserved; no new campaign, human acceptance or physical device transport validation claim."
+  },
+  "remote_multiplayer_status": "active_user_confirmed_validation_pending",
+  "stable_v1_tag_created": false
 }
