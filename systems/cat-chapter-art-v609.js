@@ -17,7 +17,7 @@ function eye(c,x,y,r,aim=1,{hurt=false,glow=MOON}={}){
  ellipse(c,x-r*.18,y-r*.3,r*.22,r*.22,'#ffffff',0,0);
 }
 
-// ─ Medusa lunar (medusa): medusa felina con campana nacarada y tentáculos bioluminiscentes
+// ─ Medusa lunar (medusa): medusa cósmica con campana nacarada y tentáculos bioluminiscentes
 function drawLunarJellyFoe(c,s){
  const {time,active,hurt,aim}=s;
  const pulse=Math.sin(time*.08)*0.07,float=Math.sin(time*.05)*3;
@@ -31,17 +31,15 @@ function drawLunarJellyFoe(c,s){
   });
   ellipse(c,k*5+wave*1.2,reach+float,2,2.5,active?MOON:PEARL,0,0);
  }
- // Orejas de gato integradas en la campana
+ // Aletas de velo translúcido lateral y ropalios marginales
  for(const side of [-1,1]){
-  const flick=Math.sin(time*.12+side)*.5;
-  fill(c,LILAC,()=>{
-   c.moveTo(side*11,float-22);c.quadraticCurveTo(side*22,float-44,side*27,float-50+flick);
-   c.quadraticCurveTo(side*35,float-28,side*26,float-12);c.closePath();
-  },1.6);
-  // triángulo interior rosado
-  fill(c,'#ffbde0',()=>{
-   c.moveTo(side*17,float-28);c.lineTo(side*25,float-43+flick);c.lineTo(side*25,float-22);c.closePath();
-  },0);
+  const flutter=Math.sin(time*.12+side*1.2)*3;
+  fill(c,'rgba(195,160,240,0.45)',()=>{
+   c.moveTo(side*16*bell,float-16);
+   c.bezierCurveTo(side*34*bell,float-28+flutter,side*36*bell,float-4+flutter,side*18*bell,float+4);
+   c.closePath();
+  },1.4);
+  ellipse(c,side*30*bell,float-12+flutter,2.2,2.2,MOON,0,0);
  }
  // Campana nacarada
  const half=32*bell;
@@ -53,6 +51,12 @@ function drawLunarJellyFoe(c,s){
   c.quadraticCurveTo(0,float+5,-half,float);
  },2.2);
  c.globalAlpha=.3;ellipse(c,-9,float-24,11,4,'#ffffff',-.3,0);c.globalAlpha=1;
+ // Canales radiales luminosos
+ for(let r=-1;r<=1;r++){
+  stroke(c,'rgba(255,255,255,0.45)',1.2,()=>{
+   c.moveTo(0,float-36);c.quadraticCurveTo(r*14,float-20,r*18*bell,float-2);
+  });
+ }
  // Mini cuernito lunar
  fill(c,MOON,()=>{c.moveTo(-4,float-36);c.lineTo(0,float-52);c.lineTo(4,float-36);},1.4);
  // Ojos somnolientas/despiertas
@@ -259,16 +263,15 @@ export function drawCatMoonJelly(ctx,s,cam,t=0,reduced=false){
   ctx.beginPath();ctx.arc(rootX+wave*1.3+k*2,y+reach,2.5,0,TAU);ctx.fill();
  }
 
- // Orejas felinas
+ // Aletas de velo translúcido sagrado y ropalios marginales
  for(const side of[-1,1]){
-  const flick=reduced?0:Math.sin(time*.11+id+side)*2.5;
-  ctx.beginPath();ctx.moveTo(x+side*12,y-27);
-  ctx.quadraticCurveTo(x+side*24,y-52,x+side*29,y-58+flick);
-  ctx.quadraticCurveTo(x+side*38,y-32,x+side*30,y-15);
-  ctx.closePath();ctx.fillStyle=pal.bell;ctx.fill();
-  ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.stroke();
-  ctx.beginPath();ctx.moveTo(x+side*20,y-33);ctx.lineTo(x+side*28,y-49+flick);ctx.lineTo(x+side*28,y-24);
-  ctx.closePath();ctx.fillStyle=pal.ear;ctx.fill();
+  const ripple=reduced?0:Math.sin(time*.11+id+side)*3;
+  ctx.beginPath();ctx.moveTo(x+side*14,y-24);
+  ctx.bezierCurveTo(x+side*38,y-44+ripple,x+side*44,y-14+ripple,x+side*22,y+2);
+  ctx.closePath();ctx.fillStyle=pal.ear+'99';ctx.fill();
+  ctx.strokeStyle=pal.rim;ctx.lineWidth=1.8;ctx.stroke();
+  ctx.beginPath();ctx.arc(x+side*34,y-26+ripple,2.5,0,TAU);
+  ctx.fillStyle=done?pal.glow:pal.ear;ctx.fill();
  }
 
  // Campana principal
@@ -284,10 +287,22 @@ export function drawCatMoonJelly(ctx,s,cam,t=0,reduced=false){
  ctx.beginPath();ctx.ellipse(x-10,y-28,12,4.5,-.3,0,TAU);ctx.fillStyle='#fff';ctx.fill();
  ctx.globalAlpha=1;
 
- // Cuerno lunar central
+ // Cuerno lunar central y diadema de perlas
  ctx.beginPath();ctx.moveTo(x-5,y-42);ctx.lineTo(x,y-63);ctx.lineTo(x+5,y-42);
  ctx.closePath();ctx.fillStyle=pal.glow;ctx.fill();
  ctx.strokeStyle=ink;ctx.lineWidth=1.6;ctx.stroke();
+ for(const side of[-1,1]){
+  ctx.beginPath();ctx.arc(x+side*14,y-42,3.2,0,TAU);
+  ctx.fillStyle=done?pal.glow:pal.ear;ctx.fill();
+  ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
+ }
+
+ // Canales radiales sagrados
+ for(let r=-2;r<=2;r++){
+  ctx.beginPath();ctx.moveTo(x,y-44);
+  ctx.quadraticCurveTo(x+r*11*bell,y-22,x+r*15*bell,y);
+  ctx.strokeStyle=done?'rgba(255,255,255,0.45)':'rgba(255,255,255,0.2)';ctx.lineWidth=1.2;ctx.stroke();
+ }
 
  // Ojos
  const blinking=!reduced&&done&&((time+id*39)%190<7);
@@ -366,6 +381,16 @@ export function drawCatCrystalBridge(ctx,s,cam,t=0,reduced=false){
    const py=y-4-((t*0.6+p*23)%28);
    ctx.beginPath();ctx.arc(px,py,1.5,0,TAU);ctx.fill();
   }
+  // Pulso bioluminiscente a lo largo del puente
+  const bPulse=Math.sin(t*0.08)*0.25+0.45;
+  ctx.globalAlpha=bPulse;
+  const glow=ctx.createLinearGradient(x,y+4,x+w,y+4);
+  glow.addColorStop(0,'rgba(122,240,224,0)');
+  glow.addColorStop(0.5,'rgba(122,240,224,0.35)');
+  glow.addColorStop(1,'rgba(122,240,224,0)');
+  ctx.fillStyle=glow;
+  roundRect(ctx,x,y+2,w,h-2,4);ctx.fill();
+  ctx.globalAlpha=1;
  }
 
  ctx.restore();
@@ -427,7 +452,7 @@ export function drawCatTrap(ctx,trap,cam,t=0,reduced=false){
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ATMÓSFERA CELESTIAL: AURORAS BOREALES Y NEBULOSAS
+// ATMÓSFERA CELESTIAL: AURORAS ABISALES, NEBULOSAS Y FITOPLANCTON CÓSMICO
 // ─────────────────────────────────────────────────────────────────────────────
 export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
  if(!ctx)return;
@@ -467,6 +492,20 @@ export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
  ctx.lineTo(-60,0);
  ctx.closePath();
  ctx.fill();
+
+ // Fitoplancton cósmico: esporas bioluminiscentes flotando suavemente
+ if(!reduced){
+  ctx.globalAlpha=0.45;
+  for(let i=0;i<12;i++){
+   const seed=i*137.5;
+   const fx=((t*0.15+seed)%(vw+80))-40;
+   const fy=60+Math.sin(t*0.03+seed)*50+(seed%200);
+   const fr=1.2+Math.sin(t*0.06+i)*0.6;
+   ctx.fillStyle=i%3===0?'#7af0e0':i%3===1?'#deb3ff':'#ffe6aa';
+   ctx.beginPath();ctx.arc(fx,fy,fr,0,TAU);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+ }
 
  ctx.restore();
 }

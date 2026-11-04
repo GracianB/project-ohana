@@ -1,12 +1,12 @@
-// V609 — Jardín Lunar de Michi: ruta canónica de 14400, medusas sagradas,
-// nieblas astrales y fauna lunar de 5 especies con roles y leashes definidos.
+// V609 — Jardín Lunar de Medusaluna: ruta canónica de 14400, medusas sagradas,
+// nieblas astrales y fauna abisal lunar de 5 especies con roles y leashes definidos.
 import {MICHI_CHAPTER_BOSS_ID,MICHI_CHAPTER_ARENA} from './cat-chapter.js';
 const FLOOR=1134;
 
 export const CAT_JELLIES_V609=Object.freeze([
  {id:0,x:1680,y:FLOOR-220,kind:'jelly',name:'Medusa I · Faroluna del Umbral',   lesson:'Salta hacia la medusa dormida en el aire para despertarla. Se convierte en plataforma y apoyo.'},
  {id:1,x:3360,y:FLOOR-280,kind:'jelly',name:'Medusa II · Linterna del Estanque', lesson:'Alcánzala con un doble salto. Cada medusa despertada añade XP y abre nuevas rutas de vuelo.'},
- {id:2,x:5040,y:FLOOR-340,kind:'jelly',name:'Medusa III · Velo del Sueño',       lesson:'La niebla astral bloquea el paso; despierta la medusa para disiparlo. J lanza el ovillo a distancia.'},
+ {id:2,x:5040,y:FLOOR-340,kind:'jelly',name:'Medusa III · Velo del Sueño',       lesson:'La niebla astral bloquea el paso; despierta la medusa para disiparlo. J proyecta la perla estelar a distancia.'},
  {id:3,x:6720,y:FLOOR-400,kind:'jelly',name:'Medusa IV · Espejo de Estrellas',   lesson:'Cuarta medusa. La red lunar se refuerza; los guardianes coordinan ataques aéreos en parejas.'},
  {id:4,x:8100,y:FLOOR-460,kind:'jelly',name:'Medusa V · Corazón del Altar',      lesson:'Última medusa del jardín. Las cinco despiertas abren la cámara del Oráculo Medusaluna.'}
 ].map(Object.freeze));
@@ -75,7 +75,7 @@ export function authorCatEncounters(room){
   [5750,914,180],[6050,814,200],[6350,714,200],
   [6650,794,180],[6950,714,180],
 
-  // Sector 3 — Observatorio gatuno (x: 7200 – 9600)
+  // Sector 3 — Sagrario de las Nueve Corrientes (x: 7200 – 9600)
   [7200,1034,200],[7500,934,180],[7800,834,200],
   [8100,894,200],[8400,794,200],[8700,714,180],
   [8950,774,200],[9200,694,200],
@@ -118,7 +118,7 @@ export function authorCatEncounters(room){
   [5950,'murcielago',108,2],
   [6450,'medusa',  106,2],
 
-  // ─ Grupo 3 (Act 3: Observatorio → Medusa 3, x: 6900 – 8050) ─
+  // ─ Grupo 3 (Act 3: Sagrario → Medusa 3, x: 6900 – 8050) ─
   [6950,'ufo',     124,3],
   [7300,'murcielago',128,3],
   [7700,'phosquito',132,3],

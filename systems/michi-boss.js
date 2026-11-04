@@ -1,7 +1,7 @@
 import {chapterBossStart,chapterBossFinish} from './chapters-lunar-prism-embers.js';
 // LOS JARDINES DE LA LUNA — Oráculo Medusaluna (Michicornio's personal mini boss).
-// 100% vector Canvas drawing: colossal astral celestial feline with iridescent moon jelly mantle.
-// Four phases: shadow pounce, dream orb barrage, crescent ground strike, and full eclipse barrage.
+// 100% vector Canvas drawing: colossal abyssal jellyfish deity with iridescent moon jelly mantle.
+// Four phases: tentacle lash, dream orb barrage, crescent ground strike, and full eclipse barrage.
 export const MICHI_BOSS_ID='hub-michi-boss-v1';
 export const MICHI_BOSS=Object.freeze({hp:480,left:3120,right:3990,floor:1134});
 const PATTERNS=Object.freeze(['pounce','dream_barrage','crescent_strike','eclipse_overload']);
@@ -88,7 +88,7 @@ export function updateMichiBoss(e,g,hurt){
   if(b.attack===0){
    e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x+b.aim*(b.tier===3?9.5:6.2)));
    if(Math.abs(dx)<(e.w+p.w)/2&&Math.abs(p.y+p.h/2-e.y-e.h/2)<(p.h+e.h)/2){
-    hurt?.(b.tier===3?22:16,'ZARPAZO ASTRAL');
+    hurt?.(b.tier===3?22:16,'LATIGAZO ABISAL');
    }
   }
   if(--b.clock<=0){b.phase='rest';b.clock=b.tier===3?38:70;b.attack=(b.attack+1)%PATTERNS.length;b.exposed=true;}
@@ -156,7 +156,7 @@ export function drawMichiBossSignals(ctx,e,cam,t=0,reduced=false){
  const PHASE_INFO={
   intro:{icon:'◎',col:'#a8e5ff',txt:'DESPERTANDO ESPÍRITU ASTRAL'},
   rest:{icon:'◉',col:'#7af0e0',txt:'NÚCLEO ASTRAL EXPUESTO · ¡ATACA!'},
-  warn:{icon:'▲',col:'#ffb86c',txt:['SALTA EL ZARPAZO ASTRAL','ORBES DE SUEÑO · ESQUIVA','MEDIA LUNA · SALTA LA ONDA','ECLIPSE TOTAL · SAL DE LAS COLUMNAS'][b.attack]},
+  warn:{icon:'▲',col:'#ffb86c',txt:['ESQUIVA EL LATIGAZO ABISAL','ORBES DE SUEÑO · ESQUIVA','MEDIA LUNA · SALTA LA ONDA','ECLIPSE TOTAL · SAL DE LAS COLUMNAS'][b.attack]},
   attack:{icon:'✦',col:'#ff5978',txt:'DESCARGA ASTRAL'}
  };
  const pi=PHASE_INFO[b.phase]||PHASE_INFO.intro;
