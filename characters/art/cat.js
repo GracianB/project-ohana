@@ -4,7 +4,7 @@ import {drawMoonHare} from '../michi-moon-hare.js';
 import {michiMotion} from "../michi-motion.js";
 import {michiGenome,jellyPulse,drawJellyBell,drawTentacle} from "../michi-jelly.js";
 import {michiLaunchKick,michiLaunchFrame,drawCatTail,drawFairyWing} from "../michi-anatomy.js";
-// Michicornio: kitten → fairy cat → moon jelly → lunar hare → winged nine-tail guardian.
+// Medusaluna: pólipo astral → sílfide de cristal → medusa onírica → hidrozoo cósmico → deidad medusaluna.
 export const MICHI_VISUAL_H=[60,72,84,94,106];
 const TAU = Math.PI * 2;
 
@@ -23,8 +23,6 @@ export function michiWelcomeRig(pose={},form=0){
  const breath=(n(w.breath)-.5)*2;
  const f=Number.isFinite(form)?Math.max(0,Math.min(4,Math.round(form))):0;
  const baby=f===0?.65:f===2?.74:1;
- // F0 has a soft oval belly. F2 is a cloud (no invented cat boots).
- // F3 keeps the moon hare silhouette. F1 has moth wings; F4 has feathered wings.
  const expansion=[.072,.059,.042,.037,.034][f];
  return {
   active:true,
@@ -96,16 +94,15 @@ export function michiFootwork(pose={}){
 }
 function drawMichiFootwork(ctx,pose,f,t){
  const m=michiFootwork(pose);if(!m)return;ctx.save();ctx.lineCap='round';const col=['#ffd4b5','#ffc982','#ffc4e8','#bea5f5','#ffe2ac'][f];ctx.fillStyle=col;ctx.strokeStyle=col;
- if(m.running>.3)for(let i=0;i<3;i++){const k=((t*.055+i/3)%1+1)%1,x=-12-k*26,y=-2-k*4;ctx.globalAlpha=.4*(1-k)*m.running;if(f===2){ctx.beginPath();ctx.moveTo(x-3,y);ctx.lineTo(x,y-3);ctx.lineTo(x+3,y);ctx.lineTo(x,y+3);ctx.closePath();ctx.fill();}else if(f===3){ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(x,y,3,.25,Math.PI*1.5);ctx.stroke();}else{ctx.beginPath();ctx.ellipse(x,y,2.5,1.6,-.3,0,Math.PI*2);ctx.fill();for(const dx of [-2,0,2]){ctx.beginPath();ctx.arc(x+dx,y-3,1,0,Math.PI*2);ctx.fill();}}}
+ if(m.running>.3)for(let i=0;i<3;i++){const k=((t*.055+i/3)%1+1)%1,x=-12-k*26,y=-2-k*4;ctx.globalAlpha=.4*(1-k)*m.running;if(f===2){ctx.beginPath();ctx.moveTo(x-3,y);ctx.lineTo(x,y-3);ctx.lineTo(x+3,y);ctx.lineTo(x,y+3);ctx.closePath();ctx.fill();}else if(f===3){ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(x,y,3,.25,Math.PI*1.5);ctx.stroke();}else{ctx.beginPath();ctx.ellipse(x,y,3,1.8,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.arc(x,y,1.1,0,Math.PI*2);ctx.fill();}}
  if(m.landing>.02){ctx.globalAlpha=m.landing*.55;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,-1,11+(1-m.landing)*18,3,0,0,Math.PI*2);ctx.stroke();for(const side of [-1,1]){ctx.beginPath();ctx.arc(side*(12+(1-m.landing)*10),-4-(1-m.landing)*6,2,0,Math.PI*2);ctx.fill();}}
  if(m.turn>.02){ctx.globalAlpha=m.turn*.6;ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(-7,-5);ctx.bezierCurveTo(-29,-2,-28,-23,-12,-14);ctx.bezierCurveTo(-6,-10,-18,-7,-21,-13);ctx.stroke();}
  if(m.brake>.02){ctx.globalAlpha=m.brake*.5;ctx.lineWidth=1.3;for(let i=0;i<2;i++){ctx.beginPath();ctx.ellipse(-16-i*9,-2-i*2,5,2,-.3,0,Math.PI*1.6);ctx.stroke();}}
  ctx.restore();
 }
 
-
-// V625 · The three magical morphologies keep a front-facing facial plane.
-// Sculpted contours, planted paws and attached materials replace doll-like discs.
+// V625 · Morfologías etéreas de la estirpe Medusa: Campanas translúcidas vivas,
+// velos nácar y zarcillos celestiales. Cero anatomía felina.
 function drawMichiMythic(ctx,pose,r,f){
  const finite=(v,d=0)=>Number.isFinite(v)?v:d,unit=v=>Math.max(0,Math.min(1,finite(v)));
  const still=!!pose.reduceMotion,t=still?0:finite(pose.t),state=r.st;
@@ -117,7 +114,7 @@ function drawMichiMythic(ctx,pose,r,f){
  const g=michiGenome(pose.michiSeed),pal=g.palette,ink='#49394f',fur='#efe4ff',shade='#bca7d5',white='#fff8ff';
  const stroke=(col,w=1.4)=>{ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();};
  const shape=(col,fn,w=1.4,colInk=ink)=>{ctx.beginPath();fn();ctx.closePath();ctx.fillStyle=col;ctx.fill();if(w)stroke(colInk,w);};
- const oval=(x,y,rx,ry,col,w=0)=>shape(col,()=>ctx.ellipse(x,y,rx,ry,0,0,TAU),w);
+ const oval=(x,y,rx,ry,col,w=0)=>shape(col,()=>ctx.ellipse(x,y,Math.max(0,rx),Math.max(0,ry),0,0,TAU),w);
  const line=(col,w,fn)=>{ctx.beginPath();fn();stroke(col,w);};
  const crescent=(x,y,s,col)=>shape(col,()=>{ctx.moveTo(x+s*.5,y-s);ctx.bezierCurveTo(x-s*1.1,y-s*1.25,x-s*1.2,y+s*1.2,x+s*.5,y+s);ctx.bezierCurveTo(x-s*.35,y+s*.3,x-s*.35,y-s*.3,x+s*.5,y-s);},.65);
  const sparkle=(x,y,s,col)=>{line(col,1,()=>{ctx.moveTo(x-s,y);ctx.quadraticCurveTo(x,y-s*.15,x,y-s*1.4);ctx.quadraticCurveTo(x,y-s*.15,x+s,y);ctx.quadraticCurveTo(x,y+s*.15,x,y+s*1.4);ctx.quadraticCurveTo(x,y+s*.15,x-s,y);});};
@@ -137,37 +134,31 @@ function drawMichiMythic(ctx,pose,r,f){
  }
  function catHead({x=0,y=0,size=1,coat=fur,shadow=shade,muzzle=white,earLength=35,crown=false}={}){
   ctx.save();ctx.translate(x,y);ctx.scale(size,size);ctx.rotate(finite(r.michiHead)*.22+finite(r.motion?.head)*.4+(hurt?-.1:0));
-  // Curved ears fold from the same roots as the skull; the far inner surface is shaded.
   for(const side of[-1,1]){
    const flick=(still?0:wave(side,.075)*2)+finite(r.michiEar)*4+finite(r.motion?.ear)*5-(hurt?5:0);
-   shape(coat,()=>{ctx.moveTo(side*12,-15);ctx.bezierCurveTo(side*18,-28,side*26,-earLength+flick,side*29,-earLength-2+flick);ctx.quadraticCurveTo(side*35,-24,side*27,-5);ctx.quadraticCurveTo(side*21,-9,side*12,-15);},1.45);
-   shape('#eab7cf',()=>{ctx.moveTo(side*18,-17);ctx.quadraticCurveTo(side*24,-29,side*28,-earLength+6+flick);ctx.quadraticCurveTo(side*30,-22,side*26,-12);ctx.closePath();},0);
-   line('#fff7ed',1.35,()=>{ctx.moveTo(side*16,-18);ctx.quadraticCurveTo(side*22,-29,side*27,-earLength+2+flick);});
-   line(shadow,.8,()=>{ctx.moveTo(side*28,-earLength+2+flick);ctx.quadraticCurveTo(side*30,-earLength+1+flick,side*31,-earLength-2+flick);});
+   shape(coat,()=>{ctx.moveTo(side*12,-18);ctx.bezierCurveTo(side*18,-30,side*26,-28+flick,side*28,-36+flick);ctx.quadraticCurveTo(side*32,-20,side*22,-10);ctx.quadraticCurveTo(side*16,-12,side*12,-18);},1.25);
+   line('#fff7ed',1.1,()=>{ctx.moveTo(side*14,-20);ctx.quadraticCurveTo(side*20,-28,side*26,-34+flick);});
+   oval(side*28,-36+flick,2,2,pal.bead);
   }
-  shape(coat,()=>{ctx.moveTo(-27,-5);ctx.bezierCurveTo(-29,-23,-12,-30,2,-28);ctx.bezierCurveTo(20,-28,31,-18,28,-3);ctx.quadraticCurveTo(29,2,33,5);ctx.lineTo(27,6);ctx.lineTo(31,10);ctx.quadraticCurveTo(23,11,22,17);ctx.bezierCurveTo(11,28,-12,24,-23,16);ctx.lineTo(-30,10);ctx.lineTo(-26,6);ctx.lineTo(-32,4);ctx.quadraticCurveTo(-27,0,-27,-5);},1.55);
+  shape(coat,()=>{ctx.moveTo(-28,-6);ctx.bezierCurveTo(-30,-26,-12,-34,2,-32);ctx.bezierCurveTo(20,-32,31,-22,28,-4);ctx.quadraticCurveTo(29,4,31,8);ctx.lineTo(25,9);ctx.quadraticCurveTo(21,14,19,18);ctx.bezierCurveTo(10,26,-10,24,-20,17);ctx.lineTo(-24,10);ctx.quadraticCurveTo(-28,4,-28,-6);},1.45);
   shape(shadow,()=>{ctx.moveTo(-27,2);ctx.bezierCurveTo(-14,15,9,21,27,7);ctx.quadraticCurveTo(27,21,7,23);ctx.quadraticCurveTo(-15,25,-27,9);},0);
-  // A single joined cheek/muzzle surface reads frontally around a centered nose.
-  shape(muzzle,()=>{ctx.moveTo(-17,7);ctx.quadraticCurveTo(-10,-1,-1,8);ctx.quadraticCurveTo(8,0,19,7);ctx.bezierCurveTo(24,17,14,23,2,22);ctx.bezierCurveTo(-11,22,-22,18,-17,7);},0);
   shape('#fff8f3',()=>{ctx.moveTo(-21,-11);ctx.quadraticCurveTo(-14,-25,1,-25);ctx.quadraticCurveTo(-8,-19,-12,-10);ctx.closePath();},0);
   eye(-12,-3.5,8);eye(12,-3.5,8);
   oval(-20,10,3.5,1.45,'#efbbd4');oval(20,10,3.5,1.45,'#efbbd4');
-  shape('#d995b0',()=>{ctx.moveTo(-2,9);ctx.quadraticCurveTo(1,7,5,9);ctx.quadraticCurveTo(4,12,1,12);ctx.closePath();},.75);
-  line(ink,1.1,()=>{ctx.moveTo(1,12);ctx.lineTo(1,14);ctx.quadraticCurveTo(-2,18,-5,15);ctx.moveTo(1,14);ctx.quadraticCurveTo(5,18,8,14);});
   const open=Math.max(atkK*.65,castK*(power===5?.6:.25),victory?.55:0);
-  if(open>.1){shape('#71485e',()=>{ctx.moveTo(-3,15);ctx.quadraticCurveTo(1,17,6,14);ctx.quadraticCurveTo(6,19+open*3,1,19+open*3);ctx.quadraticCurveTo(-3,18+open*2,-3,15);},.7);oval(2,19+open,2.7,1.2,'#efb4cb');}
-  for(const side of[-1,1])for(let k=0;k<2;k++)line('#a990b3',.65,()=>{ctx.moveTo(side*18,11+k*3);ctx.quadraticCurveTo(side*26,10+k*3,side*34,8+k*5);});
-  // Three fur strokes frame the forehead. The horn is rooted between them.
-  for(const [x0,y0,x1,y1]of[[-8,-24,-5,-17],[0,-25,1,-18],[8,-24,6,-17]])line(shadow,1,()=>{ctx.moveTo(x0,y0);ctx.quadraticCurveTo(x0,y1-2,x1,y1);});
-  horn(1,-23,crown?29:24,crown?4.7:4);
-  if(crown){crescent(1,-16,3.4,'#d4b481');for(const side of[-1,1])line('#d9c5a0',.95,()=>{ctx.moveTo(side*8,-21);ctx.quadraticCurveTo(side*15,-16,side*20,-19);});}
+  if(open>.1){shape('#71485e',()=>{ctx.moveTo(-3,12);ctx.quadraticCurveTo(1,14,6,11);ctx.quadraticCurveTo(6,16+open*3,1,16+open*3);ctx.quadraticCurveTo(-3,15+open*2,-3,12);},.7);oval(2,16+open,2.7,1.2,'#efb4cb');}
+  else{line(ink,1.0,()=>{ctx.moveTo(-2,11);ctx.quadraticCurveTo(1,13,5,11);});}
+  for(const [x0,y0,x1,y1]of[[-8,-26,-5,-19],[0,-27,1,-20],[8,-26,6,-19]])line(shadow,1,()=>{ctx.moveTo(x0,y0);ctx.quadraticCurveTo(x0,y1-2,x1,y1);});
+  horn(1,-25,crown?30:24,crown?4.8:4);
+  if(crown){crescent(1,-17,3.6,'#d4b481');for(const side of[-1,1])line('#d9c5a0',.95,()=>{ctx.moveTo(side*8,-22);ctx.quadraticCurveTo(side*15,-17,side*20,-20);});}
   ctx.restore();
  }
- function limb({hip,paw,width=5,coat=fur,shadow=shade,far=false,bend=1,pads=false}){
-  const hx=hip[0],hy=hip[1],px=paw[0],py=paw[1],ex=(hx+px)*.5+bend*5,ey=(hy+py)*.5;
-  shape(coat,()=>{ctx.moveTo(hx-width,hy);ctx.quadraticCurveTo(ex-width*.9,ey,px-width*.9,py-4);ctx.bezierCurveTo(px-width*1.7,py-3,px-width*1.6,py+2,px-width*.4,py+2);ctx.quadraticCurveTo(px+width*2,py+3,px+width*1.9,py-1);ctx.quadraticCurveTo(px+width*1.8,py-5,px+width*.8,py-5);ctx.quadraticCurveTo(ex+width*.7,ey,hx+width,hy);},far?1:1.3);
-  shape(shadow,()=>{ctx.moveTo(hx-width*.7,hy+1);ctx.quadraticCurveTo(ex-width*.75,ey,px-width*.55,py-3);ctx.quadraticCurveTo(px,py-1,px+width*.6,py);ctx.quadraticCurveTo(px-width*.3,py+1,px-width*.8,py);ctx.quadraticCurveTo(ex-width*.9,ey,hx-width*.7,hy+1);},0);
-  if(!far){line('#fffaf1',1,()=>{ctx.moveTo(hx+width*.35,hy+4);ctx.quadraticCurveTo(ex+width*.4,ey,px+width*.7,py-5);});for(const dx of[.5,1.05])line('#ae92b5',.65,()=>{ctx.moveTo(px+width*dx,py-1.4);ctx.lineTo(px+width*dx,py+1.3);});if(pads)oval(px+1,py-1,width*.48,width*.29,'#e7bad5');}
+ function jellyFilament({root,end,width=4,col=pal.glow,far=false,curl=0}){
+  const rx=root[0],ry=root[1],ex=end[0],ey=end[1];
+  const mx=(rx+ex)*.5+curl*8,my=(ry+ey)*.5;
+  shape(col,()=>{ctx.moveTo(rx-width,ry);ctx.quadraticCurveTo(mx-width*.7,my,ex-width*.3,ey);ctx.quadraticCurveTo(ex+width*.3,ey,mx+width*.7,my);ctx.quadraticCurveTo(rx+width,ry,rx-width,ry);},far?1:1.25);
+  line('#fffdf5',.9,()=>{ctx.moveTo(rx,ry+2);ctx.quadraticCurveTo(mx,my,ex,ey-2);});
+  oval(ex,ey,width*.55,width*.55,pal.bead);
  }
  function spellAccents(x,y){
   if(still||castK<.05||power===1)return;
@@ -179,7 +170,7 @@ function drawMichiMythic(ctx,pose,r,f){
   else if(power===5)for(const side of[-1,1])sparkle(x+side*13,y-6,2.5,col);
   ctx.restore();
  }
- if(f===1){ // HADA FELINA · petal moth wings, soft dancer's limbs, alert moon-cat face.
+ if(f===1){ // SÍLFIDE DE CRISTAL / MEDUSA ALADA · aletas ondulantes de velo nácar, campana esbelta y zarcillos flotantes.
   const flutter=still?0:Math.sin(t*(air?.42:run?.34:.16)+g.pulsePhase*6),hover=still?8:8+wave(0,.055)*2;
   ctx.save();ctx.scale(.72,.72);ctx.translate(0,-hover+(hurt?3:0));
   const fold=hurt?.42:state==='glide'?.98:Math.min(1,.83+castK*.14),wingSize=56+(air?6:0)+(victory?3:0);
@@ -187,34 +178,29 @@ function drawMichiMythic(ctx,pose,r,f){
    drawFairyWing(ctx,{x:side*6,y:-44,side,size:wingSize*.82,open:fold,flap:flutter*.7,lower:true,fill:pal.glow2,rim:'#d9b9dc',vein:pal.ink,alpha:.68,accent:pal.rim,outline:ink});
    drawFairyWing(ctx,{x:side*7,y:-56,side,size:wingSize,open:fold,flap:flutter,fill:pal.glow,rim:'#ebd8ec',vein:pal.ink,spot:pal.gonad,alpha:.78,accent:pal.glow2,outline:ink});
   }
-  // One rooted plume follows its hips; the gold tip is a marking, not an orbiting toy.
-  const tailO={x:-9,y:-31,len:47,t,still,swish:1+atkK+(run?.5:0),curl:1.0,dir:-2.6,phase:g.phases[0],root:5.5,tip:2.5,fur,dark:shade,ink,fluff:true,tipColor:'#f4ddb0'};
-  drawCatTail(ctx,tailO);
-  for(const side of[-1,1]){
-   const kick=still?0:wave(side*1.4,air?.24:.08)*(air?6:2.3);
-   limb({hip:[side*7,-31],paw:[side*9+kick*.5-(air?3:0),-7-Math.abs(kick)*.5-(state==='jump'?7:0)],width:4,far:side<0,bend:side,pads:air});
-  }
-  shape(fur,()=>{ctx.moveTo(-11,-62);ctx.bezierCurveTo(-20,-55,-14,-36,-10,-29);ctx.quadraticCurveTo(0,-23,11,-30);ctx.bezierCurveTo(17,-39,19,-53,11,-63);ctx.quadraticCurveTo(0,-68,-11,-62);},1.45);
-  shape(white,()=>{ctx.moveTo(-7,-57);ctx.quadraticCurveTo(0,-61,8,-56);ctx.quadraticCurveTo(11,-40,4,-33);ctx.quadraticCurveTo(-6,-33,-7,-57);},0);
-  // The collar is six attached curled petals, with space around the face.
+  shape(fur,()=>{ctx.moveTo(-14,-66);ctx.bezierCurveTo(-22,-52,-18,-34,-12,-25);ctx.quadraticCurveTo(0,-18,12,-25);ctx.bezierCurveTo(18,-34,22,-52,14,-66);ctx.quadraticCurveTo(0,-72,-14,-66);},1.45);
+  shape(white,()=>{ctx.moveTo(-10,-58);ctx.quadraticCurveTo(0,-63,10,-58);ctx.quadraticCurveTo(12,-38,4,-30);ctx.quadraticCurveTo(-8,-30,-10,-58);},0);
   for(const side of[-1,1])for(let k=0;k<3;k++)shape(k===1?'#ebc4d9':'#d3c6ed',()=>{ctx.moveTo(side*(3+k*3),-61);ctx.quadraticCurveTo(side*(13+k*3),-59+k*2,side*(10+k*2),-54+k*2);ctx.quadraticCurveTo(side*(5+k*2),-53+k*2,side*(3+k*3),-61);},.65);
   for(const side of[-1,1]){
-   let paw=[side*10,-43+wave(side,.07)];
-   if(air)paw=[side*15,-47];if(state==='wall')paw=[side>0?29:-10,side>0?-69:-43];
-   if(castK){if(power===1)paw=[side*(8+castK*3),-40];else if(power===3)paw=[side*14+castK*13,-46-castK*12];else if(power===4)paw=[side*21,-70-castK*9];else if(power===5)paw=[side*(15+castK*8),-59-wave(side,.2)*3];else if(side>0)paw=[20+castK*6,-67-castK*(power===2?15:4)];}
-   if(atkK&&side>0)paw=[21+atkK*18,-54+atkK*3];if(victory)paw=[side*23,-76+wave(side,.1)*2];if(hurt)paw=[side*12,-56];
-   limb({hip:[side*10,-58],paw,width:3.7,far:side<0,bend:side,pads:air||castK>.2});
-   if(side>0)spellAccents(paw[0],paw[1]);
+   const kick=still?0:wave(side*1.4,air?.24:.08)*(air?6:2.3);
+   const end=[side*9+kick*.5-(air?3:0),-7-Math.abs(kick)*.5-(state==='jump'?7:0)];
+   jellyFilament({root:[side*8,-25],end,width:3.8,col:side<0?pal.deep:pal.arm,far:side<0,curl:side*0.3});
+  }
+  for(const side of[-1,1]){
+   let tip=[side*11,-42+wave(side,.07)];
+   if(air)tip=[side*16,-46];if(state==='wall')tip=[side>0?30:-10,side>0?-68:-42];
+   if(castK){if(power===1)tip=[side*(8+castK*3),-38];else if(power===3)tip=[side*14+castK*13,-45-castK*12];else if(power===4)tip=[side*21,-69-castK*9];else if(power===5)tip=[side*(15+castK*8),-58-wave(side,.2)*3];else if(side>0)tip=[21+castK*6,-66-castK*(power===2?15:4)];}
+   if(atkK&&side>0)tip=[22+atkK*18,-53+atkK*3];if(victory)tip=[side*24,-75+wave(side,.1)*2];if(hurt)tip=[side*12,-55];
+   jellyFilament({root:[side*9,-40],end:tip,width:3.5,col:pal.glow,far:side<0,curl:side*0.25});
+   if(side>0)spellAccents(tip[0],tip[1]);
   }
   catHead({y:-83,size:.91,earLength:32});
-  // A small botanical wreath stays attached to the brow, above the eyes.
   for(const [x,y,col]of[[-11,-105,'#e8c6df'],[12,-105,'#d6cce9']]){for(let k=0;k<5;k++){const a=k*TAU/5;shape(col,()=>{ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.cos(a-.5)*5,y+Math.sin(a-.5)*5,x+Math.cos(a)*5,y+Math.sin(a)*5);ctx.quadraticCurveTo(x+Math.cos(a+.5)*5,y+Math.sin(a+.5)*5,x,y);},.45);}oval(x,y,1.5,1.5,'#f2daac');}
-  // One pair of quiet stamens grows from behind the ears; no lens rings on the eyes.
   for(const side of[-1,1]){const bend=wave(side,.08)*2;line('#b193b5',.85,()=>{ctx.moveTo(side*9,-109);ctx.bezierCurveTo(side*10,-120,side*18,-119+bend,side*18,-124+bend);});oval(side*18,-124+bend,1.6,2,'#f4e3b9');}
   if(!still){for(let k=0;k<3;k++){const s=g.moteSeeds[k],u=(t*.005+s)%1;ctx.save();ctx.globalAlpha=(1-u)*.5;sparkle((s-.5)*65,-61+u*47,1.2,pal.bead);ctx.restore();}}
   ctx.restore();return;
  }
- if(f===2){ // MEDUSA ONÍRICA · Aurelia bell, seven real tentacles and two oral frills.
+ if(f===2){ // MEDUSA ONÍRICA · Aurelia bell, seven real tentacles and two oral frills. Pura Medusa viva sin rasgos felinos.
   let contraction=jellyPulse(t,g,still).c;if(state==='jump')contraction=Math.max(contraction,.85);else if(state==='fall'||state==='glide')contraction*=.2;else if(hurt)contraction=.55;
   const float=air?1:0,trail=run?-11:state==='glide'?-6:0,Lcast=state==='cast'&&power===2;
   ctx.save();ctx.scale(.72,.72);ctx.translate(0,-5-contraction*5+wave(0,.06));
@@ -231,27 +217,22 @@ function drawMichiMythic(ctx,pose,r,f){
   for(let i=0;i<7;i+=2)tent(i,false);
   const bell=drawJellyBell(ctx,{x:0,y:rimY,w:bellW,h:bellH,pal,t,c:contraction,still,ink:pal.ink,spots:g.spots,alpha:.88,glow:0,flash:0});
   for(let i=1;i<7;i+=2)tent(i,true);
-  // The head is the umbrella itself. The face follows that front surface without a mask.
   for(const side of[-1,1]){
    const flick=wave(side,.085)*3+finite(r.motion?.ear)*5;
-   shape(pal.bell,()=>{ctx.moveTo(side*13,bell.top+10);ctx.quadraticCurveTo(side*23,bell.top-3,side*29,bell.top-14+flick);ctx.quadraticCurveTo(side*36,bell.top+4,side*32,bell.top+19);ctx.quadraticCurveTo(side*24,bell.top+15,side*13,bell.top+10);},1.2,pal.ink);
-   shape(pal.gonad,()=>{ctx.moveTo(side*21,bell.top+9);ctx.quadraticCurveTo(side*26,bell.top-2,side*29,bell.top-6+flick);ctx.quadraticCurveTo(side*31,bell.top+6,side*29,bell.top+12);},0);
-   line('#fff7fa',1,()=>{ctx.moveTo(side*18,bell.top+8);ctx.quadraticCurveTo(side*24,bell.top-4,side*29,bell.top-11+flick);});
+   shape(pal.bell,()=>{ctx.moveTo(side*12,bell.top+8);ctx.quadraticCurveTo(side*22,bell.top-2,side*28,bell.top-12+flick);ctx.quadraticCurveTo(side*34,bell.top+6,side*28,bell.top+18);ctx.quadraticCurveTo(side*22,bell.top+14,side*12,bell.top+8);},1.2,pal.ink);
+   shape(pal.gonad,()=>{ctx.moveTo(side*18,bell.top+7);ctx.quadraticCurveTo(side*24,bell.top-1,side*27,bell.top-5+flick);ctx.quadraticCurveTo(side*29,bell.top+6,side*26,bell.top+12);},0);
+   line('#fff7fa',1,()=>{ctx.moveTo(side*16,bell.top+6);ctx.quadraticCurveTo(side*22,bell.top-3,side*27,bell.top-9+flick);});
   }
   horn(0,bell.top+3,22,4);
   eye(-13,-84,7.2);eye(13,-84,7.2);
-  shape('#db9ab4',()=>{ctx.moveTo(-2,-73);ctx.quadraticCurveTo(0,-75,3,-73);ctx.lineTo(0,-70);},.6,pal.ink);
-  line(pal.ink,1.1,()=>{ctx.moveTo(0,-70);ctx.quadraticCurveTo(-3,-66,-6,-69);ctx.moveTo(0,-70);ctx.quadraticCurveTo(3,-66,6,-69);});
+  shape(pal.gonad,()=>{ctx.moveTo(-3,-71);ctx.quadraticCurveTo(0,-74,3,-71);ctx.quadraticCurveTo(2,-68,0,-68);ctx.quadraticCurveTo(-2,-68,-3,-71);},.6,pal.ink);
   for(const side of[-1,1]){oval(side*22,-73,3.6,1.4,pal.gonad);for(let k=0;k<2;k++)line('#a08eb1',.7,()=>{ctx.moveTo(side*24,-73+k*4);ctx.quadraticCurveTo(side*34,-73+k*4,side*42,-77+k*6+wave(side,.08));});}
   if(castK>0)spellAccents(31,-74);
   ctx.restore();return;
  }
- if(f===4){ // ECLIPSE · feathered white moon guardian, nine rooted luminous plumes.
+ if(f===4){ // DEIDAD MEDUSALUNA / AVATAR ABISAL · cúpula catedralicia translúcida, 9 tentáculos primordiales sagrados y alas de velo divino.
   const bodyY=run?-Math.abs(step)*2.5:0,wingBeat=still?0:Math.sin(t*(air?.3:.09))*.26;
   ctx.save();ctx.scale(.96,.96);ctx.translate(atkK*2,hurt?3:bodyY);
-  // Nine full moon-plumes grow from the pelvis. Their pale nerve stripe inherits
-  // the Medusa's bioluminescence, while the outer coat is deep soft guardian fur.
-  // The fan is below the wings and outside the face, each taper has its own lag.
   const Lcast=state==='cast'&&power===2;
   const plumeEnds=[[-82,-45],[-86,-22],[-76,-1],[-55,11],[-43,-79],[55,11],[76,-1],[86,-22],[82,-45]];
   for(let i=0;i<9;i++){
@@ -268,11 +249,9 @@ function drawMichiMythic(ctx,pose,r,f){
    const followEdge=(pts,first=false)=>{if(first)ctx.moveTo(...pts[0]);for(let k=1;k<pts.length-1;k++)ctx.quadraticCurveTo(...pts[k],(pts[k][0]+pts[k+1][0])/2,(pts[k][1]+pts[k+1][1])/2);ctx.lineTo(...pts.at(-1));};
    shape(i%3===0?'#e2cce5':i%3===1?'#f7e7d2':'#e9dff2',()=>{followEdge(edges[0],true);followEdge([...edges[1]].reverse());},1.05);
    line('#fff8e7',2.1,()=>{followEdge(points,true);});
-   // Fine guard-hairs stay in the coat, rather than another free particle halo.
    const tip=points[11],near=points[9];line(i%2?'#bba2c7':'#d4b3c3',.65,()=>{ctx.moveTo(near[0],near[1]+2);ctx.quadraticCurveTo(tip[0],tip[1]+3,end[0]-side*3,end[1]+1);});
    if(!still&&castK>.2)sparkle(end[0],end[1],1.8,'#f8e2af');
   }
-  // The wings have individual long primaries, not another jelly umbrella on its back.
   for(const side of[-1,1]){
    ctx.save();ctx.translate(side*13,-54);ctx.scale(side,1);ctx.rotate((air?-.13:.18)+wingBeat);
    shape('#e6d7ec',()=>{ctx.moveTo(0,2);ctx.bezierCurveTo(8,-15,35,-45,57,-43);ctx.bezierCurveTo(63,-39,45,-12,25,0);ctx.quadraticCurveTo(10,9,0,2);},1.25);
@@ -280,58 +259,42 @@ function drawMichiMythic(ctx,pose,r,f){
    shape('#fff4e1',()=>{ctx.moveTo(-2,1);ctx.bezierCurveTo(4,-18,18,-23,27,-24);ctx.quadraticCurveTo(16,-4,3,7);ctx.closePath();},.8);
    ctx.restore();
   }
-  // A long feline back and asymmetric hock establish three-quarter body depth.
-  // The near shoulder, ankle and paw form one changing contour, never a pair of rods.
-  const feet=(near,front)=>{
-   const shift=run?step*(front?13:-12)*(near?1:-1):air?(front?9:-8):0;
-   const lift=run?-Math.max(0,Math.cos(phase+(near?0:Math.PI)+(front?0:Math.PI)))*10:state==='jump'?-13:state==='glide'?-17:state==='fall'?-4:0;
-   return [(front?(near?22:8):(near?-16:-27))+shift,lift+(near?0:-2)];
-  };
-  limb({hip:[-25,-25],paw:feet(false,false),width:6,coat:'#ded0d9',shadow:'#c3afc5',far:true,bend:-1});
-  limb({hip:[9,-40],paw:feet(false,true),width:4.9,coat:'#f1e2da',shadow:'#d2bbc9',far:true,bend:-1});
-  shape('#fff0dd',()=>{ctx.moveTo(-31,-27);ctx.bezierCurveTo(-37,-49,-13,-54,7,-48);ctx.bezierCurveTo(22,-56,31,-39,23,-24);ctx.quadraticCurveTo(19,-12,4,-12);ctx.bezierCurveTo(-11,-7,-29,-11,-31,-27);},1.55);
+  const bellY=-32;
+  shape('#fff0dd',()=>{ctx.moveTo(-32,bellY);ctx.bezierCurveTo(-38,-54,-14,-58,6,-52);ctx.bezierCurveTo(22,-60,32,-42,24,-26);ctx.quadraticCurveTo(20,-12,4,-12);ctx.bezierCurveTo(-11,-7,-30,-11,-32,bellY);},1.55);
   shape('#d8c4d4',()=>{ctx.moveTo(-32,-24);ctx.quadraticCurveTo(-15,-8,10,-15);ctx.quadraticCurveTo(19,-18,23,-28);ctx.quadraticCurveTo(24,-15,10,-10);ctx.quadraticCurveTo(-25,1,-32,-24);},0);
   shape('#fff9ef',()=>{ctx.moveTo(-28,-36);ctx.bezierCurveTo(-21,-48,-5,-49,8,-43);ctx.quadraticCurveTo(-10,-45,-25,-31);},0);
-  // Near thigh is carved into the flank; its curved fold is not a circular joint.
   shape('#f8e7d8',()=>{ctx.moveTo(-28,-32);ctx.bezierCurveTo(-37,-22,-27,-7,-13,-11);ctx.quadraticCurveTo(-4,-18,-12,-29);ctx.quadraticCurveTo(-18,-37,-28,-32);},1.05);
   line('#fffaf1',1.5,()=>{ctx.moveTo(-26,-29);ctx.quadraticCurveTo(-17,-34,-12,-24);});
-  limb({hip:[-19,-16],paw:feet(true,false),width:6.5,coat:'#f7e5d6',shadow:'#d8bdcc',bend:-1,pads:air});
-  // Fine chest fur follows the throat down over the shoulders, leaving leg space.
   shape('#fff9ed',()=>{ctx.moveTo(-5,-63);ctx.bezierCurveTo(9,-67,27,-59,27,-45);ctx.quadraticCurveTo(26,-34,20,-27);ctx.lineTo(18,-32);ctx.quadraticCurveTo(13,-27,9,-25);ctx.lineTo(8,-31);ctx.lineTo(2,-28);ctx.lineTo(3,-35);ctx.quadraticCurveTo(-6,-31,-5,-41);ctx.quadraticCurveTo(-11,-39,-9,-47);ctx.quadraticCurveTo(-13,-52,-5,-63);},1.1);
   line('#dcc7da',.85,()=>{ctx.moveTo(-1,-54);ctx.quadraticCurveTo(-3,-42,5,-36);ctx.moveTo(18,-54);ctx.quadraticCurveTo(22,-44,16,-37);});
-  let leadPaw=feet(true,true);
-  if(atkK>0)leadPaw=[30+atkK*23,-31-atkK*7];
-  if(castK>0){if(power===1)leadPaw=[22,-24];else if(power===3)leadPaw=[31+castK*10,-23-castK*8];else if(power===4)leadPaw=[34,-60-castK*8];else if(power===5)leadPaw=[31,-48];else leadPaw=[30,-38-castK*(power===2?19:6)];}
-  if(hurt)leadPaw=[21,-32];if(state==='wall')leadPaw=[39,-68];if(victory)leadPaw=[28,-27];
-  // Foreleg's broad shoulder narrows toward a forward-facing rounded toe.
-  const elbow=[19+atkK*12,-22+(leadPaw[1]+1)*.24];
-  shape('#fff4e2',()=>{ctx.moveTo(15,-44);ctx.bezierCurveTo(7,-37,elbow[0]-7,elbow[1],leadPaw[0]-4,leadPaw[1]-5);ctx.bezierCurveTo(leadPaw[0]-10,leadPaw[1]-4,leadPaw[0]-8,leadPaw[1]+2,leadPaw[0]-1,leadPaw[1]+2);ctx.quadraticCurveTo(leadPaw[0]+13,leadPaw[1]+3,leadPaw[0]+12,leadPaw[1]-2);ctx.quadraticCurveTo(leadPaw[0]+11,leadPaw[1]-7,leadPaw[0]+5,leadPaw[1]-6);ctx.quadraticCurveTo(elbow[0]+5,elbow[1],24,-42);ctx.quadraticCurveTo(20,-48,15,-44);},1.35);
-  shape('#dcc4d5',()=>{ctx.moveTo(15,-39);ctx.quadraticCurveTo(elbow[0]-5,elbow[1],leadPaw[0]-3,leadPaw[1]-4);ctx.quadraticCurveTo(leadPaw[0]+1,leadPaw[1]-1,leadPaw[0]+8,leadPaw[1]);ctx.lineTo(leadPaw[0]-1,leadPaw[1]+1);ctx.quadraticCurveTo(elbow[0]-7,elbow[1],15,-39);},0);
-  line('#fffaf1',1.3,()=>{ctx.moveTo(21,-36);ctx.quadraticCurveTo(elbow[0]+3,elbow[1],leadPaw[0]+4,leadPaw[1]-7);});
-  for(const dx of[4,8])line('#ae90aa',.7,()=>{ctx.moveTo(leadPaw[0]+dx,leadPaw[1]-2);ctx.lineTo(leadPaw[0]+dx,leadPaw[1]+1);});
+  let leadTip=[30,-38];
+  if(atkK>0)leadTip=[30+atkK*23,-31-atkK*7];
+  if(castK>0){if(power===1)leadTip=[22,-24];else if(power===3)leadTip=[31+castK*10,-23-castK*8];else if(power===4)leadTip=[34,-60-castK*8];else if(power===5)leadTip=[31,-48];else leadTip=[30,-38-castK*(power===2?19:6)];}
+  if(hurt)leadTip=[21,-32];if(state==='wall')leadTip=[39,-68];if(victory)leadTip=[28,-27];
+  const elbow=[19+atkK*12,-22+(leadTip[1]+1)*.24];
+  shape('#fff4e2',()=>{ctx.moveTo(15,-44);ctx.bezierCurveTo(7,-37,elbow[0]-7,elbow[1],leadTip[0]-4,leadTip[1]-5);ctx.bezierCurveTo(leadTip[0]-10,leadTip[1]-4,leadTip[0]-8,leadTip[1]+2,leadTip[0]-1,leadTip[1]+2);ctx.quadraticCurveTo(leadTip[0]+13,leadTip[1]+3,leadTip[0]+12,leadTip[1]-2);ctx.quadraticCurveTo(leadTip[0]+11,leadTip[1]-7,leadTip[0]+5,leadTip[1]-6);ctx.quadraticCurveTo(elbow[0]+5,elbow[1],24,-42);ctx.quadraticCurveTo(20,-48,15,-44);},1.35);
+  shape('#dcc4d5',()=>{ctx.moveTo(15,-39);ctx.quadraticCurveTo(elbow[0]-5,elbow[1],leadTip[0]-3,leadTip[1]-4);ctx.quadraticCurveTo(leadTip[0]+1,leadTip[1]-1,leadTip[0]+8,leadTip[1]);ctx.lineTo(leadTip[0]-1,leadTip[1]+1);ctx.quadraticCurveTo(elbow[0]-7,elbow[1],15,-39);},0);
+  line('#fffaf1',1.3,()=>{ctx.moveTo(21,-36);ctx.quadraticCurveTo(elbow[0]+3,elbow[1],leadTip[0]+4,leadTip[1]-7);});
+  for(const dx of[4,8])line('#ae90aa',.7,()=>{ctx.moveTo(leadTip[0]+dx,leadTip[1]-2);ctx.lineTo(leadTip[0]+dx,leadTip[1]+1);});
   catHead({x:8,y:-77,size:1.01,coat:'#fff4df',shadow:'#dcc8d3',muzzle:'#fffaf2',earLength:35,crown:true});
-  spellAccents(leadPaw[0],leadPaw[1]);
+  spellAccents(leadTip[0],leadTip[1]);
   ctx.restore();return;
  }
 }
-
 
 // Public action vocabulary is also consumed by welcome/cinema validation.
 export const MICHICORNIO_ACTIONS=Object.freeze(['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);
 
 function draw(ctx, pose, R) {
   const src = pose || {},finite=(v,d=0)=>Number.isFinite(v)?v:d;
-  // Rendering never repairs the live actor. Malformed replay clocks are bounded
-  // in this local pose; reduced motion freezes the complete performance, not
-  // only the sine waves (including tentacle launch progress and landing squash).
   const safe={...src,look:{x:finite(src.look?.x,1),y:finite(src.look?.y)}};
   for(const key of ['t','phase','speed','atk','cast','flourish','flourishN','hurt','bounce','land','turnPulse','brake','bodyTilt','michiSeed'])safe[key]=finite(src[key]);
   if(safe.reduceMotion){safe.t=0;safe.phase=0;safe.atk=safe.state==='attack'?.5:0;safe.cast=safe.state==='cast'?.5:0;safe.land=0;safe.bounce=0;safe.bodyTilt=0;safe.flourish=0;safe.hurt=.5;}
   const f = Math.max(0, Math.min(4, Math.round(finite(Number(safe.form)))));
-  if(f===0){ // MOON KITTEN: its own connected, soft kitten anatomy.
+  if(f===0){
     drawMoonKitten(ctx,safe);return;
   }
-  if(f===3){ // MOON HARE: its own rabbit rig replaces feline overlays.
+  if(f===3){ // MOON HARE
     drawMoonHare(ctx,safe);return;
   }
   const r = solve(safe);
@@ -350,10 +313,7 @@ function draw(ctx, pose, R) {
   }
   ctx.save();
   drawMichiFootwork(ctx,safe,f,safe.t||0);
-  // Each form owns its accents; no shared halo obscures the face.
   ctx.translate(0, r.bob + (safe.bounce || 0) * 2);
-  // One connected original cat silhouette per form: tail, feet, shoulder
-  // roots, ears and (F4 only) feathered wings expand together from the paws.
   if(welcome.active)ctx.scale(welcome.torsoX,welcome.torsoY);
   if(r.motion){ctx.translate(0,r.motion.lift+r.motion.crouch);ctx.rotate(r.motion.lean);ctx.scale(r.motion.sx,r.motion.sy);}
   if (r.st === "dead") {
@@ -365,7 +325,6 @@ function draw(ctx, pose, R) {
   else if (r.slot === 1) ctx.scale(1.08, 0.9);
   else if (safe.bodyTilt) ctx.rotate(safe.bodyTilt * 0.8);
   drawMichiMythic(ctx,safe,r,f);
-  // The articulated body already performs the action; avoid doubled gesture FX.
   ctx.restore();
 }
 
