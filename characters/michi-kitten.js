@@ -1,8 +1,8 @@
 import {drawMichiEye} from './michi-eyes.js';
-// Pólipo Astral / Medusita Cósmica Bebé (Form 0)
-// Silueta 100% Medusa Abisal Cósmica: campana translúcida viva, núcleo de pulso,
-// canales radiales, ropalios, gónadas celestiales, 4 zarcillos bioluminiscentes
-// y ojos de perla etérea. Cero anatomía felina. Geometría ultra articulada (>100 ops).
+// Plánula Luminosa (Form 0)
+// Larva bioluminiscente de medusa: gota oblonga translúcida con cilios vibrátiles,
+// núcleo estelar palpitante, pseudópodos cortos y motas de luz interna.
+// Cero anatomía felina. Geometría ultra articulada (>100 ops).
 const TAU = Math.PI * 2;
 const P = Object.freeze({
   ink: '#51425f', coat: '#f5eafa', shade: '#cdb8dc', deep: '#aa8cbd',
@@ -24,19 +24,18 @@ function oval(c, x, y, rx, ry, color, angle = 0) {
   shape(c, color, () => c.ellipse(x, y, Math.max(0, rx), Math.max(0, ry), angle, 0, TAU), 0);
 }
 
-// Zarcillo tierno y ondulante de la medusita bebé con 4 segmentos Bézier y perlas luminosas
+// Pseudópodo corto y translúcido de la plánula (brazo larval primitivo)
 function babyTentacle(c, rootX, rootY, endX, endY, w, far = false, curl = 0) {
   const col = far ? P.shade : P.coat;
   const dx = endX - rootX, dy = endY - rootY;
-  const p1x = rootX + dx * 0.33 + curl * 6, p1y = rootY + dy * 0.33;
-  const p2x = rootX + dx * 0.66 - curl * 4, p2y = rootY + dy * 0.66;
+  const mx = rootX + dx * 0.5 + curl * 4, my = rootY + dy * 0.5;
 
+  // Pseudópodo como lóbulo corto y redondeado
   c.beginPath();
   c.moveTo(rootX - w, rootY);
-  c.quadraticCurveTo(p1x - w * 0.8, p1y, p2x - w * 0.6, p2y);
-  c.quadraticCurveTo(endX - w * 0.3, endY, endX, endY);
-  c.quadraticCurveTo(endX + w * 0.3, endY, p2x + w * 0.6, p2y);
-  c.quadraticCurveTo(p1x + w * 0.8, p1y, rootX + w, rootY);
+  c.quadraticCurveTo(mx - w * 0.7, my, endX - w * 0.4, endY);
+  c.quadraticCurveTo(endX, endY + w * 0.6, endX + w * 0.4, endY);
+  c.quadraticCurveTo(mx + w * 0.7, my, rootX + w, rootY);
   c.closePath();
   c.fillStyle = col;
   c.fill();
@@ -44,20 +43,14 @@ function babyTentacle(c, rootX, rootY, endX, endY, w, far = false, curl = 0) {
   c.lineWidth = 1.05;
   c.stroke();
 
-  // Línea nerviosa central bioluminiscente
+  // Nervio central bioluminiscente
   line(c, far ? P.deep : P.light, 0.85, () => {
     c.moveTo(rootX, rootY + 1);
-    c.bezierCurveTo(p1x, p1y, p2x, p2y, endX, endY);
+    c.quadraticCurveTo(mx, my, endX, endY);
   });
 
-  // Perlas / nódulos luminosos en el tentáculo
-  for (let k = 1; k <= 3; k++) {
-    const u = k / 4;
-    const nx = (1 - u) * (1 - u) * rootX + 2 * (1 - u) * u * p1x + u * u * endX;
-    const ny = (1 - u) * (1 - u) * rootY + 2 * (1 - u) * u * p1y + u * u * endY;
-    oval(c, nx, ny, Math.max(0.6, w * 0.35 * (1 - u * 0.4)), Math.max(0.6, w * 0.35 * (1 - u * 0.4)), P.gold);
-  }
-  oval(c, endX, endY, Math.max(0.8, w * 0.55), Math.max(0.8, w * 0.55), P.gold);
+  // Punta luminosa
+  oval(c, endX, endY, Math.max(0.8, w * 0.45), Math.max(0.8, w * 0.45), P.gold);
 }
 
 function eye(c, x, y, scale, r) {
@@ -170,147 +163,174 @@ export function drawMoonKitten(c, p = {}) {
   c.rotate(dead ? 0.5 : jump ? -0.06 : state === 'glide' ? 0.06 : hurt ? -0.08 : reach * 0.05);
   if (dead) c.translate(-2, -8);
 
-  const bw = Math.max(12, 24 * (1 + bellSquash)), bh = Math.max(12, 22 * (1 + bellStretch));
+  const bw = Math.max(12, 20 * (1 + bellSquash)), bh = Math.max(16, 30 * (1 + bellStretch));
   const rimY = -12 + r.headY;
 
-  // 1. Halo bioluminiscente de la medusa (3 capas suaves)
+  // 1. Halo bioluminiscente de la plánula (3 capas suaves, oblongas)
   for (const [k, a] of [[1.35, 0.06], [1.18, 0.09], [1.05, 0.13]]) {
     c.save();
     c.globalAlpha = a;
-    oval(c, 0, rimY - bh * 0.55, bw * k, bh * k, P.glow);
+    oval(c, 0, rimY - bh * 0.45, bw * k, bh * k * 0.75, P.glow);
     c.restore();
   }
 
-  // 2. Zarcillos posteriores (far tentacles)
-  const hindX = -12 + (run ? -step * 5 : 0) - follow * 4;
-  const hindY = rimY + 12 + (air ? 4 : Math.sin(t * 0.08) * 2);
-  babyTentacle(c, -10, rimY, hindX - 4, hindY + 4, 2.6, true, -0.2);
-  babyTentacle(c, 10, rimY, 12 + (run ? -step * 4 : 0), hindY + 2, 2.6, true, 0.2);
+  // 2. Pseudópodos posteriores (cortos, larvales)
+  const hindX = -8 + (run ? -step * 4 : 0) - follow * 3;
+  const hindY = rimY + 6 + (air ? 3 : Math.sin(t * 0.08) * 1.5);
+  babyTentacle(c, -8, rimY, hindX - 2, hindY + 2, 2.2, true, -0.15);
+  babyTentacle(c, 8, rimY, 8 + (run ? -step * 3 : 0), hindY + 1, 2.2, true, 0.15);
 
-  // 3. Campana principal de la Medusita (cúpula translúcida abovedada)
+  // 3. Cuerpo de la Plánula — gota oblonga translúcida (NO campana/dome)
   shape(c, P.coat, () => {
-    c.moveTo(-bw, rimY);
-    c.bezierCurveTo(-bw * 1.05, rimY - bh * 0.7, -bw * 0.65, rimY - bh * 1.35, 0, rimY - bh * 1.35);
-    c.bezierCurveTo(bw * 0.65, rimY - bh * 1.35, bw * 1.05, rimY - bh * 0.7, bw, rimY);
-    // 6 festones de la subumbrela (lóbulos del borde)
-    for (let k = 6; k > 0; k--) {
-      const x0 = -bw + 2 * bw * (k - 1) / 6;
-      const x1 = -bw + 2 * bw * (k - 0.5) / 6;
-      c.quadraticCurveTo(x1, rimY + 3.5 + (k % 2 ? 1 : -0.5) * pulse, x0, rimY);
-    }
+    c.moveTo(-bw * 0.6, rimY + 2);
+    // Lado izquierdo: curva suave hacia arriba
+    c.bezierCurveTo(-bw * 1.05, rimY - bh * 0.3, -bw * 0.8, rimY - bh * 0.9, -bw * 0.3, rimY - bh * 1.1);
+    // Punta superior redondeada (no puntiaguda)
+    c.bezierCurveTo(-bw * 0.1, rimY - bh * 1.2, bw * 0.1, rimY - bh * 1.2, bw * 0.3, rimY - bh * 1.1);
+    // Lado derecho: curva simétrica hacia abajo
+    c.bezierCurveTo(bw * 0.8, rimY - bh * 0.9, bw * 1.05, rimY - bh * 0.3, bw * 0.6, rimY + 2);
+    // Base inferior: redondeada (la plánula es ovalada por abajo)
+    c.bezierCurveTo(bw * 0.4, rimY + bh * 0.18, -bw * 0.4, rimY + bh * 0.18, -bw * 0.6, rimY + 2);
   }, 1.3);
 
-  // 4. Sombras internas y volumen de la mesoglea
+  // 4. Cilios vibrátiles alrededor del perímetro (24 pelitos cortos oscilantes)
+  for (let k = 0; k < 24; k++) {
+    const angle = (k / 24) * TAU - Math.PI * 0.5;
+    const cx0 = Math.cos(angle) * bw * 0.72;
+    const cy0 = rimY - bh * 0.45 + Math.sin(angle) * bh * 0.65;
+    const wave = reduced ? 0 : Math.sin(t * 0.18 + k * 0.6) * 2.5;
+    const cLen = 5 + (run ? 2 : 0) + (k % 3 === 0 ? 1.5 : 0);
+    const tipX = cx0 + Math.cos(angle) * cLen + wave * Math.sin(angle);
+    const tipY = cy0 + Math.sin(angle) * cLen + wave * Math.cos(angle);
+    line(c, k % 3 === 0 ? P.gold : P.light, 0.7, () => {
+      c.moveTo(cx0, cy0);
+      c.lineTo(tipX, tipY);
+    });
+  }
+
+  // 5. Sombra interna de volumen (mesoglea larval)
   shape(c, P.shade, () => {
-    c.moveTo(-bw * 0.85, rimY - 2);
-    c.bezierCurveTo(-bw * 0.5, rimY + 2, bw * 0.5, rimY + 2, bw * 0.85, rimY - 2);
-    c.quadraticCurveTo(bw * 0.4, rimY + 4, 0, rimY + 4);
-    c.quadraticCurveTo(-bw * 0.4, rimY + 4, -bw * 0.85, rimY - 2);
+    c.moveTo(-bw * 0.5, rimY - 1);
+    c.bezierCurveTo(-bw * 0.3, rimY + 3, bw * 0.3, rimY + 3, bw * 0.5, rimY - 1);
+    c.quadraticCurveTo(bw * 0.2, rimY + bh * 0.1, 0, rimY + bh * 0.1);
+    c.quadraticCurveTo(-bw * 0.2, rimY + bh * 0.1, -bw * 0.5, rimY - 1);
   }, 0);
 
-  // 5. Canales radiales de transporte de luz en la campana
-  for (const k of [-3, -2, -1, 1, 2, 3]) {
-    line(c, '#ffffff', 0.8, () => {
-      c.moveTo(k * bw * 0.08, rimY - bh * 1.2);
-      c.quadraticCurveTo(k * bw * 0.24, rimY - bh * 0.55, k * bw * 0.28, rimY - 1);
+  // 6. Redes nerviosas internas (en vez de canales radiales, nervios ramificados de la larva)
+  for (const k of [-2, -1, 1, 2]) {
+    line(c, '#ffffff', 0.7, () => {
+      c.moveTo(0, rimY - bh * 0.95);
+      c.quadraticCurveTo(k * bw * 0.18, rimY - bh * 0.4, k * bw * 0.25, rimY - 2);
+    });
+    // Ramificación
+    line(c, P.light, 0.5, () => {
+      c.moveTo(k * bw * 0.15, rimY - bh * 0.5);
+      c.lineTo(k * bw * 0.35, rimY - bh * 0.35);
     });
   }
 
-  // 6. Núcleo interior palpitante de luz con gónadas en trébol
-  oval(c, 0, rimY - bh * 0.65, bw * 0.55, bh * 0.45, P.core);
-  oval(c, 0, rimY - bh * 0.65, bw * 0.35, bh * 0.3, '#ffffff');
+  // 7. Núcleo estelar palpitante (corazón de la plánula)
+  const coreSize = 1 + pulse * 0.15;
+  oval(c, 0, rimY - bh * 0.55, bw * 0.4 * coreSize, bh * 0.3 * coreSize, P.core);
+  oval(c, 0, rimY - bh * 0.55, bw * 0.22 * coreSize, bh * 0.18 * coreSize, '#ffffff');
 
-  // 4 pequeñas gónadas celestiales internas
+  // Cuatro vesículas internas (proto-gónadas)
   for (let k = 0; k < 4; k++) {
-    const ga = k * Math.PI * 0.5;
-    const gx = Math.cos(ga) * bw * 0.22;
-    const gy = rimY - bh * 0.65 + Math.sin(ga) * bh * 0.18;
-    line(c, P.rose, 1.1, () => {
-      c.arc(gx, gy, bw * 0.08, 0, Math.PI * 1.6);
-    });
+    const ga = k * Math.PI * 0.5 + (reduced ? 0 : t * 0.02);
+    const gx = Math.cos(ga) * bw * 0.18;
+    const gy = rimY - bh * 0.55 + Math.sin(ga) * bh * 0.14;
+    oval(c, gx, gy, 1.8, 1.8, P.rose);
   }
 
-  // Motas estelares bioluminiscentes en la campana
-  for (let k = 0; k < 5; k++) {
-    const mx = Math.sin(k * 2.1) * bw * 0.55;
-    const my = rimY - bh * 0.95 + (k / 5) * bh * 0.65;
-    oval(c, mx, my, 1.2, 1.2, P.gold);
-    line(c, '#ffffff', 0.5, () => {
-      c.moveTo(mx - 1.5, my);
-      c.lineTo(mx + 1.5, my);
-    });
+  // 8. Motas bioluminiscentes flotando dentro del cuerpo (plancton interior)
+  for (let k = 0; k < 7; k++) {
+    const mx = Math.sin(k * 2.3 + (reduced ? 0 : t * 0.015)) * bw * 0.45;
+    const my = rimY - bh * 0.9 + (k / 7) * bh * 0.7;
+    const mAlpha = 0.5 + Math.sin(k * 1.7 + (reduced ? 0 : t * 0.04)) * 0.3;
+    c.save();
+    c.globalAlpha = mAlpha;
+    oval(c, mx, my, 1.1, 1.1, k % 2 ? P.gold : P.glow);
+    c.restore();
+    // Destello en cruz en algunas motas
+    if (k % 3 === 0) {
+      line(c, '#ffffff', 0.4, () => {
+        c.moveTo(mx - 1.5, my); c.lineTo(mx + 1.5, my);
+        c.moveTo(mx, my - 1.5); c.lineTo(mx, my + 1.5);
+      });
+    }
   }
 
-  // Reflejo especular satinado en la exumbrela superior
+  // 9. Reflejo especular satinado en la parte superior
   shape(c, '#fff8fd', () => {
-    c.moveTo(-bw * 0.65, rimY - bh * 0.85);
-    c.bezierCurveTo(-bw * 0.5, rimY - bh * 1.2, 0, rimY - bh * 1.25, bw * 0.45, rimY - bh * 0.95);
-    c.quadraticCurveTo(0, rimY - bh * 1.1, -bw * 0.4, rimY - bh * 0.8);
+    c.moveTo(-bw * 0.45, rimY - bh * 0.75);
+    c.bezierCurveTo(-bw * 0.3, rimY - bh * 1.05, bw * 0.1, rimY - bh * 1.1, bw * 0.35, rimY - bh * 0.8);
+    c.quadraticCurveTo(0, rimY - bh * 0.95, -bw * 0.3, rimY - bh * 0.7);
     c.closePath();
   }, 0);
 
-  // Ropalios (sensores de luz) en el borde inferior
-  for (let k = 0; k < 6; k++) {
-    const rx = -bw * 0.8 + k * bw * 1.6 / 5;
-    oval(c, rx, rimY + 1.2, 0.9, 0.9, P.gold);
-  }
+  // 10. Marca de nacimiento: media luna dorada en la cúspide
+  shape(c, P.gold, () => {
+    c.moveTo(1.5, rimY - bh * 1.05);
+    c.bezierCurveTo(-4, rimY - bh * 1.1, -4, rimY - bh * 0.9, 1.5, rimY - bh * 0.92);
+    c.bezierCurveTo(-2, rimY - bh * 0.94, -2, rimY - bh * 1.03, 1.5, rimY - bh * 1.05);
+  }, 0);
 
-  // 7. Zarcillos frontales articulados (lead & near tentacles)
+  // 11. Pseudópodos frontales articulados (cortos, larvales)
   let foreEnd1 = {
-    x: 10 + reach * 18 + (run ? -step * 5 : 0),
-    y: rimY + 14 + (air ? 2 : 0) + (victory ? -10 : 0)
+    x: 8 + reach * 14 + (run ? -step * 4 : 0),
+    y: rimY + 8 + (air ? 2 : 0) + (victory ? -6 : 0)
   };
   let foreEnd2 = {
-    x: -4 + (run ? -step * 6 : 0),
-    y: rimY + 16 + (air ? 3 : 0)
+    x: -3 + (run ? -step * 5 : 0),
+    y: rimY + 10 + (air ? 2 : 0)
   };
 
   if (state === 'wall') {
-    foreEnd1 = { x: 18, y: rimY - 8 };
-    foreEnd2 = { x: 8, y: rimY - 2 };
+    foreEnd1 = { x: 14, y: rimY - 4 };
+    foreEnd2 = { x: 6, y: rimY };
   } else if (state === 'glide') {
-    foreEnd1 = { x: 16, y: rimY + 8 };
-    foreEnd2 = { x: -8, y: rimY + 10 };
+    foreEnd1 = { x: 12, y: rimY + 5 };
+    foreEnd2 = { x: -6, y: rimY + 7 };
   } else if (hurt) {
-    foreEnd1 = { x: 6, y: rimY + 4 };
-    foreEnd2 = { x: -4, y: rimY + 6 };
+    foreEnd1 = { x: 5, y: rimY + 3 };
+    foreEnd2 = { x: -3, y: rimY + 5 };
   }
 
-  // Poses distintivas para los 6 poderes mágicos
+  // Poses mágicas para los pseudópodos
   if (spell) {
     const powerTargets = [
-      [22, rimY + 4],   // Yarn (luz frontal)
-      [6, rimY + 2],    // Purr (recogido sereno)
-      [18, rimY - 14],  // Ninetails (alzado en flor)
-      [26, rimY + 12],  // Látigo estelar
-      [14, rimY - 10],  // Velo ascendente
-      [20, rimY - 4]    // Estrella doble
+      [18, rimY + 3],   // Yarn (luz frontal)
+      [5, rimY + 1],    // Purr (recogido sereno)
+      [14, rimY - 10],  // Ninetails (alzado)
+      [20, rimY + 8],   // Látigo estelar
+      [11, rimY - 7],   // Velo ascendente
+      [16, rimY - 3]    // Estrella doble
     ];
-    const tgt = powerTargets[power] || [16, rimY + 6];
+    const tgt = powerTargets[power] || [12, rimY + 4];
     foreEnd1 = {
       x: foreEnd1.x + (tgt[0] - foreEnd1.x) * spell,
       y: foreEnd1.y + (tgt[1] - foreEnd1.y) * spell
     };
   }
 
-  babyTentacle(c, -5, rimY + 1, foreEnd2.x, foreEnd2.y, 3.2, false, -0.15);
-  babyTentacle(c, 6, rimY + 1, foreEnd1.x, foreEnd1.y, 3.2, false, 0.25);
+  babyTentacle(c, -4, rimY + 1, foreEnd2.x, foreEnd2.y, 2.6, false, -0.1);
+  babyTentacle(c, 5, rimY + 1, foreEnd1.x, foreEnd1.y, 2.6, false, 0.2);
 
-  // Destello / perla mágica de ataque o conjuro
+  // 12. Destello / perla mágica de ataque o conjuro
   if (reach > 0.1 || spell > 0.1) {
     c.save();
     c.globalAlpha = Math.max(reach, spell) * 0.85;
-    oval(c, foreEnd1.x + 3, foreEnd1.y, 3, 3, P.gold);
+    oval(c, foreEnd1.x + 2, foreEnd1.y, 2.5, 2.5, P.gold);
     line(c, '#ffffff', 1.2, () => {
-      c.moveTo(foreEnd1.x + 3, foreEnd1.y - 5);
-      c.lineTo(foreEnd1.x + 3, foreEnd1.y + 5);
+      c.moveTo(foreEnd1.x + 2, foreEnd1.y - 4);
+      c.lineTo(foreEnd1.x + 2, foreEnd1.y + 4);
       c.moveTo(foreEnd1.x - 2, foreEnd1.y);
-      c.lineTo(foreEnd1.x + 8, foreEnd1.y);
+      c.lineTo(foreEnd1.x + 6, foreEnd1.y);
     });
     c.restore();
   }
 
-  // 8. Rostro expresivo frontal
+  // 13. Rostro expresivo frontal (ojos de larva)
   babyFace(c, r);
 
   c.restore();

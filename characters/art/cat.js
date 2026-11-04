@@ -200,7 +200,7 @@ function drawMichiMythic(ctx,pose,r,f){
   if(!still){for(let k=0;k<3;k++){const s=g.moteSeeds[k],u=(t*.005+s)%1;ctx.save();ctx.globalAlpha=(1-u)*.5;sparkle((s-.5)*65,-61+u*47,1.2,pal.bead);ctx.restore();}}
   ctx.restore();return;
  }
- if(f===2){ // MEDUSA ONÍRICA · Aurelia bell, seven real tentacles and two oral frills. Pura Medusa viva sin rasgos felinos.
+ if(f===2){ // MEDUSA ESPEJO · Campana facetada de cristal líquido, 7 tentáculos prismáticos, prismas flotantes orbitales. Sin cuerno ni orejas.
   let contraction=jellyPulse(t,g,still).c;if(state==='jump')contraction=Math.max(contraction,.85);else if(state==='fall'||state==='glide')contraction*=.2;else if(hurt)contraction=.55;
   const float=air?1:0,trail=run?-11:state==='glide'?-6:0,Lcast=state==='cast'&&power===2;
   ctx.save();ctx.scale(.72,.72);ctx.translate(0,-5-contraction*5+wave(0,.06));
@@ -213,27 +213,67 @@ function drawMichiMythic(ctx,pose,r,f){
     dir:Math.PI/2-lash*.65-kick*.7,width:front?4.2:4.8,alpha:front?.86:.72,fill:i%2?pal.glow:pal.arm,edge:pal.ink,edgeWidth:.75,core:'#fff9fa',beads:pal.bead});
    if(Lcast&&pose.cast*26<michiLaunchFrame(i,7))oval(end[0],end[1],2.1,2.1,'#fff3d7');
   };
+  // Velos orales prismáticos
   for(const side of[-1,1])for(let layer=0;layer<2;layer++)drawTentacle(ctx,{x:side*7,y:rimY-3,len:39+layer*6,phase:g.phases[7+(side>0)]+layer*1.9,t,still,amp:3+contraction,sway:trail*.5+side*(3+castK*5),lift:contraction,curl:side*.25,width:10-layer*3,alpha:.64,fill:layer?pal.gonad:pal.arm,edge:pal.ink,edgeWidth:.55,core:pal.rim});
   for(let i=0;i<7;i+=2)tent(i,false);
   const bell=drawJellyBell(ctx,{x:0,y:rimY,w:bellW,h:bellH,pal,t,c:contraction,still,ink:pal.ink,spots:g.spots,alpha:.88,glow:0,flash:0});
   for(let i=1;i<7;i+=2)tent(i,true);
-  for(const side of[-1,1]){
-   const flick=wave(side,.085)*3+finite(r.motion?.ear)*5;
-   shape(pal.bell,()=>{ctx.moveTo(side*12,bell.top+8);ctx.quadraticCurveTo(side*22,bell.top-2,side*28,bell.top-12+flick);ctx.quadraticCurveTo(side*34,bell.top+6,side*28,bell.top+18);ctx.quadraticCurveTo(side*22,bell.top+14,side*12,bell.top+8);},1.2,pal.ink);
-   shape(pal.gonad,()=>{ctx.moveTo(side*18,bell.top+7);ctx.quadraticCurveTo(side*24,bell.top-1,side*27,bell.top-5+flick);ctx.quadraticCurveTo(side*29,bell.top+6,side*26,bell.top+12);},0);
-   line('#fff7fa',1,()=>{ctx.moveTo(side*16,bell.top+6);ctx.quadraticCurveTo(side*22,bell.top-3,side*27,bell.top-9+flick);});
+
+  // Facetas de cristal líquido superpuestas sobre la campana (hexagonales)
+  ctx.save();ctx.globalAlpha=.28;
+  for(let row=0;row<3;row++){
+   for(let col=-1;col<=1;col++){
+    const fx=col*18,fy=bell.top+8+row*14;
+    ctx.beginPath();
+    for(let v=0;v<6;v++){const a=v*TAU/6-Math.PI/6;ctx.lineTo(fx+Math.cos(a)*9,fy+Math.sin(a)*9);}
+    ctx.closePath();ctx.fillStyle=row%2?pal.glow:pal.rim;ctx.fill();
+    ctx.strokeStyle=pal.ink;ctx.lineWidth=.6;ctx.stroke();
+   }
   }
-  horn(0,bell.top+3,22,4);
+  ctx.restore();
+
+  // Reflejos iridiscentes en la campana (destellos angulares)
+  for(let k=0;k<4;k++){
+   const rx=-14+k*10,ry=bell.top+6+k*8;
+   line('#ffffff',1.1,()=>{ctx.moveTo(rx,ry);ctx.lineTo(rx+5,ry-3);ctx.lineTo(rx+10,ry);});
+  }
+
+  // Corona de prismas flotantes orbitando sobre la campana (5 rombos de cristal)
+  for(let k=0;k<5;k++){
+   const orbitAngle=k*TAU/5+(still?0:t*0.025);
+   const px=Math.cos(orbitAngle)*22,py=bell.top-8+Math.sin(orbitAngle)*6;
+   const prismCol=['#c8f0ff','#ffd6f8','#ffe8a0','#d4f0d0','#e8d0ff'][k];
+   shape(prismCol,()=>{ctx.moveTo(px,py-5);ctx.lineTo(px+3.5,py);ctx.lineTo(px,py+5);ctx.lineTo(px-3.5,py);},.7,pal.ink);
+  }
+
+  // Gónadas internas como prismas triangulares (visibles a través de la campana)
+  ctx.save();ctx.globalAlpha=.5;
+  for(const side of[-1,1]){
+   const gx=side*14,gy=-78;
+   shape(pal.gonad,()=>{ctx.moveTo(gx,gy-5);ctx.lineTo(gx+side*6,gy+3);ctx.lineTo(gx-side*2,gy+4);},.5,pal.ink);
+  }
+  ctx.restore();
+
+  // Ojos directamente sobre la campana (sin cabeza de gato)
   eye(-13,-84,7.2);eye(13,-84,7.2);
+  // Boca sutil
   shape(pal.gonad,()=>{ctx.moveTo(-3,-71);ctx.quadraticCurveTo(0,-74,3,-71);ctx.quadraticCurveTo(2,-68,0,-68);ctx.quadraticCurveTo(-2,-68,-3,-71);},.6,pal.ink);
-  for(const side of[-1,1]){oval(side*22,-73,3.6,1.4,pal.gonad);for(let k=0;k<2;k++)line('#a08eb1',.7,()=>{ctx.moveTo(side*24,-73+k*4);ctx.quadraticCurveTo(side*34,-73+k*4,side*42,-77+k*6+wave(side,.08));});}
+
+  // Facetas laterales de espejo que emiten destellos
+  for(const side of[-1,1]){
+   shape(pal.rim+'aa',()=>{ctx.moveTo(side*28,-80);ctx.lineTo(side*35,-76);ctx.lineTo(side*33,-70);ctx.lineTo(side*26,-74);},.5,pal.ink);
+   if(!still){const flash=Math.max(0,Math.min(1,Math.sin(t*.09+side*2)*.4+.3));ctx.save();ctx.globalAlpha=flash;oval(side*31,-75,2,2,'#ffffff');ctx.restore();}
+  }
+
   if(castK>0)spellAccents(31,-74);
   ctx.restore();return;
  }
- if(f===4){ // DEIDAD MEDUSALUNA / AVATAR ABISAL · cúpula catedralicia translúcida, 9 tentáculos primordiales sagrados y alas de velo divino.
-  const bodyY=run?-Math.abs(step)*2.5:0,wingBeat=still?0:Math.sin(t*(air?.3:.09))*.26;
+ if(f===4){ // LEVIATÁN DE LAS MAREAS · Medusa colosal con constelaciones internas, tentáculos fractales ramificados, ojo cíclope cósmico y medusitas satélite.
+  const bodyY=run?-Math.abs(step)*2.5:0;
   ctx.save();ctx.scale(.96,.96);ctx.translate(atkK*2,hurt?3:bodyY);
   const Lcast=state==='cast'&&power===2;
+
+  // 9 tentáculos fractales que se ramifican
   const plumeEnds=[[-82,-45],[-86,-22],[-76,-1],[-55,11],[-43,-79],[55,11],[76,-1],[86,-22],[82,-45]];
   for(let i=0;i<9;i++){
    const [endX,endY]=plumeEnds[i],side=endX<0?-1:1,kick=Lcast&&!still?michiLaunchKick(i,9,pose.cast):0;
@@ -251,32 +291,100 @@ function drawMichiMythic(ctx,pose,r,f){
    line('#fff8e7',2.1,()=>{followEdge(points,true);});
    const tip=points[11],near=points[9];line(i%2?'#bba2c7':'#d4b3c3',.65,()=>{ctx.moveTo(near[0],near[1]+2);ctx.quadraticCurveTo(tip[0],tip[1]+3,end[0]-side*3,end[1]+1);});
    if(!still&&castK>.2)sparkle(end[0],end[1],1.8,'#f8e2af');
+
+   // Ramificaciones fractales (cada tentáculo se bifurca 1-2 veces)
+   const mid=points[8];
+   for(let b=0;b<(i%2?1:2);b++){
+    const brAngle=(b===0?-1:1)*side*.45+lag*.03;
+    const brLen=14+b*5;
+    const bx=mid[0]+Math.cos(brAngle+Math.PI*.5)*brLen,by=mid[1]+Math.sin(brAngle+Math.PI*.5)*brLen;
+    line(i%2?'#dfd0e8':'#f0e4d6',2.2,()=>{ctx.moveTo(mid[0],mid[1]);ctx.quadraticCurveTo(mid[0]+side*3,mid[1]+brLen*.4,bx,by);});
+    oval(bx,by,1.8,1.8,pal.bead);
+   }
   }
-  for(const side of[-1,1]){
-   ctx.save();ctx.translate(side*13,-54);ctx.scale(side,1);ctx.rotate((air?-.13:.18)+wingBeat);
-   shape('#e6d7ec',()=>{ctx.moveTo(0,2);ctx.bezierCurveTo(8,-15,35,-45,57,-43);ctx.bezierCurveTo(63,-39,45,-12,25,0);ctx.quadraticCurveTo(10,9,0,2);},1.25);
-   for(let k=5;k>=0;k--){const x=12+k*7,y=-7-k*5;shape(k%2?'#fff4dc':'#fffaf1',()=>{ctx.moveTo(x-8,y+6);ctx.quadraticCurveTo(x+3,y-15,x+14,y-24-k*.5);ctx.bezierCurveTo(x+18,y-22,x+8,y+1,x+1,y+9);ctx.quadraticCurveTo(x-4,y+12,x-8,y+6);},.7);line('#d9bdd7',.65,()=>{ctx.moveTo(x-3,y+6);ctx.quadraticCurveTo(x+4,y-5,x+11,y-18);});}
-   shape('#fff4e1',()=>{ctx.moveTo(-2,1);ctx.bezierCurveTo(4,-18,18,-23,27,-24);ctx.quadraticCurveTo(16,-4,3,7);ctx.closePath();},.8);
+
+  // Campana colosal multicapa (3 capas concéntricas translúcidas)
+  const bellY=-38;
+  // Capa exterior (más transparente)
+  ctx.save();ctx.globalAlpha=.35;
+  shape('#efe0f4',()=>{ctx.moveTo(-42,bellY+6);ctx.bezierCurveTo(-48,-60,-18,-72,2,-70);ctx.bezierCurveTo(24,-72,48,-56,42,bellY+6);ctx.quadraticCurveTo(0,bellY+16,-42,bellY+6);},1.2);
+  ctx.restore();
+  // Capa media
+  ctx.save();ctx.globalAlpha=.55;
+  shape('#f5eafa',()=>{ctx.moveTo(-35,bellY+2);ctx.bezierCurveTo(-40,-54,-14,-64,2,-63);ctx.bezierCurveTo(20,-64,40,-52,35,bellY+2);ctx.quadraticCurveTo(0,bellY+10,-35,bellY+2);},1.1);
+  ctx.restore();
+  // Capa interior (más opaca)
+  shape('#fff0dd',()=>{ctx.moveTo(-28,bellY);ctx.bezierCurveTo(-34,-50,-12,-58,4,-56);ctx.bezierCurveTo(20,-58,34,-46,28,bellY);ctx.quadraticCurveTo(0,bellY+8,-28,bellY);},1.55);
+
+  // Constelaciones vivas dentro de la campana (puntos de luz conectados)
+  ctx.save();ctx.globalAlpha=.65;
+  const stars=[[-14,-58],[6,-62],[18,-54],[-8,-48],[12,-46],[-18,-42],[0,-52],[22,-48],[-4,-40],[8,-55]];
+  const links=[[0,1],[1,2],[0,3],[3,5],[1,4],[4,7],[6,0],[6,1],[6,4],[3,8],[8,5],[9,2],[9,6]];
+  // Líneas de constelación
+  ctx.strokeStyle='rgba(255,248,230,0.55)';ctx.lineWidth=.65;
+  for(const [a,b] of links){
+   const sa=stars[a],sb=stars[b];
+   ctx.beginPath();ctx.moveTo(sa[0],sa[1]);ctx.lineTo(sb[0],sb[1]);ctx.stroke();
+  }
+  // Estrellas
+  for(let k=0;k<stars.length;k++){
+   const [sx,sy]=stars[k];
+   const brightness=.6+Math.sin((still?0:t*.03)+k*1.3)*.35;
+   ctx.globalAlpha=brightness;
+   oval(sx,sy,1.4,1.4,k%3===0?'#ffe8a0':k%3===1?'#d8f0ff':'#ffcbe8');
+  }
+  ctx.restore();
+
+  // Sombra inferior de la campana
+  shape('#d8c4d4',()=>{ctx.moveTo(-28,bellY-2);ctx.quadraticCurveTo(-10,bellY+6,10,bellY);ctx.quadraticCurveTo(20,bellY-3,28,bellY-4);ctx.quadraticCurveTo(25,bellY+4,10,bellY+6);ctx.quadraticCurveTo(-18,bellY+8,-28,bellY-2);},0);
+
+  // Reflejo especular
+  shape('#fff9ef',()=>{ctx.moveTo(-22,-50);ctx.bezierCurveTo(-16,-56,-2,-58,8,-52);ctx.quadraticCurveTo(-6,-54,-18,-46);},0);
+
+  // Ojos abisales gemelos del Leviatán (dos ojos grandes, ligeramente asimétricos)
+  const eyeY=-48;
+  const eyeOpts={
+   closed:dead||hurt||r.mood==='closed',
+   happy:r.mood==='happy',blink:finite(r.motion?.blink),
+   mood:atkK>.3?'angry':'normal',
+   look:{x:Math.max(-1,Math.min(1,finite(pose.look?.x)+finite(r.motion?.lookX)*.3)),y:finite(pose.look?.y)}
+  };
+  ctx.save();
+  // Auras de ambos ojos
+  ctx.globalAlpha=.2;oval(-10,eyeY,13,11,'#d8f0ff');oval(10,eyeY,13,11,'#d8f0ff');
+  ctx.globalAlpha=1;
+  // Ojo izquierdo (principal)
+  drawMichiEye(ctx,-10,eyeY,11,eyeOpts);
+  // Ojo derecho (ligeramente más pequeño — asimetría abisal)
+  drawMichiEye(ctx,10,eyeY,10,eyeOpts);
+  ctx.restore();
+
+  // 4 velos orales abisales colgando de la subumbrela
+  for(let v=0;v<4;v++){
+   const vx=(v-1.5)*12,vy=bellY+4;
+   const vWave=still?0:wave(v*1.7,.06)*4;
+   line(v%2?'#e8d4ec':'#f0e2d6',2.5,()=>{ctx.moveTo(vx,vy);ctx.bezierCurveTo(vx-3,vy+12+vWave,vx+2,vy+18+vWave,vx-1,vy+24+vWave);});
+  }
+
+  // Medusitas satélite orbitando la corona (5 mini medusas)
+  for(let k=0;k<5;k++){
+   const orbitA=k*TAU/5+(still?0:t*.018);
+   const ox=Math.cos(orbitA)*32,oy=-62+Math.sin(orbitA)*8;
+   ctx.save();ctx.translate(ox,oy);ctx.scale(.3,.3);
+   // Mini campana
+   shape('#f5eafa',()=>{ctx.moveTo(-8,0);ctx.bezierCurveTo(-10,-8,-4,-14,0,-14);ctx.bezierCurveTo(4,-14,10,-8,8,0);ctx.quadraticCurveTo(0,3,-8,0);},1);
+   // Mini tentáculos
+   for(let j=-1;j<=1;j++)line('#d8c4d4',1.2,()=>{ctx.moveTo(j*4,1);ctx.lineTo(j*5,10);});
+   // Mini ojo
+   oval(0,-6,2.5,2.5,'#ffe8a0');oval(0,-6,1.2,1.2,'#51425f');
    ctx.restore();
   }
-  const bellY=-32;
-  shape('#fff0dd',()=>{ctx.moveTo(-32,bellY);ctx.bezierCurveTo(-38,-54,-14,-58,6,-52);ctx.bezierCurveTo(22,-60,32,-42,24,-26);ctx.quadraticCurveTo(20,-12,4,-12);ctx.bezierCurveTo(-11,-7,-30,-11,-32,bellY);},1.55);
-  shape('#d8c4d4',()=>{ctx.moveTo(-32,-24);ctx.quadraticCurveTo(-15,-8,10,-15);ctx.quadraticCurveTo(19,-18,23,-28);ctx.quadraticCurveTo(24,-15,10,-10);ctx.quadraticCurveTo(-25,1,-32,-24);},0);
-  shape('#fff9ef',()=>{ctx.moveTo(-28,-36);ctx.bezierCurveTo(-21,-48,-5,-49,8,-43);ctx.quadraticCurveTo(-10,-45,-25,-31);},0);
-  shape('#f8e7d8',()=>{ctx.moveTo(-28,-32);ctx.bezierCurveTo(-37,-22,-27,-7,-13,-11);ctx.quadraticCurveTo(-4,-18,-12,-29);ctx.quadraticCurveTo(-18,-37,-28,-32);},1.05);
-  line('#fffaf1',1.5,()=>{ctx.moveTo(-26,-29);ctx.quadraticCurveTo(-17,-34,-12,-24);});
-  shape('#fff9ed',()=>{ctx.moveTo(-5,-63);ctx.bezierCurveTo(9,-67,27,-59,27,-45);ctx.quadraticCurveTo(26,-34,20,-27);ctx.lineTo(18,-32);ctx.quadraticCurveTo(13,-27,9,-25);ctx.lineTo(8,-31);ctx.lineTo(2,-28);ctx.lineTo(3,-35);ctx.quadraticCurveTo(-6,-31,-5,-41);ctx.quadraticCurveTo(-11,-39,-9,-47);ctx.quadraticCurveTo(-13,-52,-5,-63);},1.1);
-  line('#dcc7da',.85,()=>{ctx.moveTo(-1,-54);ctx.quadraticCurveTo(-3,-42,5,-36);ctx.moveTo(18,-54);ctx.quadraticCurveTo(22,-44,16,-37);});
+
+  // Brazo líder para ataque/cast
   let leadTip=[30,-38];
   if(atkK>0)leadTip=[30+atkK*23,-31-atkK*7];
   if(castK>0){if(power===1)leadTip=[22,-24];else if(power===3)leadTip=[31+castK*10,-23-castK*8];else if(power===4)leadTip=[34,-60-castK*8];else if(power===5)leadTip=[31,-48];else leadTip=[30,-38-castK*(power===2?19:6)];}
   if(hurt)leadTip=[21,-32];if(state==='wall')leadTip=[39,-68];if(victory)leadTip=[28,-27];
-  const elbow=[19+atkK*12,-22+(leadTip[1]+1)*.24];
-  shape('#fff4e2',()=>{ctx.moveTo(15,-44);ctx.bezierCurveTo(7,-37,elbow[0]-7,elbow[1],leadTip[0]-4,leadTip[1]-5);ctx.bezierCurveTo(leadTip[0]-10,leadTip[1]-4,leadTip[0]-8,leadTip[1]+2,leadTip[0]-1,leadTip[1]+2);ctx.quadraticCurveTo(leadTip[0]+13,leadTip[1]+3,leadTip[0]+12,leadTip[1]-2);ctx.quadraticCurveTo(leadTip[0]+11,leadTip[1]-7,leadTip[0]+5,leadTip[1]-6);ctx.quadraticCurveTo(elbow[0]+5,elbow[1],24,-42);ctx.quadraticCurveTo(20,-48,15,-44);},1.35);
-  shape('#dcc4d5',()=>{ctx.moveTo(15,-39);ctx.quadraticCurveTo(elbow[0]-5,elbow[1],leadTip[0]-3,leadTip[1]-4);ctx.quadraticCurveTo(leadTip[0]+1,leadTip[1]-1,leadTip[0]+8,leadTip[1]);ctx.lineTo(leadTip[0]-1,leadTip[1]+1);ctx.quadraticCurveTo(elbow[0]-7,elbow[1],15,-39);},0);
-  line('#fffaf1',1.3,()=>{ctx.moveTo(21,-36);ctx.quadraticCurveTo(elbow[0]+3,elbow[1],leadTip[0]+4,leadTip[1]-7);});
-  for(const dx of[4,8])line('#ae90aa',.7,()=>{ctx.moveTo(leadTip[0]+dx,leadTip[1]-2);ctx.lineTo(leadTip[0]+dx,leadTip[1]+1);});
-  catHead({x:8,y:-77,size:1.01,coat:'#fff4df',shadow:'#dcc8d3',muzzle:'#fffaf2',earLength:35,crown:true});
   spellAccents(leadTip[0],leadTip[1]);
   ctx.restore();return;
  }
