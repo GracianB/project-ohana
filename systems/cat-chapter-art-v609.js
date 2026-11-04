@@ -1,4 +1,6 @@
-// Jardín Lunar de Michi: fauna astral, medusas sagradas y altar del sueño.
+// Jardín Lunar de Michi: fauna astral, medusas sagradas, altar del sueño,
+// eclipse dinámico, nebulosas, colonias de medusas fantasma, corales bioluminiscentes,
+// vórtices abisales en pozos, decoraciones de plataformas y fitoplancton cósmico.
 // Arte vectorial en Canvas de alta calidad (mismo nivel que V606/V607/V608).
 // Solo presentación: lee el estado real sin tocar física ni daño.
 const TAU=Math.PI*2,INK='#1a0d2e',PEARL='#f5e6ff',MOON='#fff4c8',LILAC='#c9a8f7',TEAL='#7af0e0';
@@ -452,61 +454,337 @@ export function drawCatTrap(ctx,trap,cam,t=0,reduced=false){
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ATMÓSFERA CELESTIAL: AURORAS ABISALES, NEBULOSAS Y FITOPLANCTON CÓSMICO
+// ATMÓSFERA CELESTIAL: ECLIPSE DINÁMICO, AURORAS ABISALES, NEBULOSAS,
+// COLONIAS DE MEDUSAS FANTASMA, CORALES BIOLUMINISCENTES Y FITOPLANCTON
 // ─────────────────────────────────────────────────────────────────────────────
 export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
  if(!ctx)return;
  ctx.save();
-
- // Auroras astrales ondulando en la bóveda superior del santuario
  const vw=g.viewW||1280;
+ const vh=g.viewH||720;
+
+ // ── ECLIPSE DINÁMICO: luna oscureciendo el sol con corona pulsante ─────────
+ const eclX=vw*.62,eclY=88;
+ const moonR=38,sunR=36;
+ // Corona solar pulsante (rayos de luz difusa alrededor del eclipse)
+ if(!reduced){
+  const coronaPulse=Math.sin(t*0.015)*0.12+0.32;
+  // Halo exterior difuso
+  const corona=ctx.createRadialGradient(eclX,eclY,moonR,eclX,eclY,moonR+65);
+  corona.addColorStop(0,'rgba(255,220,140,'+coronaPulse+')');
+  corona.addColorStop(0.3,'rgba(255,180,100,'+(coronaPulse*0.6)+')');
+  corona.addColorStop(0.6,'rgba(200,120,255,'+(coronaPulse*0.3)+')');
+  corona.addColorStop(1,'rgba(140,80,200,0)');
+  ctx.fillStyle=corona;
+  ctx.beginPath();ctx.arc(eclX,eclY,moonR+65,0,TAU);ctx.fill();
+  // Rayos de corona asimétricos (prominencias solares)
+  ctx.globalAlpha=coronaPulse*0.7;
+  for(let r=0;r<8;r++){
+   const ang=r*TAU/8+t*0.004;
+   const rayLen=28+Math.sin(t*0.02+r*2.1)*14;
+   const rw=3+Math.sin(t*0.03+r)*1.5;
+   ctx.beginPath();
+   ctx.moveTo(eclX+Math.cos(ang)*(moonR+4),eclY+Math.sin(ang)*(moonR+4));
+   ctx.lineTo(eclX+Math.cos(ang-0.06)*(moonR+rayLen),eclY+Math.sin(ang-0.06)*(moonR+rayLen));
+   ctx.lineTo(eclX+Math.cos(ang+0.06)*(moonR+rayLen),eclY+Math.sin(ang+0.06)*(moonR+rayLen));
+   ctx.closePath();
+   ctx.fillStyle=r%2?'rgba(255,210,120,0.35)':'rgba(220,160,255,0.3)';
+   ctx.fill();
+  }
+  ctx.globalAlpha=1;
+ }
+ // Disco solar (detrás de la luna) — anillo fino visible
+ ctx.beginPath();ctx.arc(eclX,eclY,sunR+3,0,TAU);
+ ctx.fillStyle='rgba(255,200,100,0.18)';ctx.fill();
+ // Disco lunar opaco (la luna cubre el sol)
+ const moonGrad=ctx.createRadialGradient(eclX-6,eclY-6,2,eclX,eclY,moonR);
+ moonGrad.addColorStop(0,'#1e1230');moonGrad.addColorStop(0.7,'#0d0618');moonGrad.addColorStop(1,'#060210');
+ ctx.beginPath();ctx.arc(eclX,eclY,moonR,0,TAU);
+ ctx.fillStyle=moonGrad;ctx.fill();
+ // Cráteres lunares sutiles
+ ctx.globalAlpha=0.12;
+ ctx.fillStyle='#2a1840';
+ ctx.beginPath();ctx.arc(eclX-12,eclY-8,6,0,TAU);ctx.fill();
+ ctx.beginPath();ctx.arc(eclX+8,eclY+4,4.5,0,TAU);ctx.fill();
+ ctx.beginPath();ctx.arc(eclX-3,eclY+12,3.5,0,TAU);ctx.fill();
+ ctx.globalAlpha=1;
+
+ // ── OSCURECIMIENTO GENERAL: velo abisal que se intensifica con el eclipse ──
+ const darkPulse=reduced?0.08:0.06+Math.sin(t*0.012)*0.03;
+ ctx.fillStyle='rgba(8,2,18,'+darkPulse+')';
+ ctx.fillRect(0,0,vw,vh);
+
+ // ── AURORAS ABISALES más profundas y dinámicas ────────────────────────────
  const cur1=reduced?0:Math.sin(t*0.025)*35;
  const cur2=reduced?0:Math.cos(t*0.02)*40;
 
  const auroraGrad=ctx.createLinearGradient(0,40,0,260);
- auroraGrad.addColorStop(0,'rgba(175,130,255,0)');
- auroraGrad.addColorStop(0.4,'rgba(195,140,255,0.14)');
- auroraGrad.addColorStop(0.7,'rgba(120,230,220,0.18)');
- auroraGrad.addColorStop(1,'rgba(140,110,240,0)');
+ auroraGrad.addColorStop(0,'rgba(140,90,220,0)');
+ auroraGrad.addColorStop(0.35,'rgba(160,100,240,0.18)');
+ auroraGrad.addColorStop(0.6,'rgba(80,200,190,0.22)');
+ auroraGrad.addColorStop(1,'rgba(100,60,200,0)');
  ctx.fillStyle=auroraGrad;
 
  ctx.beginPath();
  ctx.moveTo(-60,180+cur1);
  ctx.bezierCurveTo(vw*.3,100+cur2,vw*.7,240+cur1,vw+60,140+cur2);
- ctx.lineTo(vw+60,0);
- ctx.lineTo(-60,0);
- ctx.closePath();
- ctx.fill();
+ ctx.lineTo(vw+60,0);ctx.lineTo(-60,0);
+ ctx.closePath();ctx.fill();
 
- // Segunda cortina de aurora en contra-fase
+ // Segunda cortina de aurora en contra-fase (más intensa)
  const auroraGrad2=ctx.createLinearGradient(0,80,0,320);
- auroraGrad2.addColorStop(0,'rgba(230,160,255,0)');
- auroraGrad2.addColorStop(0.5,'rgba(240,170,220,0.12)');
- auroraGrad2.addColorStop(1,'rgba(100,180,255,0)');
+ auroraGrad2.addColorStop(0,'rgba(200,120,255,0)');
+ auroraGrad2.addColorStop(0.5,'rgba(220,140,200,0.16)');
+ auroraGrad2.addColorStop(1,'rgba(60,150,230,0)');
  ctx.fillStyle=auroraGrad2;
 
  ctx.beginPath();
  ctx.moveTo(-60,220-cur2);
  ctx.bezierCurveTo(vw*.35,160-cur1,vw*.65,280-cur2,vw+60,200-cur1);
- ctx.lineTo(vw+60,0);
- ctx.lineTo(-60,0);
- ctx.closePath();
- ctx.fill();
+ ctx.lineTo(vw+60,0);ctx.lineTo(-60,0);
+ ctx.closePath();ctx.fill();
 
- // Fitoplancton cósmico: esporas bioluminiscentes flotando suavemente
+ // ── NEBULOSAS DE FONDO: nubes de gas cósmico en capas ─────────────────────
  if(!reduced){
-  ctx.globalAlpha=0.45;
-  for(let i=0;i<12;i++){
-   const seed=i*137.5;
-   const fx=((t*0.15+seed)%(vw+80))-40;
-   const fy=60+Math.sin(t*0.03+seed)*50+(seed%200);
-   const fr=1.2+Math.sin(t*0.06+i)*0.6;
-   ctx.fillStyle=i%3===0?'#7af0e0':i%3===1?'#deb3ff':'#ffe6aa';
-   ctx.beginPath();ctx.arc(fx,fy,fr,0,TAU);ctx.fill();
+  for(let n=0;n<3;n++){
+   const nx=vw*(0.15+n*0.3)+Math.sin(t*0.008+n*2)*40;
+   const ny=140+n*60+Math.cos(t*0.01+n)*20;
+   const nr=80+n*20;
+   const nebula=ctx.createRadialGradient(nx,ny,0,nx,ny,nr);
+   const cols=['rgba(160,100,240,0.07)','rgba(80,180,200,0.06)','rgba(200,120,180,0.05)'];
+   nebula.addColorStop(0,cols[n]);nebula.addColorStop(1,'rgba(0,0,0,0)');
+   ctx.fillStyle=nebula;
+   ctx.beginPath();ctx.arc(nx,ny,nr,0,TAU);ctx.fill();
+  }
+ }
+
+ // ── COLONIAS DE MEDUSAS FANTASMA: siluetas translúcidas en el fondo ───────
+ if(!reduced){
+  ctx.globalAlpha=0.12;
+  for(let m=0;m<7;m++){
+   const mx=((t*0.08+m*197)%(vw+200))-100;
+   const my=180+Math.sin(t*0.025+m*1.8)*60+(m%3)*40;
+   const ms=0.4+m%3*0.15;
+   const mPulse=Math.sin(t*0.06+m*2.3)*0.03;
+   ctx.save();ctx.translate(mx,my);ctx.scale(ms+mPulse,ms+mPulse);
+   // Mini campana fantasma
+   ctx.beginPath();ctx.moveTo(-14,0);
+   ctx.bezierCurveTo(-16,-10,-6,-20,0,-20);ctx.bezierCurveTo(6,-20,16,-10,14,0);
+   ctx.quadraticCurveTo(0,4,-14,0);
+   ctx.fillStyle=m%2?'#c8b0f0':'#90d8e0';ctx.fill();
+   // Mini tentáculos fantasma
+   for(let tk=-1;tk<=1;tk++){
+    const tw=Math.sin(t*0.08+m+tk)*3;
+    ctx.beginPath();ctx.moveTo(tk*6,2);ctx.quadraticCurveTo(tk*5+tw,12,tk*4+tw*1.5,18);
+    ctx.strokeStyle=m%2?'#c8b0f0':'#90d8e0';ctx.lineWidth=1.2;ctx.stroke();
+   }
+   ctx.restore();
   }
   ctx.globalAlpha=1;
  }
 
+ // ── COLUMNAS DE BURBUJAS ASCENDENTES desde el fondo oceánico ──────────────
+ if(!reduced){
+  ctx.globalAlpha=0.3;
+  for(let col=0;col<5;col++){
+   const baseX=vw*(0.12+col*0.2);
+   for(let b=0;b<4;b++){
+    const bAge=((t*0.5+col*43+b*67)%180);
+    const bx=baseX+Math.sin(bAge*0.08+col)*8;
+    const by=vh-bAge*2.5;
+    const br=1.5+Math.sin(bAge*0.1+b)*0.8;
+    if(by>40){
+     ctx.beginPath();ctx.arc(bx,by,br,0,TAU);
+     ctx.fillStyle=col%2?'rgba(122,240,224,0.5)':'rgba(200,160,255,0.4)';
+     ctx.fill();
+    }
+   }
+  }
+  ctx.globalAlpha=1;
+ }
+
+ // ── ESTRELLAS DE FONDO: campo estelar estático con centelleo ───────────────
+ if(!reduced){
+  ctx.globalAlpha=0.55;
+  for(let s=0;s<20;s++){
+   const sx=(s*311.7)%vw,sy=(s*173.3)%(vh*0.45);
+   const twinkle=0.4+Math.sin(t*0.04+s*3.7)*0.5;
+   ctx.globalAlpha=Math.max(0,Math.min(1,twinkle));
+   ctx.fillStyle=s%4===0?'#ffe8a0':s%4===1?'#d8f0ff':s%4===2?'#ffcbe8':'#c8f0e0';
+   ctx.beginPath();ctx.arc(sx,sy,s%3===0?1.8:1.1,0,TAU);ctx.fill();
+   // Cruz estelar en las más brillantes
+   if(s%5===0&&twinkle>0.6){
+    ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(sx-3,sy);ctx.lineTo(sx+3,sy);ctx.moveTo(sx,sy-3);ctx.lineTo(sx,sy+3);ctx.stroke();
+   }
+  }
+  ctx.globalAlpha=1;
+ }
+
+ // ── FITOPLANCTON CÓSMICO: esporas bioluminiscentes (más cantidad y variedad)
+ if(!reduced){
+  ctx.globalAlpha=0.45;
+  for(let i=0;i<18;i++){
+   const seed=i*137.5;
+   const fx=((t*0.15+seed)%(vw+80))-40;
+   const fy=60+Math.sin(t*0.03+seed)*50+(seed%200);
+   const fr=1.2+Math.sin(t*0.06+i)*0.6;
+   ctx.fillStyle=i%4===0?'#7af0e0':i%4===1?'#deb3ff':i%4===2?'#ffe6aa':'#ff9ed0';
+   ctx.beginPath();ctx.arc(fx,fy,fr,0,TAU);ctx.fill();
+   // Estela corta de la espora
+   if(i%3===0){
+    ctx.globalAlpha=0.2;
+    ctx.beginPath();ctx.moveTo(fx,fy);ctx.lineTo(fx-4,fy+2);ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=0.6;ctx.stroke();
+    ctx.globalAlpha=0.45;
+   }
+  }
+  ctx.globalAlpha=1;
+ }
+
+ // ── CORALES BIOLUMINISCENTES en la franja inferior del viewport ────────────
+ if(!reduced){
+  const coralY=vh-30;
+  ctx.globalAlpha=0.18;
+  for(let c=0;c<6;c++){
+   const cx=vw*(0.08+c*0.17);
+   const ch=22+c%3*8;
+   const sway=Math.sin(t*0.04+c*1.4)*2;
+   // Rama principal
+   ctx.beginPath();ctx.moveTo(cx,coralY);
+   ctx.quadraticCurveTo(cx+sway,coralY-ch*0.6,cx+sway*1.5,coralY-ch);
+   ctx.strokeStyle=c%3===0?'#ff8ecf':c%3===1?'#7af0e0':'#deb3ff';ctx.lineWidth=3;ctx.stroke();
+   // Ramas laterales
+   for(let br=-1;br<=1;br+=2){
+    ctx.beginPath();ctx.moveTo(cx+sway*0.5,coralY-ch*0.5);
+    ctx.quadraticCurveTo(cx+br*8+sway,coralY-ch*0.7,cx+br*10+sway*1.2,coralY-ch*0.85);
+    ctx.lineWidth=1.8;ctx.stroke();
+   }
+   // Punta luminosa
+   ctx.beginPath();ctx.arc(cx+sway*1.5,coralY-ch,2.5,0,TAU);
+   ctx.fillStyle=ctx.strokeStyle;ctx.fill();
+  }
+  ctx.globalAlpha=1;
+ }
+
+ // ── ALGAS/KELP ondulando en los bordes de plataformas (franja inferior) ────
+ if(!reduced){
+  ctx.globalAlpha=0.14;
+  for(let k=0;k<8;k++){
+   const kx=vw*(0.05+k*0.13);
+   const kh=30+k%3*10;
+   const kBase=vh-15;
+   for(let seg=0;seg<4;seg++){
+    const segH=kh/4;
+    const sway=Math.sin(t*0.05+k+seg*0.8)*4*(seg+1)/4;
+    const sy1=kBase-seg*segH,sy2=kBase-(seg+1)*segH;
+    ctx.beginPath();ctx.moveTo(kx,sy1);ctx.quadraticCurveTo(kx+sway,sy1-segH*0.5,kx+sway,sy2);
+    ctx.strokeStyle=k%2?'#60c0a0':'#80a0d0';ctx.lineWidth=2.5-seg*0.4;ctx.stroke();
+   }
+  }
+  ctx.globalAlpha=1;
+ }
+
+ ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VÓRTICES DE CORRIENTE ABISAL EN LOS POZOS (efecto visual de salvación)
+// ─────────────────────────────────────────────────────────────────────────────
+export function drawCatPitVortex(ctx,hazard,cam,t=0,reduced=false){
+ if(!ctx||!hazard)return;
+ const x=hazard.x-cam.x,y=hazard.y-cam.y,w=hazard.w,h=hazard.h;
+ const cx=x+w/2,cy=y+h*0.35;
+ ctx.save();
+
+ // Corriente ascendente luminosa dentro del pozo
+ if(!reduced){
+  const upFlow=ctx.createLinearGradient(cx,y+h,cx,y);
+  upFlow.addColorStop(0,'rgba(122,240,224,0)');
+  upFlow.addColorStop(0.4,'rgba(122,240,224,0.12)');
+  upFlow.addColorStop(0.7,'rgba(180,140,255,0.08)');
+  upFlow.addColorStop(1,'rgba(180,140,255,0)');
+  ctx.fillStyle=upFlow;
+  ctx.fillRect(x+8,y,w-16,h);
+
+  // Espirales de corriente
+  ctx.globalAlpha=0.35;
+  for(let s=0;s<3;s++){
+   const spiralT=t*0.06+s*TAU/3;
+   const sr=12+s*4+Math.sin(t*0.03+s)*3;
+   const sy=cy+Math.sin(t*0.04+s*2)*30;
+   ctx.beginPath();
+   for(let a=0;a<TAU*1.5;a+=0.15){
+    const px=cx+Math.cos(a+spiralT)*sr*(1-a/(TAU*3));
+    const py=sy-a*6;
+    if(a===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+   }
+   ctx.strokeStyle=s%2?'#7af0e0':'#c495ff';
+   ctx.lineWidth=1.5;ctx.stroke();
+  }
+
+  // Partículas ascendentes (burbujas de energía)
+  ctx.globalAlpha=0.5;
+  for(let p=0;p<6;p++){
+   const pAge=((t*0.8+p*47)%120);
+   const px=cx+Math.sin(pAge*0.12+p*1.3)*w*0.25;
+   const py=y+h-pAge*2.5;
+   if(py>y&&py<y+h){
+    ctx.fillStyle=p%2?'#7af0e0':'#deb3ff';
+    ctx.beginPath();ctx.arc(px,py,1.5+Math.sin(pAge*0.1)*0.6,0,TAU);ctx.fill();
+   }
+  }
+ }
+
+ // Borde luminoso superior del pozo (indicador visual de zona segura)
+ ctx.globalAlpha=0.6;
+ const edgeGlow=ctx.createLinearGradient(x,y-6,x,y+12);
+ edgeGlow.addColorStop(0,hazard.color||'#c495ff');
+ edgeGlow.addColorStop(1,'rgba(0,0,0,0)');
+ ctx.fillStyle=edgeGlow;
+ ctx.fillRect(x,y-4,w,16);
+
+ ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DECORACIONES AMBIENTALES: FORMACIONES DE CORAL, ALGAS Y CRISTALES EN PLATAFORMAS
+// ─────────────────────────────────────────────────────────────────────────────
+export function drawCatPlatformDecor(ctx,plat,cam,t=0,reduced=false){
+ if(!ctx||!plat)return;
+ const [px,py,pw,ph]=plat;
+ if(ph>30)return; // Solo decorar plataformas (no el suelo)
+ const x=px-cam.x,y=py-cam.y,w=pw;
+ const seed=(px*7+py*13)%1000;
+
+ ctx.save();
+
+ // Musgo bioluminiscente en el borde de la plataforma
+ ctx.globalAlpha=reduced?0.1:0.22;
+ for(let m=0;m<Math.min(5,w/40);m++){
+  const mx=x+10+m*(w/5)+((seed+m*31)%20);
+  const mh=4+((seed+m*17)%6);
+  const sway=reduced?0:Math.sin(t*0.04+seed+m)*1.5;
+  ctx.beginPath();ctx.moveTo(mx,y);
+  ctx.quadraticCurveTo(mx+sway,y-mh,mx+3+sway,y-1);
+  ctx.strokeStyle=(seed+m)%3===0?'#7af0e0':(seed+m)%3===1?'#c8a0f7':'#ffe6aa';
+  ctx.lineWidth=2;ctx.stroke();
+ }
+
+ // Cristales lunares ocasionales (solo en algunas plataformas)
+ if(seed%5===0&&!reduced){
+  const cx=x+w*0.6+(seed%30);
+  ctx.globalAlpha=0.35;
+  ctx.beginPath();
+  ctx.moveTo(cx,y);ctx.lineTo(cx-3,y-12);ctx.lineTo(cx+1,y-14);ctx.lineTo(cx+4,y-10);ctx.closePath();
+  ctx.fillStyle='#d8c0ff';ctx.fill();
+  ctx.strokeStyle='#f0e8ff';ctx.lineWidth=0.8;ctx.stroke();
+  // Brillo en la punta del cristal
+  ctx.globalAlpha=0.5+Math.sin(t*0.05+seed)*0.3;
+  ctx.beginPath();ctx.arc(cx+1,y-14,1.5,0,TAU);
+  ctx.fillStyle='#fff8e0';ctx.fill();
+ }
+
+ ctx.globalAlpha=1;
  ctx.restore();
 }
 

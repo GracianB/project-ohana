@@ -1,5 +1,5 @@
 import {XP_NEED} from './xp.js';
-import {drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust} from './cat-chapter-art-v609.js';
+import {drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust,drawCatPitVortex,drawCatPlatformDecor} from './cat-chapter-art-v609.js';
 export const MICHI_CHAPTER_BOSS_ID='w1-cat-astral-v1';
 export const MICHI_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134,hp:480});
 
@@ -74,31 +74,47 @@ export function catObjective(g){
 export function drawCatChapter(ctx,g,cam){
  if(!catChapter(g))return;
  const t=g.world1?.tick||0,reduced=!!g.reduceMotion;
+ const vw=g.viewW||1280;
 
- // 1. Atmósfera celestial: Auroras boreales y velos en el cielo
+ // 1. Atmósfera celestial: eclipse dinámico, auroras, nebulosas, estrellas, medusas fantasma
  drawCatAtmosphere(ctx,g,cam,t,reduced);
 
- // 2. Trampas de telaraña activas
+ // 2. Vórtices de corriente abisal en los pozos (efecto visual)
+ for(const h of g.roomDef?.hazards||[]){
+  const hx=h.x-cam.x;
+  if(hx<-200||hx>vw+200)continue;
+  drawCatPitVortex(ctx,h,cam,t,reduced);
+ }
+
+ // 3. Decoraciones ambientales en plataformas (musgo, cristales)
+ for(const p of g.roomDef?.plats||[]){
+  if(p[3]>30)continue; // Solo plataformas, no suelo
+  const px=p[0]-cam.x;
+  if(px<-220||px>vw+220)continue;
+  drawCatPlatformDecor(ctx,p,cam,t,reduced);
+ }
+
+ // 4. Trampas de telaraña activas
  for(const trap of CAT_TRAPS){
   if(catTrapSilenced(g,trap.id))continue;
   const tx=trap.x-cam.x;
-  if(tx<-120||tx>(g.viewW||1280)+120)continue;
+  if(tx<-120||tx>vw+120)continue;
   drawCatTrap(ctx,trap,cam,t,reduced);
  }
 
- // 3. Estaciones de medusas y puentes de cristal lunar
+ // 5. Estaciones de medusas y puentes de cristal lunar
  const stations=g.world1?.stations||[];
  for(const s of stations){
   if(s.kind!=='jelly')continue;
   const sx=s.x-cam.x;
-  if(sx<-180||sx>(g.viewW||1280)+180)continue;
+  if(sx<-180||sx>vw+180)continue;
   if(s.done){
    drawCatCrystalBridge(ctx,s,cam,t,reduced);
   }
   drawCatMoonJelly(ctx,s,cam,t,reduced);
  }
 
- // 4. Estela de polvo de estrellas para Michi
+ // 6. Estela de polvo de estrellas para Michi
  if(g.player&&g.player.id==='cat'){
   drawCatStardust(ctx,g.player,cam,t,reduced);
  }
