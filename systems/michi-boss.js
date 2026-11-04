@@ -64,31 +64,45 @@ export function updateMichiBoss(e,g,hurt){
    }
   };
   if(!b.burst){
-   if(b.attack===2){astralWave(b.aim,6.5);if(b.tier>1)astralWave(-b.aim,4.5);}
+   if(b.attack===2){
+    astralWave(b.aim,7);
+    if(b.tier>1)astralWave(-b.aim,5.2);
+    // En Tier 3, genera minas de polvo estelar suspendidas en el aire
+    if(b.tier===3&&(g.projectiles?.length||0)<130){
+     g.projectiles.push({x:e.x+e.w/2-b.aim*60,y:e.y-45,w:16,h:16,vx:-b.aim*1.2,vy:-0.4,life:100,dmg:14,owner:'enemy',shape:'orb',color:'#c495ff'});
+    }
+   }
    if(b.attack===1){
-    for(let side of [-1,1]){
+    // Abanico armónico de perlas oníricas bioluminiscentes
+    const speeds=b.tier===3?[-7,-3.5,0,3.5,7]:[-5.5,-2.2,2.2,5.5];
+    for(const vx of speeds){
      if((g.projectiles?.length||0)<130){
-      g.projectiles.push({x:e.x+e.w/2,y:e.y+20,w:20,h:20,vx:side*5,vy:-3,life:120,dmg:14,owner:'enemy',shape:'orb',color:'#ffb6e4'});
+      const vy=-3.2-Math.abs(vx)*0.15;
+      g.projectiles.push({x:e.x+e.w/2,y:e.y+15,w:18,h:18,vx,vy,life:130,dmg:b.tier===3?16:13,owner:'enemy',shape:'orb',color:Math.abs(vx)>3?'#ffb6e4':'#e5c2ff'});
      }
     }
    }
    if(b.attack===3){
-    // Lunar eclipse starlight barrage from above
-    const cols=b.columns||[-80,0,80].map(off=>p.x+off);
+    // Cataclismo del Eclipse: columnas celestiales descendentes
+    const cols=b.columns||(b.tier===3?[-140,-45,45,140]:[-80,0,80]).map(off=>p.x+off);
     for(let i=0;i<cols.length;i++){
      const sx=cols[i];
-     g.fx?.emit?.(sx,p.y-120,{color:'#e5c2ff',count:8,size:3,star:true,life:30});
+     g.fx?.emit?.(sx,p.y-140,{color:'#e5c2ff',count:10,size:3.5,star:true,life:35});
      if((g.projectiles?.length||0)<130){
-      g.projectiles.push({x:sx-9,y:e.y-180,w:18,h:32,vx:0,vy:8,life:90,dmg:b.tier===3?22:15,owner:'enemy',shape:'orb',color:'#ffcbf2'});
+      g.projectiles.push({x:sx-10,y:e.y-200,w:20,h:36,vx:0,vy:8.5,life:95,dmg:b.tier===3?24:16,owner:'enemy',shape:'orb',color:'#ffcbf2'});
      }
     }
    }
    b.burst=1;
   }
   if(b.attack===0){
-   e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x+b.aim*(b.tier===3?9.5:6.2)));
+   e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x+b.aim*(b.tier===3?10:6.5)));
+   if(b.tier>=2&&b.clock%8===0){
+    astralWave(b.aim,4.5);
+    g.fx?.emit?.(e.x+e.w/2,e.y+e.h-10,{color:'#7af0e0',count:4,size:2.5,life:20});
+   }
    if(Math.abs(dx)<(e.w+p.w)/2&&Math.abs(p.y+p.h/2-e.y-e.h/2)<(p.h+e.h)/2){
-    hurt?.(b.tier===3?22:16,'LATIGAZO ABISAL');
+    hurt?.(b.tier===3?24:16,'LATIGAZO ABISAL');
    }
   }
   if(--b.clock<=0){b.phase='rest';b.clock=b.tier===3?38:70;b.attack=(b.attack+1)%PATTERNS.length;b.exposed=true;}
@@ -234,27 +248,45 @@ export function drawMichiBossBody(ctx,e,cam,t=0,reduced=false){
 
  ctx.save();ctx.translate(x,y);
 
- // Silueta de aura envolvente
- ctx.globalAlpha=.15;disk(0,-h*.48,w*.78,h*.7,'#d5b6ff');ctx.globalAlpha=1;
+ // Silueta de aura envolvente y fulgor de eclipse en tier 3
+ ctx.globalAlpha=b.tier===3?.3:.16;
+ disk(0,-h*.48,w*(b.tier===3?.95:.8),h*(b.tier===3?.85:.72),b.tier===3?'#ff82ab':'#d5b6ff');
+ if(b.tier===3&&!reduced){
+  ctx.globalAlpha=.18;
+  for(let fl=0;fl<6;fl++){
+   const fa=fl*TAU/6+t*0.03;
+   const fx=Math.cos(fa)*w*.6,fy=-h*.55+Math.sin(fa)*h*.4;
+   disk(fx,fy,14,14,'#ffd4ac');
+  }
+ }
+ ctx.globalAlpha=1;
 
- // Velos de medusa flotantes (7 tentáculos con oscilaciones independientes)
- for(let i=0;i<7;i++){
-  const lane=i-3,root=lane*13,tip=lane*17+swim*(i%2?9:-9);
+ // Velos de medusa flotantes (9 tentáculos con oscilaciones independientes)
+ for(let i=0;i<9;i++){
+  const lane=i-4,root=lane*10.5,tip=lane*14+swim*(i%2?9:-9);
   ctx.beginPath();ctx.moveTo(root,-h*.54);
-  ctx.bezierCurveTo(root-17,-h*.27,tip+18,-h*.22,tip,-4+beat*2);
-  stroke('#3f2b59',i===3?11:8);
-  stroke(i%2?'#b7b4fa':'#87e5e8',i===3?7:5);
-  disk(tip,-3+beat*2,4,5,i%2?'#fff7fa':'#b9ffff');
+  ctx.bezierCurveTo(root-14,-h*.27,tip+15,-h*.22,tip,-4+beat*2);
+  stroke('#3f2b59',Math.abs(lane)<2?10:7);
+  stroke(i%2?'#b7b4fa':'#87e5e8',Math.abs(lane)<2?6.5:4.5);
+  disk(tip,-3+beat*2,3.5,4.5,i%2?'#fff7fa':'#b9ffff');
  }
 
- // Alas de protección laterales
+ // Velos orales abisales flotantes y ondulantes (ondulaciones hidromedusa pura)
  for(const side of [-1,1]){
   ctx.save();ctx.scale(side,1);
-  ctx.beginPath();ctx.moveTo(16,-h*.65);
-  ctx.bezierCurveTo(38,-h*1.06,72,-h*1.1,60,-h*.52);
-  ctx.bezierCurveTo(43,-h*.3,27,-h*.3,16,-h*.65);
-  ctx.closePath();ctx.fillStyle='#564071';ctx.fill();stroke('#c9afec',2.5);
-  for(let j=0;j<3;j++){ctx.beginPath();ctx.moveTo(23,-h*.6+j*7);ctx.lineTo(53,-h*.77+j*12);stroke('#e8dcff',1.3);}
+  const flutter=reduced?0:Math.sin(t*.1+side*1.2)*4;
+  ctx.beginPath();ctx.moveTo(14,-h*.62);
+  ctx.bezierCurveTo(36,-h*.85+flutter,64,-h*.74+flutter,46,-h*.42);
+  ctx.bezierCurveTo(32,-h*.28,20,-h*.34,14,-h*.62);
+  ctx.closePath();
+  ctx.fillStyle=b.tier===3?'rgba(180,80,160,0.52)':'rgba(120,95,175,0.44)';
+  ctx.fill();stroke('#c9afec',2);
+  // Canales internos iridiscentes
+  for(let j=0;j<3;j++){
+   ctx.beginPath();ctx.moveTo(20,-h*.58+j*6);
+   ctx.quadraticCurveTo(36,-h*.68+j*9+flutter*.5,42,-h*.48+j*7);
+   stroke('#e8dcff',1.2);
+  }
   ctx.restore();
  }
 
@@ -273,21 +305,27 @@ export function drawMichiBossBody(ctx,e,cam,t=0,reduced=false){
  g.addColorStop(1,'#6a467d');
  ctx.fillStyle=g;ctx.fill();stroke('#27253f',3.8);
 
- // Estructura interna de vidrio
+ // Estructura interna de vidrio y 4 gónadas en media luna
  ctx.globalAlpha=.35;disk(0,-h*.76,w*.28,h*.26,'#e9f9ff');ctx.globalAlpha=1;
  for(let j=-2;j<=2;j++){
   ctx.beginPath();ctx.moveTo(j*8,-h*1.04);
   ctx.quadraticCurveTo(j*20,-h*.78,j*22,-h*.53);stroke('rgba(255,255,255,.75)',1.9);
  }
 
- // Aletas de corona y cuerno central de eclipse
+ // Corona ropálica de selenita (órganos sensoriales celestiales y perlas estelares)
  for(const side of [-1,1]){
-  ctx.beginPath();ctx.moveTo(side*18,-h*1.03);
-  ctx.lineTo(side*37,-h*1.31);ctx.lineTo(side*35,-h*.89);
-  ctx.closePath();ctx.fillStyle='#f9d6e8';ctx.fill();stroke('#47406b',2);
+  ctx.beginPath();ctx.moveTo(side*16,-h*1.02);
+  ctx.bezierCurveTo(side*30,-h*1.22,side*38,-h*1.12,side*26,-h*.88);
+  ctx.closePath();ctx.fillStyle='#f5e4fa';ctx.fill();stroke('#47406b',1.8);
+  disk(side*30,-h*1.18,3.5,3.5,b.tier===3?'#ffa8c8':'#7af0e0');
  }
- ctx.beginPath();ctx.moveTo(-9,-h*1.11);ctx.lineTo(0,-h*1.47);
- ctx.lineTo(9,-h*1.11);ctx.closePath();ctx.fillStyle='#ffedaf';ctx.fill();stroke('#46365f',2.4);
+ // Diadema central de perlas estelares (cresta abisal de 3 spires)
+ for(let p=-1;p<=1;p++){
+  const pyOffset=p===0?-h*1.28:-h*1.20;
+  ctx.beginPath();ctx.moveTo(p*8,-h*1.08);ctx.lineTo(p*11,pyOffset);ctx.lineTo(p*5,pyOffset+5);ctx.closePath();
+  ctx.fillStyle='#ffedaf';ctx.fill();stroke('#46365f',1.6);
+  disk(p*11,pyOffset,2.8,2.8,'#ffffff');
+ }
 
  // Ojos y expresión según fase / tier
  for(const side of [-1,1]){

@@ -57,6 +57,29 @@ export function authorCatEncounters(room){
   {id:2,x:7540,y:FLOOR-70,w:90,h:70,name:'Telaraña del Velo III'}
  ];
 
+ // Corrientes abisales ascendentes: sustentan el vuelo y salvan caídas sobre los tres pozos
+ room.catUpdrafts=[
+  {id:'up-1',x:2200,y:FLOOR-180,w:180,h:260,power:9},
+  {id:'up-2',x:4480,y:FLOOR-180,w:190,h:260,power:9},
+  {id:'up-3',x:6970,y:FLOOR-180,w:180,h:260,power:9}
+ ];
+
+ // Perlas de Selenita: reliquias de recarga y salud en rutas altas y cornisas
+ room.catPearls=[
+  {id:0,x:1050,y:FLOOR-260,r:10,label:'Perla de Selenita I'},
+  {id:1,x:1750,y:FLOOR-340,r:10,label:'Perla de Selenita II'},
+  {id:2,x:2290,y:FLOOR-160,r:10,label:'Perla de Selenita III'},
+  {id:3,x:3100,y:FLOOR-380,r:10,label:'Perla de Selenita IV'},
+  {id:4,x:3900,y:FLOOR-440,r:10,label:'Perla de Selenita V'},
+  {id:5,x:4575,y:FLOOR-160,r:10,label:'Perla de Selenita VI'},
+  {id:6,x:5250,y:FLOOR-400,r:10,label:'Perla de Selenita VII'},
+  {id:7,x:6100,y:FLOOR-460,r:10,label:'Perla de Selenita VIII'},
+  {id:8,x:7060,y:FLOOR-160,r:10,label:'Perla de Selenita IX'},
+  {id:9,x:7750,y:FLOOR-440,r:10,label:'Perla de Selenita X'},
+  {id:10,x:8500,y:FLOOR-480,r:10,label:'Perla de Selenita XI'},
+  {id:11,x:9150,y:FLOOR-450,r:10,label:'Perla de Selenita XII'}
+ ];
+
  // Plataformas de cristal lunar, cornisas flotantes, terrazas de coral y
  // puentes abisales sobre los pozos y a lo largo de los cinco sectores.
  const shelves=[

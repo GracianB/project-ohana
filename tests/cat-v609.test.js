@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
 import {CAT_JELLIES_V609} from '../systems/cat-encounters-v609.js';
 import {catGrowth,catObjective,MICHI_CHAPTER_ARENA} from '../systems/cat-chapter.js';
-import {drawCatCreature,drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust} from '../systems/cat-chapter-art-v609.js';
+import {drawCatCreature,drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust,drawCatBossArena,drawCatPearl,drawCatUpdraft} from '../systems/cat-chapter-art-v609.js';
+import {updateCatChapter} from '../systems/cat-chapter.js';
 
 test('V609 Cat room: single authored route of 14400 with lunar crystal terraces, pits and traps', () => {
  const room = WORLD1_ROOMS['w1-cat'];
@@ -116,4 +117,36 @@ test('V609 Cat vector art renderers: fauna and moon jelly callable without error
  drawCatTrap(dummyCtx, { x: 2740, y: 1064, w: 90, h: 70 }, { x: 0, y: 0 }, 100);
  drawCatAtmosphere(dummyCtx, { viewW: 1280 }, { x: 0, y: 0 }, 100);
  drawCatStardust(dummyCtx, { x: 1000, y: 1000, w: 40, h: 40, vx: 4, grounded: true }, { x: 0, y: 0 }, 100);
+
+ // Boss arena, pearls and updrafts
+ drawCatBossArena(dummyCtx, { viewW: 1280 }, { x: 8200, y: 0 }, 100);
+ drawCatPearl(dummyCtx, { id: 0, x: 1050, y: 874, r: 10 }, { x: 1000, y: 800 }, 100);
+ drawCatUpdraft(dummyCtx, { id: 'up-1', x: 2200, y: 954, w: 180, h: 260 }, { x: 2100, y: 900 }, 100);
+});
+
+test('V609 Cat room: pearls and abyssal updrafts are present and interact with player', () => {
+ const room = WORLD1_ROOMS['w1-cat'];
+ assert.ok(room.catPearls?.length >= 10, 'must contain collectible Selenite Pearls');
+ assert.ok(room.catUpdrafts?.length >= 3, 'must contain updrafts over the 3 pits');
+
+ const g = {
+  roomDef: room,
+  world1: {
+   stations: room.seal.stations.map(s => ({ ...s, done: false })),
+   catPearlsTaken: []
+  },
+  player: { id: 'cat', x: 1050, y: 1134 - 260, w: 30, h: 30, vy: 4, health: 50, grounded: false }
+ };
+
+ // Touching a pearl collects it and heals player
+ updateCatChapter(g);
+ assert.ok(g.world1.catPearlsTaken.includes(0));
+ assert.ok(g.player.health > 50);
+
+ // Updraft lifts falling player
+ g.player.x = 2250;
+ g.player.y = 1134 - 100;
+ g.player.vy = 8;
+ updateCatChapter(g);
+ assert.ok(g.player.vy < 0, 'updraft must propel player upwards');
 });

@@ -6,7 +6,7 @@ export const NEXT_CHAPTERS=Object.freeze({
  yomi:{bossId:'w1-yomi-custodian-v1',name:'Custodio del Observatorio',color:'#c5e4df',state:'_spiritGuide',patterns:['ESQUIVA LA DERIVA','APÁRTATE DE LOS ORBES','CAMBIA DE ALTURA','BUSCA EL HUECO ASTRAL']},
  pizza:{bossId:'w1-pizza-chef-v1',name:'Chef Magmático',color:'#f3d3ac',state:'_magmaChef',patterns:['SALTA LA CARRERA DEL CHEF','ESQUIVA EL QUESO','SALTA EL GOLPE DE PALA','BUSCA EL HUECO DEL ABANICO']},
  dino:{bossId:'w1-dino-colossus-v1',name:'Coloso de Piedra Ancestral',color:'#dce9b8',state:'_stoneColossus',patterns:['SALTA LA EMBESTIDA','ESQUIVA LAS ROCAS','SALTA LA ONDA FÓSIL','BUSCA EL HUECO DEL ABANICO']},
- cat:{bossId:'w1-cat-astral-v1',name:'Oráculo Medusaluna',color:'#e6c4f1',state:'_astralCat',patterns:['ESQUIVA EL ZARPAZO','SEPARA LOS ORBES','SALTA LA MEDIA LUNA','SAL DE LAS COLUMNAS']},
+ cat:{bossId:'w1-cat-astral-v1',name:'Oráculo Medusaluna',color:'#e6c4f1',state:'_astralCat',patterns:['ESQUIVA EL LATIGAZO ABISAL','SEPARA LOS ORBES','SALTA LA MEDIA LUNA','SAL DE LAS COLUMNAS']},
  cuerno:{bossId:'w1-cuerno-prism-v1',name:'Bestia Prisma',color:'#c8e7bd',state:'_prismBeast',patterns:['ESQUIVA LA CARGA','CAMBIA DE ALTURA','SALTA EL ABANICO','BUSCA EL HUECO ENTRE PRISMAS']},
  dragon:{bossId:'w1-dragon-igneous-v1',name:'Guardián del Núcleo Ígneo',color:'#ffc594',state:'_igneousDragon',patterns:['ESQUIVA LA CARGA','APÁRTATE DE LA LAVA','SALTA LA ONDA','CAMBIA DE ALTURA']}
 });

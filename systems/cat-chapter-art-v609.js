@@ -59,8 +59,14 @@ function drawLunarJellyFoe(c,s){
    c.moveTo(0,float-36);c.quadraticCurveTo(r*14,float-20,r*18*bell,float-2);
   });
  }
- // Mini cuernito lunar
- fill(c,MOON,()=>{c.moveTo(-4,float-36);c.lineTo(0,float-52);c.lineTo(4,float-36);},1.4);
+ // Órgano sensorial apical y perla ropálica estelar
+ ellipse(c,0,float-42,3.5,4.5,MOON,0,1.2);
+ ellipse(c,0,float-42,1.8,2.2,TEAL,0,0);
+ for(let sp=-1;sp<=1;sp+=2){
+  stroke(c,'rgba(255,255,255,0.7)',1.2,()=>{
+   c.moveTo(sp*4,float-38);c.quadraticCurveTo(sp*8,float-46,sp*5,float-50);
+  });
+ }
  // Ojos somnolientas/despiertas
  const blink=active&&((time+13)%180<6);
  for(const side of[-1,1]){
@@ -289,14 +295,16 @@ export function drawCatMoonJelly(ctx,s,cam,t=0,reduced=false){
  ctx.beginPath();ctx.ellipse(x-10,y-28,12,4.5,-.3,0,TAU);ctx.fillStyle='#fff';ctx.fill();
  ctx.globalAlpha=1;
 
- // Cuerno lunar central y diadema de perlas
- ctx.beginPath();ctx.moveTo(x-5,y-42);ctx.lineTo(x,y-63);ctx.lineTo(x+5,y-42);
- ctx.closePath();ctx.fillStyle=pal.glow;ctx.fill();
- ctx.strokeStyle=ink;ctx.lineWidth=1.6;ctx.stroke();
- for(const side of[-1,1]){
-  ctx.beginPath();ctx.arc(x+side*14,y-42,3.2,0,TAU);
-  ctx.fillStyle=done?pal.glow:pal.ear;ctx.fill();
-  ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
+ // Diadema sagrada de ropalios y perlas estelares (corona celestial de 5 agujas de selenita)
+ for(let sp=-2;sp<=2;sp++){
+  const spireH=sp===0?18:Math.abs(sp)===1?13:9;
+  const sx=x+sp*9;
+  ctx.beginPath();ctx.moveTo(sx-2.5,y-44);ctx.lineTo(sx,y-44-spireH);ctx.lineTo(sx+2.5,y-44);
+  ctx.closePath();ctx.fillStyle=done?pal.glow:pal.rim;ctx.fill();
+  ctx.strokeStyle=ink;ctx.lineWidth=1.2;ctx.stroke();
+  // Perla en la cúspide
+  ctx.beginPath();ctx.arc(sx,y-44-spireH,2.2,0,TAU);
+  ctx.fillStyle=done?'#ffffff':pal.glow;ctx.fill();
  }
 
  // Canales radiales sagrados
@@ -821,5 +829,197 @@ export function drawCatStardust(ctx,p,cam,t=0,reduced=false){
    ctx.stroke();
   }
  }
+ ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FONDO DEL SANTUARIO DEL ALTAR Y ARENA DEL ORÁCULO MEDUSALUNA
+// ─────────────────────────────────────────────────────────────────────────────
+export function drawCatBossArena(ctx,g,cam,t=0,reduced=false){
+ if(!ctx||!g)return;
+ const vw=g.viewW||1280,vh=g.viewH||720;
+ const arenaLeft=8260-cam.x,arenaRight=9320-cam.x;
+ const altarX=8790-cam.x,floor=1134-cam.y;
+
+ // Solo dibujar si la cámara está en la proximidad del altar
+ if(arenaRight<-100||arenaLeft>vw+100)return;
+
+ ctx.save();
+
+ // 1. Halo abisal del altar y eclipse centrado en el santuario
+ const eclX=altarX,eclY=floor-480;
+ const coronaPulse=reduced?0.4:0.35+Math.sin(t*0.02)*0.15;
+
+ const bgGlow=ctx.createRadialGradient(eclX,eclY,30,eclX,eclY,340);
+ bgGlow.addColorStop(0,'rgba(160,90,240,'+(coronaPulse*0.7)+')');
+ bgGlow.addColorStop(0.4,'rgba(90,40,160,'+(coronaPulse*0.4)+')');
+ bgGlow.addColorStop(0.8,'rgba(30,12,60,'+(coronaPulse*0.2)+')');
+ bgGlow.addColorStop(1,'rgba(0,0,0,0)');
+ ctx.fillStyle=bgGlow;
+ ctx.beginPath();ctx.arc(eclX,eclY,340,0,TAU);ctx.fill();
+
+ // Rayos de luz mística proyectados desde el eclipse hacia el altar
+ if(!reduced){
+  ctx.globalAlpha=0.22;
+  for(let i=-3;i<=3;i++){
+   const rayX=altarX+i*90;
+   const grad=ctx.createLinearGradient(eclX,eclY,rayX,floor);
+   grad.addColorStop(0,'rgba(220,180,255,0.6)');
+   grad.addColorStop(0.7,'rgba(122,240,224,0.3)');
+   grad.addColorStop(1,'rgba(140,80,220,0)');
+   ctx.fillStyle=grad;
+   ctx.beginPath();
+   ctx.moveTo(eclX-12,eclY);ctx.lineTo(eclX+12,eclY);
+   ctx.lineTo(rayX+24,floor);ctx.lineTo(rayX-24,floor);
+   ctx.closePath();ctx.fill();
+  }
+  ctx.globalAlpha=1;
+ }
+
+ // 2. Círculos de runas celestiales concéntricas en el suelo del altar
+ ctx.save();
+ ctx.translate(altarX,floor-8);
+ ctx.scale(1,0.28);
+ const runeSpin=reduced?0:t*0.008;
+ ctx.strokeStyle='rgba(215,180,255,0.45)';ctx.lineWidth=2.5;
+ ctx.beginPath();ctx.arc(0,0,260,0,TAU);ctx.stroke();
+ ctx.strokeStyle='rgba(122,240,224,0.35)';ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.arc(0,0,180,0,TAU);ctx.stroke();
+
+ // Glifos rúnicos giratorios
+ for(let r=0;r<12;r++){
+  const a=r*TAU/12+runeSpin;
+  const rx=Math.cos(a)*220,ry=Math.sin(a)*220;
+  ctx.fillStyle=r%3===0?'#ffe8a0':r%3===1?'#7af0e0':'#deb3ff';
+  ctx.beginPath();ctx.arc(rx,ry,4,0,TAU);ctx.fill();
+ }
+ ctx.restore();
+
+ // 3. Monolitos de cristal estelar en las fronteras de la arena (8260 y 9320)
+ for(const mx of [arenaLeft,arenaRight]){
+  const mh=180;
+  const my=floor-mh;
+  const mGrad=ctx.createLinearGradient(mx-14,my,mx+14,floor);
+  mGrad.addColorStop(0,'rgba(235,220,255,0.85)');
+  mGrad.addColorStop(0.5,'rgba(180,140,240,0.7)');
+  mGrad.addColorStop(1,'rgba(80,45,130,0.9)');
+  ctx.fillStyle=mGrad;
+  ctx.beginPath();
+  ctx.moveTo(mx,my);ctx.lineTo(mx+16,my+24);ctx.lineTo(mx+12,floor);
+  ctx.lineTo(mx-12,floor);ctx.lineTo(mx-16,my+24);
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;ctx.stroke();
+
+  // Haz de luz de confinamiento cuando el boss está activo
+  if(!reduced){
+   ctx.strokeStyle='rgba(180,140,255,0.4)';ctx.lineWidth=2;
+   if(ctx.setLineDash)ctx.setLineDash([8,6]);
+   ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(mx,my-300);ctx.stroke();
+   if(ctx.setLineDash)ctx.setLineDash([]);
+   // Gema flotante en la punta del monolito
+   const gemPulse=Math.sin(t*0.06+mx)*4;
+   ctx.fillStyle='#ffe7a8';
+   ctx.beginPath();ctx.arc(mx,my-14+gemPulse,5,0,TAU);ctx.fill();
+  }
+ }
+
+ ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PERLAS DE SELENITA (objetos coleccionables y de recarga sagrada)
+// ─────────────────────────────────────────────────────────────────────────────
+export function drawCatPearl(ctx,pearl,cam,t=0,reduced=false){
+ if(!ctx||!pearl||pearl.taken)return;
+ const x=pearl.x-cam.x,y=pearl.y-cam.y;
+ const pulse=reduced?0:Math.sin(t*0.07+pearl.id*1.5);
+ const floatY=y+(reduced?0:pulse*4);
+ const r=pearl.r||10;
+
+ ctx.save();
+
+ // Halo exterior
+ ctx.globalAlpha=reduced?0.25:0.35+pulse*0.12;
+ const halo=ctx.createRadialGradient(x,floatY,r*0.5,x,floatY,r*2.4);
+ halo.addColorStop(0,'rgba(255,245,210,0.8)');
+ halo.addColorStop(0.5,'rgba(200,160,255,0.4)');
+ halo.addColorStop(1,'rgba(122,240,224,0)');
+ ctx.fillStyle=halo;
+ ctx.beginPath();ctx.arc(x,floatY,r*2.4,0,TAU);ctx.fill();
+
+ // Perla nacarada
+ ctx.globalAlpha=0.95;
+ const grad=ctx.createRadialGradient(x-r*0.3,floatY-r*0.3,1,x,floatY,r);
+ grad.addColorStop(0,'#ffffff');
+ grad.addColorStop(0.35,'#fbf0ff');
+ grad.addColorStop(0.75,'#e0c2ff');
+ grad.addColorStop(1,'#9b72c9');
+ ctx.fillStyle=grad;
+ ctx.beginPath();ctx.arc(x,floatY,r,0,TAU);ctx.fill();
+ ctx.strokeStyle='#ffffff';ctx.lineWidth=1.2;ctx.stroke();
+
+ // Destellos de brillo
+ ctx.fillStyle='#ffffff';
+ ctx.beginPath();ctx.arc(x-r*0.32,floatY-r*0.32,2,0,TAU);ctx.fill();
+
+ // Anillo orbital de polvo estelar
+ if(!reduced){
+  ctx.save();
+  ctx.translate(x,floatY);
+  ctx.rotate(t*0.04+pearl.id);
+  ctx.strokeStyle='rgba(255,235,170,0.7)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.ellipse(0,0,r*1.6,r*0.6,0,0,TAU);ctx.stroke();
+  ctx.fillStyle='#ffe8a0';
+  ctx.beginPath();ctx.arc(r*1.6,0,1.8,0,TAU);ctx.fill();
+  ctx.restore();
+ }
+
+ ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CORRIENTES ABISALES ASCENDENTES (géiseres gravitatorios sobre los pozos)
+// ─────────────────────────────────────────────────────────────────────────────
+export function drawCatUpdraft(ctx,updraft,cam,t=0,reduced=false){
+ if(!ctx||!updraft)return;
+ const x=updraft.x-cam.x,y=updraft.y-cam.y,w=updraft.w,h=updraft.h;
+ const cx=x+w/2;
+ ctx.save();
+
+ // Haz de corriente translúcida ascendente
+ const grad=ctx.createLinearGradient(cx,y+h,cx,y);
+ grad.addColorStop(0,'rgba(122,240,224,0)');
+ grad.addColorStop(0.3,'rgba(122,240,224,0.14)');
+ grad.addColorStop(0.7,'rgba(180,140,255,0.16)');
+ grad.addColorStop(1,'rgba(235,210,255,0)');
+ ctx.fillStyle=grad;
+ ctx.fillRect(x+6,y,w-12,h);
+
+ // Líneas de corriente que fluyen hacia arriba
+ if(!reduced){
+  ctx.globalAlpha=0.45;
+  for(let i=0;i<4;i++){
+   const lx=x+15+i*(w/4)+Math.sin(t*0.05+i)*6;
+   const lOffset=((t*1.2+i*35)%h);
+   const ly=y+h-lOffset;
+   ctx.strokeStyle=i%2===0?'#7af0e0':'#deb3ff';
+   ctx.lineWidth=1.6;
+   ctx.beginPath();
+   ctx.moveTo(lx,ly);
+   ctx.quadraticCurveTo(lx+Math.sin(ly*0.05)*8,ly-18,lx,ly-32);
+   ctx.stroke();
+  }
+
+  // Burbujas ascendentes
+  ctx.globalAlpha=0.6;
+  for(let b=0;b<5;b++){
+   const bAge=((t*0.9+b*47)%h);
+   const bx=cx+Math.sin(bAge*0.06+b)*w*0.32;
+   const by=y+h-bAge;
+   ctx.fillStyle=b%2===0?'#7af0e0':'#fff5c0';
+   ctx.beginPath();ctx.arc(bx,by,1.5+Math.sin(bAge*0.1)*0.6,0,TAU);ctx.fill();
+  }
+ }
+
  ctx.restore();
 }

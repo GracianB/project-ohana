@@ -1,5 +1,5 @@
 import {XP_NEED} from './xp.js';
-import {drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust,drawCatPitVortex,drawCatPlatformDecor} from './cat-chapter-art-v609.js';
+import {drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust,drawCatPitVortex,drawCatPlatformDecor,drawCatBossArena,drawCatPearl,drawCatUpdraft} from './cat-chapter-art-v609.js';
 export const MICHI_CHAPTER_BOSS_ID='w1-cat-astral-v1';
 export const MICHI_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134,hp:480});
 
@@ -61,6 +61,33 @@ export function updateCatChapter(g,hurt){
    }
   }
  }
+
+ // Recolección de Perlas de Selenita (reliquias sagradas en terrazas altas)
+ const pearls=g.roomDef?.catPearls||[];
+ const taken=g.world1.catPearlsTaken||(g.world1.catPearlsTaken=[]);
+ for(const pearl of pearls){
+  if(taken.includes(pearl.id))continue;
+  const dx=p.x+p.w/2-pearl.x,dy=p.y+p.h/2-pearl.y;
+  if(Math.hypot(dx,dy)<32){
+   taken.push(pearl.id);
+   g.score=(g.score||0)+120;
+   p.health=Math.min(100,(p.health||100)+25);
+   g.nums?.add?.(pearl.x,pearl.y-24,'¡PERLA DE SELENITA! +120','#ffe8a0',true);
+   g.fx?.emit?.(pearl.x,pearl.y,{color:'#ffe8a0',count:16,size:3.5,star:true,life:30});
+  }
+ }
+
+ // Corrientes abisales ascendentes: salvan caídas en pozos e impulsan hacia arriba
+ const updrafts=g.roomDef?.catUpdrafts||[];
+ for(const up of updrafts){
+  if(p.x+p.w>up.x&&p.x<up.x+up.w&&p.y+p.h>up.y&&p.y<up.y+up.h){
+   p.vy=Math.min(p.vy,-up.power||-9);
+   p.grounded=false;
+   if((g.world1.tick||0)%5===0){
+    g.fx?.emit?.(p.x+p.w/2,p.y+p.h,{color:'#7af0e0',count:3,size:2.2,life:18});
+   }
+  }
+ }
 }
 
 export function catObjective(g){
@@ -79,14 +106,24 @@ export function drawCatChapter(ctx,g,cam){
  // 1. Atmósfera celestial: eclipse dinámico, auroras, nebulosas, estrellas, medusas fantasma
  drawCatAtmosphere(ctx,g,cam,t,reduced);
 
- // 2. Vórtices de corriente abisal en los pozos (efecto visual)
+ // 2. Fondo sagrado del altar del Oráculo Medusaluna en la arena
+ drawCatBossArena(ctx,g,cam,t,reduced);
+
+ // 3. Corrientes abisales ascendentes en los pozos
+ for(const up of g.roomDef?.catUpdrafts||[]){
+  const upx=up.x-cam.x;
+  if(upx<-200||upx>vw+200)continue;
+  drawCatUpdraft(ctx,up,cam,t,reduced);
+ }
+
+ // 4. Vórtices de corriente abisal en los pozos (efecto visual)
  for(const h of g.roomDef?.hazards||[]){
   const hx=h.x-cam.x;
   if(hx<-200||hx>vw+200)continue;
   drawCatPitVortex(ctx,h,cam,t,reduced);
  }
 
- // 3. Decoraciones ambientales en plataformas (musgo, cristales)
+ // 5. Decoraciones ambientales en plataformas (musgo, cristales)
  for(const p of g.roomDef?.plats||[]){
   if(p[3]>30)continue; // Solo plataformas, no suelo
   const px=p[0]-cam.x;
@@ -94,7 +131,16 @@ export function drawCatChapter(ctx,g,cam){
   drawCatPlatformDecor(ctx,p,cam,t,reduced);
  }
 
- // 4. Trampas de telaraña activas
+ // 6. Perlas de Selenita coleccionables
+ const takenPearls=g.world1?.catPearlsTaken||[];
+ for(const pearl of g.roomDef?.catPearls||[]){
+  if(takenPearls.includes(pearl.id))continue;
+  const prx=pearl.x-cam.x;
+  if(prx<-100||prx>vw+100)continue;
+  drawCatPearl(ctx,pearl,cam,t,reduced);
+ }
+
+ // 7. Trampas de telaraña activas
  for(const trap of CAT_TRAPS){
   if(catTrapSilenced(g,trap.id))continue;
   const tx=trap.x-cam.x;
@@ -102,7 +148,7 @@ export function drawCatChapter(ctx,g,cam){
   drawCatTrap(ctx,trap,cam,t,reduced);
  }
 
- // 5. Estaciones de medusas y puentes de cristal lunar
+ // 8. Estaciones de medusas y puentes de cristal lunar
  const stations=g.world1?.stations||[];
  for(const s of stations){
   if(s.kind!=='jelly')continue;
@@ -114,7 +160,7 @@ export function drawCatChapter(ctx,g,cam){
   drawCatMoonJelly(ctx,s,cam,t,reduced);
  }
 
- // 6. Estela de polvo de estrellas para Michi
+ // 9. Estela de polvo de estrellas para Michi
  if(g.player&&g.player.id==='cat'){
   drawCatStardust(ctx,g.player,cam,t,reduced);
  }
