@@ -1572,8 +1572,8 @@ if (!p || p.dead) return;
 const r = room();
 const feet = p.y + p.h;
 
-const hazardAxis = hazardContainsX(game.roomId, p);
-const hazard = hazardTrigger(game.roomId, p);
+const hazardAxis = hazardContainsX(game.roomId, p, r);
+const hazard = hazardTrigger(game.roomId, p, r);
 
 if (hazard) {
 const hazardKey = game.roomId + ":" + hazard.id;
@@ -3931,6 +3931,7 @@ if (gentleToggle) {
 }
 if (resume) resume.onclick = () => setPaused(false);
 if (quit) quit.onclick = returnToMenu;
+$("btn-close-pause")?.addEventListener("click", () => setPaused(false));
 $("btn-close-help")?.addEventListener("click", () => DOM.help.classList.remove("open"));
 $("btn-close-map")?.addEventListener("click", () => DOM.map.classList.remove("open"));
 addEventListener('ohana-death',()=>{if(game.onlineAdventure)void onlineCoop.reportDeath(game);});

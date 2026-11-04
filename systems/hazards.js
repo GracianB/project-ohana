@@ -10,28 +10,32 @@ export const ROOM_HAZARDS=Object.freeze(Object.fromEntries(Object.values(ROOMS).
 
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0));
 
-export function hazardsForRoom(roomId="") {
+export function hazardsForRoom(roomId="", roomDef=null) {
+  if (roomDef?.hazards?.length) return roomDef.hazards;
+  if (typeof game !== "undefined" && game?.roomDef?.hazards?.length && (game.roomId === roomId || !roomId)) {
+    return game.roomDef.hazards;
+  }
   return ROOMS[String(roomId)]?.hazards || ROOM_HAZARDS[String(roomId)] || Object.freeze([]);
 }
 
-export function hazardAt(roomId, player) {
+export function hazardAt(roomId, player, roomDef=null) {
   if (!player) return null;
   const px=(Number(player.x)||0)+(Number(player.w)||0)/2;
   const py=(Number(player.y)||0)+(Number(player.h)||0);
-  for (const h of hazardsForRoom(roomId)) {
+  for (const h of hazardsForRoom(roomId, roomDef)) {
     if (px > h.x && px < h.x+h.w && py > h.y && py < h.y+h.h) return h;
   }
   return null;
 }
 
-export function hazardContainsX(roomId, player) {
+export function hazardContainsX(roomId, player, roomDef=null) {
   if (!player) return null;
   const px=(Number(player.x)||0)+(Number(player.w)||0)/2;
-  return hazardsForRoom(roomId).find((h)=>px>h.x&&px<h.x+h.w)||null;
+  return hazardsForRoom(roomId, roomDef).find((h)=>px>h.x&&px<h.x+h.w)||null;
 }
 
-export function hazardTrigger(roomId, player) {
-  const h=hazardAt(roomId,player);
+export function hazardTrigger(roomId, player, roomDef=null) {
+  const h=hazardAt(roomId,player,roomDef);
   if (!h || !player || Number(player.vy)<0) return null;
   const feet=(Number(player.y)||0)+(Number(player.h)||0);
   const depth=clamp((feet-h.y)/Math.max(1,h.h),0,1);

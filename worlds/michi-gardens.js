@@ -68,12 +68,12 @@ export function drawMichiGardens(ctx,cam,t=0,viewportW=1400,viewportH=700,option
  const camX=cam.x||0,camY=cam.y||0;
  const w=viewportW,h=viewportH;
 
- // 1. Deep astral night sky
+ // 1. Deep astral night sky with high contrast (midnight abyss to deep navy)
  const sky=ctx.createLinearGradient(0,0,0,h);
- sky.addColorStop(0,'#0a0515');
- sky.addColorStop(0.5,'#180c29');
- sky.addColorStop(0.85,'#26123a');
- sky.addColorStop(1,'#381a4e');
+ sky.addColorStop(0,'#05030f');
+ sky.addColorStop(0.4,'#090d24');
+ sky.addColorStop(0.75,'#0e1638');
+ sky.addColorStop(1,'#14244c');
  ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
 
  // 2. Twinkling distant stars

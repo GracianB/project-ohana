@@ -43,11 +43,12 @@ body.playing #top-actions button[aria-pressed="true"]{color:var(--v36-cyan);back
   background:var(--v36-panel);box-shadow:0 34px 100px rgba(0,0,0,.56),inset 0 1px rgba(255,255,255,.06);
   backdrop-filter:blur(18px);
 }
-#pause-overlay .panel{width:min(880px,calc(100vw - 48px));max-height:min(92vh,820px);padding:28px 32px 22px;overflow:auto}
-#help .panel::before,#map-overlay .panel::before,#pause-overlay .panel::before{
+#pause-overlay .panel{width:min(940px,calc(100vw - 32px));max-height:min(88vh,560px);padding:clamp(16px,2.2vw,24px);overflow:hidden}
+#help .panel::before,#map-overlay .panel::before{
   content:"MUNDO 1 · ISLA HOKU";display:block;margin:0 0 8px;color:var(--v36-gold);
   font:800 8px/1 Outfit,sans-serif;letter-spacing:.32em;text-transform:uppercase;
 }
+#pause-overlay .panel::before{display:none}
 #help h2,#map-overlay h2,#pause-overlay h2{
   margin:0 0 16px;color:#fff;font:700 clamp(30px,4vw,42px)/.95 Fredoka,sans-serif;letter-spacing:-.025em;
 }

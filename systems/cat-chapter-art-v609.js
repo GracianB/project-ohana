@@ -1067,31 +1067,29 @@ export function drawCatBossArena(ctx,g,cam,t=0,reduced=false){
 
  ctx.save();
 
- // 1. Halo abisal del altar y eclipse centrado en el santuario
- const eclX=altarX,eclY=floor-480;
+ // 1. Halo místico del santuario (resplandor ascendente desde el altar, sin eclipse secundario)
  const coronaPulse=reduced?0.4:0.35+Math.sin(t*0.02)*0.15;
-
- const bgGlow=ctx.createRadialGradient(eclX,eclY,30,eclX,eclY,340);
- bgGlow.addColorStop(0,'rgba(160,90,240,'+(coronaPulse*0.7)+')');
- bgGlow.addColorStop(0.4,'rgba(90,40,160,'+(coronaPulse*0.4)+')');
- bgGlow.addColorStop(0.8,'rgba(30,12,60,'+(coronaPulse*0.2)+')');
+ const bgGlow=ctx.createRadialGradient(altarX,floor-220,40,altarX,floor-220,380);
+ bgGlow.addColorStop(0,'rgba(66,232,208,'+(coronaPulse*0.28)+')');
+ bgGlow.addColorStop(0.4,'rgba(140,90,240,'+(coronaPulse*0.18)+')');
+ bgGlow.addColorStop(0.8,'rgba(20,8,40,'+(coronaPulse*0.1)+')');
  bgGlow.addColorStop(1,'rgba(0,0,0,0)');
  ctx.fillStyle=bgGlow;
- ctx.beginPath();ctx.arc(eclX,eclY,340,0,TAU);ctx.fill();
+ ctx.fillRect(altarX-400,floor-520,800,520);
 
- // Rayos de luz mística proyectados desde el eclipse hacia el altar
+ // Rayos de starlight proyectados desde el santuario hacia el cenit
  if(!reduced){
-  ctx.globalAlpha=0.22;
+  ctx.globalAlpha=0.18;
   for(let i=-3;i<=3;i++){
    const rayX=altarX+i*90;
-   const grad=ctx.createLinearGradient(eclX,eclY,rayX,floor);
-   grad.addColorStop(0,'rgba(220,180,255,0.6)');
-   grad.addColorStop(0.7,'rgba(122,240,224,0.3)');
+   const grad=ctx.createLinearGradient(rayX,floor,rayX+i*20,floor-480);
+   grad.addColorStop(0,'rgba(122,240,224,0.4)');
+   grad.addColorStop(0.5,'rgba(220,180,255,0.25)');
    grad.addColorStop(1,'rgba(140,80,220,0)');
    ctx.fillStyle=grad;
    ctx.beginPath();
-   ctx.moveTo(eclX-12,eclY);ctx.lineTo(eclX+12,eclY);
-   ctx.lineTo(rayX+24,floor);ctx.lineTo(rayX-24,floor);
+   ctx.moveTo(rayX-16,floor);ctx.lineTo(rayX+16,floor);
+   ctx.lineTo(rayX+i*20+28,floor-480);ctx.lineTo(rayX+i*20-28,floor-480);
    ctx.closePath();ctx.fill();
   }
   ctx.globalAlpha=1;

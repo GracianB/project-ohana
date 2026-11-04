@@ -171,51 +171,60 @@ function drawMichiMythic(ctx,pose,r,f){
   else if(power===5)for(const side of[-1,1])sparkle(x+side*13,y-6,2.5,col);
   ctx.restore();
  }
- if(f===1){ // CABALLITO DE MAR CÓSMICO (Hippocampus Astral) · Cola en espiral prensil bioluminiscente, aleta dorsal rápida, cresta coronal y hocico tubular.
+ if(f===1){ // CABALLITO DE MAR CÓSMICO KAWAII (Hippocampus Astral) · Tonos azul océano y coral pastel, cresta coronal, aleta dorsal rápida y mofletes sonrosados.
   const swim=still?0:Math.sin(t*(air?.38:run?.32:.18)+g.pulsePhase*5)*4;
   const hover=still?6:6+wave(0,.055)*3;
   const stRot=state==='glide'?0.32:state==='run'?0.16:state==='jump'?-0.14:state==='fall'?0.1:state==='wall'?-0.22:state==='dead'?0.48:state==='victory'?-0.1:0;
   ctx.save();ctx.scale(.75,.75);ctx.translate(atkK*4,-hover+(hurt?4:0));ctx.rotate(stRot);
 
-  // Aleta dorsal transparente ondulante a alta frecuencia en la espalda
+  const cyanAqua='#7af0e0',coralP='#ff9e80',coralSoft='#ffd6c0',oceanBlue='#6ec6f8';
+
+  // Aleta dorsal translúcida multicapa ondulante a alta frecuencia en la espalda
   const finFlutter=still?0:Math.sin(t*.45)*6;
-  ctx.save();ctx.globalAlpha=.75;
-  shape(pal.glow2,()=>{
+  ctx.save();ctx.globalAlpha=.8;
+  shape(oceanBlue,()=>{
    ctx.moveTo(-12,-48);
-   ctx.quadraticCurveTo(-28+finFlutter,-58,-22+finFlutter,-34);
-   ctx.quadraticCurveTo(-26+finFlutter,-18,-10,-24);
+   ctx.quadraticCurveTo(-30+finFlutter,-60,-24+finFlutter,-34);
+   ctx.quadraticCurveTo(-28+finFlutter,-16,-10,-24);
    ctx.closePath();
   },1.2);
-  line('#fffdf5',.8,()=>{
+  // Capa interna coral suave de la aleta
+  shape(coralSoft,()=>{
+   ctx.moveTo(-11,-44);
+   ctx.quadraticCurveTo(-22+finFlutter,-52,-18+finFlutter,-34);
+   ctx.quadraticCurveTo(-20+finFlutter,-20,-10,-24);
+   ctx.closePath();
+  },0);
+  line('#ffffff',.9,()=>{
    for(let r=0;r<6;r++){
     ctx.moveTo(-11,-48+r*5);ctx.lineTo(-24+finFlutter,-50+r*6);
    }
   });
   ctx.restore();
 
-  // Pequeñas aletas pectorales translúcidas con rayos de nácar a los lados de la nuca
+  // Pequeñas aletas pectorales translúcidas kawaii a los lados de la nuca
   for(const side of[-1,1]){
    const earFlap=still?0:Math.sin(t*.3+side)*3;
-   shape('rgba(235,215,255,0.65)',()=>{
+   shape('rgba(122,240,224,0.7)',()=>{
     ctx.moveTo(side*10,-60);
-    ctx.quadraticCurveTo(side*22,-68+earFlap,side*18,-54+earFlap);
+    ctx.quadraticCurveTo(side*24,-70+earFlap,side*20,-54+earFlap);
     ctx.closePath();
    },.9);
    for(let pr=0;pr<3;pr++){
-    line('#ffffff',0.7,()=>{ctx.moveTo(side*10,-59+pr*2);ctx.lineTo(side*(14+pr*2),-63+pr*3+earFlap);});
+    line('#ffffff',0.7,()=>{ctx.moveTo(side*10,-59+pr*2);ctx.lineTo(side*(15+pr*2),-64+pr*3+earFlap);});
    }
   }
 
-  // Cresta de espinas dorsales a lo largo de la columna vertebral
+  // Cresta de espinas dorsales perladas de coral pastel
   for(let s=0;s<6;s++){
    const sy=-52+s*5;
-   shape('#ffedaf',()=>{ctx.moveTo(-10,sy);ctx.lineTo(-16-s*0.4,sy-2);ctx.lineTo(-11,sy+3);ctx.closePath();},0.8);
+   shape(s%2===0?coralP:'#ffedaf',()=>{ctx.moveTo(-10,sy);ctx.lineTo(-17-s*0.4,sy-2);ctx.lineTo(-11,sy+3);ctx.closePath();},0.8);
   }
 
-  // Cola en espiral prensil abisal (curvada elegantemente hacia adelante)
+  // Cola en espiral prensil abisal en tono azul océano pastel
   const tailCurl=hurt?1.4:state==='jump'?.4:state==='fall'?1.2:1;
   const tailWave=still?0:swim*.6;
-  shape(fur,()=>{
+  shape(oceanBlue,()=>{
    ctx.moveTo(-8,-26);
    ctx.bezierCurveTo(-14,-8,-8,4+tailWave,0,10+tailWave);
    // Espiral de la punta
@@ -228,29 +237,36 @@ function drawMichiMythic(ctx,pose,r,f){
    ctx.closePath();
   },1.4);
 
-  // Placas ventrales de nácar blanco en la pancita
-  shape(white,()=>{
+  // Placas ventrales de coral pastel y nácar blanco en la pancita
+  shape(coralSoft,()=>{
    ctx.moveTo(4,-26);
-   ctx.quadraticCurveTo(14,-38,10,-52);
+   ctx.quadraticCurveTo(15,-38,11,-52);
    ctx.lineTo(2,-50);
    ctx.quadraticCurveTo(4,-38,-4,-26);
    ctx.closePath();
   },0);
+  shape(white,()=>{
+   ctx.moveTo(2,-28);
+   ctx.quadraticCurveTo(10,-38,8,-48);
+   ctx.lineTo(3,-46);
+   ctx.quadraticCurveTo(4,-38,-1,-28);
+   ctx.closePath();
+  },0);
 
-  // Anillos dérmicos esqueléticos del corselete (anatomía realista de hippocampus)
+  // Anillos dérmicos esqueléticos del corselete en coral cálido y perlas
   for(let ring=0;ring<6;ring++){
    const ry=-32-ring*4;
-   line(pal.bead,1.2,()=>{ctx.moveTo(-10+ring*0.6,ry);ctx.quadraticCurveTo(0,ry+2,9-ring*0.5,ry);});
+   line(coralP,1.3,()=>{ctx.moveTo(-10+ring*0.6,ry);ctx.quadraticCurveTo(0,ry+2,9-ring*0.5,ry);});
    oval(-10+ring*0.6,ry,1.2,1.2,'#ffffff');
   }
 
-  // Segmentos y fotóforos bioluminiscentes a lo largo de la cola
+  // Segmentos y fotóforos bioluminiscentes alternados en cyan y oro pastel
   for(let b=0;b<6;b++){
-   oval(2-b*1.6,-3+b*2.8+tailWave,1.6,1.6,b%2?pal.bead:'#7af0e0');
+   oval(2-b*1.6,-3+b*2.8+tailWave,1.6,1.6,b%2?cyanAqua:coralP);
    line('rgba(255,255,255,0.6)',0.8,()=>{ctx.moveTo(-4+b*0.4,-2+b*2.8+tailWave);ctx.lineTo(6-b*1.2,-2+b*2.8+tailWave);});
   }
 
-  // Torso esbelto en forma de S de caballito de mar
+  // Torso esbelto en forma de S de caballito de mar (lavanda pastel fur con sombreado)
   shape(fur,()=>{
    ctx.moveTo(-9,-26);
    ctx.quadraticCurveTo(-15,-42,-6,-56);
@@ -259,7 +275,7 @@ function drawMichiMythic(ctx,pose,r,f){
    ctx.closePath();
   },1.4);
 
-  // Cabeza arqueada y hocico tubular de caballito de mar
+  // Cabeza arqueada y hocico tubular adorable de caballito de mar
   shape(fur,()=>{
    ctx.moveTo(-8,-54);
    ctx.bezierCurveTo(-14,-64,-8,-78,4,-76);
@@ -270,12 +286,19 @@ function drawMichiMythic(ctx,pose,r,f){
    ctx.closePath();
   },1.45);
 
-  // Corona dorsal de selenita (cresta coronal de 5 puntas)
+  // Corona dorsal de selenita (cresta coronal de 5 puntas de oro pastel)
   shape('#ffedaf',()=>{
    ctx.moveTo(-6,-76);ctx.lineTo(-4,-90);ctx.lineTo(-1,-82);ctx.lineTo(2,-94);ctx.lineTo(5,-84);ctx.lineTo(8,-89);ctx.lineTo(9,-76);
    ctx.closePath();
   },1.2);
   for(const px of[-4,-1,2,5,8])oval(px,-85,1.5,1.5,'#ffffff');
+
+  // Mofletes sonrosados kawaii
+  oval(-12,-60,3.5,2.2,'#ffa8cb');
+  oval(12,-60,3.5,2.2,'#ffa8cb');
+
+  // Boquita tierna y sonriente en el hocico
+  line(ink,1.1,()=>{ctx.moveTo(18,-64);ctx.quadraticCurveTo(21,-61,24,-65);});
 
   // Dos ojos expresivos de héroe (exactamente 2 llamadas a eye para tests)
   eye(-6,-64,7);
@@ -283,13 +306,13 @@ function drawMichiMythic(ctx,pose,r,f){
 
   // Burbujitas de polvo estelar que salen del hocico
   if(!still){
-   sparkle(26,-65+swim*.2,1.8,'#7af0e0');
-   if(castK>.2)sparkle(32,-63,2.4,pal.bead);
+   sparkle(26,-65+swim*.2,1.8,cyanAqua);
+   if(castK>.2)sparkle(32,-63,2.4,coralP);
   }
 
   // Celebración en victoria con destellos coronales
   if(victory){
-   for(let k=0;k<3;k++)oval(-6+k*6,-100,2,2,k===1?'#ffffff':pal.bead);
+   for(let k=0;k<3;k++)oval(-6+k*6,-100,2,2,k===1?'#ffffff':cyanAqua);
   }
 
   // Zarcillos delanteros para gestos y hechizos
@@ -299,7 +322,7 @@ function drawMichiMythic(ctx,pose,r,f){
    if(castK){tip=[side*12+castK*10,-48-castK*8];}
    if(atkK&&side>0)tip=[24+atkK*16,-56+atkK*2];
    if(hurt)tip=[side*8,-40];
-   jellyFilament({root:[side*7,-32],end:tip,width:3.2,col:pal.glow,far:side<0,curl:side*0.2});
+   jellyFilament({root:[side*7,-32],end:tip,width:3.2,col:cyanAqua,far:side<0,curl:side*0.2});
    if(side>0)spellAccents(tip[0],tip[1]);
   }
 
@@ -361,8 +384,10 @@ function drawMichiMythic(ctx,pose,r,f){
 
   // Ojos directamente sobre la campana (sin cabeza de gato)
   eye(-13,-84,7.2);eye(13,-84,7.2);
-  // Boca sutil
-  shape(pal.gonad,()=>{ctx.moveTo(-3,-71);ctx.quadraticCurveTo(0,-74,3,-71);ctx.quadraticCurveTo(2,-68,0,-68);ctx.quadraticCurveTo(-2,-68,-3,-71);},.6,pal.ink);
+  // Mofletes sonrosados kawaii y boquita sonriente
+  oval(-20,-78,3.6,2.2,'#ffa8cb');
+  oval(20,-78,3.6,2.2,'#ffa8cb');
+  line(pal.ink,1.2,()=>{ctx.moveTo(-3,-71);ctx.quadraticCurveTo(0,-68,3,-71);});
 
   // Facetas laterales de espejo que emiten destellos
   for(const side of[-1,1]){
@@ -373,177 +398,125 @@ function drawMichiMythic(ctx,pose,r,f){
   if(castK>0)spellAccents(31,-74);
   ctx.restore();return;
  }
- if(f===4){ // CARACOLA CÓSMICA ADORABLE (Nautilus Onírico) · Molusco adorable que vive en una caracola de selenita espiral, 9 tentaculitos curvados y ojos gigantes.
-  const bodyY=run?-Math.abs(step)*2.2:0;
-  const stRot=state==='glide'?0.24:state==='run'?0.12:state==='jump'?-0.15:state==='fall'?0.1:state==='wall'?-0.2:state==='dead'?0.42:state==='victory'?-0.1:0;
-  ctx.save();ctx.scale(.95,.95);ctx.translate(atkK*2,(hurt?4:bodyY));ctx.rotate(stRot);
-  const Lcast=state==='cast'&&power===2;
-  const retract=dead?20:hurt?14:victory?-5:0; // Se mete tímidamente en su caracola al recibir daño, asoma feliz en victoria
+ if(f===4){ // LEVIATÁN MEDUSA SOBERANA CÓSMICA KAWAII (Mega Medusa Soberana) · Campana translúcida colosal, corona de 5 agujas de selenita, 9 tentáculos celestiales, 5 mini-medusas satélite en órbita y rostro kawaii.
+  let contraction=jellyPulse(t,g,still).c;if(state==='jump')contraction=Math.max(contraction,.85);else if(state==='fall'||state==='glide')contraction*=.2;else if(hurt)contraction=.6;
+  const float=air?1:0,trail=run?-12:state==='glide'?-6:0,Lcast=state==='cast'&&power===2;
+  const stRot=state==='glide'?0.22:state==='run'?0.14:state==='jump'?-0.14:state==='fall'?0.1:state==='wall'?-0.18:state==='dead'?0.44:state==='victory'?-0.08:0;
+  ctx.save();ctx.scale(.95,.95);ctx.translate(atkK*3,-8-contraction*6+wave(0,.055)*(hurt?2:4));ctx.rotate(stRot);
 
-  // 1. Concha espiral nacarada (caracola de selenita)
-  // Base de la concha
+  const rimY=-56,bellH=64,bellW=52;
+  const aqua='#7af0e0',pinkP='#fca8db',goldP='#ffedaf';
+
+  // 1. Zarcillos y tentáculos de la Medusa Leviatán (9 tentáculos celestiales que apoyan michiLaunchKick)
+  const tent=(i,front)=>{
+   const lane=i-4,kick=Lcast&&!still?michiLaunchKick(i,9,pose.cast):0,lash=front&&lane>0?atkK:0;
+   const end=drawTentacle(ctx,{
+    x:lane*bellW*.22*(1-.1*contraction),y:rimY+4,
+    len:(54+Math.abs(lane)*5)*g.lengths[i]*(1-float*.12),phase:g.phases[i],t,still,
+    amp:4+contraction*2+float*2+(victory?3:0),sway:trail+lash*32+lane*castK*(power===4?7:power===1?1:4)+kick*36,
+    lift:contraction*.85+float*.75+Math.max(0,kick)*.4,curl:(hurt?-.45:0)+lash*.65+kick*.85+(power===5?lane*castK*.12:0),
+    dir:Math.PI/2-lash*.7-kick*.75,width:front?4.6:5.2,alpha:front?.9:.75,fill:i%2?fur:white,edge:pal.ink,edgeWidth:.8,core:'#fffaff',beads:i%2?aqua:pinkP
+   });
+   if(Lcast&&pose.cast*26<michiLaunchFrame(i,9))oval(end[0],end[1],2.4,2.4,goldP);
+   oval(end[0]*.5,end[1]*.5+rimY*.5,1.5,1.5,'#ffffff');
+  };
+
+  // Velos orales ondulantes de seda nácar
+  for(const side of[-1,1])for(let layer=0;layer<2;layer++)drawTentacle(ctx,{x:side*9,y:rimY-2,len:42+layer*8,phase:g.phases[7+(side>0)]+layer*1.8,t,still,amp:3.5+contraction,sway:trail*.5+side*(4+castK*6),lift:contraction,curl:side*.3,width:12-layer*4,alpha:.65,fill:layer?white:fur,edge:pal.ink,edgeWidth:.6,core:aqua});
+  for(let i=0;i<9;i++)if(i%2===0)tent(i,false);
+
+  // 2. Campana colosal translúcida de la Medusa Leviatán
+  const bell=drawJellyBell(ctx,{x:0,y:rimY,w:bellW,h:bellH,pal,t,c:contraction,still,ink:pal.ink,spots:g.spots,alpha:.92,glow:1,flash:0});
+  for(let i=0;i<9;i++)if(i%2!==0)tent(i,true);
+
+  // Manto superior en fur y white
   shape(fur,()=>{
-   ctx.moveTo(12,-22);
-   ctx.bezierCurveTo(34,-26,44,-54,32,-74);
-   ctx.bezierCurveTo(18,-92,-18,-94,-38,-76);
-   ctx.bezierCurveTo(-54,-58,-52,-28,-34,-12);
-   ctx.bezierCurveTo(-18,0,0,-4,12,-22);
-  },1.6);
+   ctx.moveTo(-bellW*.9,rimY);
+   ctx.bezierCurveTo(-bellW*1.05,rimY-bellH*.6,-bellW*.5,bell.top,0,bell.top);
+   ctx.bezierCurveTo(bellW*.5,bell.top,bellW*1.05,rimY-bellH*.6,bellW*.9,rimY);
+   ctx.quadraticCurveTo(0,rimY+8,-bellW*.9,rimY);
+  },1.4);
 
-  // Cámaras espirales de la caracola (crestas de crecimiento en espiral áurea)
   shape(white,()=>{
-   ctx.moveTo(8,-24);
-   ctx.bezierCurveTo(28,-28,36,-50,26,-68);
-   ctx.bezierCurveTo(14,-82,-14,-84,-30,-70);
-   ctx.bezierCurveTo(-42,-56,-40,-32,-26,-20);
-   ctx.bezierCurveTo(-12,-8,2,-12,8,-24);
+   ctx.moveTo(-bellW*.75,rimY-4);
+   ctx.bezierCurveTo(-bellW*.9,rimY-bellH*.5,-bellW*.4,bell.top+6,0,bell.top+6);
+   ctx.bezierCurveTo(bellW*.4,bell.top+6,bellW*.9,rimY-bellH*.5,bellW*.75,rimY-4);
+   ctx.quadraticCurveTo(0,rimY+2,-bellW*.75,rimY-4);
   },0);
 
-  // Costillas de crecimiento espirales nacaradas a lo largo de la concha
-  for(let r=0;r<10;r++){
-   const rad=34-r*3.2;
-   line('rgba(255,255,255,0.5)',1.1,()=>{
-    ctx.arc(-10,-52,rad,0.25*Math.PI+r*0.14,1.6*Math.PI-r*0.09);
-   });
+  // Margen festoneado de 8 lóbulos con perlas bioluminiscentes
+  for(let l=0;l<8;l++){
+   const lx=-bellW*.8+l*(bellW*1.6/7);
+   oval(lx,rimY+2,1.8,1.8,l%2===0?aqua:pinkP);
   }
 
-  // Bandas radiales prismáticas de la concha de selenita
-  for(let b=0;b<4;b++){
-   const ang=-0.8+b*0.5;
-   line(pal.bead,1.1,()=>{
-    ctx.moveTo(-10+Math.cos(ang)*14,-52+Math.sin(ang)*14);
-    ctx.lineTo(-10+Math.cos(ang)*36,-52+Math.sin(ang)*36);
-   });
-  }
-
-  // Espiral interna pastel iridiscente
-  ctx.save();ctx.globalAlpha=.75;
-  for(let sp=0;sp<3;sp++){
-   const rad=32-sp*9;
-   ctx.strokeStyle=['#d4bbf5','#ffd1e8','#a8eff2'][sp];
-   ctx.lineWidth=2.2-sp*.4;
-   ctx.beginPath();
-   ctx.arc(-10,-52,rad,0.2*Math.PI+sp*0.4,1.8*Math.PI-sp*0.3);
-   ctx.stroke();
+  // 3. Corazón de constelación interior (cámara estelar visible a través de la campana)
+  ctx.save();ctx.globalAlpha=.65;
+  const nodes=[[-16,-86],[0,-94],[16,-86],[-9,-76],[9,-76]];
+  for(let n=0;n<nodes.length;n++){
+   oval(nodes[n][0],nodes[n][1],2.2,2.2,goldP);
+   if(n<nodes.length-1)line('rgba(255,255,255,0.7)',1,()=>{ctx.moveTo(nodes[n][0],nodes[n][1]);ctx.lineTo(nodes[n+1][0],nodes[n+1][1]);});
   }
   ctx.restore();
 
-  // Centro de la espiral con gema dorada
-  oval(-10,-52,4,4,pal.bead);
-  oval(-10,-52,2,2,'#ffffff');
-
-  // Borde nacarado de la apertura de la caracola
-  shape('#ecdcf8',()=>{
-   ctx.moveTo(10,-18);
-   ctx.quadraticCurveTo(26,-32,22,-52);
-   ctx.quadraticCurveTo(8,-60,-4,-50);
-   ctx.quadraticCurveTo(-6,-28,10,-18);
+  // 4. Corona Soberana de 5 agujas de selenita en el ápice de la campana
+  shape(goldP,()=>{
+   ctx.moveTo(-18,bell.top+4);ctx.lineTo(-14,bell.top-16);ctx.lineTo(-7,bell.top-8);
+   ctx.lineTo(0,bell.top-22);
+   ctx.lineTo(7,bell.top-8);ctx.lineTo(14,bell.top-16);ctx.lineTo(18,bell.top+4);
+   ctx.closePath();
   },1.3);
+  for(const sp of[-14,-7,0,7,14])oval(sp,bell.top-14+Math.abs(sp)*0.5,1.8,1.8,'#ffffff');
 
-  // Perlas festoneadas a lo largo del borde de la apertura
-  for(let sc=0;sc<8;sc++){
-   const py=-20-sc*5,px=15-sc*1.8;
-   oval(px,py,1.8,1.8,sc%2?pal.bead:'#ffffff');
-  }
-
-  // 2. Criatura adorable asomándose por la caracola (mollusk friend)
-  ctx.save();
-  ctx.translate(0,retract); // Se esconde dentro si está herido
-
-  // Capucha suave y cabecita tierna
-  shape('#ffdcee',()=>{
-   ctx.moveTo(-4,-44);
-   ctx.bezierCurveTo(-16,-52,2,-66,18,-58);
-   ctx.bezierCurveTo(26,-50,24,-34,16,-30);
-   ctx.quadraticCurveTo(0,-28,-4,-44);
-  },1.4);
-
-  // Festón decorativo de la capucha (3 ondas suaves)
-  for(let l=0;l<3;l++){
-   oval(-2+l*8,-58+l*2,2.8,1.8,'#ffffff');
-  }
-
-  // Rostro adorable de nácar
-  shape(fur,()=>{
-   ctx.moveTo(-2,-48);
-   ctx.bezierCurveTo(-14,-56,4,-64,16,-56);
-   ctx.bezierCurveTo(24,-48,22,-36,14,-32);
-   ctx.quadraticCurveTo(0,-30,-2,-48);
-  },1.3);
-
-  // Antenitas sensoriales adorables en la coronilla del molusco
-  for(const side of[-1,1]){
-   line(pal.bead,1.3,()=>{ctx.moveTo(7+side*6,-56);ctx.quadraticCurveTo(8+side*9,-66,9+side*8,-70);});
-   oval(9+side*8,-70,1.8,1.8,'#7af0e0');
-  }
-
-  // Mofletes sonrosados adorables
-  oval(0,-38,3.5,2.4,'#ffa8cb');
-  oval(18,-42,3.5,2.4,'#ffa8cb');
-
-  // Ojos adorables gigantes de héroe (exactamente 2 llamadas a drawMichiEye)
+  // 5. Rostro Kawaii en la campana
   const eyeOpts={
    closed:dead||hurt||r.mood==='closed',
    happy:r.mood==='happy',blink:finite(r.motion?.blink),
    mood:atkK>.3?'angry':'normal',
    look:{x:Math.max(-1,Math.min(1,finite(pose.look?.x)+finite(r.motion?.lookX)*.3)),y:finite(pose.look?.y)}
   };
-  drawMichiEye(ctx,3,-46,8.5,eyeOpts);
-  drawMichiEye(ctx,15,-48,8.2,eyeOpts);
+  drawMichiEye(ctx,-14,-80,9.2,eyeOpts);
+  drawMichiEye(ctx,14,-80,9.2,eyeOpts);
 
-  // Boquita tierna
+  // Mofletes sonrosados kawaii
+  oval(-22,-74,4.2,2.6,'#ffa8cb');
+  oval(22,-74,4.2,2.6,'#ffa8cb');
+
+  // Boquita sonriente adorable
   if(!hurt&&!dead){
-   line(pal.ink,1.2,()=>{
-    ctx.moveTo(7,-36);ctx.quadraticCurveTo(10,-33,13,-36);
-   });
+   line(pal.ink,1.3,()=>{ctx.moveTo(-4,-70);ctx.quadraticCurveTo(0,-66,4,-70);});
   }
 
-  // 9 tentaculitos curvados adorables que asoman de la caracola (apoyan michiLaunchKick)
-  const plumeEnds=[[-38,-12],[-24,-4],[-10,2],[2,6],[14,8],[26,6],[36,0],[44,-8],[48,-18]];
-  for(let i=0;i<9;i++){
-   const [endX,endY]=plumeEnds[i],kick=Lcast&&!still?michiLaunchKick(i,9,pose.cast):0;
-   const waveLag=wave(g.phases[i],.055)*(run?4:2.2);
-   const rootX=endX*.35+6,rootY=-24+retract*.5;
-   const curX=endX+kick*12+(still?0:waveLag);
-   const curY=endY+Math.sin(t*.08+i)*3+retract*.3;
-
-   ctx.save();
-   line(i%2===0?'#f0dcf5':'#fff2fa',3.2,()=>{
-    ctx.moveTo(rootX,rootY);
-    ctx.quadraticCurveTo((rootX+curX)*.5+Math.sin(i)*5,(rootY+curY)*.5-4,curX,curY);
-   });
-   // Nódulo de succión y bolita suave en la punta del tentaculito
-   oval((rootX+curX)*.5,(rootY+curY)*.5,1.4,1.4,'#ffffff');
-   oval(curX,curY,2.2,2.2,i%3===0?pal.bead:i%3===1?'#7af0e0':'#fca8db');
-   ctx.restore();
-  }
-
-  ctx.restore(); // Fin del bloque retract
-
-  // Estrellitas y perlas orbitantes alrededor de la caracola
-  if(!still){
-   for(let k=0;k<3;k++){
-    const a=k*TAU/3+t*.02;
-    const ox=Math.cos(a)*42-10,oy=-48+Math.sin(a)*16;
-    sparkle(ox,oy,1.6,k%2===0?'#ffe8a0':'#7af0e0');
+  // 6. Cinco mini-medusas satélite en órbita alrededor de la Soberana
+  for(let j=0;j<5;j++){
+   const orbitA=j*TAU/5+(still?0:t*0.022);
+   const jx=Math.cos(orbitA)*64,jy=bell.top+18+Math.sin(orbitA)*16;
+   const jCol=['#c8f2ff','#ffd6f5','#ffe8b8','#c2f7df','#e6d4ff'][j];
+   shape(jCol,()=>{
+    ctx.moveTo(jx-6,jy);ctx.bezierCurveTo(jx-7,jy-7,jx+7,jy-7,jx+6,jy);ctx.closePath();
+   },.8);
+   for(let jt=-1;jt<=1;jt++){
+    const jtw=still?0:Math.sin(t*0.1+j+jt)*2;
+    line(pal.ink,.7,()=>{ctx.moveTo(jx+jt*3,jy);ctx.lineTo(jx+jt*2.5+jtw,jy+6);});
    }
+   oval(jx,jy-3,1.2,1.2,'#ffffff');
   }
 
-  // Destellos estelares festivos en victoria
+  // Celebración en victoria: auroras estelares y destellos
   if(victory){
-   for(let k=0;k<3;k++)oval(-8+k*14,-84,2.2,2.2,k===1?'#ffffff':pal.bead);
+   for(let k=0;k<4;k++)oval(-18+k*12,bell.top-28,2.4,2.4,k%2?goldP:aqua);
   }
 
   // Brazo líder para ataque / hechizos
-  let leadTip=[28,-36];
-  if(atkK>0)leadTip=[28+atkK*22,-36-atkK*6];
+  let leadTip=[28,-56];
+  if(atkK>0)leadTip=[36+atkK*26,-56-atkK*8];
   if(castK>0){
-   if(power===1)leadTip=[20,-22];
-   else if(power===3)leadTip=[30+castK*9,-22-castK*8];
-   else if(power===4)leadTip=[32,-56-castK*8];
-   else leadTip=[28,-36-castK*(power===2?18:6)];
+   if(power===1)leadTip=[22,-42];
+   else if(power===3)leadTip=[34+castK*10,-42-castK*9];
+   else if(power===4)leadTip=[36,-72-castK*8];
+   else leadTip=[32,-56-castK*(power===2?20:7)];
   }
-  if(hurt)leadTip=[18,-28];
+  if(hurt)leadTip=[18,-48];
   spellAccents(leadTip[0],leadTip[1]);
 
   ctx.restore();return;

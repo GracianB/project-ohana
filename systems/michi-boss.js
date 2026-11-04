@@ -319,6 +319,10 @@ export function drawMichiBossBody(ctx,e,cam,t=0,reduced=false){
   ctx.closePath();ctx.fillStyle='#f5e4fa';ctx.fill();stroke('#47406b',1.8);
   disk(side*30,-h*1.18,3.5,3.5,b.tier===3?'#ffa8c8':'#7af0e0');
  }
+
+ // Rubor kawaii bioluminiscente en la campana
+ disk(-w*0.22,-h*0.65,7.5,4.2,'rgba(255,150,190,0.55)');
+ disk(w*0.22,-h*0.65,7.5,4.2,'rgba(255,150,190,0.55)');
  // Diadema central de perlas estelares (cresta abisal de 3 spires)
  for(let p=-1;p<=1;p++){
   const pyOffset=p===0?-h*1.28:-h*1.20;
