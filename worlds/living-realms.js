@@ -7,7 +7,7 @@ export const REALM_STYLES=Object.freeze({
  stitcho:{sky:['#09182e','#24495f','#85b5b7'],stone:'#335566',light:'#7ef6dc',leaf:'#318d86',mist:'#a7e1d2',theme:'tidal-workshop'},
  chispin:{sky:['#477fbe','#bbdfef','#fff0c8'],stone:'#819cb4',light:'#ffe4a1',leaf:'#78adba',mist:'#f5f4df',theme:'storm-aqueduct'},
  cat:{sky:['#060414','#0e1333','#14224b'],stone:'#1b1230',light:'#fff4b8',leaf:'#42e8d0',mist:'#6dfaee',theme:'moon-garden'},
- cuerno:{sky:['#61aab6','#cbe8cd','#fff0c7'],stone:'#719c8e',light:'#ffeaba',leaf:'#5a9b87',mist:'#e3eed3',theme:'prism-forest'},
+ cuerno:{sky:['#221338','#422464','#703f8a','#d18bb7','#ffe0b2'],stone:'#35224e',light:'#ffe082',leaf:'#ba68c8',mist:'#e1bee7',theme:'prism-fantasy'},
  dragon:{sky:['#4b426b','#d28a88','#ffcf9f'],stone:'#644b61',light:'#ffb574',leaf:'#885e73',mist:'#efbca1',theme:'ember-cordillera'},
  dino:{sky:['#649cab','#c6d7b0','#ffe6a8'],stone:'#668a7e',light:'#ffe9a4',leaf:'#467f65',mist:'#dce3b7',theme:'ancient-valley'},
  frita:{sky:['#7699b8','#efc8b0','#fff0c5'],stone:'#a47b76',light:'#ffe4a0',leaf:'#8f9b75',mist:'#f6dec0',theme:'steam-market'},
@@ -133,7 +133,7 @@ function paintMiddle(c,hero,p){
    oval(c,x+80,780,145,17,'#14224b88');for(let j=0;j<7;j++){const xx=x-90+j*48;line(c,'#42e8d0',3,()=>{c.moveTo(xx,825);c.quadraticCurveTo(xx-25,730,xx,685-j%3*24);});oval(c,xx,685-j%3*24,44,18,j%2?'#1c2856':'#24386b');oval(c,xx,682-j%3*24,32,6,p.leaf+'aa');oval(c,xx,675-j%3*24,10,12,'#6dfaee77');}
   }
  }else if(hero==='cuerno'){
-  for(let i=0;i<3;i++){const x=210+i*670;tree(c,x,830,1.22,p);cliff(c,x+195,740,126,200,p);waterfall(c,x+191,740,13,165,p);
+  for(let i=0;i<3;i++){const x=210+i*670;spire(c,x,830,1.35,p,'selenite');cliff(c,x+195,740,126,200,p);waterfall(c,x+191,740,13,165,p);
    for(let j=0;j<4;j++)line(c,['#e4bbac88','#e7d39d88','#9ad1c988','#b6b0d388'][j],4,()=>{c.moveTo(x-140,730+j*5);c.bezierCurveTo(x-95,460+j*5,x+240,470+j*5,x+310,740+j*5);});
   }
  }else if(hero==='dragon'){
@@ -229,7 +229,8 @@ function paintNear(c,hero,p){
  for(let i=0;i<9;i++){
   const x=i*220+noise(i,12)*90,y=870+noise(i)*25;
   if(hero==='cat'&&i%4===0){spire(c,x,y,.45+noise(i,2)*.2,p,'selenite');continue;}
-  if(['cuerno','dino','final'].includes(hero)&&i%6===0){tree(c,x,y,.40+noise(i,2)*.25,p,hero==='dino'?'fern':'broad');continue;}
+  if(hero==='cuerno'&&i%5===0){spire(c,x,y,.55,p,'selenite');continue;}
+  if(['dino','final'].includes(hero)&&i%6===0){tree(c,x,y,.40+noise(i,2)*.25,p,hero==='dino'?'fern':'broad');continue;}
   for(let j=0;j<6;j++){
    const xx=x+j*12,top=y-20-noise(i+j,3)*45;
    line(c,p.leaf,2,()=>{c.moveTo(xx,y);c.quadraticCurveTo(xx-10,top+20,xx+4,top);});

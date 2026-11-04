@@ -42,8 +42,8 @@ function _stagSilhouette(ctx,x,y,scale){
  ctx.restore();
 }
 
-// Paint the organic grove once, then scroll its cached vector layers. Hundreds
-// of leaf and bark details cost two image blits per frame on a small viewport.
+// Paint the pure fantasy crystal realm once, then scroll its cached vector layers.
+// Crystal prism monoliths, levitating jewel shards and aurora refractions replace trees.
 const groveTiles=new WeakMap();
 function paintPrismaticGrove(ctx,camX,w,h){
  if(typeof OffscreenCanvas==='undefined')return;
@@ -51,35 +51,78 @@ function paintPrismaticGrove(ctx,camX,w,h){
  if(!tile){
   tile=new OffscreenCanvas(1200,640);const c=tile.getContext('2d');
   for(let n=0;n<3;n++){
-   const x=110+n*430,base=630,lean=n%2?1:-1;
-   c.fillStyle='#285560';c.beginPath();c.moveTo(x-24,base);
-   c.bezierCurveTo(x+18,base-150,x-lean*36,base-310,x+lean*12,base-454);
-   c.bezierCurveTo(x-lean*4,base-295,x+54,base-165,x+42,base);c.closePath();c.fill();
-   for(let side of [-1,1]){
-    c.strokeStyle='#376e71';c.lineWidth=20;c.lineCap='round';c.beginPath();
-    c.moveTo(x+8,base-175);c.bezierCurveTo(x+side*39,base-305,x+side*115,base-352,x+side*190,base-351);c.stroke();
-    c.strokeStyle='#74a39a';c.lineWidth=2;c.beginPath();c.moveTo(x+4,base-12);c.bezierCurveTo(x-18,base-143,x+side*20,base-267,x+side*90,base-328);c.stroke();
+   const x=160+n*390,base=630;
+   // High-fantasy towering crystal obelisks with multifaceted chromatic prisms
+   const colors=['#9c27b0','#00bcd4','#ff4081','#7c4dff','#00e676','#ffd700'];
+   const pCol=colors[n*2%colors.length],pCol2=colors[(n*2+1)%colors.length];
+
+   // Main central crystal monolith
+   const spireH=360+n*35,halfW=42;
+   const grad=c.createLinearGradient(x-halfW,base-spireH,x+halfW,base);
+   grad.addColorStop(0,'#ffffff');
+   grad.addColorStop(0.2,pCol+'cc');
+   grad.addColorStop(0.65,pCol2+'aa');
+   grad.addColorStop(1,'#180e29dd');
+   c.fillStyle=grad;
+   c.beginPath();
+   c.moveTo(x,base-spireH);
+   c.lineTo(x+halfW,base-spireH+60);
+   c.lineTo(x+halfW*0.8,base);
+   c.lineTo(x-halfW*0.8,base);
+   c.lineTo(x-halfW,base-spireH+60);
+   c.closePath();c.fill();
+   c.strokeStyle='#ffffff99';c.lineWidth=2;c.stroke();
+
+   // Facet line down the spine
+   c.beginPath();c.moveTo(x,base-spireH);c.lineTo(x,base);
+   c.strokeStyle='#ffffffbb';c.lineWidth=1.5;c.stroke();
+
+   // Twin flanking satellite crystal spires
+   for(const side of [-1,1]){
+    const sx=x+side*65,sh=spireH*0.62,sw=24;
+    const sGrad=c.createLinearGradient(sx,base-sh,sx,base);
+    sGrad.addColorStop(0,'#fff8e1');
+    sGrad.addColorStop(0.3,side>0?'#80deea':'#f48fb1');
+    sGrad.addColorStop(1,'#21153b');
+    c.fillStyle=sGrad;
+    c.beginPath();
+    c.moveTo(sx,base-sh);
+    c.lineTo(sx+sw,base-sh+35);
+    c.lineTo(sx+sw*0.7,base);
+    c.lineTo(sx-sw*0.7,base);
+    c.lineTo(sx-sw,base-sh+35);
+    c.closePath();c.fill();
+    c.strokeStyle='#ffffff66';c.lineWidth=1;c.stroke();
    }
-   for(let cluster=0;cluster<12;cluster++){
-    const a=cluster*Math.PI*2/12,cx=x+Math.cos(a)*135,cy=base-405+Math.sin(a)*44;
-    for(let leaf=0;leaf<18;leaf++){
-     const ang=leaf*2.399,rad=12+Math.sqrt(leaf)*11,lx=cx+Math.cos(ang)*rad,ly=cy+Math.sin(ang)*rad*.56;
-     c.fillStyle=['#3d7d79','#58978a','#80b399','#b2cda1'][(leaf+cluster+n)%4];
-     c.beginPath();c.ellipse(lx,ly,16+(leaf%3)*3,7,ang*.3,0,Math.PI*2);c.fill();
-     if(leaf%4===0){c.strokeStyle='#d4e2b880';c.lineWidth=.8;c.beginPath();c.moveTo(lx-9,ly);c.lineTo(lx+8,ly-2);c.stroke();}
-    }
+
+   // Levitating geometric prism shards floating above the crystal spire
+   for(let k=0;k<5;k++){
+    const ang=k*1.25,dist=85+k*22;
+    const fx=x+Math.cos(ang)*(halfW+dist*0.6),fy=base-spireH-20+Math.sin(ang)*50-k*28;
+    const sz=12+(k%3)*6;
+    c.save();c.translate(fx,fy);c.rotate(k*0.4);
+    c.fillStyle=['#e1bee7cc','#80deeacc','#ffcdd2cc','#ffe082cc','#b2dfdbcc'][k%5];
+    c.strokeStyle='#ffffff';c.lineWidth=1.2;
+    c.beginPath();
+    c.moveTo(0,-sz);c.lineTo(sz*0.6,0);c.lineTo(0,sz);c.lineTo(-sz*0.6,0);
+    c.closePath();c.fill();c.stroke();
+    // Inner glint
+    c.fillStyle='#ffffff';c.beginPath();c.arc(0,0,sz*0.2,0,Math.PI*2);c.fill();
+    c.restore();
    }
-   for(let vine=0;vine<6;vine++){
-    const vx=x-135+vine*51,vy=base-380+(vine%3)*17,len=65+(vine*31)%89;
-    c.strokeStyle='#8eae96';c.lineWidth=1.2;c.beginPath();c.moveTo(vx,vy);c.bezierCurveTo(vx-9,vy+len*.4,vx+11,vy+len*.7,vx+2,vy+len);c.stroke();
-    const light=c.createRadialGradient(vx+2,vy+len,1,vx+2,vy+len,20);light.addColorStop(0,'#ffefd49c');light.addColorStop(1,'#ffefd400');c.fillStyle=light;c.fillRect(vx-18,vy+len-20,40,40);
-    c.fillStyle=vine%2?'#e5bad9':'#efe1a5';c.beginPath();c.ellipse(vx+2,vy+len,4,7,.2,0,Math.PI*2);c.fill();
-   }
+
+   // Aurora light pillar emitting from the monolith tip
+   const beam=c.createRadialGradient(x,base-spireH,2,x,base-spireH,95);
+   beam.addColorStop(0,'#ffffffcc');
+   beam.addColorStop(0.35,pCol+'66');
+   beam.addColorStop(1,pCol+'00');
+   c.fillStyle=beam;
+   c.beginPath();c.arc(x,base-spireH,95,0,Math.PI*2);c.fill();
   }
   groveTiles.set(ctx,tile);
  }
  const scale=Math.max(.65,Math.min(1,h/900)),span=1200*scale,off=((camX*.22)%span+span)%span;
- ctx.save();ctx.globalAlpha=.86;
+ ctx.save();ctx.globalAlpha=.92;
  for(let x=-off-span;x<w+span;x+=span)ctx.drawImage(tile,x,h*.75-640*scale,span,640*scale);
  ctx.restore();
 }

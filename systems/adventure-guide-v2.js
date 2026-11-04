@@ -33,30 +33,18 @@ export function chapterMapDetail(id,g){
  ${r.hero?`<h4>Recuerdos: ${n}/100</h4><p>${rewardCopy(n)}</p><h4>Combinación de ${WORLD1_THEMES[r.hero].short}</h4><p><strong>${COMBO_GUIDES[r.hero][0]}</strong><br>${COMBO_GUIDES[r.hero][1]}</p><p>I: movimiento especial desde la cuarta forma. P: requiere quinta forma y 100 de carga ganada causando daño. U: compañero con recuperación propia.</p>`:''}`;
 }
 export function chapterAtlasHTML(g){
- const cards=[...WORLD1_ORDER.map(h=>'w1-'+h),'w1-final'].map(id=>{const r=WORLD1_ROOMS[id],i=WORLD1_ORDER.indexOf(r.hero),done=g.world1Seals?.includes(r.hero),open=i===0||done||g.world1Seals?.includes(WORLD1_ORDER[i-1])||id==='w1-final'&&g.world1Seals?.length===10;
-  return `<button type="button" class="wm-node ${id===g.roomId?'here selected':''}" data-room="${id}" aria-pressed="${id===g.roomId}" style="position:static;transform:none;width:auto;min-height:75px;border:1px solid;border-color:${r.color};padding:12px;border-radius:12px;background:#183347;color:#f6e7ca;text-align:left"><strong>${r.short}</strong><br><small style="white-space:normal;background:none;color:#b7d8cc">${done?'Canción recuperada':open?'Capítulo abierto':'Aún por despertar'}${r.hero?' · '+(g.world1Collect?.rooms?.[r.hero]?.found.length||0)+'/100':''}</small></button>`;}).join('');
- return `<div class="v2-atlas"><div class="wm-scroll" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px">${cards}</div><section class="wm-detail" aria-live="polite" style="display:block;padding:16px;border-radius:14px;background:#183347;color:#f5e8ce">${chapterMapDetail(g.roomId,g)}</section></div>`;
+ const cards=[...WORLD1_ORDER.map(h=>'w1-'+h),'w1-final'].map(id=>{
+  const r=WORLD1_ROOMS[id],i=WORLD1_ORDER.indexOf(r.hero),done=g.world1Seals?.includes(r.hero),open=i===0||done||g.world1Seals?.includes(WORLD1_ORDER[i-1])||id==='w1-final'&&g.world1Seals?.length===10;
+  const isHere=id===g.roomId;
+  const col=r.color||'#ffd36a';
+  const bg=isHere?`linear-gradient(135deg, ${col}38, rgba(20,38,58,.94))`:`linear-gradient(135deg, ${col}18, rgba(14,26,40,.88))`;
+  const shadow=isHere?`0 0 16px ${col}88, inset 0 0 10px ${col}44`:`0 3px 10px rgba(0,0,0,.35)`;
+  return `<button type="button" class="wm-node ${isHere?'here selected':''}" data-room="${id}" aria-pressed="${isHere}" style="position:static;transform:none;width:auto;min-height:72px;border:2px solid ${col};box-shadow:${shadow};padding:10px 12px;border-radius:12px;background:${bg};color:#f6e7ca;text-align:left;cursor:pointer"><strong style="color:${col};font-size:13px;text-shadow:0 0 8px ${col}55">${r.short}</strong><br><small style="white-space:normal;background:none;color:#d5e5e0;font-size:11px">${done?'✦ Canción recuperada':open?'Capítulo abierto':'Aún por despertar'}${r.hero?' · '+(g.world1Collect?.rooms?.[r.hero]?.found.length||0)+'/100':''}</small></button>`;
+ }).join('');
+ return `<div class="v2-atlas"><div class="wm-scroll" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">${cards}</div><section class="wm-detail" aria-live="polite" style="display:block;padding:16px;border-radius:14px;background:#142738;border:1px solid rgba(255,255,255,.12);color:#f5e8ce">${chapterMapDetail(g.roomId,g)}</section></div>`;
 }
 export function drawAdventureGuide(c,g,W,H,powers=[]){
- if(!g.roomDef?.world1||!g.player||g.world1Cine||g.relicScene)return;
- const p=g.player,guide=COMBO_GUIDES[p.id],small=W<600;
- c.save();c.textAlign='center';c.textBaseline='middle';
- if(guide){
-  const w=Math.min(W-28,small?330:440),x=(W-w)/2,y=H-(small?226:218),coach=combatCoach(g);
-  if(coach){
-  c.fillStyle='#112c3eed';c.strokeStyle='#afcbbd77';c.lineWidth=1;c.beginPath();c.roundRect(x,y,w,51,11);c.fill();c.stroke();
-  c.fillStyle='#f4e8c6';c.font=`bold ${small?11:13}px sans-serif`;
-  c.fillText(coach.title,W/2,y+17,w-15);c.font=`${small?11:12}px sans-serif`;c.fillStyle='#bdddd2';
-  c.fillText(coach.footer,W/2,y+35,w-15);
-  c.fillStyle=coach.mode==='kilo'?'#f1d498':'#94cfbe';c.fillRect(x+12,y+46,(w-24)*coach.progress,2);
-  }
- }
- const active=powers.find(q=>q.id==='star')||powers[0];
- if(active){
-  const x=W/2,w=Math.min(480,W-28),y=H*.15;c.fillStyle='#122b43ed';c.strokeStyle=active.id==='star'?'#ffe8a2':'#a7d6cf';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y,w,68,14);c.fill();c.stroke();
-  c.fillStyle='#fff1bd';c.font='bold 15px sans-serif';c.fillText(active.name+' · '+(active.duration?active.seconds+' s':active.left+' golpes'),x,y+20,w-20);
-  c.font='12px sans-serif';c.fillText(active.desc,x,y+42,w-20);
-  if(active.duration){c.fillStyle='#ffe7a0';c.fillRect(x-w/2+12,y+58,(w-24)*Math.min(1,active.left/active.duration),3);}
- }
- c.restore();
+ // Clean, unobstructed playfield: in-game HUD already displays active powers and objectives.
+ // Intrusive canvas overlay cartels that block player sightline are removed.
+ return;
 }

@@ -71,8 +71,28 @@ body.playing #top-actions button[aria-pressed="true"]{color:var(--v36-cyan);back
 #pause-overlay #btn-resume{
   background:linear-gradient(135deg,#ffe49d,#efb33f)!important;border-color:#ffe08a!important;color:#1c1307!important;
 }
-#map-grid{gap:8px}
-#map-grid>*{border-color:rgba(255,255,255,.09)!important;background:rgba(255,255,255,.035)!important}
+#map-overlay .panel{
+  width:min(960px,calc(100vw - 32px))!important;max-height:min(88vh,620px)!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;
+}
+#map-grid{gap:10px;flex:1;min-height:0;overflow:hidden;}
+.v2-atlas{
+  display:grid!important;grid-template-columns:minmax(320px,1.35fr) minmax(260px,1fr)!important;gap:14px!important;align-items:start!important;max-height:min(64vh,440px)!important;overflow-y:auto!important;padding-right:4px!important;
+}
+.v2-atlas .wm-scroll{
+  max-height:min(62vh,420px)!important;overflow-y:auto!important;padding-right:4px!important;
+}
+.v2-atlas .wm-node{
+  transition:transform .14s ease,box-shadow .14s ease!important;
+}
+.v2-atlas .wm-node:hover,.v2-atlas .wm-node:focus-visible{
+  transform:translateY(-2px)!important;
+}
+.v2-atlas .wm-node.selected{
+  outline:2px solid #fff!important;outline-offset:1px!important;
+}
+@media(max-width:760px){
+  .v2-atlas{display:flex!important;flex-direction:column!important;max-height:56vh!important;}
+}
 
 #boss-wrap{
   top:58px!important;width:min(580px,62vw)!important;padding:9px 14px 11px!important;border:1px solid rgba(255,91,117,.22)!important;

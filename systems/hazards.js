@@ -39,7 +39,7 @@ export function hazardTrigger(roomId, player, roomDef=null) {
   if (!h || !player || Number(player.vy)<0) return null;
   const feet=(Number(player.y)||0)+(Number(player.h)||0);
   const depth=clamp((feet-h.y)/Math.max(1,h.h),0,1);
-  if (depth < (h.type===HAZARD_TYPES.TRANSFER ? 0.34 : 0.46)) return null;
+  if (depth < (h.type===HAZARD_TYPES.TRANSFER ? 0.34 : 0.08)) return null;
   return Object.freeze({...h,depth});
 }
 

@@ -854,7 +854,7 @@ updateMichiYomiPlay(game);
 updateMichiDuet(game,hitEnemy);
 updateFamilyDuet(game,hitEnemy,healPlayer);
 syncState(p);
-if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
+if (S.roll > 0) { armor(p, 3); bodyHits(game, p, 48 + (p.evo || 0) * 12, { kx: 12, ky: -6, stun: 28, color: "#5ad1ff", cd: 16 }); }
 updateEvolutionAttacks(game,hitEnemy,healPlayer);
 if (S.stitchoDance > 0 && S.stitchoDanceAge > 0 && S.stitchoDanceAge % 24 === 0) {
 const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
@@ -872,8 +872,9 @@ game.nums?.add?.(cx(p), p.y - 44, danceHits ? "¡BAILE 626! +" + heal : "¡FLOTA
 }
 if (S.charge > 0) {
 const dino = p.id === "dino";
-bodyHits(game, p, dino ? 22 : 26, { kx: dino ? 11 : 15, ky: dino ? -6 : -8,
- stun: dino ? 29 : 34, color: "#c8f04a", cd: dino ? 23 : 30, shake: dino ? 4 : 7 });
+armor(p, 3);
+bodyHits(game, p, dino ? (56 + (p.evo || 0) * 14) : 36, { kx: dino ? 14 : 15, ky: dino ? -7 : -8,
+ stun: dino ? 32 : 34, color: "#c8f04a", cd: dino ? 16 : 24, shake: dino ? 5 : 7 });
 if ((game.t % (dino ? 5 : 3)) === 0) game.fx?.emit?.(cx(p) - p.facing * p.w * 0.6, p.y + p.h,
  { color: dino ? "#b9f9a0" : "#d8c7a4", count: dino ? 2 : 3, size: 3, up: 0.6, speed: 1.6 });
 if (dino && game.t % 5 === 0) pushRuntime(game.ghosts, {
@@ -1434,7 +1435,7 @@ bite(g, p, evo) {
 },
 charge(g, p, evo) {
  S.charge = 44 + evo * 7;
- armor(p, 12);
+ armor(p, 44 + evo * 7);
  p._dinoRollStart = Number(g.t) || 0;
  dinoDragonCast(g, p, "charge", evo);
  g.shake = Math.min(12, (g.shake || 0) + 2);

@@ -1467,7 +1467,7 @@ return scaleCombatHealth(e,readCombatDifficulty(e.roomId));
 }
 function hurtPlayer(amount, label) {
 const p = game.player;
-if (!p || p.dead || p.invuln > 0) return;
+if (!p || p.dead || p.invuln > 0 || (p._armorT > 0) || p._abilMove === "dino-roll" || p._abilMove === "charge" || p._abilMove === "roll") return;
 if (game.boss?._fusionBoss && game.world1Boss) { amount = world1BossFilterDamage(game, amount); if (!(amount > 0)) return; }
 const diffMul = readCombatDifficulty(game.roomId).damage;
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
@@ -1588,25 +1588,10 @@ if (hazard.type === HAZARD_TYPES.TRANSFER && hazard.dest) {
 }
 
 if (hazard.type === HAZARD_TYPES.DEATH) {
-  if (hazard.heroEscape && p.id === hazard.heroEscape && p._hazardEscapeKey !== hazardKey) {
-    p._hazardEscapeKey = hazardKey;
-    p.vy = -Math.max(9, p.jumpPower * 0.88);
-    p.vx += (p.facing || 1) * 1.8;
-    p.grounded = false;
-    p.coyote = 0;
-    p.jumps = Math.min(p.jumps || 0, Math.max(0, (p.maxJumps || 1) - 1));
-    p._masteryMove = "wingbeat";
-    game.flash = Math.max(game.flash || 0, 8);
-    game.shake = Math.min(14, (game.shake || 0) + 5);
-    game.fx?.emit(p.x + p.w / 2, p.y + p.h, {
-      color: hazard.color || "#ffd36a", count: 14, size: 3.5, up: 2.6, speed: 3.4, life: 18, star: true
-    });
-    game.nums?.add(p.x + p.w / 2, p.y - 14, "¡ÚLTIMA BATIDA!", "#ffe7a0", true);
-    return;
-  }
   dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
     type: hazard.type, id: hazard.id, room: game.roomId, hero: p.id
   }}));
+  // ¡ÚLTIMA BATIDA!
   dieVoid(p);
   return;
 }
@@ -1641,7 +1626,7 @@ const inGap = inPitX(p);
 const crossedBottom = feet > game.worldH - 24;
 const deepFall = p.y > game.worldH + 8;
 
-if (!hazardAxis && inGap && crossedBottom) {
+if (inGap && crossedBottom) {
 if (r.doors.down) loadRoom(r.doors.down, "down");
 else dieVoid(p);
 return;
@@ -2193,6 +2178,25 @@ function resolveEnemyContact(e) {
 const p = game.player;
 const solid = !(e.kind === "planta" && !e.up);
 if (p && !p.dead && e.hp>0 && !e.dying && solid && aabb(p, e)) {
+  const isRolling = (p._armorT > 0) || p._abilMove === "dino-roll" || p._abilMove === "charge" || p._abilMove === "roll";
+  if (isRolling) {
+    if (!e.boss && !(e.invuln > 0) && e.hp > 0) {
+      const evo = Number(p.evo) || 0;
+      const rollDmg = (p.id === "dino" ? (55 + evo * 15) : (45 + evo * 12)) * (p.id === "dino" ? 1.4 : 1.2);
+      const hpBefore = e.hp;
+      damageEnemy(e, rollDmg);
+      e.vx = (p.facing || 1) * 12;
+      e.vy = -5.5;
+      e.stun = Math.max(e.stun || 0, 24);
+      e.flash = 14;
+      e.invuln = Math.max(e.invuln || 0, 8);
+      if (e.hp < hpBefore) game.nums.add(e.x, e.y - 12, "" + Math.ceil(hpBefore - e.hp), "#ffe66a", true);
+      punch(e.x, e.y, p.color || "#c8f04a");
+      hitStop(2);
+      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: p.color || "#ffe66a", count: 12, size: 3.5, star: true, speed: 2.8 });
+    }
+    return;
+  }
   const kb = Math.sign((p.x + p.w / 2) - (e.x + e.w / 2) || p.facing || 1);
   const feet = p.y + p.h;
   const stomp = p.vy > 1.5 && feet - p.vy <= e.y + 8 && p.y < e.y && feet < e.y + e.h;

@@ -44,9 +44,6 @@ export function authorPizzaEncounters(room) {
 
  // Cornisas de trattorias, tejados mediterráneos y pasarelas de reparto
  const shelves = [
-  // Puentes de cruce sobre las 3 grietas
-  [1090, FLOOR - 65, 230], [3030, FLOOR - 70, 280], [6390, FLOOR - 65, 260],
-
   // Sector 0 — Muelle del Horno (x: 0 – 3000)
   [380, 1054, 200], [680, 974, 190], [980, 894, 200],
   [1480, 1034, 190], [1720, 954, 200], [2280, 1014, 200], [2560, 934, 190], [2840, 854, 200],
