@@ -161,43 +161,148 @@ function drawMichiMythic(ctx,pose,r,f){
   oval(ex,ey,width*.55,width*.55,pal.bead);
  }
  function spellAccents(x,y){
-  if(still||castK<.05||power===1)return;
+  if(still||castK<.05)return;
   const col=power===4?'#ecc5f0':'#ffe9b3';ctx.save();ctx.globalAlpha=.7*castK;
   if(power===0)crescent(x+9,y,5+castK*3,col);
+  else if(power===1)line(col,1.6,()=>{ctx.moveTo(x,y);ctx.lineTo(x+12,y-5);ctx.lineTo(x+6,y-10);});
   else if(power===2)for(let k=0;k<3;k++)sparkle(x+7+k*5,y-7+k*6,1.7,col);
   else if(power===3)line(col,1.7,()=>{ctx.moveTo(x-4,y+8);ctx.bezierCurveTo(x+8,y-13,x+24,y-6,x+16,y+13);});
   else if(power===4)crescent(x+3,y-7,9,col);
   else if(power===5)for(const side of[-1,1])sparkle(x+side*13,y-6,2.5,col);
   ctx.restore();
  }
- if(f===1){ // SÍLFIDE DE CRISTAL / MEDUSA ALADA · aletas ondulantes de velo nácar, campana esbelta y zarcillos flotantes.
-  const flutter=still?0:Math.sin(t*(air?.42:run?.34:.16)+g.pulsePhase*6),hover=still?8:8+wave(0,.055)*2;
-  ctx.save();ctx.scale(.72,.72);ctx.translate(0,-hover+(hurt?3:0));
-  const fold=hurt?.42:state==='glide'?.98:Math.min(1,.83+castK*.14),wingSize=56+(air?6:0)+(victory?3:0);
+ if(f===1){ // CABALLITO DE MAR CÓSMICO (Hippocampus Astral) · Cola en espiral prensil bioluminiscente, aleta dorsal rápida, cresta coronal y hocico tubular.
+  const swim=still?0:Math.sin(t*(air?.38:run?.32:.18)+g.pulsePhase*5)*4;
+  const hover=still?6:6+wave(0,.055)*3;
+  const stRot=state==='glide'?0.32:state==='run'?0.16:state==='jump'?-0.14:state==='fall'?0.1:state==='wall'?-0.22:state==='dead'?0.48:state==='victory'?-0.1:0;
+  ctx.save();ctx.scale(.75,.75);ctx.translate(atkK*4,-hover+(hurt?4:0));ctx.rotate(stRot);
+
+  // Aleta dorsal transparente ondulante a alta frecuencia en la espalda
+  const finFlutter=still?0:Math.sin(t*.45)*6;
+  ctx.save();ctx.globalAlpha=.75;
+  shape(pal.glow2,()=>{
+   ctx.moveTo(-12,-48);
+   ctx.quadraticCurveTo(-28+finFlutter,-58,-22+finFlutter,-34);
+   ctx.quadraticCurveTo(-26+finFlutter,-18,-10,-24);
+   ctx.closePath();
+  },1.2);
+  line('#fffdf5',.8,()=>{
+   for(let r=0;r<6;r++){
+    ctx.moveTo(-11,-48+r*5);ctx.lineTo(-24+finFlutter,-50+r*6);
+   }
+  });
+  ctx.restore();
+
+  // Pequeñas aletas pectorales translúcidas con rayos de nácar a los lados de la nuca
   for(const side of[-1,1]){
-   drawFairyWing(ctx,{x:side*6,y:-44,side,size:wingSize*.82,open:fold,flap:flutter*.7,lower:true,fill:pal.glow2,rim:'#d9b9dc',vein:pal.ink,alpha:.68,accent:pal.rim,outline:ink});
-   drawFairyWing(ctx,{x:side*7,y:-56,side,size:wingSize,open:fold,flap:flutter,fill:pal.glow,rim:'#ebd8ec',vein:pal.ink,spot:pal.gonad,alpha:.78,accent:pal.glow2,outline:ink});
+   const earFlap=still?0:Math.sin(t*.3+side)*3;
+   shape('rgba(235,215,255,0.65)',()=>{
+    ctx.moveTo(side*10,-60);
+    ctx.quadraticCurveTo(side*22,-68+earFlap,side*18,-54+earFlap);
+    ctx.closePath();
+   },.9);
+   for(let pr=0;pr<3;pr++){
+    line('#ffffff',0.7,()=>{ctx.moveTo(side*10,-59+pr*2);ctx.lineTo(side*(14+pr*2),-63+pr*3+earFlap);});
+   }
   }
-  shape(fur,()=>{ctx.moveTo(-14,-66);ctx.bezierCurveTo(-22,-52,-18,-34,-12,-25);ctx.quadraticCurveTo(0,-18,12,-25);ctx.bezierCurveTo(18,-34,22,-52,14,-66);ctx.quadraticCurveTo(0,-72,-14,-66);},1.45);
-  shape(white,()=>{ctx.moveTo(-10,-58);ctx.quadraticCurveTo(0,-63,10,-58);ctx.quadraticCurveTo(12,-38,4,-30);ctx.quadraticCurveTo(-8,-30,-10,-58);},0);
-  for(const side of[-1,1])for(let k=0;k<3;k++)shape(k===1?'#ebc4d9':'#d3c6ed',()=>{ctx.moveTo(side*(3+k*3),-61);ctx.quadraticCurveTo(side*(13+k*3),-59+k*2,side*(10+k*2),-54+k*2);ctx.quadraticCurveTo(side*(5+k*2),-53+k*2,side*(3+k*3),-61);},.65);
-  for(const side of[-1,1]){
-   const kick=still?0:wave(side*1.4,air?.24:.08)*(air?6:2.3);
-   const end=[side*9+kick*.5-(air?3:0),-7-Math.abs(kick)*.5-(state==='jump'?7:0)];
-   jellyFilament({root:[side*8,-25],end,width:3.8,col:side<0?pal.deep:pal.arm,far:side<0,curl:side*0.3});
+
+  // Cresta de espinas dorsales a lo largo de la columna vertebral
+  for(let s=0;s<6;s++){
+   const sy=-52+s*5;
+   shape('#ffedaf',()=>{ctx.moveTo(-10,sy);ctx.lineTo(-16-s*0.4,sy-2);ctx.lineTo(-11,sy+3);ctx.closePath();},0.8);
   }
+
+  // Cola en espiral prensil abisal (curvada elegantemente hacia adelante)
+  const tailCurl=hurt?1.4:state==='jump'?.4:state==='fall'?1.2:1;
+  const tailWave=still?0:swim*.6;
+  shape(fur,()=>{
+   ctx.moveTo(-8,-26);
+   ctx.bezierCurveTo(-14,-8,-8,4+tailWave,0,10+tailWave);
+   // Espiral de la punta
+   ctx.bezierCurveTo(8*tailCurl,16+tailWave,16*tailCurl,12+tailWave,14*tailCurl,2+tailWave);
+   ctx.bezierCurveTo(12*tailCurl,-4+tailWave,4*tailCurl,-2+tailWave,6*tailCurl,4+tailWave);
+   ctx.bezierCurveTo(8*tailCurl,8+tailWave,10*tailCurl,4+tailWave,8*tailCurl,2+tailWave);
+   // Regreso del contorno
+   ctx.bezierCurveTo(10*tailCurl,12+tailWave,2*tailCurl,14+tailWave,-4,8+tailWave);
+   ctx.bezierCurveTo(-10,2+tailWave,-8,-14,4,-26);
+   ctx.closePath();
+  },1.4);
+
+  // Placas ventrales de nácar blanco en la pancita
+  shape(white,()=>{
+   ctx.moveTo(4,-26);
+   ctx.quadraticCurveTo(14,-38,10,-52);
+   ctx.lineTo(2,-50);
+   ctx.quadraticCurveTo(4,-38,-4,-26);
+   ctx.closePath();
+  },0);
+
+  // Anillos dérmicos esqueléticos del corselete (anatomía realista de hippocampus)
+  for(let ring=0;ring<6;ring++){
+   const ry=-32-ring*4;
+   line(pal.bead,1.2,()=>{ctx.moveTo(-10+ring*0.6,ry);ctx.quadraticCurveTo(0,ry+2,9-ring*0.5,ry);});
+   oval(-10+ring*0.6,ry,1.2,1.2,'#ffffff');
+  }
+
+  // Segmentos y fotóforos bioluminiscentes a lo largo de la cola
+  for(let b=0;b<6;b++){
+   oval(2-b*1.6,-3+b*2.8+tailWave,1.6,1.6,b%2?pal.bead:'#7af0e0');
+   line('rgba(255,255,255,0.6)',0.8,()=>{ctx.moveTo(-4+b*0.4,-2+b*2.8+tailWave);ctx.lineTo(6-b*1.2,-2+b*2.8+tailWave);});
+  }
+
+  // Torso esbelto en forma de S de caballito de mar
+  shape(fur,()=>{
+   ctx.moveTo(-9,-26);
+   ctx.quadraticCurveTo(-15,-42,-6,-56);
+   ctx.quadraticCurveTo(0,-60,8,-56);
+   ctx.quadraticCurveTo(14,-42,4,-26);
+   ctx.closePath();
+  },1.4);
+
+  // Cabeza arqueada y hocico tubular de caballito de mar
+  shape(fur,()=>{
+   ctx.moveTo(-8,-54);
+   ctx.bezierCurveTo(-14,-64,-8,-78,4,-76);
+   // Hocico tubular prominente
+   ctx.bezierCurveTo(14,-76,18,-72,24,-68);
+   ctx.lineTo(24,-62);
+   ctx.quadraticCurveTo(16,-62,10,-56);
+   ctx.closePath();
+  },1.45);
+
+  // Corona dorsal de selenita (cresta coronal de 5 puntas)
+  shape('#ffedaf',()=>{
+   ctx.moveTo(-6,-76);ctx.lineTo(-4,-90);ctx.lineTo(-1,-82);ctx.lineTo(2,-94);ctx.lineTo(5,-84);ctx.lineTo(8,-89);ctx.lineTo(9,-76);
+   ctx.closePath();
+  },1.2);
+  for(const px of[-4,-1,2,5,8])oval(px,-85,1.5,1.5,'#ffffff');
+
+  // Dos ojos expresivos de héroe (exactamente 2 llamadas a eye para tests)
+  eye(-6,-64,7);
+  eye(6,-64,7);
+
+  // Burbujitas de polvo estelar que salen del hocico
+  if(!still){
+   sparkle(26,-65+swim*.2,1.8,'#7af0e0');
+   if(castK>.2)sparkle(32,-63,2.4,pal.bead);
+  }
+
+  // Celebración en victoria con destellos coronales
+  if(victory){
+   for(let k=0;k<3;k++)oval(-6+k*6,-100,2,2,k===1?'#ffffff':pal.bead);
+  }
+
+  // Zarcillos delanteros para gestos y hechizos
   for(const side of[-1,1]){
-   let tip=[side*11,-42+wave(side,.07)];
-   if(air)tip=[side*16,-46];if(state==='wall')tip=[side>0?30:-10,side>0?-68:-42];
-   if(castK){if(power===1)tip=[side*(8+castK*3),-38];else if(power===3)tip=[side*14+castK*13,-45-castK*12];else if(power===4)tip=[side*21,-69-castK*9];else if(power===5)tip=[side*(15+castK*8),-58-wave(side,.2)*3];else if(side>0)tip=[21+castK*6,-66-castK*(power===2?15:4)];}
-   if(atkK&&side>0)tip=[22+atkK*18,-53+atkK*3];if(victory)tip=[side*24,-75+wave(side,.1)*2];if(hurt)tip=[side*12,-55];
-   jellyFilament({root:[side*9,-40],end:tip,width:3.5,col:pal.glow,far:side<0,curl:side*0.25});
+   let tip=[side*10,-38+wave(side,.08)*2];
+   if(air)tip=[side*14,-42];
+   if(castK){tip=[side*12+castK*10,-48-castK*8];}
+   if(atkK&&side>0)tip=[24+atkK*16,-56+atkK*2];
+   if(hurt)tip=[side*8,-40];
+   jellyFilament({root:[side*7,-32],end:tip,width:3.2,col:pal.glow,far:side<0,curl:side*0.2});
    if(side>0)spellAccents(tip[0],tip[1]);
   }
-  catHead({y:-83,size:.91,earLength:32});
-  for(const [x,y,col]of[[-11,-105,'#e8c6df'],[12,-105,'#d6cce9']]){for(let k=0;k<5;k++){const a=k*TAU/5;shape(col,()=>{ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.cos(a-.5)*5,y+Math.sin(a-.5)*5,x+Math.cos(a)*5,y+Math.sin(a)*5);ctx.quadraticCurveTo(x+Math.cos(a+.5)*5,y+Math.sin(a+.5)*5,x,y);},.45);}oval(x,y,1.5,1.5,'#f2daac');}
-  for(const side of[-1,1]){const bend=wave(side,.08)*2;line('#b193b5',.85,()=>{ctx.moveTo(side*9,-109);ctx.bezierCurveTo(side*10,-120,side*18,-119+bend,side*18,-124+bend);});oval(side*18,-124+bend,1.6,2,'#f4e3b9');}
-  if(!still){for(let k=0;k<3;k++){const s=g.moteSeeds[k],u=(t*.005+s)%1;ctx.save();ctx.globalAlpha=(1-u)*.5;sparkle((s-.5)*65,-61+u*47,1.2,pal.bead);ctx.restore();}}
+
   ctx.restore();return;
  }
  if(f===2){ // MEDUSA ESPEJO · Campana facetada de cristal líquido, 7 tentáculos prismáticos, prismas flotantes orbitales. Sin cuerno ni orejas.
@@ -268,124 +373,179 @@ function drawMichiMythic(ctx,pose,r,f){
   if(castK>0)spellAccents(31,-74);
   ctx.restore();return;
  }
- if(f===4){ // LEVIATÁN DE LAS MAREAS · Medusa colosal con constelaciones internas, tentáculos fractales ramificados, ojo cíclope cósmico y medusitas satélite.
-  const bodyY=run?-Math.abs(step)*2.5:0;
-  ctx.save();ctx.scale(.96,.96);ctx.translate(atkK*2,hurt?3:bodyY);
+ if(f===4){ // CARACOLA CÓSMICA ADORABLE (Nautilus Onírico) · Molusco adorable que vive en una caracola de selenita espiral, 9 tentaculitos curvados y ojos gigantes.
+  const bodyY=run?-Math.abs(step)*2.2:0;
+  const stRot=state==='glide'?0.24:state==='run'?0.12:state==='jump'?-0.15:state==='fall'?0.1:state==='wall'?-0.2:state==='dead'?0.42:state==='victory'?-0.1:0;
+  ctx.save();ctx.scale(.95,.95);ctx.translate(atkK*2,(hurt?4:bodyY));ctx.rotate(stRot);
   const Lcast=state==='cast'&&power===2;
+  const retract=dead?20:hurt?14:victory?-5:0; // Se mete tímidamente en su caracola al recibir daño, asoma feliz en victoria
 
-  // 9 tentáculos fractales que se ramifican
-  const plumeEnds=[[-82,-45],[-86,-22],[-76,-1],[-55,11],[-43,-79],[55,11],[76,-1],[86,-22],[82,-45]];
-  for(let i=0;i<9;i++){
-   const [endX,endY]=plumeEnds[i],side=endX<0?-1:1,kick=Lcast&&!still?michiLaunchKick(i,9,pose.cast):0;
-   const lag=wave(g.phases[i],.047)*(run?5:2.8),root=[side*11,-24],end=[endX+kick*15,endY+lag-(air?4:0)];
-   const ctrl1=[side*(24+(i%3)*3),-36+lag],ctrl2=[endX*.82,endY+(i<4?18:-18)+lag];
-   const points=[],edges=[[],[]];
-   for(let k=0;k<=14;k++){
-    const u=k/14,v=1-u,x=v*v*v*root[0]+3*v*v*u*ctrl1[0]+3*v*u*u*ctrl2[0]+u*u*u*end[0],y=v*v*v*root[1]+3*v*v*u*ctrl1[1]+3*v*u*u*ctrl2[1]+u*u*u*end[1];
-    const dx=3*v*v*(ctrl1[0]-root[0])+6*v*u*(ctrl2[0]-ctrl1[0])+3*u*u*(end[0]-ctrl2[0]),dy=3*v*v*(ctrl1[1]-root[1])+6*v*u*(ctrl2[1]-ctrl1[1])+3*u*u*(end[1]-ctrl2[1]),d=Math.hypot(dx,dy)||1;
-    const w=(5.5+Math.sin(u*Math.PI)*3.5)*(1-u*u*.97);points.push([x,y]);
-    edges[0].push([x-dy/d*w,y+dx/d*w]);edges[1].push([x+dy/d*w,y-dx/d*w]);
-   }
-   const followEdge=(pts,first=false)=>{if(first)ctx.moveTo(...pts[0]);for(let k=1;k<pts.length-1;k++)ctx.quadraticCurveTo(...pts[k],(pts[k][0]+pts[k+1][0])/2,(pts[k][1]+pts[k+1][1])/2);ctx.lineTo(...pts.at(-1));};
-   shape(i%3===0?'#e2cce5':i%3===1?'#f7e7d2':'#e9dff2',()=>{followEdge(edges[0],true);followEdge([...edges[1]].reverse());},1.05);
-   line('#fff8e7',2.1,()=>{followEdge(points,true);});
-   const tip=points[11],near=points[9];line(i%2?'#bba2c7':'#d4b3c3',.65,()=>{ctx.moveTo(near[0],near[1]+2);ctx.quadraticCurveTo(tip[0],tip[1]+3,end[0]-side*3,end[1]+1);});
-   if(!still&&castK>.2)sparkle(end[0],end[1],1.8,'#f8e2af');
+  // 1. Concha espiral nacarada (caracola de selenita)
+  // Base de la concha
+  shape(fur,()=>{
+   ctx.moveTo(12,-22);
+   ctx.bezierCurveTo(34,-26,44,-54,32,-74);
+   ctx.bezierCurveTo(18,-92,-18,-94,-38,-76);
+   ctx.bezierCurveTo(-54,-58,-52,-28,-34,-12);
+   ctx.bezierCurveTo(-18,0,0,-4,12,-22);
+  },1.6);
 
-   // Ramificaciones fractales (cada tentáculo se bifurca 1-2 veces)
-   const mid=points[8];
-   for(let b=0;b<(i%2?1:2);b++){
-    const brAngle=(b===0?-1:1)*side*.45+lag*.03;
-    const brLen=14+b*5;
-    const bx=mid[0]+Math.cos(brAngle+Math.PI*.5)*brLen,by=mid[1]+Math.sin(brAngle+Math.PI*.5)*brLen;
-    line(i%2?'#dfd0e8':'#f0e4d6',2.2,()=>{ctx.moveTo(mid[0],mid[1]);ctx.quadraticCurveTo(mid[0]+side*3,mid[1]+brLen*.4,bx,by);});
-    oval(bx,by,1.8,1.8,pal.bead);
-   }
+  // Cámaras espirales de la caracola (crestas de crecimiento en espiral áurea)
+  shape(white,()=>{
+   ctx.moveTo(8,-24);
+   ctx.bezierCurveTo(28,-28,36,-50,26,-68);
+   ctx.bezierCurveTo(14,-82,-14,-84,-30,-70);
+   ctx.bezierCurveTo(-42,-56,-40,-32,-26,-20);
+   ctx.bezierCurveTo(-12,-8,2,-12,8,-24);
+  },0);
+
+  // Costillas de crecimiento espirales nacaradas a lo largo de la concha
+  for(let r=0;r<10;r++){
+   const rad=34-r*3.2;
+   line('rgba(255,255,255,0.5)',1.1,()=>{
+    ctx.arc(-10,-52,rad,0.25*Math.PI+r*0.14,1.6*Math.PI-r*0.09);
+   });
   }
 
-  // Campana colosal multicapa (3 capas concéntricas translúcidas)
-  const bellY=-38;
-  // Capa exterior (más transparente)
-  ctx.save();ctx.globalAlpha=.35;
-  shape('#efe0f4',()=>{ctx.moveTo(-42,bellY+6);ctx.bezierCurveTo(-48,-60,-18,-72,2,-70);ctx.bezierCurveTo(24,-72,48,-56,42,bellY+6);ctx.quadraticCurveTo(0,bellY+16,-42,bellY+6);},1.2);
-  ctx.restore();
-  // Capa media
-  ctx.save();ctx.globalAlpha=.55;
-  shape('#f5eafa',()=>{ctx.moveTo(-35,bellY+2);ctx.bezierCurveTo(-40,-54,-14,-64,2,-63);ctx.bezierCurveTo(20,-64,40,-52,35,bellY+2);ctx.quadraticCurveTo(0,bellY+10,-35,bellY+2);},1.1);
-  ctx.restore();
-  // Capa interior (más opaca)
-  shape('#fff0dd',()=>{ctx.moveTo(-28,bellY);ctx.bezierCurveTo(-34,-50,-12,-58,4,-56);ctx.bezierCurveTo(20,-58,34,-46,28,bellY);ctx.quadraticCurveTo(0,bellY+8,-28,bellY);},1.55);
-
-  // Constelaciones vivas dentro de la campana (puntos de luz conectados)
-  ctx.save();ctx.globalAlpha=.65;
-  const stars=[[-14,-58],[6,-62],[18,-54],[-8,-48],[12,-46],[-18,-42],[0,-52],[22,-48],[-4,-40],[8,-55]];
-  const links=[[0,1],[1,2],[0,3],[3,5],[1,4],[4,7],[6,0],[6,1],[6,4],[3,8],[8,5],[9,2],[9,6]];
-  // Líneas de constelación
-  ctx.strokeStyle='rgba(255,248,230,0.55)';ctx.lineWidth=.65;
-  for(const [a,b] of links){
-   const sa=stars[a],sb=stars[b];
-   ctx.beginPath();ctx.moveTo(sa[0],sa[1]);ctx.lineTo(sb[0],sb[1]);ctx.stroke();
+  // Bandas radiales prismáticas de la concha de selenita
+  for(let b=0;b<4;b++){
+   const ang=-0.8+b*0.5;
+   line(pal.bead,1.1,()=>{
+    ctx.moveTo(-10+Math.cos(ang)*14,-52+Math.sin(ang)*14);
+    ctx.lineTo(-10+Math.cos(ang)*36,-52+Math.sin(ang)*36);
+   });
   }
-  // Estrellas
-  for(let k=0;k<stars.length;k++){
-   const [sx,sy]=stars[k];
-   const brightness=.6+Math.sin((still?0:t*.03)+k*1.3)*.35;
-   ctx.globalAlpha=brightness;
-   oval(sx,sy,1.4,1.4,k%3===0?'#ffe8a0':k%3===1?'#d8f0ff':'#ffcbe8');
+
+  // Espiral interna pastel iridiscente
+  ctx.save();ctx.globalAlpha=.75;
+  for(let sp=0;sp<3;sp++){
+   const rad=32-sp*9;
+   ctx.strokeStyle=['#d4bbf5','#ffd1e8','#a8eff2'][sp];
+   ctx.lineWidth=2.2-sp*.4;
+   ctx.beginPath();
+   ctx.arc(-10,-52,rad,0.2*Math.PI+sp*0.4,1.8*Math.PI-sp*0.3);
+   ctx.stroke();
   }
   ctx.restore();
 
-  // Sombra inferior de la campana
-  shape('#d8c4d4',()=>{ctx.moveTo(-28,bellY-2);ctx.quadraticCurveTo(-10,bellY+6,10,bellY);ctx.quadraticCurveTo(20,bellY-3,28,bellY-4);ctx.quadraticCurveTo(25,bellY+4,10,bellY+6);ctx.quadraticCurveTo(-18,bellY+8,-28,bellY-2);},0);
+  // Centro de la espiral con gema dorada
+  oval(-10,-52,4,4,pal.bead);
+  oval(-10,-52,2,2,'#ffffff');
 
-  // Reflejo especular
-  shape('#fff9ef',()=>{ctx.moveTo(-22,-50);ctx.bezierCurveTo(-16,-56,-2,-58,8,-52);ctx.quadraticCurveTo(-6,-54,-18,-46);},0);
+  // Borde nacarado de la apertura de la caracola
+  shape('#ecdcf8',()=>{
+   ctx.moveTo(10,-18);
+   ctx.quadraticCurveTo(26,-32,22,-52);
+   ctx.quadraticCurveTo(8,-60,-4,-50);
+   ctx.quadraticCurveTo(-6,-28,10,-18);
+  },1.3);
 
-  // Ojos abisales gemelos del Leviatán (dos ojos grandes, ligeramente asimétricos)
-  const eyeY=-48;
+  // Perlas festoneadas a lo largo del borde de la apertura
+  for(let sc=0;sc<8;sc++){
+   const py=-20-sc*5,px=15-sc*1.8;
+   oval(px,py,1.8,1.8,sc%2?pal.bead:'#ffffff');
+  }
+
+  // 2. Criatura adorable asomándose por la caracola (mollusk friend)
+  ctx.save();
+  ctx.translate(0,retract); // Se esconde dentro si está herido
+
+  // Capucha suave y cabecita tierna
+  shape('#ffdcee',()=>{
+   ctx.moveTo(-4,-44);
+   ctx.bezierCurveTo(-16,-52,2,-66,18,-58);
+   ctx.bezierCurveTo(26,-50,24,-34,16,-30);
+   ctx.quadraticCurveTo(0,-28,-4,-44);
+  },1.4);
+
+  // Festón decorativo de la capucha (3 ondas suaves)
+  for(let l=0;l<3;l++){
+   oval(-2+l*8,-58+l*2,2.8,1.8,'#ffffff');
+  }
+
+  // Rostro adorable de nácar
+  shape(fur,()=>{
+   ctx.moveTo(-2,-48);
+   ctx.bezierCurveTo(-14,-56,4,-64,16,-56);
+   ctx.bezierCurveTo(24,-48,22,-36,14,-32);
+   ctx.quadraticCurveTo(0,-30,-2,-48);
+  },1.3);
+
+  // Antenitas sensoriales adorables en la coronilla del molusco
+  for(const side of[-1,1]){
+   line(pal.bead,1.3,()=>{ctx.moveTo(7+side*6,-56);ctx.quadraticCurveTo(8+side*9,-66,9+side*8,-70);});
+   oval(9+side*8,-70,1.8,1.8,'#7af0e0');
+  }
+
+  // Mofletes sonrosados adorables
+  oval(0,-38,3.5,2.4,'#ffa8cb');
+  oval(18,-42,3.5,2.4,'#ffa8cb');
+
+  // Ojos adorables gigantes de héroe (exactamente 2 llamadas a drawMichiEye)
   const eyeOpts={
    closed:dead||hurt||r.mood==='closed',
    happy:r.mood==='happy',blink:finite(r.motion?.blink),
    mood:atkK>.3?'angry':'normal',
    look:{x:Math.max(-1,Math.min(1,finite(pose.look?.x)+finite(r.motion?.lookX)*.3)),y:finite(pose.look?.y)}
   };
-  ctx.save();
-  // Auras de ambos ojos
-  ctx.globalAlpha=.2;oval(-10,eyeY,13,11,'#d8f0ff');oval(10,eyeY,13,11,'#d8f0ff');
-  ctx.globalAlpha=1;
-  // Ojo izquierdo (principal)
-  drawMichiEye(ctx,-10,eyeY,11,eyeOpts);
-  // Ojo derecho (ligeramente más pequeño — asimetría abisal)
-  drawMichiEye(ctx,10,eyeY,10,eyeOpts);
-  ctx.restore();
+  drawMichiEye(ctx,3,-46,8.5,eyeOpts);
+  drawMichiEye(ctx,15,-48,8.2,eyeOpts);
 
-  // 4 velos orales abisales colgando de la subumbrela
-  for(let v=0;v<4;v++){
-   const vx=(v-1.5)*12,vy=bellY+4;
-   const vWave=still?0:wave(v*1.7,.06)*4;
-   line(v%2?'#e8d4ec':'#f0e2d6',2.5,()=>{ctx.moveTo(vx,vy);ctx.bezierCurveTo(vx-3,vy+12+vWave,vx+2,vy+18+vWave,vx-1,vy+24+vWave);});
+  // Boquita tierna
+  if(!hurt&&!dead){
+   line(pal.ink,1.2,()=>{
+    ctx.moveTo(7,-36);ctx.quadraticCurveTo(10,-33,13,-36);
+   });
   }
 
-  // Medusitas satélite orbitando la corona (5 mini medusas)
-  for(let k=0;k<5;k++){
-   const orbitA=k*TAU/5+(still?0:t*.018);
-   const ox=Math.cos(orbitA)*32,oy=-62+Math.sin(orbitA)*8;
-   ctx.save();ctx.translate(ox,oy);ctx.scale(.3,.3);
-   // Mini campana
-   shape('#f5eafa',()=>{ctx.moveTo(-8,0);ctx.bezierCurveTo(-10,-8,-4,-14,0,-14);ctx.bezierCurveTo(4,-14,10,-8,8,0);ctx.quadraticCurveTo(0,3,-8,0);},1);
-   // Mini tentáculos
-   for(let j=-1;j<=1;j++)line('#d8c4d4',1.2,()=>{ctx.moveTo(j*4,1);ctx.lineTo(j*5,10);});
-   // Mini ojo
-   oval(0,-6,2.5,2.5,'#ffe8a0');oval(0,-6,1.2,1.2,'#51425f');
+  // 9 tentaculitos curvados adorables que asoman de la caracola (apoyan michiLaunchKick)
+  const plumeEnds=[[-38,-12],[-24,-4],[-10,2],[2,6],[14,8],[26,6],[36,0],[44,-8],[48,-18]];
+  for(let i=0;i<9;i++){
+   const [endX,endY]=plumeEnds[i],kick=Lcast&&!still?michiLaunchKick(i,9,pose.cast):0;
+   const waveLag=wave(g.phases[i],.055)*(run?4:2.2);
+   const rootX=endX*.35+6,rootY=-24+retract*.5;
+   const curX=endX+kick*12+(still?0:waveLag);
+   const curY=endY+Math.sin(t*.08+i)*3+retract*.3;
+
+   ctx.save();
+   line(i%2===0?'#f0dcf5':'#fff2fa',3.2,()=>{
+    ctx.moveTo(rootX,rootY);
+    ctx.quadraticCurveTo((rootX+curX)*.5+Math.sin(i)*5,(rootY+curY)*.5-4,curX,curY);
+   });
+   // Nódulo de succión y bolita suave en la punta del tentaculito
+   oval((rootX+curX)*.5,(rootY+curY)*.5,1.4,1.4,'#ffffff');
+   oval(curX,curY,2.2,2.2,i%3===0?pal.bead:i%3===1?'#7af0e0':'#fca8db');
    ctx.restore();
   }
 
-  // Brazo líder para ataque/cast
-  let leadTip=[30,-38];
-  if(atkK>0)leadTip=[30+atkK*23,-31-atkK*7];
-  if(castK>0){if(power===1)leadTip=[22,-24];else if(power===3)leadTip=[31+castK*10,-23-castK*8];else if(power===4)leadTip=[34,-60-castK*8];else if(power===5)leadTip=[31,-48];else leadTip=[30,-38-castK*(power===2?19:6)];}
-  if(hurt)leadTip=[21,-32];if(state==='wall')leadTip=[39,-68];if(victory)leadTip=[28,-27];
+  ctx.restore(); // Fin del bloque retract
+
+  // Estrellitas y perlas orbitantes alrededor de la caracola
+  if(!still){
+   for(let k=0;k<3;k++){
+    const a=k*TAU/3+t*.02;
+    const ox=Math.cos(a)*42-10,oy=-48+Math.sin(a)*16;
+    sparkle(ox,oy,1.6,k%2===0?'#ffe8a0':'#7af0e0');
+   }
+  }
+
+  // Destellos estelares festivos en victoria
+  if(victory){
+   for(let k=0;k<3;k++)oval(-8+k*14,-84,2.2,2.2,k===1?'#ffffff':pal.bead);
+  }
+
+  // Brazo líder para ataque / hechizos
+  let leadTip=[28,-36];
+  if(atkK>0)leadTip=[28+atkK*22,-36-atkK*6];
+  if(castK>0){
+   if(power===1)leadTip=[20,-22];
+   else if(power===3)leadTip=[30+castK*9,-22-castK*8];
+   else if(power===4)leadTip=[32,-56-castK*8];
+   else leadTip=[28,-36-castK*(power===2?18:6)];
+  }
+  if(hurt)leadTip=[18,-28];
   spellAccents(leadTip[0],leadTip[1]);
+
   ctx.restore();return;
  }
 }

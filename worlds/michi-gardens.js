@@ -84,26 +84,55 @@ export function drawMichiGardens(ctx,cam,t=0,viewportW=1400,viewportH=700,option
   ctx.beginPath();ctx.arc(sx,sy,i%4===0?2:1.2,0,TAU);ctx.fill();
  }
 
- // 3. Giant Radiant Moon with craters & halo (parallax 0.05)
+ // 3. Eclipse Cósmico Total Único con Corona Pulsante (parallax 0.05)
  const moonX=wrap(w*0.75-camX*0.05,w+400)-200;
  const moonY=h*0.28;
  ctx.save();
- // Iridescent outer halo
- ctx.fillStyle='rgba(240,210,255,0.12)';
- ctx.beginPath();ctx.arc(moonX,moonY,125,0,TAU);ctx.fill();
- ctx.fillStyle='rgba(255,230,250,0.2)';
- ctx.beginPath();ctx.arc(moonX,moonY,95,0,TAU);ctx.fill();
- // Moon sphere
- const moonGrad=ctx.createRadialGradient(moonX-20,moonY-20,15,moonX,moonY,72);
- moonGrad.addColorStop(0,'#fffbee');
- moonGrad.addColorStop(0.65,'#fed9f0');
- moonGrad.addColorStop(1,'#d29aff');
- ctx.fillStyle=moonGrad;ctx.beginPath();ctx.arc(moonX,moonY,70,0,TAU);ctx.fill();
- // Soft pastel craters
- ctx.fillStyle='rgba(180,120,220,0.18)';
- ctx.beginPath();ctx.arc(moonX-24,moonY-14,14,0,TAU);ctx.fill();
- ctx.beginPath();ctx.arc(moonX+18,moonY+16,18,0,TAU);ctx.fill();
- ctx.beginPath();ctx.arc(moonX-8,moonY+28,10,0,TAU);ctx.fill();
+ // Corona solar exterior pulsante
+ const coronaPulse=reduced?0.4:0.35+Math.sin(t*0.025)*0.15;
+ const corona=ctx.createRadialGradient(moonX,moonY,60,moonX,moonY,150);
+ corona.addColorStop(0,'rgba(255,230,170,'+(coronaPulse*0.8)+')');
+ corona.addColorStop(0.35,'rgba(235,160,255,'+(coronaPulse*0.5)+')');
+ corona.addColorStop(0.7,'rgba(122,240,224,'+(coronaPulse*0.25)+')');
+ corona.addColorStop(1,'rgba(0,0,0,0)');
+ ctx.fillStyle=corona;
+ ctx.beginPath();ctx.arc(moonX,moonY,150,0,TAU);ctx.fill();
+
+ // Prominencias solares y rayos de corona
+ if(!reduced){
+  ctx.globalAlpha=coronaPulse*0.65;
+  for(let r=0;r<8;r++){
+   const ang=r*TAU/8+t*0.005;
+   const rLen=24+Math.sin(t*0.03+r*1.8)*12;
+   ctx.beginPath();
+   ctx.moveTo(moonX+Math.cos(ang-0.08)*72,moonY+Math.sin(ang-0.08)*72);
+   ctx.lineTo(moonX+Math.cos(ang)*(72+rLen),moonY+Math.sin(ang)*(72+rLen));
+   ctx.lineTo(moonX+Math.cos(ang+0.08)*72,moonY+Math.sin(ang+0.08)*72);
+   ctx.closePath();
+   ctx.fillStyle=r%2===0?'rgba(255,225,140,0.4)':'rgba(215,160,255,0.35)';
+   ctx.fill();
+  }
+  ctx.globalAlpha=1;
+ }
+
+ // Anillo de diamante de luz solar alrededor del borde
+ ctx.beginPath();ctx.arc(moonX,moonY,71.5,0,TAU);
+ ctx.fillStyle='rgba(255,245,200,0.3)';ctx.fill();
+
+ // Disco lunar opaco del eclipse (cuerpo oscuro que oculta el sol)
+ const darkMoon=ctx.createRadialGradient(moonX-12,moonY-12,8,moonX,moonY,70);
+ darkMoon.addColorStop(0,'#160c24');
+ darkMoon.addColorStop(0.75,'#090312');
+ darkMoon.addColorStop(1,'#040108');
+ ctx.fillStyle=darkMoon;
+ ctx.beginPath();ctx.arc(moonX,moonY,70,0,TAU);ctx.fill();
+ ctx.strokeStyle='rgba(255,235,190,0.65)';ctx.lineWidth=1.5;ctx.stroke();
+
+ // Cráteres lunares sutiles
+ ctx.fillStyle='rgba(42,24,64,0.35)';
+ ctx.beginPath();ctx.arc(moonX-22,moonY-14,12,0,TAU);ctx.fill();
+ ctx.beginPath();ctx.arc(moonX+16,moonY+16,15,0,TAU);ctx.fill();
+ ctx.beginPath();ctx.arc(moonX-6,moonY+26,9,0,TAU);ctx.fill();
  ctx.restore();
 
  // 4. Far cavern roof with quartz stalactites (parallax 0.12)

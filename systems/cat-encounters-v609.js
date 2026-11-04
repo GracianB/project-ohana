@@ -42,12 +42,11 @@ export function authorCatEncounters(room){
   [9600,FLOOR,4800,126]
  ];
 
- // Pozos abisales con corriente gravitatoria — la corriente de Medusaluna devuelve
- // al jugador al borde con impulso vertical en vez de matarlo (heroEscape:'cat').
+ // Pozos y abismos lunares mortales: abismos abiertos donde la caída es letal
  room.hazards=[
-  {id:'cat-pit-1',x:2200,y:FLOOR-20,w:180,h:380,type:'death',heroEscape:'cat',label:'CORRIENTE ABISAL',color:'#c495ff'},
-  {id:'cat-pit-2',x:4480,y:FLOOR-20,w:190,h:380,type:'death',heroEscape:'cat',label:'VÓRTICE DEL ECLIPSE',color:'#9b64f2'},
-  {id:'cat-pit-3',x:6970,y:FLOOR-20,w:180,h:380,type:'death',heroEscape:'cat',label:'RESACA ESTELAR',color:'#7adbe5'}
+  {id:'cat-pit-1',x:2200,y:FLOOR-20,w:180,h:380,type:'death',label:'ABISMO DE NIEBLA ASTRAL',color:'#c495ff'},
+  {id:'cat-pit-2',x:4480,y:FLOOR-20,w:190,h:380,type:'death',label:'FOSA DEL ECLIPSE',color:'#9b64f2'},
+  {id:'cat-pit-3',x:6970,y:FLOOR-20,w:180,h:380,type:'death',label:'VÓRTICE ESTELAR',color:'#7adbe5'}
  ];
 
  // Trampas de seda astral y niebla espesa (se disipan con J o K)
@@ -57,70 +56,54 @@ export function authorCatEncounters(room){
   {id:2,x:7540,y:FLOOR-70,w:90,h:70,name:'Telaraña del Velo III'}
  ];
 
- // Corrientes abisales ascendentes: sustentan el vuelo y salvan caídas sobre los tres pozos
+ // Géiseres abisales de starlight: columnas ascendentes para impulsar a las rutas aéreas altas
  room.catUpdrafts=[
-  {id:'up-1',x:2200,y:FLOOR-180,w:180,h:260,power:9},
-  {id:'up-2',x:4480,y:FLOOR-180,w:190,h:260,power:9},
-  {id:'up-3',x:6970,y:FLOOR-180,w:180,h:260,power:9}
+  {id:'up-1',x:1850,y:FLOOR-320,w:120,h:360,power:10},
+  {id:'up-2',x:3600,y:FLOOR-360,w:120,h:380,power:10},
+  {id:'up-3',x:6300,y:FLOOR-380,w:120,h:400,power:10}
  ];
 
  // Perlas de Selenita: reliquias de recarga y salud en rutas altas y cornisas
  room.catPearls=[
   {id:0,x:1050,y:FLOOR-260,r:10,label:'Perla de Selenita I'},
   {id:1,x:1750,y:FLOOR-340,r:10,label:'Perla de Selenita II'},
-  {id:2,x:2290,y:FLOOR-160,r:10,label:'Perla de Selenita III'},
+  {id:2,x:2600,y:FLOOR-420,r:10,label:'Perla de Selenita III'},
   {id:3,x:3100,y:FLOOR-380,r:10,label:'Perla de Selenita IV'},
   {id:4,x:3900,y:FLOOR-440,r:10,label:'Perla de Selenita V'},
-  {id:5,x:4575,y:FLOOR-160,r:10,label:'Perla de Selenita VI'},
+  {id:5,x:4850,y:FLOOR-480,r:10,label:'Perla de Selenita VI'},
   {id:6,x:5250,y:FLOOR-400,r:10,label:'Perla de Selenita VII'},
   {id:7,x:6100,y:FLOOR-460,r:10,label:'Perla de Selenita VIII'},
-  {id:8,x:7060,y:FLOOR-160,r:10,label:'Perla de Selenita IX'},
+  {id:8,x:7350,y:FLOOR-480,r:10,label:'Perla de Selenita IX'},
   {id:9,x:7750,y:FLOOR-440,r:10,label:'Perla de Selenita X'},
   {id:10,x:8500,y:FLOOR-480,r:10,label:'Perla de Selenita XI'},
   {id:11,x:9150,y:FLOOR-450,r:10,label:'Perla de Selenita XII'}
  ];
 
- // Plataformas de cristal lunar, cornisas flotantes, terrazas de coral y
- // puentes abisales sobre los pozos y a lo largo de los cinco sectores.
+ // Plataformas de cristal lunar aerodinámicas: despejadas, sin sobrecargar el suelo,
+ // y aprovechando al máximo el espacio aéreo superior (y: 380 - 620) para vuelo y planeo.
  const shelves=[
-  // Cornisas de paso y trampolines sobre los tres pozos astrales
-  [2210,FLOOR-60,160],[4490,FLOOR-68,170],[6980,FLOOR-64,160],
+  // Sector 0 — Umbral del sueño (x: 0 – 2400): saltos rítmicos y balcón alto
+  [450,960,180],[850,840,190],[1350,720,180],
+  // Balcones superiores del umbral (aprovechando el espacio aéreo alto)
+  [700,540,160],[1150,440,180],[1650,480,160],
 
-  // Sector 0 — Umbral del sueño (x: 0 – 2400)
-  [340,1054,200],[580,974,180],[840,894,200],
-  [1100,974,180],[1400,894,200],[1700,814,180],
-  [2050,894,200],[2300,814,200],
-  // Terrazas altas del umbral (exploración vertical)
-  [480,834,120],[920,774,140],[1300,734,130],
-  [1650,694,110],
+  // Sector 1 — Estanque de lunas (x: 2400 – 4800): plataformas flotantes y pasarela celestial
+  [2600,940,180],[3050,820,180],[3750,780,180],[4250,740,180],
+  // Vías aéreas del estanque
+  [2850,560,170],[3350,460,190],[3950,420,180],[4400,520,160],
 
-  // Sector 1 — Estanque de lunas (x: 2400 – 4800)
-  [2550,1034,200],[2800,954,200],[3100,874,200],
-  [3420,934,180],[3700,854,200],[4000,774,200],
-  [4300,854,180],[4600,774,180],
-  // Cornisas superiores del estanque
-  [2700,814,110],[3250,754,130],[3850,714,120],
-  [4150,694,100],
+  // Sector 2 — Santuario de medusas (x: 4800 – 7200): cornisas limpias y arcos de altura
+  [5000,920,180],[5550,800,180],[6150,740,180],[6750,720,180],
+  // Pasarelas superiores del santuario
+  [5300,540,170],[5850,440,180],[6450,420,190],
 
-  // Sector 2 — Bosque de medusas (x: 4800 – 7200)
-  [4900,1034,200],[5150,934,200],[5450,834,200],
-  [5750,914,180],[6050,814,200],[6350,714,200],
-  [6650,794,180],[6950,714,180],
-  // Pasarelas altas del bosque
-  [5050,774,110],[5350,694,130],[5900,654,140],
-  [6200,634,110],[6500,654,120],
-
-  // Sector 3 — Sagrario de las Nueve Corrientes (x: 7200 – 9600)
-  [7200,1034,200],[7500,934,180],[7800,834,200],
-  [8100,894,200],[8400,794,200],[8700,714,180],
-  [8950,774,200],[9200,694,200],
-  // Terrazas del sagrario (zona más alta)
-  [7350,774,120],[7650,694,130],[8000,654,110],
-  [8550,634,120],[8850,614,100],
+  // Sector 3 — Sagrario de las Nueve Corrientes (x: 7200 – 9600): terrazas majestuosas
+  [7400,900,190],[8000,780,180],[8600,720,180],
+  // Terrazas celestiales del sagrario
+  [7600,540,170],[8250,460,190],[8850,420,180],
 
   // Sector 4 — Altar del sueño (pre-arena, x: 9200 – 9600)
-  [9300,1004,220],[9480,924,200],
-  [9350,834,130]
+  [9320,880,200],[9480,760,180]
  ];
 
  const expPlats=(room.plats||[]).filter(p=>p[0]>=9600&&p[1]<FLOOR);

@@ -48,6 +48,18 @@ function glass(c,x,y,w,h,ink,fill){
  c.fillStyle=fill;c.strokeStyle=ink;c.lineWidth=3;c.beginPath();c.moveTo(x-w/2,y);c.bezierCurveTo(x-w*.6,y-h*1.3,x+w*.6,y-h*1.3,x+w/2,y);c.closePath();c.fill();c.stroke();
  for(let i=-1;i<=1;i++)stroke(c,ink,1.5,()=>{c.moveTo(x+i*w*.2,y);c.quadraticCurveTo(x+i*w*.4,y-h*.65,x,y-h*.97);});
 }
+function crystalSpire(c,x,y){
+ c.save();
+ c.fillStyle='#654f7a';c.beginPath();c.moveTo(x-22,y);c.lineTo(x-6,y-240);c.lineTo(x+6,y-240);c.lineTo(x+22,y);c.closePath();c.fill();
+ c.strokeStyle='#d4bbf5';c.lineWidth=2.5;c.stroke();
+ c.fillStyle='rgba(235,210,255,0.45)';c.beginPath();c.moveTo(x-12,y);c.lineTo(x,y-235);c.lineTo(x+10,y);c.closePath();c.fill();
+ for(const side of[-1,1]){
+  stroke(c,'#9a70b8',6,()=>{c.moveTo(x+side*14,y);c.bezierCurveTo(x+side*60,y-90,x+side*45,y-160,x+side*85,y-180);});
+  for(let p=0;p<4;p++){const px=x+side*(30+p*15),py=y-40-p*35;ellipse(c,px,py,9,6,p%2?'#7af0e0':'#ffa8e8');}
+ }
+ ellipse(c,x,y-244,12,12,'#fff4c8');stroke(c,'#c99be8',2,()=>{c.arc(x,y-244,18,0,TAU);});
+ c.restore();
+}
 function tree(c,x,y,moon=false){
  c.fillStyle=moon?'#8e829c':'#7e8a70';c.beginPath();c.moveTo(x-24,y);c.bezierCurveTo(x-11,y-93,x-42,y-190,x-6,y-248);c.bezierCurveTo(x-19,y-140,x+38,y-87,x+26,y);c.fill();
  for(let side of [-1,1])stroke(c,moon?'#a294ab':'#8d9c7d',12,()=>{c.moveTo(x,y-123);c.quadraticCurveTo(x+side*75,y-207,x+side*161,y-205);});
@@ -78,7 +90,7 @@ export function drawChapterLandmarks(c,g,cam,t,W,H){
  for(let i=0;i<anchors.length;i++){const wx=anchors[i],x=wx-cam.x;if(x<-430||x>W+430)continue;const y=(r.terraces.find(q=>wx>=q.x&&wx<q.x+q.w)?.y??1134)-cam.y;
   ellipse(c,x,y-2,155,12,'#38505b14');
   if(h==='kilo')tree(c,x,y,false);
-  else if(h==='cat'){tree(c,x,y,true);for(let k=-1;k<=1;k++){stroke(c,'#a897b4',2,()=>{c.moveTo(x+k*91,y);c.quadraticCurveTo(x+k*91-12,y-32,x+k*91,y-59);});ellipse(c,x+k*91,y-58,25,8,'#e3ccd9');}}
+  else if(h==='cat')crystalSpire(c,x,y);
   else if(h==='dino')ribs(c,x,y);
   else if(h==='stitcho')harbor(c,x,y,true);
   else if(h==='pizza')harbor(c,x,y,false);

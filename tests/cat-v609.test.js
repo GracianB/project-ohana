@@ -144,8 +144,8 @@ test('V609 Cat room: pearls and abyssal updrafts are present and interact with p
  assert.ok(g.player.health > 50);
 
  // Updraft lifts falling player
- g.player.x = 2250;
- g.player.y = 1134 - 100;
+ g.player.x = 1880;
+ g.player.y = 1134 - 200;
  g.player.vy = 8;
  updateCatChapter(g);
  assert.ok(g.player.vy < 0, 'updraft must propel player upwards');

@@ -19,179 +19,446 @@ function eye(c,x,y,r,aim=1,{hurt=false,glow=MOON}={}){
  ellipse(c,x-r*.18,y-r*.3,r*.22,r*.22,'#ffffff',0,0);
 }
 
-// ─ Medusa lunar (medusa): medusa cósmica con campana nacarada y tentáculos bioluminiscentes
+// ─────────────────────────────────────────────────────────────────────────────
+// FAUNA ASTRAL DEL JARDÍN LUNAR (Enemigos Vectoriales Orgánicos de Alta Fidelidad)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─ Medusa lunar (medusa): Aurelia astral con campana translúcida viva, velos orales ondulantes y ropalios
 function drawLunarJellyFoe(c,s){
  const {time,active,hurt,aim}=s;
- const pulse=Math.sin(time*.08)*0.07,float=Math.sin(time*.05)*3;
- const bell=1+pulse;
- // Tentáculos serpenteantes (5 filamentos)
- for(let k=-2;k<=2;k++){
-  const wave=Math.sin(time*.1+k*1.5)*6,reach=32+(k%2?4:0)+(active?5:0);
-  stroke(c,k===0?MOON:PEARL,k===0?4:2.8,()=>{
-   c.moveTo(k*11*bell,float);
-   c.bezierCurveTo(k*10*bell+wave*.5,float+10,k*6+wave,-k*2+reach*.6,k*5+wave*1.2,reach+float);
-  });
-  ellipse(c,k*5+wave*1.2,reach+float,2,2.5,active?MOON:PEARL,0,0);
- }
- // Aletas de velo translúcido lateral y ropalios marginales
- for(const side of [-1,1]){
-  const flutter=Math.sin(time*.12+side*1.2)*3;
-  fill(c,'rgba(195,160,240,0.45)',()=>{
-   c.moveTo(side*16*bell,float-16);
-   c.bezierCurveTo(side*34*bell,float-28+flutter,side*36*bell,float-4+flutter,side*18*bell,float+4);
-   c.closePath();
-  },1.4);
-  ellipse(c,side*30*bell,float-12+flutter,2.2,2.2,MOON,0,0);
- }
- // Campana nacarada
- const half=32*bell;
- c.globalAlpha=hurt?.7:.92;
- fill(c,gradient(c,-half,float-40,half*2,40,PEARL,LILAC,'#a07ec8'),()=>{
-  c.moveTo(-half,float);
-  c.bezierCurveTo(-half-3,float-18,-20,float-40,0,float-41);
-  c.bezierCurveTo(20,float-40,half+3,float-18,half,float);
-  c.quadraticCurveTo(0,float+5,-half,float);
- },2.2);
- c.globalAlpha=.3;ellipse(c,-9,float-24,11,4,'#ffffff',-.3,0);c.globalAlpha=1;
- // Canales radiales luminosos
- for(let r=-1;r<=1;r++){
-  stroke(c,'rgba(255,255,255,0.45)',1.2,()=>{
-   c.moveTo(0,float-36);c.quadraticCurveTo(r*14,float-20,r*18*bell,float-2);
-  });
- }
- // Órgano sensorial apical y perla ropálica estelar
- ellipse(c,0,float-42,3.5,4.5,MOON,0,1.2);
- ellipse(c,0,float-42,1.8,2.2,TEAL,0,0);
- for(let sp=-1;sp<=1;sp+=2){
-  stroke(c,'rgba(255,255,255,0.7)',1.2,()=>{
-   c.moveTo(sp*4,float-38);c.quadraticCurveTo(sp*8,float-46,sp*5,float-50);
-  });
- }
- // Ojos somnolientas/despiertas
- const blink=active&&((time+13)%180<6);
+ // Pulsación natatoria orgánica asimétrica: contracción elástica rápida, relajación fluida prolongada
+ const cycle=(time*.08)%TAU;
+ const pulse=Math.sin(cycle)>0?Math.pow(Math.sin(cycle),1.8)*.14:-Math.pow(Math.sin(cycle),1.2)*.08;
+ const float=Math.sin(time*.05)*4,bellW=1+pulse,bellH=1-pulse*.7;
+
+ // 1. Velos orales internos (manubrio rizado) que ondean con retardo hidrodinámico
  for(const side of[-1,1]){
-  const ex=side*13,ey=float-16;
-  if(!active||blink){stroke(c,INK,2,()=>{c.moveTo(ex-4,ey);c.quadraticCurveTo(ex,ey+3,ex+4,ey);});}
-  else{eye(c,ex,ey,3.8,aim,{hurt,glow:TEAL});}
+  for(let layer=0;layer<2;layer++){
+   const vPhase=time*.1+side*1.2+layer*1.5;
+   const w1=Math.sin(vPhase)*5,w2=Math.sin(vPhase-.8)*8;
+   fill(c,layer?'rgba(215,190,255,0.4)':'rgba(165,130,240,0.5)',()=>{
+    c.moveTo(side*6*bellW,float-14);
+    c.bezierCurveTo(side*12*bellW+w1,float+4,side*16+w2,float+18,side*8+w2,float+28);
+    c.quadraticCurveTo(side*4+w1,float+14,0,float-10);
+   },1);
+  }
  }
- if(active)ellipse(c,0,float-8,6,3,TEAL,.0,0);
+
+ // 2. Siete tentáculos filamentosos largos con física de retraso ondulatorio
+ for(let k=-3;k<=3;k++){
+  const tPhase=time*.11+k*1.1,reach=36+Math.abs(k)*3+(active?8:0);
+  const w1=Math.sin(tPhase)*7,w2=Math.sin(tPhase-1.2)*11;
+  const col=k===0?MOON:k%2===0?PEARL:'#d9bbf5';
+  stroke(c,col,k===0?3.2:2.2,()=>{
+   c.moveTo(k*8*bellW,float);
+   c.bezierCurveTo(k*7*bellW+w1*.4,float+10,k*5+w1,float+reach*.55,k*4+w2,float+reach);
+  });
+  // Fotóforo perlado en el extremo
+  ellipse(c,k*4+w2,float+reach,2.2,2.5,active?TEAL:MOON,0,0);
+ }
+
+ // 3. Campana translúcida multicapa (exumbrela + subumbrela)
+ const half=30*bellW,topY=float-38*bellH;
+ c.save();
+ c.globalAlpha=hurt?.7:.94;
+ // Exumbrela nacarada con degradado bioluminiscente
+ fill(c,gradient(c,-half,topY,half*2,38*bellH,'#f6edff',LILAC,'#5a338c'),()=>{
+  c.moveTo(-half,float);
+  c.bezierCurveTo(-half-4,float-18*bellH,-18,topY,0,topY);
+  c.bezierCurveTo(18,topY,half+4,float-18*bellH,half,float);
+  // Margen festoneado de 8 lóbulos (lauras / lappets marginales)
+  for(let l=4;l>=-4;l--){
+   const lx=(l/4)*half,ly=float+(l%2===0?3:0);
+   c.quadraticCurveTo(lx+(half/8),float-2,lx,ly);
+  }
+ },2.2);
+
+ // Subumbrela interna bioluminiscente (halo translúcido)
+ c.globalAlpha=.35;
+ fill(c,gradient(c,-half*.7,topY+6,half*1.4,26*bellH,'#7af0e0',LILAC,'#2a104a'),()=>{
+  c.ellipse(0,float-14*bellH,half*.7,16*bellH,0,0,TAU);
+ },0);
+ c.restore();
+
+ // 4. Canales radiales gastrovasculares iluminados (8 radios)
+ for(let r=-3;r<=3;r++){
+  const rx=(r/3.5)*half*.85;
+  stroke(c,'rgba(255,255,255,0.5)',1.1,()=>{
+   c.moveTo(0,topY+4);
+   c.quadraticCurveTo(rx*.4,float-20*bellH,rx,float-2);
+  });
+ }
+
+ // 5. Órganos sensoriales marginales (8 ropalios con gemas de estatolito)
+ for(let rop=-3;rop<=3;rop+=2){
+  const ropX=(rop/3)*half*.92;
+  ellipse(c,ropX,float,1.8,1.8,active?TEAL:MOON,0,0);
+ }
+
+ // 6. Órgano apical coronal y gema de stardust
+ ellipse(c,0,topY-2,3.8,4.5,MOON,0,1.4);
+ ellipse(c,0,topY-2,1.8,2.2,TEAL,0,0);
+ for(const sp of[-1,1]){
+  stroke(c,'rgba(255,255,255,0.75)',1.2,()=>{
+   c.moveTo(sp*4,topY+2);c.quadraticCurveTo(sp*8,topY-6,sp*5,topY-11);
+  });
+ }
+
+ // 7. Ojos astrales expresivos
+ const blink=active&&((time+17)%190<6);
+ for(const side of[-1,1]){
+  const ex=side*12*bellW,ey=float-15*bellH;
+  if(!active||blink){
+   stroke(c,INK,2,()=>{c.moveTo(ex-4,ey);c.quadraticCurveTo(ex,ey+3,ex+4,ey);});
+  }else{
+   eye(c,ex,ey,3.8,aim,{hurt,glow:TEAL});
+  }
+ }
+
+ // Aura de ataque al enfurecerse
+ if(active){
+  c.save();c.globalAlpha=.45+Math.sin(time*.2)*.25;
+  stroke(c,TEAL,2,()=>{c.ellipse(0,float-18*bellH,half+6,24*bellH,0,0,TAU);});
+  c.restore();
+ }
 }
 
-// ─ Phosquito astral (phosquito): insecto brillante con alas prismáticas
+// ─ Phosquito astral (phosquito): libélula de sifonóforo con 4 alas de difracción prismática y lanceta estelar
 function drawAstralGnat(c,s){
  const {time,active,hurt,aim}=s;
- const buzz=Math.sin(time*.4)*7;
- // Cuatro alas prismáticas translúcidas
+ const buzz=Math.sin(time*.7)*14; // Aleteo de altísima frecuencia
+ const hoverY=Math.sin(time*.14)*3;
+
+ // 1. Cuatro alas de cristal de difracción prismática (pares anterior y posterior independientes)
  for(const side of[-1,1]){
-  c.save();c.translate(side*4,-20);c.rotate(side*.35+buzz*.04*side);
-  fill(c,'rgba(200,180,255,0.55)',()=>c.ellipse(side*14,-7,15,5,side*-.25,0,TAU),1.2);
-  stroke(c,LILAC,1,()=>{c.moveTo(0,0);c.lineTo(side*20,-9);});
+  // Ala anterior (larga, esbelta, con venación celérica)
+  c.save();c.translate(side*5,-22+hoverY);c.rotate(side*(.25+buzz*.03));
+  fill(c,'rgba(215,225,255,0.65)',()=>{
+   c.moveTo(0,0);
+   c.bezierCurveTo(side*12,-16,side*28,-14,side*30,-3);
+   c.quadraticCurveTo(side*18,8,0,0);
+  },1.2);
+  // Venación prismática
+  stroke(c,LILAC,0.9,()=>{
+   c.moveTo(0,0);c.lineTo(side*26,-4);
+   c.moveTo(side*12,-8);c.lineTo(side*16,3);
+   c.moveTo(side*20,-6);c.lineTo(side*23,1);
+  });
+  c.restore();
+
+  // Ala posterior (secundaria, desfasada para flujo aerodinámico)
+  c.save();c.translate(side*3,-18+hoverY);c.rotate(side*(.45-buzz*.025));
+  fill(c,'rgba(190,205,255,0.45)',()=>{
+   c.moveTo(0,0);
+   c.bezierCurveTo(side*10,-9,side*22,-6,side*20,6);
+   c.quadraticCurveTo(side*10,8,0,0);
+  },1.1);
   c.restore();
  }
- // Abdomen perlado con banda iridiscente
- fill(c,gradient(c,-11,-24,22,22,PEARL,LILAC,'#7c5faa'),()=>c.ellipse(0,-12,10,12,0,0,TAU),2.2);
- stroke(c,MOON,1.8,()=>c.ellipse(0,-12,13,5,buzz*.02,0,TAU));
- // Cabeza y antenas
- ellipse(c,0,-26,7,7,'#b096d8',0,1.8);
- for(const side of[-1,1]){
-  stroke(c,'#c8a0f0',1.4,()=>{c.moveTo(side*4,-29);c.quadraticCurveTo(side*9,-38,side*7,-42);});
-  ellipse(c,side*7,-42,2,2,MOON,0,0);
- }
- eye(c,aim*2,-26,3.8,aim,{hurt,glow:'#d0ffee'});
- // Aguijón astral inferior
- stroke(c,'#4d3870',2.2,()=>{c.moveTo(0,-2);c.lineTo(-aim*3,7);});
- stroke(c,LILAC,active?2.8:1.6,()=>{c.moveTo(-aim*3,7);c.lineTo(-aim*7,13);});
- if(active)ellipse(c,-aim*7,13,2.5,2.5,TEAL,0,0);
-}
 
-// ─ UFO cristalino (ufo): platillo giratorio con prismas de luna
-function drawCrystalSaucer(c,s){
- const {time,active,hurt,aim}=s;
- const spin=time*.07,hover=Math.sin(time*.06)*2;
- // Cúpula superior
- fill(c,gradient(c,-16,-36+hover,32,20,PEARL,LILAC,'#7a5fa0'),()=>{
-  c.ellipse(0,-28+hover,16,11,0,0,TAU);
+ // 2. Abdomen de sifonóforo segmentado en 5 cámaras de bioluminiscencia
+ for(let seg=0;seg<5;seg++){
+  const sy=-8+seg*4.5+hoverY,radX=9-seg*1.4,radY=3.2;
+  const col=seg%2===0?PEARL:LILAC;
+  fill(c,gradient(c,-radX,sy-radY,radX*2,radY*2,col,'#6a4c9c','#24103c'),()=>{
+   c.ellipse(0,sy,radX,radY,0,0,TAU);
+  },1.4);
+  // Anillo de energía estelar
+  stroke(c,seg===0?TEAL:MOON,1.1,()=>c.ellipse(0,sy,radX*.8,radY*.6,0,0,TAU));
+ }
+
+ // 3. Tórax esbelto de selenita
+ fill(c,gradient(c,-8,-24+hoverY,16,14,PEARL,LILAC,'#4a2870'),()=>{
+  c.ellipse(0,-18+hoverY,7,8,0,0,TAU);
  },1.8);
- // Prismas giratorios en la cúpula
- for(let p=0;p<3;p++){
-  const ang=p*TAU/3+spin,px=Math.cos(ang)*9,py=-28+hover+Math.sin(ang)*4;
-  ellipse(c,px,py,3,5,['#c8f0ff','#ffd6f8','#ffe8a0'][p],ang,0);
- }
- // Cuerpo del platillo (lenticular)
- fill(c,gradient(c,-28,-20+hover,56,16,'#8a6cb8','#4a2e6e','#200e38'),()=>{
-  c.ellipse(0,-12+hover,28,8,0,0,TAU);
- },2.2);
- stroke(c,LILAC,2,()=>c.ellipse(0,-12+hover,28,8,0,0,TAU));
- // Anillos de energía giratorios
- stroke(c,active?MOON:LILAC+'88',1.4,()=>c.ellipse(0,-12+hover,28,4,spin,0,TAU));
- // Luces de emisión inferiores (4 orbes en anillo)
- for(let i=0;i<4;i++){
-  const a=i*TAU/4+spin*.5,lx=Math.cos(a)*20,ly=-6+hover+Math.sin(a)*3;
-  ellipse(c,lx,ly,3,3,active?TEAL:MOON,0,0);
- }
- // Haz tractor inferior
- if(active){
-  const hg=c.createLinearGradient(0,-4+hover,0,18+hover);
-  hg.addColorStop(0,'rgba(122,240,224,0.6)');hg.addColorStop(1,'rgba(122,240,224,0)');
-  c.fillStyle=hg;c.beginPath();c.moveTo(-10,-4+hover);c.lineTo(10,-4+hover);c.lineTo(20,18+hover);c.lineTo(-20,18+hover);c.closePath();c.fill();
- }
-}
 
-// ─ Murciélago de nácaro (murcielago): saltador nocturno con alas tornasoladas
-function drawNacarBat(c,s){
- const {time,active,hurt,aim}=s;
- const flap=Math.sin(time*.22)*10;
- // Alas de membrana iridiscente
- for(const side of[-1,1]){
-  c.save();c.translate(side*3,-18);c.rotate(side*(.2+flap*.035));
-  fill(c,gradient(c,0,0,side*30,-14,LILAC,'#4a2e6e','#1a0c2a'),()=>{
-   c.moveTo(0,0);c.lineTo(side*28,-14);c.quadraticCurveTo(side*22,5,side*16,8);c.quadraticCurveTo(side*9,4,0,0);
-  },1.8);
-  stroke(c,PEARL,1.4,()=>{c.moveTo(0,0);c.lineTo(side*22,-10);c.moveTo(0,0);c.lineTo(side*14,4);});
-  ellipse(c,side*28,-14,2,2,MOON,0,0);
-  c.restore();
- }
- // Cuerpo peludo lavanda
- fill(c,gradient(c,-9,-28,18,24,'#c0a0e0','#5a3e80','#26143e'),()=>c.ellipse(0,-14,8,11,0,0,TAU),2);
- // Orejas puntiagudas con joya lunar interior
- for(const side of[-1,1]){
-  fill(c,'#7a5a9e',()=>{c.moveTo(side*2,-22);c.lineTo(side*8,-38);c.lineTo(side*10,-21);},1.4);
-  ellipse(c,side*6,-31,2,2,MOON,0,0);
- }
- eye(c,-3,-14,3.2,aim,{hurt,glow:TEAL});
- eye(c,3,-14,3.2,aim,{hurt,glow:TEAL});
- if(active)stroke(c,MOON,2,()=>{c.moveTo(-3,-7);c.lineTo(0,-3);c.lineTo(3,-7);});
-}
+ // 4. Cabeza, grandes ojos facetados y antenas plumosas
+ ellipse(c,0,-27+hoverY,6.5,6.5,'#b8a0e0',0,1.6);
+ eye(c,aim*2,-27+hoverY,3.6,aim,{hurt,glow:TEAL});
 
-// ─ Araña del velo (arana): depredadora ágil que se descuelga de hilos lunares
-function drawVeilSpider(c,s){
- const {time,step,active,hurt,aim}=s;
- const dangle=Math.sin(time*.06)*3;
- // Hilo de seda lunar (cuelga de arriba)
- stroke(c,PEARL,1,()=>{c.moveTo(0,-42+dangle);c.lineTo(0,-28+dangle);});
- // Ocho patas articuladas (4 a cada lado)
+ // Antenas plumosas con fotóforos terminales
  for(const side of[-1,1]){
-  for(let i=0;i<4;i++){
-   const rootY=-12-i*3,legSwing=step*side*(i%2?-1:1)*4;
-   stroke(c,'#4a2e6e',2.4,()=>{
-    c.moveTo(side*7,rootY);c.lineTo(side*16+legSwing,rootY-8+legSwing*.5);c.lineTo(side*22+legSwing,rootY+2);
+  const antSway=Math.sin(time*.2+side)*2;
+  stroke(c,'#d4bbf5',1.2,()=>{
+   c.moveTo(side*3,-31+hoverY);
+   c.bezierCurveTo(side*8,-38+hoverY,side*(10+antSway),-44+hoverY,side*(8+antSway),-48+hoverY);
+  });
+  // Plumas laterales
+  for(let p=0;p<3;p++){
+   stroke(c,'rgba(255,255,255,0.7)',0.8,()=>{
+    c.moveTo(side*(5+p),-36-p*3+hoverY);c.lineTo(side*(9+p*2),-38-p*3+hoverY);
+   });
+  }
+  ellipse(c,side*(8+antSway),-48+hoverY,2,2,MOON,0,0);
+ }
+
+ // 5. Patitas cristalinas replegadas bajo el tórax
+ for(const side of[-1,1]){
+  for(let l=0;l<2;l++){
+   stroke(c,'#6a4890',1.4,()=>{
+    c.moveTo(side*3,-16+l*4+hoverY);
+    c.lineTo(side*7,-11+l*4+hoverY);
+    c.lineTo(side*4,-6+l*4+hoverY);
    });
   }
  }
- // Abdomen globoso (tornasolado)
- fill(c,gradient(c,-14,-28+dangle,28,22,'#9a78c8','#4a2860','#1e0a28'),()=>c.ellipse(0,-14+dangle,13,11,0,0,TAU),2.2);
- // Patrón de luna en el abdomen
- stroke(c,PEARL,1.4,()=>{c.arc(0,-14+dangle,7,0,TAU);});
- // Cefalotórax pequeño
- fill(c,'#2e1644',()=>c.ellipse(0,-27+dangle,8,7,0,0,TAU),1.8);
- // 8 ojos en dos filas
- for(const ex of[-5,-2,2,5]){
-  ellipse(c,ex,-27+dangle,1.5,1.5,active?TEAL:MOON,0,0);
+
+ // 6. Lanceta estelar inferior (aguijón astral)
+ stroke(c,'#402860',2.4,()=>{c.moveTo(0,14+hoverY);c.lineTo(-aim*3,22+hoverY);});
+ stroke(c,active?TEAL:MOON,active?2.8:1.8,()=>{c.moveTo(-aim*3,22+hoverY);c.lineTo(-aim*6,30+hoverY);});
+ if(active){
+  ellipse(c,-aim*6,30+hoverY,3,3,TEAL,0,0);
+  // Destello de carga estelar
+  for(let k=0;k<3;k++){
+   const a=k*TAU/3+time*.2;
+   ellipse(c,-aim*6+Math.cos(a)*5,30+hoverY+Math.sin(a)*5,1.2,1.2,'#ffffff',0,0);
+  }
  }
- // Quelíceros (mandíbulas)
+}
+
+// ─ UFO cristalino (ufo): cronómetro astronómico flotante con anillos contrarrotatorios y haz tractor
+function drawCrystalSaucer(c,s){
+ const {time,active,hurt,aim}=s;
+ const spin=time*.06,hover=Math.sin(time*.06)*3;
+
+ // 1. Haz tractor gravitatorio volumétrico inferior
+ if(active){
+  c.save();
+  const beamH=34;
+  const hg=c.createLinearGradient(0,-6+hover,0,beamH+hover);
+  hg.addColorStop(0,'rgba(122,240,224,0.6)');
+  hg.addColorStop(0.4,'rgba(195,165,255,0.35)');
+  hg.addColorStop(1,'rgba(122,240,224,0)');
+  c.fillStyle=hg;
+  c.beginPath();
+  c.moveTo(-12,-6+hover);c.lineTo(12,-6+hover);
+  c.lineTo(26,beamH+hover);c.lineTo(-26,beamH+hover);
+  c.closePath();c.fill();
+
+  // Ondas gravitatorias descendentes animadas dentro del haz
+  for(let w=0;w<3;w++){
+   const wy=((time*.06+w/3)%1)*beamH;
+   const wSpread=12+(wy/beamH)*12;
+   stroke(c,'rgba(255,255,255,0.5)',1.2,()=>{
+    c.ellipse(0,-6+hover+wy,wSpread,wSpread*.25,0,0,TAU);
+   });
+  }
+  c.restore();
+ }
+
+ // 2. Espejos y prismas orbitales flotantes que giran alrededor del platillo
+ for(let p=0;p<4;p++){
+  const ang=p*TAU/4+spin;
+  const px=Math.cos(ang)*34,py=-14+hover+Math.sin(ang)*8;
+  const prismCols=['#c8f0ff','#ffd6f8','#ffe8a0','#bbf5dd'];
+  fill(c,prismCols[p],()=>{
+   c.moveTo(px,py-4);c.lineTo(px+3,py);c.lineTo(px,py+4);c.lineTo(px-3,py);
+  },.8);
+ }
+
+ // 3. Cúpula superior de selenita con núcleo levitante visible
+ fill(c,gradient(c,-16,-38+hover,32,22,PEARL,LILAC,'#6a4890'),()=>{
+  c.ellipse(0,-28+hover,16,13,0,0,TAU);
+ },1.8);
+
+ // Núcleo octaédrico levitante en el interior de la cúpula
+ const coreBob=Math.sin(time*.12)*2;
+ fill(c,gradient(c,-5,-32+hover+coreBob,10,10,'#ffffff',TEAL,'#3a1a60'),()=>{
+  c.moveTo(0,-34+hover+coreBob);c.lineTo(5,-28+hover+coreBob);c.lineTo(0,-22+hover+coreBob);c.lineTo(-5,-28+hover+coreBob);
+ },1.1);
+
+ // 4. Casco lenticular principal (platillo biselado)
+ fill(c,gradient(c,-30,-22+hover,60,20,'#9a78cc','#4e3076','#1a0a2c'),()=>{
+  c.ellipse(0,-13+hover,30,9,0,0,TAU);
+ },2.2);
+ stroke(c,LILAC,1.8,()=>c.ellipse(0,-13+hover,30,9,0,0,TAU));
+
+ // 5. Anillo ecuatorial con engranajes rúnicos contrarrotatorios
+ stroke(c,active?MOON:'rgba(215,190,255,0.7)',1.4,()=>{
+  c.ellipse(0,-13+hover,30,4.5,-spin*.7,0,TAU);
+ });
+ for(let notch=0;notch<6;notch++){
+  const na=notch*TAU/6-spin*.7;
+  const nx=Math.cos(na)*29,ny=-13+hover+Math.sin(na)*4.2;
+  ellipse(c,nx,ny,1.6,1.6,active?TEAL:MOON,0,0);
+ }
+
+ // 6. Ojo de navegación astral central y luces emisoras inferiores
+ eye(c,0,-14+hover,3.8,aim,{hurt,glow:active?TEAL:MOON});
+ for(let i=0;i<5;i++){
+  const a=i*TAU/5+spin;
+  const lx=Math.cos(a)*22,ly=-7+hover+Math.sin(a)*3.5;
+  ellipse(c,lx,ly,2.4,2.4,active?TEAL:MOON,0,0);
+ }
+}
+
+// ─ Manta cósmica de nácar (murcielago): volador etéreo con alas ondulantes de seda y cola estelar bifurcada
+function drawNacarBat(c,s){
+ const {time,active,hurt,aim}=s;
+ // Ondulación hidrodinámica/aerodinámica que recorre la envergadura del ala
+ const flapCycle=time*.2;
+ const flap=Math.sin(flapCycle)*12;
+ const bodyHover=Math.sin(flapCycle-.5)*3;
+
+ // 1. Cola bifurcada celestial con perlas luminosas en las puntas (flota en la corriente)
  for(const side of[-1,1]){
-  stroke(c,'#c8a0f0',1.6,()=>{c.moveTo(side*3,-30+dangle);c.lineTo(side*6,-34+dangle);});
-  if(hurt)ellipse(c,side*6,-34+dangle,2,2,'#ff6060',0,0);
+  const tailSway=Math.sin(time*.12+side*.8)*5;
+  stroke(c,LILAC,1.6,()=>{
+   c.moveTo(side*2,-6+bodyHover);
+   c.bezierCurveTo(side*5,6+bodyHover,side*8+tailSway,18+bodyHover,side*6+tailSway,28+bodyHover);
+  });
+  ellipse(c,side*6+tailSway,28+bodyHover,2.5,2.5,active?TEAL:MOON,0,0);
+ }
+
+ // 2. Alas etéreas de nácar multicapa con puntales de hueso de selenita
+ for(const side of[-1,1]){
+  c.save();
+  c.translate(side*4,-18+bodyHover);
+  c.rotate(side*(.15+flap*.035));
+
+  // Membrana del ala con gradiente nácar
+  fill(c,gradient(c,0,-16,side*34,32,PEARL,LILAC,'#32164e'),()=>{
+   c.moveTo(0,0);
+   // Borde de ataque con curvatura elegante
+   c.bezierCurveTo(side*14,-18+flap*.15,side*28,-14,side*34,-8);
+   // Borde de fuga festoneado de 3 lóbulos
+   c.quadraticCurveTo(side*28,8,side*22,4);
+   c.quadraticCurveTo(side*16,10,side*11,5);
+   c.quadraticCurveTo(side*5,7,0,0);
+  },1.8);
+
+  // Puntales de hueso luminosos (3 nervaduras de soporte)
+  stroke(c,'rgba(255,255,255,0.75)',1.3,()=>{
+   c.moveTo(0,0);c.lineTo(side*34,-8);
+   c.moveTo(0,0);c.lineTo(side*22,4);
+   c.moveTo(0,0);c.lineTo(side*11,5);
+  });
+  // Garra estelar en el vértice del ala
+  ellipse(c,side*34,-8,2.2,2.2,MOON,0,0);
+  c.restore();
+ }
+
+ // 3. Cuerpo esbelto aterciopelado de lavanda astral
+ fill(c,gradient(c,-9,-30+bodyHover,18,26,'#d0b4f5','#6c4a96','#24103c'),()=>{
+  c.ellipse(0,-15+bodyHover,8.5,12,0,0,TAU);
+ },2.2);
+
+ // Constelación estelar en el lomo (3 nodos conectados)
+ for(let n=0;n<3;n++){
+  const ny=-22+n*6+bodyHover;
+  ellipse(c,0,ny,1.4,1.4,'#ffffff',0,0);
+  if(n<2)stroke(c,'rgba(255,255,255,0.5)',0.8,()=>{c.moveTo(0,ny);c.lineTo(0,ny+6);});
+ }
+
+ // 4. Orejas puntiagudas estilizadas con resonadores de selenita
+ for(const side of[-1,1]){
+  fill(c,'#7c58a6',()=>{
+   c.moveTo(side*2,-24+bodyHover);
+   c.lineTo(side*8,-42+bodyHover);
+   c.lineTo(side*10,-22+bodyHover);
+  },1.4);
+  // Resonador interno lunar
+  ellipse(c,side*6,-33+bodyHover,2,2.5,MOON,0,0);
+ }
+
+ // 5. Ojos somnolientos o vigilantes
+ eye(c,-3.5,-16+bodyHover,3.4,aim,{hurt,glow:active?TEAL:MOON});
+ eye(c,3.5,-16+bodyHover,3.4,aim,{hurt,glow:active?TEAL:MOON});
+
+ // 6. Mandíbula y colmillitos tiernos al rugir
+ if(active){
+  stroke(c,MOON,2,()=>{
+   c.moveTo(-3,-9+bodyHover);c.lineTo(0,-5+bodyHover);c.lineTo(3,-9+bodyHover);
+  });
+ }
+}
+
+// ─ Araña del velo (arana): tejedora de cristal y seda astral con 8 patas multiarticuladas y abdomen de gema facetada
+function drawVeilSpider(c,s){
+ const {time,step,active,hurt,aim}=s;
+ // Suspensión elástica en hilo de seda: balanceo pendular suave y rebote
+ const pendular=Math.sin(time*.07)*4;
+ const bob=Math.sin(time*.14)*3;
+ const totalY=bob;
+
+ // 1. Hilo de seda lunar trenzado (desciende desde lo alto)
+ stroke(c,'rgba(255,255,255,0.75)',1.2,()=>{
+  c.moveTo(pendular*.5,-48+totalY);c.lineTo(0,-28+totalY);
+ });
+
+ // 2. Ocho patas de cristal multiarticuladas (4 a cada lado) con cinemática de gateo viva
+ for(const side of[-1,1]){
+  for(let i=0;i<4;i++){
+   const legPhase=time*.16+i*1.1+(side>0?Math.PI:0);
+   const legReach=step*side*5+Math.sin(legPhase)*4;
+   const rootY=-12-i*3.5+totalY;
+   const kneeX=side*(14+i*2)+legReach*.6,kneeY=rootY-10-i*1.5+legReach*.4;
+   const footX=side*(22+i*3)+legReach,footY=rootY+4+i*1.2;
+
+   // Artejo fémur
+   stroke(c,'#583480',2.4,()=>{
+    c.moveTo(side*7,rootY);c.lineTo(kneeX,kneeY);
+   });
+   // Artejo tibia y tarso
+   stroke(c,side===1&&i%2===0?LILAC:'#402064',1.8,()=>{
+    c.moveTo(kneeX,kneeY);c.lineTo(footX,footY);
+   });
+   // Rodillera de cristal
+   ellipse(c,kneeX,kneeY,1.6,1.6,PEARL,0,0);
+   // Uña tarsal brillante
+   ellipse(c,footX,footY,1.2,1.2,active?TEAL:MOON,0,0);
+  }
+ }
+
+ // 3. Abdomen facetado de joya amatista-ópalo
+ fill(c,gradient(c,-15,-28+totalY,30,26,'#b08ce8','#542c7c','#1e0830'),()=>{
+  c.ellipse(0,-14+totalY,14,12,0,0,TAU);
+ },2.4);
+
+ // Facetas cristalinas sobre el abdomen
+ for(let f=0;f<4;f++){
+  const fa=f*TAU/4+Math.PI/4;
+  stroke(c,'rgba(255,255,255,0.4)',1,()=>{
+   c.moveTo(0,-14+totalY);
+   c.lineTo(Math.cos(fa)*12,-14+totalY+Math.sin(fa)*9);
+  });
+ }
+ // Emblema lunar central en el abdomen
+ stroke(c,MOON,1.6,()=>c.arc(0,-14+totalY,6.5,0,TAU));
+ ellipse(c,0,-14+totalY,3,3,TEAL,0,0);
+
+ // 4. Cefalotórax acorazado
+ fill(c,'#34164c',()=>c.ellipse(0,-28+totalY,8.5,7.5,0,0,TAU),2);
+
+ // 5. Ocho ojos de diamante dispuestos en dos arcos
+ for(const ex of[-5,-2,2,5]){
+  ellipse(c,ex,-30+totalY,1.5,1.5,active?TEAL:MOON,0,0);
+  ellipse(c,ex*.7,-27+totalY,1.2,1.2,active?TEAL:'#ffffff',0,0);
+ }
+
+ // 6. Quelíceros (mandíbulas) y pedipalpos sensoriales
+ for(const side of[-1,1]){
+  // Pedipalpo delantero
+  stroke(c,PEARL,1.4,()=>{
+   c.moveTo(side*4,-30+totalY);c.lineTo(side*7,-35+totalY);c.lineTo(side*5,-38+totalY);
+  });
+  // Quelícero de selenita
+  stroke(c,active?TEAL:'#c8a0f0',1.8,()=>{
+   c.moveTo(side*3,-32+totalY);c.lineTo(side*6,-36+totalY);
+  });
+  if(hurt)ellipse(c,side*6,-36+totalY,2,2,'#ff6060',0,0);
+ }
+
+ // Red astral tejida bajo las garras en emboscada activa
+ if(active){
+  c.save();c.globalAlpha=.55+Math.sin(time*.2)*.25;
+  stroke(c,TEAL,1.2,()=>{
+   for(let p=0;p<5;p++){
+    const pa=p*TAU/5;
+    c.moveTo(0,10+totalY);c.lineTo(Math.cos(pa)*20,10+totalY+Math.sin(pa)*12);
+   }
+  });
+  c.restore();
  }
 }
 
@@ -462,60 +729,14 @@ export function drawCatTrap(ctx,trap,cam,t=0,reduced=false){
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ATMÓSFERA CELESTIAL: ECLIPSE DINÁMICO, AURORAS ABISALES, NEBULOSAS,
-// COLONIAS DE MEDUSAS FANTASMA, CORALES BIOLUMINISCENTES Y FITOPLANCTON
+// ATMÓSFERA CELESTIAL: AURORAS ABISALES, NEBULOSAS, COLONIAS DE MEDUSAS FANTASMA,
+// CORALES BIOLUMINISCENTES, BURBUJAS OCEÁNICAS Y FITOPLANCTON
 // ─────────────────────────────────────────────────────────────────────────────
 export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
  if(!ctx)return;
  ctx.save();
  const vw=g.viewW||1280;
  const vh=g.viewH||720;
-
- // ── ECLIPSE DINÁMICO: luna oscureciendo el sol con corona pulsante ─────────
- const eclX=vw*.62,eclY=88;
- const moonR=38,sunR=36;
- // Corona solar pulsante (rayos de luz difusa alrededor del eclipse)
- if(!reduced){
-  const coronaPulse=Math.sin(t*0.015)*0.12+0.32;
-  // Halo exterior difuso
-  const corona=ctx.createRadialGradient(eclX,eclY,moonR,eclX,eclY,moonR+65);
-  corona.addColorStop(0,'rgba(255,220,140,'+coronaPulse+')');
-  corona.addColorStop(0.3,'rgba(255,180,100,'+(coronaPulse*0.6)+')');
-  corona.addColorStop(0.6,'rgba(200,120,255,'+(coronaPulse*0.3)+')');
-  corona.addColorStop(1,'rgba(140,80,200,0)');
-  ctx.fillStyle=corona;
-  ctx.beginPath();ctx.arc(eclX,eclY,moonR+65,0,TAU);ctx.fill();
-  // Rayos de corona asimétricos (prominencias solares)
-  ctx.globalAlpha=coronaPulse*0.7;
-  for(let r=0;r<8;r++){
-   const ang=r*TAU/8+t*0.004;
-   const rayLen=28+Math.sin(t*0.02+r*2.1)*14;
-   const rw=3+Math.sin(t*0.03+r)*1.5;
-   ctx.beginPath();
-   ctx.moveTo(eclX+Math.cos(ang)*(moonR+4),eclY+Math.sin(ang)*(moonR+4));
-   ctx.lineTo(eclX+Math.cos(ang-0.06)*(moonR+rayLen),eclY+Math.sin(ang-0.06)*(moonR+rayLen));
-   ctx.lineTo(eclX+Math.cos(ang+0.06)*(moonR+rayLen),eclY+Math.sin(ang+0.06)*(moonR+rayLen));
-   ctx.closePath();
-   ctx.fillStyle=r%2?'rgba(255,210,120,0.35)':'rgba(220,160,255,0.3)';
-   ctx.fill();
-  }
-  ctx.globalAlpha=1;
- }
- // Disco solar (detrás de la luna) — anillo fino visible
- ctx.beginPath();ctx.arc(eclX,eclY,sunR+3,0,TAU);
- ctx.fillStyle='rgba(255,200,100,0.18)';ctx.fill();
- // Disco lunar opaco (la luna cubre el sol)
- const moonGrad=ctx.createRadialGradient(eclX-6,eclY-6,2,eclX,eclY,moonR);
- moonGrad.addColorStop(0,'#1e1230');moonGrad.addColorStop(0.7,'#0d0618');moonGrad.addColorStop(1,'#060210');
- ctx.beginPath();ctx.arc(eclX,eclY,moonR,0,TAU);
- ctx.fillStyle=moonGrad;ctx.fill();
- // Cráteres lunares sutiles
- ctx.globalAlpha=0.12;
- ctx.fillStyle='#2a1840';
- ctx.beginPath();ctx.arc(eclX-12,eclY-8,6,0,TAU);ctx.fill();
- ctx.beginPath();ctx.arc(eclX+8,eclY+4,4.5,0,TAU);ctx.fill();
- ctx.beginPath();ctx.arc(eclX-3,eclY+12,3.5,0,TAU);ctx.fill();
- ctx.globalAlpha=1;
 
  // ── OSCURECIMIENTO GENERAL: velo abisal que se intensifica con el eclipse ──
  const darkPulse=reduced?0.08:0.06+Math.sin(t*0.012)*0.03;
