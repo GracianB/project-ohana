@@ -348,7 +348,7 @@ DOM.mute?.setAttribute("aria-pressed", String(muted));
 DOM.mute?.setAttribute("aria-label", muted ? "Activar sonido" : "Silenciar sonido");
 }
 function setPaused(on) {
-if (game.finale && game.finale.t > 0) return;
+if (on && game.finale && game.finale.t > 0) return;
 
 paused = !!on && game.running;
 clearBufferedActions(game.player);
@@ -710,7 +710,8 @@ if(r.world1){if(game.roomAlbums)delete game.roomAlbums[id];game.roomAlbumItems=[
 enterWorld1Collect(game);enterWorld1(game);
 // A genuinely earned seal restores exploration tools quietly. First visits
 // still start as babies; revisits do not replay four evolution cinematics.
-if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4){
+if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4
+ && !game._resumeCheckpoint && !(game.player.id==="cat"&&game._explicitStartForm!==null)){
  game.player.xp=Math.max(game.player.xp||0,420);game.player.evo=4;
  applyForm(game.player,{silent:true});renderAbilityBar();
 }
@@ -861,7 +862,8 @@ enterAdventure(game);
 Festival.onEnterRoom(game);
 Passives.onRoom(game);
 Magic.onRoom(game, id);
-save();
+// A Continue must not overwrite its only good checkpoint during reconstruction.
+if(!game._restoringSave)save();
 if(r.fusionBoss)updateHUD();
 dispatchEvent(new CustomEvent("ohana-room", { detail: {
 id,
@@ -930,7 +932,7 @@ applyForm(p, { silent: true });
 paintFit(p);
 return p;
 }
-function start(def) {
+function start(def, requestedStartForm = null) {
 game.loadRoom = loadRoom;
 game._cuernoIntroT = def?.id === "cuerno" && !reduceMotion ? 0 : null;
 game.lastAbilityId = null;
@@ -951,6 +953,12 @@ if(resume&&game.personalAdventureSolo&&!game._e2eLegacyStart){
  if(saved&&isWorld1Room(saved.roomId))def=ROSTER.find(h=>h.id===saved.id)||def;
 }
 try { localStorage.removeItem("ohana-resume"); } catch (e) {}
+// Always discard the previous run\'s transient form and checkpoint flags.
+game._chosenStartForm=null;
+game._resumeCheckpoint=false;
+game._restoringSave=resume;
+game._explicitStartForm=!resume&&def.id==="cat"&&Number.isInteger(requestedStartForm)
+  ? Math.max(0,Math.min(4,requestedStartForm)) : null;
 input?.reset();
 clock.reset();
 t = 0;
@@ -981,8 +989,10 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
-if (typeof globalThis.__ohanaStartForm === "number") {
-  const chosenForm = Math.max(0, Math.min(4, globalThis.__ohanaStartForm));
+const newForm = !resume && Number.isInteger(requestedStartForm) ? requestedStartForm
+  : !resume && typeof globalThis.__ohanaStartForm === "number" ? globalThis.__ohanaStartForm : null;
+if (newForm !== null) {
+  const chosenForm = Math.max(0, Math.min(4, Math.round(newForm)));
   game.player.evo = chosenForm;
   game.player.xp = XP_NEED[chosenForm] || 0;
   applyForm(game.player, { silent: true });
@@ -1124,7 +1134,14 @@ renderAbilityBar();
 if (!loadRoom(roomId)) loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub");
 if (!resume && game.roomDef?.world1 && !game.world1Seals.length) playWorld1Cine(game, "intro");
 if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
-if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
+if (game._magicSnap) {
+  try { Magic.restore(game._magicSnap); }
+  catch (error) { console.warn("[OHANA] Optional spell snapshot could not be restored",error); }
+  game._magicSnap = null;
+}
+game._restoringSave=false;
+game._chosenStartForm=null;
+if (!resume) { globalThis.__ohanaStartForm=null; globalThis.__ohanaStartHero=null; }
 if (onlineMode) {
 void onlineCoop.start(game, def).catch((error) => {
   console.error("[OHANA online]", error);
@@ -3921,7 +3938,24 @@ if (!canAct() || e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.target?.clo
 const kind = Object.keys(CUERNO_PLAY_KEYS).find((k) => CUERNO_PLAY_KEYS[k] === e.key);
 if (kind) queueCuernoPlay(kind);
 });
-addEventListener("ohana-start", (e) => start(ROSTER.find((r) => r.id === e.detail?.id)));
+addEventListener("ohana-start", (e) => {
+  const def=ROSTER.find((r) => r.id === e.detail?.id);
+  if(!def){e.detail?.onResult?.(false,new Error("Personaje no encontrado"));return;}
+  try {
+    start(def,e.detail?.startForm);
+    e.detail?.onResult?.(true);
+  } catch(error) {
+    // Never call returnToMenu here: it would save a half-initialized character
+    // over the checkpoint the player is trying to recover.
+    console.error("[OHANA] Could not start or restore adventure",error);
+    game._restoringSave=false;game._resumeCheckpoint=false;game.running=false;
+    game.world1Cine=null;game._pendingWorld1Cine=null;paused=false;
+    document.body.classList.remove("playing","boss-fight");
+    document.getElementById("char-select")?.classList.remove("hidden");
+    closeOverlays();
+    e.detail?.onResult?.(false,error);
+  }
+});
 addEventListener("keydown", (e) => {
 if (game.running || overlayOpen() || e.repeat) return;
 if (/^[0-9]$/.test(e.key)) {
