@@ -172,7 +172,7 @@ export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2,opts={}){
  ctx.restore();
  if(eclipse){ctx.save();ctx.globalAlpha=.92*beat.moon;oval(ctx,cx+mr*.34,my-mr*.04,mr*.93,mr*.94,'#0b0e26');ctx.restore();}
  drawMotif(ctx,beat.motif,w,h,cx,cy,K,fxTime,beat.charge*(1-beat.bloom*.5)+beat.bloom*.4,pal,gentle);
- drawMarineOmen(ctx,cx,cy,K,beat.to,fxTime,beat.charge,pal===null?true:gentle,pal);
+ drawMarineOmen(ctx,cx,cy,K,beat.to,fxTime,beat.charge,gentle,pal);
  // Ground: reflective pool with ripple.
  ctx.save();ctx.globalAlpha=.3;oval(ctx,cx,cy+5*K,110*K,13*K,'#8a6eb8');ctx.globalAlpha=.18;oval(ctx,cx,cy+5*K,70*K,7*K,pal.glow);ctx.restore();
  const rise=gentle?0:Math.sin(now*7)*2.3*K;
