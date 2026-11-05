@@ -30,7 +30,7 @@ const HITS = {
   kilo:    { name: "Nota",     kind: "note",  color: "#ff9ab0" },
   stitcho: { name: "Zarpa",    kind: "claws", color: "#7eb6ff" },
   chispin: { name: "Chispín", kind: "spark", color: "#ffe14a" },
-  cat:     { name: "Zarpazo",  kind: "paw",   color: "#ffb6e4" },
+  cat:     { name: "Golpe de Marea",  kind: "paw",   color: "#a9f5ea" },
   dragon:  { name: "Garra",    kind: "flame", color: "#ff6a2a" },
   dino:    { name: "Mordisco", kind: "bite",  color: "#8ee07a" },
   frita:   { name: "Corte",    kind: "slice", color: "#f0b43a" },
