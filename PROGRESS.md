@@ -1,3 +1,12 @@
+## OHANA 637 · Pozos letales, Continuar sin bucle y armario de evoluciones (PR en borrador)
+
+- **Pozos:** comprobación física con solapamiento mayoritario del cuerpo, incluso cuando un portal está cargando; prueba de caída real de las cinco formas de Medusaluna y otros seis protagonistas en las siete salas con abismos mortales. Respawn respeta los checkpoints.
+- **Continuar:** si un capítulo antiguo no existe, intento de rescate por una entrada segura con el héroe guardado, sin sobrescribir el checkpoint fallido. El botón propio del campamento se distingue de «Nueva partida».
+- **Formas desbloqueadas:** `maxEvo` guarda la mejor forma lograda por separado de la equipada. Compatible con saves antiguos. Selector de formas adquiridas en el campamento, Continuar y HUD del juego, sin perder XP ni activar evoluciones no obtenidas.
+- **Diseño:** galería de cinco criaturas marinas animadas, distintivos de desbloqueo, tarjeta de partida y selector integrado en HUD. Personajes y enemigos no cambian de hitbox.
+- **Offline:** candidata **ohana-637**, revisiones SHA de archivos runtime; `main` y publicación pública siguen sin modificarse.
+- **Validación:** pruebas de Node y Chromium `tests/browser/medusaluna-resume.mjs` y `tests/browser/pit-death-v637.mjs` obligatorias. No fusionar ni declarar publicación antes de verde CI.
+
 ## OHANA 636 · Medusaluna, formas elegibles y reanudación segura
 
 - Medusaluna sustituye visualmente las cinco formas felinas por una metamorfosis oceánica de autor: Huevo de Nácar, Caballito de Sueños, Medusa Onírica, Estrella Astral y Medusa de las Mil Lunas. Su identificador técnico `cat` se conserva para no invalidar partidas históricas.
