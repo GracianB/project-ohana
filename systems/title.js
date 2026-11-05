@@ -502,14 +502,20 @@ function startSelected() {
   let result=null;
   dispatchEvent(new CustomEvent("ohana-start", { detail: {
     id:selectedId,
-    startForm:pendingStartKind==="new"&&selectedId==="cat"?selectedOceanForm:null,
+    startForm:pendingStartKind==="new"&&selectedId==="cat"
+      ? (Number.isInteger(globalThis.__ohanaStartForm)?globalThis.__ohanaStartForm:selectedOceanForm) : null,
     onResult:(ok,error)=>{result={ok,error};}
   }}));
   if(result&&!result.ok)throw result.error||new Error("La aventura no pudo arrancar.");
 }
 
-function begin(kind) {
+function begin(kind,source="title") {
 pendingStartKind=kind;
+// The campsite already chose its own evolution. Do not overwrite it with the dossier.
+if(kind==="new"&&source!=="camp"){
+  globalThis.__ohanaStartHero=selectedId;
+  globalThis.__ohanaStartForm=selectedId==="cat"?selectedOceanForm:null;
+}
 document.getElementById("ohana-start-error")?.remove();
 const def = ROSTER.find((r) => r.id === selectedId);
 const name = def ? def.name : "Ohana";
@@ -595,7 +601,7 @@ applyLook();
 buildDots();
 // V100 Especial: native grid selection, no carousel arrow controls.
 mark(selectedId);
-mountFamilyCamp({select:id=>dispatchEvent(new CustomEvent("ohana-select",{detail:{id}})),onBegin:()=>begin("new")});
+mountFamilyCamp({select:id=>dispatchEvent(new CustomEvent("ohana-select",{detail:{id}})),onBegin:()=>begin("new","camp")});
 const replay = document.createElement("button");
 replay.id = "btn-replay-welcome"; replay.type = "button"; replay.className = "cta ghost";
 replay.textContent = "Ver la bienvenida";
