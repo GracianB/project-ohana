@@ -72,7 +72,7 @@ export const ALL_ROSTER = [
     color: "#ffb6e4",
     speed: 5.0, jumpPower: 12.0, maxJumps: 2, health: 72, w: 22, h: 22,
     abilities: ["yarn", "purr", "ninetails"],
-    passive: { id: "ninelives", name: "Nueve vidas", desc: "Sobrevive una vez por sala a un golpe mortal." },
+    passive: { id: "ninelives", name: "Corazón de Nácar", desc: "La energía del océano la protege una vez por sala de un golpe mortal." },
     evoNames: ["Huevo de Nácar", "Caballito de Sueños", "Medusa Onírica", "Estrella Astral", "Medusa de las Mil Lunas"],
     forms: [
       { name: "Huevo de Nácar", color: "#f6d7fa", speed: 5.0, jump: 12.0, jumps: 2, hp: 72, w: 22, h: 22 },
