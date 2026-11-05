@@ -521,3 +521,36 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
  .u-partner-panel label{flex:1 1 100%;text-align:center}
  #u-partner-technique{font-size:.72rem}
 }
+
+/* Medusaluna · explicit starting-form choice, visible only on her dossier. */
+.ocean-form-picker{
+  margin:.65rem auto .15rem;padding:.7rem .8rem;
+  border:1px solid rgba(167,239,244,.45);border-radius:14px;
+  background:linear-gradient(145deg,rgba(29,77,101,.55),rgba(76,38,109,.5));
+  width:min(100%,680px);box-sizing:border-box;
+}
+.ocean-form-picker[hidden]{display:none!important}
+.ocean-form-picker .ocean-form-label{display:block;color:#d8fbff;font-size:.78rem;font-weight:900;letter-spacing:.075em;text-transform:uppercase;margin-bottom:.5rem}
+#ocean-form-buttons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.3rem}
+#ocean-form-buttons button{
+  border:1px solid rgba(174,235,245,.45);border-radius:9px;padding:.48rem .25rem;
+  font:700 .68rem/1.28 system-ui,sans-serif;color:#f6f5ff;
+  background:rgba(12,32,63,.79);cursor:pointer;min-height:54px;
+  transition:transform .15s ease,background .15s ease,border-color .15s ease;
+}
+#ocean-form-buttons button:hover{transform:translateY(-2px);background:rgba(36,85,115,.8)}
+#ocean-form-buttons button.active,#ocean-form-buttons button[aria-pressed="true"]{
+  border-color:#ffeabb;color:#12273e;background:linear-gradient(130deg,#b2ffff,#f9d6ec 65%,#ffeeb6);
+  box-shadow:0 0 15px rgba(160,243,243,.21);
+}
+#ocean-form-buttons button:focus-visible{outline:3px solid #fff6b7;outline-offset:2px}
+.ocean-form-picker small{display:block;margin-top:.5rem;color:#e5e7f4;font:.71rem/1.4 system-ui,sans-serif}
+@media(max-width:640px){
+ #ocean-form-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #ocean-form-buttons button{min-height:42px;font-size:.71rem}
+ .ocean-form-picker{padding:.6rem}
+}
+@media(prefers-reduced-motion:reduce){
+ #ocean-form-buttons button{transition:none}
+ #ocean-form-buttons button:hover{transform:none}
+}
