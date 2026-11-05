@@ -1,3 +1,21 @@
+## OHANA 637 · Pozos letales, Continuar sin bucle y armario de evoluciones (PR en borrador)
+
+- **Pozos:** comprobación física con solapamiento mayoritario del cuerpo, incluso cuando un portal está cargando; prueba de caída real de las cinco formas de Medusaluna y otros seis protagonistas en las siete salas con abismos mortales. Respawn respeta los checkpoints.
+- **Continuar:** si un capítulo antiguo no existe, intento de rescate por una entrada segura con el héroe guardado, sin sobrescribir el checkpoint fallido. El botón propio del campamento se distingue de «Nueva partida».
+- **Formas desbloqueadas:** `maxEvo` guarda la mejor forma lograda por separado de la equipada. Compatible con saves antiguos. Selector de formas adquiridas en el campamento, Continuar y HUD del juego, sin perder XP ni activar evoluciones no obtenidas.
+- **Diseño:** galería de cinco criaturas marinas animadas, distintivos de desbloqueo, tarjeta de partida y selector integrado en HUD. Personajes y enemigos no cambian de hitbox.
+- **Offline:** candidata **ohana-637**, revisiones SHA de archivos runtime; `main` y publicación pública siguen sin modificarse.
+- **Validación:** pruebas de Node y Chromium `tests/browser/medusaluna-resume.mjs` y `tests/browser/pit-death-v637.mjs` obligatorias. No fusionar ni declarar publicación antes de verde CI.
+
+## OHANA 636 · Medusaluna, formas elegibles y reanudación segura
+
+- Medusaluna sustituye visualmente las cinco formas felinas por una metamorfosis oceánica de autor: Huevo de Nácar, Caballito de Sueños, Medusa Onírica, Estrella Astral y Medusa de las Mil Lunas. Su identificador técnico `cat` se conserva para no invalidar partidas históricas.
+- El selector del dossier y el campamento permiten elegir la forma inicial. La pantalla de Continuar utiliza exclusivamente la forma, la XP y el capítulo guardados, sin imponer la forma final por tener un sello antiguo.
+- La reanudación evita sobrescribir la partida durante la reconstrucción del capítulo, y los errores de arranque dejan un mensaje visible en el menú.
+- Se revisó la acción Seguir para no mantener una pausa irreversible en un estado del final.
+- Offline: versión **ohana-636**, nuevas siluetas Canvas y referencias Git precacheadas; los datos de usuario no se eliminan por este cambio de caché.
+- Pruebas añadidas: `node --test tests/medusaluna-forms.test.js` y `npm run test:browser:medusaluna`. Antes de publicar: `npm test`, `npm run release:check`, navegador y revisión visual de las cinco formas. No confundir cambios preparados con validación completada.
+
 ohana-635 publicada y comprobada: merge c803446; Pages aprobado. Los siete archivos runtime cambiados coinciden por hash con la web pública. Bienvenida y selector ofrecen enlace online a1280/390/320 px, con Tab/Enter y táctil. El vestíbulo directo de GitHub conserva la invitación al navegar al host Netlify sin iniciar clientes/API sobre Pages. El destino se intercepta en la prueba: no se atribuye partida remota. Validación local: 1.831 pruebas Node22, integridad offline, carga recuperable y regresiones V634 del vestíbulo/sesiones. Acceso a Netlify y Handshake bloqueado por la red de este entorno; URL entregada en SME pendiente de obtener. La API denegó crear PR; merge Git ordinario autorizado. Evidencia: docs/V635-PUBLICATION.json.
 
 ohana-635 · Se restaura la entrada visible de dos jugadores en bienvenida y selección. El vestíbulo directo de GitHub Pages lleva al host Netlify conservando invitaciones antes de iniciar clientes API. Se conservan las mejoras V634 del usuario. Validada localmente: 1.831 pruebas Node22, integridad offline, entrada nativa1280/390/320, recuperación de descarga, vestíbulo e invitaciones V634. Pendiente verificación pública: docs/V635-VALIDATION.json y docs/V635-PUBLICATION.json.

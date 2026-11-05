@@ -147,6 +147,7 @@ import { drawEncounterSignals } from "./systems/encounter-signals.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
+import {unlockedEvolution,equipOwnedEvolution} from './systems/evolution-ownership.js';
 import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill, addCombo as safeAddCombo } from "./systems/mutations.js";
 import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, compactLiveList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
 import { createFixedClock } from "./engine/clock.js";
@@ -348,7 +349,7 @@ DOM.mute?.setAttribute("aria-pressed", String(muted));
 DOM.mute?.setAttribute("aria-label", muted ? "Activar sonido" : "Silenciar sonido");
 }
 function setPaused(on) {
-if (game.finale && game.finale.t > 0) return;
+if (on && game.finale && game.finale.t > 0) return;
 
 paused = !!on && game.running;
 clearBufferedActions(game.player);
@@ -650,6 +651,7 @@ if(game.personalAdventureSolo&&!game._e2eLegacyStart){
    const def=ROSTER.find(h=>h.id===targetHero)||ROSTER.find(h=>h.id===chapter.hero);
    game.player=makePlayer(def);
    game.player.evo=game._chosenStartForm;
+   game.player.maxUnlockedEvo=game._chosenStartForm;
    game.player.xp=XP_NEED[game._chosenStartForm]||0;
    applyForm(game.player,{silent:true});
    paintFit(game.player);
@@ -710,7 +712,8 @@ if(r.world1){if(game.roomAlbums)delete game.roomAlbums[id];game.roomAlbumItems=[
 enterWorld1Collect(game);enterWorld1(game);
 // A genuinely earned seal restores exploration tools quietly. First visits
 // still start as babies; revisits do not replay four evolution cinematics.
-if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4){
+if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4
+ && !(game.player.id==="cat"&&(game._resumeCheckpoint||game._explicitStartForm!==null))){
  game.player.xp=Math.max(game.player.xp||0,420);game.player.evo=4;
  applyForm(game.player,{silent:true});renderAbilityBar();
 }
@@ -861,7 +864,8 @@ enterAdventure(game);
 Festival.onEnterRoom(game);
 Passives.onRoom(game);
 Magic.onRoom(game, id);
-save();
+// A Continue must not overwrite its only good checkpoint during reconstruction.
+if(!game._restoringSave)save();
 if(r.fusionBoss)updateHUD();
 dispatchEvent(new CustomEvent("ohana-room", { detail: {
 id,
@@ -930,7 +934,7 @@ applyForm(p, { silent: true });
 paintFit(p);
 return p;
 }
-function start(def) {
+function start(def, requestedStartForm = null) {
 game.loadRoom = loadRoom;
 game._cuernoIntroT = def?.id === "cuerno" && !reduceMotion ? 0 : null;
 game.lastAbilityId = null;
@@ -948,9 +952,23 @@ const resume = !onlineMode && (function () { try { return localStorage.getItem("
 // title card. Chapter transitions can change the hero without reopening title.
 if(resume&&game.personalAdventureSolo&&!game._e2eLegacyStart){
  const saved=saveStore.read();
- if(saved&&isWorld1Room(saved.roomId))def=ROSTER.find(h=>h.id===saved.id)||def;
+ // The saved campaign owner always wins over whichever title-card happened
+ // to be highlighted. This also covers valid legacy hub checkpoints.
+ if(saved)def=ROSTER.find(h=>h.id===saved.id)||def;
 }
+const requestedResumeForm=resume&&def.id==='cat'&&Number.isInteger(requestedStartForm)
+ ? Math.max(0,Math.min(4,requestedStartForm)) : null;
 try { localStorage.removeItem("ohana-resume"); } catch (e) {}
+// Always discard the previous run\'s transient form and checkpoint flags.
+game._chosenStartForm=null;
+game._resumeCheckpoint=false;
+game._restoringSave=resume;
+game._explicitStartForm=!resume&&def.id==="cat"&&Number.isInteger(requestedStartForm)
+  ? Math.max(0,Math.min(4,requestedStartForm)) : null;
+// Used by catGrowth throughout the room, not just during first load.
+// Replaying completed objectives must never grant 420 XP over a saved form.
+game._preserveCompletedCatForm=def.id==="cat"&&(resume||
+  Number.isInteger(requestedStartForm)||Number.isInteger(globalThis.__ohanaStartForm));
 input?.reset();
 clock.reset();
 t = 0;
@@ -981,9 +999,13 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
-if (typeof globalThis.__ohanaStartForm === "number") {
-  const chosenForm = Math.max(0, Math.min(4, globalThis.__ohanaStartForm));
+game.player.maxUnlockedEvo=0;
+const newForm = !resume && Number.isInteger(requestedStartForm) ? requestedStartForm
+  : !resume && typeof globalThis.__ohanaStartForm === "number" ? globalThis.__ohanaStartForm : null;
+if (newForm !== null) {
+  const chosenForm = Math.max(0, Math.min(4, Math.round(newForm)));
   game.player.evo = chosenForm;
+  game.player.maxUnlockedEvo = chosenForm;
   game.player.xp = XP_NEED[chosenForm] || 0;
   applyForm(game.player, { silent: true });
   paintFit(game.player);
@@ -1087,6 +1109,7 @@ try {
   const u = saveStore.read(def.id);
   if (u) {
     game.player.evo = u.evo;
+    game.player.maxUnlockedEvo=unlockedEvolution(u);
     game.player.xp = u.xp;
     // V313 saves contained one U EXP value. Migrate it to the equipped
     // partner only, rather than gifting it to all nine companions.
@@ -1108,6 +1131,12 @@ try {
     applyForm(game.player, { silent: true });
     paintFit(game.player);
     if (u.hp != null) game.player.health = Math.max(1, Math.min(game.player.maxHealth, u.hp));
+    // Continue defaults to the exact checkpointed form. An explicit selection
+    // can equip any PREVIOUSLY unlocked marine shape, preserving XP and health.
+    if(requestedResumeForm!==null&&requestedResumeForm<=game.player.maxUnlockedEvo){
+      equipOwnedEvolution(game.player,requestedResumeForm,applyForm);
+      paintFit(game.player);
+    }
     if (u.nineUsed) game.player._nineUsed = true;
     game.clearTicks = u.clearTicks || 0;
     game.best = u.best || null;
@@ -1116,15 +1145,33 @@ try {
     game.dragonTrial = u.dragonTrial || null;
     roomId = ROOMS[u.roomId] ? u.roomId : "hub";
   }
-} catch (e) {}
+} catch (e) {
+  console.error("[OHANA] Saved checkpoint recovery failed",e);
+  throw e; // Surface the failure without replacing the last good save.
+}
 }
 document.body.classList.add("playing");
 document.getElementById("char-select")?.classList.add("hidden");
 renderAbilityBar();
-if (!loadRoom(roomId)) loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub");
+if (!loadRoom(roomId)) {
+  if(resume){
+    // A missing chapter must not create a menu-return loop or overwrite the
+    // saved checkpoint. Recover at the chapter's safe entry with the same hero.
+    const safeRoom=game.personalAdventureSolo?world1StartRoom(def.id,game.world1Seals):'hub';
+    if(!loadRoom(safeRoom))throw new Error("No se pudo recuperar ni el capítulo "+roomId+" ni la entrada segura "+safeRoom);
+    showSystemMessage('CONTINUAR','El capítulo guardado no estaba disponible. Hemos recuperado la entrada segura conservando tu evolución y progreso.');
+  }else if(!loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub"))throw new Error("El mundo inicial no se pudo abrir.");
+}
 if (!resume && game.roomDef?.world1 && !game.world1Seals.length) playWorld1Cine(game, "intro");
 if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
-if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
+if (game._magicSnap) {
+  try { Magic.restore(game._magicSnap); }
+  catch (error) { console.warn("[OHANA] Optional spell snapshot could not be restored",error); }
+  game._magicSnap = null;
+}
+game._restoringSave=false;
+game._chosenStartForm=null;
+if (!resume) { globalThis.__ohanaStartForm=null; globalThis.__ohanaStartHero=null; }
 if (onlineMode) {
 void onlineCoop.start(game, def).catch((error) => {
   console.error("[OHANA online]", error);
@@ -1154,6 +1201,7 @@ return;
 }
 const previousHealth=p.health,previousMax=p.maxHealth;
 p.evo += 1;
+p.maxUnlockedEvo=Math.max(p.maxUnlockedEvo||0,p.evo);
 applyForm(p);
 if(game.roomDef?.kiloEncounterVersion)p.health=Math.min(p.maxHealth,previousHealth+Math.max(0,p.maxHealth-previousMax));
 if (p.id === "cuerno") { try { cuernoEvolveBurst(game, p); } catch (_) {} }
@@ -2038,7 +2086,10 @@ if (!h.taken && Math.hypot(p.x + p.w / 2 - h.x, p.y + p.h / 2 - h.y) < 36) {
   h.taken = true; healPlayer(p, 25); game.nums.add(h.x, h.y, "+HP", "#f66"); beep("pickup");
 }
 }
-if (!(portals.isBusy && portals.isBusy())) { tryDoors(); checkVoidDeath(); }
+// A charging portal may delay a door transition, never the lethal pit check.
+// Otherwise players could stand inside an abyss indefinitely during the charge.
+if (!(portals.isBusy && portals.isBusy())) tryDoors();
+checkVoidDeath();
 portals.update(game);
 if (portals.isBusy && portals.isBusy() && portals.charge) {
 const ov = typeof portals.getOverlay === "function" ? portals.getOverlay() : null;
@@ -3567,8 +3618,48 @@ av.appendChild(cv);
 drawHudPortrait(cv,p,t,{reduceMotion:game.reduceMotion||reduceMotion});
 }
 
+function updateMarineFormControl() {
+ const holder=document.querySelector('.evo-display');
+ const p=game.player,visible=!!p&&p.id==='cat'&&!!game.running&&!game.onlineAdventure;
+ if(!holder)return;
+ let wrap=document.getElementById('marine-owned-forms');
+ if(!visible){if(wrap)wrap.hidden=true;return;}
+ if(!wrap){
+  wrap=document.createElement('section');wrap.id='marine-owned-forms';
+  wrap.setAttribute('aria-label','Evoluciones desbloqueadas de Medusaluna');
+  wrap.innerHTML='<button type="button" id="marine-form-toggle" aria-expanded="false" aria-controls="marine-form-choices">✦ Cambiar evolución</button><div id="marine-form-choices" role="group" aria-label="Seleccionar una evolución conseguida" hidden></div>';
+  holder.append(wrap);
+  wrap.querySelector('#marine-form-toggle').addEventListener('click',e=>{
+   e.stopPropagation();
+   const choices=wrap.querySelector('#marine-form-choices');
+   choices.hidden=!choices.hidden;
+   wrap.querySelector('#marine-form-toggle').setAttribute('aria-expanded',String(!choices.hidden));
+  });
+  wrap.querySelector('#marine-form-choices').addEventListener('click',e=>{
+   const button=e.target.closest('[data-owned-form]');
+   if(!button||!game.player||game.player.dead||game.onlineAdventure)return;
+   const chosen=Number(button.dataset.ownedForm);
+   if(!equipOwnedEvolution(game.player,chosen,applyForm))return;
+   paintFit(game.player);
+   renderAbilityBar();save();updateHUD();
+  });
+ }
+ wrap.hidden=false;
+ const max=unlockedEvolution({evo:p.evo,maxEvo:p.maxUnlockedEvo});
+ const key=p.id+':'+p.evo+':'+max;
+ if(wrap.dataset.renderKey===key)return;
+ wrap.dataset.renderKey=key;
+ const toggle=wrap.querySelector('#marine-form-toggle');
+ toggle.textContent='✦ Evoluciones '+(p.evo+1)+'/'+(max+1)+' · Cambiar';
+ const group=wrap.querySelector('#marine-form-choices');
+ const names=p.evoNames||p.forms?.map(f=>f.name)||[];
+ group.innerHTML=names.map((name,i)=>'<button type="button" data-owned-form="'+i+'"'+
+  (i>max?' disabled aria-disabled="true"':'')+
+  ' aria-pressed="'+String(i===p.evo)+'">'+(i+1)+' · '+name+'</button>').join('');
+}
 function updateHUD() {
 const p = game.player; if (!p) return;
+updateMarineFormControl();
 const jumpHint=p.id==='cat'&&p.evo===1?'saltar · mantener: aletear':p.id==='cat'&&p.evo===4?'mantener: volar':'saltar';
 if(game._jumpHint!==jumpHint){
  game._jumpHint=jumpHint;const caption=document.getElementById('jump-control-caption');if(caption)caption.textContent=jumpHint;
@@ -3921,7 +4012,24 @@ if (!canAct() || e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.target?.clo
 const kind = Object.keys(CUERNO_PLAY_KEYS).find((k) => CUERNO_PLAY_KEYS[k] === e.key);
 if (kind) queueCuernoPlay(kind);
 });
-addEventListener("ohana-start", (e) => start(ROSTER.find((r) => r.id === e.detail?.id)));
+addEventListener("ohana-start", (e) => {
+  const def=ROSTER.find((r) => r.id === e.detail?.id);
+  if(!def){e.detail?.onResult?.(false,new Error("Personaje no encontrado"));return;}
+  try {
+    start(def,e.detail?.startForm);
+    e.detail?.onResult?.(true);
+  } catch(error) {
+    // Never call returnToMenu here: it would save a half-initialized character
+    // over the checkpoint the player is trying to recover.
+    console.error("[OHANA] Could not start or restore adventure",error);
+    game._restoringSave=false;game._resumeCheckpoint=false;game.running=false;
+    game.world1Cine=null;game._pendingWorld1Cine=null;paused=false;
+    document.body.classList.remove("playing","boss-fight");
+    document.getElementById("char-select")?.classList.remove("hidden");
+    closeOverlays();
+    e.detail?.onResult?.(false,error);
+  }
+});
 addEventListener("keydown", (e) => {
 if (game.running || overlayOpen() || e.repeat) return;
 if (/^[0-9]$/.test(e.key)) {

@@ -1,6 +1,6 @@
-// OHANA V461 · Michicornio's living metamorphosis, four seconds, four acts.
+// OHANA 636 · Medusaluna, a four-act ocean metamorphosis for five unique marine bodies.
 // All 2D Canvas, deterministic per seed, accessible; no images, gradients or RNG.
-// Phase: listening → horn gathers light → jelly cocoon + bloom → living reveal.
+// Phase: listening → tide of pearls → sea-glass chrysalis → living reveal.
 // The run seed picks one of four curated staging motifs (marea, capullo,
 // constelación, aurora) and the dream palette shared with the character art.
 import {ROSTER} from '../../characters/roster.js';
@@ -29,7 +29,7 @@ export function michicornioEvoBeat(t=0,from=1,to=2,reducedMotion=false,seed=0){
  return Object.freeze({act:act.id,progress,from:begin,to:end,time,reducedMotion:!!reducedMotion,
    charge:smooth((time-.65)/1.2),arrival:smooth((time-2.15)/.85),
    face:time<1.75?'cast':time<2.8?'jump':'victory',
-   tendrils:end>=3?end>=5?9:7:3,
+   tendrils:end>=5?11:end===3?7:end===4?5:3,
    moon:smooth((time-.9)/1.4),
    glow:time<1.75?smooth((time-.4)/1.35):1-smooth((time-2.7)/1.4)*.28,
    cocoon:smooth((time-1.75)/.42)*(1-smooth((time-MICHI_BLOOM_AT)/.22)),
@@ -81,6 +81,62 @@ function drawMotif(ctx,motif,w,h,cx,cy,K,t,k,pal,gentle){
  }
  ctx.restore();
 }
+// The transition's destination has its own maritime constellation, not a
+// generic interchangeable ring. Strokes only, with a finite per-frame budget.
+function drawMarineOmen(ctx,cx,cy,K,to,t,charge,gentle,pal){
+ const k=clip(charge),phase=gentle?0:t;
+ if(k<.005)return;
+ ctx.save();ctx.globalAlpha=k*.72;ctx.lineCap='round';ctx.lineJoin='round';
+ ctx.strokeStyle=pal.glow;ctx.lineWidth=1.7*K;
+ const y=cy-103*K;
+ if(to===2){
+  // Seahorse: a single coiling ocean current, with seven shell pearls.
+  ctx.beginPath();ctx.moveTo(cx-80*K,y-23*K);
+  ctx.bezierCurveTo(cx-99*K,y-89*K,cx+100*K,y-90*K,cx+64*K,y);
+  ctx.bezierCurveTo(cx+52*K,y+65*K,cx-38*K,y+41*K,cx-15*K,y);
+  ctx.stroke();
+  for(let i=0;i<7;i++){
+   const a=i*.87+phase*.35,r=(38+i*8)*K;
+   diamond(ctx,cx+Math.cos(a)*r,y+Math.sin(a)*r*.62,2.4*K,i%2?pal.bead:'#f6fff2');
+  }
+ }else if(to===3){
+  // Dream jelly: translucent umbrella lines and breathing wavelets.
+  ctx.beginPath();ctx.moveTo(cx-96*K,y+13*K);
+  ctx.bezierCurveTo(cx-97*K,y-71*K,cx+93*K,y-73*K,cx+95*K,y+13*K);ctx.stroke();
+  for(let i=-3;i<=3;i++){
+   const x=cx+i*23*K;
+   ctx.beginPath();ctx.moveTo(x,y+12*K);ctx.quadraticCurveTo(
+    x+Math.sin(phase*2+i)*17*K,y+52*K,x+Math.sin(phase+i)*10*K,y+78*K);
+   ctx.stroke();
+  }
+ }else if(to===4){
+  // Astral sea star: FIVE long arms and an outlined constellation core.
+  const arms=[];
+  for(let i=0;i<5;i++){
+   const a=-Math.PI/2+i*TAU/5+phase*.06;
+   arms.push([cx+Math.cos(a)*114*K,y+Math.sin(a)*103*K]);
+  }
+  ctx.beginPath();for(let i=0;i<5;i++){
+   const a=arms[i],b=arms[(i+2)%5];if(!i)ctx.moveTo(a[0],a[1]);
+   ctx.lineTo(b[0],b[1]);
+  }ctx.closePath();ctx.stroke();
+  for(let i=0;i<5;i++)diamond(ctx,arms[i][0],arms[i][1],4*K,'#fff1be');
+ }else{
+  // Queen of a thousand moons: 11 pearl rays, five lunar rings and a crown.
+  for(let i=0;i<11;i++){
+   const a=i*TAU/11+phase*.11;
+   const x=cx+Math.cos(a)*144*K,yy=y+Math.sin(a)*87*K;
+   ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*75*K,y+Math.sin(a)*44*K);
+   ctx.quadraticCurveTo(cx+Math.cos(a)*110*K,yy,x,yy);ctx.stroke();
+   diamond(ctx,x,yy,3*K,i%2?'#e9edff':'#fff3bf');
+  }
+  for(let i=0;i<3;i++){
+   ctx.beginPath();ctx.ellipse(cx,y, (78+i*23)*K,(33+i*14)*K,-.18,0,TAU);
+   ctx.stroke();
+  }
+ }
+ ctx.restore();
+}
 export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2,opts={}){
  const K=h/300,cx=w/2,cy=h*.74;
  let gentle=!!opts.reducedMotion;
@@ -88,7 +144,7 @@ export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2,opts={}){
   !!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;}catch{}
  const seed=Number(opts.seed)||0,g=michiGenome(seed),pal=g.palette;
  const beat=michicornioEvoBeat(t,fromForm,toForm,gentle,seed);
- const eclipse=beat.to===5,medusa=beat.to>=3,now=beat.time;
+ const eclipse=beat.to===5,medusa=beat.to===3||beat.to===5,now=beat.time;
  const fxTime=gentle?0:now;
  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
  // Deep night stage in the Michicornio moon palette.
@@ -116,20 +172,21 @@ export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2,opts={}){
  ctx.restore();
  if(eclipse){ctx.save();ctx.globalAlpha=.92*beat.moon;oval(ctx,cx+mr*.34,my-mr*.04,mr*.93,mr*.94,'#0b0e26');ctx.restore();}
  drawMotif(ctx,beat.motif,w,h,cx,cy,K,fxTime,beat.charge*(1-beat.bloom*.5)+beat.bloom*.4,pal,gentle);
+ drawMarineOmen(ctx,cx,cy,K,beat.to,fxTime,beat.charge,gentle,pal);
  // Ground: reflective pool with ripple.
  ctx.save();ctx.globalAlpha=.3;oval(ctx,cx,cy+5*K,110*K,13*K,'#8a6eb8');ctx.globalAlpha=.18;oval(ctx,cx,cy+5*K,70*K,7*K,pal.glow);ctx.restore();
  const rise=gentle?0:Math.sin(now*7)*2.3*K;
  const S=2.25*K;
  if(beat.act==='listen'){
   drawEvolutionActor(ctx,'cat',cx,cy+rise,S,beat.from,now,{state:'idle',reducedMotion:gentle,seed});
-  // Motes drift toward the horn: the dream is calling.
+  // Motes drift toward the first pearl: the ocean is calling.
   for(let i=0;i<12;i++){const u=gentle?.5:clip(((now*.9+hn(i,21))%1));const a=hn(i,22)*TAU,r=(170-u*140)*K;
    ctx.save();ctx.globalAlpha=Math.sin(Math.PI*u)*.7*beat.progress+.1;diamond(ctx,cx+Math.cos(a)*r,cy-110*K+Math.sin(a)*r*.5,2.2*K,pal.bead);ctx.restore();}
   orbit(ctx,cx,cy-95*K,62*K,fxTime,.1+beat.progress*.2,3,pal.glow2);
  }else if(beat.act==='gather'){
   orbit(ctx,cx,cy-100*K,(70-beat.progress*14)*K,fxTime,.35+beat.progress*.5,7,pal.glow2);
   drawEvolutionActor(ctx,'cat',cx,cy+rise,S,beat.from,now,{state:'cast',cast:.12+beat.progress*.8,reducedMotion:gentle,seed});
-  // Horn light gathers: a growing star above the head.
+  // Ocean pearl gathers above the head; no horns or feline silhouettes.
   const hy=cy-[118,150,165,190,200][beat.from-1]*K*.98;
   halo(ctx,cx,hy,(10+beat.progress*26)*K,(10+beat.progress*26)*K,'#fff3c0',1.5+beat.progress);
   ctx.save();ctx.globalAlpha=.6+.4*beat.progress;ctx.strokeStyle='#fff8dc';ctx.lineWidth=2*K;
@@ -138,7 +195,7 @@ export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2,opts={}){
   for(let i=0;i<3;i++)lunarRibbon(ctx,cx,cy-120*K,i,3,fxTime,70*K,beat.charge*.5,pal);
  }else if(beat.act==='morph'){
   const pre=now<MICHI_BLOOM_AT,cocoon=beat.cocoon,bloom=beat.bloom;
-  const ribbons=medusa?beat.tendrils:4;
+  const ribbons=beat.to===4?5:medusa?beat.tendrils:4;
   if(!pre)for(let i=0;i<ribbons;i++)lunarRibbon(ctx,cx,cy-70*K,i,ribbons,fxTime,95*K,(1-bloom)*.6+.15,pal);
   if(pre){
    // The old form curls up inside a translucent jelly cocoon.
@@ -165,7 +222,7 @@ export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2,opts={}){
  }else{
   // The new form celebrates; tendril crown + gentle sparkle rain.
   const settle=gentle?1:backOut(clip(beat.progress*1.6));
-  const ribbons=medusa?beat.tendrils:5;
+  const ribbons=beat.to===4?5:medusa?beat.tendrils:5;
   for(let i=0;i<ribbons;i++)lunarRibbon(ctx,cx,cy-70*K,i,ribbons,fxTime,118*K,.1+.2*Math.sin(beat.progress*Math.PI),pal);
   drawEvolutionActor(ctx,'cat',cx,cy+rise,S*(.96+.04*settle),beat.to,now,{state:'victory',reducedMotion:gentle,seed});
   orbit(ctx,cx,cy-108*K,100*K,fxTime,.5*(1-beat.progress*.4),9,pal.glow2);
@@ -181,7 +238,7 @@ export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2,opts={}){
  if(now>=2.75){
   const show=smooth((now-2.75)/.38),name=FORM_NAMES[beat.to-1];
   const line=evolutionMessage('cat',beat.from).line;
-  const fs=Math.max(15,Math.round(24*K));
+  const fs=Math.min(Math.max(15,Math.round(24*K)),Math.max(15,Math.floor(w/(name.length*.61))));
   ctx.save();ctx.globalAlpha=show;ctx.textAlign='center';
   ctx.translate(0,(1-show)*10*K);
   ctx.fillStyle='#0d0b24';ctx.globalAlpha=show*.55;ctx.fillRect(cx-Math.min(w*.46,190*K),h*.07,Math.min(w*.92,380*K),56*K);

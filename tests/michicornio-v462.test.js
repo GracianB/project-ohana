@@ -44,24 +44,24 @@ test('V462 cat mouth opens with tongue and fangs; closed mouth still reads as ω
  assert.ok(closed.log.ops.quadraticCurveTo>=4,'ω lips');
 });
 
-test('Hada Felina retains its winged, luminous identity after the V625 anatomy review',()=>{
+test('Caballito de Sueños has its own flowing silhouette and palette',()=>{
  const p=ROSTER.find(x=>x.id==='cat');
- assert.equal(p.forms[1].name,'Hada Felina');assert.equal(p.evoNames[1],'Hada Felina');
+ assert.equal(p.forms[1].name,'Caballito de Sueños');assert.equal(p.evoNames[1],'Caballito de Sueños');
  const ops=f=>{const r=rec();cat.draw(r.c,pose('idle',60,f),{});return r.log;};
  const kitten=ops(0),fairy=ops(1);
  const curves=o=>(o.ops.bezierCurveTo||0)+(o.ops.quadraticCurveTo||0)+(o.ops.ellipse||0);
- assert.ok(curves(fairy)>20&&curves(kitten)>20,'both bodies use articulated curved silhouettes');
- assert.ok([...fairy.fills].filter(x=>!kitten.fills.has(x)).length>=6,'fairy palette differs from kitten');
+ assert.ok(curves(fairy)>10&&curves(kitten)>10,'both marine shapes need multiple authored curves');
+ assert.ok([...fairy.fills].filter(x=>!kitten.fills.has(x)).length>=4,'seahorse differs from the egg');
  // Wing beat: airborne flaps faster than idle hover.
  const wing=t=>{const tr=[];const c=new Proxy({},{get:(_,k)=>k==='scale'||k==='rotate'?(...a)=>tr.push(a.map(v=>v.toFixed(3)).join()):()=>{},set:()=>true});
   drawFairyWing(c,{x:0,y:0,side:1,size:60,open:1,flap:Math.sin(t*.3)});return tr.join('|');};
  assert.notEqual(wing(3),wing(8),'wings beat');
 });
 
-test('Fourth-form moon hare opens its mouth on attack',()=>{
+test('Fourth-form astral star changes its gesture for attack',()=>{
  const idle=rec(),atk=rec();
  cat.draw(idle.c,pose('idle',30,3),{});cat.draw(atk.c,pose('attack',30,3),{});
- assert.ok(atk.log.fills.has('#2a0f2e')&&atk.log.fills.has('#ff7fae'),'open roar with tongue');
+ assert.ok((atk.log.ops.moveTo||0)>(idle.log.ops.moveTo||0),'attacking star needs distinct magic particles');
 
 });
 
@@ -75,9 +75,9 @@ test('every form x state retains articulated vectors and permits only shared eye
  assert.doesNotMatch(readFileSync(new URL('../characters/michi-anatomy.js',import.meta.url),'utf8'),/Math\.random|create(Linear|Radial)Gradient/);
 });
 
-test('Moon hare replaces the serpent while preserving the fourth evolution slot',()=>{
- assert.match(src,/if\(f===3\).*MOON HARE/);
- assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Conejornio Lunar');
+test('Astral sea star replaces the historical hare in the fourth evolution slot',()=>{
+ assert.match(src,/drawMedusaluna\(ctx,safe,f\)/);
+ assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Estrella Astral');
  const a=rec();cat.draw(a.c,pose('run',30,3),{});assert.ok(a.log.grad<=2);assert.equal(a.log.radial,0);
 });
 
@@ -86,8 +86,10 @@ test('fairy materials remain deterministic for the saved Michi seed',()=>{
  assert.equal(fills(7),fills(7),'deterministic per seed');
 });
 
-test('baby and fourth form use their own anatomical renderers through the canonical cat dispatcher',()=>{
- assert.match(src,/drawMoonKitten\(ctx,safe\)/,'baby has its own connected anatomy');
- assert.match(src,/drawMoonHare\(ctx,safe\)/,'fourth form uses its own rabbit anatomy');
+test('egg and starfish use the new marine renderer through the compatibility dispatcher',()=>{
+ assert.match(src,/drawMedusaluna\(ctx,safe,f\)/,'renderer dispatch remains backward-compatible');
+ const ocean=readFileSync(new URL('../characters/michi-ocean.js',import.meta.url),'utf8');
+ assert.match(ocean,/function egg\(/,'baby has its own connected egg anatomy');
+ assert.match(ocean,/function starfish\(/,'fourth form has a dedicated five-armed anatomy');
  for(const f of [0,1,3]){const a=rec(),b=rec();cat.draw(a.c,pose('run',10,f),{});cat.draw(b.c,pose('run',30,f),{});assert.ok(a.log.grad<=2);assert.equal(a.log.radial,0);}
 });

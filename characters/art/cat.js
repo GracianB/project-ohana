@@ -1,10 +1,12 @@
 import {drawMichiEye} from '../michi-eyes.js';
+import {drawMedusaluna} from '../michi-ocean.js';
 import {drawMoonKitten} from '../michi-kitten.js';
 import {drawMoonHare} from '../michi-moon-hare.js';
 import {michiMotion} from "../michi-motion.js";
 import {michiGenome,jellyPulse,drawJellyBell,drawTentacle} from "../michi-jelly.js";
 import {michiLaunchKick,michiLaunchFrame,drawCatTail,drawFairyWing} from "../michi-anatomy.js";
-// Michicornio: kitten → fairy cat → moon jelly → lunar hare → winged nine-tail guardian.
+// Medusaluna: pearlescent egg → dream seahorse → moon jelly → astral starfish → royal jellyfish.
+// Legacy feline drawing helpers remain for compatibility and comparison; the canonical renderer is marine.
 export const MICHI_VISUAL_H=[60,72,84,94,106];
 const TAU = Math.PI * 2;
 
@@ -466,7 +468,9 @@ function draw(ctx, pose, R) {
   for(const key of ['t','phase','speed','atk','cast','flourish','flourishN','hurt','bounce','land','turnPulse','brake','bodyTilt','michiSeed'])safe[key]=finite(src[key]);
   if(safe.reduceMotion){safe.t=0;safe.phase=0;safe.atk=safe.state==='attack'?.5:0;safe.cast=safe.state==='cast'?.5:0;safe.land=0;safe.bounce=0;safe.bodyTilt=0;safe.flourish=0;safe.hurt=.5;}
   const f = Math.max(0, Math.min(4, Math.round(finite(Number(safe.form)))));
-  if(f===0){ // MOON KITTEN: its own connected, soft kitten anatomy.
+  // Every game, menu, HUD and cinematic uses the same canonical ocean art.
+  drawMedusaluna(ctx,safe,f);return;
+  if(f===0){ // Historic moon-kitten renderer (not active).
     drawMoonKitten(ctx,safe);return;
   }
   if(f===3){ // MOON HARE: its own rabbit rig replaces feline overlays.

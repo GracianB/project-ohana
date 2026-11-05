@@ -1,0 +1,10 @@
+{
+ "version": "ohana-637",
+ "status": "not_published",
+ "public_release": "ohana-635",
+ "pull_request": "https://github.com/GracianB/project-ohana/pull/450",
+ "deployment": "none",
+ "approval": "pending",
+ "merge": "draft PR only",
+ "caution": "This unreleased candidate includes save and pit changes. Do not equate branch CI with a public deployment or a player's own checkpoint being recovered on their device."
+}

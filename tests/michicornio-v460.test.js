@@ -44,13 +44,13 @@ test('V460: intro lunar crown, iris and live reactions retain original family ti
  }
  assert.ok(michiWelcomeBeat(5.14).moonCrown>michiWelcomeBeat(0).moonCrown);
 });
-test('V460: four cinematic acts animate real feline forms and medusa-tendril reveal',()=>{
+test('V636: four marine metamorphosis acts and the eleven royal jellyfish currents',()=>{
  assert.equal(EVO_CINE_DURATION,4);
  assert.deepEqual(MICHI_EVO_ACTS.map(x=>x.id),['listen','gather','morph','reveal']);
  const frames=[0,.7,1.2,1.74,1.76,2.2,2.8,3.1,3.8];
  assert.deepEqual(frames.map(x=>michicornioEvoBeat(x,2,3).act),
   ['listen','listen','gather','gather','morph','morph','morph','reveal','reveal']);
- assert.equal(michicornioEvoBeat(3.4,4,5).tendrils,9);
+ assert.equal(michicornioEvoBeat(3.4,4,5).tendrils,11);
  assert.equal(michicornioEvoBeat(3.4,2,3).tendrils,7);
  for(let from=1;from<5;from++)for(const t of frames){
   assert.doesNotThrow(()=>drawEvoCine(ctx(),960,540,t,from,from+1));

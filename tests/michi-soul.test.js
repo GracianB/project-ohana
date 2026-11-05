@@ -8,7 +8,7 @@ const evolution = fs.readFileSync('characters/evolution.js', 'utf8');
 const abilities = fs.readFileSync('systems/abilities.js', 'utf8');
 
 test('the five Michi forms keep their animation local to the Canvas draw call', () => {
-  const files=['characters/art/cat.js','characters/michi-kitten.js','characters/michi-moon-hare.js'];
+  const files=['characters/art/cat.js','characters/michi-ocean.js','characters/michi-kitten.js','characters/michi-moon-hare.js'];
   for(const file of files)assert.doesNotMatch(fs.readFileSync(file,'utf8'),/Math\.random|setTimeout|setInterval|requestAnimationFrame|localStorage|drawImage/);
   assert.doesNotMatch(art,/moonSoul\(ctx, safe/,'V625 removes the duplicated shared halo');
 });
@@ -34,7 +34,7 @@ test('Michi keeps the defensive ronroneo and six own magic gestures', () => {
 });
 
 test('V51 moon evolution and claw crescents retain story identity', () => {
-  assert.match(evolution, /Nueve vidas, un solo guardián/);
+  assert.match(evolution, /Medusa de las Mil Lunas/);
   assert.match(cinematic, /const claws=seg\(k,\.34,\.65\)/);
   assert.match(cinematic, /i<3;i\+\+/);
 });

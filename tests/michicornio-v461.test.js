@@ -60,13 +60,12 @@ test('five forms x eleven states x eight seeds keep finite vectors with only the
  }
 });
 
-test('V461 randomness is visible but identity-safe: palette changes jelly forms, not the cat base',()=>{
+test('V461 seed changes jellyfish palettes, not the seahorse identity',()=>{
  const colours=(seed,f)=>{const {c,log}=rec();cat.draw(c,pose('idle',60,f,seed),{});return [...log.fills].sort().join('|');};
  const jelly=new Set(SEEDS.slice(0,6).map(s=>colours(s,2)));
  assert.ok(jelly.size>=3,'seeds must visibly vary the Medusa Onírica');
- const base=(seed)=>{const {c,log}=rec();cat.draw(c,pose('idle',60,1,seed),{});return log.fills.has('#efe4ff')&&log.fills.has('#fff8ff');};
- // V462: F1 became the Hada Felina; its fur stays canonical, only wings/dust take the dream palette.
- assert.ok(SEEDS.every(base),'fairy-cat fur colours are canonical for every seed');
+ const seahorses=new Set(SEEDS.map(seed=>colours(seed,1)));
+ assert.equal(seahorses.size,1,'seahorse body colours are canonical for every seed');
 });
 
 test('V461 reduced motion is clock independent for every form',()=>{
