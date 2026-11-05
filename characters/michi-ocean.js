@@ -189,22 +189,31 @@ export function drawMedusaluna(ctx, pose = {}, form = 0) {
   const f = Math.round(clamp(Number(form),0,4));
   const t = pose.reduceMotion ? 0 : (Number.isFinite(pose.t) ? pose.t : 0);
   const state = pose.state || 'idle', active = state==='run'||state==='jump'||state==='glide';
+  const power = Math.round(clamp(Number(pose.michiPowerIndex ?? pose.castSlot ?? 0),0,5));
   const bob = pose.reduceMotion?0:Math.sin(t*(active?.09:.045))*(active?2.6:1.4);
   ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
   ctx.translate(0,bob);
-  if(state==='dead')ctx.rotate(.7);
-  else if(state==='hurt')ctx.rotate(-.11);
-  else if(state==='jump')ctx.scale(.93,1.07);
+  // Every physical state and every magic slot has an individually readable pose.
+  const acting={idle:0,run:.046,jump:-.085,fall:.082,glide:-.04,wall:.13,attack:-.06,cast:.064,hurt:-.15,victory:-.1,dead:.67};
+  ctx.rotate((acting[state] ?? 0) + (state==='cast'?(power+1)*.027:0) + (state==='attack'?clamp(pose.atk,0,1)*.19:0));
+  if(state==='jump')ctx.scale(.93,1.07);
   else if(state==='fall')ctx.scale(1.06,.94);
   if(f===0)egg(ctx,t);
   else if(f===1)seahorse(ctx,t,state);
   else if(f===2)jelly(ctx,t,false,state);
   else if(f===3)starfish(ctx,t,state);
   else jelly(ctx,t,true,state);
+  // Subtle deterministic ocean dust provides a textured, animated silhouette.
+  ctx.save();ctx.globalAlpha*=.25;
+  for(let i=0;i<22;i++){
+    const angle=i*2.399963+t*.004, radius=24+(i%7)*6+f*2;
+    sparkle(ctx,Math.cos(angle)*radius, -44+Math.sin(angle)*radius*.72,1.1+(i%3)*.22,i%2?'#c9ffff':'#fff1f9');
+  }
+  ctx.restore();
   if(state==='cast'||state==='attack'||state==='victory'){
-    const force=clamp(Number(pose.cast)||Number(pose.atk)||.5,0,1);
+    const force=pose.reduceMotion?.5:clamp(Number(pose.cast)||Number(pose.atk)||.5,0,1);
     for(let i=0;i<5;i++){
-      let a=(i/5)*TAU+t*.055;
+      let a=(i/5)*TAU+t*.055+(state==='cast'?power*.19:0);
       sparkle(ctx,Math.cos(a)*(32+f*7),-43-Math.sin(a)*(30+f*3),2+force*2,
         i%2?'#b7ffff':'#fff2c3');
     }
