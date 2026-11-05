@@ -523,7 +523,12 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
 }
 
 /* Medusaluna · explicit starting-form choice, visible only on her dossier. */
-/* The previous cinematic dossier disabled ALL pointer events. The user must be able to click form choices. */
+/* The latest family-grid composition hides the old dossier.
+   Only Medusaluna needs it visible to expose her five-form selector. */
+#char-select[data-selector-mode="family-grid"][data-hero="cat"] .hero-dossier{
+ display:flex!important;pointer-events:auto!important;height:auto!important;
+ min-height:190px!important;grid-column:2!important;grid-row:1!important;
+}
 #char-select[data-selector-mode="family-grid"] .hero-dossier{pointer-events:auto!important;}
 #char-select[data-selector-mode="family-grid"] #ocean-form-picker:not([hidden]){display:block!important;}
 
