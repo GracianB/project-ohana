@@ -35,6 +35,12 @@ try{
 
   // Reuse a legitimate game-created snapshot and only change the checkpointed
   // evolution. Continue should read this save, not clobber it inside loadRoom.
+  // The live game writes a fresh checkpoint during pagehide. Reload FIRST,
+  // then stage the historical snapshot from the menu, while no game is running.
+  // Otherwise pagehide overwrites our form-2 fixture with the active form 0.
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.documentElement.dataset.ohanaBoot==='ready');
+  await page.keyboard.press('Escape');
   await page.evaluate(()=>{
     const save=JSON.parse(localStorage.getItem('ohana'));
     if(!save)throw new Error('The game did not create its checkpoint');
@@ -42,9 +48,8 @@ try{
     localStorage.setItem('ohana',JSON.stringify(save));
     localStorage.removeItem('ohana.tmp');
   });
-  await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>document.documentElement.dataset.ohanaBoot==='ready');
-  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('ohana')).evo),2,
+    'The resume fixture must exist after pagehide, not before it');
   await page.locator('#btn-continue').click();
   await page.waitForFunction(()=>window.__OHANA_E2E?.state().running===true);
   const restored=await page.evaluate(()=>window.__OHANA_E2E.state());
