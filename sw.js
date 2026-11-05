@@ -679,7 +679,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "129fb8797d987c90f02795cc7d4d25d65e3371ff",
+  "index.html": "a95fac5cd9d99b436af22d93d5d2c18f23734075",
   "multiplayer.html": "778d4e60ca9b94799d52206d48c7e8827c72510b",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
