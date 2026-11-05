@@ -851,7 +851,7 @@ export function playTitleIntro(options = {}) {
 // ---------------------------------------------------------------------------
 // Cinemática corta al empezar (Empezar / Continuar)
 // ---------------------------------------------------------------------------
-export function playIntro(kind, name, done, id) {
+export function playIntro(kind, name, done, id, options={}) {
   let el = document.getElementById("start-intro");
   if (!el) {
     el = document.createElement("div");
@@ -869,7 +869,11 @@ export function playIntro(kind, name, done, id) {
   if (kind === "resume") {
     try {
       const sv = saveStore.readRaw();
-      if (sv && canonId(sv.id) === def.id) evo = clamp(Number(sv.evo) || 0, 0, 4);
+      if (sv && canonId(sv.id) === def.id) {
+        const cap=Math.max(Number(sv.evo)||0,Number(sv.maxEvo)||0);
+        evo=Number.isInteger(options.resumeForm)&&options.resumeForm>=0&&options.resumeForm<=cap
+          ? options.resumeForm : clamp(Number(sv.evo)||0,0,4);
+      }
     } catch (_) {}
   }
   const form = (def.forms && def.forms[evo]) || def;
