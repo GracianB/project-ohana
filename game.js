@@ -711,7 +711,7 @@ enterWorld1Collect(game);enterWorld1(game);
 // A genuinely earned seal restores exploration tools quietly. First visits
 // still start as babies; revisits do not replay four evolution cinematics.
 if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4
- && !game._resumeCheckpoint && !(game.player.id==="cat"&&game._explicitStartForm!==null)){
+ && !(game.player.id==="cat"&&(game._resumeCheckpoint||game._explicitStartForm!==null))){
  game.player.xp=Math.max(game.player.xp||0,420);game.player.evo=4;
  applyForm(game.player,{silent:true});renderAbilityBar();
 }
