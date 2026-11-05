@@ -147,6 +147,7 @@ import { drawEncounterSignals } from "./systems/encounter-signals.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
+import {unlockedEvolution,equipOwnedEvolution} from './systems/evolution-ownership.js';
 import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill, addCombo as safeAddCombo } from "./systems/mutations.js";
 import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, compactLiveList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
 import { createFixedClock } from "./engine/clock.js";
@@ -950,8 +951,12 @@ const resume = !onlineMode && (function () { try { return localStorage.getItem("
 // title card. Chapter transitions can change the hero without reopening title.
 if(resume&&game.personalAdventureSolo&&!game._e2eLegacyStart){
  const saved=saveStore.read();
- if(saved&&isWorld1Room(saved.roomId))def=ROSTER.find(h=>h.id===saved.id)||def;
+ // The saved campaign owner always wins over whichever title-card happened
+ // to be highlighted. This also covers valid legacy hub checkpoints.
+ if(saved)def=ROSTER.find(h=>h.id===saved.id)||def;
 }
+const requestedResumeForm=resume&&def.id==='cat'&&Number.isInteger(requestedStartForm)
+ ? Math.max(0,Math.min(4,requestedStartForm)) : null;
 try { localStorage.removeItem("ohana-resume"); } catch (e) {}
 // Always discard the previous run\'s transient form and checkpoint flags.
 game._chosenStartForm=null;
@@ -993,11 +998,13 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
+game.player.maxUnlockedEvo=0;
 const newForm = !resume && Number.isInteger(requestedStartForm) ? requestedStartForm
   : !resume && typeof globalThis.__ohanaStartForm === "number" ? globalThis.__ohanaStartForm : null;
 if (newForm !== null) {
   const chosenForm = Math.max(0, Math.min(4, Math.round(newForm)));
   game.player.evo = chosenForm;
+  game.player.maxUnlockedEvo = chosenForm;
   game.player.xp = XP_NEED[chosenForm] || 0;
   applyForm(game.player, { silent: true });
   paintFit(game.player);
@@ -1101,6 +1108,7 @@ try {
   const u = saveStore.read(def.id);
   if (u) {
     game.player.evo = u.evo;
+    game.player.maxUnlockedEvo=unlockedEvolution(u);
     game.player.xp = u.xp;
     // V313 saves contained one U EXP value. Migrate it to the equipped
     // partner only, rather than gifting it to all nine companions.
@@ -1122,6 +1130,12 @@ try {
     applyForm(game.player, { silent: true });
     paintFit(game.player);
     if (u.hp != null) game.player.health = Math.max(1, Math.min(game.player.maxHealth, u.hp));
+    // Continue defaults to the exact checkpointed form. An explicit selection
+    // can equip any PREVIOUSLY unlocked marine shape, preserving XP and health.
+    if(requestedResumeForm!==null&&requestedResumeForm<=game.player.maxUnlockedEvo){
+      equipOwnedEvolution(game.player,requestedResumeForm,applyForm);
+      paintFit(game.player);
+    }
     if (u.nineUsed) game.player._nineUsed = true;
     game.clearTicks = u.clearTicks || 0;
     game.best = u.best || null;
@@ -1139,8 +1153,13 @@ document.body.classList.add("playing");
 document.getElementById("char-select")?.classList.add("hidden");
 renderAbilityBar();
 if (!loadRoom(roomId)) {
-  if(resume)throw new Error("El capítulo guardado no se puede abrir: "+roomId);
-  if(!loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub"))throw new Error("El mundo inicial no se pudo abrir.");
+  if(resume){
+    // A missing chapter must not create a menu-return loop or overwrite the
+    // saved checkpoint. Recover at the chapter's safe entry with the same hero.
+    const safeRoom=game.personalAdventureSolo?world1StartRoom(def.id,game.world1Seals):'hub';
+    if(!loadRoom(safeRoom))throw new Error("No se pudo recuperar ni el capítulo "+roomId+" ni la entrada segura "+safeRoom);
+    showSystemMessage('CONTINUAR','El capítulo guardado no estaba disponible. Hemos recuperado la entrada segura conservando tu evolución y progreso.');
+  }else if(!loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub"))throw new Error("El mundo inicial no se pudo abrir.");
 }
 if (!resume && game.roomDef?.world1 && !game.world1Seals.length) playWorld1Cine(game, "intro");
 if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
@@ -1181,6 +1200,7 @@ return;
 }
 const previousHealth=p.health,previousMax=p.maxHealth;
 p.evo += 1;
+p.maxUnlockedEvo=Math.max(p.maxUnlockedEvo||0,p.evo);
 applyForm(p);
 if(game.roomDef?.kiloEncounterVersion)p.health=Math.min(p.maxHealth,previousHealth+Math.max(0,p.maxHealth-previousMax));
 if (p.id === "cuerno") { try { cuernoEvolveBurst(game, p); } catch (_) {} }
@@ -2065,7 +2085,10 @@ if (!h.taken && Math.hypot(p.x + p.w / 2 - h.x, p.y + p.h / 2 - h.y) < 36) {
   h.taken = true; healPlayer(p, 25); game.nums.add(h.x, h.y, "+HP", "#f66"); beep("pickup");
 }
 }
-if (!(portals.isBusy && portals.isBusy())) { tryDoors(); checkVoidDeath(); }
+// A charging portal may delay a door transition, never the lethal pit check.
+// Otherwise players could stand inside an abyss indefinitely during the charge.
+if (!(portals.isBusy && portals.isBusy())) tryDoors();
+checkVoidDeath();
 portals.update(game);
 if (portals.isBusy && portals.isBusy() && portals.charge) {
 const ov = typeof portals.getOverlay === "function" ? portals.getOverlay() : null;
