@@ -277,3 +277,42 @@ body.playing #char-select.camp-on {display:none!important;}
 #family-camp[data-hero="cat"][data-resume-checkpoint="true"] .camp-forms button[data-resume-owned="false"]{
   border-style:dashed!important;
 }
+
+/* V637 · Small, keyboard-accessible in-game marine form wheel. */
+#marine-owned-forms[hidden],#marine-form-choices[hidden]{display:none!important}
+#marine-owned-forms{position:relative;margin-top:5px;max-width:250px}
+#marine-form-toggle{
+ cursor:pointer;display:block;width:100%;padding:6px 10px;border-radius:9px;
+ border:1px solid #9cf1e0;background:#1c3959e9;color:#e6fffb;
+ font:750 11px/1.3 Outfit,sans-serif;white-space:normal;
+}
+#marine-form-toggle:hover,#marine-form-toggle:focus-visible{
+ outline:2px solid #fce9b4;outline-offset:2px;
+}
+#marine-form-choices{
+ display:grid;grid-template-columns:minmax(0,1fr);
+ gap:3px;position:absolute;top:calc(100% + 4px);left:0;z-index:60;
+ width:min(280px,90vw);padding:7px;
+ border-radius:11px;border:1px solid #92e9e6;
+ background:#0c213aec;box-shadow:0 7px 28px #030d20b9;
+}
+#marine-form-choices button{
+ cursor:pointer;min-height:30px;text-align:left;border-radius:7px;
+ border:1px solid #8fb6d355;background:#183653;
+ color:#e4f8ff;padding:5px 8px;font:650 11px/1.3 Outfit,sans-serif;
+}
+#marine-form-choices button[aria-pressed="true"]{
+ border-color:#fce5ab;background:#584f7f;color:#fff5bd;
+}
+#marine-form-choices button:disabled{
+ cursor:not-allowed;opacity:.38;border-style:dashed;
+}
+#marine-form-choices button:not(:disabled):hover,
+#marine-form-choices button:focus-visible{
+ outline:2px solid #b5fff2;outline-offset:1px;
+}
+@media(max-width:680px){
+ #marine-owned-forms{max-width:180px}
+ #marine-form-toggle{padding:5px;font-size:9px}
+ #marine-form-choices{width:min(230px,84vw)}
+}
