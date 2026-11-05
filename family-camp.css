@@ -250,3 +250,30 @@ body.playing #char-select.camp-on {display:none!important;}
   transform:none!important;
  }
 }
+
+/* V637 · Resume and owned-form separation. New game never masquerades as Continue. */
+#family-camp #camp-resume-hint:empty{display:none!important}
+#family-camp #camp-resume-hint{
+  margin:4px 0 12px;padding:9px 11px;
+  color:#e7f9ff;background:linear-gradient(135deg,#163b57bb,#302858dd);
+  border:1px solid #95e9eb63;border-radius:11px;
+  font:600 11px/1.52 Outfit,sans-serif;
+}
+#family-camp #camp-resume[hidden]{display:none!important}
+#family-camp #camp-resume{
+  display:block;width:100%;margin-top:10px;padding:12px 15px;
+  border-radius:12px;border:2px solid #90f4e6;
+  background:linear-gradient(115deg,#163c52,#24416b);
+  color:#efffff;font:800 13px/1.25 Outfit,sans-serif;cursor:pointer;
+  box-shadow:0 5px 17px #06102b77, inset 0 1px #ffffff35;
+  white-space:normal;
+}
+#family-camp #camp-resume:hover{border-color:#fff2bb;background:#25536f}
+#family-camp #camp-resume:focus-visible{outline:3px solid #fce8b9;outline-offset:3px}
+#family-camp[data-hero="cat"][data-resume-checkpoint="true"] .camp-forms button[data-resume-owned="true"]::after{
+  content:"✓";position:absolute;top:3px;right:4px;
+  color:#b8fff1;font-size:11px;text-shadow:0 1px 3px #092a42;
+}
+#family-camp[data-hero="cat"][data-resume-checkpoint="true"] .camp-forms button[data-resume-owned="false"]{
+  border-style:dashed!important;
+}
