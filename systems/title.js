@@ -86,6 +86,8 @@ return { scale, foot, visualAspect, envelope };
 const TITLE_E2E = new URLSearchParams(location.search).has("e2e");
 const ROSTER_BY_ID = new Map(ROSTER.map((def, index) => [def.id, { def, index }]));
 let selectedId = "kilo";
+let selectedOceanForm = 0;
+let pendingStartKind = "new";
 let tick = 0;
 let raf = 0;
 let portraitCanvases = [];
@@ -141,7 +143,7 @@ portraitClock.advance(now, () => {
     const qaEvo = TITLE_E2E && Number.isInteger(window.__OHANA_TITLE_EVO_OVERRIDE)
       ? Math.max(0, Math.min(4, window.__OHANA_TITLE_EVO_OVERRIDE))
       : null;
-    const evo = hero ? (qaEvo ?? (Math.floor(tick / 220) % 5)) : 1;
+    const evo = hero ? (qaEvo ?? (def.id === "cat" ? selectedOceanForm : Math.floor(tick / 220) % 5)) : 1;
     if (cv._evo === undefined) cv._evo = evo;
     if (cv._evo !== evo) { cv._burst = 90; cv._evo = evo; }
     cv._burst = Math.max(0, (cv._burst || 0) - 2);
@@ -340,6 +342,32 @@ if (!el) {
 return el;
 }
 
+function syncOceanFormPicker() {
+  const picker=document.getElementById("ocean-form-picker");
+  const group=document.getElementById("ocean-form-buttons");
+  const def=ROSTER.find(h=>h.id==="cat");
+  if(!picker||!group||!def)return;
+  picker.hidden=selectedId!=="cat";
+  if(!group.children.length)for(let i=0;i<def.forms.length;i++){
+    const btn=document.createElement("button");
+    btn.type="button";btn.dataset.oceanForm=String(i);
+    btn.textContent=(i+1)+" · "+def.forms[i].name;
+    btn.addEventListener("click",()=>{
+      selectedOceanForm=i;
+      syncOceanFormPicker();
+      for(const cv of portraitCanvases)if(cv.dataset.id==="cat"){cv._needsFit=true;cv._lastPaintAt=0;}
+    });
+    group.appendChild(btn);
+  }
+  for(const btn of group.children){
+    const on=Number(btn.dataset.oceanForm)===selectedOceanForm;
+    btn.classList.toggle("active",on);
+    btn.setAttribute("aria-pressed",String(on));
+  }
+  const label=document.getElementById("selected-hero-form");
+  if(selectedId==="cat"&&label)label.textContent=def.forms[selectedOceanForm].name+" · Forma "+(selectedOceanForm+1)+"/5";
+}
+
 function mark(id) {
 selectedId = id;
 const cards = [...document.querySelectorAll("#chars-grid .char-card")];
@@ -398,6 +426,7 @@ if (selectedDef) {
   const rank = difficulty(selectedDef.id);
   if (heroName) heroName.textContent = selectedDef.name;
   if (heroForm) heroForm.textContent = selectedDef.evoNames?.[0] || selectedDef.forms?.[0]?.name || "Forma inicial";
+  syncOceanFormPicker();
   if (heroDifficulty) heroDifficulty.textContent = "Manejo " + (rank === 1 ? "fácil" : rank === 3 ? "difícil" : "media");
   const mastery = masteryOf(selectedDef.id);
   if (heroLine) {
@@ -470,10 +499,18 @@ dots.querySelectorAll("i").forEach((i) => i.classList.toggle("on", i.dataset.id 
 }
 
 function startSelected() {
-dispatchEvent(new CustomEvent("ohana-start", { detail: { id: selectedId } }));
+  let result=null;
+  dispatchEvent(new CustomEvent("ohana-start", { detail: {
+    id:selectedId,
+    startForm:pendingStartKind==="new"&&selectedId==="cat"?selectedOceanForm:null,
+    onResult:(ok,error)=>{result={ok,error};}
+  }}));
+  if(result&&!result.ok)throw result.error||new Error("La aventura no pudo arrancar.");
 }
 
 function begin(kind) {
+pendingStartKind=kind;
+document.getElementById("ohana-start-error")?.remove();
 const def = ROSTER.find((r) => r.id === selectedId);
 const name = def ? def.name : "Ohana";
 if (kind === "new") {
