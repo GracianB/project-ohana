@@ -1,0 +1,20 @@
+{
+  "version": "ohana-637",
+  "status": "in_review",
+  "pull_request": "https://github.com/GracianB/project-ohana/pull/450",
+  "scope": [
+    "Fatal physical abyss collisions across authored World 1 chapters",
+    "Continue never overwrites a saved Medusaluna checkpoint on failed startup",
+    "Separate owned evolution ceiling from currently equipped form",
+    "Choose unlocked Medusaluna form from camp and gameplay HUD",
+    "Retain HP ratio, XP and room when switching marine creature",
+    "Five premium animated marine creatures with desktop and mobile art gallery"
+  ],
+  "tests": {
+    "node": "npm test",
+    "browser_resume": "npm run test:browser:medusaluna",
+    "browser_pits": "node tests/browser/pit-death-v637.mjs",
+    "release": "npm run release:check"
+  },
+  "disclaimer": "Candidate validation plan, not a claim of passing checks. Use this PR's GitHub Actions for verified acceptance. The public game remains 635."
+}
