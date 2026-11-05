@@ -18,20 +18,27 @@ export function hazardsForRoom(roomId="", roomDef=null) {
   return ROOMS[String(roomId)]?.hazards || ROOM_HAZARDS[String(roomId)] || Object.freeze([]);
 }
 
+// Minimum real body overlap, rather than one centre pixel. The inset avoids
+// lethal grazes when the hero is still supported by the bank at either edge.
+function overlapBodyX(h, player) {
+  const x=Number(player?.x)||0,w=Math.max(0,Number(player?.w)||0);
+  return Math.max(0,Math.min(x+w,h.x+h.w)-Math.max(x,h.x));
+}
+function committedToPit(h, player) {
+  const w=Math.max(1,Number(player?.w)||1);
+  return overlapBodyX(h,player)>=Math.min(w*.55,h.w*.55);
+}
 export function hazardAt(roomId, player, roomDef=null) {
   if (!player) return null;
-  const px=(Number(player.x)||0)+(Number(player.w)||0)/2;
-  const py=(Number(player.y)||0)+(Number(player.h)||0);
-  for (const h of hazardsForRoom(roomId, roomDef)) {
-    if (px > h.x && px < h.x+h.w && py > h.y && py < h.y+h.h) return h;
+  const feet=(Number(player.y)||0)+(Number(player.h)||0);
+  for(const h of hazardsForRoom(roomId,roomDef)) {
+    if(committedToPit(h,player) && feet>h.y && feet<h.y+h.h)return h;
   }
   return null;
 }
-
-export function hazardContainsX(roomId, player, roomDef=null) {
-  if (!player) return null;
-  const px=(Number(player.x)||0)+(Number(player.w)||0)/2;
-  return hazardsForRoom(roomId, roomDef).find((h)=>px>h.x&&px<h.x+h.w)||null;
+export function hazardContainsX(roomId,player,roomDef=null) {
+  if(!player)return null;
+  return hazardsForRoom(roomId,roomDef).find(h=>committedToPit(h,player))||null;
 }
 
 export function hazardTrigger(roomId, player, roomDef=null) {
