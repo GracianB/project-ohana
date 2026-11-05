@@ -1126,12 +1126,18 @@ try {
     game.dragonTrial = u.dragonTrial || null;
     roomId = ROOMS[u.roomId] ? u.roomId : "hub";
   }
-} catch (e) {}
+} catch (e) {
+  console.error("[OHANA] Saved checkpoint recovery failed",e);
+  throw e; // Surface the failure without replacing the last good save.
+}
 }
 document.body.classList.add("playing");
 document.getElementById("char-select")?.classList.add("hidden");
 renderAbilityBar();
-if (!loadRoom(roomId)) loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub");
+if (!loadRoom(roomId)) {
+  if(resume)throw new Error("El capítulo guardado no se puede abrir: "+roomId);
+  if(!loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub"))throw new Error("El mundo inicial no se pudo abrir.");
+}
 if (!resume && game.roomDef?.world1 && !game.world1Seals.length) playWorld1Cine(game, "intro");
 if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
 if (game._magicSnap) {
