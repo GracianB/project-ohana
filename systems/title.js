@@ -5,6 +5,7 @@ import {STITCHO_VISUAL_H} from "../characters/art/stitcho.js";
 import {KILO_VISUAL_H} from "../characters/art/kilo.js";
 import { ROSTER } from "../characters/roster.js";
 import { canonId, saveStore } from "./save.js";
+import {unlockedEvolution} from "./evolution-ownership.js";
 import { createFixedClock } from "../engine/clock.js";
 import { menuPaintAllowedInDocument } from "./menu-visibility.js";
 import { drawCharacter } from "../characters/draw.js";
@@ -36,7 +37,7 @@ const HERO_LINES = {
 kilo: "Corrientes de polen, flotación y vuelo solar en las formas altas.",
 stitcho: "Paredes, agarre, trepa y vaults para dominar rutas verticales.",
 chispin: "J marca blancos; L los busca y consume su marca. K atraviesa el espacio con una estela eléctrica.",
-cat: "Moon Pounce, nueve vidas y movilidad felina para corregir saltos imposibles.",
+cat: "Cinco criaturas del océano lunar. Perlas, cantos abisales y corrientes celestiales.",
 dragon: "Batidas extra, planeo y vuelo: el aire es una ruta, no una caída.",
 dino: "Pisotón sísmico, ruptura de grietas y rebote colosal tras el impacto.",
 frita: "Deslizamiento encadenado y carriles de impulso que conservan velocidad.",
@@ -110,6 +111,12 @@ cuerno:  ["idle","victory","jump"],
 });
 
 function readSave() { return saveStore.readRaw(); }
+function resumeOceanForm(){
+ const save=readSave();if(!save||canonId(save.id)!=='cat')return null;
+ const requested=globalThis.__ohanaResumeForm;
+ const max=unlockedEvolution(save);
+ return Number.isInteger(requested)&&requested>=0&&requested<=max?requested:Math.max(0,Math.min(max,Number(save.evo)||0));
+}
 
 function paintPortraits(now = performance.now()) {
 if (!menuPaintAllowedInDocument(document)) {
@@ -354,6 +361,11 @@ function syncOceanFormPicker() {
     btn.textContent=(i+1)+" · "+def.forms[i].name;
     btn.addEventListener("click",()=>{
       selectedOceanForm=i;
+      const save=readSave();
+      if(save&&canonId(save.id)==='cat'){
+       globalThis.__ohanaResumeForm=i<=unlockedEvolution(save)?i:null;
+       dispatchEvent(new Event('ohana-resume-form-change'));
+      }
       syncOceanFormPicker();
       for(const cv of portraitCanvases)if(cv.dataset.id==="cat"){cv._needsFit=true;cv._lastPaintAt=0;}
     });
@@ -363,6 +375,10 @@ function syncOceanFormPicker() {
     const on=Number(btn.dataset.oceanForm)===selectedOceanForm;
     btn.classList.toggle("active",on);
     btn.setAttribute("aria-pressed",String(on));
+    const save=readSave();
+    const available=save&&canonId(save.id)==='cat'&&Number(btn.dataset.oceanForm)<=unlockedEvolution(save);
+    btn.dataset.resumeUnlocked=String(!!available);
+    btn.title=available?'Desbloqueada: puedes continuar con esta forma':'Para Continuar, desbloquea esta evolución en la partida';
   }
   const label=document.getElementById("selected-hero-form");
   if(selectedId==="cat"&&label)label.textContent=def.forms[selectedOceanForm].name+" · Forma "+(selectedOceanForm+1)+"/5";
@@ -502,8 +518,11 @@ function startSelected() {
   let result=null;
   dispatchEvent(new CustomEvent("ohana-start", { detail: {
     id:selectedId,
-    startForm:pendingStartKind==="new"&&selectedId==="cat"
-      ? (Number.isInteger(globalThis.__ohanaStartForm)?globalThis.__ohanaStartForm:selectedOceanForm) : null,
+    startForm:selectedId==='cat'
+      ? pendingStartKind==='new'
+        ? (Number.isInteger(globalThis.__ohanaStartForm)?globalThis.__ohanaStartForm:selectedOceanForm)
+        : pendingStartKind==='resume' ? resumeOceanForm() : null
+      : null,
     onResult:(ok,error)=>{result={ok,error};}
   }}));
   if(result&&!result.ok)throw result.error||new Error("La aventura no pudo arrancar.");
@@ -528,7 +547,7 @@ if (kind === "new") {
 if (kind === "resume") {
   try { localStorage.setItem("ohana-resume", "1"); } catch (e) {}
 }
-playIntro(kind, name, startSelected, selectedId);
+playIntro(kind, name, startSelected, selectedId,{resumeForm:kind==='resume'?resumeOceanForm():null});
 }
 
 function applyLook() {
@@ -622,6 +641,9 @@ function refreshContinue() {
   if (id && ROSTER.some((r) => r.id === id)) {
     cont.classList.remove("hidden");
     cont.disabled = false;
+    const form=id==='cat'?resumeOceanForm():null;
+    cont.textContent=form!==null?'Continuar · '+(ROSTER.find(h=>h.id==='cat')?.evoNames[form]||'Medusaluna'):'Continuar';
+    cont.title=form!==null?'Recupera tu capítulo con la forma '+(form+1)+' desbloqueada':'Retoma el guardado existente';
     cont.onclick = () => { selectedId = id; mark(id); begin("resume"); };
   } else {
     cont.classList.add("hidden");
@@ -629,6 +651,7 @@ function refreshContinue() {
   }
 }
 refreshContinue();
+addEventListener('ohana-resume-form-change',refreshContinue);
 addEventListener("keydown", (e) => {
   if (document.body.classList.contains("playing")) return;
   if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)) {
