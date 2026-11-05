@@ -1,6 +1,7 @@
 // Browser regression: selection, new-game evolution, saved chapter recovery.
 // Use actual title buttons, real localStorage checkpoints and normal game boot.
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {startServer} from './server.mjs';
 const server=await startServer(0);
@@ -34,6 +35,8 @@ try{
       return false;
     });
   });
+  await fs.mkdir('test-results/medusaluna',{recursive:true});
+  await page.locator('#family-camp .camp-dossier').screenshot({path:'test-results/medusaluna/sea-forms-desktop.png'});
   const artwork=await page.evaluate(()=>[...document.querySelectorAll('#family-camp [data-camp-form] canvas')].map(cv=>cv.toDataURL()));
   assert.equal(new Set(artwork).size,5,'each evolution needs its own real Canvas silhouette');
   for(const {width,height} of [{width:390,height:844},{width:320,height:568}]){
@@ -41,6 +44,7 @@ try{
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,
       'Medusaluna gallery must not overflow mobile viewport '+width);
     assert.equal(await page.locator('#family-camp .camp-forms [data-camp-form]').count(),5);
+    await page.locator('#family-camp .camp-dossier').screenshot({path:'test-results/medusaluna/sea-forms-'+width+'.png'});
   }
   await page.setViewportSize({width:1280,height:900});
 
