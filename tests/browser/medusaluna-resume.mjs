@@ -19,7 +19,16 @@ try{
   });
   await page.locator('.char-card[data-id="cat"]').click();
   const picker=page.locator('#ocean-form-picker');
-  assert.equal(await picker.isVisible(),true);
+  const diagnostic=await page.evaluate(()=>{
+    const p=document.querySelector('#ocean-form-picker');
+    const d=p?.closest('.hero-dossier');
+    return {selected:document.querySelector('.char-card.selected')?.dataset.id,
+      pickerHidden:p?.hidden,display:p&&getComputedStyle(p).display,
+      parentDisplay:d&&getComputedStyle(d).display,
+      parentPointer:d&&getComputedStyle(d).pointerEvents,
+      bodyClass:document.body.className};
+  });
+  assert.equal(await picker.isVisible(),true,JSON.stringify(diagnostic));
   assert.equal(await page.locator('#ocean-form-buttons button').count(),5);
   await page.locator('[data-ocean-form="0"]').click();
   await page.locator('#btn-play').click();
