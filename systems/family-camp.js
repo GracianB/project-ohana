@@ -98,6 +98,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  const previous=selected==='cat'?saveStore.read('cat'):null;
  const unlocked=previous?unlockedEvolution(previous):-1;
  host.dataset.resumeCheckpoint=String(!!previous);
+ host.querySelector('.camp-form-prompt').textContent=previous?'ELIGE UNA EVOLUCIÓN DESBLOQUEADA PARA CONTINUAR':'ELIGE TU FORMA INICIAL';
  const selectedResume=globalThis.__ohanaResumeForm;
  const willResume=Number.isInteger(selectedResume)&&selectedResume>=0&&selectedResume<=unlocked?selectedResume:previous?.evo;
  $('camp-resume').hidden=!previous;
