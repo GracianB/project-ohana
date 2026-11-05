@@ -20,7 +20,9 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; la comprobación remota entre dispositivos sigue pendiente.
 
-Registro de entrega pública: `ohana-635` / acceso al multijugador.\n\n**En revisión, todavía sin publicar:** `ohana-636` (PR #450). [Plan de validación](docs/V636-VALIDATION.json) · [Estado de publicación](docs/V636-PUBLICATION.json). Medusaluna sustituye las formas felinas por huevo de nácar → caballito de sueños → medusa onírica → estrella astral → medusa de las mil lunas; elegir forma inicial y restaurar capítulo/evolución con Continuar. No confundir con el despliegue público hasta superar la CI. [Validación](docs/V635-VALIDATION.json) · [Publicación](docs/V635-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+Registro de entrega pública: `ohana-635` / acceso al multijugador. [Validación](docs/V635-VALIDATION.json) · [Publicación](docs/V635-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+
+**En revisión, todavía sin publicar:** `ohana-636` (PR #450). [Plan de validación](docs/V636-VALIDATION.json) · [Estado de publicación](docs/V636-PUBLICATION.json). Medusaluna sustituye las formas felinas por huevo de nácar → caballito de sueños → medusa onírica → estrella astral → medusa de las mil lunas; elegir forma inicial y restaurar capítulo/evolución con Continuar. No confundir con el despliegue público hasta superar la CI.
 
 ## Historial de desarrollo
 
