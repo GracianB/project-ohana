@@ -109,10 +109,10 @@ chispin: [
 "La nube reconoce a su compañero: Chispín ya sabe cuidar de una tempestad.",
 ],
 cat: [
-"Le brotan alas de luna: Michi flota, gira y deja polvo de estrellas.",
-"Aprende a saltar entre reflejos de luna sin tocar el suelo.",
-"El eclipse responde a sus zarpas: nueve huellas, ninguna igual.",
-"Nueve vidas, un solo guardián. Y todavía exige caricias.",
+"Del huevo de nácar nace un caballito que nada por el aire y dibuja espirales de luz.",
+"Sus aletas se funden en una campana transparente: Medusa Onírica despierta las mareas.",
+"Cinco brazos astrales abrazan el océano: la Estrella Astral aprende a guiar las corrientes.",
+"Medusa de las Mil Lunas: una corona de galaxias, once tentáculos y un corazón luminoso.",
 ],
 dragon: [
 "Sus pequeñas alas vencen al suelo por primera vez.",
