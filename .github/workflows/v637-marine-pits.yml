@@ -25,7 +25,7 @@ jobs:
       - name: Chromium
         run: npx playwright install chromium
       - name: Locate Chromium
-        run: node --input-type=module -e 'import fs from "node:fs"; import {chromium} from "playwright"; fs.appendFileSync(process.env.GITHUB_ENV, "CHROMIUM_BIN="+chromium.executablePath()+"\\n");'
+        run: node --input-type=module -e 'import fs from "node:fs"; import {chromium} from "playwright"; fs.appendFileSync(process.env.GITHUB_ENV, "CHROMIUM_BIN="+chromium.executablePath()+"\n");'
       - name: Resume with unlocked form through real camp and HUD
         run: node tests/browser/medusaluna-resume.mjs
       - name: Real death in authored pits across seven chapters
