@@ -687,7 +687,7 @@ const PRECACHE_REVISIONS = {
   "manifest.json": "3e910803d5c4ea7d158370d0b5becb462c23d77b",
   "favicon.svg": "0abf301dd591cf61ff22025c55d3308d6a61c8d7",
   "style.css": "6769861d61e32ff7f4e6bacd4259f4b890c775f0",
-  "title-stage.css": "4278f93ecf501cbcef100859ed7fed1a7a5aeb6f",
+  "title-stage.css": "ea4c6a0e71a05bd91e46977729f27745cf6278ea",
   "atrium-interact.css": "d7da49b1a7d2c0d5ac3bef25d5ba8fd79e86ea5b",
   "hud.css": "5379f6f940e99575fb50a637088ecb933cdae308",
   "evo.css": "132220ace77530b5c4e976e03f43addfef22d343",
