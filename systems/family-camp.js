@@ -1,4 +1,6 @@
 import {readKeepsakes,KEEPSAKES} from './keepsakes.js';
+import {saveStore} from './save.js';
+import {unlockedEvolution} from './evolution-ownership.js';
 import {HERO_IDENTITY} from '../characters/identity-v2.js';
 import {markAt} from '../characters/signature.js';
 import {WORLD1_CHAPTER_PLANS} from './world1-rooms.js';
@@ -52,7 +54,7 @@ export function mountFamilyCamp({select,onBegin,document:doc=globalThis.document
  const menu=doc.getElementById('char-select');if(!menu||doc.getElementById('family-camp'))return;
  menu.classList.add('camp-on');menu.dataset.selectorMode='family-camp';
  const host=doc.createElement('section');host.id='family-camp';host.setAttribute('aria-label','El Observatorio de las Diez Voces');
- host.innerHTML=`<div class="camp-scene"><div class="camp-scene-heading"><span>ANTES DE SALVAR EL MUNDO…</span><strong>Un ratito con la familia.</strong></div><canvas id="camp-canvas" tabindex="0" role="img" aria-label="Cinco islas de la familia. Flechas o WASD mueven la luciérnaga; acércate a un personaje o elígelo en los botones inferiores."></canvas><p class="camp-instructions">Mueve la luciérnaga · toca un personaje · descubre sus travesuras</p><div class="camp-mystery" aria-label="La U revela un compañero sorpresa"><span aria-hidden="true">?</span><p>Una ayuda inesperada.<small>Tu compañero se revela al pulsar U.</small></p></div></div><aside class="camp-dossier"><p class="camp-eyebrow">TU COMPAÑERO DE AVENTURA</p><h2 id="camp-name"></h2><p id="camp-role"></p><div class="camp-album-art"><canvas id="camp-portrait" width="300" height="240" role="img"></canvas><span id="camp-form-name"></span></div><p class="camp-form-prompt">ELIGE TU FORMA INICIAL</p><div class="camp-forms" role="group" aria-label="Elige la forma inicial de tu personaje">${[0,1,2,3,4].map(n=>`<button type="button" data-camp-form="${n}" aria-label="Ver forma ${n+1}"><canvas width="100" height="120" aria-hidden="true"></canvas><span class="camp-form-index">${n+1}</span><span class="camp-form-title" aria-hidden="true"></span></button>`).join('')}</div><p id="camp-route"></p><dl id="camp-stats"></dl><div class="camp-talk" aria-live="polite"><p id="camp-line"></p></div><div class="camp-film-controls"><button type="button" id="camp-film">Ver su travesura</button><button type="button" id="camp-film-stop" hidden>Terminar escena</button></div><button type="button" id="camp-start">¡Vámonos de aventura! ↗</button></aside>`;
+ host.innerHTML=`<div class="camp-scene"><div class="camp-scene-heading"><span>ANTES DE SALVAR EL MUNDO…</span><strong>Un ratito con la familia.</strong></div><canvas id="camp-canvas" tabindex="0" role="img" aria-label="Cinco islas de la familia. Flechas o WASD mueven la luciérnaga; acércate a un personaje o elígelo en los botones inferiores."></canvas><p class="camp-instructions">Mueve la luciérnaga · toca un personaje · descubre sus travesuras</p><div class="camp-mystery" aria-label="La U revela un compañero sorpresa"><span aria-hidden="true">?</span><p>Una ayuda inesperada.<small>Tu compañero se revela al pulsar U.</small></p></div></div><aside class="camp-dossier"><p class="camp-eyebrow">TU COMPAÑERO DE AVENTURA</p><h2 id="camp-name"></h2><p id="camp-role"></p><div class="camp-album-art"><canvas id="camp-portrait" width="300" height="240" role="img"></canvas><span id="camp-form-name"></span></div><p class="camp-form-prompt">ELIGE TU FORMA INICIAL</p><div class="camp-forms" role="group" aria-label="Elige la forma inicial de tu personaje">${[0,1,2,3,4].map(n=>`<button type="button" data-camp-form="${n}" aria-label="Ver forma ${n+1}"><canvas width="100" height="120" aria-hidden="true"></canvas><span class="camp-form-index">${n+1}</span><span class="camp-form-title" aria-hidden="true"></span></button>`).join('')}</div><p id="camp-resume-hint" aria-live="polite"></p><p id="camp-route"></p><dl id="camp-stats"></dl><div class="camp-talk" aria-live="polite"><p id="camp-line"></p></div><div class="camp-film-controls"><button type="button" id="camp-film">Ver su travesura</button><button type="button" id="camp-film-stop" hidden>Terminar escena</button></div><button type="button" id="camp-start">¡Vámonos de aventura! ↗</button><button type="button" id="camp-resume" hidden>Continuar partida guardada →</button></aside>`;
  menu.querySelector('.hero-stage').before(host);
  host.querySelector('.camp-scene').append(menu.querySelector('.hero-stage'));
  let railSize='',featuredPaintKey='';
@@ -93,6 +95,16 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  const idleActors=new Map();
  const $=id=>host.querySelector('#'+id);
  function update(){host.dataset.final='false';const def=ROSTER.find(r=>r.id===selected),data=CAMP_HEROES[selected],f=def.forms[form];
+ const previous=selected==='cat'?saveStore.read('cat'):null;
+ const unlocked=previous?unlockedEvolution(previous):-1;
+ host.dataset.resumeCheckpoint=String(!!previous);
+ const selectedResume=globalThis.__ohanaResumeForm;
+ const willResume=Number.isInteger(selectedResume)&&selectedResume>=0&&selectedResume<=unlocked?selectedResume:previous?.evo;
+ $('camp-resume').hidden=!previous;
+ if(previous){
+  $('camp-resume').textContent='CONTINUAR · '+def.evoNames[willResume]+' →';
+  $('camp-resume-hint').textContent='PARTIDA GUARDADA · '+def.evoNames[previous.evo]+' · '+(unlocked+1)+' de 5 formas desbloqueadas. Selecciona una de tus formas y pulsa CONTINUAR para retomar el capítulo sin perder XP.';
+ }else $('camp-resume-hint').textContent='';
  $('camp-start').textContent=w1sel?'Entrar en su capítulo →':'¡Vámonos de aventura! ↗';
  $('camp-name').textContent=def.name;$('camp-role').textContent=w1sel?'Su capítulo · '+(def.identity?.title||'comienza como bebé'):data.role;$('camp-route').textContent=w1sel?('VENTAJA: '+def.identity?.strength+' · RETO: '+def.identity?.weakness):'Tu camino: '+data.route+'.';$('camp-form-name').textContent=def.evoNames[form];
  portrait.setAttribute('aria-label',def.evoNames[form]+' · personaje real');
@@ -106,6 +118,8 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
   b.setAttribute('aria-pressed',String(i===form));
   b.setAttribute('aria-label',`Elegir forma ${i+1}: ${def.evoNames[i]}`);
   b.title=def.evoNames[i];
+  b.dataset.resumeOwned=String(!!previous&&i<=unlocked);
+  if(previous)b.title+=' · '+(i<=unlocked?'desbloqueada para CONTINUAR':'solo vista previa/nueva partida');
   const caption=b.querySelector('.camp-form-title');if(caption)caption.textContent=def.evoNames[i];
  }
  $('camp-line').textContent=HERO_IDENTITY[selected].strength+' · '+HERO_IDENTITY[selected].weakness;host.dataset.hero=selected;host.dataset.form=String(form);
@@ -125,7 +139,14 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  }update();}
  const selectHero=(id,walk=false)=>{choose(id,walk);select(id);};
  addEventListener('ohana-title-hero',e=>{if(e.detail.id!==selected||host.dataset.final==='true')choose(e.detail.id);});
- host.querySelector('.camp-forms').addEventListener('click',e=>{const b=e.target.closest('[data-camp-form]');if(b){form=Number(b.dataset.campForm);update();}});
+ host.querySelector('.camp-forms').addEventListener('click',e=>{const b=e.target.closest('[data-camp-form]');if(b){form=Number(b.dataset.campForm);
+  if(selected==='cat'){
+   const saved=saveStore.read('cat');
+   globalThis.__ohanaResumeForm=saved&&form<=unlockedEvolution(saved)?form:null;
+   dispatchEvent(new Event('ohana-resume-form-change'));
+  }
+  update();}});
+ $('camp-resume').onclick=()=>doc.getElementById('btn-continue')?.click();
  $('camp-film').onclick=()=>{film={id:selected,start:time};$('camp-line').textContent=campPresentation(selected,0).line;$('camp-film-stop').hidden=false;$('camp-film').hidden=true;};
  $('camp-film-stop').onclick=()=>{stopFilm();$('camp-line').textContent=CAMP_HEROES[selected].lines[0];};
  $('camp-start').onclick=()=>{
