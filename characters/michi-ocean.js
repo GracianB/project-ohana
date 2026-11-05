@@ -10,10 +10,11 @@ function path(ctx, color, stroke, width, fn) {
 function oval(ctx, x, y, rx, ry, color, stroke, width = 1) {
   path(ctx, color, stroke, width, () => ctx.ellipse(x, y, rx, ry, 0, 0, TAU));
 }
-function glow(ctx, x, y, radius, inner, outer = 'rgba(110,190,255,0)') {
-  const g = ctx.createRadialGradient(x, y, 2, x, y, radius);
-  g.addColorStop(0, inner); g.addColorStop(1, outer);
-  oval(ctx, x, y, radius, radius, g);
+function glow(ctx,x,y,radius,inner) {
+  // Three transparent vector halos: no expensive per-frame gradients.
+  ctx.save();
+  for(let i=3;i>0;i--){ctx.globalAlpha*=.66;oval(ctx,x,y,radius*i/3,radius*i/3,inner);}
+  ctx.restore();
 }
 function sparkle(ctx, x, y, r, color = '#fff9ed') {
   ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = Math.max(.8, r * .2);
@@ -41,9 +42,7 @@ function ribbon(ctx, pts, width, fill, edge = '#8e64c4') {
   ctx.lineWidth=Math.max(.8,width*.19);ctx.strokeStyle='#fff7ef';ctx.stroke();ctx.restore();
 }
 function bell(ctx, w, h, y, colors, beat) {
-  const grad=ctx.createLinearGradient(0,y-h,0,y+8);
-  grad.addColorStop(0,colors[0]);grad.addColorStop(.48,colors[1]);grad.addColorStop(1,colors[2]);
-  path(ctx,grad,'#f8eaff',1.6,()=>{
+  path(ctx,colors[1],'#f8eaff',1.6,()=>{
     ctx.moveTo(-w,y);
     ctx.bezierCurveTo(-w*1.08,y-h*.58,-w*.53,y-h,w*.03,y-h);
     ctx.bezierCurveTo(w*.58,y-h,w*1.06,y-h*.64,w,y);
@@ -53,7 +52,8 @@ function bell(ctx, w, h, y, colors, beat) {
     ctx.quadraticCurveTo(-w*.72,y+6+beat*2,-w,y);
   });
   ctx.save();ctx.globalAlpha=.45;
-  oval(ctx,0,y-h*.69,w*.55,h*.16,'#fffaff');ctx.restore();
+  oval(ctx,0,y-h*.69,w*.55,h*.16,colors[0]);ctx.restore();
+  oval(ctx,0,y-h*.08,w*.74,2.6,colors[2]);
   for(let n=-2;n<=2;n++) {
     oval(ctx,n*w*.3,y-h*.26,2.6,3.6,n%2?'#fff0b0':'#b7faff');
   }
@@ -76,8 +76,7 @@ function egg(ctx, t) {
     ribbon(ctx,[x,-5,x+sway*2,-16,x+sway*3,-8-(i%3)*3],2.8,
       i%2?'#89ead8':'#fac6d9','#6b84b4');
   }
-  const shell=ctx.createLinearGradient(-28,-62,28,-3);
-  shell.addColorStop(0,'#fff9dd');shell.addColorStop(.35,'#f7daff');shell.addColorStop(.72,'#a9e5f6');shell.addColorStop(1,'#dcb1fc');
+  const shell='#f7daff';
   ctx.save();ctx.scale(1+pulse,1-pulse);
   path(ctx,shell,'#fff9ef',2,()=>{
     ctx.moveTo(0,-65);ctx.bezierCurveTo(-14,-66,-26,-51,-25,-32);
@@ -106,8 +105,7 @@ function seahorse(ctx,t,state) {
   // Curl is a single uninterrupted spiral, not a detached ring.
   ribbon(ctx,[-3,-30,34+tail,-4,8,-5],13,'#85d9e9','#4583b3');
   ribbon(ctx,[8,-5,-16,-9,-5,-20],8,'#c8f8e8','#4583b3');
-  const body=ctx.createLinearGradient(-22,-85,24,-15);
-  body.addColorStop(0,'#ffe8cf');body.addColorStop(.52,'#f6bddb');body.addColorStop(1,'#75dbdc');
+  const body='#f6bddb';
   path(ctx,body,'#6286b6',2,()=>{
     ctx.moveTo(-8,-75);ctx.bezierCurveTo(-25,-69,-24,-44,-16,-25);
     ctx.quadraticCurveTo(-7,-10,14,-25);ctx.quadraticCurveTo(30,-41,18,-54);
@@ -124,7 +122,12 @@ function seahorse(ctx,t,state) {
   eyes(ctx,-2,-83,.69,'#efa6b6',state==='hurt');
   oval(ctx,27,-64,4,2,'#ffccab');
 }
-function jelly(ctx,t,royal=false,state='idle'){
+const SEA_PALETTES = Object.freeze([
+  ['#e6faff','#afeced','#ffbddd'],['#fff4e2','#c3b7fa','#f3b4f6'],
+  ['#dcf8ff','#9fcaf7','#ffe8bd'],['#fae5ff','#d4c5f8','#83f2ee'],
+  ['#f3ffda','#b0efd5','#f4b5d1'],['#ffe9ec','#bbcaef','#9ef0df']
+]);
+function jelly(ctx,t,royal=false,state='idle',swatch=SEA_PALETTES[0]){
   const beat=Math.sin(t*.09),isRoyal=!!royal;
   const y=isRoyal?-63:-55,w=isRoyal?49:36,h=isRoyal?60:43;
   glow(ctx,0,y-h*.6,isRoyal?84:68,isRoyal?'rgba(171,133,255,.27)':'rgba(117,236,248,.29)');
@@ -139,7 +142,7 @@ function jelly(ctx,t,royal=false,state='idle'){
       });ctx.restore();
     }
   }
-  bell(ctx,w,h,y,isRoyal?['#e8d1ff','#b9d2ff','#9d84e6']:['#e6faff','#afeced','#ffbddd'],beat);
+  bell(ctx,w,h,y,isRoyal?[swatch[0],swatch[1],swatch[2]]:swatch,beat);
   eyes(ctx,0,y-h*.48,isRoyal?1:.82,'#ffaecf',state==='hurt');
   if(isRoyal){
     // Halo, regal crown and cosmic lanterns are part of the creature, not feline ears.
@@ -166,9 +169,7 @@ function starfish(ctx,t,state) {
     const angle=-Math.PI/2+i*Math.PI/5,r=i%2===0?out:inn;
     points.push([Math.cos(angle)*r,Math.sin(angle)*r]);
   }
-  const grad=ctx.createRadialGradient(-10,-12,4,0,0,58);
-  grad.addColorStop(0,'#fff6d9');grad.addColorStop(.48,'#ffc5d8');grad.addColorStop(1,'#c77ce3');
-  path(ctx,grad,'#8a68b5',2,()=>{
+  path(ctx,'#ffc5d8','#8a68b5',2,()=>{
     const p=points;
     ctx.moveTo((p[9][0]+p[0][0])/2,(p[9][1]+p[0][1])/2);
     for(let i=0;i<10;i++)ctx.quadraticCurveTo(p[i][0],p[i][1],(p[i][0]+p[(i+1)%10][0])/2,(p[i][1]+p[(i+1)%10][1])/2);
@@ -200,9 +201,9 @@ export function drawMedusaluna(ctx, pose = {}, form = 0) {
   else if(state==='fall')ctx.scale(1.06,.94);
   if(f===0)egg(ctx,t);
   else if(f===1)seahorse(ctx,t,state);
-  else if(f===2)jelly(ctx,t,false,state);
+  else if(f===2)jelly(ctx,t,false,state,SEA_PALETTES[Math.abs((Math.imul((Number(pose.michiSeed)||0)^0x452d9f3b,2654435761)>>>0))%SEA_PALETTES.length]);
   else if(f===3)starfish(ctx,t,state);
-  else jelly(ctx,t,true,state);
+  else jelly(ctx,t,true,state,SEA_PALETTES[Math.abs((Math.imul((Number(pose.michiSeed)||0)^0x452d9f3b,2654435761)>>>0))%SEA_PALETTES.length]);
   // Subtle deterministic ocean dust provides a textured, animated silhouette.
   ctx.save();ctx.globalAlpha*=.25;
   for(let i=0;i<22;i++){
