@@ -70,10 +70,15 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
    stopFilm();
    host.dataset.final='true';$('camp-name').textContent='El Corazón';$('camp-role').textContent='Diez guardianes · diez recuerdos · Quimera';$('camp-line').textContent=r.card.tagline;$('camp-start').textContent='Entrar en el Corazón →';
   }else if(r.card?.hero){
-   if(r.card.hero!==selected)selectHero(r.card.hero);
+   if(r.action!=='enter'&&r.card.hero!==selected)selectHero(r.card.hero);
    else if(host.dataset.final==='true')update();
   }
-  if(r.action==='enter'){globalThis.__ohanaWorld1Start=r.room;onBegin();}
+  if(r.action==='enter'){
+   globalThis.__ohanaWorld1Start=r.room;
+   globalThis.__ohanaStartHero=selected;
+   globalThis.__ohanaStartForm=form;
+   onBegin();
+  }
   else if(r.action==='locked'&&r.message)$('camp-line').textContent=r.message;
  };
  if(w1sel){
@@ -115,7 +120,17 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  host.querySelector('.camp-forms').addEventListener('click',e=>{const b=e.target.closest('[data-camp-form]');if(b){form=Number(b.dataset.campForm);update();}});
  $('camp-film').onclick=()=>{film={id:selected,start:time};$('camp-line').textContent=campPresentation(selected,0).line;$('camp-film-stop').hidden=false;$('camp-film').hidden=true;};
  $('camp-film-stop').onclick=()=>{stopFilm();$('camp-line').textContent=CAMP_HEROES[selected].lines[0];};
- $('camp-start').onclick=()=>w1sel?w1enter(world1SelectKey(w1sel,'Enter')):onBegin();
+ $('camp-start').onclick=()=>{
+  globalThis.__ohanaStartHero=selected;
+  globalThis.__ohanaStartForm=form;
+  if(w1sel){
+   const currentCard=w1sel.cards[w1sel.index];
+   if(currentCard&&currentCard.unlocked){
+    globalThis.__ohanaWorld1Start=currentCard.room;
+   }
+   w1enter(world1SelectKey(w1sel,'Enter'));
+  }else onBegin();
+ };
  function position(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/view.scale+view.x,y:(e.clientY-r.top)/view.scale};}
  canvas.addEventListener('pointerdown',e=>{canvas.focus({preventScroll:true});const p=position(e),id=campNearest(p.x,p.y+35,100);if(id)selectHero(id);else target={x:Math.max(140,Math.min(1230,p.x)),y:Math.max(190,Math.min(540,p.y))};});
  canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','w','a','s','d','W','A','S','D'].includes(e.key)){e.preventDefault();e.stopPropagation();if(!keys.size)walkSelectionLatched=false;keys.add(e.key.toLowerCase());}});

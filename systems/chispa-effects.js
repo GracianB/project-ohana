@@ -4,27 +4,129 @@ const unit=x=>Math.max(0,Math.min(1,Number(x)||0));
 function oval(ctx,x,y,rx,ry,c){ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fill();}
 export function drawChispaCloud(ctx,x,y,scale=1,charge=0,t=0,reduced=false){
  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
- // A suspended thunder seal: hard metallic conductors, no flame or cloud silhouette.
- ctx.strokeStyle='#e5cf86';ctx.lineWidth=3;
- ctx.beginPath();ctx.ellipse(0,0,43,16,0,0,TAU);ctx.stroke();
- ctx.beginPath();ctx.ellipse(0,0,24,32,0,0,TAU);ctx.stroke();
- ctx.strokeStyle='#adf0ff';ctx.lineWidth=2;
- const turn=reduced?0:t*.025;
- for(let i=0;i<4;i++){
-  const a=i*TAU/4+turn,x=Math.cos(a)*42,y=Math.sin(a)*16;
-  ctx.fillStyle='#fffefa';ctx.beginPath();ctx.moveTo(x,y-7);ctx.lineTo(x+4,y);ctx.lineTo(x,y+7);ctx.lineTo(x-4,y);ctx.closePath();ctx.fill();ctx.stroke();
+ const time = reduced ? 0 : t;
+ const pulse = Math.sin(time * 0.12);
+ const flash = (!reduced && Math.sin(time * 0.25) > 0.6) ? 0.9 : 0.35;
+
+ // Turbulent layered electric thunderhead
+ ctx.save();
+ ctx.shadowColor = "#38f0ff";
+ ctx.shadowBlur = reduced ? 0 : 16;
+ 
+ // Base storm cloud lobes
+ ctx.fillStyle = "#1e163b";
+ ctx.strokeStyle = "#38f0ff";
+ ctx.lineWidth = 2.2;
+ ctx.beginPath();
+ ctx.arc(-24, 2, 22, 0, TAU);
+ ctx.arc(0, -10, 26, 0, TAU);
+ ctx.arc(24, 2, 22, 0, TAU);
+ ctx.arc(10, 12, 18, 0, TAU);
+ ctx.arc(-10, 12, 18, 0, TAU);
+ ctx.fill();
+ ctx.stroke();
+
+ // Internal electric storm illumination
+ ctx.fillStyle = `rgba(100, 230, 255, ${flash})`;
+ ctx.beginPath();
+ ctx.arc(0, -6, 17, 0, TAU);
+ ctx.fill();
+
+ ctx.fillStyle = `rgba(255, 238, 90, ${flash * 0.8})`;
+ ctx.beginPath();
+ ctx.arc(2, -4, 9, 0, TAU);
+ ctx.fill();
+
+ // Orbiting electric energy ring
+ const turn = reduced ? 0 : time * 0.04;
+ ctx.strokeStyle = "#ffe847";
+ ctx.lineWidth = 1.6;
+ ctx.beginPath();
+ ctx.ellipse(0, 4, 46, 18, turn * 0.5, 0, TAU);
+ ctx.stroke();
+
+ // Plasma spark conductors along the perimeter
+ for (let i = 0; i < 4; i++) {
+  const a = i * TAU / 4 + turn;
+  const sx = Math.cos(a) * 44, sy = 4 + Math.sin(a) * 17;
+  ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#fff176";
+  ctx.beginPath();
+  ctx.arc(sx, sy, 2.5 + (i % 2), 0, TAU);
+  ctx.fill();
  }
- ctx.beginPath();ctx.moveTo(5,-25);ctx.lineTo(-9,2);ctx.lineTo(5,-1);ctx.lineTo(-5,26);ctx.lineTo(13,-6);ctx.lineTo(0,-3);ctx.stroke();
+
+ // Central high-voltage lightning crest
+ ctx.strokeStyle = "#ffffff";
+ ctx.lineWidth = 2.4;
+ ctx.lineCap = "round";
+ ctx.lineJoin = "round";
+ ctx.beginPath();
+ ctx.moveTo(6, -22);
+ ctx.lineTo(-8, -2);
+ ctx.lineTo(4, -3);
+ ctx.lineTo(-6, 20);
+ ctx.lineTo(11, -5);
+ ctx.lineTo(0, -4);
+ ctx.closePath();
+ ctx.fillStyle = "#ffe742";
+ ctx.fill();
+ ctx.stroke();
+
+ ctx.restore();
  ctx.restore();
 }
 function lightning(ctx,x1,y1,x2,y2,width,t,reduced){
- const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy)||1,n=9;
+ const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy)||1,n=10;
  const points=[[x1,y1]];
- for(let i=1;i<n;i++){const k=i/n,off=(reduced?Math.sin(i*2.4):Math.sin(i*2.4+Math.floor(t/3)*1.3))*Math.min(16,len*.07)*Math.sin(k*Math.PI);points.push([x1+dx*k-dy/len*off,y1+dy*k+dx/len*off]);}
- points.push([x2,y2]);
- for(const [c,w] of [['#8bdff5',width+4],['#e2cc86',width+1],['#ffffff',Math.max(1,width*.35)]]){
-  ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
+ for(let i=1;i<n;i++){
+  const k=i/n;
+  const off=(reduced?Math.sin(i*2.4):Math.sin(i*2.8+Math.floor(t/2)*1.4))*Math.min(22,len*0.09)*Math.sin(k*Math.PI);
+  points.push([x1+dx*k-dy/len*off,y1+dy*k+dx/len*off]);
  }
+ points.push([x2,y2]);
+
+ // Layer 1: Electric cyan outer glow
+ ctx.save();
+ ctx.lineCap = "round";
+ ctx.lineJoin = "round";
+ ctx.strokeStyle = "#00e5ff";
+ ctx.lineWidth = width + 7;
+ ctx.globalAlpha = (ctx.globalAlpha || 1) * 0.38;
+ ctx.beginPath();
+ points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+ ctx.stroke();
+
+ // Layer 2: Radiant thunder gold
+ ctx.strokeStyle = "#ffe742";
+ ctx.lineWidth = width + 2.5;
+ ctx.globalAlpha = 0.85;
+ ctx.beginPath();
+ points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+ ctx.stroke();
+
+ // Layer 3: Blinding pure white core
+ ctx.strokeStyle = "#ffffff";
+ ctx.lineWidth = Math.max(1.4, width * 0.35);
+ ctx.globalAlpha = 1.0;
+ ctx.beginPath();
+ points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+ ctx.stroke();
+
+ // Fork branches
+ if (!reduced && len > 50) {
+  for (let b = 2; b < n - 2; b += 3) {
+   const [bx, by] = points[b];
+   const side = b % 2 === 0 ? 1 : -1;
+   const fLen = 14 + (b % 3) * 6;
+   ctx.strokeStyle = "#8beeff";
+   ctx.lineWidth = Math.max(1, width * 0.3);
+   ctx.beginPath();
+   ctx.moveTo(bx, by);
+   ctx.lineTo(bx + side * fLen * 0.7 - dy / len * 4, by + fLen * 0.5 + dx / len * 4);
+   ctx.stroke();
+  }
+ }
+ ctx.restore();
 }
 export function drawChispaStorm(ctx,f,cam,t,reduced=false){
  ctx.save();

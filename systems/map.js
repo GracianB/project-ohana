@@ -320,12 +320,42 @@ export function drawSigns(ctx, room, cam, t, evo) {
     ctx.lineCap = "butt";
 
     const bankX=hazard.x-cam.x-34,bankY=hazard.y-cam.y+20;
-    ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.shadowBlur=0;
-    ctx.fillStyle='#644832';ctx.fillRect(bankX-3,bankY-75,7,79);
-    ctx.fillStyle='#ffdf70';ctx.strokeStyle='#302b26';ctx.lineWidth=2;
-    rrect(ctx,bankX-33,bankY-77,66,28,3);ctx.fill();ctx.stroke();
-    ctx.fillStyle='#302b26';ctx.font='900 11px Outfit,system-ui,sans-serif';
+    ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
+    
+    // Sleek cyber-fantasy neon lamppost
+    ctx.fillStyle='#0a1019';ctx.fillRect(bankX-3,bankY-85,6,89);
+    // Neon vertical runner strip
+    ctx.fillStyle='#00f0ff';ctx.fillRect(bankX-1,bankY-85,2,89);
+    
+    // Top neon lantern beacon
+    const beaconPulse = 0.7 + 0.3 * Math.sin(t / 5);
+    ctx.save();
+    ctx.shadowColor = deadly ? '#ff2b56' : '#00f0ff';
+    ctx.shadowBlur = 14 * beaconPulse;
+    ctx.fillStyle = deadly ? '#ff2b56' : '#00f0ff';
+    ctx.beginPath();
+    ctx.ellipse(bankX, bankY-90, 8, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(bankX, bankY-90, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Luminous neon danger card
+    ctx.save();
+    const neonColor = deadly ? '#ff2a55' : '#00e5ff';
+    ctx.shadowColor = neonColor;
+    ctx.shadowBlur = 12 * beaconPulse;
+    ctx.fillStyle = 'rgba(7, 12, 20, 0.92)';
+    ctx.strokeStyle = neonColor;
+    ctx.lineWidth = 1.8;
+    rrect(ctx,bankX-34,bankY-78,68,26,6);ctx.fill();ctx.stroke();
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 11px Outfit,system-ui,sans-serif';
     ctx.fillText('DANGER',bankX,bankY-62);
+    ctx.restore();
 
     ctx.restore();
   }

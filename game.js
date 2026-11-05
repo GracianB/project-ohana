@@ -400,7 +400,13 @@ pauseLayer.setAttribute("aria-hidden", paused ? "false" : "true");
 }function closeOverlays() {
 closeFinalHeroChoice(game);
 DOM.help?.classList.remove("open");
+DOM.help?.setAttribute("aria-hidden", "true");
 DOM.map?.classList.remove("open");
+DOM.map?.setAttribute("aria-hidden", "true");
+DOM.pause?.classList.remove("open");
+DOM.pause?.setAttribute("aria-hidden", "true");
+document.getElementById("world1-album")?.classList.remove("open");
+document.getElementById("world1-album")?.setAttribute("aria-hidden", "true");
 Festival.close();
 setPaused(false);
 }
@@ -639,11 +645,25 @@ if(game.personalAdventureSolo&&!game._e2eLegacyStart){
  const finalEntry=id==="w1-final"&&world1SealsComplete(game.world1Seals);
  const chapter=finalEntry?{hero:game.finalRitualEnabled?(game.player?.id||'kilo'):'kilo',reset:game.finalRitualEnabled?game.player?.evo<4:game.roomId!==id||game.player?.id!=="kilo"}:world1ChapterEntry(id,{hero:game.player?.id,previousRoom:game.roomId,resume:!!game._resumeCheckpoint});
  if(chapter?.reset){
-  const def=ROSTER.find(h=>h.id===chapter.hero);
-  game.player=makePlayer(def);
-  if(finalEntry){game.player.evo=4;game.player.xp=420;applyForm(game.player,{silent:true});}
-  game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
-  game.player.uBonds=readStoredUBonds(localStorage,def.id);
+  if(game._chosenStartForm!=null&&game.player){
+   const targetHero=(globalThis.__ohanaStartHero&&ROSTER.some(h=>h.id===globalThis.__ohanaStartHero))?globalThis.__ohanaStartHero:(game.player?.id||chapter.hero);
+   const def=ROSTER.find(h=>h.id===targetHero)||ROSTER.find(h=>h.id===chapter.hero);
+   game.player=makePlayer(def);
+   game.player.evo=game._chosenStartForm;
+   game.player.xp=XP_NEED[game._chosenStartForm]||0;
+   applyForm(game.player,{silent:true});
+   paintFit(game.player);
+   game._chosenStartForm=null;
+   globalThis.__ohanaStartHero=null;
+   globalThis.__ohanaStartForm=null;
+  }else{
+   const def=ROSTER.find(h=>h.id===chapter.hero);
+   game.player=makePlayer(def);
+   if(finalEntry){game.player.evo=4;game.player.xp=420;applyForm(game.player,{silent:true});}
+  }
+  const curDef=ROSTER.find(h=>h.id===game.player.id)||ROSTER[0];
+  game.player.uPartner=loadUPartnerChoice(localStorage,curDef.id);
+  game.player.uBonds=readStoredUBonds(localStorage,curDef.id);
   game.player.uExp=bondXP(game.player);
   game.player.uSurprise=!e2eEnabled;
   renderAbilityBar();
@@ -961,6 +981,14 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
+if (typeof globalThis.__ohanaStartForm === "number") {
+  const chosenForm = Math.max(0, Math.min(4, globalThis.__ohanaStartForm));
+  game.player.evo = chosenForm;
+  game.player.xp = XP_NEED[chosenForm] || 0;
+  applyForm(game.player, { silent: true });
+  paintFit(game.player);
+  game._chosenStartForm = chosenForm;
+}
 if(def.id==='kilo')game.player._kiloEntranceAt=t;
 else game.player._ohanaEntranceAt=t;
 // Browser audits can pin a pair; normal play always invokes a surprise.
@@ -1042,7 +1070,13 @@ game.best = null;
 Surprises.reset();
 Festival.reset();
 game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
-game.running = true; closeOverlays();
+game.running = true;
+paused = false;
+closeOverlays();
+DOM.pause?.classList.remove("open");
+DOM.pause?.setAttribute("aria-hidden", "true");
+document.getElementById("world1-album")?.classList.remove("open");
+document.getElementById("world1-album")?.setAttribute("aria-hidden", "true");
 // V468: una partida nueva en solitario empieza en el Mundo 1 (Claro de Kilo).
 // V470: el arnés e2e (window.__OHANA_E2E.start) conserva el arranque clásico del Mundo 2
 // para las suites de navegador heredadas; el jugador real empieza en el Mundo 1.
@@ -3813,7 +3847,7 @@ try { input?.reset(); } catch (_) {}
 try { clock.reset(); } catch (_) {}
 game.hitstop = 0;
 game.renderDirty = true;
-if (game.running) {
+if (game.running && error?.fatal) {
 paused = true;
 try { DOM.pause?.classList.add("open"); } catch (_) {}
 }

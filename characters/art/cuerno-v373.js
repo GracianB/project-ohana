@@ -369,6 +369,26 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.lineTo(bx+nx*.72,by+ny*.72);ctx.closePath();ctx.fillStyle=f===2?'#f0e1ff':P.night?'#c9c1ed':'#fff9de';ctx.fill();
   ctx.strokeStyle = P.night ? "#6ad8e0" : "#e8a23a"; ctx.lineWidth = lw * .6;
   for (let i = 1; i < 4; i++) { const k = i / 4; ctx.beginPath(); ctx.moveTo(bx - nx * (1 - k) + (tx - bx) * k, by - ny * (1 - k) + (ty - by) * k); ctx.lineTo(bx + nx * (1 - k) + (tx - bx) * (k + .08), by + ny * (1 - k) + (ty - by) * (k + .08)); ctx.stroke(); }
+  if (!dead) {
+    const ambientTwinkle = face.reduced ? 0.8 : 0.7 + 0.3 * Math.sin(t * 0.08);
+    ctx.save();
+    star(ctx, tx, ty, (1.8 * ambientTwinkle) * u, P.night ? "#ffffff" : "#fffbe8");
+    ctx.globalAlpha = 0.65 * ambientTwinkle;
+    ctx.strokeStyle = P.night ? "#7af0ff" : "#ffd77a";
+    ctx.lineWidth = lw * 0.55;
+    ctx.beginPath();
+    ctx.arc(tx, ty, 3.2 * u * ambientTwinkle, 0, TAU);
+    ctx.stroke();
+    // Spiral bioluminescent rainbow specks along horn
+    for (let s = 1; s <= 3; s++) {
+      const sk = s / 4, sx = bx + (tx - bx) * sk, sy = by + (ty - by) * sk;
+      ctx.fillStyle = IRIS[(s * 2) % 7];
+      ctx.beginPath();
+      ctx.arc(sx + Math.sin(t * 0.1 + s) * 1.5 * u, sy, 1.2 * u, 0, TAU);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
   if (att && atk > .18 && atk < .85) {
     // V466: the horn splits light into a seven-colour prism fan (layered alpha,
     // no gradients) with a white starburst at the tip.

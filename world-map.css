@@ -1,9 +1,9 @@
 /* PROJECT OHANA V40 · WORLD GRAPH MAP */
 /* An illustrated atlas, backed by the actual room graph. */
-#map-overlay .panel{width:min(960px,calc(100vw - 24px))!important;max-height:calc(100dvh - 28px)!important;overflow:auto;padding:28px!important;background:#f4efdF!important;color:#193d43;border:1px solid #fff7dc;border-radius:24px!important;box-shadow:0 28px 100px #001d2b88;text-align:left;}
-#map-title{font:600 32px Fredoka,sans-serif;color:#183b40;margin:4px 0 8px;}
-.map-eyebrow{font:700 10px Outfit,sans-serif;letter-spacing:.18em;color:#54776e;margin:0;}
-.map-intro{font-size:13px;color:#54706e;margin:0 0 16px;}
+#map-overlay .panel{width:min(960px,calc(100vw - 24px))!important;max-height:calc(100dvh - 28px)!important;overflow:auto;padding:26px!important;background:radial-gradient(circle at 50% 25%,rgba(20,44,70,.92),rgba(8,16,28,.97) 75%)!important;color:#e8f4f2!important;border:1.5px solid rgba(100,210,255,.28)!important;border-radius:24px!important;box-shadow:0 28px 100px rgba(0,0,0,.75),0 0 50px rgba(0,210,255,.14),inset 0 1px rgba(255,255,255,.12)!important;backdrop-filter:blur(22px)!important;text-align:left;}
+#map-title{font:700 32px Fredoka,sans-serif!important;color:#ffffff!important;margin:4px 0 8px;text-shadow:0 0 20px rgba(100,220,255,.5)!important;}
+.map-eyebrow{font:800 10px Outfit,sans-serif!important;letter-spacing:.22em!important;color:#00f0ff!important;text-shadow:0 0 10px rgba(0,240,255,.6)!important;margin:0;}
+.map-intro{font-size:13px;color:#9abed2!important;margin:0 0 16px;}
 #map-grid{display:block!important;position:relative!important;width:100%!important;aspect-ratio:auto!important;min-height:0!important;margin:0!important;overflow:visible!important;background:none!important;border:0!important;box-shadow:none!important;}
 .world-map-v40{position:relative!important;inset:auto!important;background:none!important;border:0!important;}
 .wm-summary{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font:700 10px Outfit,sans-serif;letter-spacing:.1em;color:#5b756d;}

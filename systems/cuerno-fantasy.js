@@ -94,13 +94,14 @@ export function drawCuernoFantasyRibbon(ctx,f,cam,t,reduce=false){
     ctx.stroke();
   }
   // Very few deliberate pearlescent glints; none animated when reduced.
-  ctx.strokeStyle="#fffef0";ctx.lineWidth=1.2;
+  ctx.strokeStyle="#fffef0";ctx.lineWidth=1.5;
   for(let i=1;i<pts.length;i+=4){
     const p=pts[i],x=p.x-ox,y=p.y-oy-9;
     const twinkle=reduce?1:.65+.35*Math.sin(t*.07+i*.8);
-    ctx.globalAlpha=alpha*.6*twinkle;
-    ctx.beginPath();ctx.moveTo(x-3,y);ctx.lineTo(x+3,y);
-    ctx.moveTo(x,y-3);ctx.lineTo(x,y+3);ctx.stroke();
+    ctx.globalAlpha=alpha*.75*twinkle;
+    ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+4,y);
+    ctx.moveTo(x,y-4);ctx.lineTo(x,y+4);ctx.stroke();
+    ctx.fillStyle="#ffffff";ctx.beginPath();ctx.arc(x,y,1.5,0,TAU);ctx.fill();
   }
   drawCuernoHoofprints(ctx,pts,cam,f.life,reduce);
   ctx.restore();
