@@ -23,6 +23,27 @@ try{
   await page.waitForFunction(()=>document.querySelector('#family-camp')?.dataset.hero==='cat');
   assert.equal(await page.locator('#family-camp [data-camp-form]').count(),5);
   assert.equal(await page.locator('#camp-name').textContent(),'Medusaluna');
+
+  // Gallery integration: the visible selector must show five genuinely different
+  // rendered creatures, not the previous row of five indistinguishable numbers.
+  await page.waitForFunction(()=>{
+    const canvases=[...document.querySelectorAll('#family-camp [data-camp-form] canvas')];
+    return canvases.length===5&&canvases.every(cv=>{
+      const pixels=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data;
+      for(let j=3;j<pixels.length;j+=4)if(pixels[j]>25)return true;
+      return false;
+    });
+  });
+  const artwork=await page.evaluate(()=>[...document.querySelectorAll('#family-camp [data-camp-form] canvas')].map(cv=>cv.toDataURL()));
+  assert.equal(new Set(artwork).size,5,'each evolution needs its own real Canvas silhouette');
+  for(const {width,height} of [{width:390,height:844},{width:320,height:568}]){
+    await page.setViewportSize({width,height});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,
+      'Medusaluna gallery must not overflow mobile viewport '+width);
+    assert.equal(await page.locator('#family-camp .camp-forms [data-camp-form]').count(),5);
+  }
+  await page.setViewportSize({width:1280,height:900});
+
   const picker=page.locator('#family-camp .camp-forms');
   assert.equal(await picker.isVisible(),true);
   await page.locator('#family-camp [data-camp-form="0"]').click();
