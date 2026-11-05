@@ -21,9 +21,15 @@ try{
      const e=window.__OHANA_E2E,events=[];
      const listener=event=>events.push(event.detail);
      window.addEventListener('ohana-death',listener);
+     e.manualClock(true);
      e.startWorld1(hero);
      const state=e.state();
      if(state.roomId!=='w1-'+hero)e.loadRoom('w1-'+hero);
+     // Complete actual authored chapter arrival/cinematics before the fall:
+     // pending World 1 scenes intentionally suspend movement and would make
+     // a "drop 27 frames" test inspect a frozen, not-yet-playable character.
+     e.setInvulnerable(600);
+     e.step(520);
      if(form)e.setEvo(form);
      const pit=e.checkpointData().hazards.find(h=>h.type==='death');
      if(!pit)throw new Error('Expected lethal pit in '+hero);
@@ -32,7 +38,16 @@ try{
      e.exhaustPlayerJumps();
      e.setInvulnerable(150);
      e.setPlayerVelocity(0,11);
+     const before=e.state();
      const after=e.step(27);
+     if(after.hp>0&&after.player?.y===before.player?.y){
+       throw new Error('Pit fixture is not in active player physics. '+JSON.stringify({
+        hero,form,room:after.roomId,world1Cine:after.world1Cine,
+        pendingWorld1Cine:after.pendingWorld1Cine,paused:after.paused,
+        running:after.running,runtimeFaults:after.runtimeFaults,pit:pit.id,
+        initial:before.player,after:after.player
+       }));
+     }
      window.removeEventListener('ohana-death',listener);
      return {hero,form,pit:pit.id,after,events};
     },{hero,form});
