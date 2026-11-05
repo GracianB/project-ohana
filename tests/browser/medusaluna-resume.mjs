@@ -12,26 +12,23 @@ try{
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.documentElement.dataset.ohanaBoot==='ready');
-  await page.keyboard.press('Escape');
   await page.evaluate(()=>{
-    // A previously earned seal must not force the chosen marine form to its finale.
+    // The camp reads earned seals at mount, so seed progress before its next boot.
     localStorage.setItem('ohana-w1-seals-v1',JSON.stringify(['kilo','stitcho','chispin','cat']));
   });
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.documentElement.dataset.ohanaBoot==='ready');
+  await page.keyboard.press('Escape');
   await page.locator('.char-card[data-id="cat"]').click();
-  const picker=page.locator('#ocean-form-picker');
-  const diagnostic=await page.evaluate(()=>{
-    const p=document.querySelector('#ocean-form-picker');
-    const d=p?.closest('.hero-dossier');
-    return {selected:document.querySelector('.char-card.selected')?.dataset.id,
-      pickerHidden:p?.hidden,display:p&&getComputedStyle(p).display,
-      parentDisplay:d&&getComputedStyle(d).display,
-      parentPointer:d&&getComputedStyle(d).pointerEvents,
-      bodyClass:document.body.className};
-  });
-  assert.equal(await picker.isVisible(),true,JSON.stringify(diagnostic));
-  assert.equal(await page.locator('#ocean-form-buttons button').count(),5);
-  await page.locator('[data-ocean-form="0"]').click();
-  await page.locator('#btn-play').click();
+  await page.waitForFunction(()=>document.querySelector('#family-camp')?.dataset.hero==='cat');
+  assert.equal(await page.locator('#family-camp [data-camp-form]').count(),5);
+  assert.equal(await page.locator('#camp-name').textContent(),'Medusaluna');
+  const picker=page.locator('#family-camp .camp-forms');
+  assert.equal(await picker.isVisible(),true);
+  await page.locator('#family-camp [data-camp-form="0"]').click();
+  assert.equal(await page.locator('#camp-form-name').textContent(),'Huevo de Nácar');
+  assert.equal(await page.locator('#family-camp').getAttribute('data-form'),'0');
+  await page.locator('#camp-start').click();
   await page.waitForFunction(()=>window.__OHANA_E2E?.state().running===true);
   const baby=await page.evaluate(()=>window.__OHANA_E2E.state());
   assert.equal(baby.hero,'cat');assert.equal(baby.evo,0,'the saved seal must not force form 5 on a new run');
