@@ -112,6 +112,13 @@ function egg(c,t,st,reduced){
   c.quadraticCurveTo(18,-3,26,-30);
   c.quadraticCurveTo(5,-16,-7,-24);c.quadraticCurveTo(-15,-28,-25,-31);
  });
+ // Iridescent carved currents across the shell distinguish this creature
+ // even when rendered as a thumbnail. Every rib belongs to the egg, not FX.
+ for(let i=0;i<12;i++){
+  let y=-19-i*3.7;
+  curved(c,[-20+Math.sin(i*.6)*3,y],[-7-Math.cos(i)*2,y-3],[13+Math.sin(i*.6+1)*4,y-1],
+   i%3===0?'#fef8e2':i%3===1?'#d8f9fb':'#f1d5ff',.6);
+ }
  c.save();c.globalAlpha=.52;
  el(c,-11,-51,9,15,'#fffef9',null,0,-.25);
  el(c,13,-23,7,9,'#f8effe');c.restore();
@@ -377,7 +384,8 @@ export function drawMedusaluna(c,pose={},form=0){
  c.translate(0,sway);
  const tilt={idle:0,run:.048,jump:-.09,fall:.085,glide:-.035,
   wall:.12,attack:-.07,cast:.05,hurt:-.17,victory:-.10,dead:.64};
- c.rotate((tilt[state]??0)+(state==='cast'?.025*(power+1):0));
+ const attackPhase=state==='attack'?(reduced?.5:cap(Number(pose.atk),0,1))*.20:0;
+ c.rotate((tilt[state]??0)+(state==='cast'?.025*(power+1):0)+attackPhase);
  if(state==='jump')c.scale(.94,1.055);
  else if(state==='fall')c.scale(1.035,.94);
  tide(c,t,f,state,reduced);
