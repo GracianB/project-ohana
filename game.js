@@ -959,6 +959,10 @@ game._resumeCheckpoint=false;
 game._restoringSave=resume;
 game._explicitStartForm=!resume&&def.id==="cat"&&Number.isInteger(requestedStartForm)
   ? Math.max(0,Math.min(4,requestedStartForm)) : null;
+// Used by catGrowth throughout the room, not just during first load.
+// Replaying completed objectives must never grant 420 XP over a saved form.
+game._preserveCompletedCatForm=def.id==="cat"&&(resume||
+  Number.isInteger(requestedStartForm)||Number.isInteger(globalThis.__ohanaStartForm));
 input?.reset();
 clock.reset();
 t = 0;
