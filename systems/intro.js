@@ -888,7 +888,19 @@ export function playIntro(kind, name, done, id) {
   function startGame() {
     if (started) return;
     started = true;
-    try { if (done) done(); } catch (err) {}
+    try { if (done) done(); }
+    catch (err) {
+      // Previously swallowed startup failures left the user stranded at title
+      // without a clue, while a partial resume could silently overwrite saves.
+      console.error('[OHANA] Start or Continue failed', err);
+      let msg=document.getElementById('ohana-start-error');
+      if(!msg){
+        msg=document.createElement('p');msg.id='ohana-start-error';msg.setAttribute('role','alert');
+        msg.style.cssText='color:#ffe6ef;background:#6b2445;padding:10px 14px;border:1px solid #ffc1dd;border-radius:12px;text-align:center;max-width:36rem;margin:8px auto;';
+        (document.getElementById('menu-row') || document.getElementById('char-select') || document.body).appendChild(msg);
+      }
+      msg.textContent='No se pudo recuperar la aventura. El guardado anterior se conserva. Vuelve a pulsar Continuar; si persiste, revisa la consola para el error concreto.';
+    }
   }
 
   function frame(now) {
