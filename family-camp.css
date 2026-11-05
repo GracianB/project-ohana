@@ -162,3 +162,10 @@ body.playing #char-select.camp-on {display:none!important;}
 @media(max-width:760px){#camp-keepsake{grid-column:1/-1;}}
 /* Keep the observatory heading clear of the Canvas room label on narrow phones. */
 @media(max-width:760px){#family-camp .camp-scene-heading{max-width:calc(100% - 36px);}}
+
+/* Form selection is a game-start choice, not merely a cinematic preview. */
+#family-camp .camp-form-prompt{margin:12px 0 4px;color:#b2edf2;font:800 10px/1.4 Outfit,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+#family-camp .camp-forms button{min-width:38px;min-height:38px;transition:background .15s,border-color .15s}
+#family-camp .camp-forms button:focus-visible{outline:3px solid #c0faff;outline-offset:3px}
+#family-camp .camp-forms button[aria-pressed="true"]{box-shadow:0 0 0 2px #90efff60,0 0 16px #a8ecff30}
+@media(prefers-reduced-motion:reduce){#family-camp .camp-forms button{transition:none}}
