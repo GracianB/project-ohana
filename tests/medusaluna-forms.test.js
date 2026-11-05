@@ -4,6 +4,7 @@ import {ROSTER} from '../characters/roster.js';
 import {MEDUSALUNA_FORMS,drawMedusaluna} from '../characters/michi-ocean.js';
 import {packSave,unpackSave} from '../systems/save.js';
 import {catGrowth} from '../systems/cat-chapter.js';
+import {nextChapterGrowth} from '../systems/chapters-lunar-prism-embers.js';
 
 const expected=['Huevo de Nácar','Caballito de Sueños','Medusa Onírica','Estrella Astral','Medusa de las Mil Lunas'];
 test('Medusaluna has five marine forms and the old cat save identifier',()=>{
@@ -43,10 +44,10 @@ test('sealed Medusaluna chapter preserves player choice and loaded XP across all
   const game={roomDef:{id:'w1-cat',growthChapter:'cat'},
     world1:{sealed:true,stations:Array.from({length:5},()=>({done:true}))},
     player:{id:'cat',evo:2,xp:160},_preserveCompletedCatForm:true};
-  for(let i=0;i<240;i++)catGrowth(game);
+  for(let i=0;i<240;i++){catGrowth(game);nextChapterGrowth(game);}
   assert.equal(game.player.evo,2);
   assert.equal(game.player.xp,160);
   game._preserveCompletedCatForm=false;
-  catGrowth(game);
+  catGrowth(game);nextChapterGrowth(game);
   assert.ok(game.player.xp>=420,'legacy completed chapter can still recover earned XP');
 });
