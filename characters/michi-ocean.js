@@ -243,6 +243,23 @@ function jelly(c,t,royal=false,st='idle',swatch=SEA_PALETTES[0],reduced=false){
    for(let i=1;i<=3;i++)line(c,side*37,y-21,side*(48+i*8),y-38+i*5,'#fbf6ff',.7);
    c.restore();
   }
+ }else{
+  // Dream jelly: two transparent, rippling coral fins behind the bell,
+  // like an opaline butterfly under water rather than a smaller queen.
+  const finLift=reduced?0:Math.sin(t*.063)*5;
+  for(const side of [-1,1]){
+   c.save();c.globalAlpha=.62;
+   shape(c,side>0?'#aaf8ed':'#c6c1fa','#fff9e9',1.1,()=>{
+    c.moveTo(side*25,y-22);
+    c.quadraticCurveTo(side*(60+finLift),y-59,side*67,y-13);
+    c.quadraticCurveTo(side*58,y+12,side*26,y-5);
+   });
+   for(let i=1;i<=3;i++){
+    curved(c,[side*32,y-18],[side*(42+i*2),y-36+i*8],
+      [side*(45+i*5),y-24+i*7],'#fffced',.7);
+   }
+   c.restore();
+  }
  }
  tentacles(c,royal?11:7,y+2,royal?66:51,t,royal,reduced);
  // Layered oral arms give the jelly a living, translucent under-body.
@@ -276,6 +293,16 @@ function jelly(c,t,royal=false,st='idle',swatch=SEA_PALETTES[0],reduced=false){
   }
   el(c,0,y-h*.19,14,8,'#f3d1ff','#fffff3',1.1);
   star(c,0,y-h*.19,6,'#fff7ba');
+  // Each moon medallion is cut into the royal mantle. These five tiny
+  // lunar phases are intentionally independent of her eleven arms.
+  for(let i=-2;i<=2;i++){
+   const xx=i*19,yy=y-h*.67+Math.abs(i)*5.2;
+   c.save();c.globalAlpha=.76;
+   shape(c,i%2?'#fff0b3':'#e0faff','#f5f8ff',.65,()=>{
+    c.moveTo(xx,yy-4.8);c.arc(xx,yy,4.8,-Math.PI/2,Math.PI/2);
+    c.quadraticCurveTo(xx+2.2+i*.3,yy,xx,yy-4.8);
+   });c.restore();
+  }
  }else{
   // The Onírica form wears three pearls and a delicate wave diadem.
   for(let i=-1;i<=1;i++){
