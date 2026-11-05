@@ -211,7 +211,7 @@ export function drawMedusaluna(ctx, pose = {}, form = 0) {
   }
   ctx.restore();
   if(state==='cast'||state==='attack'||state==='victory'){
-    const force=pose.reduceMotion?.5:clamp(Number(pose.cast)||Number(pose.atk)||.5,0,1);
+    const force=pose.reduceMotion ? 0.5 : clamp(Number(pose.cast)||Number(pose.atk)||.5,0,1);
     for(let i=0;i<5;i++){
       let a=(i/5)*TAU+t*.055+(state==='cast'?power*.19:0);
       sparkle(ctx,Math.cos(a)*(32+f*7),-43-Math.sin(a)*(30+f*3),2+force*2,
