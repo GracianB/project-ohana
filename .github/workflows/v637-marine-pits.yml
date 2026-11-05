@@ -24,14 +24,12 @@ jobs:
         run: node --test tests/medusaluna-form-ownership.test.js tests/medusaluna-forms.test.js
       - name: Chromium
         run: npx playwright install chromium
+      - name: Locate Chromium
+        run: node --input-type=module -e 'import fs from "node:fs"; import {chromium} from "playwright"; fs.appendFileSync(process.env.GITHUB_ENV, "CHROMIUM_BIN="+chromium.executablePath()+"\\n");'
       - name: Resume with unlocked form through real camp and HUD
         run: node tests/browser/medusaluna-resume.mjs
-        env:
-          CHROMIUM_BIN: ''
       - name: Real death in authored pits across seven chapters
         run: node tests/browser/pit-death-v637.mjs
-        env:
-          CHROMIUM_BIN: ''
       - name: Visual screenshots
         if: always()
         uses: actions/upload-artifact@v4
