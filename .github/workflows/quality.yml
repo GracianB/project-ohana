@@ -67,7 +67,7 @@ jobs:
       - name: Resolve installed Chromium for all browser checks
         run: node --input-type=module -e 'import fs from "node:fs"; import {chromium} from "playwright"; fs.appendFileSync(process.env.GITHUB_ENV, "CHROMIUM_BIN=" + chromium.executablePath() + "\n");'
 
-      - name: V622 native startup recovery and Canvas memory silhouettes
+      - name: V636 Medusaluna · chosen form and recoverable Continue\n        run: npm run test:browser:medusaluna\n\n      - name: V622 native startup recovery and Canvas memory silhouettes
         run: npm run test:browser:startup && npm run test:browser:memory-art
 
       - name: V500 constellation UI and persistence
