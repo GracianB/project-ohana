@@ -545,7 +545,7 @@ const PRECACHE_REVISIONS = {
   "systems/chapter-encounters.js": "457d07ff55d9fa992e81cefc66a7a80451a4c9f7",
   "systems/campaign-creature-art.js": "6dc8ba3849d83754e35e85d870610dd13329dce8",
   "worlds/chapter-vistas.js": "4add1f6b1654dcaf33924bb8a912aef9af2feb22",
-  "systems/chapters-lunar-prism-embers.js": "86411539abf49227f5b80c75c28eb5e4bb591458",
+  "systems/chapters-lunar-prism-embers.js": "43c5f5d987c217c4c9b8747b41a50006ea6b6c25",
   "worlds/ohana-crafted-scenes.js": "67c654f2ee9422a6bc1f62a08821f189a7a222c0",
   "systems/chispin-chapter.js": "d412988082275b9f792b977f4cab464201528477",
   "systems/stitcho-chapter.js": "5dcb4d885bf3c93a643aa5f971782fd4fd0bd75b",
