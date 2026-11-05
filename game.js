@@ -651,6 +651,7 @@ if(game.personalAdventureSolo&&!game._e2eLegacyStart){
    const def=ROSTER.find(h=>h.id===targetHero)||ROSTER.find(h=>h.id===chapter.hero);
    game.player=makePlayer(def);
    game.player.evo=game._chosenStartForm;
+   game.player.maxUnlockedEvo=game._chosenStartForm;
    game.player.xp=XP_NEED[game._chosenStartForm]||0;
    applyForm(game.player,{silent:true});
    paintFit(game.player);
@@ -3617,8 +3618,48 @@ av.appendChild(cv);
 drawHudPortrait(cv,p,t,{reduceMotion:game.reduceMotion||reduceMotion});
 }
 
+function updateMarineFormControl() {
+ const holder=document.querySelector('.evo-display');
+ const p=game.player,visible=!!p&&p.id==='cat'&&!!game.running&&!game.onlineAdventure;
+ if(!holder)return;
+ let wrap=document.getElementById('marine-owned-forms');
+ if(!visible){if(wrap)wrap.hidden=true;return;}
+ if(!wrap){
+  wrap=document.createElement('section');wrap.id='marine-owned-forms';
+  wrap.setAttribute('aria-label','Evoluciones desbloqueadas de Medusaluna');
+  wrap.innerHTML='<button type="button" id="marine-form-toggle" aria-expanded="false" aria-controls="marine-form-choices">✦ Cambiar evolución</button><div id="marine-form-choices" role="group" aria-label="Seleccionar una evolución conseguida" hidden></div>';
+  holder.append(wrap);
+  wrap.querySelector('#marine-form-toggle').addEventListener('click',e=>{
+   e.stopPropagation();
+   const choices=wrap.querySelector('#marine-form-choices');
+   choices.hidden=!choices.hidden;
+   wrap.querySelector('#marine-form-toggle').setAttribute('aria-expanded',String(!choices.hidden));
+  });
+  wrap.querySelector('#marine-form-choices').addEventListener('click',e=>{
+   const button=e.target.closest('[data-owned-form]');
+   if(!button||!game.player||game.player.dead||game.onlineAdventure)return;
+   const chosen=Number(button.dataset.ownedForm);
+   if(!equipOwnedEvolution(game.player,chosen,applyForm))return;
+   paintFit(game.player);
+   renderAbilityBar();save();updateHUD();
+  });
+ }
+ wrap.hidden=false;
+ const max=unlockedEvolution({evo:p.evo,maxEvo:p.maxUnlockedEvo});
+ const key=p.id+':'+p.evo+':'+max;
+ if(wrap.dataset.renderKey===key)return;
+ wrap.dataset.renderKey=key;
+ const toggle=wrap.querySelector('#marine-form-toggle');
+ toggle.textContent='✦ Evoluciones '+(p.evo+1)+'/'+(max+1)+' · Cambiar';
+ const group=wrap.querySelector('#marine-form-choices');
+ const names=p.evoNames||p.forms?.map(f=>f.name)||[];
+ group.innerHTML=names.map((name,i)=>'<button type="button" data-owned-form="'+i+'"'+
+  (i>max?' disabled aria-disabled="true"':'')+
+  ' aria-pressed="'+String(i===p.evo)+'">'+(i+1)+' · '+name+'</button>').join('');
+}
 function updateHUD() {
 const p = game.player; if (!p) return;
+updateMarineFormControl();
 const jumpHint=p.id==='cat'&&p.evo===1?'saltar · mantener: aletear':p.id==='cat'&&p.evo===4?'mantener: volar':'saltar';
 if(game._jumpHint!==jumpHint){
  game._jumpHint=jumpHint;const caption=document.getElementById('jump-control-caption');if(caption)caption.textContent=jumpHint;
