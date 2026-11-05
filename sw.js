@@ -479,7 +479,7 @@ const PRECACHE_REVISIONS = {
   "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
   "characters/michi-flight.js": "f76733588d2d43bfc6b8d696e5faffb027cf3a22",
   "characters/michi-kitten.js": "9cde42417809f14a2ee2dfdea77eb78f2eb830fa",
-  "characters/michi-ocean.js": "cb3a701b2fefd13643ed2672e72d77c017989c1f",
+  "characters/michi-ocean.js": "ae4ab14bdfb93ec042c9ad929a5224dafc6746f5",
   "systems/evolution-ownership.js": "02aaf00f2235556c5f71591c552d073e1bf64492",
   "engine/foes/creature-finish.js": "5eef8f7c348cfed6bd3739db70fa7ecea1ac6f5b",
   "systems/open-chapter-pits.js": "8ab9008a7e82758bf836e01493b9b85c0dbdac54",
