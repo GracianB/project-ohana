@@ -85,8 +85,37 @@ try{
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('ohana')));
   assert.equal(saved.evo,2);assert.equal(saved.roomId,'w1-cat');
   assert.equal(await page.evaluate(()=>document.body.classList.contains('playing')),true);
+
+  // The user-facing camp Continue path (not an E2E boot shortcut) must expose
+  // previously earned forms and resume at the very same real chapter/XP.
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.documentElement.dataset.ohanaBoot==='ready');
+  await page.keyboard.press('Escape');
+  await page.locator('.char-card[data-id="cat"]').click();
+  await page.waitForFunction(()=>document.querySelector('#family-camp')?.dataset.hero==='cat');
+  assert.equal(await page.locator('#camp-resume').isVisible(),true);
+  assert.equal(await page.locator('[data-camp-form="2"]').getAttribute('data-resume-owned'),'true');
+  assert.equal(await page.locator('[data-camp-form="3"]').getAttribute('data-resume-owned'),'false');
+  await page.locator('#family-camp [data-camp-form="1"]').click();
+  assert.match(await page.locator('#camp-resume').textContent(),/Caballito de Sueños/);
+  await page.locator('#camp-resume').click();
+  await page.waitForFunction(()=>window.__OHANA_E2E?.state().running===true);
+  const equipped=await page.evaluate(()=>window.__OHANA_E2E.state());
+  assert.equal(equipped.hero,'cat');assert.equal(equipped.roomId,'w1-cat');
+  assert.equal(equipped.evo,1,'chosen owned form must be equipped when continuing');
+  assert.equal(equipped.xp,160,'changing equipped form cannot erase earned XP');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('ohana')).maxEvo),2);
+  assert.equal(await page.locator('#marine-form-toggle').isVisible(),true);
+  await page.locator('#marine-form-toggle').click();
+  await page.locator('#marine-form-choices [data-owned-form="2"]').click();
+  const reEquipped=await page.evaluate(()=>window.__OHANA_E2E.state());
+  assert.equal(reEquipped.evo,2,'in-game switch restores the already owned Medusa Onírica');
+  assert.equal(reEquipped.xp,160);
+  assert.equal(reEquipped.roomId,'w1-cat');
+  assert.equal(await page.locator('#marine-form-choices [data-owned-form="3"]').isDisabled(),true);
+
   assert.deepEqual(errors,[],'no uncaught browser errors');
-  console.log('PASS Medusaluna: fresh form zero and previously sealed, save/Continue preserves form 2');
+  console.log('PASS V637 Medusaluna: continue, owned form choice, in-game swap and XP persistence');
   await context.close();
 }finally{
   await browser.close();
