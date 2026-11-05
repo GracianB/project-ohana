@@ -179,39 +179,177 @@ function drawMichiMythic(ctx,pose,r,f){
   else if(power===5)for(const side of[-1,1])sparkle(x+side*13,y-6,2.5,col);
   ctx.restore();
  }
- if(f===1){ // HADA FELINA · petal moth wings, soft dancer's limbs, alert moon-cat face.
-  const flutter=still?0:Math.sin(t*(air?.42:run?.34:.16)+g.pulsePhase*6),hover=still?8:8+wave(0,.055)*2;
-  ctx.save();ctx.scale(.72,.72);ctx.translate(0,-hover+(hurt?3:0));
-  const fold=hurt?.42:state==='glide'?.98:Math.min(1,.83+castK*.14),wingSize=56+(air?6:0)+(victory?3:0);
+ if(f===1){ // CABALLITO DE MAR CÓSMICO (Hippocampus Feérico) · Ultra adorable, kawaii, cuerpo rechoncho, colita en espiral elástica, aletas de hada y rostro angelical.
+  const swim=still?0:Math.sin(t*(air?.38:run?.32:.18)+g.pulsePhase*5)*4;
+  const hover=still?6:6+wave(0,.055)*3;
+  const stRot=state==='glide'?0.26:state==='run'?0.14:state==='jump'?-0.15:state==='fall'?0.12:state==='wall'?-0.2:state==='dead'?0.48:state==='victory'?-0.1:0;
+  const squash=state==='jump'?-0.18:state==='fall'?0.14:state==='glide'?0.2:hurt?-0.15:Math.sin(t*.12)*.06;
+
+  ctx.save();ctx.scale(.74,.74);ctx.translate(atkK*5,-hover+(hurt?3:0));ctx.rotate(stRot);
+
+  // Aletas de hada translúcidas en la espalda que aletean grácilmente
+  const wingFlap=still?0:Math.sin(t*(air?.46:run?.38:.22)+g.pulsePhase*6);
+  const wingOpen=hurt?.35:state==='glide'?.98:Math.min(1,.82+castK*.15);
+  const wingSize=52+(air?6:0)+(victory?4:0);
   for(const side of[-1,1]){
-   drawFairyWing(ctx,{x:side*6,y:-44,side,size:wingSize*.82,open:fold,flap:flutter*.7,lower:true,fill:pal.glow2,rim:'#d9b9dc',vein:pal.ink,alpha:.68,accent:pal.rim,outline:ink});
-   drawFairyWing(ctx,{x:side*7,y:-56,side,size:wingSize,open:fold,flap:flutter,fill:pal.glow,rim:'#ebd8ec',vein:pal.ink,spot:pal.gonad,alpha:.78,accent:pal.glow2,outline:ink});
+   drawFairyWing(ctx,{x:side*6-12,y:-42,side,size:wingSize*.8,open:wingOpen,flap:wingFlap*.7,lower:true,fill:'#7ee8dc',rim:'#cbf1f7',vein:'#483552',alpha:.72,accent:fur,outline:'#483552'});
+   drawFairyWing(ctx,{x:side*7-10,y:-52,side,size:wingSize,open:wingOpen,flap:wingFlap,fill:white,rim:'#ffb0d3',vein:'#483552',spot:'#ffe59a',alpha:.82,accent:'#bba7df',outline:'#483552'});
   }
-  // One rooted plume follows its hips; the gold tip is a marking, not an orbiting toy.
-  const tailO={x:-9,y:-31,len:47,t,still,swish:1+atkK+(run?.5:0),curl:1.0,dir:-2.6,phase:g.phases[0],root:5.5,tip:2.5,fur,dark:shade,ink,fluff:true,tipColor:'#f4ddb0'};
-  drawCatTail(ctx,tailO);
+
+  // Pequeñas aletitas de seda en la nuca (pectoral flutter)
   for(const side of[-1,1]){
-   const kick=still?0:wave(side*1.4,air?.24:.08)*(air?6:2.3);
-   limb({hip:[side*7,-31],paw:[side*9+kick*.5-(air?3:0),-7-Math.abs(kick)*.5-(state==='jump'?7:0)],width:4,far:side<0,bend:side,pads:air});
+   const earFlap=still?0:Math.sin(t*.28+side)*2.5;
+   shape('#cbf1f7',()=>{
+    ctx.moveTo(side*8+2,-66);
+    ctx.bezierCurveTo(side*18+4,-76+earFlap,side*20+2,-58+earFlap,side*8+2,-58);
+   },1,'#483552');
+   line(white,0.8,()=>{ctx.moveTo(side*8+2,-63);ctx.quadraticCurveTo(side*14+3,-66+earFlap,side*16+2,-60+earFlap);});
   }
-  shape(fur,()=>{ctx.moveTo(-11,-62);ctx.bezierCurveTo(-20,-55,-14,-36,-10,-29);ctx.quadraticCurveTo(0,-23,11,-30);ctx.bezierCurveTo(17,-39,19,-53,11,-63);ctx.quadraticCurveTo(0,-68,-11,-62);},1.45);
-  shape(white,()=>{ctx.moveTo(-7,-57);ctx.quadraticCurveTo(0,-61,8,-56);ctx.quadraticCurveTo(11,-40,4,-33);ctx.quadraticCurveTo(-6,-33,-7,-57);},0);
-  // The collar is six attached curled petals, with space around the face.
-  for(const side of[-1,1])for(let k=0;k<3;k++)shape(k===1?'#ebc4d9':'#d3c6ed',()=>{ctx.moveTo(side*(3+k*3),-61);ctx.quadraticCurveTo(side*(13+k*3),-59+k*2,side*(10+k*2),-54+k*2);ctx.quadraticCurveTo(side*(5+k*2),-53+k*2,side*(3+k*3),-61);},.65);
-  for(const side of[-1,1]){
-   let paw=[side*10,-43+wave(side,.07)];
-   if(air)paw=[side*15,-47];if(state==='wall')paw=[side>0?29:-10,side>0?-69:-43];
-   if(castK){if(power===1)paw=[side*(8+castK*3),-40];else if(power===3)paw=[side*14+castK*13,-46-castK*12];else if(power===4)paw=[side*21,-70-castK*9];else if(power===5)paw=[side*(15+castK*8),-59-wave(side,.2)*3];else if(side>0)paw=[20+castK*6,-67-castK*(power===2?15:4)];}
-   if(atkK&&side>0)paw=[21+atkK*18,-54+atkK*3];if(victory)paw=[side*23,-76+wave(side,.1)*2];if(hurt)paw=[side*12,-56];
-   limb({hip:[side*10,-58],paw,width:3.7,far:side<0,bend:side,pads:air||castK>.2});
-   if(side>0)spellAccents(paw[0],paw[1]);
+
+  // Colita en espiral tierna y elástica (plush curl, bounciness orgánico)
+  const tailWave=still?0:swim*.65;
+  const tailCurl=hurt?1.35:state==='jump'?0.5:state==='fall'?1.15:state==='glide'?0.7:1;
+  shape(fur,()=>{
+   ctx.moveTo(-10,-24);
+   ctx.bezierCurveTo(-18,-6,-10,8+tailWave,-2,16+tailWave);
+   // Espiral suave hacia adelante y adentro (curva de caballito tierno)
+   ctx.bezierCurveTo(8*tailCurl,24+tailWave,20*tailCurl,18+tailWave,18*tailCurl,6+tailWave);
+   ctx.bezierCurveTo(16*tailCurl,-4+tailWave,4*tailCurl,-4+tailWave,6*tailCurl,4+tailWave);
+   ctx.bezierCurveTo(7.5*tailCurl,9+tailWave,12*tailCurl,8+tailWave,11*tailCurl,4+tailWave);
+   // Espesor de retorno de la espiral
+   ctx.bezierCurveTo(10*tailCurl,-1+tailWave,13*tailCurl,-1+tailWave,14*tailCurl,6+tailWave);
+   ctx.bezierCurveTo(15*tailCurl,14+tailWave,6*tailCurl,18+tailWave,-1,11+tailWave);
+   ctx.bezierCurveTo(-6,5+tailWave,-8,-10,4,-24);
+  },1.4,'#483552');
+
+  // Sombra suave en la curvatura de la colita
+  shape('#bba7df',()=>{
+   ctx.moveTo(-9,-22);
+   ctx.quadraticCurveTo(-15,-4,-1,14+tailWave);
+   ctx.quadraticCurveTo(8*tailCurl,19+tailWave,14*tailCurl,6+tailWave);
+   ctx.quadraticCurveTo(9*tailCurl,14+tailWave,-1,10+tailWave);
+   ctx.quadraticCurveTo(-7,4,-6,-22);
+  },0);
+
+  // Perlita brillante en la punta del rizo de la colita
+  oval(9*tailCurl,5+tailWave,2,2,'#ffe59a');
+
+  // Pancita suave, gordita y redondeada (chubby kawaii belly)
+  shape(fur,()=>{
+   ctx.moveTo(-14,-58);
+   ctx.bezierCurveTo(-22*(1-squash),-44,-24*(1-squash),-26,-12,-22);
+   ctx.quadraticCurveTo(0,-18,14,-22);
+   ctx.bezierCurveTo(24*(1+squash),-28,26*(1+squash),-46,14,-58);
+   ctx.quadraticCurveTo(0,-64,-14,-58);
+  },1.45,'#483552');
+
+  // Peto ventral de nácar pastel en la barriguita
+  shape(white,()=>{
+   ctx.moveTo(2,-22);
+   ctx.quadraticCurveTo(18,-26,18,-42);
+   ctx.quadraticCurveTo(16,-54,6,-56);
+   ctx.quadraticCurveTo(10,-42,4,-30);
+   ctx.quadraticCurveTo(0,-26,2,-22);
+  },0);
+
+  // Rayas suaves pastel de la pancita (arcos curvos, tiernos, no esqueléticos)
+  for(let b=0;b<4;b++){
+   const by=-28-b*7;
+   line('#bba7df',1,()=>{ctx.moveTo(3+b*0.5,by);ctx.quadraticCurveTo(11+b*0.5,by-2,17-b*0.8,by+1);});
+   oval(2+b*0.5,by,1.1,1.1,'#ffe59a');
   }
-  catHead({y:-83,size:.91,earLength:32});
-  // A small botanical wreath stays attached to the brow, above the eyes.
-  for(const [x,y,col]of[[-11,-105,'#e8c6df'],[12,-105,'#d6cce9']]){for(let k=0;k<5;k++){const a=k*TAU/5;shape(col,()=>{ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.cos(a-.5)*5,y+Math.sin(a-.5)*5,x+Math.cos(a)*5,y+Math.sin(a)*5);ctx.quadraticCurveTo(x+Math.cos(a+.5)*5,y+Math.sin(a+.5)*5,x,y);},.45);}oval(x,y,1.5,1.5,'#f2daac');}
-  // One pair of quiet stamens grows from behind the ears; no lens rings on the eyes.
-  for(const side of[-1,1]){const bend=wave(side,.08)*2;line('#b193b5',.85,()=>{ctx.moveTo(side*9,-109);ctx.bezierCurveTo(side*10,-120,side*18,-119+bend,side*18,-124+bend);});oval(side*18,-124+bend,1.6,2,'#f4e3b9');}
-  if(!still){for(let k=0;k<3;k++){const s=g.moteSeeds[k],u=(t*.005+s)%1;ctx.save();ctx.globalAlpha=(1-u)*.5;sparkle((s-.5)*65,-61+u*47,1.2,pal.bead);ctx.restore();}}
+
+  // Cabecita dulce y redondita con hocico suave
+  shape(fur,()=>{
+   ctx.moveTo(-16,-62);
+   ctx.bezierCurveTo(-24,-74,-10,-92,6,-90);
+   ctx.bezierCurveTo(20,-89,28,-78,24,-66);
+   // Hocico curvo y suave hacia adelante
+   ctx.quadraticCurveTo(28,-65,34,-61);
+   ctx.bezierCurveTo(37,-58,35,-53,30,-54);
+   ctx.quadraticCurveTo(24,-55,18,-58);
+   ctx.quadraticCurveTo(4,-60,-16,-62);
+  },1.45,'#483552');
+
+  // Luz de volumen en la frente
+  shape(white,()=>{
+   ctx.moveTo(-6,-86);ctx.quadraticCurveTo(6,-87,14,-80);
+   ctx.quadraticCurveTo(6,-82,-4,-78);
+  },0);
+
+  // Boquita sonriente en el hocico
+  if(!hurt&&!dead){
+   line('#483552',1.1,()=>{
+    ctx.moveTo(29,-56);ctx.quadraticCurveTo(33,-55,34,-58);
+   });
+  }
+
+  // Perlita o burbuja de luz mágica que flota en la punta del hociquito
+  const bubWave=still?0:Math.sin(t*.1)*2;
+  oval(37+atkK*5,-58+bubWave,2.6,2.6,'#cbf1f7',0.8);
+  oval(36+atkK*5,-59+bubWave,1,1,white);
+
+  // Coronita astral de tres perlitas con cuernito de luz en la coronilla
+  shape('#ffe59a',()=>{
+   ctx.moveTo(0,-91);
+   ctx.lineTo(3,-99-atkK*2);
+   ctx.lineTo(6,-92);
+   ctx.lineTo(10,-97);
+   ctx.lineTo(11,-90);
+   ctx.quadraticCurveTo(5,-88,0,-91);
+  },0.8,'#483552');
+  oval(3,-99-atkK*2,1.6,1.6,white);
+
+  // Mofletes sonrosados adorables (blushing kawaii cheeks)
+  oval(16,-62,4.2,2.6,'#ffb0d3');
+  oval(4,-64,3.2,2.0,'#ffb0d3');
+
+  // Ojos héroe gemelos grandes y tiernos (exactamente 2 llamadas a drawMichiEye)
+  const eyeOpts={
+   closed:dead||hurt||r.mood==='closed',
+   happy:victory||r.mood==='happy',
+   blink:finite(r.motion?.blink),
+   mood:atkK>.3?'angry':'normal',
+   look:{x:Math.max(-1,Math.min(1,finite(pose.look?.x)+finite(r.motion?.lookX)*.3)),y:finite(pose.look?.y)}
+  };
+  // Ojo lejano
+  drawMichiEye(ctx,1,-74,7.4,eyeOpts);
+  // Ojo cercano
+  drawMichiEye(ctx,16,-72,8.2,eyeOpts);
+
+  // Bracito / aletita pectoral líder para ataque y conjuros
+  let finTip=[20,-48];
+  if(atkK>0)finTip=[22+atkK*22,-48-atkK*8];
+  if(castK>0){
+   if(power===1)finTip=[14,-34];
+   else if(power===3)finTip=[24+castK*12,-36-castK*10];
+   else if(power===4)finTip=[26,-66-castK*9];
+   else if(power===5)finTip=[22+castK*8,-54];
+   else finTip=[20,-48-castK*(power===2?18:6)];
+  }
+  if(hurt)finTip=[10,-42];if(state==='wall')finTip=[26,-68];if(victory)finTip=[22,-62];
+
+  // Dibujar la aletita delantera que gesticula
+  shape(fur,()=>{
+   ctx.moveTo(8,-44);
+   ctx.quadraticCurveTo(14,-46,finTip[0],finTip[1]-3);
+   ctx.quadraticCurveTo(finTip[0]+4,finTip[1]+2,finTip[0]-2,finTip[1]+4);
+   ctx.quadraticCurveTo(10,-40,8,-44);
+  },1.2,'#483552');
+  line(white,0.8,()=>{ctx.moveTo(9,-43);ctx.quadraticCurveTo(14,-44,finTip[0]-1,finTip[1]);});
+
+  spellAccents(finTip[0],finTip[1]);
+
+  // Burbujitas y motas de polvo estelar flotando alrededor (chibi aura)
+  if(!still){
+   for(let k=0;k<3;k++){
+    const a=k*TAU/3+t*.03;
+    const bx=Math.cos(a)*28+4,by=-50+Math.sin(a)*18;
+    oval(bx,by,1.5,1.5,k===0?'#ffe59a':k===1?'#cbf1f7':'#ffb0d3');
+    sparkle(bx,by,1.1,white);
+   }
+  }
+
   ctx.restore();return;
  }
  if(f===2){ // MEDUSA ONÍRICA · Aurelia bell, seven real tentacles and two oral frills.
