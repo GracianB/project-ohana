@@ -5,6 +5,7 @@ import {WORLD1_CHAPTER_PLANS} from './world1-rooms.js';
 import {drawFamilyIslands,pairedScene} from "./family-islands.js";
 import {ROSTER} from '../characters/roster.js';
 import {drawCharacter} from '../characters/draw.js';
+import {drawMedusaluna} from '../characters/michi-ocean.js';
 import {CAMP_HEROES,campNearest,campViewport,campPresentation} from './family-camp-model.js';
 import {menuPaintAllowedInDocument} from './menu-visibility.js';
 import {reducedMotion} from './cinema-kit.js';
@@ -51,7 +52,7 @@ export function mountFamilyCamp({select,onBegin,document:doc=globalThis.document
  const menu=doc.getElementById('char-select');if(!menu||doc.getElementById('family-camp'))return;
  menu.classList.add('camp-on');menu.dataset.selectorMode='family-camp';
  const host=doc.createElement('section');host.id='family-camp';host.setAttribute('aria-label','El Observatorio de las Diez Voces');
- host.innerHTML=`<div class="camp-scene"><div class="camp-scene-heading"><span>ANTES DE SALVAR EL MUNDO…</span><strong>Un ratito con la familia.</strong></div><canvas id="camp-canvas" tabindex="0" role="img" aria-label="Cinco islas de la familia. Flechas o WASD mueven la luciérnaga; acércate a un personaje o elígelo en los botones inferiores."></canvas><p class="camp-instructions">Mueve la luciérnaga · toca un personaje · descubre sus travesuras</p><div class="camp-mystery" aria-label="La U revela un compañero sorpresa"><span aria-hidden="true">?</span><p>Una ayuda inesperada.<small>Tu compañero se revela al pulsar U.</small></p></div></div><aside class="camp-dossier"><p class="camp-eyebrow">TU COMPAÑERO DE AVENTURA</p><h2 id="camp-name"></h2><p id="camp-role"></p><div class="camp-album-art"><canvas id="camp-portrait" width="300" height="240" role="img"></canvas><span id="camp-form-name"></span></div><p class="camp-form-prompt">ELIGE TU FORMA INICIAL</p><div class="camp-forms" role="group" aria-label="Elige la forma inicial de tu personaje">${[0,1,2,3,4].map(n=>`<button type="button" data-camp-form="${n}" aria-label="Ver forma ${n+1}">${n+1}</button>`).join('')}</div><p id="camp-route"></p><dl id="camp-stats"></dl><div class="camp-talk" aria-live="polite"><p id="camp-line"></p></div><div class="camp-film-controls"><button type="button" id="camp-film">Ver su travesura</button><button type="button" id="camp-film-stop" hidden>Terminar escena</button></div><button type="button" id="camp-start">¡Vámonos de aventura! ↗</button></aside>`;
+ host.innerHTML=`<div class="camp-scene"><div class="camp-scene-heading"><span>ANTES DE SALVAR EL MUNDO…</span><strong>Un ratito con la familia.</strong></div><canvas id="camp-canvas" tabindex="0" role="img" aria-label="Cinco islas de la familia. Flechas o WASD mueven la luciérnaga; acércate a un personaje o elígelo en los botones inferiores."></canvas><p class="camp-instructions">Mueve la luciérnaga · toca un personaje · descubre sus travesuras</p><div class="camp-mystery" aria-label="La U revela un compañero sorpresa"><span aria-hidden="true">?</span><p>Una ayuda inesperada.<small>Tu compañero se revela al pulsar U.</small></p></div></div><aside class="camp-dossier"><p class="camp-eyebrow">TU COMPAÑERO DE AVENTURA</p><h2 id="camp-name"></h2><p id="camp-role"></p><div class="camp-album-art"><canvas id="camp-portrait" width="300" height="240" role="img"></canvas><span id="camp-form-name"></span></div><p class="camp-form-prompt">ELIGE TU FORMA INICIAL</p><div class="camp-forms" role="group" aria-label="Elige la forma inicial de tu personaje">${[0,1,2,3,4].map(n=>`<button type="button" data-camp-form="${n}" aria-label="Ver forma ${n+1}"><canvas width="100" height="120" aria-hidden="true"></canvas><span class="camp-form-index">${n+1}</span><span class="camp-form-title" aria-hidden="true"></span></button>`).join('')}</div><p id="camp-route"></p><dl id="camp-stats"></dl><div class="camp-talk" aria-live="polite"><p id="camp-line"></p></div><div class="camp-film-controls"><button type="button" id="camp-film">Ver su travesura</button><button type="button" id="camp-film-stop" hidden>Terminar escena</button></div><button type="button" id="camp-start">¡Vámonos de aventura! ↗</button></aside>`;
  menu.querySelector('.hero-stage').before(host);
  host.querySelector('.camp-scene').append(menu.querySelector('.hero-stage'));
  let railSize='',featuredPaintKey='';
@@ -60,6 +61,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  let selected=menu.dataset.hero||'kilo',form=0,film=null,last=0,time=0,raf=0,view={scale:1,x:0};
  let cursor={x:CAMP_HEROES[selected].x,y:CAMP_HEROES[selected].y+40},target={...cursor};const keys=new Set();let walkSelectionLatched=false;
  const canvas=host.querySelector('#camp-canvas'),ctx=canvas.getContext('2d');
+ let lastMarineThumb=0;
  // V468: selección del Mundo 1 — una carta-portal por héroe enlazada a SU sala (sin islas en pareja).
  const w1opts=()=>{let counts={};try{const g={};loadWorld1Collect(g);counts=countsByHero(g);}catch(_){}return {seals:readWorld1Seals(),counts,keepsakes:readKeepsakes()};};
  let w1sel=null;try{w1sel=createWorld1Select({...w1opts(),start:selected});}catch(_){w1sel=null;}
@@ -104,6 +106,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
   b.setAttribute('aria-pressed',String(i===form));
   b.setAttribute('aria-label',`Elegir forma ${i+1}: ${def.evoNames[i]}`);
   b.title=def.evoNames[i];
+  const caption=b.querySelector('.camp-form-title');if(caption)caption.textContent=def.evoNames[i];
  }
  $('camp-line').textContent=HERO_IDENTITY[selected].strength+' · '+HERO_IDENTITY[selected].weakness;host.dataset.hero=selected;host.dataset.form=String(form);
  }
@@ -140,6 +143,19 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  canvas.addEventListener('pointerdown',e=>{canvas.focus({preventScroll:true});const p=position(e),id=campNearest(p.x,p.y+35,100);if(id)selectHero(id);else target={x:Math.max(140,Math.min(1230,p.x)),y:Math.max(190,Math.min(540,p.y))};});
  canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','w','a','s','d','W','A','S','D'].includes(e.key)){e.preventDefault();e.stopPropagation();if(!keys.size)walkSelectionLatched=false;keys.add(e.key.toLowerCase());}});
  canvas.addEventListener('keyup',e=>{keys.delete(e.key.toLowerCase());if(!keys.size)target={...cursor};});canvas.addEventListener('blur',()=>{keys.clear();walkSelectionLatched=false;target={...cursor};});
+ function marineStrip(t,reduce){
+  if(selected!=='cat'||(lastMarineThumb>0&&t-lastMarineThumb<.13))return;
+  lastMarineThumb=t;
+  for(const button of host.querySelectorAll('[data-camp-form]')){
+   const cv=button.querySelector('canvas');if(!cv)continue;
+   const i=Number(button.dataset.campForm),c=cv.getContext('2d');
+   c.clearRect(0,0,cv.width,cv.height);
+   c.save();c.translate(cv.width/2,107);
+   c.scale([.78,.63,.70,.72,.53][i],[.78,.63,.70,.72,.53][i]);
+   drawMedusaluna(c,{t:reduce?0:Math.round(t*60),state:i===form?'victory':'idle',michiSeed:0,reduceMotion:reduce},i);
+   c.restore();
+  }
+ }
  function paint(now){raf=0;if(!menuPaintAllowedInDocument(doc)){last=0;return;}if(last&&now-last<50){raf=requestAnimationFrame(paint);return;}
  if(!last&&w1sel){refreshWorld1Select(w1sel,w1opts());update();if(w1sel.cards[w1sel.index]?.final)w1enter({action:'move',card:w1sel.cards[w1sel.index]});}
  const dt=last?Math.min(.08,(now-last)/1000):0;last=now;time+=dt;const reduce=reducedMotion(),width=canvas.clientWidth,height=canvas.clientHeight,dpr=Math.min(devicePixelRatio||1,1.5);
@@ -152,6 +168,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
   selectHero(near,true);
   if(keys.size){walkSelectionLatched=true;target={...cursor};}
  }
+ marineStrip(time,reduce);
  if(w1sel){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);drawWorld1Select(ctx,width,height,reduce?0:time*60,w1sel,{reduceMotion:reduce,previewForm:form,drawActor:(c,hero,x,y,sc,acting={})=>{const actorTime=Math.floor(time*60+(acting.animationOffset||0));const d=ROSTER.find(r=>r.id===hero);if(!d)throw Error('hero');c.save();c.translate(x,y);const pose=!acting.miniature&&film?.id===hero?campPresentation(hero,time-film.start).pose:acting.pose||'idle';const actor=campActor(d,acting.form??0,pose,Math.max(28,sc*64));actor._theatreHQ=sc*64>150;if(acting.performance)actor._kiloPerformance={kind:acting.performance,time:actorTime/60};drawCharacter(c,actor,{x:0,y:0},reduce?0:actorTime,{reduceMotion:reduce});c.restore();}});
  // Publish the form only after the visible Canvas has actually painted it.
  // Update attributes on selection/form changes, never on every animation tick.
