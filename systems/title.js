@@ -18,6 +18,7 @@ import { masteryOf } from "./hero-mastery.js";
 import { rosterIndex } from "./roster-navigation.js";
 import { CALIBRATED_VISUAL_H, CALIBRATED_HEIGHT } from "../characters/visual-size.js";
 import { mountFamilyCamp } from "./family-camp.js";
+import { clampStartEvo, startFormName, startDetail, formCount } from "./start-form.js";
 
 // Jingle de portada al primer toque/tecla (los navegadores no dejan sonar antes).
 let titleJingle = false;
@@ -85,6 +86,7 @@ return { scale, foot, visualAspect, envelope };
 const TITLE_E2E = new URLSearchParams(location.search).has("e2e");
 const ROSTER_BY_ID = new Map(ROSTER.map((def, index) => [def.id, { def, index }]));
 let selectedId = "kilo";
+let selectedEvo = 0;
 let tick = 0;
 let raf = 0;
 let portraitCanvases = [];
@@ -139,7 +141,10 @@ portraitClock.advance(now, () => {
     const qaEvo = TITLE_E2E && Number.isInteger(window.__OHANA_TITLE_EVO_OVERRIDE)
       ? Math.max(0, Math.min(4, window.__OHANA_TITLE_EVO_OVERRIDE))
       : null;
-    const evo = hero ? (qaEvo ?? (Math.floor(tick / 220) % 5)) : 1;
+    // Selected hero shows the form the player picked (selectedEvo), not a
+    // silent auto-cycle — that cycle made Medusa look "selected" while start
+    // still forced evo 0.
+    const evo = hero ? (qaEvo ?? selectedEvo) : 1;
     if (cv._evo === undefined) cv._evo = evo;
     if (cv._evo !== evo) { cv._burst = 90; cv._evo = evo; }
     cv._burst = Math.max(0, (cv._burst || 0) - 2);
@@ -295,7 +300,8 @@ portraitClock.advance(now, () => {
       }
       const rail = card.querySelector(".form-rail");
       if (rail) {
-        rail.querySelectorAll("i").forEach((dot, n) => {
+        rail.querySelectorAll("[data-evo]").forEach((dot) => {
+          const n = Number(dot.dataset.evo);
           dot.classList.toggle("on", hero && n <= evo);
           dot.classList.toggle("now", hero && n === evo);
         });
@@ -377,13 +383,24 @@ cards.forEach((el) => {
 
   const def = ROSTER.find((item) => item.id === el.dataset.id);
   if (def) {
-    const form = def.forms?.[0]?.name || "Forma inicial";
+    const form = selected ? startFormName(def, selectedEvo) : (def.forms?.[0]?.name || "Forma inicial");
     el.setAttribute(
       "aria-label",
       (selected ? "Seleccionado: " : "") +
       def.name + ". " + form + ". " +
       "Dificultad " + (difficulty(def.id) === 1 ? "fácil" : difficulty(def.id) === 3 ? "difícil" : "media")
     );
+    const rail = el.querySelector(".form-rail");
+    if (rail) {
+      rail.querySelectorAll("[data-evo]").forEach((dot) => {
+        const n = Number(dot.dataset.evo);
+        const on = selected && n === selectedEvo;
+        dot.classList.toggle("on", selected && n <= selectedEvo);
+        dot.classList.toggle("now", on);
+        dot.setAttribute("aria-pressed", selected ? String(on) : "false");
+        dot.tabIndex = selected ? 0 : -1;
+      });
+    }
   }
 });
 
@@ -395,7 +412,7 @@ if (selectedDef) {
   const heroLine = document.getElementById("selected-hero-line");
   const rank = difficulty(selectedDef.id);
   if (heroName) heroName.textContent = selectedDef.name;
-  if (heroForm) heroForm.textContent = selectedDef.evoNames?.[0] || selectedDef.forms?.[0]?.name || "Forma inicial";
+  if (heroForm) heroForm.textContent = startFormName(selectedDef, selectedEvo);
   if (heroDifficulty) heroDifficulty.textContent = "Dificultad " + (rank === 1 ? "fácil" : rank === 3 ? "difícil" : "media");
   const mastery = masteryOf(selectedDef.id);
   if (heroLine) {
@@ -414,8 +431,8 @@ const status = selectionStatus();
 if (status && selectedDef) {
   status.textContent =
     "Personaje seleccionado: " + selectedDef.name +
-    ". " + (selectedDef.forms?.[0]?.name || "Forma inicial") +
-    ". Elige cualquier personaje del panel.";
+    ". Forma inicial: " + startFormName(selectedDef, selectedEvo) +
+    ". Usa los puntos de forma para elegir con cuál empezar.";
 }
 
 const focused = document.activeElement;
@@ -467,8 +484,19 @@ if (!dots) return;
 dots.querySelectorAll("i").forEach((i) => i.classList.toggle("on", i.dataset.id === selectedId));
 }
 
+function setSelectedEvo(evo, { announce = true } = {}) {
+const def = ROSTER.find((r) => r.id === selectedId);
+selectedEvo = clampStartEvo(evo, formCount(def) - 1);
+const card = document.querySelector('#chars-grid .char-card[data-id="' + selectedId + '"]');
+const canvas = card?.querySelector("canvas");
+if (canvas) { canvas._needsFit = true; canvas._lastPaintAt = 0; canvas._labelEvo = undefined; }
+mark(selectedId);
+if (announce) sfx("ui");
+}
+
 function startSelected() {
-dispatchEvent(new CustomEvent("ohana-start", { detail: { id: selectedId } }));
+const def = ROSTER.find((r) => r.id === selectedId);
+dispatchEvent(new CustomEvent("ohana-start", { detail: startDetail(selectedId, selectedEvo, def) }));
 }
 
 function begin(kind) {
@@ -524,15 +552,51 @@ wrap.querySelectorAll(".char-card").forEach((el) => {
       role.classList.add("r" + rank);
     }
   }
-  if (!el.querySelector(".form-rail")) {
-    const rail = document.createElement("span");
+  let rail = el.querySelector(".form-rail");
+  if (!rail) {
+    rail = document.createElement("div");
     rail.className = "form-rail";
-    rail.setAttribute("aria-hidden", "true");
-    rail.innerHTML = "<i></i><i></i><i></i><i></i><i></i>";
+    rail.setAttribute("role", "group");
+    rail.setAttribute("aria-label", "Elegir forma inicial de " + def.name);
     el.appendChild(rail);
   }
-  el.addEventListener("pointerdown", () => mark(def.id));
-  el.addEventListener("focus", () => mark(def.id));
+  if (!rail.dataset.wired) {
+    rail.dataset.wired = "1";
+    const names = def.evoNames || def.forms?.map((f) => f.name) || [];
+    rail.innerHTML = "";
+    for (let n = 0; n < formCount(def); n++) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.dataset.evo = String(n);
+      dot.className = "form-dot";
+      dot.setAttribute("aria-label", (names[n] || ("Forma " + (n + 1))) + " · empezar con esta forma");
+      dot.setAttribute("aria-pressed", "false");
+      dot.tabIndex = -1;
+      dot.addEventListener("pointerdown", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (selectedId !== def.id) {
+          selectedId = def.id;
+          selectedEvo = n;
+          mark(def.id);
+          dispatchEvent(new CustomEvent("ohana-select", { detail: { id: def.id, evo: n } }));
+        } else {
+          setSelectedEvo(n);
+          dispatchEvent(new CustomEvent("ohana-select-form", { detail: { id: def.id, evo: n } }));
+        }
+      });
+      rail.appendChild(dot);
+    }
+  }
+  el.addEventListener("pointerdown", (ev) => {
+    if (ev.target.closest(".form-rail")) return;
+    if (selectedId !== def.id) selectedEvo = 0;
+    mark(def.id);
+  });
+  el.addEventListener("focus", () => {
+    if (selectedId !== def.id) selectedEvo = 0;
+    mark(def.id);
+  });
   el.addEventListener("pointerenter", () => { if (selectedId !== def.id) sfx("ui"); });
 });
 portraitCanvases = [...wrap.querySelectorAll(".char-card canvas")];
@@ -556,7 +620,11 @@ applyLook();
 buildDots();
 // V100 Especial: native grid selection, no carousel arrow controls.
 mark(selectedId);
-mountFamilyCamp({select:id=>dispatchEvent(new CustomEvent("ohana-select",{detail:{id}})),onBegin:()=>begin("new")});
+mountFamilyCamp({
+  select:(id)=>{ if(selectedId!==id) selectedEvo=0; dispatchEvent(new CustomEvent("ohana-select",{detail:{id,evo:selectedEvo}})); },
+  onForm:(evo)=>setSelectedEvo(evo),
+  onBegin:({evo}={})=>{ if(Number.isFinite(Number(evo))) selectedEvo=clampStartEvo(evo, formCount(ROSTER.find(r=>r.id===selectedId))-1); begin("new"); },
+});
 const replay = document.createElement("button");
 replay.id = "btn-replay-welcome"; replay.type = "button"; replay.className = "cta ghost";
 replay.textContent = "Ver la bienvenida";
@@ -567,7 +635,11 @@ const neu = document.getElementById("btn-new");
 if (play) play.onclick = () => begin("new");
 if (neu) neu.onclick = () => begin("new");
 addEventListener("ohana-select", (e) => {
-  if (!document.body.classList.contains("playing") && ROSTER.some((r) => r.id === e.detail?.id)) mark(e.detail.id);
+  if (document.body.classList.contains("playing") || !ROSTER.some((r) => r.id === e.detail?.id)) return;
+  const id = e.detail.id;
+  if (selectedId !== id) selectedEvo = 0;
+  if (e.detail.evo != null) selectedEvo = clampStartEvo(e.detail.evo, formCount(ROSTER.find((r) => r.id === id)) - 1);
+  mark(id);
 });
 function refreshContinue() {
   const save = readSave();

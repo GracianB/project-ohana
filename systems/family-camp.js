@@ -41,7 +41,7 @@ function prop(c,id,x,y,t,active,reduce){
  else if(type==='fire'){ellipse(c,35,-35,8,14,'#f4b27e');}
  c.restore();
 }
-export function mountFamilyCamp({select,onBegin,document:doc=globalThis.document}={}){
+export function mountFamilyCamp({select,onBegin,onForm,document:doc=globalThis.document}={}){
  const menu=doc.getElementById('char-select');if(!menu||doc.getElementById('family-camp'))return;
  menu.classList.add('camp-on');menu.dataset.selectorMode='family-camp';
  const host=doc.createElement('section');host.id='family-camp';host.setAttribute('aria-label','Campamento de la familia');
@@ -59,22 +59,23 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  portrait.setAttribute('aria-label',def.evoNames[form]+' · personaje real');
  $('camp-stats').innerHTML=`<div><dt>Vida</dt><dd>${f.hp}</dd></div><div><dt>Velocidad</dt><dd>${f.speed}</dd></div><div><dt>Salto</dt><dd>${f.jump}</dd></div>`;
  $('camp-powers').textContent=def.abilities.map((id,i)=>['J','K','L'][i]+' · '+(ABILITY_DEFS[id]?.name||id)).join(' / ');
- for(const b of host.querySelectorAll('[data-camp-form]'))b.setAttribute('aria-pressed',String(Number(b.dataset.campForm)===form));
+ for(const b of host.querySelectorAll('[data-camp-form]')){const n=Number(b.dataset.campForm);b.setAttribute('aria-pressed',String(n===form));b.setAttribute('aria-label',(def.evoNames[n]||('Forma '+(n+1)))+' · empezar con esta forma');}
  $('camp-line').textContent=data.lines[0];host.dataset.hero=selected;host.dataset.form=String(form);
+ $('camp-start').textContent=form?('¡Empezar como '+def.evoNames[form]+'! ↗'):'¡Vámonos de aventura! ↗';
  }
- function choose(id,walk=false){if(!CAMP_HEROES[id])return;selected=id;form=0;film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;if(!walk){
+ function choose(id,walk=false){if(!CAMP_HEROES[id])return;const changed=selected!==id;selected=id;if(changed)form=0;film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;if(!walk){
   // Direct card/pointer selections must also relocate the firefly. Otherwise
   // the next arrow key starts from a stale character across the archipelago.
   cursor={x:CAMP_HEROES[id].x,y:CAMP_HEROES[id].y+40};
   target={...cursor};
   walkSelectionLatched=false;
  }update();}
- const selectHero=(id,walk=false)=>{choose(id,walk);select(id);};
+ const selectHero=(id,walk=false)=>{const prev=selected;choose(id,walk);select?.(id);if(prev!==id)onForm?.(form);};
  addEventListener('ohana-title-hero',e=>{if(e.detail.id!==selected)choose(e.detail.id);});
- host.querySelector('.camp-forms').addEventListener('click',e=>{const b=e.target.closest('[data-camp-form]');if(b){form=Number(b.dataset.campForm);update();}});
+ host.querySelector('.camp-forms').addEventListener('click',e=>{const b=e.target.closest('[data-camp-form]');if(b){form=Number(b.dataset.campForm);update();onForm?.(form);}});
  $('camp-film').onclick=()=>{film={id:selected,start:time};$('camp-film-stop').hidden=false;$('camp-film').hidden=true;};
  $('camp-film-stop').onclick=()=>{film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;$('camp-line').textContent=CAMP_HEROES[selected].lines[0];};
- $('camp-start').onclick=()=>onBegin();
+ $('camp-start').onclick=()=>onBegin?.({evo:form});
  function position(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/view.scale+view.x,y:(e.clientY-r.top)/view.scale};}
  canvas.addEventListener('pointerdown',e=>{canvas.focus({preventScroll:true});const p=position(e),id=campNearest(p.x,p.y+35,100);if(id)selectHero(id);else target={x:Math.max(140,Math.min(1230,p.x)),y:Math.max(190,Math.min(540,p.y))};});
  canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','w','a','s','d','W','A','S','D'].includes(e.key)){e.preventDefault();e.stopPropagation();if(!keys.size)walkSelectionLatched=false;keys.add(e.key.toLowerCase());}});

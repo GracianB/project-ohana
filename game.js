@@ -63,6 +63,7 @@ import { horizontalLook, clearBufferedActions } from "./engine/camera.js";
 import { sanitizeRuntimeState } from "./systems/runtime-state.js";
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
+import { clampStartEvo } from "./systems/start-form.js";
 import { mountSelectScreen } from "./systems/select-screen.js";
 import { evolutionMessage } from "./characters/evolution.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
@@ -748,11 +749,12 @@ function michiRunSeed(resume){
  try{localStorage.setItem('ohana-michi-seed',String(fresh));}catch(_){}
  return fresh;
 }
-function makePlayer(def) {
+function makePlayer(def, opts = {}) {
+const startEvo = clampStartEvo(opts.evo, Math.max(0, (def?.forms?.length || 5) - 1));
 const p = {
 ...def,
 x: 180, y: 500, vx: 0, vy: 0,
-facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0,
+facing: 1, jumps: 0, grounded: false, evo: startEvo, dead: false, invuln: 0,
 cds: {}, cdDur: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0,
 dash: 0, dashBuf: 0, melee: 0, meleeBuf: 0, wall: 0,
 abilities: Array.isArray(def.abilities) ? def.abilities.slice() : (def.abilities || []),
@@ -762,7 +764,7 @@ applyForm(p, { silent: true });
 paintFit(p);
 return p;
 }
-function start(def) {
+function start(def, opts = {}) {
 game.loadRoom = loadRoom;
 game._cuernoIntroT = def?.id === "cuerno" && !reduceMotion ? 0 : null;
 game.lastAbilityId = null;
@@ -799,7 +801,7 @@ game.hitstop = 0;
 game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
-game.player = makePlayer(def);
+game.player = makePlayer(def, opts);
 if(def.id==='kilo')game.player._kiloEntranceAt=t;
 else game.player._ohanaEntranceAt=t;
 // Browser audits can pin a pair; normal play always invokes a surprise.
@@ -3453,7 +3455,10 @@ if (!canAct() || e.repeat || e.ctrlKey || e.altKey || e.metaKey || e.target?.clo
 const kind = Object.keys(CUERNO_PLAY_KEYS).find((k) => CUERNO_PLAY_KEYS[k] === e.key);
 if (kind) queueCuernoPlay(kind);
 });
-addEventListener("ohana-start", (e) => start(ROSTER.find((r) => r.id === e.detail?.id)));
+addEventListener("ohana-start", (e) => {
+const def = ROSTER.find((r) => r.id === e.detail?.id);
+start(def, { evo: e.detail?.evo });
+});
 addEventListener("keydown", (e) => {
 if (game.running || overlayOpen() || e.repeat) return;
 if (/^[0-9]$/.test(e.key)) {

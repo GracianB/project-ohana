@@ -3717,3 +3717,25 @@ body.playing .ability-slot {
 
 /* The ten-second discovery scene keeps the stage clear of combat chrome. */
 body.relic-cinema > :not(#game):not(#pause-overlay):not(#a11y-game-announcements):not(script):not(style){visibility:hidden!important;pointer-events:none!important}
+
+/* Forma inicial en el selector: puntos clicables del .form-rail */
+#chars-grid .form-rail{
+  display:flex;gap:5px;justify-content:center;align-items:center;
+  margin-top:6px;pointer-events:auto;z-index:2;
+}
+#chars-grid .form-rail .form-dot,
+#chars-grid .form-rail button{
+  width:10px;height:10px;padding:0;border-radius:50%;
+  border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);
+  cursor:pointer;appearance:none;-webkit-appearance:none;
+}
+#chars-grid .form-rail .form-dot.on,
+#chars-grid .form-rail button.on{background:rgba(255,214,120,.55);border-color:rgba(255,214,120,.85)}
+#chars-grid .form-rail .form-dot.now,
+#chars-grid .form-rail button.now{
+  background:var(--tint,#ffd678);border-color:#fff6c8;
+  box-shadow:0 0 0 2px rgba(255,246,200,.35);
+  transform:scale(1.15);
+}
+#chars-grid .form-rail .form-dot:focus-visible,
+#chars-grid .form-rail button:focus-visible{outline:2px solid #fff6c8;outline-offset:2px}
