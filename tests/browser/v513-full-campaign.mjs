@@ -39,7 +39,7 @@ try{
     // preserve the earned inventory, and play the complete opening chapter.
     s=await advanceKiloEncounterControls(page,s,step,i);
     forms.add(s.evo);minHp=Math.min(minHp,s.hp);
-    assert.equal(s.runtimeFaults,0);assert.ok(s.evo<=s.world1.done,'Kilo grows only after its current instrument');
+    assert.equal(s.runtimeFaults,0,'Runtime error during Kilo / frame '+i+': '+String(s.lastRuntimeFault||'unknown'));assert.ok(s.evo<=s.world1.done,'Kilo grows only after its current instrument');
     if(i%150===0){await fs.writeFile('test-results/v600/campaign-debug.json',JSON.stringify({s,expedition:null,node:null}));await page.screenshot({path:'test-results/v600/campaign-current.png'});console.log('CAMPAIGN',JSON.stringify({hero,i,x:Math.round(s.player.x),hp:s.hp,done:s.world1.done,evo:s.evo,expedition:0,y:Math.round(s.player.y)}));}
     continue;
    }
@@ -107,7 +107,7 @@ try{
    if(!node&&p.grounded&&p.y<1000&&hero!=='cat')await hold('s');else await release('s');
    s=await step(node&&jump?16:Math.abs(dx)>24?Math.min(14,Math.max(1,Math.floor(Math.abs(dx)/7))):20);
    await release('d');await release('a');if(node&&hero==='kilo'){await release('w');await release('s');}if(jump){await release('w');s=await step(1);}
-   assert.equal(s.runtimeFaults,0);
+   assert.equal(s.runtimeFaults,0,'Runtime error during '+hero+' / frame '+i+': '+String(s.lastRuntimeFault||'unknown'));
    if(i%150===0){await fs.writeFile('test-results/v600/campaign-debug.json',JSON.stringify({s,expedition,node}));await page.screenshot({path:'test-results/v600/campaign-current.png'});}
    if(i%150===0)console.log('CAMPAIGN',JSON.stringify({hero,i,x:Math.round(s.player.x),hp:s.hp,done:s.world1.done,evo:s.evo,boss:boss?.hp,expedition:expedition?.done.length,target:node?.id,y:Math.round(s.player.y)}));
   }

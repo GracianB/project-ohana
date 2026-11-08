@@ -1164,6 +1164,14 @@ if (!loadRoom(roomId)) {
 }
 if (!resume && game.roomDef?.world1 && !game.world1Seals.length) playWorld1Cine(game, "intro");
 if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
+// Apply the requested owned sea form AFTER chapter setup, which can restore
+// its own evolution state from the checkpoint or completed objectives.
+if(resume && requestedResumeForm!==null && game.player?.id==='cat'
+  && requestedResumeForm<=game.player.maxUnlockedEvo){
+  equipOwnedEvolution(game.player,requestedResumeForm,applyForm);
+  paintFit(game.player);
+  renderAbilityBar();
+}
 if (game._magicSnap) {
   try { Magic.restore(game._magicSnap); }
   catch (error) { console.warn("[OHANA] Optional spell snapshot could not be restored",error); }

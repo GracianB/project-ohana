@@ -514,14 +514,14 @@ if (!dots) return;
 dots.querySelectorAll("i").forEach((i) => i.classList.toggle("on", i.dataset.id === selectedId));
 }
 
-function startSelected() {
+function startSelected(chosenResumeForm = null) {
   let result=null;
   dispatchEvent(new CustomEvent("ohana-start", { detail: {
     id:selectedId,
     startForm:selectedId==='cat'
       ? pendingStartKind==='new'
         ? (Number.isInteger(globalThis.__ohanaStartForm)?globalThis.__ohanaStartForm:selectedOceanForm)
-        : pendingStartKind==='resume' ? resumeOceanForm() : null
+        : pendingStartKind==='resume' ? (Number.isInteger(chosenResumeForm) ? chosenResumeForm : resumeOceanForm()) : null
       : null,
     onResult:(ok,error)=>{result={ok,error};}
   }}));
@@ -547,7 +547,9 @@ if (kind === "new") {
 if (kind === "resume") {
   try { localStorage.setItem("ohana-resume", "1"); } catch (e) {}
 }
-playIntro(kind, name, startSelected, selectedId,{resumeForm:kind==='resume'?resumeOceanForm():null});
+// Capture the deliberate selection before an async introduction can rerender the camp.
+const resumeForm=kind==='resume' ? resumeOceanForm() : null;
+playIntro(kind, name, () => startSelected(resumeForm), selectedId, {resumeForm});
 }
 
 function applyLook() {

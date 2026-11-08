@@ -98,6 +98,7 @@ try{
   assert.equal(await page.locator('[data-camp-form="3"]').getAttribute('data-resume-owned'),'false');
   await page.locator('#family-camp [data-camp-form="1"]').click();
   assert.match(await page.locator('#camp-resume').textContent(),/Caballito de Sueños/);
+  assert.equal(await page.evaluate(()=>globalThis.__ohanaResumeForm),1,'camp selection must reach the title Continue flow');
   await page.locator('#camp-resume').click();
   await page.waitForFunction(()=>window.__OHANA_E2E?.state().running===true);
   const equipped=await page.evaluate(()=>window.__OHANA_E2E.state());
