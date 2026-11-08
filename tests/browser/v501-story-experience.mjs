@@ -53,6 +53,11 @@ try{
  assert.equal(await page.evaluate(()=>document.activeElement?.id),'game');
  await page.keyboard.down('d');await page.evaluate(()=>window.__OHANA_E2E.step(20));await page.keyboard.up('d');
  assert.ok((await page.evaluate(()=>window.__OHANA_E2E.state().player.x))>before.player.x,'control returns after story');
+ // Once the real World 1 introduction and controls have been checked, move
+ // this debug-XP fixture to the free exploration hub. Story objectives must
+ // continue to gate real campaign evolution, even under Ctrl+Z.
+ await page.evaluate(()=>window.__OHANA_E2E.loadRoom('hub'));
+ assert.equal(await page.evaluate(()=>window.__OHANA_E2E.state().roomId),'hub');
  // Test the authored unlock message for each form using actual evolution code.
  for(const [evo,key,index] of [[1,'K',1],[2,'L',2],[3,'I',4],[4,'P',5]]){
   await page.locator('#game').focus();await page.keyboard.press('Control+z');

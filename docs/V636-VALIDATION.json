@@ -1,0 +1,19 @@
+{
+  "version": "ohana-636",
+  "status": "in_review",
+  "pull_request": "https://github.com/GracianB/project-ohana/pull/450",
+  "scope": [
+    "Medusaluna five marine Canvas forms",
+    "selection of starting evolution",
+    "Continue restores existing progress",
+    "pause recovery",
+    "offline precache and Versus modulepreload"
+  ],
+  "tests": {
+    "node": "npm test",
+    "browser": "npm run test:browser:medusaluna",
+    "art": "npm run test:browser:michi-art",
+    "release": "npm run release:check"
+  },
+  "disclaimer": "This file is a validation plan, not a claim that checks have passed; use the live PR statuses and artifacts for final acceptance."
+}

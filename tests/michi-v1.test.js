@@ -10,12 +10,12 @@ test('Michi V1: 5 forms include pure vector Canvas metadata and active roster en
   const def = ROSTER.find(r => r.id === 'cat');
   assert.ok(def, 'Michi (cat) must exist in active roster');
   assert.equal(def.forms.length, 5, 'Must have exactly 5 forms');
-  assert.equal(def.forms[0].name, 'Michicornio Bebé');
-  assert.equal(def.forms[1].name, 'Hada Felina');
+  assert.equal(def.forms[0].name, 'Huevo de Nácar');
+  assert.equal(def.forms[1].name, 'Caballito de Sueños');
   assert.equal(def.forms[2].name, 'Medusa Onírica');
-  assert.equal(def.forms[3].name, 'Conejornio Lunar');
-  assert.equal(def.forms[4].name, 'Michicornio Eclipse');
-  assert.equal(def.evoNames[4], 'Michicornio Eclipse');
+  assert.equal(def.forms[3].name, 'Estrella Astral');
+  assert.equal(def.forms[4].name, 'Medusa de las Mil Lunas');
+  assert.equal(def.evoNames[4], 'Medusa de las Mil Lunas');
   assert.equal(def.passive.id, 'ninelives');
 });
 

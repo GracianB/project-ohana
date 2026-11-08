@@ -162,3 +162,157 @@ body.playing #char-select.camp-on {display:none!important;}
 @media(max-width:760px){#camp-keepsake{grid-column:1/-1;}}
 /* Keep the observatory heading clear of the Canvas room label on narrow phones. */
 @media(max-width:760px){#family-camp .camp-scene-heading{max-width:calc(100% - 36px);}}
+
+/* Form selection is a game-start choice, not merely a cinematic preview. */
+#family-camp .camp-form-prompt{margin:12px 0 4px;color:#b2edf2;font:800 10px/1.4 Outfit,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+#family-camp .camp-forms button{min-width:38px;min-height:38px;transition:background .15s,border-color .15s}
+#family-camp .camp-forms button:focus-visible{outline:3px solid #c0faff;outline-offset:3px}
+#family-camp .camp-forms button[aria-pressed="true"]{box-shadow:0 0 0 2px #90efff60,0 0 16px #a8ecff30}
+@media(prefers-reduced-motion:reduce){#family-camp .camp-forms button{transition:none}}
+
+/* OHANA 636 · Medusaluna: a real five-creature gallery inside the ACTIVE camp.
+   Legacy number-only navigation remains intact for the other nine heroes. */
+#family-camp .camp-forms button canvas,
+#family-camp .camp-forms .camp-form-title{display:none}
+#family-camp .camp-forms .camp-form-index{font:800 11px/1 Outfit,sans-serif}
+#family-camp[data-hero="cat"] .camp-form-prompt{
+ color:#b7f9f2;letter-spacing:.18em;font-size:10px;
+}
+#family-camp[data-hero="cat"] .camp-forms{
+ display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));
+ gap:5px;margin:8px 0 14px;align-items:stretch;width:100%;
+}
+#family-camp[data-hero="cat"] .camp-forms button{
+ display:flex!important;position:relative;flex-direction:column;
+ justify-content:flex-start;align-items:center;gap:3px;
+ min-width:0;width:auto!important;min-height:113px!important;
+ height:auto;border:1px solid #8fd3e177!important;padding:3px 2px 7px!important;
+ border-radius:11px!important;
+ background:linear-gradient(180deg,#23486677,#111b3cdd)!important;
+ color:#d8edff!important;
+ box-shadow:inset 0 1px 0 #ffffff28;
+ transition:border-color .18s,transform .18s,background .18s,box-shadow .18s;
+}
+#family-camp[data-hero="cat"] .camp-forms button canvas{
+ display:block!important;pointer-events:none;width:100%;height:70px;
+ max-height:70px;min-height:0;object-fit:contain;
+ filter:drop-shadow(0 2px 5px #8d66bd33);
+}
+#family-camp[data-hero="cat"] .camp-forms .camp-form-index{
+ display:block;position:absolute;left:4px;top:4px;z-index:1;
+ border-radius:6px;padding:3px 4px;background:#061326ad;
+ color:#e7faff;font:900 9px/1 Outfit,sans-serif;
+}
+#family-camp[data-hero="cat"] .camp-forms .camp-form-title{
+ display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+ overflow:hidden;text-overflow:ellipsis;white-space:normal;
+ width:100%;height:26px;padding:0 1px;
+ text-align:center;font:700 8.5px/1.28 Outfit,sans-serif;
+ color:#e9f9ff;letter-spacing:0;
+}
+#family-camp[data-hero="cat"] .camp-forms button[aria-pressed="true"]{
+ transform:translateY(-3px);border:2px solid #fff0bb!important;
+ background:linear-gradient(180deg,#4966a8bb,#372766e8)!important;
+ box-shadow:0 0 0 2px #8af5ff45,0 8px 18px #060d21aa,inset 0 1px 0 #ffffff55;
+}
+#family-camp[data-hero="cat"] .camp-forms button[aria-pressed="true"] .camp-form-title{
+ color:#fff5c4;
+}
+#family-camp[data-hero="cat"] .camp-forms button:hover{
+ border-color:#dbffff!important;transform:translateY(-2px);
+}
+#family-camp[data-hero="cat"] .camp-forms button:focus-visible{
+ outline:3px solid #fff2b0!important;outline-offset:3px!important;
+}
+#family-camp[data-hero="cat"] #camp-form-name{
+ color:#f7e4ff;text-shadow:0 0 11px #b5abff59;
+}
+@media(max-width:700px){
+ #family-camp[data-hero="cat"] .camp-dossier .camp-form-prompt,
+ #family-camp[data-hero="cat"] .camp-dossier .camp-forms{
+  grid-column:1/-1!important;
+ }
+ #family-camp[data-hero="cat"] .camp-forms button{min-height:102px!important;}
+ #family-camp[data-hero="cat"] .camp-forms button canvas{height:59px;max-height:59px;}
+ #family-camp[data-hero="cat"] .camp-forms .camp-form-title{font-size:8px;}
+}
+@media(max-width:390px){
+ #family-camp[data-hero="cat"] .camp-forms{gap:3px;}
+ #family-camp[data-hero="cat"] .camp-forms button{
+  padding:2px 1px 5px!important;min-height:96px!important;
+ }
+ #family-camp[data-hero="cat"] .camp-forms button canvas{height:54px;max-height:54px;}
+ #family-camp[data-hero="cat"] .camp-forms .camp-form-title{font-size:7.5px;}
+}
+@media(prefers-reduced-motion:reduce){
+ #family-camp[data-hero="cat"] .camp-forms button{transition:none!important;}
+ #family-camp[data-hero="cat"] .camp-forms button[aria-pressed="true"]{
+  transform:none!important;
+ }
+}
+
+/* V637 · Resume and owned-form separation. New game never masquerades as Continue. */
+#family-camp #camp-resume-hint:empty{display:none!important}
+#family-camp #camp-resume-hint{
+  margin:4px 0 12px;padding:9px 11px;
+  color:#e7f9ff;background:linear-gradient(135deg,#163b57bb,#302858dd);
+  border:1px solid #95e9eb63;border-radius:11px;
+  font:600 11px/1.52 Outfit,sans-serif;
+}
+#family-camp #camp-resume[hidden]{display:none!important}
+#family-camp #camp-resume{
+  display:block;width:100%;margin-top:10px;padding:12px 15px;
+  border-radius:12px;border:2px solid #90f4e6;
+  background:linear-gradient(115deg,#163c52,#24416b);
+  color:#efffff;font:800 13px/1.25 Outfit,sans-serif;cursor:pointer;
+  box-shadow:0 5px 17px #06102b77, inset 0 1px #ffffff35;
+  white-space:normal;
+}
+#family-camp #camp-resume:hover{border-color:#fff2bb;background:#25536f}
+#family-camp #camp-resume:focus-visible{outline:3px solid #fce8b9;outline-offset:3px}
+#family-camp[data-hero="cat"][data-resume-checkpoint="true"] .camp-forms button[data-resume-owned="true"]::after{
+  content:"✓";position:absolute;top:3px;right:4px;
+  color:#b8fff1;font-size:11px;text-shadow:0 1px 3px #092a42;
+}
+#family-camp[data-hero="cat"][data-resume-checkpoint="true"] .camp-forms button[data-resume-owned="false"]{
+  border-style:dashed!important;
+}
+
+/* V637 · Small, keyboard-accessible in-game marine form wheel. */
+#marine-owned-forms[hidden],#marine-form-choices[hidden]{display:none!important}
+#marine-owned-forms{position:relative;margin-top:5px;max-width:250px}
+#marine-form-toggle{
+ cursor:pointer;display:block;width:100%;padding:6px 10px;border-radius:9px;
+ border:1px solid #9cf1e0;background:#1c3959e9;color:#e6fffb;
+ font:750 11px/1.3 Outfit,sans-serif;white-space:normal;
+}
+#marine-form-toggle:hover,#marine-form-toggle:focus-visible{
+ outline:2px solid #fce9b4;outline-offset:2px;
+}
+#marine-form-choices{
+ display:grid;grid-template-columns:minmax(0,1fr);
+ gap:3px;position:absolute;top:calc(100% + 4px);left:0;z-index:60;
+ width:min(280px,90vw);padding:7px;
+ border-radius:11px;border:1px solid #92e9e6;
+ background:#0c213aec;box-shadow:0 7px 28px #030d20b9;
+}
+#marine-form-choices button{
+ cursor:pointer;min-height:30px;text-align:left;border-radius:7px;
+ border:1px solid #8fb6d355;background:#183653;
+ color:#e4f8ff;padding:5px 8px;font:650 11px/1.3 Outfit,sans-serif;
+}
+#marine-form-choices button[aria-pressed="true"]{
+ border-color:#fce5ab;background:#584f7f;color:#fff5bd;
+}
+#marine-form-choices button:disabled{
+ cursor:not-allowed;opacity:.38;border-style:dashed;
+}
+#marine-form-choices button:not(:disabled):hover,
+#marine-form-choices button:focus-visible{
+ outline:2px solid #b5fff2;outline-offset:1px;
+}
+@media(max-width:680px){
+ #marine-owned-forms{max-width:180px}
+ #marine-form-toggle{padding:5px;font-size:9px}
+ #marine-form-choices{width:min(230px,84vw)}
+}

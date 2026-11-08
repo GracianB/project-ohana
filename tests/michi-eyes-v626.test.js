@@ -39,10 +39,11 @@ test('Michi uses the exact existing hero eye renderer, including white sclera, i
  }
 });
 
-test('all five real Michi forms render both shared hero eyes when awake',()=>{
+test('all five Medusaluna forms render gradient-free sea-creature faces',()=>{
  for(let form=0;form<5;form++){
   const drawing=record(ctx=>cat.draw(ctx,{form,state:'idle',t:73,phase:1.3,speed:0,look:{x:.25,y:0},michiSeed:42},{}));
-  assert.equal(drawing.gradients,2,`form ${form}: both eyes must use the existing hero iris renderer`);
+  assert.equal(drawing.gradients,0,`form ${form}: ocean eyes must be drawable without per-frame gradients`);
+  assert.ok(drawing.ops.some(([op])=>op==='ellipse'),`form ${form} must draw an expressive face`);
  }
 });
 

@@ -17,6 +17,11 @@ export function nextChapter(g){const hero=g?.roomDef?.growthChapter;return NEXT_
 export const mirrorRestored=g=>!!g.secrets?.['w1-cuerno']?.includes(DAWN_MIRROR.id);
 export function nextChapterGrowth(g){
  const hero=nextChapter(g),w=g?.world1,p=g?.player;if(!hero||!w||!p)return 0;
+ // V636: the shared chapter-growth engine also runs for cat, so guard here
+ // as well as catGrowth. Sealed stages are already earned; a saved or chosen
+ // Medusaluna form must not be replaced by an automatic 420-XP grant.
+ if(hero==='cat'&&w.sealed&&p.id==='cat'&&g._preserveCompletedCatForm)
+  return XP_NEED[p.evo]||0;
  const n=w.stations.filter(s=>s.done).length;
  const stage=w.sealed?4:hero==='frita'?Math.min(4,n+(fritaLaunched(g)?1:0)):hero==='pizza'?Math.min(4,n+(pizzaBaked(g)?1:0)):hero==='cat'?[0,1,2,3,3,4][Math.min(5,n)]:hero==='cuerno'?Math.min(4,n+(mirrorRestored(g)?1:0)):Math.min(4,n);
  const floor=XP_NEED[stage]||0;p.xp=Math.max(Number(p.xp)||0,floor);return floor;

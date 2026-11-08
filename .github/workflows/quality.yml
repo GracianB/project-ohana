@@ -67,6 +67,12 @@ jobs:
       - name: Resolve installed Chromium for all browser checks
         run: node --input-type=module -e 'import fs from "node:fs"; import {chromium} from "playwright"; fs.appendFileSync(process.env.GITHUB_ENV, "CHROMIUM_BIN=" + chromium.executablePath() + "\n");'
 
+      - name: V636 Medusaluna · chosen form and recoverable Continue
+        run: npm run test:browser:medusaluna
+
+      - name: V637 Pit lethality · all five Medusaluna forms and seven chapters
+        run: node tests/browser/pit-death-v637.mjs
+
       - name: V622 native startup recovery and Canvas memory silhouettes
         run: npm run test:browser:startup && npm run test:browser:memory-art
 

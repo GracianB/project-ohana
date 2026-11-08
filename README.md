@@ -12,7 +12,7 @@
 
 Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, más el Corazón de Ohana. Recupera sus sellos, rescata los diez recuerdos personales y enfréntate a Quimera. Los mil recuerdos del álbum son opcionales y conservan tu progreso entre partidas. Escenarios, héroes y efectos se dibujan en Canvas.
 
-- **Michi:** sus cinco formas usan los mismos ojos de Kilo, Chispín, Dino y Cuerno; Hada y Eclipse ganan altura manteniendo salto. Eclipse mantiene el vuelo, suelta para planear y abajo para descender.
+- **Medusaluna (cambio en revisión OHANA 637, todavía en PR):** cinco criaturas marinas de Canvas originales. Al pulsar **Continuar** puedes elegir cualquier evolución previamente desbloqueada sin perder capítulo, XP ni guardado; también puedes cambiarla desde el HUD durante la partida. Su ID técnico `cat` sigue preservando la compatibilidad. Los pozos mortales pasan por comprobación de contacto real y pruebas de caída. La versión pública permanece en OHANA 635 hasta que la PR supere las puertas de calidad. [Validación OHANA 637 (pendiente de CI)](docs/V637-VALIDATION.json) · [Publicación OHANA 637: todavía no publicada](docs/V637-PUBLICATION.json).
 - **Corazón:** diez núcleos de energía con tres objetos propios a sus pies. Reúne sus resonancias y elige qué héroe invoca al guardián; vuelve a elegir antes de Quimera.
 - **Objetos:** los tres descubrimientos obligatorios de cada sala tienen arte propio de Canvas y reaparecen en su núcleo final. Cada capítulo entrega un único sello.
 - **Combate:** H de cerca, J a distancia y poderes distintos por héroe. El libro explica los enlaces, I, P y el compañero U.
@@ -20,7 +20,9 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; la comprobación remota entre dispositivos sigue pendiente.
 
-Registro de entrega: `ohana-635` / acceso al multijugador. [Validación](docs/V635-VALIDATION.json) · [Publicación](docs/V635-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+Registro de entrega pública: `ohana-635` / acceso al multijugador. [Validación](docs/V635-VALIDATION.json) · [Publicación](docs/V635-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+
+**En revisión, todavía sin publicar:** `ohana-637` (PR #450). [Plan de validación](docs/V636-VALIDATION.json) · [Estado de publicación](docs/V636-PUBLICATION.json). Medusaluna sustituye las formas felinas por huevo de nácar → caballito de sueños → medusa onírica → estrella astral → medusa de las mil lunas; elegir forma inicial y restaurar capítulo/evolución con Continuar. No confundir con el despliegue público hasta superar la CI.
 
 ## Historial de desarrollo
 

@@ -34,7 +34,9 @@ try{
   return page.evaluate(()=>window.__OHANA_E2E.state());
  };
  const objective=()=>page.evaluate(async()=>(await import('/systems/notify.js')).messageManager.objective);
+ let activeHero='';
  async function begin(hero){
+  activeHero=hero;
   await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});
   assert.ok(await page.evaluate(()=>!!window.__OHANA_E2E));
   // Every per-hero fixture starts a fresh page. Close the actual opening
@@ -55,7 +57,7 @@ try{
  async function approach(x,done){
   let state=await step(1),lastX=state.player.x;
   for(let n=0;n<400&&!await done(state);n++){
-   assert.ok(state.hp>0,'route must not require injected healing or a death bypass');
+   assert.ok(state.hp>0,'route must not require injected healing or a death bypass: '+JSON.stringify({hero:activeHero,room:state.roomId,player:state.player,runtimeFault:state.lastRuntimeFault,objective:await objective(),target:x}));
    const dx=x-state.player.x-state.player.w/2;
    await page.keyboard.up('d');await page.keyboard.up('a');
    if(Math.abs(dx)>18)await page.keyboard.down(dx>0?'d':'a');

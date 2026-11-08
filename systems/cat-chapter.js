@@ -17,6 +17,11 @@ export function catChapterReady(g){
 
 export function catGrowth(g){
  if(!catChapter(g)||!g.world1||!g.player)return 0;
+ // Reopening a completed chapter must not inject XP for every old station.
+ // New Medusaluna form choices and saved evolutions are intentional states.
+ // Keep normal station growth intact while the chapter is still unfinished.
+ if(g.world1.sealed&&g.player.id==='cat'&&g._preserveCompletedCatForm)
+  return XP_NEED[g.player.evo]||0;
  const n=g.world1.stations.filter(s=>s.done).length;
  const stage=[0,1,2,3,3,4][Math.min(5,n)];
  const floor=XP_NEED[stage]||0;
