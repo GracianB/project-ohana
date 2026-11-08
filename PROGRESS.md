@@ -7,6 +7,8 @@
 - **Offline:** candidata **ohana-637**, revisiones SHA de archivos runtime; `main` y publicación pública siguen sin modificarse.
 - **Validación:** pruebas de Node y Chromium `tests/browser/medusaluna-resume.mjs` y `tests/browser/pit-death-v637.mjs` obligatorias. No fusionar ni declarar publicación antes de verde CI.
 
+6 de noviembre de 2026 · Corrección Medusa Onírica: elegir Michicornio (cualquier forma, p. ej. Medusa Onírica con el botón 3 del campamento) y entrar en su capítulo rompía el render de w1-cat en cada fotograma: el eclipse pasaba un color rgba() a glow(), que generaba 'rgba(6600'. glow() acepta ahora hex y rgb/rgba. La forma elegida en el campamento ya se respetaba (evo 2 comprobada en navegador, 0 fallos runtime). Validación: 1.833 pruebas Node y release:check. Sin cambio de versión; revisiones offline actualizadas.
+
 ## OHANA 636 · Medusaluna, formas elegibles y reanudación segura
 
 - Medusaluna sustituye visualmente las cinco formas felinas por una metamorfosis oceánica de autor: Huevo de Nácar, Caballito de Sueños, Medusa Onírica, Estrella Astral y Medusa de las Mil Lunas. Su identificador técnico `cat` se conserva para no invalidar partidas históricas.

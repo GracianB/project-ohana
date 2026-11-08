@@ -518,7 +518,7 @@ const PRECACHE_REVISIONS = {
   "systems/kilo-chapter-art-v606.js": "3bbcef81eaeb66ee4633c78d011aa4879761dbfd",
   "caprichos.css": "5f7f569dde9552f4590af5e06d64e5445276fbc8",
   "systems/field-guide.js": "f56ab3835b5ca62559349a372ad932b43eef5529",
-  "worlds/living-realms.js": "d71302045a770340388cb326ac83860dd034aad6",
+  "worlds/living-realms.js": "9ce82a36b7eed175cc903031ba11b835f333367a",
   "versus.html": "ea7dbf8c75e5cedcdc7607de21a8e25e8ad26e42",
   "versus.css": "1342f8b77b943437a13eba326cb3d0f0dd948991",
   "multiplayer/versus-client.js": "b330e4e74d0f4a124708666e45e8a27fc7e7cef7",

@@ -23,7 +23,9 @@ function path(c,color,fn,stroke=null,width=1){c.beginPath();fn();c.closePath();c
 function line(c,color,width,fn){c.beginPath();fn();c.strokeStyle=color;c.lineWidth=width;c.lineCap='round';c.lineJoin='round';c.stroke();}
 function oval(c,x,y,rx,ry,color,angle=0){c.beginPath();c.ellipse(x,y,rx,ry,angle,0,TAU);c.fillStyle=color;c.fill();}
 function gradient(c,x,y,x2,y2,stops){const g=c.createLinearGradient(x,y,x2,y2);for(const [at,color] of stops)g.addColorStop(at,color);return g;}
-function glow(c,x,y,r,color){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,color);g.addColorStop(1,color.slice(0,7)+'00');c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2);}
+// Transparent end stop for #rrggbb[aa] and rgb()/rgba() inputs (an rgba() glow used to crash the Michi eclipse render).
+function clearStop(color){const m=/^rgba?\(([^,]+),([^,]+),([^,)]+)/.exec(color);return m?`rgba(${m[1]},${m[2]},${m[3]},0)`:color.slice(0,7)+'00';}
+function glow(c,x,y,r,color){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,color);g.addColorStop(1,clearStop(color));c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2);}
 function cloud(c,x,y,w,h,color){
  const fill=gradient(c,x,y-h*1.2,x,y+h*.4,[[0,tone(color,22)],[.48,color],[1,tone(color,-25)]]);
  path(c,fill,()=>{c.moveTo(x-w,y);c.bezierCurveTo(x-w*1.08,y-h*.55,x-w*.6,y-h*.95,x-w*.36,y-h*.48);c.bezierCurveTo(x-w*.4,y-h*1.6,x+w*.5,y-h*1.6,x+w*.46,y-h*.45);c.bezierCurveTo(x+w*.95,y-h*.9,x+w*1.2,y-h*.05,x+w*.75,y+h*.2);c.bezierCurveTo(x+w*.3,y+h*.5,x-w*.9,y+h*.45,x-w,y);});
