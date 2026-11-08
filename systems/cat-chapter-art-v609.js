@@ -24,11 +24,17 @@ function eye(c,x,y,r,aim=1,{hurt=false,glow=MOON}={}){
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─ Medusa lunar (medusa): Aurelia astral con campana translúcida viva, velos orales ondulantes y ropalios
+// Fractional powers of negative sine values return NaN and crash Canvas
+// gradients during the second half of every swimming cycle.
+export function lunarJellyPulse(time=0){
+ const phase=(Number.isFinite(time)?time:0)*.08;
+ const wave=Math.sin(phase);
+ return wave>=0?Math.pow(wave,1.8)*.14:-Math.pow(-wave,1.2)*.08;
+}
 function drawLunarJellyFoe(c,s){
  const {time,active,hurt,aim}=s;
  // Pulsación natatoria orgánica asimétrica: contracción elástica rápida, relajación fluida prolongada
- const cycle=(time*.08)%TAU;
- const pulse=Math.sin(cycle)>0?Math.pow(Math.sin(cycle),1.8)*.14:-Math.pow(Math.sin(cycle),1.2)*.08;
+ const pulse=lunarJellyPulse(time);
  const float=Math.sin(time*.05)*4,bellW=1+pulse,bellH=1-pulse*.7;
 
  // 1. Velos orales internos (manubrio rizado) que ondean con retardo hidrodinámico
