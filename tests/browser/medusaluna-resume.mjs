@@ -105,6 +105,12 @@ try{
   assert.equal(equipped.hero,'cat');assert.equal(equipped.roomId,'w1-cat');
   assert.equal(equipped.evo,1,'chosen owned form must be equipped when continuing');
   assert.equal(equipped.xp,160,'changing equipped form cannot erase earned XP');
+  // The original bug was an XP tick silently promoting form 1 back to form 2.
+  // Prove that the chosen form remains equipped after simulated real gameplay.
+  await page.evaluate(()=>window.__OHANA_E2E.step(90));
+  const afterTicks=await page.evaluate(()=>window.__OHANA_E2E.state());
+  assert.equal(afterTicks.evo,1,'already-earned XP must not force an equipped older form to upgrade');
+  assert.equal(afterTicks.xp,160,'resuming a prior form must not spend earned XP');
   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('ohana')).maxEvo),2);
   assert.equal(await page.locator('#marine-form-toggle').isVisible(),true);
   await page.locator('#marine-form-toggle').click();

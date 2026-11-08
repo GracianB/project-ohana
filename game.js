@@ -2163,12 +2163,16 @@ else if (chapterGrowthWaiting(game) && p.xp >= (XP_NEED[p.evo + 1] || Infinity))
 const instrument = world1NextObjective(game);
 setPrompt(instrument ? instrument.label + " · " + instrument.action : "Devuelve su voz al siguiente instrumento", true);
 }
-else if (p.evo < 4 && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
+else if ((p.id!=='cat'||p.evo>=(p.maxUnlockedEvo||0)) && p.evo < 4 && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
 const nxt = p.forms && p.forms[p.evo + 1];
 setPrompt("Tu experiencia despierta" + (nxt ? " · " + nxt.name : " la siguiente forma"), true);
 }
 else setPrompt("", false);
-while (!game.relicScene && p.evo < Math.min(kiloUnlockedForm(game),stitchoUnlockedForm(game)) && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
+// Marine form selection is distinct from XP already earned. Do not immediately
+// evolve an intentionally equipped older Medusaluna shape on the next tick.
+while (!game.relicScene && (p.id!=='cat'||p.evo>=(p.maxUnlockedEvo||0))
+ && p.evo < Math.min(kiloUnlockedForm(game),stitchoUnlockedForm(game))
+ && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
 tickRam(p);
 }
 function tickRam(p) {
