@@ -99,6 +99,30 @@ try {
       'mobile view must not cause horizontal page overflow');
     await page.screenshot({path:'test-results/dino-dragon/'+world+'-chapter-mobile.png'});
     await page.setViewportSize({width:1280,height:900});
+
+    // Movement alone must not award a seal. Use the real keyboard J input
+    // near the first brazier, with the fixture limited to initial positioning.
+    if(world==='dragon'){
+      await page.evaluate(async()=>{
+        const e=window.__OHANA_E2E;
+        const {WORLD1_ROOMS}=await import('/systems/world1-rooms.js');
+        const st=WORLD1_ROOMS['w1-dragon'].seal.stations[0];
+        const p=e.state().player;
+        e.setPlayer(st.x-36,st.y-p.h);
+        e.step(4);
+      });
+      const before=await page.evaluate(()=>window.__OHANA_E2E.state());
+      assert.equal(before.world1.done,0,'approaching alone never lights a brazier');
+      await page.locator('#game').focus();
+      await page.keyboard.press('j');
+      await page.evaluate(()=>window.__OHANA_E2E.step(18));
+      await page.clock.runFor(32);
+      const after=await page.evaluate(()=>window.__OHANA_E2E.state());
+      assert.equal(after.lastAbilitySlot,0,'real J breath is cast');
+      assert.equal(after.world1.done,1,'real J breath lights nearby ancient brazier');
+      assert.equal(after.runtimeFaults,0);
+      await page.screenshot({path:'test-results/dino-dragon/dragon-first-earned-brazier.png'});
+    }
   }
   assert.deepEqual(errors,[],'page-level JavaScript errors');
   await fs.writeFile('test-results/dino-dragon/acceptance.json',JSON.stringify(results,null,2)+'\n');
