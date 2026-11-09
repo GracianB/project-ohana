@@ -485,7 +485,7 @@ const PRECACHE_REVISIONS = {
   "systems/combat-coach.js": "532f2e7c614c726c98f236d08a5da8868043a469",
   "systems/memory-pickup-art.js": "f85aa423441c0efa82ee158246b2e64ea47cc216",
   "startup.css": "546f7e36e6d84813d5498ed70e66ca8272f14db4",
-  "systems/cat-chapter-art-v609.js": "ac9bfb27bd9d25da09e7cc145050195418f3c067",
+  "systems/cat-chapter-art-v609.js": "54cc8f9258e9d730a8e51a80d59099c7c1b19535",
   "systems/cat-chapter.js": "c89bb87cd3ba151a9b2733bf2d84dff393c989fd",
   "systems/cat-encounters-v609.js": "65f162f8db33c72f813e843a2519cccf41ecb18a",
   "systems/cuerno-chapter-art-v610.js": "a70e68b06a4d37f0fe6a3d17bd80abd96e655ae8",
