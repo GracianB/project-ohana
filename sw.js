@@ -473,7 +473,7 @@ const PRECACHE = [
 const PRECACHE_REVISIONS = {
   "systems/michi-field-manual.js": "ae18461211658d7e2df45033d66d1aece8fb9fbe",
   "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
-  "worlds/michi-reactive-night.js": "7ac0b734aedcc97e65e07a3df39761fd6583040f",
+  "worlds/michi-reactive-night.js": "9b1ed6bababa47ca8e79689f6584072457a4436a",
   "characters/michi-lumina.js": "a2fe2e77217b3a69be7783cf589c8bd6bcea9ded",
   "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
   "multiplayer/entry-route.js": "41d98a5b44ec9d397c4677de0c83f6017f373b5d",

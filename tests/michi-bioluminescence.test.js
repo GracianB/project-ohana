@@ -77,3 +77,15 @@ test('five manuscript chapters share authentic Michi silhouette metadata',()=>{
  assert.equal(clampMichiForm(-1),0);assert.equal(clampMichiForm(99),4);
  assert.equal(clampMichiForm(2.8),2);assert.equal(clampMichiForm(NaN),0);
 });
+
+test('mycelium follows real platforms without mutation or light leaking into other chapters',()=>{
+ const platforms=[Object.freeze({x:270,y:1008,w:280,h:30}),Object.freeze({x:670,y:1080,w:140,h:22})];
+ const room={roomDef:{world1:true,hero:'cat'},player:{x:400,y:980,w:22,h:22,evo:0},cam:{x:100,y:360},worldH:1260,enemies:[],platforms};
+ const before=JSON.stringify(platforms);
+ const plan=planMichiLights(room,{width:390,height:844});
+ assert.ok(plan.pathlights.some(node=>node.near>0));
+ assert.ok(plan.pathlights.every(node=>Number.isFinite(node.x)&&Number.isFinite(node.y)&&node.near>=0&&node.near<=1));
+ assert.ok(plan.pathlights.length<=MICHI_LIGHT_LIMIT.pathlights);
+ assert.equal(JSON.stringify(platforms),before);
+ assert.equal(planMichiLights({...room,roomDef:{world1:true,hero:'dragon'},michiTrail:{}},{width:390,height:844}),null);
+});

@@ -10,9 +10,9 @@ const EYE_COLORS=Object.freeze({
   avispa:'#fce5a2',phosquito:'#7ae7f4',arana:'#ffa8c1',
   planta:'#a2ffd2',rana:'#b6fa9a',cangrejo:'#ffca9c'
 });
-export const MICHI_LIGHT_LIMIT=Object.freeze({enemies:18,fireflies:24,bufferScale:.5});
+export const MICHI_LIGHT_LIMIT=Object.freeze({enemies:18,fireflies:24,pathlights:24,bufferScale:.5});
 export function isMichiWorld(game){
-  return !!(game?.roomDef?.hero==='cat'&&game.roomDef.world1)||!!game?.michiTrail;
+  return !!(game?.roomDef?.hero==='cat'&&game.roomDef.world1);
 }
 export function planMichiLights(game,viewport={width:1280,height:720}){
   if(!isMichiWorld(game)||!game?.player)return null;
@@ -35,7 +35,24 @@ export function planMichiLights(game,viewport={width:1280,height:720}){
     const near=clamp(1-distance/330);
     flowers.push({x,y,near,id:i,color:i%3===0?'#ffbadf':i%3===1?'#8af6da':'#b1c6ff'});
   }
-  return {hero,enemies,flowers,form,width,height,darkness:clamp(.70-form*.025,.5,.72)};
+  // Actual colliders double as the bed for living mycelium. The lights
+  // are cosmetic and cannot change the route, enemies or physics.
+  const pathlights=[];
+  const visible=(game.platforms||[]).filter(pl=>pl&&pl.w>=30&&pl.h>=3
+    &&Number.isFinite(pl.x)&&Number.isFinite(pl.y)&&Number.isFinite(pl.w));
+  for(const [index,pl] of visible.entries()){
+    if(pathlights.length>=MICHI_LIGHT_LIMIT.pathlights)break;
+    const left=Math.max(pl.x,camX-60),right=Math.min(pl.x+pl.w,camX+width+60);
+    if(right<=left)continue;
+    const y=pl.y-camY-4;if(y<-80||y>height+80)continue;
+    const count=Math.min(3,Math.max(1,Math.floor((right-left)/95)));
+    for(let k=0;k<count&&pathlights.length<MICHI_LIGHT_LIMIT.pathlights;k++){
+      const x=left+(k+.5)*(right-left)/count-camX;
+      const near=clamp(1-Math.hypot(x-hero.x,(y-hero.y)*.77)/(hero.radius+165));
+      pathlights.push({x,y,near,id:index*4+k,color:palette[(index+k+form)%5]});
+    }
+  }
+  return {hero,enemies,flowers,pathlights,form,width,height,darkness:clamp(.70-form*.025,.5,.72)};
 }
 let buffer=null,bufferCtx=null,bufferW=0,bufferH=0;
 function darkenBuffer(plan,t,reduced){
@@ -64,6 +81,7 @@ function darkenBuffer(plan,t,reduced){
   erase(plan.hero.x,plan.hero.y,plan.hero.radius,1);
   for(const e of plan.enemies)erase(e.x,e.y,e.radius,e.boss?.84:.6);
   for(const f of plan.flowers)if(f.near>.14)erase(f.x,f.y,23+f.near*29,f.near*.5);
+  for(const q of plan.pathlights)if(q.near>.12)erase(q.x,q.y,20+q.near*38,q.near*.45);
   c.globalCompositeOperation='source-over';
   return buffer;
 }
@@ -100,6 +118,20 @@ export function drawMichiReactiveNight(ctx,game,t=0,w=1280,h=720,reduced=false){
     }
     ctx.beginPath();ctx.arc(f.x,f.y,3,0,TAU);ctx.fill();ctx.globalAlpha=1;
   }
+  // Mycelial filaments illuminate the REAL solid ledges as Michi passes.
+  for(const q of plan.pathlights){
+    const light=.17+q.near*.78;
+    const wave=reduced?0:Math.sin(t*.027+q.id*1.31)*2.2;
+    ctx.globalAlpha=light;ctx.strokeStyle=q.color;ctx.lineWidth=1.4+q.near*1.35;
+    ctx.beginPath();ctx.moveTo(q.x-17,q.y+2);
+    ctx.bezierCurveTo(q.x-11,q.y-4-wave,q.x+5,q.y+4+wave,q.x+17,q.y+2);
+    ctx.stroke();
+    if(q.near>.09){
+      bloom(ctx,q.x,q.y,10+q.near*21,q.color,q.near*.48);
+      ctx.fillStyle='#dcfff3';ctx.beginPath();ctx.arc(q.x,q.y-2,1.2+q.near,0,TAU);ctx.fill();
+    }
+  }
+  ctx.globalAlpha=1;
   // The hero leaves a wake of floating motes and flowers ignite near them.
   for(let i=0;i<MICHI_LIGHT_LIMIT.fireflies;i++){
     const sx=plan.hero.x+Math.sin(i*2.4)*plan.hero.radius*.55;
