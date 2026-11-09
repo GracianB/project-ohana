@@ -11,6 +11,9 @@ on:
       - 'tests/dino-dragon-threat-cues.test.js'
       - 'tests/browser/dino-dragon-threats.mjs'
       - 'tests/browser/dino-dragon-forms-guardians.mjs'
+      - 'tests/browser/v507-three-chapters.mjs'
+      - 'tests/browser/v508-dino-chapter.mjs'
+      - 'tests/browser/authored-terrain-controls.mjs'
       - '.github/workflows/dino-dragon-visual.yml'
   workflow_dispatch:
 
@@ -22,6 +25,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  earned-chapter-pilots:
+    name: Physically complete ${{ matrix.hero }} chapter
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        hero: [dino, dragon]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Play earned chapter with genuine keyboard movement and attacks
+        env:
+          OHANA_PILOT_HERO: ${{ matrix.hero }}
+        run: |
+          if [ "$OHANA_PILOT_HERO" = "dino" ]; then
+            node tests/browser/v508-dino-chapter.mjs
+          else
+            node tests/browser/v507-three-chapters.mjs
+          fi
+      - name: Upload boss warnings, earned seals and mobile evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dino-dragon-earned-${{ matrix.hero }}
+          path: |
+            test-results/v507/
+            test-results/v508/
+          if-no-files-found: ignore
+          retention-days: 14
+
   dedicated-visual:
     name: Real Canvas / Chromium / mobile atlas
     runs-on: ubuntu-latest
