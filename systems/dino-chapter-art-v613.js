@@ -1,5 +1,6 @@
 // V613 — Valle Fósil de Dino: arte vectorial puro para 5 especies prehistóricas,
 // placas fósiles ancestrales con venas de ámbar, géiseres de fango y atmósfera de jade.
+import {drawChapterThreatCue} from './chapter-threat-cues.js';
 const TAU = Math.PI * 2;
 
 function _rr(c, x, y, w, h, r = 4) {
@@ -7,11 +8,12 @@ function _rr(c, x, y, w, h, r = 4) {
 }
 
 export function drawDinoCreature(ctx, e, cam, t, reduced = false) {
+ // Freeze *all* creature artwork, including limbs and wings, under reduced motion.
+ if(reduced)t=0;
  if (!e || (e.roomId !== 'w1-dino' && !e._dinoEncounter && !e.roomPersona?.dinoEncounter)) return false;
  const kind = e.kind || e._species;
  if (!['cucaracho', 'rana', 'cangrejo', 'arana', 'libelula', 'abeja'].includes(kind)) return false;
 
- const a = e._campaign || {}, wind = (a.wind || 0) > 0 || !!e.telegraph, active = (a.active || 0) > 0;
  const x = e.x + e.w / 2 - cam.x, y = e.y + e.h - cam.y, facing = e.facing || 1;
  const hurt = e.invuln > 0 || e.stun > 4;
  const step = reduced ? 0 : Math.sin((t * 0.14) + (e.spawnIndex || 0) * 1.3);
@@ -21,13 +23,7 @@ export function drawDinoCreature(ctx, e, cam, t, reduced = false) {
  ctx.scale(facing, 1);
  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
- if (wind) {
-  ctx.save();
-  ctx.strokeStyle = 'rgba(165, 214, 167, 0.7)';
-  ctx.lineWidth = 1.8; ctx.setLineDash([4, 3]);
-  ctx.beginPath(); ctx.ellipse(0, 0, 24, 6, 0, 0, TAU); ctx.stroke();
-  ctx.restore();
- }
+ drawChapterThreatCue(ctx, e, t, reduced, 'fossil');
 
  if (kind === 'cucaracho') {
   // ── Trilobite acorazado (pursuer) ──
