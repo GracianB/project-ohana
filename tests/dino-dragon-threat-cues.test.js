@@ -136,4 +136,17 @@ test('Dragon cannot auto-ignite a brazier merely by sprinting nearby',()=>{
  assert.equal(other[0].done,true);
  assert.equal(g.score,300);
  assert.equal(saves,2);
+
+ // The real J dispatcher timestamps a breath. It need not set state='cast'.
+ g.t=201;g.player.state='idle';g.player.x=6770;
+ g.player._cast={id:'breath',slot:0,t:200};
+ updateDragonChapter(g);
+ assert.equal(other[1].done,true,'real J breath must light its own station');
+ assert.equal(g.score,450);
+ assert.equal(saves,3);
+
+ g.t=300;g.player.x=9170;
+ g.player._cast={id:'breath',slot:0,t:200};
+ updateDragonChapter(g);
+ assert.equal(other[2].done,false,'an expired fire cast must not light a new station');
 });
