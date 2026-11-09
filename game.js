@@ -1631,7 +1631,7 @@ if (hazard.type === HAZARD_TYPES.DEATH) {
   dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
     type: hazard.type, id: hazard.id, room: game.roomId, hero: p.id
   }}));
-  // Dragón puede escapar una sola vez de este pozo mientras permanece sobre él.
+  // ¡ÚLTIMA BATIDA! Dragón puede escapar una sola vez de este pozo mientras permanece sobre él.
   // La batida usa velocidad física real; el siguiente contacto vuelve a ser mortal.
   if (p.id === "dragon" && p.evo >= 4 && p._hazardEscapeKey !== hazardKey) {
     p._hazardEscapeKey = hazardKey;
