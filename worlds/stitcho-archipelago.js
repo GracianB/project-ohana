@@ -110,6 +110,34 @@ export function drawStitchoArchipelago(ctx,cam,t,width,height,{reducedMotion=fal
  }
  ctx.globalAlpha=1;
 
+ // ── CONSTELACIÓN 626 (Crucero Estelar de Caos) ───────────────────────────
+ const stitchoStars=[
+  {x:0.18,y:0.18},{x:0.25,y:0.14},{x:0.32,y:0.18},
+  {x:0.29,y:0.25},{x:0.21,y:0.25},{x:0.25,y:0.20}, // Cockpit / Hull
+  {x:0.12,y:0.22},{x:0.38,y:0.22}, // Wing tips
+  {x:0.22,y:0.31},{x:0.28,y:0.31}  // Twin thruster exhausts
+ ];
+ ctx.save();
+ ctx.strokeStyle='rgba(110,230,255,0.55)';ctx.lineWidth=1.2;
+ ctx.beginPath();
+ ctx.moveTo(stitchoStars[0].x*W,stitchoStars[0].y*H);
+ for(let i=1;i<=4;i++)ctx.lineTo(stitchoStars[i].x*W,stitchoStars[i].y*H);
+ ctx.closePath();ctx.stroke();
+ // Wings & thrusters
+ ctx.beginPath();
+ ctx.moveTo(stitchoStars[0].x*W,stitchoStars[0].y*H);ctx.lineTo(stitchoStars[6].x*W,stitchoStars[6].y*H);
+ ctx.moveTo(stitchoStars[2].x*W,stitchoStars[2].y*H);ctx.lineTo(stitchoStars[7].x*W,stitchoStars[7].y*H);
+ ctx.moveTo(stitchoStars[4].x*W,stitchoStars[4].y*H);ctx.lineTo(stitchoStars[8].x*W,stitchoStars[8].y*H);
+ ctx.moveTo(stitchoStars[3].x*W,stitchoStars[3].y*H);ctx.lineTo(stitchoStars[9].x*W,stitchoStars[9].y*H);
+ ctx.stroke();
+ for(const st of stitchoStars){
+  ctx.fillStyle='rgba(255,255,255,0.95)';ctx.beginPath();ctx.arc(st.x*W,st.y*H,2.2,0,TAU);ctx.fill();
+  ctx.fillStyle='rgba(110,230,255,0.40)';ctx.beginPath();ctx.arc(st.x*W,st.y*H,4.8,0,TAU);ctx.fill();
+ }
+ ctx.fillStyle='rgba(170,235,255,0.60)';ctx.font='bold 10px sans-serif';ctx.textAlign='left';
+ ctx.fillText('CONSTELACIÓN 626 · CRUCERO ESTELAR',stitchoStars[6].x*W,stitchoStars[1].y*H-8);
+ ctx.restore();
+
  // Distant ocean horizon and twilight water gradient
  const horizon=H*.69-cY*.018;
  const sea=ctx.createLinearGradient(0,horizon,0,H);
@@ -133,13 +161,24 @@ export function drawStitchoArchipelago(ctx,cam,t,width,height,{reducedMotion=fal
   ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+13,y-4,x+36,y);ctx.stroke();
  }
 
- // Placed world landmarks with culling
+ // Placed world landmarks spanning full 14400 room
  const landmarks=[
   {x:480,type:'wreck',y:720},
   {x:1420,type:'spire',y:675},
   {x:2150,type:'spire',y:680},
   {x:2990,type:'spire',y:635},
-  {x:3560,type:'temple',y:1134}
+  {x:3560,type:'temple',y:1134},
+  {x:4420,type:'wreck',y:710},
+  {x:5280,type:'spire',y:660},
+  {x:6150,type:'spire',y:680},
+  {x:7050,type:'wreck',y:725},
+  {x:7900,type:'spire',y:640},
+  {x:8750,type:'temple',y:1134},
+  {x:9620,type:'wreck',y:715},
+  {x:10480,type:'spire',y:670},
+  {x:11350,type:'spire',y:650},
+  {x:12250,type:'wreck',y:720},
+  {x:13100,type:'temple',y:1134}
  ];
  for(const l of landmarks){
   const x=l.x-cX,y=l.y-cY;if(!visible(x,W,340)||y<-500||y>H+400)continue;
@@ -155,8 +194,8 @@ export function drawStitchoArchipelago(ctx,cam,t,width,height,{reducedMotion=fal
   }
  }
 
- // Plasma conduit docks communicating the chapter's horizontal route
- for(const xx of [200,890,1730,2480,3310,3980]){
+ // Plasma conduit docks communicating the chapter's horizontal route across 14400px
+ for(let xx=200;xx<=14400;xx+=820){
   const x=xx-cX,y=1134-cY;if(!visible(x,W,90))continue;
   ctx.strokeStyle='#7cd4eb';ctx.lineWidth=5;ctx.beginPath();
   ctx.moveTo(x-36,y);ctx.lineTo(x-36,y-54);ctx.lineTo(x+36,y-54);ctx.lineTo(x+36,y);ctx.stroke();

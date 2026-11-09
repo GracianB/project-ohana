@@ -114,6 +114,11 @@ function drawUfoDrone(c,s){
  // Antena superior
  stroke(c,'#2c546e',2,()=>{c.moveTo(0,-30);c.lineTo(0,-38);});
  ellipse(c,0,-39,2.5,2.5,wind?'#ffdd77':CYAN,0,1);
+ if(wind){
+  c.save();c.strokeStyle='rgba(110,230,255,0.45)';c.lineWidth=1.5;
+  c.beginPath();c.moveTo(aim*12,-16);c.lineTo(aim*180,-16);c.stroke();
+  c.restore();
+ }
 }
 
 // ─ Vigía nocturno (murcielago): murciélago alienígena con alas de radar
@@ -176,6 +181,11 @@ export function drawStitchoCreature(c,e,cam,t,reduced=false){
  drawFn(c,{time,step,wind,active,hurt,aim});
 
  c.restore();
+ if(e._alertT>0){
+  const ax=e.x+e.w/2-cam.x,ay=e.y-cam.y-14;
+  c.save();c.fillStyle='#7ee7ff';c.strokeStyle='#10233d';c.lineWidth=2.5;c.font='bold 14px sans-serif';c.textAlign='center';
+  c.strokeText('!',ax,ay);c.fillText('!',ax,ay);c.restore();
+ }
  return true;
 }
 

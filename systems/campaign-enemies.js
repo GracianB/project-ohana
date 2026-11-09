@@ -15,7 +15,15 @@ const cx=e=>e.x+e.w/2,cy=e=>e.y+e.h/2;
 export function shieldBlocksHit(e,p){
  if(!e||!p||e.campaignRole!=='shield'||!e._shieldFacing||e.hp<=0||e.dying)return false;
  const side=cx(p)-cx(e),level=Math.abs(cy(p)-cy(e));
- return side*e._shieldFacing>0&&level<e.h+Math.max(30,p.h*.5);
+ const blocked=side*e._shieldFacing>0&&level<e.h+Math.max(30,p.h*.5);
+ if(blocked){
+  e._shieldImpact=18;
+  const a=e._campaign;
+  if(a&&(a.cd||0)<=12&&!a.wind&&!a.active&&!e._guardBreak){
+   a.wind=14;a.aim=e._shieldFacing;e._counterBash=true;
+  }
+ }
+ return blocked;
 }
 export function campaignRole(room,index){return CAMPAIGN_ROLES[(index+['beach','jungle','cave','lab','ridge','space','reef','volcano'].indexOf(room)*3+24)%8];}
 export function updateCampaignEnemy(e,g,hurt){
@@ -29,6 +37,8 @@ export function updateCampaignEnemy(e,g,hurt){
  e._shieldImpact=Math.max(0,(e._shieldImpact||0)-1);
  const visible=e.x+e.w>g.cam.x&&e.x<g.cam.x+(g.viewW||1000)&&e.y+e.h>g.cam.y&&e.y<g.cam.y+(g.viewH||720);
  if(!visible&&dist>1100){e.vx=0;return true;}
+ if(visible&&dist<550&&!e._alerted){e._alerted=true;e._alertT=22;g.fx?.emit?.(cx(e),e.y-8,{color:e.elite?'#ffc060':'#8cecff',count:4,size:2.5,life:14});}
+ if(e._alertT>0)e._alertT--;
  const difficulty=g.combatDifficulty||readCombatDifficulty(g.roomId);
  const variant=e.roomPersona?.variant||0,pace=[.85,1,1.12,.95][variant%4],reach=[1,.85,1.15,1.05][variant%4];
  // Feed the articulated creature rigs the actual combat state, not a cosmetic clock.
@@ -57,11 +67,24 @@ export function updateCampaignEnemy(e,g,hurt){
     g.fx?.emit?.(cx(e),cy(e),{color:'#ffd598',count:8,size:3,life:22});
    }
   }
- }else if(a.active>0){a.active--;if(role==='captain'||role==='shooter'||role==='gunner')e.vx*=.8;}
- else{
+ }else if(a.active>0){
+  a.active--;
+  if(e._counterBash){e.vx=a.aim*9.5;e._counterBash=false;}
+  else if(role==='captain'||role==='shooter'||role==='gunner')e.vx*=.8;
+ }else{
   a.cd--;e.telegraph=false;
+  if(a.hopCd>0)a.hopCd--;
+  if(a.dodgeCd>0)a.dodgeCd--;
   const range=['shooter','gunner','captain'].includes(role)?300:role==='flyer'?230:role==='jumper'?170:90;
   e.vx=dist<650?dir*(Math.abs(dx)>range*reach?2.2*pace:Math.abs(dx)<range*.6?-pace:0):0;
+  if((role==='shooter'||role==='gunner'||role==='flyer')&&!a.active&&dist<115)e.vx=-dir*2.6*pace;
+  if(role==='jumper'&&e.grounded&&!a.wind&&!a.active&&dist>130&&dist<440&&(a.hopCd||0)<=0&&a.cd<=24){
+   a.hopCd=65+(e.spawnIndex||0)%3*15;e.vy=-7.5;e.vx=dir*3.4*pace;e.grounded=false;
+  }
+  if(role==='jumper'&&e.grounded&&!a.wind&&!a.active&&(a.dodgeCd||0)<=0){
+   const shot=(g.projectiles||[]).find(pr=>pr.owner!=='enemy'&&Math.hypot(pr.x-cx(e),pr.y-cy(e))<88);
+   if(shot){e.vy=-9.2;e.vx=-Math.sign(shot.vx||dir)*4.5;e.grounded=false;a.dodgeCd=85;g.fx?.emit?.(cx(e),e.y,{color:'#a8f5cc',count:5,size:2.5,life:16});}
+  }
   if(e.aiIntent==='RETREAT')e.vx=-dir*2.4*pace;
   else if(e.aiIntent==='FLANK'){
    const target=cx(p)+(e.aiFlankDir||-dir)*Math.max(110,range*.8);

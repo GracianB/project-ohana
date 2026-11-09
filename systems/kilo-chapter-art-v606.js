@@ -156,9 +156,12 @@ function frog(c,s){
  ellipse(c,2,-26+down,15,13,'#cbd9a3',0,1.2);
  fill(c,'#79b68c',()=>{c.moveTo(-24,-41+down);c.bezierCurveTo(-30,-62+down,-11,-64+down,-6,-51+down);c.quadraticCurveTo(0,-56+down,6,-51+down);c.bezierCurveTo(17,-65+down,31,-58+down,24,-39+down);c.quadraticCurveTo(0,-23+down,-24,-41+down);},2.2);
  for(const side of [-1,1])eye(c,side*14,-50+down,6.7,aim,{hurt,angry:wind});
+ const croakPuff = (!s.reduced && !wind && !active) ? Math.max(0, Math.sin(s.time * 0.08)) * 4 : 0;
+ if(croakPuff > 0.5) ellipse(c, 0, -22 + down + croakPuff * 0.5, 9 + croakPuff, 7 + croakPuff, '#e8f5e9', 0, 1.2);
  stroke(c,'#315f56',1.8,()=>{c.moveTo(-14,-36+down);c.quadraticCurveTo(0,-30+down,15,-36+down);});
  for(const side of [-1,1])ellipse(c,side*21,-36+down,3,2,'#d3c69a',0,0);
- for(let k=0;k<4;k++)ellipse(c,-15+k*9,-24+down+(k%2)*3,2,1.5,'#70a27b',.2,0);
+ for(let k=0;k<4;k++)ellipse(c,-15+k*9,-24+down+(k%2)*3,2.5,2,'#ffd54f',.2,0);
+ for(let k=0;k<3;k++)ellipse(c,-10+k*10,-32+down,2,2,'#4dd0e1',-.2,0);
 }
 function plant(c,s){
  const {time,wind,active,hurt,aim,reduced}=s,sway=reduced?0:Math.sin(time*.045)*3;
@@ -221,6 +224,11 @@ export function drawKiloCreature(c,e,cam,t,reduced=false){
  // A grounded contact shadow and a committed pose communicate the warning.
  if(wind){c.save();c.globalAlpha=.35;ellipse(c,0,2,e.kind==='rana'?32:25,3.3,'#ffe0a5',0,0);c.restore();}
  c.restore();
+ if(e._alertT>0){
+  const ax=e.x+e.w/2-cam.x,ay=e.y-cam.y-14;
+  c.save();c.fillStyle='#ffe57f';c.strokeStyle='#243e41';c.lineWidth=2.5;c.font='bold 14px sans-serif';c.textAlign='center';
+  c.strokeText('!',ax,ay);c.fillText('!',ax,ay);c.restore();
+ }
  if(e.hp<e.max&&e.hp>0){const x=e.x-cam.x,y=e.y-cam.y-9;c.save();c.fillStyle='#244644';c.beginPath();c.roundRect(x,y,e.w,4,2);c.fill();c.fillStyle='#e9d6a3';c.beginPath();c.roundRect(x,y,e.w*clamp(e.hp/e.max,0,1),4,2);c.fill();c.restore();}
  return true;
 }

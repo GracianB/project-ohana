@@ -3166,7 +3166,8 @@ function drawWorld1Backdrop(world,W,H){
  const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
  if(h!=="kilo"&&drawLivingRealm(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H,t,{reduceMotion:rd})){drawChapterLandmarks(ctx,game,game.cam,t,W,H);drawRealmSignatures(ctx,h,game.cam,W,H,t,rd);return;}
  if(h==="kilo")drawKiloBayBackdrop(ctx,game.cam,t,W,H,rd);
- else if(h==="stitcho"||h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
+ else if(h==="stitcho")drawStitchoArchipelago(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:game.world1?.stations?.filter(s=>s.done).length||0});
+ else if(h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
  else if(h==="cat")drawMichiGardens(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
 
  else if(h==="dragon")drawDragonCalderaBackdrop(ctx,game.cam,t,W,H,rd);

@@ -728,7 +728,7 @@ const face = p.facing || 1, worldW = game.worldW || 1600;
 const probe = { x: face > 0 ? p.x + p.w - 3 : p.x - 9,
   y: p.y + p.h * 0.2, w: 12, h: p.h * 0.6 };
 const edge = face < 0 ? p.x <= 8 : p.x + p.w >= worldW - 8;
-const wall = edge || (game.platforms || []).some(pl => aabb(probe, pl));
+const wall = edge || (game.platforms || []).some(pl => (pl.h > 24 || pl._solid) && aabb(probe, pl));
 const maxBounces = 1 + Math.min(2, Math.floor((Number(p.evo) || 0) / 2));
 if (wall && S.rollBounces < maxBounces) {
   S.rollBounces++;
