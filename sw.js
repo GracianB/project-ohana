@@ -686,7 +686,7 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/real-actor.js": "c88c1bc78277e559869c3ded755da36e8426a1d4",
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
-  "characters/visual-size.js": "af120c4e9186c27da5346924f0c2bfd52d8847d4",
+  "characters/visual-size.js": "3ec310ed762b14ba11fec3f2ba4cc356296cd612",
   "index.html": "4cfdaca241de47001623ba78b0b16988f76a54e3",
   "multiplayer.html": "778d4e60ca9b94799d52206d48c7e8827c72510b",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
