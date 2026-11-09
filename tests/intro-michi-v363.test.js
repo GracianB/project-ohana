@@ -49,7 +49,7 @@ test("V457 five distinct mythic silhouettes retain the welcome rig and game coll
  const src=readFileSync(new URL("../characters/art/cat.js",import.meta.url),"utf8");
  assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/);
  for(const form of [0,3,4])
-   assert.match(src,new RegExp('if\\\\(f==='+form+'\\\\)\\\\{'),'Michi new silhouette F'+form);
+   assert.ok(src.includes('if(f==='+form+'){'),'Michi new silhouette F'+form);
  assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/,'Hada and Medusa keep their authored gameplay rigs');
  // V625 reauthors the drawings; identity is checked from their real geometry,
  // rather than frozen English comments about the removed renderer.

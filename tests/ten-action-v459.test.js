@@ -61,7 +61,7 @@ test('V459: character lineage is cat->lunar lynx->cat-eared jelly->moon hare->je
  assert.equal(name.forms[4].name,'Capibara Astral');
  assert.equal(name.forms[0].name,'Michi · Luciérnaga Lunar');
  // Each evolution has a dedicated anatomical rendering path after V625.
- for(const form of [0,3,4])assert.match(src,new RegExp('if\\\\(f==='+form+'\\\\)\\\\{'));
+ for(const form of [0,3,4])assert.ok(src.includes('if(f==='+form+'){'),'missing authored F'+form);
  assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/,'Hada and Medusa remain separate crafted silhouettes');
  assert.deepEqual(MICHICORNIO_ACTIONS,['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);
 });
