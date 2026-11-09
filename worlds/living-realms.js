@@ -267,13 +267,13 @@ function live(c,hero,p,cam,t,W,H){
  for(let i=-1;i<5;i++){const x=mod(i*430-cam.x*.025-t*.08,width+700)-200;cloud(c,x,135+(i%3)*64,100,22,p.mist+'35');}
  const night=['stitcho','cat','yomi'].includes(hero);
  for(let i=0;i<(night?32:16);i++){const x=mod(i*131.71-cam.x*.09+t*(hero==='dragon'?.12:.025),width+80)-40,y=170+mod(i*83.13-t*(hero==='dragon'?.34:.06),520);const a=.2+(Math.sin(t*.018+i)+1)*.16;
-  c.globalAlpha=a;oval(c,x,y,i%5?1.5:3,i%5?1.5:3,p.light);}
+  c.globalAlpha=a*.45;oval(c,x,y,(i%5?2.5:4.5),(i%5?2.5:4.5),p.light);c.globalAlpha=a;oval(c,x,y,i%5?1.2:2.2,i%5?1.2:2.2,'#ffffff');}
  c.globalAlpha=1;
  if(hero==='stitcho'){
   for(let i=0;i<20;i++){const x=mod(i*149-cam.x*.16+t*.4,width+160)-80,y=660+(i%8)*21;line(c,p.light+'35',1,()=>{c.moveTo(x,y);c.quadraticCurveTo(x+24,y+Math.sin(t*.02+i)*3,x+58,y);});}
   for(let tile=-TILE-middleX;tile<width+TILE;tile+=TILE)for(let i=0;i<3;i++){
    const x=tile+530+i*600,y=360-middleY;if(x< -40||x>width+40)continue;
-   line(c,'#b7d4c0',1.5,()=>{c.moveTo(x,y);c.lineTo(x+Math.sin(t*.016+i)*18,y+110);});oval(c,x+Math.sin(t*.016+i)*18,y+119,25,10,p.light+'99');
+   line(c,'#b7d4c0',1.5,()=>{c.moveTo(x,y);c.lineTo(x+Math.sin(t*.016+i)*18,y+110);});oval(c,x+Math.sin(t*.016+i)*18,y+119,36,18,p.light+'33');oval(c,x+Math.sin(t*.016+i)*18,y+119,25,10,p.light+'cc');oval(c,x+Math.sin(t*.016+i)*18,y+119,10,4,'#ffffff');
   }
  }else if(hero==='chispin'||hero==='yomi'||hero==='final'){
   const anchors=hero==='chispin'?[450,1480]:[0,1,2].map(i=>(hero==='final'?260:240)+i*600),height=hero==='chispin'?445:hero==='final'?410:430;

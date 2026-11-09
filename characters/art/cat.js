@@ -206,6 +206,19 @@ function drawMichiMythic(ctx,pose,r,f){
    line(white,0.8,()=>{ctx.moveTo(side*8+2,-63);ctx.quadraticCurveTo(side*14+3,-66+earFlap,side*16+2,-60+earFlap);});
   }
 
+  // Cresta y aletita dorsal de seda feérica en la espalda
+  const dorsalWave = still ? 0 : Math.sin(t * 0.3) * 2.2;
+  shape('#cbf1f7', () => {
+   ctx.moveTo(-16, -62);
+   ctx.bezierCurveTo(-26 + dorsalWave, -54, -28 - dorsalWave, -40, -18, -28);
+   ctx.bezierCurveTo(-14, -22, -11, -22, -12, -26);
+   ctx.bezierCurveTo(-18, -36, -18, -50, -14, -58);
+  }, 1, '#483552');
+  line(white, 0.8, () => {
+   ctx.moveTo(-15, -60);
+   ctx.quadraticCurveTo(-22 + dorsalWave, -46, -15, -30);
+  });
+
   // Colita en espiral tierna y elástica (plush curl, bounciness orgánico)
   const tailWave=still?0:swim*.65;
   const tailCurl=hurt?1.35:state==='jump'?0.5:state==='fall'?1.15:state==='glide'?0.7:1;
@@ -284,10 +297,11 @@ function drawMichiMythic(ctx,pose,r,f){
    });
   }
 
-  // Perlita o burbuja de luz mágica que flota en la punta del hociquito
+  // Perlita o burbuja de luz mágica con destello que flota en la punta del hociquito
   const bubWave=still?0:Math.sin(t*.1)*2;
-  oval(37+atkK*5,-58+bubWave,2.6,2.6,'#cbf1f7',0.8);
-  oval(36+atkK*5,-59+bubWave,1,1,white);
+  oval(37+atkK*5,-58+bubWave,3.4,3.4,'#cbf1f7',0.8);
+  oval(36+atkK*5,-59+bubWave,1.3,1.3,white);
+  sparkle(37+atkK*5,-58+bubWave,1.1,'#ffe59a');
 
   // Coronita astral de tres perlitas con cuernito de luz en la coronilla
   shape('#ffe59a',()=>{
@@ -298,11 +312,12 @@ function drawMichiMythic(ctx,pose,r,f){
    ctx.lineTo(11,-90);
    ctx.quadraticCurveTo(5,-88,0,-91);
   },0.8,'#483552');
-  oval(3,-99-atkK*2,1.6,1.6,white);
+  oval(3,-99-atkK*2,1.8,1.8,white);
 
-  // Mofletes sonrosados adorables (blushing kawaii cheeks)
-  oval(16,-62,4.2,2.6,'#ffb0d3');
-  oval(4,-64,3.2,2.0,'#ffb0d3');
+  // Mofletes sonrosados adorables con destello de brillo (blushing kawaii cheeks)
+  oval(16,-62,5.2,3.2,'#ff9dbb');
+  oval(4,-64,3.8,2.4,'#ff9dbb');
+  oval(17,-63,1.3,0.9,white);
 
   // Ojos héroe gemelos grandes y tiernos (exactamente 2 llamadas a drawMichiEye)
   const eyeOpts={
