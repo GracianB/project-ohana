@@ -3,6 +3,7 @@
 // the hero over a terrace without pressing jump, which must not be misdiagnosed
 // as walking through a solid wall.
 import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {chromium} from 'playwright';import {startServer} from './server.mjs';
+import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 const server=await startServer(0);let browser;
 try{
  browser=await chromium.launch(process.env.CHROMIUM_BIN?{executablePath:process.env.CHROMIUM_BIN}:{});
@@ -42,7 +43,13 @@ try{
    assert.equal(solid.hitX,-1,hero+' real bank must stop horizontal crossing');
    assert.ok(solid.right<=bank.x+1,hero+' solid bank must not permit tunnelling');
   }
-  await page.keyboard.down('d');await page.evaluate(()=>window.__OHANA_E2E.step(360));
+  await page.keyboard.down('d');
+  // The authored Frita route contains real oil pits. Using a single blind
+  // 360-frame straight walk kills the test pilot before it can observe bank
+  // geometry. On decorative-floor chapters press real W only when the shared
+  // physical terrain planner sees a ledge/pit; never teleport or grant health.
+  if(flatDock)await advanceTerrainControls(page,360);
+  else await page.evaluate(()=>window.__OHANA_E2E.step(360));
   const blocked=await page.evaluate(()=>window.__OHANA_E2E.state());
   const snap=p=>({x:p.x,y:p.y,w:p.w,h:p.h,vx:p.vx,vy:p.vy,grounded:p.grounded,jumps:p.jumps});
   console.log('V511 BANK OBSERVATION',JSON.stringify({hero,bank,before:{...snap(before.player),hp:before.hp},after:{...snap(blocked.player),hp:blocked.hp},solid,roomId:blocked.roomId,steps:360}));
