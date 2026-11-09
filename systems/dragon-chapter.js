@@ -47,7 +47,14 @@ export function updateDragonChapter(g,hurt){
   if(s.kind!=='brazier'||s.done)continue;
   const dx=s.x-(p.x+p.w/2);
   const near=Math.abs(dx)<160&&Math.abs(p.y+p.h-s.y)<150;
-  const fireActive=(p.state==='cast'||p.state==='attack'||s.flameUntil>w.tick);
+  // The native J ability records a timestamped breath cast, not necessarily a
+  // player.state transition. Keep its short window so genuine input lights
+  // the brazier while an ancient cast cannot activate a later station.
+  const cast=p._cast;
+  const castAge=Number(g.t)-Number(cast?.t);
+  const breathActive=p.id==='dragon'&&cast?.id==='breath'&&cast?.slot===0&&
+   Number.isFinite(castAge)&&castAge>=0&&castAge<24;
+  const fireActive=breathActive||p.state==='cast'||p.state==='attack'||s.flameUntil>w.tick;
   if(near&&fireActive){
    s.done=true;
    w.calderaHeat=Math.min(100,w.calderaHeat+25);
