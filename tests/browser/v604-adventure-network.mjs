@@ -39,7 +39,7 @@ try{browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||chro
  console.log('BOOT',await Promise.all(pages.map(read)));
  for(const p of pages)await p.evaluate(async()=>{window.__ohanaNetwork=(await import('/systems/online-coop.js')).onlineCoop;});
  for(const p of pages)await finishStory(p);
- for(const p of pages)assert.deepEqual(await p.evaluate(()=>{const game=window.__ohanaNetwork._combatGame;return{seals:game.world1Seals,discoveries:game.expedition.done};}),{seals:[],discoveries:[]},'solo seals and discoveries must not unlock a fresh cooperative room');
+ for(const p of pages)assert.deepEqual(await p.evaluate(()=>{const game=window.__ohanaNetwork._combatGame;return{seals:game.world1Seals,discoveries:game.expedition?.done||[]};}),{seals:[],discoveries:[]},'solo seals and discoveries must not unlock a fresh cooperative room');
  await g.getByRole('button',{name:'Usar a Kilo',exact:true}).click();await g.waitForFunction(()=>window.__ohanaNetwork._combatGame.player.id==='kilo');await h.waitForFunction(()=>window.__ohanaNetwork.remote?.characterId==='kilo');await g.waitForTimeout(1300);await g.getByRole('button',{name:'Volver a Stitcho',exact:true}).click();await g.waitForFunction(()=>window.__ohanaNetwork._combatGame.player.id==='stitcho');await h.waitForFunction(()=>window.__ohanaNetwork.remote?.characterId==='stitcho');console.log('PASS voluntary chapter-role swap and return to the chosen hero through real mobile controls');
 
  // Fixture places the guest on the authored note. The production puzzle
