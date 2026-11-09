@@ -950,6 +950,32 @@ export function playIntro(kind, name, done, id) {
       p._poseOverride=t<T.in?'jump':t<T.out-.25?'cast':'victory';
       drawChispaCeremony(ctx,cx,footY+yOff,target,t,reduce,'intro');
     }
+    if(def.id==='dragon'){
+      p._poseOverride=t<T.in?'glide':t<T.out-.2?'attack':'victory';
+      if(!reduce){
+        ctx.save();
+        const grad=ctx.createRadialGradient(cx,footY+yOff-target*0.2,target*0.05,cx,footY+yOff-target*0.2,target*0.75);
+        grad.addColorStop(0,'rgba(255,140,40,0.4)');
+        grad.addColorStop(0.5,'rgba(255,60,20,0.2)');
+        grad.addColorStop(1,'rgba(255,40,10,0)');
+        ctx.fillStyle=grad;
+        ctx.beginPath();ctx.arc(cx,footY+yOff-target*0.2,target*0.75,0,Math.PI*2);ctx.fill();
+        ctx.restore();
+      }
+    }
+    if(def.id==='dino'){
+      p._poseOverride=t<T.in?'jump':t<T.out-.2?'attack':'victory';
+      if(!reduce&&t>=T.in-0.05){
+        const shock=seg(t,T.in-0.05,T.in+0.35);
+        ctx.save();
+        ctx.strokeStyle='rgba(190,240,120,'+(1-shock)*0.75+')';
+        ctx.lineWidth=Math.max(2,target*0.025);
+        ctx.beginPath();
+        ctx.ellipse(cx,footY,target*(0.3+shock*0.7),target*(0.1+shock*0.2),0,0,Math.PI*2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
     drawDummy(ctx, p, cx, footY + yOff, scale * (1 + 0.1 * outK), t * 60);
     ctx.restore();
     parts.update(dt);

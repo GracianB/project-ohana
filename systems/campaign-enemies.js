@@ -52,6 +52,20 @@ export function updateCampaignEnemy(e,g,hurt){
   if(e.kind==='ufo'&&a.wind===12)g.fx?.emit?.(cx(e),cy(e)-10,{color:'#ff5252',count:3,size:2,life:12});
   if(e.kind==='murcielago'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#d05ce3',count:3,size:2,life:12});
  }
+ if(g.roomDef?.dragonEncounterVersion&&visible){
+  if(e.kind==='escoria'&&a.active>0&&a.active%5===0)g.fx?.emit?.(cx(e),e.y+e.h-2,{color:'#ff5722',count:3,size:2.4,life:10});
+  if(e.kind==='brasita'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#ff9800',count:4,size:2.6,life:12});
+  if(e.kind==='planta'&&a.wind===12)g.fx?.emit?.(cx(e),cy(e)-12,{color:'#ff3d00',count:4,size:2.4,life:12});
+  if(e.kind==='murcielago'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#ff6d00',count:4,size:2.2,life:12});
+  if(e.kind==='rana'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#ffab40',count:3,size:2.2,life:12});
+ }
+ if(g.roomDef?.dinoEncounterVersion&&visible){
+  if(e.kind==='cucaracho'&&a.active>0&&a.active%6===0)g.fx?.emit?.(cx(e),e.y+e.h-2,{color:'#7ca990',count:3,size:2.2,life:8});
+  if(e.kind==='rana'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#69f0ae',count:4,size:2.5,life:12});
+  if((e.kind==='cangrejo'||e.kind==='arana')&&e._shieldImpact===17)g.fx?.emit?.(cx(e)+(e._shieldFacing||dir)*e.w*.5,cy(e),{color:'#ffd54f',count:5,size:2.5,life:12});
+  if(e.kind==='abeja'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#ffb300',count:4,size:2.2,life:12});
+  if(e.kind==='libelula'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#80deea',count:4,size:2.2,life:12});
+ }
  const difficulty=g.combatDifficulty||readCombatDifficulty(g.roomId);
  const variant=e.roomPersona?.variant||0,pace=[.85,1,1.12,.95][variant%4],reach=[1,.85,1.15,1.05][variant%4];
  // Feed the articulated creature rigs the actual combat state, not a cosmetic clock.
@@ -59,9 +73,9 @@ export function updateCampaignEnemy(e,g,hurt){
  if(e.kind==='planta'){e.up=true;e.plantWind=a.wind;e.shoot=a.active?24:0;}
  if(role==='flyer')e.diving=a.active>0;
  const shoot=(vx,vy,damage=12)=>{if(g.projectiles.length<160)g.projectiles.push({x:cx(e),y:cy(e),vx,vy,w:12,h:12,life:140,dmg:damage,owner:'enemy',color:e.elite?'#ffb882':'#ef9db1'});};
- const chapterCommit=(!!g.roomDef?.kiloEncounterVersion||!!g.roomDef?.stitchoEncounterVersion||!!g.roomDef?.catEncounterVersion)&&(a.wind>0||a.active>0)&&!e._guardBreak;
+ const chapterCommit=(!!g.roomDef?.kiloEncounterVersion||!!g.roomDef?.stitchoEncounterVersion||!!g.roomDef?.catEncounterVersion||!!g.roomDef?.dragonEncounterVersion||!!g.roomDef?.dinoEncounterVersion)&&(a.wind>0||a.active>0)&&!e._guardBreak;
  if(chapterCommit)e.stun=Math.min(e.stun||0,5);
- if(e.sleep>0||e.stun>5){e.sleep=Math.max(0,(e.sleep||0)-1);a.wind=0;a.active=0;a.volley=null;e.telegraph=false;e.vx=0;if(g.roomDef?.kiloEncounterVersion||g.roomDef?.stitchoEncounterVersion||g.roomDef?.catEncounterVersion)a.cd--;}
+ if(e.sleep>0||e.stun>5){e.sleep=Math.max(0,(e.sleep||0)-1);a.wind=0;a.active=0;a.volley=null;e.telegraph=false;e.vx=0;if(g.roomDef?.kiloEncounterVersion||g.roomDef?.stitchoEncounterVersion||g.roomDef?.catEncounterVersion||g.roomDef?.dragonEncounterVersion||g.roomDef?.dinoEncounterVersion)a.cd--;}
  else if(a.wind>0){
   a.wind--;e.telegraph=true;e.vx*=.7;
   if(!a.wind){e.telegraph=false;a.active=24;a.cd=Math.round((role==='captain'?130:85)*difficulty.cooldown);
@@ -126,7 +140,7 @@ export function updateCampaignEnemy(e,g,hurt){
   if(e.grounded&&!a.wind&&!a.active&&!(e.sleep>0)&&!(e.stun>5)){e.vy=-9;e.grounded=false;}
   e.vx=0;break;
  }
- if((g.roomDef?.kiloEncounterVersion||g.roomDef?.stitchoEncounterVersion||g.roomDef?.chispinEncounterVersion||g.roomDef?.catEncounterVersion)&&e.roomPersona?.leash)nextX=Math.max(e.roomPersona.leash.left,Math.min(e.roomPersona.leash.right-e.w,nextX));
+ if((g.roomDef?.kiloEncounterVersion||g.roomDef?.stitchoEncounterVersion||g.roomDef?.chispinEncounterVersion||g.roomDef?.catEncounterVersion||g.roomDef?.dragonEncounterVersion||g.roomDef?.dinoEncounterVersion)&&e.roomPersona?.leash)nextX=Math.max(e.roomPersona.leash.left,Math.min(e.roomPersona.leash.right-e.w,nextX));
  e.x=nextX;e.y+=e.vy||0;e.grounded=false;
  if(!flying&&e.vy>=0)for(const floor of g.platforms)if(e.x+e.w>floor.x&&e.x<floor.x+floor.w&&oldFeet<=floor.y+2&&e.y+e.h>=floor.y){e.y=floor.y-e.h;e.vy=0;e.grounded=true;break;}
  const band=flying?e.roomPersona?.flightBand:null;

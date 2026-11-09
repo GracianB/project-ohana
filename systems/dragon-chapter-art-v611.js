@@ -9,6 +9,7 @@ export function drawDragonCreature(ctx,e,cam,t,reduced=false){
  const kind=e.kind||e._species;
  if(!['escoria','brasita','planta','rana','murcielago'].includes(kind))return false;
 
+ const a=e._campaign||{}, wind=(a.wind||0)>0||!!e.telegraph, active=(a.active||0)>0;
  const x=e.x+e.w/2-cam.x,y=e.y+e.h-cam.y,facing=e.facing||1;
  const hurt=e.invuln>0||e.stun>4;
  const step=reduced?0:Math.sin((t*0.14)+(e.spawnIndex||0)*1.3);
@@ -17,6 +18,14 @@ export function drawDragonCreature(ctx,e,cam,t,reduced=false){
  ctx.translate(x,y);
  ctx.scale(facing,1);
  ctx.lineCap='round';ctx.lineJoin='round';
+
+ if(wind){
+  ctx.save();
+  ctx.strokeStyle='rgba(255,109,0,0.65)';
+  ctx.lineWidth=1.8;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.ellipse(0,0,26,7,0,0,TAU);ctx.stroke();
+  ctx.restore();
+ }
 
  if(kind==='escoria'){
   // ── Salamandra de lava (pursuer) — versión colosal ──
@@ -325,6 +334,20 @@ export function drawDragonCreature(ctx,e,cam,t,reduced=false){
  }
 
  ctx.restore();
+
+ if(e._alertT>0){
+  const ax=e.x+e.w/2-cam.x,ay=e.y-cam.y-14;
+  ctx.save();ctx.fillStyle='#ffab40';ctx.strokeStyle='#210c06';ctx.lineWidth=2.5;ctx.font='bold 14px sans-serif';ctx.textAlign='center';
+  ctx.strokeText('!',ax,ay);ctx.fillText('!',ax,ay);ctx.restore();
+ }
+ if(e.hp<e.max&&e.hp>0){
+  const bx=e.x-cam.x,by=e.y-cam.y-8;
+  ctx.save();ctx.fillStyle='rgba(20,8,6,0.85)';
+  _rr(ctx,bx,by,e.w,4,2);ctx.fill();
+  ctx.fillStyle='#ff7043';
+  _rr(ctx,bx,by,e.w*Math.max(0,Math.min(1,e.hp/e.max)),4,2);ctx.fill();
+  ctx.restore();
+ }
  return true;
 }
 

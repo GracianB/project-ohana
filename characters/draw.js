@@ -1549,7 +1549,7 @@ if (burstK > 0.35) {
   if(p.id==="kilo"||michiRig)flashA=Math.min(.12,flashA);
 }
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; if (p.id === "frita") flashA = hurtFresh ? 0.3 : 0.18; if(michiRig)flashA=hurtFresh?.22:.12; }
-const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
+const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat","dragon","dino"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
 drawKiloFlightTrail(ctx,p,H,t,options.reduceMotion===true);
 ctx.save();
 ctx.rotate(tilt * 0.5);

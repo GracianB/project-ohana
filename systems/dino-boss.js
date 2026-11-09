@@ -310,6 +310,19 @@ function _drawColossus(ctx, e, t) {
   ctx.fillStyle = `rgba(255,143,0,${0.18 + Math.sin(t * 0.1) * 0.08})`;
   ctx.beginPath(); ctx.ellipse(0, -30, 70, 56, 0, 0, Math.PI * 2); ctx.fill();
  }
+
+ // Geoda de ámbar expuesta en reposo / vulnerabilidad
+ if (b.exposed || b.phase === 'rest') {
+  ctx.fillStyle = '#ffb300';
+  ctx.beginPath(); ctx.ellipse(12, -34, 14, 18, -0.2, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#fff9c4'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(12, -34, 8 + Math.sin(t * 0.25) * 2, 12 + Math.sin(t * 0.25) * 2, -0.2, 0, Math.PI * 2); ctx.stroke();
+  for (let c = 0; c < 4; c++) {
+   const ang = c * (Math.PI / 2) + t * 0.05;
+   ctx.fillStyle = '#ffffff';
+   ctx.fillRect(12 + Math.cos(ang) * 9 - 2, -34 + Math.sin(ang) * 11 - 2, 4, 4);
+  }
+ }
 }
 
 export function drawDinoBoss(ctx, e, cam, t, reduceMotion = false) {
@@ -321,6 +334,18 @@ export function drawDinoBoss(ctx, e, cam, t, reduceMotion = false) {
  const flip = b.aim || 1; ctx.scale(flip, 1);
 
  _drawColossus(ctx, e, reduceMotion ? 0 : t);
+
+ // Stomp ground impact wave
+ if (b.stomp > 0 && !reduceMotion) {
+  const sk = b.stomp / 24;
+  ctx.save();
+  ctx.strokeStyle = `rgba(255, 183, 77, ${sk * 0.85})`;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.ellipse(0, 36, 120 * (1 - sk * 0.5), 24 * (1 - sk * 0.5), 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+ }
 
  // Telegraph warning box
  if (e.telegraph) {

@@ -110,27 +110,48 @@ export function drawKineticSignature(ctx,p,H,pose,t=0,reduced=false){
    }break;
   case "embers":
    for(let i=0;i<n;i++){
-    const xx=x+i*h*.085,yy=y-(i%3)*h*.08-(air?h*.10:0);
-    const wobble=a.reduced?0:Math.sin(stamp*.09+i)*h*.025;
+    const xx=x+i*h*.085,yy=y-(i%3)*h*.08-(air?h*.12:0);
+    const wobble=a.reduced?0:Math.sin(stamp*.09+i)*h*.028;
     ctx.fillStyle=i%2?a.alt:a.accent;ctx.beginPath();
-    ctx.moveTo(xx+wobble,yy-radius*.70);
-    ctx.quadraticCurveTo(xx+radius*.50,yy-radius*.18,xx+radius*.35,yy+radius*.23);
-    ctx.quadraticCurveTo(xx-radius*.55,yy+radius*.50,xx-radius*.25,yy);
+    ctx.moveTo(xx+wobble,yy-radius*.75);
+    ctx.quadraticCurveTo(xx+radius*.55,yy-radius*.18,xx+radius*.38,yy+radius*.25);
+    ctx.quadraticCurveTo(xx-radius*.58,yy+radius*.52,xx-radius*.25,yy);
     ctx.closePath();ctx.fill();
-    diamond(ctx,xx,yy,radius*.15,a.glint);
+    diamond(ctx,xx,yy,radius*.18,a.glint);
+    if(!a.reduced&&i===0){
+     ctx.fillStyle=a.glint;
+     ctx.beginPath();ctx.arc(xx+wobble*.5,yy-radius*.2,Math.max(1,radius*.1),0,TAU);ctx.fill();
+    }
    }
-   if(air||attack)curve(ctx,x-h*.22,y+h*.15,x+h*.12,y-h*.34,x+h*.40,y-h*.12,a.alt,width*1.4);
+   if(air||attack){
+    curve(ctx,x-h*.22,y+h*.15,x+h*.12,y-h*.34,x+h*.42,y-h*.14,a.alt,width*1.5);
+    curve(ctx,x-h*.28,y+h*.05,x+h*.04,y-h*.42,x+h*.36,y-h*.24,a.accent,width*.9);
+   }
+   if(turn||brake){
+    curve(ctx,x-h*.24,y+h*.02,x-h*.38,y-h*.16,x-h*.12,y-h*.28,a.accent,width*1.2);
+   }
    break;
   case "fossils":
-   ctx.beginPath();ctx.strokeStyle=a.alt;ctx.lineWidth=width*1.5;
-   ctx.moveTo(x-h*.28,y+h*.035);
-   for(let i=0;i<n+1;i++)ctx.lineTo(x-h*.22+i*h*.11,y+(i%2?-.12:.025)*h*k);
+   ctx.beginPath();ctx.strokeStyle=a.alt;ctx.lineWidth=width*1.6;
+   ctx.moveTo(x-h*.30,y+h*.035);
+   for(let i=0;i<n+1;i++)ctx.lineTo(x-h*.24+i*h*.11,y+(i%2?-.13:.028)*h*k);
    ctx.stroke();
    for(let i=0;i<n;i++){
-    const xx=x-h*.18+i*h*.11,yy=y-h*.04-(i%2)*h*.04;
-    line(ctx,xx,yy,xx+h*.03,yy-h*.05,a.accent,width*.80);
-    diamond(ctx,xx+h*.02,yy-h*.09,radius*.21,a.glint);
-   }break;
+    const xx=x-h*.20+i*h*.11,yy=y-h*.04-(i%2)*h*.04;
+    line(ctx,xx,yy,xx+h*.035,yy-h*.055,a.accent,width*.90);
+    diamond(ctx,xx+h*.022,yy-h*.095,radius*.22,a.glint);
+    if(attack){
+     ctx.fillStyle=a.alt;
+     ctx.beginPath();
+     ctx.moveTo(xx+h*.04,yy-h*.08);ctx.lineTo(xx+h*.08,yy-h*.14);ctx.lineTo(xx+h*.01,yy-h*.16);
+     ctx.closePath();ctx.fill();
+    }
+   }
+   if(landing){
+    ctx.strokeStyle=a.glint;ctx.lineWidth=width*1.1;
+    ctx.beginPath();ctx.ellipse(x,y+h*.02,radius*1.4,radius*.45,0,0,TAU);ctx.stroke();
+   }
+   break;
   case "salt":
    for(let i=0;i<n;i++){
     const xx=x+i*h*.08,yy=y-(i%3)*h*.065;

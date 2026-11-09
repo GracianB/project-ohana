@@ -353,6 +353,25 @@ export function drawDragonBoss(ctx,e,cam,t){
  ctx.fillStyle=pupilColor;
  ctx.beginPath();ctx.ellipse(67,-62,2.5,5,0,0,TAU);ctx.fill();
 
+ // Resplandor incandescente en las fauces anticipando ataque de fuego
+ if(b.phase==='warn'||e.telegraph){
+  ctx.fillStyle='rgba(255,235,59,'+(0.6+Math.sin(t*0.3)*0.3)+')';
+  ctx.beginPath();ctx.arc(72,-56,9,0,TAU);ctx.fill();
+ }
+
+ // Núcleo ígneo expuesto en fase de reposo/vulnerabilidad
+ if(b.exposed||b.phase==='rest'){
+  const coreGlow=ctx.createRadialGradient(8,-50,2,8,-50,22);
+  coreGlow.addColorStop(0,'#ffffff');
+  coreGlow.addColorStop(0.35,'#ffe082');
+  coreGlow.addColorStop(0.7,'#ff6d00');
+  coreGlow.addColorStop(1,'rgba(255,60,10,0)');
+  ctx.fillStyle=coreGlow;
+  ctx.beginPath();ctx.arc(8,-50,22,0,TAU);ctx.fill();
+  ctx.strokeStyle='#fff9c4';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(8,-50,8+Math.sin(t*0.25)*2,0,TAU);ctx.stroke();
+ }
+
  // Efecto tier 3: brillo total del cuerpo
  if(tier3){
   ctx.strokeStyle='rgba(255,220,80,0.25)';ctx.lineWidth=8;

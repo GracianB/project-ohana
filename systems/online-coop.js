@@ -1401,6 +1401,26 @@ class OnlineCoop {
     // character renderer when the teammate is outside camera by a wide margin.
     const vx=this.remote.x-(game.cam?.x||0),vy=this.remote.y-(game.cam?.y||0);
     const vw=Number(game.viewW)||1280,vh=Number(game.viewH)||720;
+    const offscreen = vx < 20 || vx > vw - 20 || vy < 20 || vy > vh - 20;
+    if (offscreen && !game.reduceMotion) {
+      const def = ROSTER.find((item) => item.id === this.remote.characterId);
+      const color = def?.color || "#7ee7ff";
+      const margin = 38;
+      const bx = Math.max(margin, Math.min(vw - margin, vx));
+      const by = Math.max(margin, Math.min(vh - margin, vy));
+      const angle = Math.atan2(vy - vh / 2, vx - vw / 2);
+      ctx.save();
+      ctx.translate(bx, by);
+      ctx.rotate(angle);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "rgba(4, 12, 24, 0.85)";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(14, 0); ctx.lineTo(-8, -10); ctx.lineTo(-3, 0); ctx.lineTo(-8, 10);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
     if(vx < -240 || vx > vw+240 || vy < -300 || vy > vh+300)return;
     const definition = ROSTER.find((item) => item.id === this.remote.characterId);
     if (!definition) return;
