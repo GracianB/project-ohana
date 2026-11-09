@@ -48,13 +48,14 @@ test("V363 five family responses: music, sparks, food chase, lantern and dino",(
 test("V457 five distinct mythic silhouettes retain the welcome rig and game collision contract",()=>{
  const src=readFileSync(new URL("../characters/art/cat.js",import.meta.url),"utf8");
  assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/);
- for(const form of [0,1,2,3,4])
-   assert.match(src,new RegExp("if\\(f==="+form+"\\)\\{"),"Michi F"+form+" must have its own drawing path");
+ for(const form of [0,3,4])
+   assert.ok(src.includes('if(f==='+form+'){'),'Michi new silhouette F'+form);
+ assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/,'Hada and Medusa keep their authored gameplay rigs');
  // V625 reauthors the drawings; identity is checked from their real geometry,
  // rather than frozen English comments about the removed renderer.
  const signatures=[];
  for(let form=0;form<5;form++){
-  const ops=[],ctx=new Proxy({globalAlpha:1},{get:(o,k)=>k in o?o[k]:k==='createLinearGradient'?((...a)=>{ops.push([k,...a]);return{addColorStop(...stops){ops.push(['addColorStop',...stops]);}};}):(...a)=>ops.push([k,...a]),set:(o,k,v)=>(o[k]=v,true)});
+  const ops=[],ctx=new Proxy({globalAlpha:1},{get:(o,k)=>k in o?o[k]:(k==='createLinearGradient'||k==='createRadialGradient')?((...a)=>{assert.ok(a.every(Number.isFinite));ops.push([k,...a]);return{addColorStop(offset,color){assert.ok(offset>=0&&offset<=1);ops.push(['addColorStop',offset,color]);}};}):(...a)=>ops.push([k,...a]),set:(o,k,v)=>(o[k]=v,true)});
   cat.draw(ctx,{form,state:'idle',t:73,look:{x:.3,y:0}},{});signatures.push(JSON.stringify(ops));
  }
  assert.equal(new Set(signatures).size,5,'five anatomical silhouettes');

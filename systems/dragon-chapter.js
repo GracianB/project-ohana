@@ -42,17 +42,31 @@ export function updateDragonChapter(g,hurt){
   p.calderaBoost=false;
  }
 
- // Encender braseros con aliento de fuego (J / cast / attack) o contacto cercano
+ // Los braseros se ganan al usar fuego cerca: correr por delante no cuenta.
  for(const s of w.stations){
   if(s.kind!=='brazier'||s.done)continue;
   const dx=s.x-(p.x+p.w/2);
   const near=Math.abs(dx)<160&&Math.abs(p.y+p.h-s.y)<150;
-  const fireActive=(p.state==='cast'||p.state==='attack'||s.flameUntil>w.tick);
-  if(near&&(fireActive||Math.abs(p.vx)>5)){
-   s.done=true;
+  // The native J ability records a timestamped breath cast, not necessarily a
+  // player.state transition. Keep its short window so genuine input lights
+  // the brazier while an ancient cast cannot activate a later station.
+  const cast=p._cast;
+  const castAge=Number(g.t)-Number(cast?.t);
+  const breathActive=p.id==='dragon'&&cast?.id==='breath'&&cast?.slot===0&&
+   Number.isFinite(castAge)&&castAge>=0&&castAge<24;
+  const fireActive=breathActive||p.state==='cast'||p.state==='attack'||s.flameUntil>w.tick;
+  if(near&&fireActive){
+   s.done=true; s._scored=true;
+   // The braziers are completed here, before world1-play's generic "braseros"
+   // pass. That pass therefore skips complete(), which normally updates the
+   // persisted station ledger. Save the exact earned IDs *before* g.save().
+   // Without this, Continue can restore only one of two lit braziers.
+   g.world1Stations={...(g.world1Stations||{}),
+    [g.roomId||'w1-dragon']:w.stations.filter(b=>b.done&&b.kind!=='oven').map(b=>b.id)};
    w.calderaHeat=Math.min(100,w.calderaHeat+25);
    g.score=(g.score||0)+150;
    dragonGrowth(g);
+   g.onWorld1Beat?.('station','dragon');
    g.nums?.add?.(s.x,s.y-90,'¡BRASERO ANCESTRAL ENCENDIDO!','#ff9e40',true);
    g.fx?.emit?.(s.x,s.y-70,{color:'#ff6d00',count:28,size:5,star:true,life:45});
    g.fx?.emit?.(s.x,s.y-85,{color:'#ffe082',count:16,size:3,life:35});

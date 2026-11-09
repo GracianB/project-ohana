@@ -2,20 +2,64 @@ import assert from'node:assert/strict';import fs from'node:fs/promises';import{c
 const s=await startMultiplayerServer();let browser;
 try{browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||chromium.executablePath(),args:['--disable-background-timer-throttling','--disable-renderer-backgrounding']});const contexts=[await browser.newContext(),await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true})],pages=await Promise.all(contexts.map(c=>c.newPage())),errors=[];for(const p of pages){p.on('pageerror',e=>errors.push(e.message));p.on('response',async r=>{if(r.request().method()==='POST'){try{const b=r.request().postDataJSON();if(b.action==='travel'){const d=await r.json();console.log('TRAVEL',b.decision,r.status(),d.data?.travel?.status,d.error?.code);}}catch{}}});}
  for(const context of contexts)await context.addInitScript(()=>{localStorage.setItem('ohana-w1-seals-v1','["kilo"]');localStorage.setItem('ohana-expeditions-v2',JSON.stringify({'w1-kilo':['w1-kilo-v2-trial-0']}));});
- const[h,g]=pages;await h.goto(s.url+'/multiplayer.html');await h.getByRole('button',{name:'Crear sala',exact:true}).click();await h.waitForFunction(()=>/^[A-HJ-NP-Z2-9]{6}$/.test(document.querySelector('#room-code').textContent.trim()));const code=(await h.locator('#room-code').innerText()).trim();await h.getByRole('button',{name:'Seleccionar a Kilo',exact:true}).click();await h.locator('#confirm-character').click();await g.goto(s.url+'/multiplayer.html');await g.locator('#room-input').fill(code);await g.getByRole('button',{name:'Unirse',exact:true}).click();await g.getByRole('button',{name:'Seleccionar a Stitcho',exact:true}).click();await g.locator('#confirm-character').click();
+ const[h,g]=pages;await h.goto(s.url+'/multiplayer.html');await h.getByRole('button',{name:'Crear sala',exact:true}).click();await h.waitForFunction(()=>/^[A-HJ-NP-Z2-9]{6}$/.test(document.querySelector('#room-code').textContent.trim()));const code=(await h.locator('#room-code').innerText()).trim();await h.getByRole('button',{name:'Seleccionar a Kilo',exact:true}).click();await h.locator('#confirm-character').click();// Enter through the actual shared invitation URL. Wait for the native
+ // invite initializer to hydrate the code before submitting; a fast .fill()
+ // during bootstrap can be replaced by an asynchronous session restore.
+ await g.goto(s.url+'/multiplayer.html?room='+encodeURIComponent(code));
+ await g.waitForFunction(expected=>document.getElementById('room-input')?.value===expected,code);
+ const typedCode=await g.locator('#room-input').inputValue();
+ console.log('GUEST_CODE_PRE_JOIN',JSON.stringify({hostCode:code,hostLength:code.length,typed:typedCode,typedLength:typedCode.length,match:typedCode===code}));
+ if(!/^[A-HJ-NP-Z2-9]{6}$/.test(typedCode))throw new Error('The host-issued invite was not entered as six valid characters');
+ g.on('request',request=>{if(request.method()==='POST'&&request.url().includes('/.netlify/functions/')){try{const body=request.postDataJSON();if(body.action==='join')console.log('JOIN_REQUEST_DIAGNOSTIC',JSON.stringify({roomId:body.roomId,length:body.roomId?.length,identity:!!body.identity}));}catch{}}});
+ await g.getByRole('button',{name:'Unirse',exact:true}).click();// Guest must really reach the lobby before character selection. A vanished
+ // button often means the JOIN request failed, not that Stitcho was renamed.
+ const guestCard=g.locator('#character-grid button[data-hero="stitcho"]');
+ try{await guestCard.waitFor({state:'visible',timeout:10000});}
+ catch(err){
+  const diagnostic=await g.evaluate(()=>({
+   url:location.href,
+   entryHidden:document.getElementById('entry')?.hidden,
+   lobbyHidden:document.getElementById('lobby')?.hidden,
+   entryError:document.getElementById('entry-error')?.textContent?.trim(),
+   lobbyError:document.getElementById('lobby-error')?.textContent?.trim(),
+   status:document.getElementById('lobby-status')?.textContent?.trim(),
+   roomCode:document.getElementById('room-code')?.textContent?.trim(),
+   cards:document.querySelectorAll('#character-grid button').length,
+   html:document.getElementById('character-grid')?.innerHTML.slice(0,800)
+  }));
+  await fs.mkdir('test-results/v604',{recursive:true});
+  await g.screenshot({path:'test-results/v604/guest-lobby-failure.png'});
+  await fs.writeFile('test-results/v604/guest-lobby-failure.json',JSON.stringify(diagnostic,null,2)+'\\n');
+  throw new Error('Guest join/selection did not render: '+JSON.stringify(diagnostic)+'; '+err.message);
+ }
+ await guestCard.click();await g.locator('#confirm-character').click();
  for(const p of pages){await p.waitForURL(/index.html\?online=1/);await p.waitForFunction(()=>document.body.dataset.onlineState==='connected');}
  const finishStory=async p=>{for(let i=0;i<8;i++){const active=await p.evaluate(async()=>!!(await import('/systems/online-coop.js')).onlineCoop._combatGame?.world1Cine);if(!active)break;await p.keyboard.press('Enter');await p.waitForTimeout(120);}};
  const read=p=>p.evaluate(async()=>{const{o}= {o:(await import('/systems/online-coop.js')).onlineCoop};return{room:o._combatGame?.roomId,hero:o._combatGame?.player.id,mode:o.snapshot?.mode,slot:o.currentPlayer(o.snapshot)?.slot,epoch:o.identity.connectionEpoch,peer:!!o.remote,transport:document.body.dataset.coopTransport,rtc:{initiator:o.direct?.initiator,local:!!o.direct?.pc?.localDescription,remote:!!o.direct?.pc?.remoteDescription,state:o.direct?.pc?.connectionState,closed:o.direct?.closed},phase:o.snapshot?.phase};});
  console.log('BOOT',await Promise.all(pages.map(read)));
  for(const p of pages)await p.evaluate(async()=>{window.__ohanaNetwork=(await import('/systems/online-coop.js')).onlineCoop;});
  for(const p of pages)await finishStory(p);
- for(const p of pages)assert.deepEqual(await p.evaluate(()=>{const game=window.__ohanaNetwork._combatGame;return{seals:game.world1Seals,discoveries:game.expedition.done};}),{seals:[],discoveries:[]},'solo seals and discoveries must not unlock a fresh cooperative room');
+ for(const p of pages)assert.deepEqual(await p.evaluate(()=>{const game=window.__ohanaNetwork._combatGame;return{seals:game.world1Seals,discoveries:game.expedition?.done||[]};}),{seals:[],discoveries:[]},'solo seals and discoveries must not unlock a fresh cooperative room');
  await g.getByRole('button',{name:'Usar a Kilo',exact:true}).click();await g.waitForFunction(()=>window.__ohanaNetwork._combatGame.player.id==='kilo');await h.waitForFunction(()=>window.__ohanaNetwork.remote?.characterId==='kilo');await g.waitForTimeout(1300);await g.getByRole('button',{name:'Volver a Stitcho',exact:true}).click();await g.waitForFunction(()=>window.__ohanaNetwork._combatGame.player.id==='stitcho');await h.waitForFunction(()=>window.__ohanaNetwork.remote?.characterId==='stitcho');console.log('PASS voluntary chapter-role swap and return to the chosen hero through real mobile controls');
 
  // Fixture places the guest on the authored note. The production puzzle
  // requires its real hold interval; no done flag, XP or server state is injected.
- assert.equal(await g.evaluate(async()=>{const game=(await import('/systems/online-coop.js')).onlineCoop._combatGame,{updateWorld1}=await import('/systems/world1-play.js'),s=game.world1.stations[0],p=game.player,enemies=game.enemies;game.enemies=[];p.x=s.x-p.w/2;p.y=s.y-p.h;p.grounded=true;p.vx=0;for(let i=0;i<45;i++)updateWorld1(game);game.enemies=enemies;return s.done;}),true);
+ // Kilo V606 intentionally rejects the obsolete passive 45-tick hold.
+ // His first conch awakens only via the real E interaction or a valid
+ // ability cast. The host is Kilo; Stitcho cannot earn Kilo's instrument
+ // merely by standing on it, even in a shared room.
+ await h.evaluate(async()=>{
+  const game=(await import('/systems/online-coop.js')).onlineCoop._combatGame,
+   station=game.world1.stations[0],p=game.player;
+  game._testFoes=game.enemies;game.enemies=[];
+  p.x=station.x-p.w/2;p.y=station.y-p.h;p.grounded=true;p.vx=0;p.vy=0;
+ });
+ await h.locator('#game').focus();
+ await h.keyboard.press('e');
  await h.waitForFunction(()=>{const game=window.__ohanaNetwork._combatGame;return game.world1.stations[0].done&&game.world1.stations[0]._scored;});
+ await h.evaluate(()=>{const game=window.__ohanaNetwork._combatGame;game.enemies=game._testFoes;delete game._testFoes;});
+ console.log('PASS host earned first Kilo instrument with real E input');
+ await g.waitForFunction(()=>{const game=window.__ohanaNetwork._combatGame;return game.world1.stations[0].done&&game.world1.stations[0]._scored;});
  for(const p of pages)assert.deepEqual(await p.evaluate(()=>JSON.parse(localStorage.getItem('ohana-w1-seals-v1'))),['kilo']);
  console.log('PASS guest puzzle completion reaches the host without importing or changing solo progress');
  await g.context().setOffline(true);

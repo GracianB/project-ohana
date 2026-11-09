@@ -18,7 +18,17 @@ try{
  await page.locator('#game').focus();
  for(const foe of await page.evaluate(()=>window.__OHANA_E2E.roomCast()))assert.ok(foe.y+foe.h<=1134.1,'no enemy spawned through the floor');
  for(let i=0;i<2500&&!s.world1.sealed;i++){
-  if(s.hp<=0){assert.ok(++deaths<=8,'too many natural deaths in '+hero);await page.evaluate(()=>window.__OHANA_E2E.respawn());s=await step(600);}
+  if(s.hp<=0){
+   const failedAttempt=++deaths;
+   const context={hero,attempt:failedAttempt,x:Math.round(s.player.x),y:Math.round(s.player.y),
+    evo:s.evo,done:s.world1.done,room:s.roomId,hp:s.hp,
+    runtimeFaults:s.runtimeFaults,fault:s.lastRuntimeFault};
+   await fs.writeFile('test-results/v508/'+hero+'-death-'+failedAttempt+'.json',
+    JSON.stringify(context,null,2)+'\n');
+   await page.screenshot({path:'test-results/v508/'+hero+'-death-'+failedAttempt+'.png'});
+   assert.ok(failedAttempt<=8,'too many natural deaths in '+hero+': '+JSON.stringify(context));
+   await page.evaluate(()=>window.__OHANA_E2E.respawn());s=await step(600);
+  }
   if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.clock.runFor(400);await page.locator('#game').focus();}
   forms.add(s.evo);
   const data=await page.evaluate(()=>window.__OHANA_E2E.nextChapterState()),foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast()),boss=foes.find(e=>e.chapterBoss),b=boss?.chapterBoss;

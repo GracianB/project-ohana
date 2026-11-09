@@ -13,7 +13,7 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);
  for(const hero of ['frita','yomi']){
   await page.setViewportSize({width:1440,height:900});
-  await page.evaluate(hero=>{localStorage.clear();const e=window.__OHANA_E2E;e.startWorld1(hero);e.loadRoom('w1-'+hero);e.step(60);},hero);await page.clock.runFor(160);
+  await page.evaluate(hero=>{localStorage.clear();const e=window.__OHANA_E2E;e.start(hero);e.loadRoom('w1-'+hero);e.step(60);},hero);await page.clock.runFor(160);
   assert.equal(await page.evaluate(()=>window.__OHANA_E2E.state().world1Cine),'roomEnter');
   await page.screenshot({path:`test-results/v510/${hero}-arrival.png`});
   await page.evaluate(()=>{const e=window.__OHANA_E2E;e.step(600);e.setEvo(4);e.setPlayer(3500,950);e.step(15);});await page.clock.runFor(160);
@@ -25,7 +25,7 @@ try{
   await page.screenshot({path:`test-results/v510/${hero}-mobile.png`});
  }
  for(const hero of ['frita','yomi']){
-  await page.setViewportSize({width:1440,height:900});await page.evaluate(hero=>{localStorage.clear();const e=window.__OHANA_E2E;e.startWorld1(hero);e.loadRoom('w1-'+hero);e.step(600);e.setEvo(4);e.setPlayer(8510,1050);e.step(12);},hero);await page.clock.runFor(160);await page.screenshot({path:`test-results/v510/${hero}-boss-design.png`});
+  await page.setViewportSize({width:1440,height:900});await page.evaluate(hero=>{localStorage.clear();const e=window.__OHANA_E2E;e.startWorld1(hero);e.step(600);e.setEvo(4);e.setPlayer(8510,1050);e.step(12);},hero);await page.clock.runFor(160);await page.screenshot({path:`test-results/v510/${hero}-boss-design.png`});
  }
  assert.deepEqual(errors,[]);console.log('PASS Frita and Yomi animated arrivals, distinct landscapes, reduced motion and touch J; presentation fixtures');
 }finally{await browser?.close();await new Promise(r=>server.close(r));}

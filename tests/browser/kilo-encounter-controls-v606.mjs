@@ -17,6 +17,12 @@ export async function advanceKiloEncounterControls(page,s,step,i=0){
   const station=stations[s.world1.done],cx=p.x+p.w/2,cy=p.y+p.h/2;
   const near=cast.filter(e=>!e.miniBoss&&e.hp>0&&Math.hypot(e.x+e.w/2-cx,e.y+e.h/2-cy)<365).sort((a,b)=>Math.abs(a.x-cx)-Math.abs(b.x-cx))[0];
   const bossFight=!station&&boss&&Math.abs(boss.x+boss.w/2-cx)<850;
+  // The next native Tambor turn is the announced ground charge. If Kilo is
+  // still airborne after dodging the wave, the boss legitimately substitutes
+  // its aerial fan; give the physical pilot room to land so acceptance covers
+  // the actual charge without scripting the guardian or altering hero state.
+  const chargePreparation=bossFight&&b.turn%3===1&&(b.phase==='rest'||b.phase==='step');
+  const landingNeeded=chargePreparation&&(!p.grounded||p.y+p.h<1134-100);
   let target=station?.x??(boss?boss.x-220:13980),jump=false,air=false;
   if(near&&Math.abs(near.x+near.w/2-cx)<170&&!bossFight){
    const dir=Math.sign(near.x+near.w/2-cx)||1;
@@ -32,7 +38,8 @@ export async function advanceKiloEncounterControls(page,s,step,i=0){
   }
   if(bossFight){
    const center=boss.x+boss.w/2,side=cx<center?-1:1;
-   if(b.phase==='rest')target=center+side*135;
+   if(landingNeeded)target=center+side*680;
+   else if(b.phase==='rest')target=center+side*135;
    else if(b.phase==='warn'||b.phase==='strike'){
     target=center+side*(b.pattern===1?315:265);
     if(b.pattern===0&&(b.phase==='strike'||b.timer<18)&&p.grounded)jump=true;
@@ -45,7 +52,7 @@ export async function advanceKiloEncounterControls(page,s,step,i=0){
   // Face a real target before casting, without moving its position by a hook.
   const aim=near&&!bossFight?near.x+near.w/2:bossFight?boss.x+boss.w/2:station?.x;
   if(Math.abs(dx)<=22&&aim!=null){await hold(aim>=cx?'d':'a');s=await step(1);await release('d');await release('a');}
-  if(near&&(!bossFight||b.phase==='rest')){
+  if(near&&(!bossFight||(b.phase==='rest'&&!chargePreparation))){
    await press('h');await press('j');if(i%9===0)await press('u');
    if(s.evo>=2&&i%13===0)await press('l');
   }
@@ -54,11 +61,12 @@ export async function advanceKiloEncounterControls(page,s,step,i=0){
    else if(station.note===2){if(!p.grounded)await press('j');}
    else{await press('j');if(station.note===3&&s.kiloCombo.ready)await press('i');}
   }
-  if(bossFight&&b.phase==='rest'){
+  if(bossFight&&b.phase==='rest'&&!chargePreparation){
    await press('h');await press('j');if(i%8===0)await press('u');if(s.evo>=2)await press('l');
    if(s.kiloCombo.ready)await press('i');if(s.finisherCharge>=100)await press('p');
   }
-  if(!air&&!jump&&p.grounded&&p.y+p.h<1080&&station?.note!==2)await hold('s');
+  if(landingNeeded&&s.kiloFlight?.remaining>0)await press('k'); // Switch off real K-flight before the charge.
+  if(!air&&!jump&&((p.grounded&&p.y+p.h<1080&&station?.note!==2)||landingNeeded))await hold('s');
   if(jump)await hold('w');
   s=await step(bossFight?10:Math.abs(dx)>22?Math.min(20,Math.max(4,Math.floor(Math.abs(dx)/7))):28);
   for(const k of ['d','a','w','s'])await release(k);
