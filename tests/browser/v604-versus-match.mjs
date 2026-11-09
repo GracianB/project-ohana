@@ -1,7 +1,25 @@
 import assert from'node:assert/strict';import fs from'node:fs/promises';import{chromium}from'playwright';import{startMultiplayerServer}from'../../tools/local-multiplayer-server.mjs';
 const s=await startMultiplayerServer();let browser;
 try{browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||chromium.executablePath(),args:['--disable-background-timer-throttling','--disable-renderer-backgrounding']});const contexts=[await browser.newContext({viewport:{width:1440,height:900}}),await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true})],pages=await Promise.all(contexts.map(c=>c.newPage())),errors=[];for(const p of pages)p.on('pageerror',e=>{errors.push(e.message);console.error('RUNTIME',e.message);});const[h,g]=pages;
- await h.goto(s.url+'/multiplayer.html');await h.locator('#room-mode').selectOption('versus');await h.locator('#room-arena').selectOption('w1-kilo');await h.getByRole('button',{name:'Crear sala',exact:true}).click();await h.waitForFunction(()=>/^[A-HJ-NP-Z2-9]{6}$/.test(document.querySelector('#room-code').textContent.trim()));const code=(await h.locator('#room-code').innerText()).trim();await h.getByRole('button',{name:'Seleccionar a Dino',exact:true}).click();await h.locator('#confirm-character').click();await g.goto(s.url+'/multiplayer.html');await g.locator('#room-input').fill(code);await g.getByRole('button',{name:'Unirse',exact:true}).click();await g.getByRole('button',{name:'Seleccionar a Chispín',exact:true}).click();await g.locator('#confirm-character').click();
+ await h.goto(s.url+'/multiplayer.html');await h.locator('#room-mode').selectOption('versus');await h.locator('#room-arena').selectOption('w1-kilo');await h.getByRole('button',{name:'Crear sala',exact:true}).click();await h.waitForFunction(()=>/^[A-HJ-NP-Z2-9]{6}$/.test(document.querySelector('#room-code').textContent.trim()));const code=(await h.locator('#room-code').innerText()).trim();await h.getByRole('button',{name:'Seleccionar a Dino',exact:true}).click();await h.locator('#confirm-character').click();// Use OHANA's real invitation workflow. Waiting for the guest page's
+ // initialization prevents a late hydration from clearing a hurried .fill().
+ await g.goto(s.url+'/multiplayer.html?room='+encodeURIComponent(code));
+ await g.waitForFunction(invite=>document.getElementById('room-input')?.value===invite,code);
+ await g.getByRole('button',{name:'Unirse',exact:true}).click();
+ const guestCard=g.locator('#character-grid button[data-hero="chispin"]');
+ try{await guestCard.waitFor({state:'visible',timeout:10000});}
+ catch(err){
+  const entry=await g.evaluate(()=>({
+   error:document.getElementById('entry-error')?.textContent,
+   lobbyError:document.getElementById('lobby-error')?.textContent,
+   code:document.getElementById('room-input')?.value,
+   cards:document.querySelectorAll('#character-grid button').length
+  }));
+  await fs.mkdir('test-results/v604',{recursive:true});
+  await g.screenshot({path:'test-results/v604/versus-match-join-failure.png'});
+  throw new Error('Versus match guest join failed: '+JSON.stringify(entry)+'; '+err.message);
+ }
+ await guestCard.click();await g.locator('#confirm-character').click();
  for(const p of pages){await p.waitForURL(/versus.html/);await p.waitForFunction(()=>document.querySelectorAll('.fighter').length===2);await p.waitForFunction(()=>document.querySelector('#connection').textContent==='Conectado');}
  const session=await h.evaluate(()=>JSON.parse(sessionStorage.getItem('ohana-coop-session')));
  const read=async()=> (await s.service.poll(code,session.identity)).versus;
