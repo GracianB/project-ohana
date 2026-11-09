@@ -57,6 +57,15 @@ export function updateDragonChapter(g,hurt){
   const fireActive=breathActive||p.state==='cast'||p.state==='attack'||s.flameUntil>w.tick;
   if(near&&fireActive){
    s.done=true;
+   // This chapter is allowed to ignite a brazier before the generic
+   // World 1 station handler sees it. Persist its *authored id* through the
+   // same world1Stations ledger as other earned objectives, or Continue
+   // silently loses the second brazier while retaining the visible effects.
+   const roomId=w.room||g.roomId||g.roomDef?.id;
+   if(roomId){
+    g.world1Stations={...(g.world1Stations||{}),
+     [roomId]:w.stations.filter(st=>st.done&&st.kind!=='oven').map(st=>st.id)};
+   }
    w.calderaHeat=Math.min(100,w.calderaHeat+25);
    g.score=(g.score||0)+150;
    dragonGrowth(g);
