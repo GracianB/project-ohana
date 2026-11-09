@@ -15,7 +15,7 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await page.keyboard.press('Escape');
  for(const [width,height]of[[1280,900],[390,844],[320,568]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(180);
-  await page.locator('.char-card[data-id="cat"]').click();
+  await page.locator('.char-card[data-id="cat"]').focus();await page.keyboard.press('Enter');
   for(let form=0;form<5;form++){
    const button=page.locator(`[data-camp-form="${form}"]`);await button.click();await page.waitForTimeout(90);
    assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),'cat');
