@@ -1,3 +1,4 @@
+import {drawKiloBayBackdrop} from "../worlds/kilo-bay.js";
 import {WORLD1_ORDER,WORLD1_ROOMS,WORLD1_THEMES} from './world1-rooms.js';
 import {drawLivingRealm} from '../worlds/living-realms.js';
 import {drawOhanaGarden} from '../worlds/ohana-garden.js';
@@ -27,7 +28,7 @@ if(doc){
  function paintScene(now=0){
   sceneFrame=0;if(sceneHero==="together"||sceneHero==="heart")return;if(!help.closest("#help").classList.contains("open")||doc.hidden)return;
   if(now-lastPaint>=80){const canvas=guide.querySelector(".fg-landscape");if(canvas){const c=canvas.getContext("2d"),reduce=matchMedia("(prefers-reduced-motion:reduce)").matches,t=reduce?0:now/1000;
-   if(sceneHero==="kilo")drawOhanaGarden(c,{x:t*9,y:0},t*60,640,220);else drawLivingRealm(c,sceneHero,{x:t*9,y:0},640,220,t*60,{reduceMotion:reduce});
+   if(sceneHero==="kilo")drawKiloBayBackdrop(c,{x:t*9,y:0},t*60,640,220,reduce);else drawLivingRealm(c,sceneHero,{x:t*9,y:0},640,220,t*60,{reduceMotion:reduce});
   }lastPaint=now;}if(!matchMedia("(prefers-reduced-motion:reduce)").matches)sceneFrame=requestAnimationFrame(paintScene);
  }
  const resume=()=>{if(!sceneFrame&&!doc.hidden&&help.closest("#help").classList.contains("open"))sceneFrame=requestAnimationFrame(paintScene);};

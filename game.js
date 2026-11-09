@@ -28,6 +28,7 @@ import {dinoChapterAbility} from './systems/dino-chapter.js';
 import {NEXT_CHAPTERS,NEXT_ARENA,nextChapterAbility,drawChapterBossHud,mirrorRestored} from './systems/chapters-lunar-prism-embers.js';
 import {CHISPIN_CHAPTER_BOSS_ID,CHISPIN_CHAPTER_ARENA,chispinChapterAbility,chispinGateState} from './systems/chispin-chapter.js';
 import {STITCHO_CHAPTER_BOSS_ID,STITCHO_CHAPTER_ARENA} from './systems/stitcho-chapter.js';
+import {drawKiloBayBackdrop} from "./worlds/kilo-bay.js";
 import {drawOhanaPlace} from "./worlds/ohana-environments.js";
 import {installFamilyConstellation} from "./systems/family-constellation.js";
 import {world1Guidance} from "./systems/world1-guidance.js";
@@ -3164,7 +3165,8 @@ ctx.restore();
 function drawWorld1Backdrop(world,W,H){
  const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
  if(h!=="kilo"&&drawLivingRealm(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H,t,{reduceMotion:rd})){drawChapterLandmarks(ctx,game,game.cam,t,W,H);drawRealmSignatures(ctx,h,game.cam,W,H,t,rd);return;}
- if(h==="stitcho"||h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
+ if(h==="kilo")drawKiloBayBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="stitcho"||h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
  else if(h==="cat")drawMichiGardens(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
 
  else if(h==="dragon")drawDragonCalderaBackdrop(ctx,game.cam,t,W,H,rd);
@@ -3174,12 +3176,11 @@ function drawWorld1Backdrop(world,W,H){
  else if(h==="yomi")drawYomiDawn(ctx,game.cam,t,W,H,rd);
  else if(h==="cuerno")drawCuernoForestBackdrop(ctx,game.cam,t,W,H,rd);
  else renderWorld(ctx,world,game.cam,t,W,H);
- // One complete backdrop per room: never paint a second sky over the first.
- if(h==="kilo")drawOhanaPlace(ctx,game,game.cam,t,W,H);
+
  drawRealmSignatures(ctx,h,game.cam,W,H,t,rd);
  drawChapterVista(ctx,game,game.cam,t,W,H);
  drawChapterLandmarks(ctx,game,game.cam,t,W,H);
- if(!['stitcho','chispin','cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(h))drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
+ if(!['kilo','stitcho','chispin','cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(h))drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
  if(game.roomDef.fusionBoss)drawWorld1BossBackdrop(ctx,game,game.cam,t);
 }
 const w1Actors=new Map();

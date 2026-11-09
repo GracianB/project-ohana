@@ -1,3 +1,4 @@
+import {drawKiloBayBackdrop} from "../worlds/kilo-bay.js";
 import{ROSTER}from'../characters/roster.js';import{paintFit}from'../characters/look.js';import{drawCharacter}from'../characters/draw.js';
 import{drawCampaignCreature}from'../systems/campaign-creature-art.js';import{drawChapterBossV2}from'../systems/chapter-boss-art-v2.js';import{drawGauntletProjectile,drawGauntletWorld}from'../systems/final-gauntlet.js';import{drawLivingRealm}from'../worlds/living-realms.js';import{drawOhanaGarden}from'../worlds/ohana-garden.js';import{drawTerrain}from'../worlds/terrain.js';import{KEEPSAKES}from'../systems/keepsakes.js';
 import{WORLD1_ARENA,WORLD1_FLOOR}from'../systems/world1-rooms.js';
@@ -103,7 +104,7 @@ function draw(now){requestAnimationFrame(draw);const dt=lastFrameAt?now-lastFram
  const meShown=shown.find(a=>a._isMe);stats.meX=meShown?meShown.x:0;
  const target=meShown?.hp>0?meShown:shown.find(a=>a.hp>0)||meShown;
  const want=Math.max(LEFT,Math.min(RIGHT-W,target.x+target.w/2-W/2));cam.x+=(want-cam.x)*(1-Math.exp(-dt/(reduce?40:110)));cam.y=FLOOR-H*.76;
- if(v.arenaId==='w1-kilo')drawOhanaGarden(c,cam,reduce?0:frame,W,H);else drawLivingRealm(c,v.arenaId.slice(3),cam,W,H,frame,{reduceMotion:reduce});drawTerrain(c,[{x:LEFT,y:FLOOR,w:RIGHT-LEFT,h:180}],{id:'grove',chapterHero:v.arenaId.slice(3),groundTop:'#d3ceab',ground:'#4c5960'},cam,frame,{width:W,height:H});
+ if(v.arenaId==='w1-kilo')drawKiloBayBackdrop(c,cam,frame,W,H,reduce);else drawLivingRealm(c,v.arenaId.slice(3),cam,W,H,frame,{reduceMotion:reduce});drawTerrain(c,[{x:LEFT,y:FLOOR,w:RIGHT-LEFT,h:180}],{id:'grove',chapterHero:v.arenaId.slice(3),groundTop:'#d3ceab',ground:'#4c5960'},cam,frame,{width:W,height:H});
  v.foes.forEach((e,i)=>{if(e.hp<=0)return;const pos=eased('foe:'+(e.id??i),projected(e,false,ticks),dt,70),f={...e,x:pos.x,y:pos.y};drawCampaignCreature(c,f,cam,frame);c.fillStyle='#99d9b5';c.fillRect(f.x-cam.x,f.y-cam.y-12,f.w*f.hp/f.max,4);});
  if(v.boss?.hp>0){drawChapterBossV2(c,v.boss,cam,frame);drawGauntletWorld(c,{finalGauntlet:{phase:'fight',hero:v.arenaId.slice(3),guardian:v.boss,object:null,found:[]}},cam,frame);}
  for(const a of shown){c.save();if(!a.hp)c.globalAlpha=.3;actor(a,tick);c.restore();const dx=a.x-cam.x;

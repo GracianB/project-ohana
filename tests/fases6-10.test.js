@@ -24,6 +24,7 @@ import {createYomiRoom} from '../systems/yomi-room.js';
 import {enterYomiTrail,yomiTrailSnapshot,YOMI_BEACONS,YOMI_SOULS,YOMI_DRAFTS} from '../systems/yomi-trail.js';
 import {createYomiBoss,updateYomiBoss,YOMI_BOSS_ID,YOMI_BOSS} from '../systems/yomi-boss.js';
 import {drawYomiObservatoryBackdrop} from '../worlds/yomi-observatory.js';
+import {drawKiloBayBackdrop} from '../worlds/kilo-bay.js';
 
 // Cuerno (Fase 10)
 import {createCuernoRoom} from '../systems/cuerno-room.js';
@@ -182,6 +183,12 @@ test('Frita V1: Rey Crujiente creates with 480 HP and 3 tiers', () => {
 test('Frita V1: Market backdrop renders procedural vector paths', () => {
   const ctx = makeDummyCtx();
   drawFritaMarketBackdrop(ctx, { x: 500, y: 300 }, 60, 1600, 1000, false);
+  assert.ok(ctx._commands() > 20);
+});
+
+test('Kilo V1: Kilo Bay backdrop renders procedural vector paths', () => {
+  const ctx = makeDummyCtx();
+  drawKiloBayBackdrop(ctx, { x: 500, y: 300 }, 60, 1600, 1000, false);
   assert.ok(ctx._commands() > 20);
 });
 
