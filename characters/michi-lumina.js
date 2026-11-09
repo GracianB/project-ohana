@@ -193,17 +193,62 @@ export function drawMichiAstralCapybara(c,p={}){
   powerSigil(c,r,1.15);
   c.restore();
 }
+// The intermediate forms are fully alive, not a generic circular neon outline.
+// These layers sit behind the original articulated seahorse/fairy and jelly rigs.
 export function drawMichiLivingHalo(c,p={},form=0){
-  const r=michiPerformance(p);
-  c.save();biolumAura(c,r,form,.88);
-  // Fairy wings and jelly bells carry a travelling light around their anatomy.
-  c.globalAlpha=.5+r.magic*.3;
-  const y=form===1?-60:-64;
-  const a=r.reduceMotion?0:sin(r.t*.09);
-  for(let i=0;i<6;i++){
-    const th=i*TAU/6+r.t*.016;
-    const x=Math.cos(th)*(31+(form===2?8:0)),yy=y+Math.sin(th)*(19+a*2);
-    oval(c,x,yy,2.2+(i%3),2.6,form===1?PAL.sea:PAL.blush);
-  }
-  powerSigil(c,r,.8);c.restore();
+ const r=michiPerformance(p),t=r.t;
+ c.save();biolumAura(c,r,form,.88);
+ if(form===1){
+   // Silk-veined wings bend around separate root and tip joints. The two
+   // wings respond asymmetrically to run, glide, cast and airborne states.
+   c.translate(0,-62);
+   for(const side of [-1,1]){
+     const flutter=r.reduceMotion?0:sin(t*.23+side*.72)*.11;
+     const spread=1+(r.state==='glide'?.28:0)+(r.state==='cast'?r.magic*.1:0);
+     c.save();c.scale(side*spread,1);c.rotate(flutter*side);
+     const grad=c.createLinearGradient(2,-24,60,23);
+     grad.addColorStop(0,'#d4fff7ce');grad.addColorStop(.47,'#7ceffff0');grad.addColorStop(1,'#ad9cff28');
+     c.globalAlpha=.43+r.magic*.24;
+     path(c,grad,()=>{
+       c.moveTo(2,-7);c.bezierCurveTo(20,-33,42,-38,53,-27);
+       c.bezierCurveTo(61,-6,34,4,4,12);c.quadraticCurveTo(12,0,2,-7);
+     },'#baffed',1.5);
+     c.globalAlpha=.58;
+     for(let v=0;v<3;v++){
+       line(c,v===0?'#ecffff':'#bdf7ed',.8,()=>{
+         c.moveTo(4,-5);c.quadraticCurveTo(23+v*8,-22+v*12,46-v*4,-20+v*11);
+       });
+     }
+     sparkle(c,45,-24,2.5,PAL.gold);c.restore();
+   }
+ }else if(form===2){
+   // Seven slow, independently drifting tentacles with luminous nerve nodes.
+   // This is a trailing glow behind the living bell, never a static texture.
+   c.translate(0,-50);c.globalAlpha=.45+r.magic*.22;
+   for(let i=0;i<7;i++){
+     const lane=i-3,root=lane*6;
+     const pulse=r.reduceMotion?0:sin(t*.068+i*1.27)*5;
+     const trail=r.state==='run'?r.run*8:0;
+     const end=root+lane*1.1+pulse+trail;
+     const length=36+(i%3)*8;
+     line(c,i%2?PAL.blush:PAL.sea,1.9+(i%2)*.8,()=>{
+       c.moveTo(root,5);
+       c.bezierCurveTo(root-6+pulse*.3,18,root+11+trail,33,end,length);
+     });
+     const nodeY=18+(i%3)*7;
+     const nodeX=root+sin(t*.035+i*.94)*4;
+     oval(c,nodeX,nodeY,2.4,3.4,i%3?PAL.lilac:PAL.mint);
+     if(i%2===0)sparkle(c,end,length,1.9,PAL.moon);
+   }
+   oval(c,0,-17,31,8,'#acffed38');
+ }
+ // Orbiting plankton follows each new body without introducing randomness.
+ c.globalAlpha=.44+r.magic*.26;
+ for(let i=0;i<6;i++){
+   const th=i*TAU/6+t*.016;
+   const x=Math.cos(th)*(31+(form===2?8:0));
+   const y=(form===1?-60:-64)+Math.sin(th)*(19+(r.reduceMotion?0:sin(t*.09))*2);
+   oval(c,x,y,2.1+(i%3),2.6,form===1?PAL.sea:PAL.blush);
+ }
+ powerSigil(c,r,.8);c.restore();
 }
