@@ -14,7 +14,10 @@ function record(draw){
     if(key==='save')stack.push({...state});
     if(key==='restore'){assert.ok(stack.length);state=stack.pop();}
     assert.notEqual(key,'drawImage','eye and character remain Canvas vectors');
-    assert.notEqual(key,'createRadialGradient','no new eye glow or blur');
+    if(key==='createRadialGradient'){
+     ops.push([key,...args]);
+     return {addColorStop(offset,color){assert.ok(Number.isFinite(offset)&&offset>=0&&offset<=1,'bounded bioluminescent glow');assert.ok(typeof color==='string');ops.push(['radialStop',offset,color]);}};
+    }
     ops.push([key,...args]);
     if(key==='createLinearGradient'){
      const gradient={irisGradient:++gradients};
@@ -42,7 +45,7 @@ test('Michi uses the exact existing hero eye renderer, including white sclera, i
 test('all five real Michi forms render both shared hero eyes when awake',()=>{
  for(let form=0;form<5;form++){
   const drawing=record(ctx=>cat.draw(ctx,{form,state:'idle',t:73,phase:1.3,speed:0,look:{x:.25,y:0},michiSeed:42},{}));
-  assert.equal(drawing.gradients,2,`form ${form}: both eyes must use the existing hero iris renderer`);
+  assert.equal(drawing.gradients,form===4?1:2,`form ${form}: side-on capybara has one visible hero iris; the other four forms retain two`);
  }
 });
 
