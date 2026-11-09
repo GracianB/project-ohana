@@ -106,13 +106,15 @@ test('role symbols are truly different, both themes work, and no cue appears whi
 
 test('Dragon cannot auto-ignite a brazier merely by sprinting nearby',()=>{
  let saves=0;
+ const persisted=[];
  const first={id:0,x:2000,y:1134,kind:'brazier',done:false};
  const other=[4400,6800,9200].map((x,i)=>({id:i+1,x,y:1134,kind:'brazier',done:false}));
  const g={
   roomDef:{id:'w1-dragon',growthChapter:'dragon'},roomId:'w1-dragon',
   player:{id:'dragon',x:1970,y:1070,w:32,h:64,vx:12,vy:0,state:'idle',xp:0,grounded:true},
   world1:{tick:40,stations:[first,...other],calderaHeat:0},
-  score:0,nums:{add(){}},fx:{emit(){}},save(){saves++}
+  world1Stations:{'w1-kilo':[0]},
+  score:0,nums:{add(){}},fx:{emit(){}},save(){saves++;persisted.push(structuredClone(this.world1Stations));}
  };
  updateDragonChapter(g);
  assert.equal(first.done,false,'speed alone is not a fire action');
@@ -125,6 +127,8 @@ test('Dragon cannot auto-ignite a brazier merely by sprinting nearby',()=>{
  assert.equal(g.score,150);
  assert.equal(g.player.xp,55,'earned station advances canonical XP floor');
  assert.equal(saves,1);
+ assert.deepEqual(persisted[0],{'w1-kilo':[0],'w1-dragon':[0]},
+  'the same save must retain other chapters and first earned brazier');
  updateDragonChapter(g);
  assert.equal(g.score,150,'station cannot pay twice');
  assert.equal(saves,1,'save exactly once per station');
@@ -136,6 +140,8 @@ test('Dragon cannot auto-ignite a brazier merely by sprinting nearby',()=>{
  assert.equal(other[0].done,true);
  assert.equal(g.score,300);
  assert.equal(saves,2);
+ assert.deepEqual(persisted[1]['w1-dragon'],[0,1],
+  'Continue must recover both earned braziers in canonical id order');
 
  // The real J dispatcher timestamps a breath. It need not set state='cast'.
  g.t=201;g.player.state='idle';g.player.x=6770;
@@ -144,6 +150,8 @@ test('Dragon cannot auto-ignite a brazier merely by sprinting nearby',()=>{
  assert.equal(other[1].done,true,'real J breath must light its own station');
  assert.equal(g.score,450);
  assert.equal(saves,3);
+ assert.deepEqual(persisted[2]['w1-dragon'],[0,1,2],
+  'time-stamped J breath must also survive a save and Continue');
 
  g.t=300;g.player.x=9170;
  g.player._cast={id:'breath',slot:0,t:200};
