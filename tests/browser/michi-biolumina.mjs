@@ -46,7 +46,7 @@ try{
     return {png:canvas.toDataURL().split(',')[1],visible,edgePixels};
    };
    const a=draw(75),b=draw(145),ra=draw(75,true),rb=draw(145,true);
-   cases.push({form,visible:a.visible,moving:a.png!==b.png,reducedStable:ra.png===rb.png,png:a.png});
+   cases.push({form,visible:a.visible,edgePixels:a.edgePixels,moving:a.png!==b.png,reducedStable:ra.png===rb.png,png:a.png});
   }
   return cases;
  });
