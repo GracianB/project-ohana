@@ -162,3 +162,25 @@ body.playing #char-select.camp-on {display:none!important;}
 @media(max-width:760px){#camp-keepsake{grid-column:1/-1;}}
 /* Keep the observatory heading clear of the Canvas room label on narrow phones. */
 @media(max-width:760px){#family-camp .camp-scene-heading{max-width:calc(100% - 36px);}}
+
+/* V637 · Mobile World 1 dossier: content-sized rows, no text collisions. */
+@media (max-width:760px) {
+ #family-camp[data-world="1"] .camp-scene-heading {
+  position:absolute!important;left:0!important;top:0!important;
+  width:1px!important;height:1px!important;margin:-1px!important;
+  overflow:hidden!important;clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+ }
+ #family-camp[data-world="1"] .camp-dossier {
+  align-content:start!important;grid-auto-rows:max-content!important;
+  row-gap:10px!important;overflow-y:auto!important;overscroll-behavior:contain;
+ }
+ #family-camp[data-world="1"] #camp-route,
+ #family-camp[data-world="1"] #camp-powers,
+ #family-camp[data-world="1"] #camp-keepsake {
+  grid-column:1/-1!important;position:static!important;
+  height:auto!important;min-height:0!important;max-height:none!important;
+  margin:4px 0!important;font-size:12px!important;line-height:1.6!important;
+  white-space:normal!important;overflow-wrap:anywhere!important;
+ }
+}

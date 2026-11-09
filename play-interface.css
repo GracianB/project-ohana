@@ -156,3 +156,15 @@ body.playing.relic-cinema :is(#ability-bar,#combo-chip,#prompt,#hud,#top-actions
 
 /* The guardian instruction card owns its space; relevant new toasts remain visible below. */
 body.playing.guardian-fight #notification-container{top:var(--guardian-notice-top,310px);}
+
+/* V637 · Mobile: the notice is opaque, so Canvas lettering cannot bleed
+   through the active objective card; chapter names truncate intentionally. */
+@media (max-width:640px) {
+ body.playing #notification-container .game-notification {
+  background:#102831!important;box-shadow:0 10px 24px #05131ce0;
+ }
+ body.playing #hud #hud-world {
+  display:block;max-width:100%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;
+ }
+}

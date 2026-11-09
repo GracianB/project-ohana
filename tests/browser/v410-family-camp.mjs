@@ -37,7 +37,16 @@ assert.equal(access.unlocked,true,'Stitcho has direct chapter access');
 assert.match(await p.locator('#camp-start').innerText(),/Entrar en su capítulo/i,'actual selected portal can be entered');
 await fs.mkdir('test-results/visual',{recursive:true});
 for(const [name,width,height] of [['desktop',1440,1050],['mobile',390,844],['landscape',844,390]]){await p.setViewportSize({width,height});await p.locator('.char-card[data-id="cuerno"]').click();await p.waitForTimeout(600);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' overflow');
- const cards=await p.locator('.char-card').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height,x:r.x,right:r.right}}));assert.equal(cards.length,10);assert.ok(cards.every(r=>r.w>=40&&r.h>=44&&r.x>=0&&r.right<=width+1));await p.screenshot({path:`test-results/visual/v410-camp-${name}.png`,fullPage:true,timeout:20000});}
+ const cards=await p.locator('.char-card').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height,x:r.x,right:r.right}}));assert.equal(cards.length,10);assert.ok(cards.every(r=>r.w>=40&&r.h>=44&&r.x>=0&&r.right<=width+1));
+ if(name==='mobile'){
+  const rows=await p.evaluate(()=>['camp-route','camp-powers','camp-keepsake'].map(id=>{
+   const e=document.getElementById(id),r=e.getBoundingClientRect();
+   return {id,top:r.top,bottom:r.bottom,height:r.height,text:e.textContent};
+  }));
+  assert.ok(rows.every((row,i)=>i===0||row.top>=rows[i-1].bottom-1),'mobile dossier paragraphs must not overlap: '+JSON.stringify(rows));
+  assert.equal(await p.locator('.camp-scene-heading').evaluate(e=>getComputedStyle(e).clipPath),'inset(50%)','duplicate Canvas heading must stay visually hidden on phones');
+ }
+ await p.screenshot({path:`test-results/visual/v410-camp-${name}.png`,fullPage:true,timeout:20000});}
 assert.equal(await p.locator('.camp-mystery canvas').count(),0);assert.equal(await p.locator('.u-partner-panel').isVisible(),false);
 // Cuerno was selected only to audit the three viewport layouts. A clean
 // campaign has not earned the previous four seals, so entry MUST remain locked.

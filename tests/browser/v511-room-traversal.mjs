@@ -8,8 +8,16 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);const report=[];
  for(const hero of ['kilo','stitcho','chispin','cat','cuerno','dragon','dino','frita','pizza','yomi']){
   const bank=await page.evaluate(hero=>{localStorage.clear();const e=window.__OHANA_E2E;e.startWorld1(hero);e.loadRoom('w1-'+hero);e.step(600);return e.roomTraversal().terraces[0];},hero);await page.locator('#game').focus();
+  const before=await page.evaluate(()=>window.__OHANA_E2E.state());
   await page.keyboard.down('d');await page.evaluate(()=>window.__OHANA_E2E.step(360));
-  const blocked=await page.evaluate(()=>window.__OHANA_E2E.state());assert.ok(blocked.player.x+blocked.player.w<=bank.x+1,hero+' cannot walk through the bank');assert.ok(blocked.player.x+blocked.player.w>bank.x-10,hero+' reaches its real face');
+  const blocked=await page.evaluate(()=>window.__OHANA_E2E.state());
+  const snap=p=>({x:p.x,y:p.y,w:p.w,h:p.h,vx:p.vx,vy:p.vy,grounded:p.grounded,health:p.health,jumps:p.jumps});
+  console.log('V511 BANK OBSERVATION',JSON.stringify({hero,bank,before:snap(before.player),after:snap(blocked.player),roomId:blocked.roomId,steps:360}));
+  if(blocked.player.x+blocked.player.w>bank.x+1){
+   await fs.mkdir('test-results/v511',{recursive:true});
+   await page.screenshot({path:'test-results/v511/bank-diagnostic-'+hero+'.png'});
+  }
+  assert.ok(blocked.player.x+blocked.player.w<=bank.x+1,hero+' cannot walk through the bank');assert.ok(blocked.player.x+blocked.player.w>bank.x-10,hero+' reaches its real face');
   await page.keyboard.down('w');await page.evaluate(()=>window.__OHANA_E2E.step(16));await page.keyboard.up('w');await page.evaluate(()=>window.__OHANA_E2E.step(80));await page.keyboard.up('d');
   const after=await page.evaluate(()=>window.__OHANA_E2E.state());assert.ok(after.player.x>bank.x+bank.w,hero+' crosses through ordinary jumping');assert.ok(after.hp>0);report.push({hero,bank,blockedX:blocked.player.x,crossedX:after.player.x});
  }
