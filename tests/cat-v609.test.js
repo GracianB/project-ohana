@@ -150,3 +150,33 @@ test('V609 Cat room: pearls and abyssal updrafts are present and interact with p
  updateCatChapter(g);
  assert.ok(g.player.vy < 0, 'updraft must propel player upwards');
 });
+
+
+test('V609 Michi: a full lunar jelly swim cycle never feeds NaN into Canvas',()=>{
+ const gradient=(...args)=>{
+  assert.ok(args.every(Number.isFinite),'nonfinite Canvas gradient '+JSON.stringify(args));
+  return {addColorStop(offset){assert.ok(Number.isFinite(offset));}};
+ };
+ let grads=0;
+ const ctx=new Proxy({},{
+  get(_target,key){
+   if(key==='createLinearGradient'||key==='createRadialGradient')
+    return (...args)=>{grads++;return gradient(...args);};
+   if(typeof key==='symbol')return undefined;
+   return (...args)=>{
+    for(const v of args)if(typeof v==='number')
+     assert.ok(Number.isFinite(v),'nonfinite Canvas command '+String(key));
+   };
+  },
+  set(){return true;}
+ });
+ const e={roomId:'w1-cat',roomPersona:{catEncounter:true},kind:'medusa',
+  campaignRole:'flyer',x:1790,y:990,w:56,h:56,vx:0,
+  hp:55,max:55,invuln:0,stun:0,facing:1,spawnIndex:6,
+  _campaign:{wind:0,active:0,aim:1}};
+ for(let t=0;t<=300;t+=2){
+  assert.equal(drawCatCreature(ctx,e,{x:1400,y:600},t,false),true);
+  assert.equal(drawCatCreature(ctx,e,{x:1400,y:600},t,true),true);
+ }
+ assert.ok(grads>400,'renders repeated real translucent bell gradients');
+});
