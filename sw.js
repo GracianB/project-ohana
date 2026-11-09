@@ -499,7 +499,7 @@ const PRECACHE_REVISIONS = {
   "systems/dino-chapter-art-v613.js": "fb60b32256fe2f4127cc5578e87d785a1ea3a57d",
   "systems/dino-encounters-v613.js": "cb284b5c2cf5280bbb956a5da68a26435e646f0e",
   "systems/frita-chapter-art-v614.js": "0646e340c4bd6c954c94dd60d11515653ecc3685",
-  "systems/frita-encounters-v614.js": "0829bd42a82dfb14e19292a6b545f0ea74bc73eb",
+  "systems/frita-encounters-v614.js": "39ada710aa0f8791226268ebc472e5f4891d66c4",
   "systems/pizza-chapter-art-v615.js": "d712a3c7ee6f8302d710f5602339ee913426519a",
   "systems/pizza-encounters-v615.js": "5a09ad8ce8fa54c23f54c4255c982f806fcdd1c8",
   "systems/yomi-chapter-art-v616.js": "c01f0a6d15c044d5932987505b58c41d5917e34b",
