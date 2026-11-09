@@ -57,3 +57,13 @@ test('terrain pilot: read-only planning leaves the original state untouched',()=
  assert.equal(intent.jump,true);
  assert.deepEqual(data,original);
 });
+
+test('terrain pilot: Dino single-jump mud gap keeps the full W hold',()=>{
+ const data=snapshot(2067,{vx:4.3,jumps:0,maxJumps:1});
+ data.route.pits=[{x:2150,w:190}];
+ const intent=planTerrainJump(data,14);
+ assert.equal(intent.nearPit,false);
+ assert.equal(intent.frames,14,'do not truncate a 14-frame Dino leap to four frames');
+ assert.equal(intent.jump,true);
+ assert.equal(intent.reason,'pit-lip');
+});
