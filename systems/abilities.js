@@ -995,18 +995,28 @@ for (let i = 0; i < 6; i++) {
 }
 if (p.id === "stitcho") {
 ctx.strokeStyle = slot === 2 ? "#b38cff" : "#67ddff";
-ctx.lineWidth = 1.8;
-ctx.globalAlpha = Math.min(.86, .34 + k * .52);
-const count = slot === 0 ? 3 : slot === 1 ? 5 : 7;
-const span = 22 + slot * 9;
-for (let i=0;i<count;i++) {
-  const yy = y + (i-(count-1)/2) * 8;
-  const xx = x + face * (18 + (i%2)*5);
+ctx.lineWidth = 2.4;
+ctx.globalAlpha = Math.min(.92, .40 + k * .56);
+const count = slot === 0 ? 4 : slot === 1 ? 6 : 8;
+const span = 24 + slot * 10;
+for (let i = 0; i < count; i++) {
+  const yy = y + (i - (count - 1) / 2) * 7.5;
+  const xx = x + face * (18 + (i % 2) * 6);
   ctx.beginPath();
-  ctx.moveTo(xx-face*span*.55,yy-3);
-  ctx.lineTo(xx-face*span*.12,yy+2);
-  ctx.lineTo(xx+face*span*.34,yy-2);
+  ctx.moveTo(xx - face * span * 0.55, yy - 3);
+  ctx.lineTo(xx - face * span * 0.12, yy + 2.5);
+  ctx.lineTo(xx + face * span * 0.38, yy - 2);
   ctx.stroke();
+  // White-hot plasma core
+  ctx.save();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(xx - face * span * 0.45, yy - 2.5);
+  ctx.lineTo(xx - face * span * 0.12, yy + 2);
+  ctx.lineTo(xx + face * span * 0.3, yy - 1.5);
+  ctx.stroke();
+  ctx.restore();
 }
 }
 ctx.restore();
@@ -2509,10 +2519,17 @@ ctx.quadraticCurveTo(15 * s, -9 * s, 11 * s, 0);
 ctx.quadraticCurveTo(11 * s, -6 * s, 5.2 * s, -7 * s);
 ctx.closePath();
 ctx.fill();
-ctx.fillStyle = "rgba(255,255,255,.75)";
+// Specular glint
+ctx.fillStyle = "rgba(255,255,255,.85)";
 ctx.beginPath();
 ctx.ellipse(-5 * s, 4.6 * s, 2.2 * s, 1.4 * s, -0.45, 0, TAU);
 ctx.fill();
+// Musical harmonic aura ring
+ctx.strokeStyle = "rgba(255,240,180,0.5)";
+ctx.lineWidth = 1;
+ctx.beginPath();
+ctx.ellipse(-3 * s, 6 * s, 8.5 * s, 6.4 * s, -0.45, 0, TAU);
+ctx.stroke();
 }
 
 function drawBallAura(ctx, p, cam, t, color) {
@@ -2544,18 +2561,47 @@ ctx.moveTo(x - p.facing * (r + 4), yy);
 ctx.lineTo(x - p.facing * (r + 18 + (t * 7 + i * 13) % 14), yy);
 ctx.stroke();
 }
-// Stitcho no deja una estela genérica: "cose" el recorrido.
+// Stitcho no deja una estela genérica: "cose" el recorrido y suelta chispas de plasma de fricción
 if (p.id === "stitcho") {
-ctx.globalAlpha = .70;
+ctx.globalAlpha = .82;
 ctx.strokeStyle = color === "#8f7bff" ? "#d8b7ff" : "#9cf6ff";
-ctx.lineWidth = 1.8;
-for (let i=0;i<6;i++) {
+ctx.lineWidth = 2.2;
+for (let i = 0; i < 6; i++) {
   const xx = x - p.facing * (r + 12 + i * 13);
-  const yy = y + Math.sin(t*.20+i)*r*.36;
+  const yy = y + Math.sin(t * 0.20 + i) * r * 0.36;
   ctx.beginPath();
-  ctx.moveTo(xx-p.facing*6,yy-3);
-  ctx.lineTo(xx,yy+2);
-  ctx.lineTo(xx+p.facing*6,yy-2);
+  ctx.moveTo(xx - p.facing * 6, yy - 3);
+  ctx.lineTo(xx, yy + 2);
+  ctx.lineTo(xx + p.facing * 6, yy - 2);
+  ctx.stroke();
+  // Quantum suture cross-stitch
+  ctx.save();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(xx - p.facing * 3, yy + 2.5);
+  ctx.lineTo(xx + p.facing * 3, yy - 2.5);
+  ctx.stroke();
+  ctx.restore();
+}
+// Ground friction plasma sparks beneath the rolling ball
+const floorY = y + r - 2;
+for (let i = 0; i < 4; i++) {
+  const sparkX = x - p.facing * (i * 8 + (t * 5 + i * 9) % 12);
+  const sparkY = floorY + (i % 2 ? -2 : 1);
+  ctx.fillStyle = i % 2 ? "#ffffff" : "#62f3ff";
+  ctx.beginPath();
+  ctx.arc(sparkX, sparkY, 1.4, 0, TAU);
+  ctx.fill();
+}
+// Rebound shockwaves if bouncing off walls
+const bounces = Number(p._stitchoRollBounces) || 0;
+if (bounces > 0) {
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1.6;
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.arc(x, y, r + 8 + (t * 2) % 12, 0, TAU);
   ctx.stroke();
 }
 }
@@ -2569,23 +2615,27 @@ const radius = 30 + Math.max(p.w, p.h) * 0.65;
 ctx.save();
 ctx.globalCompositeOperation = "lighter";
 ctx.lineCap = "round";
-for (let i = 0; i < 3; i++) {
-  const a = phase + i * TAU / 3, r = radius + Math.sin(phase + i * 1.7) * 4;
-  ctx.globalAlpha = reduced ? 0.42 : 0.52;
-  ctx.strokeStyle = i === 1 ? "#d7b2ff" : "#85edff";
-  ctx.lineWidth = 2.4;
+const vortexCols = ["#85edff", "#d7b2ff", "#ff8de3", "#b2f5ff"];
+for (let i = 0; i < 4; i++) {
+  const a = phase + i * TAU / 4, r = radius + Math.sin(phase + i * 1.5) * 5;
+  ctx.globalAlpha = reduced ? 0.42 : 0.58;
+  ctx.strokeStyle = vortexCols[i % 4];
+  ctx.lineWidth = 2.6;
   ctx.beginPath();
-  ctx.ellipse(x + Math.cos(a) * 5, y + Math.sin(a) * 3, r, r * 0.38, a * 0.2, 0, Math.PI * 1.45);
+  ctx.ellipse(x + Math.cos(a) * 6, y + Math.sin(a) * 3, r, r * 0.38, a * 0.25, 0, Math.PI * 1.55);
   ctx.stroke();
 }
-ctx.globalAlpha = 0.8;
-for (let i = 0; i < 4; i++) {
-  const a = phase * (i % 2 ? -1 : 1) + i * TAU / 4;
+ctx.globalAlpha = 0.88;
+for (let i = 0; i < 5; i++) {
+  const a = phase * (i % 2 ? -1 : 1) + i * TAU / 5;
   const px = x + Math.cos(a) * (radius + 9), py = y - 5 + Math.sin(a) * radius * 0.48;
   ctx.strokeStyle = i % 2 ? "#f4c8ff" : "#bcf7ff";
-  ctx.lineWidth = 1.8;
-  ctx.beginPath(); ctx.moveTo(px - 2, py - 4); ctx.lineTo(px + 2, py); ctx.lineTo(px - 1, py + 3); ctx.stroke();
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(px - 3, py - 5); ctx.lineTo(px + 2, py); ctx.lineTo(px - 1, py + 4); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(px + 4, py - 6); ctx.lineTo(px + 4, py + 3); ctx.stroke();
+  // Orbiting micro plasma spark
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath(); ctx.arc(px, py, 1.6, 0, TAU); ctx.fill();
 }
 ctx.restore();
 }
@@ -3982,20 +4032,59 @@ ctx.strokeStyle = "rgba(255,255,255,.8)";
 ctx.lineWidth = 1;
 ctx.beginPath(); ctx.moveTo(-w * 0.18, -h * 0.04); ctx.lineTo(w * 0.2, -h * 0.04); ctx.stroke();
 } else if (shape === "bolt") {
-ctx.beginPath();
-ctx.moveTo(-w / 2, 0);
-ctx.lineTo(w / 2, -h / 2);
-ctx.lineTo(w / 4, 0);
-ctx.lineTo(w / 2, h / 2);
-ctx.closePath();
-ctx.fill();
-ctx.fillStyle = "#fff";
-ctx.beginPath();
-ctx.moveTo(-w / 6, 0);
-ctx.lineTo(w / 3, -h / 5);
-ctx.lineTo(w / 8, 0);
-ctx.lineTo(w / 3, h / 5);
-ctx.fill();
+const isPlasma = pr.color === "#9ef0ff" || pr.color === "#5ad1ff" || pr.color === "#7eb6ff";
+if (isPlasma) {
+  ctx.save();
+  ctx.lineCap = "round";
+  // Outer ion glow
+  ctx.fillStyle = pr.color;
+  ctx.globalAlpha = 0.45;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, w * 0.75, h * 0.9, 0, 0, TAU);
+  ctx.fill();
+  // Blazing plasma core dart
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = pr.color;
+  ctx.beginPath();
+  ctx.moveTo(w * 0.6, 0);
+  ctx.lineTo(-w * 0.5, -h * 0.45);
+  ctx.lineTo(-w * 0.25, 0);
+  ctx.lineTo(-w * 0.5, h * 0.45);
+  ctx.closePath();
+  ctx.fill();
+  // White-hot needle core
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.moveTo(w * 0.55, 0);
+  ctx.lineTo(-w * 0.25, -h * 0.2);
+  ctx.lineTo(-w * 0.08, 0);
+  ctx.lineTo(-w * 0.25, h * 0.2);
+  ctx.closePath();
+  ctx.fill();
+  // Trailing discharge spark
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.25, 0);
+  ctx.lineTo(-w * 0.65, (t % 2 ? -2 : 2));
+  ctx.stroke();
+  ctx.restore();
+} else {
+  ctx.beginPath();
+  ctx.moveTo(-w / 2, 0);
+  ctx.lineTo(w / 2, -h / 2);
+  ctx.lineTo(w / 4, 0);
+  ctx.lineTo(w / 2, h / 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.moveTo(-w / 6, 0);
+  ctx.lineTo(w / 3, -h / 5);
+  ctx.lineTo(w / 8, 0);
+  ctx.lineTo(w / 3, h / 5);
+  ctx.fill();
+}
 } else if (shape === "zap") {
 ctx.lineWidth = 2.4;
 ctx.strokeStyle = pr.color;
@@ -4135,10 +4224,24 @@ ctx.translate(x, y);
 ctx.scale(s.facing || 1, 1);
 
 if (kind === "claws") {
-for (let i = 0; i < 3; i++) {
-  const rr = reach * (0.58 + i * 0.16);
-  swingArc(ctx, rr, a0, a1, 9 - i, col, 0.28 * fade);
-  swingArc(ctx, rr, a0, a1, 3.4, "#f7fbff", 0.95 * fade);
+for (let i = 0; i < 4; i++) {
+  const rr = reach * (0.54 + i * 0.15);
+  const clawCol = i === 3 ? "#b88aff" : i === 1 ? "#9ef8ff" : col;
+  swingArc(ctx, rr, a0, a1, 10 - i * 1.5, clawCol, 0.35 * fade);
+  swingArc(ctx, rr, a0, a1, 4.2, clawCol, 0.75 * fade);
+  swingArc(ctx, rr, a0, a1, 1.8, "#ffffff", 0.98 * fade);
+  // Impact tip spark
+  const tipX = Math.cos(a1) * rr, tipY = Math.sin(a1) * rr;
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(tipX, tipY, 2.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = clawCol;
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(tipX + 6, tipY + (i % 2 ? -4 : 4));
+  ctx.stroke();
 }
 } else if (kind === "spark") {
 swingArc(ctx, reach * 0.82, a0, a1, 14, col, 0.22 * fade);
@@ -4381,6 +4484,38 @@ ctx.lineTo(len - 4, -7);
 ctx.lineTo(len - 4, 7);
 ctx.closePath();
 ctx.fill();
+ctx.restore();
+} else if (kind === "note") {
+const staffCols = ["#ffe04a", "#ff9ab0", "#7fe0ff"];
+for (let i = 0; i < 3; i++) {
+  const rr = reach * (0.66 + i * 0.13);
+  swingArc(ctx, rr, a0, a1, 10 - i * 2, staffCols[i], 0.35 * fade);
+  swingArc(ctx, rr, a0, a1, 3.4, staffCols[i], 0.85 * fade);
+  swingArc(ctx, rr, a0, a1, 1.4, "#ffffff", 0.95 * fade);
+}
+// Leading edge: golden eighth note and tropical hibiscus petal burst
+ctx.save();
+ctx.translate(Math.cos(a1) * reach * 0.82, Math.sin(a1) * reach * 0.82);
+ctx.rotate(a1);
+ctx.globalAlpha = fade;
+ctx.fillStyle = "#ffd36a";
+ctx.beginPath();
+ctx.ellipse(0, 4, 8, 5.5, -0.4, 0, Math.PI * 2);
+ctx.fill();
+ctx.strokeStyle = "#fff";
+ctx.lineWidth = 2.4;
+ctx.beginPath();
+ctx.moveTo(6, 2); ctx.lineTo(6, -16);
+ctx.quadraticCurveTo(18, -18, 16, -6);
+ctx.stroke();
+// Tropical floral petal burst at the impact crest
+for (let p = 0; p < 4; p++) {
+  const pa = p * Math.PI * 0.5 + 0.3;
+  ctx.fillStyle = p % 2 ? "#ff7092" : "#ffe04a";
+  ctx.beginPath();
+  ctx.ellipse(Math.cos(pa) * 11, Math.sin(pa) * 7, 4.5, 2.5, pa, 0, Math.PI * 2);
+  ctx.fill();
+}
 ctx.restore();
 } else {
 swingArc(ctx, reach * 0.8, a0, a1, 14, col, 0.3 * fade);

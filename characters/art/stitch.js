@@ -788,8 +788,19 @@ function drawBiped(ctx, R, pose, f, S, C) {
     const lunge = Math.sin(Math.PI * Math.min(1, k / 0.85));
     headDX += lunge * 4; lift -= lunge * 2.5;
   } else if (st === "cast") {
-    if (pose.castSlot === 0) { armA = 1.3; armB = 1.0; lean += 0.1; headRot = 0.05; legA = 0.35; legB = -0.3; }
-    else { armA = 1.45 + Math.sin(t * 0.6) * 0.1; armB = -1.85; kA = 1.25; kB = 1.35; headRot = -0.22; legA = 0.4; legB = -0.4; lift = 0; }
+    if (pose.castSlot === 0) {
+      const recoil = pose.reduceMotion ? 0 : Math.sin(pose.cast * Math.PI);
+      armA = 1.42 - recoil * 0.28; armB = 1.15 - recoil * 0.24;
+      lean -= recoil * 0.12; headRot = -0.05 + recoil * 0.08; headDX -= recoil * 2.5;
+      legA = 0.42; legB = -0.32;
+    } else if (pose.castSlot === 1) {
+      armA = 0.85; armB = -0.85; lean += 0.16; headRot = 0.14; legA = 0.75; legB = 0.65; lift += 2;
+    } else {
+      const swirl = pose.reduceMotion ? 0 : Math.sin(t * 0.6);
+      armA = 1.6 + swirl * 0.22; armB = -2.05 - swirl * 0.22;
+      kA = 1.3; kB = 1.35; headRot = -0.22 + swirl * 0.08;
+      legA = 0.45; legB = -0.45; lift = pose.reduceMotion ? 0 : -Math.abs(swirl) * 3;
+    }
   } else if (st === "hurt") {
     armA = 1.25; armB = -2.1; lean -= 0.42*(pose.hurt||.5); headRot = -0.42*(pose.hurt||.5); headDX = -5*(pose.hurt||.5); headDY = 1.5; legA = 0.55; legB = -0.35; legBendA = -4;
     if (!pose.reduceMotion) { headDX += Math.sin(t * 2.2) * 1.4; armA += Math.sin(t * 1.7) * 0.25; }  // V465: dizzy shudder
@@ -857,23 +868,51 @@ function drawBiped(ctx, R, pose, f, S, C) {
     if (!trail) return;
     ctx.save();
     const a0 = Math.PI / 2 - trail.from, a1 = Math.PI / 2 - trail.to; // swing → canvas
-    // V465: three razor claw-slashes that taper from the claw tips backwards,
-    // layered alpha (glow + white core), plus sparks at the leading edge.
+    // Razor-sharp alien plasma claw-slashes that taper from the claw tips backwards,
+    // multi-tiered: ultraviolet outer mantle, neon cyan core, blazing white cutting edge,
+    // with transverse electric sparks jumping between the claw blades.
     ctx.lineCap = "round";
-    const N = 9, base = ctx.globalAlpha;
-    for (let i = 0; i < 3; i++) {
-      const r = len + hs * 1.4 + i * 4.2;
+    const clawCount = S.extraArms || S.bigClaw ? 4 : 3;
+    const N = 10, base = ctx.globalAlpha;
+    for (let i = 0; i < clawCount; i++) {
+      const r = len + hs * 1.35 + i * 4.4;
       for (let j = 0; j < N; j++) {
-        const k0 = j / N, k1 = (j + 1) / N, w = (S.bigClaw ? 4.2 : 3.2) * (1 - k0) * (1 - i * 0.18);
+        const k0 = j / N, k1 = (j + 1) / N, w = (S.bigClaw ? 4.6 : 3.4) * (1 - k0) * (1 - i * 0.14);
         const b0 = a1 + (a0 - a1) * k0, b1 = a1 + (a0 - a1) * k1;
-        ctx.globalAlpha = base * (1 - k0) * 0.35; ctx.strokeStyle = i === 1 ? "#b6f8ff" : CYAN; ctx.lineWidth = w + 3;
+        // Outer plasma glow
+        ctx.globalAlpha = base * (1 - k0) * 0.42;
+        ctx.strokeStyle = i === 1 ? "#9ef8ff" : i === 3 ? "#b88aff" : CYAN;
+        ctx.lineWidth = w + 3.2;
         ctx.beginPath(); ctx.arc(sh[0], sh[1], r, Math.min(b0, b1), Math.max(b0, b1)); ctx.stroke();
-        ctx.globalAlpha = base * (1 - k0) * 0.95; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = Math.max(0.6, w * 0.45);
+        // White-hot blade core
+        ctx.globalAlpha = base * (1 - k0) * 0.98;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = Math.max(0.7, w * 0.48);
         ctx.stroke();
       }
       const tx = sh[0] + Math.cos(a1) * r, ty = sh[1] + Math.sin(a1) * r;
-      ctx.globalAlpha = base * 0.9;
-      zap(ctx, tx, ty, a1 + (a1 > a0 ? 1.3 : -1.3), 5 + i * 1.5, i % 2 ? "#ffffff" : CYAN, 1.3);
+      ctx.globalAlpha = base * 0.95;
+      zap(ctx, tx, ty, a1 + (a1 > a0 ? 1.35 : -1.35), 6 + i * 1.6, i % 2 ? "#ffffff" : CYAN, 1.4);
+      // Kinetic shock diamond at leading edge tip
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(tx, ty, 1.6, 0, TAU);
+      ctx.fill();
+    }
+    // High-voltage electric arc jumping between upper and lower claw paths
+    if (clawCount >= 4 && !pose.reduceMotion) {
+      const midA = (a0 + a1) * 0.5;
+      const rA = len + hs * 1.35, rB = len + hs * 1.35 + 3 * 4.4;
+      const xA = sh[0] + Math.cos(midA) * rA, yA = sh[1] + Math.sin(midA) * rA;
+      const xB = sh[0] + Math.cos(midA) * rB, yB = sh[1] + Math.sin(midA) * rB;
+      ctx.globalAlpha = base * 0.75;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(xA, yA);
+      ctx.lineTo((xA + xB) * 0.5 + Math.sin(t * 0.5) * 4, (yA + yB) * 0.5);
+      ctx.lineTo(xB, yB);
+      ctx.stroke();
     }
     ctx.restore();
   };

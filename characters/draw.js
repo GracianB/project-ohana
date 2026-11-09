@@ -257,12 +257,16 @@ ctx.globalAlpha = Math.min(0.92, (0.16 + k * 0.52) * (Number(evoCombat.glow) || 
 switch (kind) {
 case "note-bounce":
   for (let i = 0; i < 3; i++) {
-    const a = t * 0.09 + i * 2.1;
-    const x = f * H * 0.22 + Math.cos(a) * H * 0.15;
+    const a = t * 0.1 + i * 2.1;
+    const x = f * H * 0.22 + Math.cos(a) * H * 0.16;
     const y = -H * 0.45 + Math.sin(a) * H * 0.22;
     ctx.save(); ctx.translate(x, y); ctx.rotate(a);
-    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(0, 2, H * 0.035, 0, Math.PI * 2); ctx.fill();
-    ctx.fillRect(H * 0.025, -H * 0.13, H * 0.018, H * 0.15);
+    ctx.fillStyle = i === 1 ? "#ffd36a" : color;
+    ctx.beginPath(); ctx.arc(0, 2, H * 0.04, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(H * 0.025, -H * 0.14, H * 0.02, H * 0.16);
+    // Acoustic soundwave ripple
+    ctx.strokeStyle = "rgba(255,240,160,0.6)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(0, 2, H * 0.06, H * 0.04, 0, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
   }
   break;
@@ -283,22 +287,36 @@ case "ohana-halo":
   break;
 
 case "plasma-burst":
-  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.2, H * 0.018);
+  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.4, H * 0.02);
   for (let i = 0; i < 3; i++) {
-    const x = f * H * (0.12 + i * 0.08);
-    ctx.beginPath(); ctx.arc(x, -H * 0.48, r * (0.45 + i * 0.2), -1.3, 1.3); ctx.stroke();
+    const x = f * H * (0.12 + i * 0.09);
+    ctx.beginPath(); ctx.arc(x, -H * 0.48, r * (0.45 + i * 0.22), -1.35, 1.35); ctx.stroke();
+    // Muzzle plasma flash sparkles
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(x + Math.cos(0.8) * r * (0.45 + i * 0.22), -H * 0.48 + Math.sin(0.8) * r * (0.45 + i * 0.22), 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
   }
   break;
 case "roll-trail":
-  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, H * 0.024);
-  for (let i = 0; i < 2; i++) {
-    ctx.beginPath(); ctx.arc(-f * H * (0.10 + i * 0.10), -H * 0.45, r * (0.85 + i * 0.18), 0.2, 2.5); ctx.stroke();
+  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.8, H * 0.026);
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath(); ctx.arc(-f * H * (0.08 + i * 0.11), -H * 0.45, r * (0.8 + i * 0.2), 0.2, 2.5); ctx.stroke();
+    // Neon quantum suture crosses
+    const sx = -f * H * (0.12 + i * 0.14), sy = -H * 0.45 + (i % 2 ? 5 : -5);
+    ctx.save();
+    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(sx - 3, sy - 3); ctx.lineTo(sx + 3, sy + 3); ctx.moveTo(sx + 3, sy - 3); ctx.lineTo(sx - 3, sy + 3); ctx.stroke();
+    ctx.restore();
   }
   break;
 case "chaos-orbit":
-  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.4, H * 0.021);
-  for (let i = 0; i < 3; i++) {
-    ctx.beginPath(); ctx.ellipse(0, -H * 0.45, r * (0.9 + i * 0.28), r * (0.35 + i * 0.12), t * 0.12 * (i % 2 ? -1 : 1), 0, Math.PI * 2); ctx.stroke();
+  for (let i = 0; i < 4; i++) {
+    const orbCol = i % 2 ? "#b88aff" : color;
+    ctx.strokeStyle = orbCol; ctx.lineWidth = Math.max(1.6, H * 0.023);
+    ctx.beginPath(); ctx.ellipse(0, -H * 0.45, r * (0.85 + i * 0.25), r * (0.32 + i * 0.11), t * 0.14 * (i % 2 ? -1 : 1), 0, Math.PI * 2); ctx.stroke();
   }
   break;
 
@@ -474,23 +492,32 @@ ctx.strokeStyle = color;
 ctx.lineWidth = Math.max(1.4, H * 0.022);
 
 switch (kind) {
-case "note":
-  for (let i = 0; i < 3; i++) { const a = -0.7 + i * 0.35; ctx.beginPath(); ctx.arc(f * reach * 0.45, -H * 0.45 + Math.sin(a) * H * 0.08, H * 0.04, 0, Math.PI * 2); ctx.stroke(); }
-  break;
-case "claws": {
-  // V465 · Stitcho: three staggered rake marks that tear diagonally through the
-  // air (glow pass + white core), each ending in a tiny cyan spark tick.
-  const lw0 = ctx.lineWidth, a0 = ctx.globalAlpha;
+case "note": {
+  const noteCols = ["#ffe04a", "#ff9ab0", "#7fe0ff"];
   for (let i = 0; i < 3; i++) {
-    const kk = Math.max(0, Math.min(1, k * 1.7 - i * 0.2));
+    const a = -0.7 + i * 0.35;
+    const nx = f * reach * (0.42 + i * 0.08);
+    const ny = -H * 0.45 + Math.sin(a) * H * 0.12;
+    ctx.strokeStyle = noteCols[i]; ctx.lineWidth = Math.max(1.2, H * 0.02);
+    ctx.beginPath(); ctx.arc(nx, ny, H * 0.045, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = noteCols[i];
+    ctx.fillRect(nx + f * H * 0.02, ny - H * 0.08, H * 0.015, H * 0.08);
+  }
+  break;
+}
+case "claws": {
+  // Quad-claw savage plasma strike (4 lanes with electric cyan and white core)
+  const lw0 = ctx.lineWidth, a0 = ctx.globalAlpha;
+  for (let i = 0; i < 4; i++) {
+    const kk = Math.max(0, Math.min(1, k * 1.7 - i * 0.18));
     if (kk <= 0) continue;
-    const x0 = f * (reach * 0.3 + i * H * 0.075), y0 = -H * (0.74 - i * 0.035);
-    const x1 = x0 + f * H * 0.28 * kk, y1 = y0 + H * 0.36 * kk;
+    const x0 = f * (reach * 0.28 + i * H * 0.07), y0 = -H * (0.76 - i * 0.04);
+    const x1 = x0 + f * H * 0.29 * kk, y1 = y0 + H * 0.38 * kk;
     const path = () => { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo((x0 + x1) / 2 + f * H * 0.07, (y0 + y1) / 2 - H * 0.03, x1, y1); };
-    path(); ctx.strokeStyle = color; ctx.lineWidth = lw0 * 2.4; ctx.globalAlpha = a0 * 0.4; ctx.stroke();
-    path(); ctx.strokeStyle = "#ffffff"; ctx.lineWidth = lw0 * 0.75; ctx.globalAlpha = a0; ctx.stroke();
+    path(); ctx.strokeStyle = i === 3 ? "#b88aff" : color; ctx.lineWidth = lw0 * 2.5; ctx.globalAlpha = a0 * 0.45; ctx.stroke();
+    path(); ctx.strokeStyle = "#ffffff"; ctx.lineWidth = lw0 * 0.8; ctx.globalAlpha = a0; ctx.stroke();
     ctx.strokeStyle = "#62f3ff"; ctx.lineWidth = lw0 * 0.6;
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 + f * H * 0.04, y1 - H * 0.03); ctx.moveTo(x1, y1); ctx.lineTo(x1 + f * H * 0.05, y1 + H * 0.015); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 + f * H * 0.045, y1 - H * 0.035); ctx.moveTo(x1, y1); ctx.lineTo(x1 + f * H * 0.055, y1 + H * 0.018); ctx.stroke();
   }
   ctx.lineWidth = lw0; ctx.globalAlpha = a0; ctx.strokeStyle = color;
   break;

@@ -805,35 +805,78 @@ function cape(ctx, R, pose, d, r) {
 function effects(ctx, R, pose, f, d, r, headTop) {
   const t = pose.t, sy = -d.ll - d.th;
   if (r.fx === "notes") {
-    const cols = ["#ffe04a", "#7fe0ff", "#ff8ab0"];
-    for (let i = 0; i < 3; i++) {
-      const k = ((t * 0.02 + i / 3) % 1);
-      note(ctx, R, 18 + k * 24 + Math.sin(k * 8 + i) * 4, sy + 2 - k * 36, 7.5, cols[i], Math.min(1, Math.sin(k * Math.PI) * 2));
+    const cols = ["#ffe04a", "#ff9ab0", "#7fe0ff", "#ffd36a"];
+    for (let i = 0; i < 4; i++) {
+      const k = ((t * 0.022 + i / 4) % 1);
+      const nx = 16 + k * 26 + Math.sin(k * 7 + i * 1.7) * 5;
+      const ny = sy + 2 - k * 42;
+      const alpha = Math.min(1, Math.sin(k * Math.PI) * 2.2);
+      ctx.save();
+      ctx.globalAlpha *= alpha;
+      // Musical ripple wave ring
+      ctx.strokeStyle = cols[i % 4];
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(nx, ny + 4, 4 + k * 8, 2 + k * 3, -0.2, 0, Math.PI * 2);
+      ctx.stroke();
+      // Note glyph with starlight sparkle
+      note(ctx, R, nx, ny, 7.5 + (f >= 3 ? 1.5 : 0), cols[i % 4], 1);
+      if (i % 2 === 0) {
+        hibiscus(ctx, R, nx - 6, ny + 3, 2.5, "#ff6f91", t * 0.08 + i);
+      }
+      ctx.restore();
     }
   } else if (r.fx === "summon") {
-    const oy = headTop - 12 + Math.sin(t * 0.2) * 2;
-    glowOrb(ctx, R, 0, oy, 7 + r.fxK * 5, t, f >= 3 ? "#ffd36a" : "#ff8ab0");
+    const oy = headTop - 14 + Math.sin(t * 0.18) * 2.5;
+    const god = f >= 3;
+    const crownCol = god ? "#ffd36a" : "#ff8ab0";
+    glowOrb(ctx, R, 0, oy, 8 + r.fxK * 6, t, crownCol);
+    // Floating Polynesian solar crown with petals
     ctx.save();
-    ctx.strokeStyle = "rgba(255,240,200,0.6)"; ctx.lineWidth = 1.6; ctx.setLineDash([2, 4]); ctx.lineDashOffset = -t * 0.6;
-    ctx.beginPath(); ctx.moveTo(r.handF[0], r.handF[1]); ctx.quadraticCurveTo(10, oy + 6, 0, oy);
-    ctx.moveTo(r.handB[0], r.handB[1]); ctx.quadraticCurveTo(-10, oy + 6, 0, oy); ctx.stroke();
+    ctx.translate(0, oy);
+    ctx.rotate(t * 0.04);
+    for (let i = 0; i < 6; i++) {
+      const ang = i * Math.PI / 3;
+      ctx.fillStyle = i % 2 ? "#fff2a0" : crownCol;
+      ctx.beginPath();
+      ctx.ellipse(Math.cos(ang) * 11, Math.sin(ang) * 6, 4.5, 2.2, ang, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+    // Cascading sunbeam blessing filaments to hands
+    ctx.save();
+    ctx.strokeStyle = god ? "rgba(255,230,140,0.75)" : "rgba(255,210,225,0.7)";
+    ctx.lineWidth = 1.8; ctx.setLineDash([3, 4]); ctx.lineDashOffset = -t * 0.8;
+    ctx.beginPath();
+    ctx.moveTo(r.handF[0], r.handF[1]); ctx.quadraticCurveTo(12, oy + 7, 0, oy);
+    ctx.moveTo(r.handB[0], r.handB[1]); ctx.quadraticCurveTo(-12, oy + 7, 0, oy);
+    ctx.stroke();
+    // Rising stardust particles
+    for (let i = 0; i < 3; i++) {
+      const pk = ((t * 0.03 + i / 3) % 1);
+      const px = Math.sin(i * 2.3 + t * 0.05) * 14;
+      const py = oy + 12 - pk * 24;
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.arc(px, py, 1.2 * (1 - pk), 0, Math.PI * 2); ctx.fill();
+    }
     ctx.restore();
   } else if (r.fx === "spin") {
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(255,240,160,0.75)"; ctx.lineWidth = 2.2; ctx.lineCap = "round";
     for (let i = 0; i < 3; i++) {
-      const y = -d.ll * (0.4 + i * 0.5), a0 = t * 0.4 + i * 2;
-      ctx.beginPath(); ctx.ellipse(0, y, 22 + i * 2, 5, 0, a0, a0 + 2.2); ctx.stroke();
+      const y = -d.ll * (0.4 + i * 0.5), a0 = t * 0.45 + i * 2.1;
+      ctx.beginPath(); ctx.ellipse(0, y, 24 + i * 2.5, 6, 0, a0, a0 + 2.3); ctx.stroke();
     }
     ctx.restore();
-    hibiscus(ctx, R, Math.cos(t * 0.3) * 24, -d.ll * 0.6 + Math.sin(t * 0.3) * 4, 4, "#ff6f91", t * 0.2);
+    hibiscus(ctx, R, Math.cos(t * 0.3) * 26, -d.ll * 0.6 + Math.sin(t * 0.3) * 4, 4.5, "#ff6f91", t * 0.2);
+    hibiscus(ctx, R, Math.cos(t * 0.3 + Math.PI) * 24, -d.ll * 0.7 - Math.sin(t * 0.3) * 3, 3.8, "#ffd23f", -t * 0.2);
   } else if (r.fx === "flowers") {
-    const cols = ["#ff6f91", "#ffd23f", "#ffffff", "#ff4d6d"];
-    for (let i = 0; i < 6; i++) {
-      const k = ((t * 0.012 + i / 6) % 1);
+    const cols = ["#ff6f91", "#ffd23f", "#ffffff", "#ff4d6d", "#7fe0ff"];
+    for (let i = 0; i < 7; i++) {
+      const k = ((t * 0.012 + i / 7) % 1);
       ctx.save();
       ctx.globalAlpha *= Math.min(1, (1 - k) * 2.5);
-      hibiscus(ctx, R, Math.sin(i * 2.1 + t * 0.03) * 34 * (0.5 + k), sy - 6 - k * 44, 4 + (i % 3), cols[i % 4], t * 0.05 + i);
+      hibiscus(ctx, R, Math.sin(i * 2.1 + t * 0.03) * 36 * (0.5 + k), sy - 6 - k * 46, 4 + (i % 3), cols[i % 5], t * 0.05 + i);
       ctx.restore();
     }
   }
@@ -1013,10 +1056,32 @@ function draw(ctx, pose, R) {
   if (!r.armOver) frontArm();
   if (r.smear > 0) {
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255," + (0.65 * r.smear).toFixed(3) + ")";
-    ctx.lineWidth = 7; ctx.lineCap = "round";
     const a1 = Math.PI / 2 - r.smearA;
-    ctx.beginPath(); ctx.arc(4, sy + 3, al + 12, a1 - 1.6, a1); ctx.stroke();
+    const rad = al + 12;
+    // Outer warm floral chord aura
+    ctx.strokeStyle = "rgba(255,210,90," + (0.42 * r.smear).toFixed(3) + ")";
+    ctx.lineWidth = 14; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.arc(4, sy + 3, rad, a1 - 1.6, a1); ctx.stroke();
+    // Inner vibrant hibiscus pink/coral ribbon
+    ctx.strokeStyle = "rgba(255,115,150," + (0.8 * r.smear).toFixed(3) + ")";
+    ctx.lineWidth = 6; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.arc(4, sy + 3, rad + 1, a1 - 1.45, a1); ctx.stroke();
+    // Intense starlight core
+    ctx.strokeStyle = "rgba(255,255,255," + (0.95 * r.smear).toFixed(3) + ")";
+    ctx.lineWidth = 2.4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.arc(4, sy + 3, rad, a1 - 1.3, a1); ctx.stroke();
+    // Flying musical stardust & hibiscus petals
+    if (r.smear > 0.25) {
+      for (let i = 0; i < 3; i++) {
+        const ang = a1 - 0.25 - i * 0.45;
+        const px = 4 + Math.cos(ang) * (rad + (i % 2 ? 4 : -3));
+        const py = sy + 3 + Math.sin(ang) * (rad + (i % 2 ? 4 : -3));
+        ctx.fillStyle = i === 1 ? "#ffd23f" : "#ff7092";
+        ctx.beginPath(); ctx.arc(px, py, 2.2 * r.smear, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath(); ctx.arc(px + 0.6, py - 0.6, 0.9 * r.smear, 0, Math.PI * 2); ctx.fill();
+      }
+    }
     ctx.restore();
   }
   ctx.save();
