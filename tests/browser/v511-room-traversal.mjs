@@ -48,11 +48,15 @@ try{
   // 360-frame straight walk kills the test pilot before it can observe bank
   // geometry. On decorative-floor chapters press real W only when the shared
   // physical terrain planner sees a ledge/pit; never teleport or grant health.
-  if(flatDock)await advanceTerrainControls(page,360);
-  else await page.evaluate(()=>window.__OHANA_E2E.step(360));
+  // Frita has a genuine oil-pit sequence after the opening safe approach.
+  // The blind collision probe must stay before that hazard; the full earned
+  // geyser/pit route is covered separately by V600, not by a 360-frame march.
+  const frames=hero==='frita'?70:360;
+  if(flatDock)await advanceTerrainControls(page,frames);
+  else await page.evaluate(n=>window.__OHANA_E2E.step(n),frames);
   const blocked=await page.evaluate(()=>window.__OHANA_E2E.state());
   const snap=p=>({x:p.x,y:p.y,w:p.w,h:p.h,vx:p.vx,vy:p.vy,grounded:p.grounded,jumps:p.jumps});
-  console.log('V511 BANK OBSERVATION',JSON.stringify({hero,bank,before:{...snap(before.player),hp:before.hp},after:{...snap(blocked.player),hp:blocked.hp},solid,roomId:blocked.roomId,steps:360}));
+  console.log('V511 BANK OBSERVATION',JSON.stringify({hero,bank,before:{...snap(before.player),hp:before.hp},after:{...snap(blocked.player),hp:blocked.hp},solid,roomId:blocked.roomId,steps:frames}));
   if(blocked.player.x+blocked.player.w>bank.x+1){
    await fs.mkdir('test-results/v511',{recursive:true});
    await page.screenshot({path:'test-results/v511/bank-diagnostic-'+hero+'.png'});
