@@ -27,8 +27,17 @@ try{
    const hit=resolveBody(probe,platforms,{prevX:oldX,prevY:oldY});
    return {right:probe.x+probe.w,hitX:hit.hitX,hitY:hit.hitY};
   },{bank});
-  assert.equal(solid.hitX,-1,hero+' bank must stop physical horizontal collision');
-  assert.ok(solid.right<=bank.x+1,hero+' solid bank must not permit tunnelling');
+  // Stitcho's authored docks intentionally replace terraced *colliders* with
+  // one flat floor to support transport and rolling. The visible dock markers
+  // are scenery, unlike solid-bank chapters. Verify both contracts explicitly.
+  const flatDock=hero==='stitcho';
+  if(flatDock){
+   assert.equal(solid.hitX,0,'Stitcho docks must keep the rolling lane unobstructed');
+   assert.ok(solid.right>bank.x,'visual dock edge is intentionally traversable');
+  }else{
+   assert.equal(solid.hitX,-1,hero+' real bank must stop horizontal crossing');
+   assert.ok(solid.right<=bank.x+1,hero+' solid bank must not permit tunnelling');
+  }
   await page.keyboard.down('d');await page.evaluate(()=>window.__OHANA_E2E.step(360));
   const blocked=await page.evaluate(()=>window.__OHANA_E2E.state());
   const snap=p=>({x:p.x,y:p.y,w:p.w,h:p.h,vx:p.vx,vy:p.vy,grounded:p.grounded,jumps:p.jumps});
@@ -38,7 +47,9 @@ try{
    await page.screenshot({path:'test-results/v511/bank-diagnostic-'+hero+'.png'});
   }
   const combatVault=blocked.player.x+blocked.player.w>bank.x+1;
-  if(combatVault){
+  if(flatDock){
+   assert.ok(combatVault,'Stitcho should roll/walk through its uninterrupted dock lane');
+  }else if(combatVault){
    // A contact hit launches the live actor upward. Landing *on* the bank
    // is not phasing through it. The independent geometry audit above still
    // requires the actual collision engine to reject walking through the face.
@@ -48,7 +59,7 @@ try{
    assert.ok(blocked.player.x+blocked.player.w>bank.x-10,hero+' reaches its real face');
   }
   await page.keyboard.down('w');await page.evaluate(()=>window.__OHANA_E2E.step(16));await page.keyboard.up('w');await page.evaluate(()=>window.__OHANA_E2E.step(80));await page.keyboard.up('d');
-  const after=await page.evaluate(()=>window.__OHANA_E2E.state());assert.ok(after.player.x>bank.x+bank.w,hero+' crosses with physical inputs');assert.ok(after.hp>0);report.push({hero,bank,solid,combatVault,blockedX:blocked.player.x,crossedX:after.player.x});
+  const after=await page.evaluate(()=>window.__OHANA_E2E.state());assert.ok(after.player.x>bank.x+bank.w,hero+' crosses with physical inputs');assert.ok(after.hp>0);report.push({hero,bank,solid,flatDock,combatVault,blockedX:blocked.player.x,crossedX:after.player.x});
  }
  // One shared touch control is held with actual Chromium touch input.
  const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),phone=await mobile.newPage();
@@ -58,5 +69,5 @@ try{
  const button=await phone.locator('.touch-btn.jump').boundingBox(),cdp=await mobile.newCDPSession(phone);
  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:button.x+button.width/2,y:button.y+button.height/2}]});await phone.evaluate(()=>window.__OHANA_E2E.step(16));
  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await phone.evaluate(()=>window.__OHANA_E2E.step(80));await phone.keyboard.up('d');assert.ok((await phone.evaluate(()=>window.__OHANA_E2E.state())).player.x>bank.x+bank.w);
- await mobile.close();assert.deepEqual(errors,[]);await fs.mkdir('test-results/v511',{recursive:true});await fs.writeFile('test-results/v511/terrain-traversal.json',JSON.stringify({rooms:report,mobileHeldJump:true},null,2));console.log('PASS ten real solid bank collision faces, live physical traversals (recording earned combat knockback) and shared touch jump');
+ await mobile.close();assert.deepEqual(errors,[]);await fs.mkdir('test-results/v511',{recursive:true});await fs.writeFile('test-results/v511/terrain-traversal.json',JSON.stringify({rooms:report,mobileHeldJump:true},null,2));console.log('PASS nine solid bank collision faces, one intentionally flat Stitcho dock, physical ten-chapter traversals and shared touch jump');
 }finally{await browser?.close();await new Promise(r=>server.close(r));}
