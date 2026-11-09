@@ -35,10 +35,16 @@ export function updateCampaignEnemy(e,g,hurt){
  const dx=cx(p)-cx(e),dy=cy(p)-cy(e),dir=Math.sign(dx)||1,dist=Math.hypot(dx,dy),a=e._campaign||={age:0,wind:0,cd:40,active:0,aim:1};a.age++;
  e._guardBreak=Math.max(0,(e._guardBreak||0)-1);
  e._shieldImpact=Math.max(0,(e._shieldImpact||0)-1);
+ if(e._shieldImpact===17)g.fx?.emit?.(cx(e)+(e._shieldFacing||dir)*e.w*.5,cy(e),{color:'#80deea',count:4,size:2.5,life:12});
  const visible=e.x+e.w>g.cam.x&&e.x<g.cam.x+(g.viewW||1000)&&e.y+e.h>g.cam.y&&e.y<g.cam.y+(g.viewH||720);
  if(!visible&&dist>1100){e.vx=0;return true;}
  if(visible&&dist<550&&!e._alerted){e._alerted=true;e._alertT=22;g.fx?.emit?.(cx(e),e.y-8,{color:e.elite?'#ffc060':'#8cecff',count:4,size:2.5,life:14});}
  if(e._alertT>0)e._alertT--;
+ if(g.roomDef?.kiloEncounterVersion&&visible){
+  if(e.kind==='cucaracho'&&a.active>0&&a.active%6===0)g.fx?.emit?.(cx(e),e.y+e.h-2,{color:'#c5b382',count:2,size:2,life:8});
+  if(e.kind==='planta'&&a.wind===12)g.fx?.emit?.(cx(e),cy(e)-12,{color:'#ffd54f',count:4,size:2.2,life:12});
+  if(e.kind==='rana'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#80deea',count:3,size:2,life:12});
+ }
  const difficulty=g.combatDifficulty||readCombatDifficulty(g.roomId);
  const variant=e.roomPersona?.variant||0,pace=[.85,1,1.12,.95][variant%4],reach=[1,.85,1.15,1.05][variant%4];
  // Feed the articulated creature rigs the actual combat state, not a cosmetic clock.

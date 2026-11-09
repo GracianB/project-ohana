@@ -55,6 +55,11 @@ function chapterRest(e){
 function updateChapterGuardian(e,g,hurt){
  const p=g.player,a=e._drummer,arena=e._groveArena;if(!p||p.dead)return true;
  a.rhythm=chapterRhythm(g);a.round=e.hp<=e.max*.5?2:1;
+ if(a.round===2&&!a._phase2Announced){
+  a._phase2Announced=true;
+  g.nums?.add?.(e.x+e.w/2,e.y-45,'¡FURIA DEL CLARO · SEGUNDO COMPÁS!','#ffd54f',true);
+  g.fx?.emit?.(e.x+e.w/2,e.y+e.h*.45,{color:'#ffd54f',count:16,size:3.5,life:26});
+ }
  const visible=e.x+e.w>g.cam.x&&e.x<g.cam.x+(g.viewW||1000)&&e.y+e.h>g.cam.y&&e.y<g.cam.y+(g.viewH||720),
   dx=p.x+p.w/2-(e.x+e.w/2);
  if(e.invuln>0)e.invuln--;
@@ -94,6 +99,7 @@ function updateChapterGuardian(e,g,hurt){
  }else if(a.phase==='rest'){
   if(--a.timer<=0||e.damageWindowRemaining<=0){a.phase='step';a.timer=90;a.sleepPause=0;e.damageWindowRemaining=0;}
  }
+ if(a.phase!=='rest'&&e.flash>0)g.fx?.emit?.(e.x+e.w/2,e.y+e.h*.45,{color:'#d4af37',count:3,size:2,life:10});
  e.damageTakenScale=a.phase==='rest'&&e.damageWindowRemaining>0?1:0;
  if(a.phase!=='rest')e.damageWindowRemaining=0;
  e.x=clamp(e.x+e.vx,arena.left,arena.right-e.w);e.y=arena.floor-e.h;e.vy=0;e.grounded=true;
@@ -137,26 +143,56 @@ export function updateGroveGuardian(e,g,hurt){
 function drawChapterGuardianSignals(c,e,cam){
  const a=e._drummer,x=e.x+e.w/2-cam.x,y=e.y-cam.y,floor=e._groveArena.floor-cam.y;
  c.save();c.textAlign='center';c.lineJoin='round';c.lineCap='round';
- c.fillStyle='#143638ec';c.strokeStyle='#d3c794';c.lineWidth=1;c.beginPath();c.roundRect(x-126,y-79,252,65,12);c.fill();c.stroke();
- c.fillStyle='#fff0c7';c.font='600 12px Outfit,sans-serif';c.fillText('TAMBOR DEL CLARO · '+a.round+'/2',x,y-61);
- const cue=a.phase==='waiting'?'LA CANCIÓN AÚN NO ESTÁ COMPLETA':a.phase==='intro'?'ESCUCHA EL COMPÁS':a.phase==='step'?'BUSCA TU POSICIÓN':a.phase==='rest'?'APERTURA · ¡RESPONDE AHORA!':a.phase==='warn'?[
-  a.airTarget?'SALTA LA ONDA · CAMBIA DE ALTURA':'REDOBLE · SALTA AL LLEGAR LA ONDA',
-  'CARGA · SALTA SOBRE EL CORREDOR',
-  a.round===2?'DOS ABANICOS · CAMBIA TU TRAYECTORIA':'ABANICO · SAL DE LA MARCA'
+ // Ornate Placard with sacred Hawaiian border motifs
+ c.fillStyle='#143638f2';c.strokeStyle=a.round===2?'#ffb74d':'#d3c794';c.lineWidth=1.5;c.beginPath();c.roundRect(x-130,y-83,260,70,12);c.fill();c.stroke();
+ // Corner spiral accents
+ c.strokeStyle=a.round===2?'#ffa726':'#a3b794';c.lineWidth=1;
+ for(const sx of [-122,122])for(const sy of [-75,-21]){
+  c.beginPath();c.arc(x+sx,y+sy,3,0,KILO_TAU);c.stroke();
+ }
+ c.fillStyle=a.round===2?'#ffe082':'#fff0c7';c.font='bold 12px Outfit,sans-serif';
+ c.fillText('TAMBOR DEL CLARO · '+(a.round===2?'FASE 2: FURIA DEL CLARO 🔥':'FASE 1: RITMO SOLAR'),x,y-64);
+ const cue=a.phase==='waiting'?'LA CANCIÓN AÚN NO ESTÁ COMPLETA':a.phase==='intro'?'ESCUCHA EL COMPÁS':a.phase==='step'?'BUSCA TU POSICIÓN':a.phase==='rest'?'¡APERTURA VULNERABLE! · ¡RESPONDE AHORA!':a.phase==='warn'?[
+  a.airTarget?'SALTA LA ONDA · CAMBIA DE ALTURA':'REDOBLE · ¡SALTA AL LLEGAR LA ONDA!',
+  'CARGA DE CORTEZA · ¡SALTA SOBRE EL CORREDOR!',
+  a.round===2?'DOBLE ABANICO · ¡BUSCA EL HUECO EN EL AIRE!':'ABANICO DE SEMILLAS · ¡SAL DE LA MARCA!'
  ][a.pattern]:'DEJA PASAR EL GOLPE';
- c.font='600 10px Outfit,sans-serif';c.fillStyle=a.phase==='rest'?'#bde9c5':'#e8d6ab';c.fillText(cue,x,y-43,238);
- c.fillStyle='#3d5b54';c.fillRect(x-111,y-31,222,5);c.fillStyle=a.phase==='rest'?'#a6d4ad':'#e6bd83';c.fillRect(x-111,y-31,222*Math.max(0,e.hp/e.max),5);
+ c.font='600 10.5px Outfit,sans-serif';
+ c.fillStyle=a.phase==='rest'?'#69f0ae':a.round===2?'#ffcc80':'#e8d6ab';
+ c.fillText(cue,x,y-46,244);
+
+ // Health bar with 50% phase 2 threshold tick
+ c.fillStyle='#233f3a';c.fillRect(x-111,y-33,222,6);
+ c.fillStyle=a.phase==='rest'?'#69f0ae':a.round===2?'#ff9800':'#e6bd83';
+ c.fillRect(x-111,y-33,222*Math.max(0,e.hp/e.max),6);
+ // 50% notch
+ c.fillStyle='#ffffff';c.fillRect(x,y-34,2,8);
+
  if(a.phase==='warn'){
-  const progress=1-a.timer/(a.warnMax||60);c.fillStyle='#e9e8c1';c.fillRect(x-111,y-20,222*clamp(progress,0,1),2);
+  const progress=1-a.timer/(a.warnMax||60);
+  c.fillStyle=a.round===2?'#ffb300':'#e9e8c1';c.fillRect(x-111,y-22,222*clamp(progress,0,1),3);
   if(a.pattern===1){
    const from=(a.chargeStartX??e.x)+e.w/2-cam.x,to=(a.chargeEndX??e.x)+e.w/2-cam.x,left=Math.min(from,to),width=Math.abs(to-from);
-   // Leaf footprints mark the committed corridor rather than a debug ray.
-   c.fillStyle='#b9c98b';c.globalAlpha=.22;c.beginPath();c.roundRect(left-20,floor-8,width+40,13,6);c.fill();c.globalAlpha=.6;
-   const n=Math.max(1,Math.floor(width/85));for(let i=0;i<=n;i++){const xx=from+(to-from)*i/n;c.beginPath();c.ellipse(xx,floor-2,10,3,-a.aim*.3,0,KILO_TAU);c.fill();}
+   // Leaf footprints & directional chevron corridor
+   c.fillStyle=a.round===2?'#ffb74d':'#b9c98b';c.globalAlpha=.22;c.beginPath();c.roundRect(left-20,floor-9,width+40,14,6);c.fill();c.globalAlpha=.65;
+   const n=Math.max(1,Math.floor(width/75));
+   for(let i=0;i<=n;i++){
+    const xx=from+(to-from)*i/n;
+    c.beginPath();c.ellipse(xx,floor-2,10,3,-a.aim*.3,0,KILO_TAU);c.fill();
+    // Directional chevron
+    c.strokeStyle=a.round===2?'#ffd54f':'#e5e8ba';c.lineWidth=1.5;
+    c.beginPath();c.moveTo(xx-a.aim*6,floor-6);c.lineTo(xx+a.aim*4,floor-2);c.lineTo(xx-a.aim*6,floor+2);c.stroke();
+   }
    c.globalAlpha=1;
   }else if((a.pattern===2||a.airTarget)&&Number.isFinite(a.targetX)&&Number.isFinite(a.targetY)){
-   const tx=a.targetX-cam.x,ty=a.targetY-cam.y;c.strokeStyle='#c9e6c6';c.lineWidth=2;c.globalAlpha=.75;
-   for(let i=0;i<4;i++){const angle=i*Math.PI/2;c.beginPath();c.ellipse(tx+Math.cos(angle)*15,ty+Math.sin(angle)*15,5,9,angle,0,KILO_TAU);c.stroke();}c.globalAlpha=1;
+   const tx=a.targetX-cam.x,ty=a.targetY-cam.y;
+   c.strokeStyle=a.round===2?'#ffb74d':'#c9e6c6';c.lineWidth=2;c.globalAlpha=.85;
+   for(let i=0;i<4;i++){
+    const angle=i*Math.PI/2;
+    c.beginPath();c.ellipse(tx+Math.cos(angle)*16,ty+Math.sin(angle)*16,5,9,angle,0,KILO_TAU);c.stroke();
+   }
+   c.beginPath();c.arc(tx,ty,7,0,KILO_TAU);c.stroke();
+   c.globalAlpha=1;
   }
  }
  c.restore();
