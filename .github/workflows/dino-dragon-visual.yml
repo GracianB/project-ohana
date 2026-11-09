@@ -10,6 +10,7 @@ on:
       - 'systems/dragon-chapter.js'
       - 'tests/dino-dragon-threat-cues.test.js'
       - 'tests/browser/dino-dragon-threats.mjs'
+      - 'tests/browser/dino-dragon-forms-guardians.mjs'
       - '.github/workflows/dino-dragon-visual.yml'
   workflow_dispatch:
 
@@ -38,6 +39,8 @@ jobs:
         run: node --test tests/dino-dragon-threat-cues.test.js
       - name: Validate actual Canvas pixels and both chapter viewports
         run: node tests/browser/dino-dragon-threats.mjs
+      - name: Audit five playable forms and three guardian phases
+        run: node tests/browser/dino-dragon-forms-guardians.mjs
       - name: Upload real visual evidence
         if: always()
         uses: actions/upload-artifact@v4
