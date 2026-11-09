@@ -56,19 +56,17 @@ export function updateDragonChapter(g,hurt){
    Number.isFinite(castAge)&&castAge>=0&&castAge<24;
   const fireActive=breathActive||p.state==='cast'||p.state==='attack'||s.flameUntil>w.tick;
   if(near&&fireActive){
-   s.done=true;
-   // This chapter is allowed to ignite a brazier before the generic
-   // World 1 station handler sees it. Persist its *authored id* through the
-   // same world1Stations ledger as other earned objectives, or Continue
-   // silently loses the second brazier while retaining the visible effects.
-   const roomId=w.room||g.roomId||g.roomDef?.id;
-   if(roomId){
-    g.world1Stations={...(g.world1Stations||{}),
-     [roomId]:w.stations.filter(st=>st.done&&st.kind!=='oven').map(st=>st.id)};
-   }
+   s.done=true; s._scored=true;
+   // The braziers are completed here, before world1-play's generic "braseros"
+   // pass. That pass therefore skips complete(), which normally updates the
+   // persisted station ledger. Save the exact earned IDs *before* g.save().
+   // Without this, Continue can restore only one of two lit braziers.
+   g.world1Stations={...(g.world1Stations||{}),
+    [g.roomId||'w1-dragon']:w.stations.filter(b=>b.done&&b.kind!=='oven').map(b=>b.id)};
    w.calderaHeat=Math.min(100,w.calderaHeat+25);
    g.score=(g.score||0)+150;
    dragonGrowth(g);
+   g.onWorld1Beat?.('station','dragon');
    g.nums?.add?.(s.x,s.y-90,'¡BRASERO ANCESTRAL ENCENDIDO!','#ff9e40',true);
    g.fx?.emit?.(s.x,s.y-70,{color:'#ff6d00',count:28,size:5,star:true,life:45});
    g.fx?.emit?.(s.x,s.y-85,{color:'#ffe082',count:16,size:3,life:35});
