@@ -25,7 +25,11 @@ export async function advanceTerrainControls(page,frames){
   const dist=axis>0?h.x-edge:edge-(h.x+h.w);
   // Trigger before a single simulation step can take the actor across
   // the lip. The 180–190 px author-designed gaps remain fully lethal.
-  return dist>=-4&&dist<Math.min(205,Math.max(120,frames*12+30));
+  // Start near the edge, not two hundred pixels upstream: a slower baby
+  // would spend its entire first jump before reaching the actual gap.
+  const speed=Math.max(3,Math.abs(Number(p.vx)||0));
+  const lead=Math.max(75,Math.min(118,frames*speed*0.75+34));
+  return dist>=-4&&dist<lead;
  });
  // Some 260–300 px authored gaps require a *second earned jump* in the
  // baby form. Use the real jump key near the first arc's apex while in the
