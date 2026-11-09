@@ -1,0 +1,33 @@
+name: V510 Frita and Yomi Presentation
+on:
+  push:
+    branches:
+      - 'integration/dino-dragon-ready-20261109'
+      - 'integration/ohana-michi-full-20261109'
+  pull_request:
+    paths:
+      - 'game.js'
+      - 'systems/world1-cine.js'
+      - 'tests/browser/v510-frita-yomi-presentation.mjs'
+      - '.github/workflows/v510-presentation.yml'
+permissions:
+  contents: read
+jobs:
+  cinematic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - name: Frita and Yomi real cinematic entrance, HUD, touch and mobile
+        run: node tests/browser/v510-frita-yomi-presentation.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v510-frita-yomi-cinematic
+          path: test-results/v510/
+          if-no-files-found: ignore
