@@ -55,7 +55,7 @@ test('all six cast powers retain distinct animated intentions',()=>{
  assert.deepEqual(list,[0,1,2,3,4,5]);
 });
 test('darkness never spills to unrelated heroes or games and the living world glows near the actual actor',()=>{
- const base={roomDef:{hero:'cat',world1:true},cam:{x:100,y:0},worldH:1260,player:{x:400,y:990,w:22,h:22,evo:0},enemies:[{x:430,y:980,w:30,h:20,kind:'medusa',hp:20}]};
+ const base={roomDef:{hero:'cat',world1:true},cam:{x:100,y:360},worldH:1260,player:{x:400,y:990,w:22,h:22,evo:0},enemies:[{x:430,y:980,w:30,h:20,kind:'medusa',hp:20}]};
  assert.equal(isMichiWorld({...base,roomDef:{hero:'dragon',world1:true}}),false);
  assert.equal(planMichiLights({...base,roomDef:{hero:'dragon',world1:true}}),null);
  const plan=planMichiLights(base,{width:390,height:844});

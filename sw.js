@@ -1,4 +1,4 @@
-const VERSION = "ohana-636";
+const VERSION = "ohana-635";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./multiplayer/entry.js",
@@ -683,7 +683,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "7d372933252f14566fefec6454ce4528516a5a28",
+  "index.html": "4cfdaca241de47001623ba78b0b16988f76a54e3",
   "multiplayer.html": "778d4e60ca9b94799d52206d48c7e8827c72510b",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
