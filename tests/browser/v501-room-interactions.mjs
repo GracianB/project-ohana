@@ -129,6 +129,11 @@ try{
  // preempt (not delete) the delivery objective. Dismiss through the actual
  // clickable announcement, then prove the live heat objective reappears.
  const goalCard=page.locator('#notification-container .game-notification[data-persistent="1"]');
+ // The oven can schedule an evolution one animation frame AFTER the timer
+ // notification becomes visible. Flush real browser timers before checking
+ // visibility; an active evolution correctly hides the HUD until dismissed.
+ await page.clock.runFor(500);
+ await step(1);
  const interstitials=[];
  for(let n=0;n<18;n++){
    if(await goalCard.isVisible())break;
