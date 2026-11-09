@@ -36,4 +36,6 @@ export const CALIBRATED_VISUAL_H = Object.freeze(Object.fromEntries(
 ));
 
 // Optical normalization of the remaining Canvas silhouettes; hitboxes stay physical.
-export const OPTICAL_SCALE = Object.freeze({"kilo": [0.8594, 0.8537, 0.8854, 0.9189, 0.8451], "stitcho": [0.8594, 0.7955, 0.9444, 0.8793, 0.8571], "chispin": [1.10, 0.975, 0.865, 0.875, 0.935], "cat": [1.2222, 1.0769, 1.0625, 0.9027, 0.8889], "cuerno": [1.0185, 1.129, 1.0241, 1.0408, 1.0256]});
+// Michi Biolumina F1 wing halos and F3 star arms require a measured, strictly
+// increasing optical curve (~70/84/98/117/133px). No physics or HP changes.
+export const OPTICAL_SCALE = Object.freeze({"kilo": [0.8594, 0.8537, 0.8854, 0.9189, 0.8451], "stitcho": [0.8594, 0.7955, 0.9444, 0.8793, 0.8571], "chispin": [1.10, 0.975, 0.865, 0.875, 0.935], "cat": [1.2222, 0.75, 0.84, 1.56, 1.39], "cuerno": [1.0185, 1.129, 1.0241, 1.0408, 1.0256]});
