@@ -3310,7 +3310,7 @@ for (const e of game.enemies) {
   else if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
-  else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t);
+  else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._dinoBoss)drawDinoBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._pizzaBoss)drawPizzaBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._fritaBoss)drawFritaBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
@@ -3336,8 +3336,7 @@ for (const e of game.enemies) {
   else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
-// The living night belongs to Michi alone. It is drawn after enemies, before
-// the actual actor and HUD, so combat signals remain readable in the dark.
+// Michi's authentic light field is composed after foes, before the actor and HUD.
 drawMichiReactiveNight(ctx,game,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
 if (!game.finale) {
   ctx.save(); ctx.translate(-game.cam.x, -game.cam.y);

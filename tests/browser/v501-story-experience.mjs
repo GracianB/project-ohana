@@ -29,8 +29,10 @@ try{
    if(layout.lines.length>(w<h?4:3))throw Error('Too many lines: '+shot.title);
   }
  });
- const start=await page.evaluate(()=>window.__OHANA_E2E.startWorld1('kilo'));
- assert.equal(start.roomId,'w1-kilo');assert.equal(start.world1Cine,'intro');
+ // Dragon has ordinary XP growth. Kilo intentionally requires four earned
+ // instruments, so Ctrl+Z cannot bypass his authored growth gates.
+ const start=await page.evaluate(()=>window.__OHANA_E2E.startWorld1('dragon'));
+ assert.equal(start.roomId,'w1-dragon');assert.equal(start.world1Cine,'intro');
  const button=page.locator('#world1-cine-next');
  await button.waitFor({state:'visible'});
  await page.waitForFunction(()=>document.querySelector('#world1-cine-next')?.getAttribute('aria-disabled')==='false');

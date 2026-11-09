@@ -1,0 +1,35 @@
+name: V511 Authored Terrain & Physical Controls
+on:
+  push:
+    branches:
+      - 'integration/dino-dragon-ready-20261109'
+  pull_request:
+    paths:
+      - 'engine/collide.js'
+      - 'systems/chapter-room-composition.js'
+      - 'systems/world1-rooms.js'
+      - 'systems/*-encounters-*.js'
+      - 'tests/browser/v511-room-traversal.mjs'
+      - '.github/workflows/v511-terrain.yml'
+permissions:
+  contents: read
+jobs:
+  traversals:
+    name: Real ten-chapter terrain and touch controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - name: V511 solid/decorative terrain contracts
+        run: node tests/browser/v511-room-traversal.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v511-terrain-evidence
+          path: test-results/v511/
+          if-no-files-found: ignore

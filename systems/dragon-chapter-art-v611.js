@@ -1,15 +1,17 @@
 // V612 — Caldera del Dragón: arte vectorial completo, 5 especies volcánicas,
 // braseros ancestrales de la forja, corrientes térmicas y atmósfera volcánica.
+import {drawChapterThreatCue} from './chapter-threat-cues.js';
 const TAU=Math.PI*2;
 
 function _rr(c,x,y,w,h,r=4){if(c.roundRect)c.roundRect(x,y,w,h,r);else c.rect(x,y,w,h);}
 
 export function drawDragonCreature(ctx,e,cam,t,reduced=false){
+ // Freeze *all* creature artwork, including limbs and wings, under reduced motion.
+ if(reduced)t=0;
  if(!e||e.roomId!=='w1-dragon'&&!e._dragonEncounter&&!e.roomPersona?.dragonEncounter)return false;
  const kind=e.kind||e._species;
  if(!['escoria','brasita','planta','rana','murcielago'].includes(kind))return false;
 
- const a=e._campaign||{}, wind=(a.wind||0)>0||!!e.telegraph, active=(a.active||0)>0;
  const x=e.x+e.w/2-cam.x,y=e.y+e.h-cam.y,facing=e.facing||1;
  const hurt=e.invuln>0||e.stun>4;
  const step=reduced?0:Math.sin((t*0.14)+(e.spawnIndex||0)*1.3);
@@ -19,13 +21,7 @@ export function drawDragonCreature(ctx,e,cam,t,reduced=false){
  ctx.scale(facing,1);
  ctx.lineCap='round';ctx.lineJoin='round';
 
- if(wind){
-  ctx.save();
-  ctx.strokeStyle='rgba(255,109,0,0.65)';
-  ctx.lineWidth=1.8;ctx.setLineDash([4,3]);
-  ctx.beginPath();ctx.ellipse(0,0,26,7,0,0,TAU);ctx.stroke();
-  ctx.restore();
- }
+ drawChapterThreatCue(ctx,e,t,reduced,'volcanic');
 
  if(kind==='escoria'){
   // ── Salamandra de lava (pursuer) — versión colosal ──

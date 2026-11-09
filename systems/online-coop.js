@@ -1402,7 +1402,7 @@ class OnlineCoop {
     const vx=this.remote.x-(game.cam?.x||0),vy=this.remote.y-(game.cam?.y||0);
     const vw=Number(game.viewW)||1280,vh=Number(game.viewH)||720;
     const offscreen = vx < 20 || vx > vw - 20 || vy < 20 || vy > vh - 20;
-    if (offscreen && !game.reduceMotion) {
+    if (offscreen) {
       const def = ROSTER.find((item) => item.id === this.remote.characterId);
       const color = def?.color || "#7ee7ff";
       const margin = 38;
