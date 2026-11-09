@@ -8,13 +8,15 @@ export function planTerrainJump(data, requestedFrames) {
  const direction=axis>0?1:axis<0?-1:0;
  const edge=p?(direction>0?p.x+p.w:p.x):0;
  const pitDistance=h=>direction>0?h.x-edge:edge-(h.x+h.w);
- const nearPit=!!p&&direction!==0&&pits.some(h=>{
+ // Long drops (Frita's 260–300px oil pits) need intermediate checks for
+ // a genuine second jump. The shorter 170–200px gaps in Dino/Dragon are
+ // designed for a *single sustained jump*: chopping W into 4-frame taps
+ // turns a full leap into a short hop and makes the chapter unbeatable.
+ const nearWidePit=!!p&&direction!==0&&pits.some(h=>{
   const dist=pitDistance(h);
-  return dist>-h.w-90&&dist<Math.max(240,Math.abs(p.vx||0)*20);
+  return h.w>=240&&dist>-h.w-90&&dist<Math.max(240,Math.abs(p.vx||0)*20);
  });
- // Reinspect input/velocity every four frames at a chasm: this catches the
- // lip, leap apex and earned second-jump window without any engine mutation.
- const frames=nearPit?Math.min(4,requestedFrames):requestedFrames;
+ const frames=nearWidePit?Math.min(4,requestedFrames):requestedFrames;
  const advancing=!!p&&p.grounded&&!data.s.input.jump&&!data.s.input.down&&direction!==0;
  const bankAhead=advancing&&terraces.some(t=>{
   const foot=p.y+p.h,dist=direction>0?t.x-edge:edge-(t.x+t.w);
@@ -30,7 +32,7 @@ export function planTerrainJump(data, requestedFrames) {
  const midairSecond=!!p&&!p.grounded&&!data.s.input.jump&&direction!==0&&
   Number(p.jumps)<Number(p.maxJumps)&&Number(p.vy)>=-1.5&&
   pits.some(h=>{const center=p.x+p.w/2;return center>h.x-10&&center<h.x+h.w+25;});
- return {frames,jump:!!(bankAhead||pitAhead||midairSecond),nearPit,
+ return {frames,jump:!!(bankAhead||pitAhead||midairSecond),nearPit:nearWidePit,
   reason:bankAhead?'bank':pitAhead?'pit-lip':midairSecond?'earned-air-jump':'none'};
 }
 
