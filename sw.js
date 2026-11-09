@@ -494,7 +494,7 @@ const PRECACHE_REVISIONS = {
   "systems/cuerno-encounters-v610.js": "4e65603c4b3621184246c8246cd8d5e9e6ac62ff",
   "systems/chapter-threat-cues.js": "d691d976c42427f78ed23688a6d75c3e16cf7d4d",
   "systems/dragon-chapter-art-v611.js": "3baff2398d236ecdf2e000c8a1e17e066875dd24",
-  "systems/dragon-chapter.js": "00f2ef7263396461f2181b53cfbcaf101fd29671",
+  "systems/dragon-chapter.js": "f6c723fb0b20d4251be8fc3e17059038f96d9b1d",
   "systems/dragon-encounters-v611.js": "6bc3e15d054b1133e2cdf8a0f136c64a55cb50f5",
   "systems/dino-chapter-art-v613.js": "fb60b32256fe2f4127cc5578e87d785a1ea3a57d",
   "systems/dino-encounters-v613.js": "cb284b5c2cf5280bbb956a5da68a26435e646f0e",
