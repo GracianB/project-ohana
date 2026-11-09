@@ -19,18 +19,20 @@ export function moonHarePose(p={}){
  const land=reduced?0:clamp(p.land),breath=reduced?0:Math.sin(t*.055);
  const stride=moving?Math.sin(phase):0,follow=moving?Math.sin(phase-.75):0;
  const speed=clamp(finite(p.speed,1),.25,1.25),sit=state==='victory';
+ const hopLift=moving?Math.max(0,Math.sin(phase)):0;
+ const earBounce=moving?Math.cos(phase)*.2:(reduced?0:Math.sin(t*.08)*.06);
  const welcome=p.michiWelcome||{},inspect=reduced?0:clamp(welcome.inspect),groom=reduced?0:clamp(welcome.groom);
  const hurt=state==='hurt',jump=state==='jump',fall=state==='fall',glide=state==='glide',wall=state==='wall',dead=state==='dead';
- const ears=(dead?-1.0:moving?-.28-Math.max(0,stride)*.22:jump?-.48:glide?-.92:fall?.24:hurt?-.82:0);
+ const ears=(dead?-1.0:moving?-.26-hopLift*.22:jump?-.48:glide?-.92:fall?.24:hurt?-.82:0);
  const rig={
   state,t,reduced,power,attack,charge,air,sit,dead,
-  bodyX:attack*3.5-hurt*2,bodyY:moving?-Math.max(0,stride)*5.5*speed:land*3.5+breath*.6,
-  lean:dead?.6:hurt?-.10:jump?-.055:glide?.055:attack*-.05,
+  bodyX:attack*3.5-hurt*2,bodyY:moving?-hopLift*8*speed:land*3.5+breath*.8,
+  lean:dead?.6:hurt?-.10:jump?-.055:glide?.055:attack*-.05+(moving?hopLift*.04:0),
   chest:sit?-8:jump?-1:land*3,headX:attack*6-hurt*3+inspect*2,
-  headY:sit?-11:jump?-3:land*2,headTilt:hurt?-.18:wall?-.12:sit?-.09+breath*.035:-follow*.035,
-  earNear:ears+(reduced?0:Math.sin(t*.063)*.045)+inspect*.25-groom*.13,
-  earFar:ears*.7+(reduced?0:Math.sin(t*.051-.8)*.065)-inspect*.12,
-  tail:moving?-follow*.2:reduced?0:Math.sin(t*.049)*.10,
+  headY:sit?-11:jump?-3:land*2+(moving?-hopLift*2.5:0),headTilt:hurt?-.18:wall?-.12:sit?-.09+breath*.035:-follow*.05,
+  earNear:ears+earBounce+inspect*.25-groom*.13,
+  earFar:ears*.7+earBounce*.8-inspect*.12,
+  tail:moving?-follow*.28:reduced?0:Math.sin(t*.06)*.14,
   backX:moving?-13+stride*17:jump?-24:glide?-36:fall?-18:-10,
   backY:moving?-3-Math.max(0,Math.cos(phase))*11:jump?-20:glide?-13:fall?-4:-3,
   frontX:moving?29-Math.sin(phase+.65)*15:attack?31+attack*24:jump?18:glide?48:wall?37:sit?13:28,
@@ -130,7 +132,7 @@ function head(c,r){
  path(c,P.light,()=>{c.moveTo(-16,-12);c.bezierCurveTo(-9,-25,7,-24,16,-16);c.quadraticCurveTo(6,-21,1,-13);c.quadraticCurveTo(-5,-19,-16,-12);},0);
  path(c,'#fffaf0',()=>{c.moveTo(-11,7);c.quadraticCurveTo(-5,1,3,7);c.quadraticCurveTo(12,2,17,8);c.bezierCurveTo(18,16,12,19,3,18);c.quadraticCurveTo(-9,19,-11,7);},0);
  eye(c,face.far.x,face.far.y,true,r);eye(c,face.near.x,face.near.y,false,r);
- oval(c,-15,7.5,3.5,1.5,'#e8b9cf',-.1,0);oval(c,17,8,3.9,1.6,'#edbfd1',.1,0);
+ oval(c,-14,7.5,4.8,2.4,'#ff9ec4',-.1,0);oval(c,17,8,5.2,2.6,'#ff9ec4',.1,0);
  c.save();c.translate(face.nose.x-3,face.nose.y-7);
  path(c,'#ce91ac',()=>{c.moveTo(-.8,7+r.nose);c.quadraticCurveTo(3,5.2,6.8,7+r.nose);c.quadraticCurveTo(5,10,3,10.3);c.quadraticCurveTo(1,9.7,-.8,7+r.nose);},.65);
  line(c,P.ink,.85,()=>{c.moveTo(3,10.3);c.lineTo(3,12.7);c.quadraticCurveTo(-1,16,-4,12.8);c.moveTo(3,12.7);c.quadraticCurveTo(7,16,10,12.8);});

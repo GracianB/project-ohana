@@ -182,8 +182,8 @@ function drawMichiMythic(ctx,pose,r,f){
  if(f===1){ // CABALLITO DE MAR CÓSMICO (Hippocampus Feérico) · Ultra adorable, kawaii, cuerpo rechoncho, colita en espiral elástica, aletas de hada y rostro angelical.
   const swim=still?0:Math.sin(t*(air?.38:run?.32:.18)+g.pulsePhase*5)*4;
   const hover=still?6:6+wave(0,.055)*3;
-  const stRot=state==='glide'?0.26:state==='run'?0.14:state==='jump'?-0.15:state==='fall'?0.12:state==='wall'?-0.2:state==='dead'?0.48:state==='victory'?-0.1:0;
-  const squash=state==='jump'?-0.18:state==='fall'?0.14:state==='glide'?0.2:hurt?-0.15:Math.sin(t*.12)*.06;
+  const stRot=still?0:(state==='glide'?0.26:state==='run'?0.14:state==='jump'?-0.15:state==='fall'?0.12:state==='wall'?-0.2:state==='dead'?0.48:state==='victory'?-0.1:0);
+  const squash=still?0:(state==='jump'?-0.18:state==='fall'?0.14:state==='glide'?0.2:hurt?-0.15:Math.sin(t*.12)*.06);
 
   ctx.save();ctx.scale(.74,.74);ctx.translate(atkK*5,-hover+(hurt?3:0));ctx.rotate(stRot);
 
