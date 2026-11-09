@@ -51,9 +51,9 @@ try{
   // Frita has a genuine oil-pit sequence after the opening safe approach.
   // The blind collision probe must stay before that hazard; the full earned
   // geyser/pit route is covered separately by V600, not by a 360-frame march.
-  // Frita's oil wells and Pizza's oven hazard deliberately begin immediately
+  // Frita's oil wells, Pizza's oven hazard and Yomi's exposed terminals begin
   // beyond their safe opening lane; V600 validates those full hazard sequences.
-  const frames=['frita','pizza'].includes(hero)?70:360;
+  const frames=['frita','pizza','yomi'].includes(hero)?70:360;
   if(flatDock)await advanceTerrainControls(page,frames);
   else await page.evaluate(n=>window.__OHANA_E2E.step(n),frames);
   const blocked=await page.evaluate(()=>window.__OHANA_E2E.state());
