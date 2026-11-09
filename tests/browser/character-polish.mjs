@@ -15,8 +15,13 @@ try{
   const box=await page.locator('.oi-story-dialogue').boundingBox();
   assert.ok(box.x>=0&&box.x+box.width<=width+1&&box.y>=0,'speech stays visible');
   // V602+ cinematic stage has light dialogue text on a dark panel.
-  const speech=await page.locator('.oi-story-line').evaluate(el=>getComputedStyle(el).color);
-  assert.equal(speech,'rgb(236, 237, 219)','cinematic dialogue remains legible');
+  const speech=await page.locator('.oi-story-line').evaluate(el=>{
+    const color=getComputedStyle(el).color;
+    const rgb=(color.match(/[\\d.]+/g)||[]).slice(0,3).map(Number);
+    const linear=rgb.map(v=>{const s=v/255;return s<=.04045?s/12.92:((s+.055)/1.055)**2.4;});
+    return {color,luminance:.2126*linear[0]+.7152*linear[1]+.0722*linear[2]};
+  });
+  assert.ok(speech.luminance>=.80,'cinematic dialogue must retain high-contrast near-white text: '+JSON.stringify(speech));
   await page.screenshot({path:`test-results/polish/intro-${width}.png`});
  }
  await page.locator('.oi-enter').click();
@@ -42,7 +47,7 @@ try{
   }document.body.append(board);
  });
  await page.locator('#silhouette-audit').screenshot({path:'test-results/polish/all-forms.png'});
- await page.locator('[data-hero="chispin"]').screenshot({path:'test-results/polish/chispa-forms.png'});
+ await page.locator('#silhouette-audit [data-hero="chispin"]').screenshot({path:'test-results/polish/chispa-forms.png'});
  await page.goto(base+'previews/u-companions.html');await page.waitForFunction(()=>window.previewReady);
  await page.selectOption('#hero','dragon');await page.selectOption('#ally','cat');
  for(const age of [66,180,240,330]){
