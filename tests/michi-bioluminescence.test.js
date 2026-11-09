@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {MICHI_BIOLUM_FORMS,michiPerformance,drawMichiLanternKitten,drawMichiTideStar,drawMichiAstralCapybara,drawMichiLivingHalo} from '../characters/michi-lumina.js';
 import {planMichiLights,isMichiWorld,MICHI_LIGHT_LIMIT} from '../worlds/michi-reactive-night.js';
+import {MICHI_FIELD_NOTES,clampMichiForm} from '../systems/michi-field-manual.js';
 
 const BASE={state:'idle',t:105,phase:1.2,look:{x:0,y:0},atk:.6,cast:.4,castSlot:2,michiSeed:7};
 const states=['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory','dead'];
@@ -64,4 +65,15 @@ test('darkness never spills to unrelated heroes or games and the living world gl
  const evolved=planMichiLights({...base,player:{...base.player,evo:4}},{width:390,height:844});
  assert.ok(evolved.hero.radius>plan.hero.radius);assert.ok(evolved.darkness<plan.darkness);
  assert.ok(plan.enemies.length<=MICHI_LIGHT_LIMIT.enemies);
+});
+
+test('five manuscript chapters share authentic Michi silhouette metadata',()=>{
+ assert.equal(MICHI_FIELD_NOTES.length,5);
+ for(let i=0;i<5;i++){
+  const note=MICHI_FIELD_NOTES[i];
+  assert.equal(note.subtitle,MICHI_BIOLUM_FORMS[i].name);
+  assert.ok(note.description.length>55&&note.secret.length>40&&note.gesture.length>25);
+ }
+ assert.equal(clampMichiForm(-1),0);assert.equal(clampMichiForm(99),4);
+ assert.equal(clampMichiForm(2.8),2);assert.equal(clampMichiForm(NaN),0);
 });

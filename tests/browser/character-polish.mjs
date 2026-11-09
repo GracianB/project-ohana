@@ -17,7 +17,7 @@ try{
   // V602+ cinematic stage has light dialogue text on a dark panel.
   const speech=await page.locator('.oi-story-line').evaluate(el=>{
     const color=getComputedStyle(el).color;
-    const rgb=(color.match(/[\\d.]+/g)||[]).slice(0,3).map(Number);
+    const rgb=(color.match(/[0-9.]+/g)||[]).slice(0,3).map(Number);
     const linear=rgb.map(v=>{const s=v/255;return s<=.04045?s/12.92:((s+.055)/1.055)**2.4;});
     return {color,luminance:.2126*linear[0]+.7152*linear[1]+.0722*linear[2]};
   });

@@ -52,6 +52,7 @@ const PRECACHE = [
   "./systems/kilo-chapter-art-v606.js?v=" + VERSION,
   "./caprichos.css",
   "./systems/field-guide.js?v=" + VERSION,
+  "./systems/michi-field-manual.js?v=" + VERSION,
   "./worlds/living-realms.js?v=" + VERSION,
   "./versus.html",
   "./versus.css",
@@ -470,7 +471,8 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "help-odyssey.css": "5f6c30a7ecae5ffb757097dcfccdc8d24f279dc3",
+  "systems/michi-field-manual.js": "ae18461211658d7e2df45033d66d1aece8fb9fbe",
+  "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
   "worlds/michi-reactive-night.js": "7ac0b734aedcc97e65e07a3df39761fd6583040f",
   "characters/michi-lumina.js": "a2fe2e77217b3a69be7783cf589c8bd6bcea9ded",
   "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
@@ -520,7 +522,7 @@ const PRECACHE_REVISIONS = {
   "systems/kilo-encounters-v606.js": "c346bdd40b286c441996d4790433c8297cd52e2c",
   "systems/kilo-chapter-art-v606.js": "f2ca402b0bbb4709d20c0d7657c61c04e3c0f32d",
   "caprichos.css": "6f4f8b0a5e3415c02b01545ae9bde11767168c4e",
-  "systems/field-guide.js": "893ee5f31dbe31fd8907a08ac73b635e30587096",
+  "systems/field-guide.js": "f326c4c9624d1c046251776aecf47ace99e427cc",
   "worlds/living-realms.js": "665bdbf783583d65bf4a0ee4919a051280df4f8e",
   "versus.html": "e2c3e952ee894004ea84f7ac23037c5e16565d80",
   "versus.css": "1342f8b77b943437a13eba326cb3d0f0dd948991",

@@ -88,6 +88,26 @@ try{
   assert.ok(geom.left>=0&&geom.right<=width+1&&geom.top>=0,'help accessible within viewport '+width+': '+JSON.stringify(geom));
   await help.screenshot({path:output+'/help-'+width+'.png'});
  }
+ // Inspect five production drawings inside the interactive field manual.
+ await page.locator('#field-guide [data-guide="cat"]').click();
+ const atlas=page.locator('#michi-field-manual');
+ await atlas.waitFor({state:'visible'});
+ assert.equal(await atlas.locator('[data-michi-form]').count(),5);
+ for(let form=0;form<5;form++){
+  await atlas.locator('[data-michi-form="'+form+'"]').click();
+  assert.equal(await atlas.locator('.mfm-copy h6').innerText(),names[form]);
+  assert.equal(await atlas.locator('[data-michi-form="'+form+'"]').getAttribute('aria-pressed'),'true');
+  assert.ok(await atlas.locator('canvas').evaluate(c=>c.getContext('2d').getImageData(0,0,c.width,c.height).data.some(v=>v>0)));
+ }
+ await atlas.locator('[data-michi-form="4"]').focus();
+ await page.keyboard.press('ArrowRight');
+ assert.equal(await atlas.locator('[data-michi-form="0"]').getAttribute('aria-pressed'),'true','focus should wrap');
+ await page.keyboard.press('ArrowLeft');
+ assert.equal(await atlas.locator('[data-michi-form="4"]').getAttribute('aria-pressed'),'true','reverse wrap');
+ await page.setViewportSize({width:390,height:844});
+ const bound=await atlas.boundingBox();
+ assert.ok(bound.x>=0&&bound.x+bound.width<=391,'manual fits mobile viewport');
+ await atlas.screenshot({path:output+'/manual-390.png'});
  await page.locator('#btn-close-help').click();
  assert.deepEqual(errors,[],'zero uncaught browser errors');
  await fs.writeFile(output+'/report.json',JSON.stringify({selection:selections,forms:art.map(({png,...rest})=>rest),world:first.roomId,lighting:planets,errors},null,2));
