@@ -523,7 +523,7 @@ const PRECACHE_REVISIONS = {
   "systems/hud-portrait-v606.js": "f05800678591f7c5b1cabd9b8f2f90de6ad9e6e6",
   "systems/kilo-encounters-v606.js": "c346bdd40b286c441996d4790433c8297cd52e2c",
   "systems/kilo-chapter-art-v606.js": "f2ca402b0bbb4709d20c0d7657c61c04e3c0f32d",
-  "caprichos.css": "6f4f8b0a5e3415c02b01545ae9bde11767168c4e",
+  "caprichos.css": "dcee7e3762eeb90c2f985aea60bbb75995c40fb3",
   "systems/field-guide.js": "f326c4c9624d1c046251776aecf47ace99e427cc",
   "worlds/living-realms.js": "665bdbf783583d65bf4a0ee4919a051280df4f8e",
   "versus.html": "ae1d2d16ab4e6d05f285e09d7215feb168d83d84",
