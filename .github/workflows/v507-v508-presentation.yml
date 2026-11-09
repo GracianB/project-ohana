@@ -1,0 +1,39 @@
+name: V507 V508 Realm Presentation
+on:
+  push:
+    branches:
+      - 'integration/dino-dragon-ready-20261109'
+      - 'integration/ohana-michi-full-20261109'
+  pull_request:
+    paths:
+      - 'game.js'
+      - 'systems/world1-cine.js'
+      - 'tests/browser/v507-three-realms.mjs'
+      - 'tests/browser/v508-dino-presentation.mjs'
+      - '.github/workflows/v507-v508-presentation.yml'
+permissions:
+  contents: read
+jobs:
+  arrivals:
+    name: Physical-entry cinematics in four realms, responsive and touch
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Real Michi, Cuerno, Dragon and Dino arrivals and accessible mobile controls
+        run: |
+          npm run test:browser:three-realms
+          npm run test:browser:dino-presentation
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v507-v508-cinematic-evidence
+          path: |
+            test-results/v507/
+            test-results/v508/
+          if-no-files-found: ignore
