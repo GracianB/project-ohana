@@ -27,7 +27,16 @@ export async function advanceTerrainControls(page,frames){
   // the lip. The 180–190 px author-designed gaps remain fully lethal.
   return dist>=-4&&dist<Math.min(205,Math.max(120,frames*12+30));
  });
- const ahead=bankAhead||pitAhead;
+ // Some 260–300 px authored gaps require a *second earned jump* in the
+ // baby form. Use the real jump key near the first arc's apex while in the
+ // gap, never inject vertical velocity or grant extra jumps.
+ const midairSecond=!!p&&!p.grounded&&!data.s.input.jump&&Math.abs(axis)>.2&&
+  Number(p.jumps)<Number(p.maxJumps)&&Number(p.vy)>=-1.5&&
+  pits.some(h=>{
+   const center=p.x+p.w/2;
+   return center>h.x-10&&center<h.x+h.w+25;
+  });
+ const ahead=bankAhead||pitAhead||midairSecond;
  if(!ahead){await page.evaluate(n=>window.__OHANA_E2E.step(n),frames);return;}
  await page.keyboard.down('w');const held=Math.min(16,frames);await page.evaluate(n=>window.__OHANA_E2E.step(n),held);await page.keyboard.up('w');
  if(frames>held)await page.evaluate(n=>window.__OHANA_E2E.step(n),frames-held);
