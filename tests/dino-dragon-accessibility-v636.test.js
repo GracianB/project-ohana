@@ -21,7 +21,12 @@ function canvasTrace(draw) {
         ops.push([property, ...args]);
       };
     },
-    set(_target, property, value) { ops.push(['set', property, value]); return true; }
+    set(_target, property, value) {
+      const stable = value && typeof value === 'object' && typeof value.addColorStop === 'function'
+        ? '[CanvasGradient]' : value;
+      ops.push(['set', property, stable]);
+      return true;
+    }
   });
   draw(ctx);
   assert.equal(ops.filter(op => op[0] === 'save').length,
