@@ -19,7 +19,7 @@ try{
   // actual WCAG contrast; changes that harm readability will still fail.
   const contrast=await page.locator('.oi-story-line').evaluate(el=>{
     const rgba=str=>{
-      const v=String(str).match(/[\\d.]+/g)?.map(Number)||[];
+      const v=String(str).match(/[\d.]+/g)?.map(Number)||[];
       return [v[0]??0,v[1]??0,v[2]??0,v[3]??1];
     };
     const fg=rgba(getComputedStyle(el).color);
