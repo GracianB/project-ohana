@@ -107,7 +107,10 @@ try{
    if(!node&&p.grounded&&p.y<1000&&hero!=='cat')await hold('s');else await release('s');
    s=await step(node&&jump?16:Math.abs(dx)>24?Math.min(14,Math.max(1,Math.floor(Math.abs(dx)/7))):20);
    await release('d');await release('a');if(node&&hero==='kilo'){await release('w');await release('s');}if(jump){await release('w');s=await step(1);}
-   assert.equal(s.runtimeFaults,0);
+   assert.equal(s.runtimeFaults,0,
+     'First runtime exception '+JSON.stringify({hero,iteration:i,room:s.roomId,
+       x:Math.round(s.player.x),evo:s.evo,phase:s.world1Cine,
+       fault:s.lastRuntimeFault}));
    if(i%150===0){await fs.writeFile('test-results/v600/campaign-debug.json',JSON.stringify({s,expedition,node}));await page.screenshot({path:'test-results/v600/campaign-current.png'});}
    if(i%150===0)console.log('CAMPAIGN',JSON.stringify({hero,i,x:Math.round(s.player.x),hp:s.hp,done:s.world1.done,evo:s.evo,boss:boss?.hp,expedition:expedition?.done.length,target:node?.id,y:Math.round(s.player.y)}));
   }
