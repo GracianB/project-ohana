@@ -44,7 +44,21 @@ try{browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||chro
 
  // Fixture places the guest on the authored note. The production puzzle
  // requires its real hold interval; no done flag, XP or server state is injected.
- assert.equal(await g.evaluate(async()=>{const game=(await import('/systems/online-coop.js')).onlineCoop._combatGame,{updateWorld1}=await import('/systems/world1-play.js'),s=game.world1.stations[0],p=game.player,enemies=game.enemies;game.enemies=[];p.x=s.x-p.w/2;p.y=s.y-p.h;p.grounded=true;p.vx=0;for(let i=0;i<45;i++)updateWorld1(game);game.enemies=enemies;return s.done;}),true);
+ // Kilo V606 intentionally rejects the obsolete passive 45-tick hold.
+ // His first conch awakens only via the real E interaction or a valid
+ // ability cast. The host is Kilo; Stitcho cannot earn Kilo's instrument
+ // merely by standing on it, even in a shared room.
+ await h.evaluate(async()=>{
+  const game=(await import('/systems/online-coop.js')).onlineCoop._combatGame,
+   station=game.world1.stations[0],p=game.player;
+  game._testFoes=game.enemies;game.enemies=[];
+  p.x=station.x-p.w/2;p.y=station.y-p.h;p.grounded=true;p.vx=0;p.vy=0;
+ });
+ await h.locator('#game').focus();
+ await h.keyboard.press('e');
+ await h.waitForFunction(()=>{const game=window.__ohanaNetwork._combatGame;return game.world1.stations[0].done&&game.world1.stations[0]._scored;});
+ await h.evaluate(()=>{const game=window.__ohanaNetwork._combatGame;game.enemies=game._testFoes;delete game._testFoes;});
+ console.log('PASS host earned first Kilo instrument with real E input');
  await h.waitForFunction(()=>{const game=window.__ohanaNetwork._combatGame;return game.world1.stations[0].done&&game.world1.stations[0]._scored;});
  for(const p of pages)assert.deepEqual(await p.evaluate(()=>JSON.parse(localStorage.getItem('ohana-w1-seals-v1'))),['kilo']);
  console.log('PASS guest puzzle completion reaches the host without importing or changing solo progress');
