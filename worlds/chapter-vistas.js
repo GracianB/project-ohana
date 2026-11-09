@@ -17,7 +17,13 @@ function stone(c,x,y,w,h,col){
 }
 function window(c,x,y,w,h,col){c.fillStyle=col;c.beginPath();c.roundRect(x-w/2,y-h,w,h,w/2);c.fill();stroke(c,'#ffebbc90',2,()=>{c.moveTo(x,y-h+3);c.lineTo(x,y-3);c.moveTo(x-w/2+2,y-h*.5);c.lineTo(x+w/2-2,y-h*.5);});}
 function fern(c,x,y,s,col){stroke(c,col,3,()=>{c.moveTo(x,y);c.quadraticCurveTo(x-s*.2,y-s*.8,x+s*.15,y-s);});for(let k=1;k<8;k++)for(let side of [-1,1])leaf(c,x+side*s*.17,y-k*s*.11,s*(.22-k*.018),col,side*.55);}
-function lantern(c,x,y,col){stroke(c,'#78948b',1.5,()=>{c.moveTo(x,y-40);c.quadraticCurveTo(x-8,y-25,x,y);});oval(c,x,y+8,7,12,col);oval(c,x-2,y+5,2,5,'#fff2ce');}
+function lantern(c,x,y,col){
+ stroke(c,'#78948b',1.5,()=>{c.moveTo(x,y-40);c.quadraticCurveTo(x-8,y-25,x,y);});
+ oval(c,x,y+8,15,20,col+'33');
+ oval(c,x,y+8,10,15,col+'66');
+ oval(c,x,y+8,7,12,col);
+ oval(c,x-1,y+6,2.5,6,'#ffffff');
+}
 function house(c,x,y,w,h,col){c.fillStyle=col;c.beginPath();c.roundRect(x-w/2,y-h,w,h,5);c.fill();shape(c,'#af685a',()=>{c.moveTo(x-w*.63,y-h);c.quadraticCurveTo(x,y-h-28,x+w*.63,y-h);});for(let k=-1;k<=1;k++)window(c,x+k*w*.27,y-h*.35,10,21,'#4c7b80');}
 function moonLily(c,x,y,s){stroke(c,'#8da6bc',3,()=>{c.moveTo(x,y);c.bezierCurveTo(x-35*s,y-65*s,x+30*s,y-95*s,x,y-140*s);});for(let k=0;k<5;k++)oval(c,x+(k-2)*14*s,y-140*s+Math.abs(k-2)*3*s,24*s,10*s,['#c6b5e6','#efd6e6','#f6e7c3'][k%3],(k-2)*.18);lantern(c,x,y-118*s,'#fae9ba');}
 function paint(c,hero){

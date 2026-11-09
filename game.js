@@ -380,6 +380,11 @@ setText(document.getElementById("pause-room-strategy"),game.player?.id==='kilo'&
  "Flor Solar: K activa vuelo sostenido y otra pulsación permite descender. Dirige J moviéndote antes de disparar. El daño corta el vuelo; esquiva el abanico del Tambor. Busca los tres carillones elevados."
  ][game.player.evo] : room().strategy||"");
 setText(document.getElementById("pause-form"), ((p?.evo || 0) + 1) + " / 5");
+document.querySelectorAll(".pause-form-btn").forEach(b => {
+  const active = Number(b.dataset.pauseForm) === (p?.evo || 0);
+  b.classList.toggle("active", active);
+  b.setAttribute("aria-pressed", String(active));
+});
 setText(document.getElementById("pause-journey"), world1Guidance(game.roomId,game)?.journey || Math.min(10, Object.keys(game.visited || {}).length) + " / 10");
 setText(document.getElementById("pause-score"), String(game.score || 0));
 setText(document.getElementById('pause-progress'),(game.world1Seals?.length||0)+'/10 sellos · '+Object.values(game.world1Collect?.rooms||{}).reduce((n,a)=>n+(a.found?.length||0),0)+'/1000 recuerdos');
@@ -3969,6 +3974,24 @@ if (gentleToggle) {
 }
 if (resume) resume.onclick = () => { setPaused(false); closeOverlays(); };
 if (quit) quit.onclick = returnToMenu;
+document.querySelector(".pause-form-selector")?.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-pause-form]");
+  if (btn && game.player) {
+    const targetEvo = Math.max(0, Math.min(4, Number(btn.dataset.pauseForm)));
+    game.player.evo = targetEvo;
+    game.player.xp = XP_NEED[targetEvo] || 0;
+    applyForm(game.player, { silent: true });
+    paintFit(game.player);
+    renderAbilityBar();
+    setText(document.getElementById("pause-form"), (targetEvo + 1) + " / 5");
+    document.querySelectorAll(".pause-form-btn").forEach(b => {
+      const active = Number(b.dataset.pauseForm) === targetEvo;
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-pressed", String(active));
+    });
+    try { save(); } catch (_) {}
+  }
+});
 $("btn-close-pause")?.addEventListener("click", () => { setPaused(false); closeOverlays(); });
 $("btn-close-help")?.addEventListener("click", () => DOM.help.classList.remove("open"));
 $("btn-close-map")?.addEventListener("click", () => DOM.map.classList.remove("open"));

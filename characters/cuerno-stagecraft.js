@@ -1,5 +1,5 @@
 // Cuerno's shared visual language. Pure Canvas, bounded geometry, no gradients.
-export const CUERNO_RAINBOW = Object.freeze(["#ff9fc4", "#ffc791", "#fff1ad", "#b2e9c3", "#a8ddfa", "#c7b1f1"]);
+export const CUERNO_RAINBOW = Object.freeze(["#ff5ca8", "#ff9d3b", "#ffe63b", "#42f5b8", "#38d8ff", "#b97bff"]);
 const TAU = Math.PI * 2;
 const clamp = n => Math.max(0, Math.min(1, Number(n) || 0));
 function ellipse(ctx,x,y,rx,ry,color) {

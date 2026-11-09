@@ -3217,21 +3217,23 @@ ctx.textAlign = "center";
 ctx.fillText(name, x, y - r - 16);
 },
 ohana(ctx, f, cam, t, g, p) {
-const x = f.x - cam.x, cyK = p ? (p.y + p.h * 0.5 - cam.y) : (f.y - cam.y), k = Math.min(1, f.life / 24);
+const cxK = p ? (p.x + p.w * 0.5 - cam.x) : (f.x - cam.x);
+const cyK = p ? (p.y + p.h * 0.5 - cam.y) : (f.y - cam.y);
+const k = Math.min(1, f.life / 24);
 ctx.save();
-// Orbiting celestial solar halo around Kilo
+// Orbiting celestial solar halo centered strictly on Kilo
 const time = g?.reduceMotion ? 0 : t;
-const rx = f.r, ry = f.r * 0.42;
+const rx = f.r, ry = f.r * 0.46;
 
 // Subtle radial orbital stardust ring
 ctx.save();
-ctx.lineWidth = 1.8;
+ctx.lineWidth = 2;
 for (let i = 0; i < 4; i++) {
-  const arcA = i * Math.PI / 2 + time * 0.015;
-  ctx.globalAlpha = 0.28 * k;
+  const arcA = i * Math.PI / 2 + time * 0.025;
+  ctx.globalAlpha = 0.32 * k;
   ctx.strokeStyle = i % 2 ? "#ffd36a" : "#ff9d54";
   ctx.beginPath();
-  ctx.ellipse(x, cyK, rx, ry, 0, arcA, arcA + 1.1);
+  ctx.ellipse(cxK, cyK, rx, ry, 0, arcA, arcA + 1.15);
   ctx.stroke();
 }
 ctx.restore();
@@ -3239,17 +3241,17 @@ ctx.restore();
 // Sort spirits so back spirits draw before front spirits
 const spirits = [];
 for (let i = 0; i < f.n; i++) {
-  const a = i / f.n * TAU + (g?.reduceMotion ? 0 : time * 0.032);
-  const px = x + Math.cos(a) * rx, py = cyK + Math.sin(a) * ry;
+  const a = i / f.n * TAU + (g?.reduceMotion ? 0 : time * 0.045);
+  const px = cxK + Math.cos(a) * rx, py = cyK + Math.sin(a) * ry;
   spirits.push({ a, px, py, sinA: Math.sin(a), i });
 }
 spirits.sort((a, b) => a.sinA - b.sinA);
 
 for (const sp of spirits) {
   const depth = (sp.sinA + 1) * 0.5; // 0 (back) to 1 (front)
-  const sc = 0.75 + depth * 0.45;
-  const alpha = (0.55 + depth * 0.45) * k;
-  const wingFlutter = Math.sin(time * 0.35 + sp.i * 1.5) * 4;
+  const sc = 0.78 + depth * 0.42;
+  const alpha = (0.6 + depth * 0.4) * k;
+  const wingFlutter = Math.sin(time * 0.38 + sp.i * 1.5) * 4.5;
 
   ctx.save();
   ctx.translate(sp.px, sp.py);
@@ -3257,9 +3259,9 @@ for (const sp of spirits) {
   ctx.globalAlpha = alpha;
 
   // Luminous outer aura
-  ctx.fillStyle = depth > 0.5 ? "rgba(255,220,110,0.32)" : "rgba(255,180,80,0.2)";
+  ctx.fillStyle = depth > 0.5 ? "rgba(255,220,110,0.36)" : "rgba(255,180,80,0.22)";
   ctx.beginPath();
-  ctx.arc(0, 0, 16, 0, TAU);
+  ctx.arc(0, 0, 17, 0, TAU);
   ctx.fill();
 
   // Celestial fluttering fairy/solar wings
@@ -3268,48 +3270,71 @@ for (const sp of spirits) {
   ctx.lineWidth = 1.2;
   for (const side of [-1, 1]) {
     ctx.beginPath();
-    ctx.moveTo(side * 3, -2);
-    ctx.quadraticCurveTo(side * (14 + wingFlutter), -14, side * (10 + wingFlutter * 0.5), 2);
-    ctx.quadraticCurveTo(side * 5, 2, side * 3, -2);
+    ctx.moveTo(side * 3, -1);
+    ctx.quadraticCurveTo(side * (15 + wingFlutter), -15, side * (11 + wingFlutter * 0.5), 3);
+    ctx.quadraticCurveTo(side * 5, 3, side * 3, -1);
     ctx.fill();
     ctx.stroke();
   }
 
-  // Golden teardrop spirit body
+  // Floating starlight ribbon wisp tail
+  const tailSway = Math.sin(time * 0.2 + sp.i) * 3;
+  ctx.strokeStyle = "#ffa533";
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(0, 6);
+  ctx.quadraticCurveTo(tailSway * 1.2, 13, tailSway * 2, 19);
+  ctx.stroke();
+  ctx.strokeStyle = "#ffe885";
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  // Ultra-cute round star-wisp body
   ctx.fillStyle = "#ffdb5c";
   ctx.strokeStyle = "#c97824";
   ctx.lineWidth = 1.4;
   ctx.beginPath();
-  ctx.moveTo(0, -11);
-  ctx.bezierCurveTo(-9, -7, -8, 7, 0, 9);
-  ctx.bezierCurveTo(8, 7, 9, -7, 0, -11);
+  ctx.arc(0, 0, 8.5, 0, TAU);
   ctx.fill();
   ctx.stroke();
 
-  // Inner warm flame core
-  ctx.fillStyle = "#fff4b8";
+  // Inner warm glow core
+  ctx.fillStyle = "#fffbee";
   ctx.beginPath();
-  ctx.ellipse(0, -1, 4.5, 6, 0, 0, TAU);
+  ctx.arc(0, -1, 5.2, 0, TAU);
   ctx.fill();
 
-  // Cheerful starlight eyes
-  ctx.fillStyle = "#4a280c";
+  // Rosy blush cheeks (ultra-kawaii)
+  ctx.fillStyle = "rgba(255,130,150,0.6)";
   ctx.beginPath();
-  ctx.arc(-2.5, -2, 1.2, 0, TAU);
-  ctx.arc(2.5, -2, 1.2, 0, TAU);
+  ctx.arc(-4.5, 2, 1.8, 0, TAU);
+  ctx.arc(4.5, 2, 1.8, 0, TAU);
   ctx.fill();
 
-  // Smile
-  ctx.strokeStyle = "#6a3a14";
-  ctx.lineWidth = 1;
+  // Cheerful starlight eyes with sparkle highlights
+  ctx.fillStyle = "#3d1f05";
   ctx.beginPath();
-  ctx.arc(0, 1.5, 2, 0.2, Math.PI - 0.2);
-  ctx.stroke();
+  ctx.arc(-2.6, -1.2, 1.4, 0, TAU);
+  ctx.arc(2.6, -1.2, 1.4, 0, TAU);
+  ctx.fill();
 
-  // Crest starlight spark
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.arc(0, -9, 1.8, 0, TAU);
+  ctx.arc(-2.2, -1.8, 0.65, 0, TAU);
+  ctx.arc(3.0, -1.8, 0.65, 0, TAU);
+  ctx.fill();
+
+  // Sweet gentle smile
+  ctx.strokeStyle = "#5a2608";
+  ctx.lineWidth = 1.1;
+  ctx.beginPath();
+  ctx.arc(0, 1.8, 2, 0.15, Math.PI - 0.15);
+  ctx.stroke();
+
+  // Crest golden star crown
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(0, -8.8, 1.8, 0, TAU);
   ctx.fill();
 
   ctx.restore();
@@ -3321,27 +3346,29 @@ for (const impact of f.impacts || []) {
   const impK = impact.life / 12 * k;
   
   // Find nearest spirit origin to shoot lightning from
-  let bestX = x, bestY = cyK, minD = Infinity;
+  let bestX = cxK, bestY = cyK, minD = Infinity;
   for (const sp of spirits) {
     const d = Math.hypot(sp.px - tx, sp.py - ty);
     if (d < minD) { minD = d; bestX = sp.px; bestY = sp.py; }
   }
 
-  // 5-point jagged lightning bolt
+  // 7-point branched electric thunderbolt
   const dx = tx - bestX, dy = ty - bestY;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len, ny = dx / len;
   const pts = [[bestX, bestY]];
-  for (let step = 1; step <= 4; step++) {
-    const frac = step / 5;
-    const jag = (Math.sin(time * 0.8 + step * 2.3 + impact.life) * 14) * (1 - Math.abs(frac - 0.5) * 1.5);
-    pts.push([bestX + dx * frac - (dy / (Math.hypot(dx, dy) || 1)) * jag, bestY + dy * frac + (dx / (Math.hypot(dx, dy) || 1)) * jag]);
+  for (let step = 1; step <= 5; step++) {
+    const frac = step / 6;
+    const jag = ((step % 2 === 1 ? 1 : -1) * (14 + (step * 3) % 7)) * (1 - Math.abs(frac - 0.5) * 1.3);
+    pts.push([bestX + dx * frac + nx * jag, bestY + dy * frac + ny * jag]);
   }
   pts.push([tx, ty]);
 
-  // Layer 1: Wide warm solar glow
+  // Layer 1: Wide neon solar glow
   ctx.save();
-  ctx.globalAlpha = 0.42 * impK;
-  ctx.strokeStyle = "#ff9426";
-  ctx.lineWidth = 8;
+  ctx.globalAlpha = 0.55 * impK;
+  ctx.strokeStyle = "#ff7b00";
+  ctx.lineWidth = 9;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
@@ -3349,16 +3376,27 @@ for (const impact of f.impacts || []) {
   ctx.stroke();
 
   // Layer 2: Radiant golden lightning
-  ctx.globalAlpha = 0.85 * impK;
-  ctx.strokeStyle = "#ffeb6b";
-  ctx.lineWidth = 3.8;
+  ctx.globalAlpha = 0.9 * impK;
+  ctx.strokeStyle = "#ffe742";
+  ctx.lineWidth = 4;
   ctx.stroke();
 
-  // Layer 3: Blinding white solar core
+  // Layer 3: Blinding pure white lightning core
   ctx.globalAlpha = 1.0 * impK;
   ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 1.6;
+  ctx.lineWidth = 1.8;
   ctx.stroke();
+
+  // Secondary fork branch
+  if (pts.length > 4) {
+    const [fx, fy] = pts[2];
+    ctx.strokeStyle = "#ffe266";
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(fx + nx * 14 + dx * 0.15, fy + ny * 14 + dy * 0.15);
+    ctx.stroke();
+  }
 
   // Target impact starburst & particle shock
   const burstR = (1 - impact.life / 12) * 26 + 8;

@@ -6,67 +6,77 @@ export function drawChispaCloud(ctx,x,y,scale=1,charge=0,t=0,reduced=false){
  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
  const time = reduced ? 0 : t;
  const pulse = Math.sin(time * 0.12);
- const flash = (!reduced && Math.sin(time * 0.25) > 0.6) ? 0.9 : 0.35;
+ const flash = (!reduced && Math.sin(time * 0.25) > 0.6) ? 0.9 : 0.4;
 
- // Turbulent layered electric thunderhead
+ // Outer luminous atmospheric halo
  ctx.save();
- ctx.shadowColor = "#38f0ff";
- ctx.shadowBlur = reduced ? 0 : 16;
+ ctx.shadowColor = "#00f0ff";
+ ctx.shadowBlur = reduced ? 0 : 20;
  
- // Base storm cloud lobes
- ctx.fillStyle = "#1e163b";
- ctx.strokeStyle = "#38f0ff";
- ctx.lineWidth = 2.2;
+ // Base storm cloud lobes (layered deep cosmic twilight indigo with neon cyan outline)
+ ctx.fillStyle = "#271d4a";
+ ctx.strokeStyle = "#4deeff";
+ ctx.lineWidth = 2.4;
  ctx.beginPath();
- ctx.arc(-24, 2, 22, 0, TAU);
- ctx.arc(0, -10, 26, 0, TAU);
- ctx.arc(24, 2, 22, 0, TAU);
- ctx.arc(10, 12, 18, 0, TAU);
- ctx.arc(-10, 12, 18, 0, TAU);
+ ctx.arc(-26, 2, 23, 0, TAU);
+ ctx.arc(-10, -12, 25, 0, TAU);
+ ctx.arc(12, -14, 27, 0, TAU);
+ ctx.arc(28, 2, 23, 0, TAU);
+ ctx.arc(12, 14, 20, 0, TAU);
+ ctx.arc(-12, 14, 20, 0, TAU);
  ctx.fill();
  ctx.stroke();
 
- // Internal electric storm illumination
- ctx.fillStyle = `rgba(100, 230, 255, ${flash})`;
+ // Volumetric upper cloud highlight tier (soft electric violet-lavender billows)
+ ctx.fillStyle = "#4a3b78";
  ctx.beginPath();
- ctx.arc(0, -6, 17, 0, TAU);
+ ctx.arc(-20, 0, 18, 0, TAU);
+ ctx.arc(-8, -10, 20, 0, TAU);
+ ctx.arc(10, -11, 21, 0, TAU);
+ ctx.arc(22, 1, 18, 0, TAU);
  ctx.fill();
 
- ctx.fillStyle = `rgba(255, 238, 90, ${flash * 0.8})`;
+ // High-voltage internal storm core illumination
+ ctx.fillStyle = `rgba(130, 240, 255, ${flash})`;
  ctx.beginPath();
- ctx.arc(2, -4, 9, 0, TAU);
+ ctx.arc(0, -5, 19, 0, TAU);
  ctx.fill();
 
- // Orbiting electric energy ring
- const turn = reduced ? 0 : time * 0.04;
- ctx.strokeStyle = "#ffe847";
- ctx.lineWidth = 1.6;
+ ctx.fillStyle = `rgba(255, 242, 110, ${flash * 0.85})`;
  ctx.beginPath();
- ctx.ellipse(0, 4, 46, 18, turn * 0.5, 0, TAU);
+ ctx.arc(2, -3, 11, 0, TAU);
+ ctx.fill();
+
+ // Orbiting electric energy ring with crackling stardust
+ const turn = reduced ? 0 : time * 0.045;
+ ctx.strokeStyle = "#ffe747";
+ ctx.lineWidth = 1.8;
+ ctx.beginPath();
+ ctx.ellipse(0, 4, 48, 19, turn * 0.5, 0, TAU);
  ctx.stroke();
 
  // Plasma spark conductors along the perimeter
- for (let i = 0; i < 4; i++) {
-  const a = i * TAU / 4 + turn;
-  const sx = Math.cos(a) * 44, sy = 4 + Math.sin(a) * 17;
-  ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#fff176";
+ for (let i = 0; i < 5; i++) {
+  const a = i * TAU / 5 + turn;
+  const sx = Math.cos(a) * 46, sy = 4 + Math.sin(a) * 18;
+  ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#7af0e0";
   ctx.beginPath();
   ctx.arc(sx, sy, 2.5 + (i % 2), 0, TAU);
   ctx.fill();
  }
 
- // Central high-voltage lightning crest
+ // Central high-voltage lightning crest with radiant white/gold sheen
  ctx.strokeStyle = "#ffffff";
  ctx.lineWidth = 2.4;
  ctx.lineCap = "round";
  ctx.lineJoin = "round";
  ctx.beginPath();
- ctx.moveTo(6, -22);
- ctx.lineTo(-8, -2);
- ctx.lineTo(4, -3);
- ctx.lineTo(-6, 20);
- ctx.lineTo(11, -5);
- ctx.lineTo(0, -4);
+ ctx.moveTo(7, -24);
+ ctx.lineTo(-9, -3);
+ ctx.lineTo(4, -4);
+ ctx.lineTo(-7, 22);
+ ctx.lineTo(12, -6);
+ ctx.lineTo(1, -5);
  ctx.closePath();
  ctx.fillStyle = "#ffe742";
  ctx.fill();

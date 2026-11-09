@@ -313,6 +313,12 @@ body.boss-fight #combo-chip { top: 168px; }
 .pause-stats div {border-left:2px solid rgba(122,240,224,.4);padding-left:10px;}
 .pause-stats dt {font-size:11px;color:#9bbcd0;}
 .pause-stats dd {margin:3px 0 0;font:600 21px Fredoka,sans-serif;color:#fff2c2;}
+.pause-form-selector {display:flex;align-items:center;gap:10px;margin:8px 0;padding:6px 10px;background:rgba(14,30,48,.65);border:1px solid rgba(122,240,224,.35);border-radius:10px;}
+.pause-form-label {font:700 10px Outfit,sans-serif;letter-spacing:.08em;color:#7af0e0;}
+.pause-form-buttons {display:flex;gap:6px;}
+.pause-form-btn {width:30px;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#e8f4f2;font:700 13px Fredoka,sans-serif;cursor:pointer;transition:all .15s ease;display:grid;place-items:center;}
+.pause-form-btn:hover {background:rgba(122,240,224,.25);border-color:#7af0e0;transform:translateY(-1px);}
+.pause-form-btn.active,.pause-form-btn[aria-pressed="true"] {background:linear-gradient(135deg,#7af0e0,#42e8d0);color:#05141e;border-color:#9efcf0;box-shadow:0 2px 10px rgba(66,232,208,.4);font-weight:800;}
 .pause-progress {font-size:11.5px;color:#b0cadb;margin:4px 0;}
 .pause-save-status {font-size:11px;color:#82a8bf;margin:2px 0 0;line-height:1.35;}
 .pause-controls {display:flex;flex-wrap:wrap;gap:8px 12px;font-size:11.5px;color:#afc6d5;margin-bottom:12px;}

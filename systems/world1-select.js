@@ -49,7 +49,7 @@ export function world1SelectCards({ seals = [], counts = {},keepsakes=[] } = {})
   const done = new Set(cleanWorld1Seals(seals));
   const cards = WORLD1_ORDER.map((hero, i) => {
     const th = WORLD1_THEMES[hero];
-    const unlocked = i === 0 || done.has(hero) || done.has(WORLD1_ORDER[i - 1]);
+    const unlocked = true;
     return {
       hero, index: i, room: "w1-" + hero, name: heroDisplayName(hero), roomName: th.name,
       color: th.color, tint: th.tint, tagline: WORLD1_TAGLINES[hero], relic: th.relic,

@@ -2,7 +2,7 @@
 // Pool propio con tope fijo, sin gradientes ni Math.random. Formas 1..5 escalan intensidad.
 import { drawRainbowPuff } from "../characters/cuerno-stagecraft.js";
 export const CUERNO_FX_MAX = 160;
-const RAINBOW = ["#ff6b8a", "#ffb04a", "#ffe45a", "#6ee07a", "#5ac8ff", "#a88cff"];
+const RAINBOW = ["#ff5ca8", "#ff9d3b", "#ffe63b", "#42f5b8", "#38d8ff", "#b97bff"];
 const h01 = (i) => { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
 export function createCuernoFx() { return { list: [], seed: 0, arc: null, trail: [] }; }
 // K a lo bestia: rastro arcoíris. seg = { x, y, w?, life?, form? } (lo pasa cuerno-kit).
@@ -93,11 +93,14 @@ export function drawCuernoFx(ctx, fx) {
   }
   if (fx.arc) {
     const a = fx.arc, k = a.life / CUERNO_ARC_LIFE, R = 34 + a.form * 4;
-    ctx.globalAlpha = Math.min(1, k * 2); ctx.lineWidth = 3;
+    ctx.globalAlpha = Math.min(1, k * 2); ctx.lineWidth = 3.2;
     for (let b = 0; b < 6; b++) {
       ctx.strokeStyle = RAINBOW[b];
       ctx.beginPath(); ctx.arc(a.x, a.y + R * 0.6, R - b * 3, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
     }
+    // Ethereal bioluminescent rainbow sheen (medusa glow)
+    ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(a.x, a.y + R * 0.6, R - 7.5, Math.PI * 1.12, Math.PI * 1.88); ctx.stroke();
   }
   for (const q of fx.list) {
     const k = q.life / q.max;
