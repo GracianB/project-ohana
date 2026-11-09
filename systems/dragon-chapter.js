@@ -42,13 +42,13 @@ export function updateDragonChapter(g,hurt){
   p.calderaBoost=false;
  }
 
- // Encender braseros con aliento de fuego (J / cast / attack) o contacto cercano
+ // Los braseros se ganan al usar fuego cerca: correr por delante no cuenta.
  for(const s of w.stations){
   if(s.kind!=='brazier'||s.done)continue;
   const dx=s.x-(p.x+p.w/2);
   const near=Math.abs(dx)<160&&Math.abs(p.y+p.h-s.y)<150;
   const fireActive=(p.state==='cast'||p.state==='attack'||s.flameUntil>w.tick);
-  if(near&&(fireActive||Math.abs(p.vx)>5)){
+  if(near&&fireActive){
    s.done=true;
    w.calderaHeat=Math.min(100,w.calderaHeat+25);
    g.score=(g.score||0)+150;
