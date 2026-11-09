@@ -32,7 +32,29 @@ try{
   const forms=new Set([0]);let deaths=0,iterations=0,minHp=s.hp,railRun=false;
   for(let i=0;i<7000&&!s.world1.sealed;i++){
    iterations=i;
-   if(s.hp<=0){assert.ok(++deaths<=12,'natural retries exhausted '+hero);await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();s=await step(90);}
+   if(s.hp<=0){
+    const attempt=++deaths, p=s.player||{};
+    const hazard=await page.evaluate(async()=>{
+     const id=window.__OHANA_E2E.state().roomId;
+     const room=(await import('/systems/world1-rooms.js')).WORLD1_ROOMS[id];
+     const player=window.__OHANA_E2E.state().player;
+     if(!room||!player)return null;
+     return (room.hazards||[]).filter(h=>h.type==='death').map(h=>({
+      id:h.id,x:h.x,w:h.w,distance:Math.round(h.x-(player.x+player.w))
+     })).sort((a,b)=>Math.abs(a.distance)-Math.abs(b.distance))[0]||null;
+    });
+    const evidence={hero,iteration:i,attempt,room:s.roomId,evo:s.evo,
+     x:Math.round(p.x),y:Math.round(p.y),vx:p.vx,vy:p.vy,
+     jumps:p.jumps,maxJumps:p.maxJumps,grounded:p.grounded,
+     xp:s.xp,hp:s.hp,done:s.world1?.done,nearestLethalGap:hazard,
+     lastRuntimeFault:s.lastRuntimeFault};
+    await fs.writeFile('test-results/v600/death-'+hero+'-'+attempt+'.json',
+     JSON.stringify(evidence,null,2)+'\\n');
+    if(attempt<=2||attempt===8||attempt===12||attempt===13)
+     await page.screenshot({path:'test-results/v600/death-'+hero+'-'+attempt+'.png'});
+    assert.ok(attempt<=12,'natural retries exhausted '+JSON.stringify(evidence));
+    await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();s=await step(90);
+   }
    await films();s=await state();forms.add(s.evo);minHp=Math.min(minHp,s.hp);
    if(hero==='kilo'){
     // Same physical controller as the isolated V606 journey. Stay on this page,
