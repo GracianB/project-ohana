@@ -28,7 +28,10 @@ function drawLunarJellyFoe(c,s){
  const {time,active,hurt,aim}=s;
  // Pulsación natatoria orgánica asimétrica: contracción elástica rápida, relajación fluida prolongada
  const cycle=(time*.08)%TAU;
- const pulse=Math.sin(cycle)>0?Math.pow(Math.sin(cycle),1.8)*.14:-Math.pow(Math.sin(cycle),1.2)*.08;
+ // Fractional powers of a *negative* sine produce NaN and make Canvas
+ // createLinearGradient throw. Magnitudes stay finite on both swim half-cycles.
+ const swim=Math.sin(cycle);
+ const pulse=swim>0?Math.pow(swim,1.8)*.14:-Math.pow(-swim,1.2)*.08;
  const float=Math.sin(time*.05)*4,bellW=1+pulse,bellH=1-pulse*.7;
 
  // 1. Velos orales internos (manubrio rizado) que ondean con retardo hidrodinámico
