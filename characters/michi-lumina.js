@@ -55,10 +55,13 @@ export function michiPerformance(p={}){
 
 function biolumAura(c,r,form,opacity=1){
   const info=MICHI_BIOLUM_FORMS[Math.max(0,Math.min(4,form))];
-  c.save();c.globalAlpha=.45*opacity;
-  const g=c.createRadialGradient(0,-39,4,0,-39,info.radius*.60);
-  g.addColorStop(0,info.glow);g.addColorStop(.34,info.glow+'80');g.addColorStop(1,info.glow+'00');
-  c.fillStyle=g;c.beginPath();c.ellipse(0,-39,info.radius*.67,info.radius*.63,0,0,TAU);c.fill();
+  c.save();c.globalAlpha=.30*opacity;
+  // Two distinct radii: the WORLD light cone grows to 240px; the drawn
+  // character's soft halo must fit cached 240x230px portraits without clipping.
+  const localRadius=Math.min(83,info.radius*.35);
+  const g=c.createRadialGradient(0,-39,3,0,-39,localRadius);
+  g.addColorStop(0,info.glow+'ba');g.addColorStop(.36,info.glow+'57');g.addColorStop(1,info.glow+'00');
+  c.fillStyle=g;c.beginPath();c.ellipse(0,-39,localRadius,localRadius*.94,0,0,TAU);c.fill();
   c.globalAlpha=.76*opacity;
   for(let i=0;i<9;i++){
     const a=i*TAU/9+(!r.reduceMotion?r.t*.018:0);
@@ -108,11 +111,21 @@ export function drawMichiTideStar(c,p={}){
     arms.push({a,tip:[Math.cos(a)*radius,Math.sin(a)*radius]});
   }
   function outline(color,thick){
-    path(c,color,()=>{for(let i=0;i<5;i++){
-      const tip=arms[i].tip,next=arms[(i+1)%5].tip,m=(arms[i].a+TAU/5*.5),rad=19;
-      i?c.lineTo(tip[0],tip[1]):c.moveTo(tip[0],tip[1]);
-      c.quadraticCurveTo(Math.cos(m)*rad,Math.sin(m)*rad,next[0],next[1]);
-    }},PAL.outline,thick);
+    // A real sea star has pillowy, rounded arm tips, not five sharp polygon
+    // vertices. Each tip bends independently with the gameplay pose.
+    const cap=arms.map(({a,tip})=>{
+      const len=Math.hypot(...tip),neck=len-8;
+      return {tip,start:[Math.cos(a-.17)*neck,Math.sin(a-.17)*neck],
+        end:[Math.cos(a+.17)*neck,Math.sin(a+.17)*neck]};
+    });
+    path(c,color,()=>{
+      c.moveTo(...cap[0].start);
+      for(let i=0;i<5;i++){
+        const next=cap[(i+1)%5],mid=arms[i].a+TAU/10;
+        c.quadraticCurveTo(...cap[i].tip,...cap[i].end);
+        c.quadraticCurveTo(Math.cos(mid)*19,Math.sin(mid)*19,...next.start);
+      }
+    },PAL.outline,thick);
   }
   outline('#3aa6ba',6);outline('#85eddb',2.1);
   oval(c,0,4,22,20,'#d7fff1',0,'#66a8ad',1.7);

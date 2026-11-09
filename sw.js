@@ -472,7 +472,7 @@ const PRECACHE = [
 const PRECACHE_REVISIONS = {
   "help-odyssey.css": "5f6c30a7ecae5ffb757097dcfccdc8d24f279dc3",
   "worlds/michi-reactive-night.js": "7ac0b734aedcc97e65e07a3df39761fd6583040f",
-  "characters/michi-lumina.js": "86f179c71f287c359f811a4bfd08cd1e1d2b8db5",
+  "characters/michi-lumina.js": "a2fe2e77217b3a69be7783cf589c8bd6bcea9ded",
   "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
   "multiplayer/entry-route.js": "41d98a5b44ec9d397c4677de0c83f6017f373b5d",
   "final-ritual.css": "cb3fa260f55cd948ce875311f33f0adffcdfb16a",

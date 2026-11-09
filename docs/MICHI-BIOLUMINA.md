@@ -57,3 +57,6 @@ navegación por teclado y preferencias de accesibilidad.
 
 Esta rama experimental apunta a `main` únicamente para aislar el trabajo
 visual: **NO MERGE** mientras las pruebas y la integración #456 sigan abiertas.
+
+## Arte en caché y radio de luz
+El halo local de los personajes está limitado a 83px en el espacio vectorial para no recortar el arte en retratos de 240px. **No** reduce el radio real que ilumina el escenario (115–240px). La nueva prueba Playwright mide píxeles en ambos bordes del retrato: las cinco siluetas deben quedar dentro del Canvas. Los brazos de Estrella se redondean con curvas cuadráticas, no esquinas triangulares.

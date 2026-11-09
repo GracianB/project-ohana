@@ -37,8 +37,13 @@ try{
     const c=canvas.getContext('2d');c.translate(120,183);c.scale(1.12,1.12);
     cat.draw(c,{form,state:'idle',t:time,phase:time*.17,castSlot:1,look:{x:.2,y:0},reduceMotion:reduced},{});
     const pixels=c.getImageData(0,0,240,230).data;
-    let visible=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]>25)visible++;
-    return {png:canvas.toDataURL().split(',')[1],visible};
+    let visible=0,edgePixels=0;
+    for(let y=0;y<230;y++)for(let x=0;x<240;x++){
+      const alpha=pixels[(y*240+x)*4+3];
+      if(alpha>25)visible++;
+      if(alpha>25&&(x<=2||x>=237))edgePixels++;
+    }
+    return {png:canvas.toDataURL().split(',')[1],visible,edgePixels};
    };
    const a=draw(75),b=draw(145),ra=draw(75,true),rb=draw(145,true);
    cases.push({form,visible:a.visible,moving:a.png!==b.png,reducedStable:ra.png===rb.png,png:a.png});
@@ -48,6 +53,7 @@ try{
  for(const row of art){
   assert.ok(row.visible>170,'non-empty visible artwork F'+row.form);
   assert.ok(row.moving,'living animation F'+row.form);
+  assert.equal(row.edgePixels,0,'local glow / anatomy must not be clipped horizontally in portrait F'+row.form);
   assert.ok(row.reducedStable,'frozen accessible pose F'+row.form);
   await fs.writeFile(output+'/form-'+row.form+'.png',Buffer.from(row.png,'base64'));
  }
