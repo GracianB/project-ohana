@@ -1,0 +1,19 @@
+name: OHANA Full Integration Quality
+
+on:
+  push:
+    branches:
+      - integration/ohana-michi-full-20261109
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Independent branch-side replay of the EXACT canonical quality workflow.
+# Pull-request triggered workflows can be unavailable or fail before job
+# creation. Do not publish based on this alone: required PR gates must also pass.
+jobs:
+  full-quality:
+    uses: ./.github/workflows/quality.yml
+    with:
+      run_multiplayer: false
