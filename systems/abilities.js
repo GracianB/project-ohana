@@ -3645,61 +3645,98 @@ ctx.globalCompositeOperation = "source-over";
 gust(ctx, f, cam, t) {
 const k = 1 - f.life / 24;
 const x = f.x - cam.x, y = f.y - cam.y;
+ctx.save();
 ctx.lineCap = "round";
-for (let i = 0; i < 3; i++) {
-  const d = 30 + k * 180 + i * 34;
-  ctx.globalAlpha = (1 - k) * (1 - i * 0.2);
-  ctx.strokeStyle = i === 1 ? "#fff" : "#bfefff";
-  ctx.lineWidth = 5 - i;
+ctx.lineJoin = "round";
+// Outer aerodynamic pressure wave
+for (let i = 0; i < 4; i++) {
+  const d = 26 + k * 210 + i * 36;
+  const alpha = (1 - k) * (1 - i * 0.18);
+  ctx.globalAlpha = Math.max(0, alpha * 0.45);
+  ctx.strokeStyle = i === 0 ? "#ffd36a" : i === 1 ? "#ffffff" : "#7ef0e5";
+  ctx.lineWidth = Math.max(1.5, 6 - i * 1.2);
   ctx.beginPath();
-  ctx.arc(x + f.f * (d - 40), y, 40 + i * 10, f.f > 0 ? -0.8 : Math.PI - 0.8, f.f > 0 ? 0.8 : Math.PI + 0.8);
+  ctx.arc(x + f.f * (d - 40), y, 42 + i * 14, f.f > 0 ? -0.85 : Math.PI - 0.85, f.f > 0 ? 0.85 : Math.PI + 0.85);
   ctx.stroke();
+  // Swirling vortices at wingtip edges
+  ctx.globalAlpha = Math.max(0, alpha * 0.75);
+  const sx = x + f.f * d * 0.82, sy = y - 26 + i * 18;
   ctx.beginPath();
-  const sx = x + f.f * d * 0.8, sy = y - 20 + i * 20;
-  ctx.arc(sx, sy, 8, 0, TAU * 0.75);
-  ctx.stroke();
-}
-ctx.globalAlpha = 1 - k;
-ctx.strokeStyle = "#dff6ff";
-ctx.lineWidth = 2;
-for (let i = -2; i <= 2; i++) {
-  ctx.beginPath();
-  ctx.moveTo(x + i * 8, y + 20 + k * 20);
-  ctx.lineTo(x + i * 10, y + 40 + k * 50);
+  ctx.arc(sx, sy, 7 + i * 2, f.f > 0 ? 0.2 : Math.PI + 0.2, f.f > 0 ? TAU * 0.82 : Math.PI + TAU * 0.82);
   ctx.stroke();
 }
+// Upward dragon thermal wind streamers
+ctx.strokeStyle = "#fff6cf";
+ctx.lineWidth = 2.2;
+for (let i = -3; i <= 3; i++) {
+  const streamK = ((t * 0.15 + i * 0.3) % 1 + 1) % 1;
+  ctx.globalAlpha = (1 - k) * (1 - streamK) * 0.7;
+  const sx = x + i * 12 + f.f * k * 40;
+  const sy = y + 25 + streamK * 45;
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  ctx.quadraticCurveTo(sx + f.f * 8, sy - 14, sx + f.f * 14, sy - 28);
+  ctx.stroke();
+}
+ctx.restore();
 },
 meteor(ctx, f, cam) {
 const x = f.x - cam.x, y = f.y - cam.y;
-const len = 60;
+const len = 78;
 const d = Math.hypot(f.vx, f.vy) || 1;
 const gx = x - (f.vx / d) * len, gy = y - (f.vy / d) * len;
-// V371: estela plana en 3 tramos (sin gradiente por frame).
+ctx.save();
 ctx.lineCap = "round";
-for (let i = 0; i < 3; i++) {
-  const a0 = i / 3, a1 = (i + 1) / 3;
-  ctx.globalAlpha = 0.25 + i * 0.3;
-  ctx.strokeStyle = f.dino ? (i < 2 ? "#9fea9b" : "#d8ff9a") : (i < 2 ? "#ff6a2a" : "#ffd36a");
-  ctx.lineWidth = f.r * (0.9 + i * 0.35);
-  ctx.beginPath(); ctx.moveTo(gx + (x - gx) * a0, gy + (y - gy) * a0); ctx.lineTo(gx + (x - gx) * a1, gy + (y - gy) * a1); ctx.stroke();
+ctx.lineJoin = "round";
+// Volumetric infernal flame trail (4 layered gradient segments)
+const trailCols = f.dino
+  ? ["#2a401c", "#5e9438", "#a6f05e", "#fffdb5"]
+  : ["#8a1a0c", "#e64a19", "#ff9800", "#fff3a8"];
+for (let i = 0; i < 4; i++) {
+  const a0 = i / 4, a1 = (i + 1) / 4;
+  ctx.globalAlpha = 0.28 + i * 0.22;
+  ctx.strokeStyle = trailCols[i];
+  ctx.lineWidth = f.r * (1.1 + (3 - i) * 0.38);
+  ctx.beginPath();
+  ctx.moveTo(gx + (x - gx) * a0, gy + (y - gy) * a0);
+  ctx.lineTo(gx + (x - gx) * a1, gy + (y - gy) * a1);
+  ctx.stroke();
 }
-ctx.globalAlpha = 1;
-ctx.fillStyle = f.dino ? "#b9f890" : "#ff8a2a";
-ctx.globalAlpha = 0.22; ctx.beginPath(); ctx.arc(x, y, f.r * 2.6, 0, TAU); ctx.fill();
-ctx.globalAlpha = 0.4; ctx.beginPath(); ctx.arc(x, y, f.r * 1.7, 0, TAU); ctx.fill();
-ctx.globalAlpha = 1;
+// Outer plasma mantle aura
+ctx.globalAlpha = 0.35;
+ctx.fillStyle = f.dino ? "#b9f890" : "#ff5722";
+ctx.beginPath(); ctx.arc(x, y, f.r * 2.8, 0, TAU); ctx.fill();
+ctx.globalAlpha = 0.65;
+ctx.fillStyle = f.dino ? "#e6ff94" : "#ffb74d";
+ctx.beginPath(); ctx.arc(x, y, f.r * 1.8, 0, TAU); ctx.fill();
+// Molten asteroid rock core with craggy basalt facets
+ctx.save();
 ctx.translate(x, y);
 ctx.rotate(f.rot);
-ctx.fillStyle = f.dino ? "#4e6540" : "#5a2a1a";
+ctx.globalAlpha = 1;
+ctx.fillStyle = f.dino ? "#35482a" : "#3d140a";
 ctx.beginPath();
-for (let i = 0; i < 7; i++) {
-  const a = (i / 7) * TAU, rr = f.r * (0.8 + ((i * 37) % 5) / 12);
+for (let i = 0; i < 8; i++) {
+  const a = (i / 8) * TAU, rr = f.r * (0.82 + ((i * 37) % 6) / 14);
   if (i === 0) ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); else ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
 }
 ctx.closePath(); ctx.fill();
-ctx.strokeStyle = f.dino ? "#e9ffae" : "#ffb347";
-ctx.lineWidth = 2;
-ctx.beginPath(); ctx.moveTo(-f.r * 0.4, -f.r * 0.2); ctx.lineTo(f.r * 0.1, f.r * 0.2); ctx.lineTo(f.r * 0.4, -f.r * 0.1); ctx.stroke();
+ctx.strokeStyle = f.dino ? "#8bb862" : "#943b18";
+ctx.lineWidth = 2.2;
+ctx.stroke();
+// Incandescent glowing magma fissures inside the rock
+ctx.strokeStyle = f.dino ? "#f4ffae" : "#ffe066";
+ctx.lineWidth = 2.4;
+ctx.beginPath();
+ctx.moveTo(-f.r * 0.5, -f.r * 0.2); ctx.lineTo(-f.r * 0.1, f.r * 0.15);
+ctx.lineTo(f.r * 0.45, -f.r * 0.1); ctx.stroke();
+ctx.strokeStyle = "#ffffff";
+ctx.lineWidth = 1.2;
+ctx.beginPath();
+ctx.moveTo(-f.r * 0.3, -f.r * 0.1); ctx.lineTo(-f.r * 0.05, f.r * 0.1);
+ctx.lineTo(f.r * 0.3, -f.r * 0.05); ctx.stroke();
+ctx.restore();
+ctx.restore();
 },
 blast(ctx, f, cam) {
 const k = 1 - f.life / 16;
@@ -3711,36 +3748,66 @@ ctx.lineWidth = 6 * (1 - k) + 1;
 ctx.beginPath(); ctx.arc(x, y, f.R * (0.3 + k * 0.8), 0, TAU); ctx.stroke();
 },
 quake(ctx, f, cam) {
+ctx.save();
+ctx.lineCap = "round";
+ctx.lineJoin = "round";
+// Craggy fossil monoliths bursting through the earth
 for (const s of f.spikes) {
   const u = s.life / 26;
   const hh = s.h * Math.sin(Math.min(1, (1 - u) * 4) * Math.PI / 2) * Math.min(1, u * 3);
   const x = s.x - cam.x, y = s.y - cam.y;
-  ctx.fillStyle = "#8a6238";
+  // Shaded back facet
+  ctx.fillStyle = "#3e2d1d";
   ctx.beginPath();
-  ctx.moveTo(x - 8, y + 2);
+  ctx.moveTo(x - 11, y + 2);
   ctx.lineTo(x + s.lean * hh, y - hh);
-  ctx.lineTo(x + 8, y + 2);
+  ctx.lineTo(x + 11, y + 2);
   ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = "#c8a060";
+  // Main sandstone body
+  ctx.fillStyle = "#8a6638";
   ctx.beginPath();
-  ctx.moveTo(x - 3, y);
+  ctx.moveTo(x - 9, y + 2);
   ctx.lineTo(x + s.lean * hh, y - hh);
-  ctx.lineTo(x + 1, y);
+  ctx.lineTo(x + 4, y + 2);
   ctx.closePath();
   ctx.fill();
+  // Sunlit limestone ridge highlight
+  ctx.fillStyle = "#dfc698";
+  ctx.beginPath();
+  ctx.moveTo(x - 2, y + 1);
+  ctx.lineTo(x + s.lean * hh, y - hh);
+  ctx.lineTo(x + 4, y + 1);
+  ctx.closePath();
+  ctx.fill();
+  // Ridge crest accent line
+  ctx.strokeStyle = "#fff2cb";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(x + 1, y);
+  ctx.lineTo(x + s.lean * hh, y - hh);
+  ctx.stroke();
 }
-ctx.strokeStyle = "rgba(40,20,5,.8)";
-ctx.lineWidth = 2;
+// Jagged ground fracture fissures
+ctx.strokeStyle = "rgba(42,22,6,0.92)";
+ctx.lineWidth = 2.4;
 for (const fr of f.fronts) {
   const x0 = f.ox - cam.x, x1 = fr.x - cam.x, y = fr.y - cam.y + 3;
   ctx.beginPath();
   ctx.moveTo(x0, y);
-  const n = Math.max(1, Math.abs(x1 - x0) / 18 | 0);
-  for (let i = 1; i <= n; i++) ctx.lineTo(x0 + (x1 - x0) * (i / n), y + ((i * 7) % 5) - 2);
+  const n = Math.max(1, Math.abs(x1 - x0) / 16 | 0);
+  for (let i = 1; i <= n; i++) {
+    const frac = i / n;
+    const jag = ((i * 7) % 5) - 2;
+    ctx.lineTo(x0 + (x1 - x0) * frac, y + jag);
+  }
   ctx.stroke();
-  if (fr.on) glow(ctx, x1, y - 6, 28, "#ffe0a0", 0.5);
+  if (fr.on) {
+    glow(ctx, x1, y - 6, 32, "#ffd566", 0.65);
+    glow(ctx, x1, y - 6, 14, "#ffffff", 0.85);
+  }
 }
+ctx.restore();
 },
 muzzle(ctx, f, cam, t, g, p) {
 const h = hand(p);
@@ -3982,36 +4049,71 @@ const y = p.y + p.h * 0.4 - cam.y;
 ctx.save();
 ctx.translate(x, y);
 ctx.scale(p.facing || 1, 1);
-ctx.globalAlpha = 0.92;
-ctx.fillStyle = "#24140c";
+ctx.lineCap = "round";
+ctx.lineJoin = "round";
+
+// Primal inner mouth shadow
+ctx.globalAlpha = 0.95;
+ctx.fillStyle = "#1e140d";
 ctx.beginPath();
 ctx.moveTo(0, 0);
-ctx.lineTo(reach * 0.85, -gap);
-ctx.lineTo(reach * 0.85, gap);
+ctx.lineTo(reach * 0.88, -gap);
+ctx.lineTo(reach * 0.88, gap);
 ctx.closePath();
 ctx.fill();
-ctx.strokeStyle = "#8ee07a";
-ctx.lineWidth = 5;
-ctx.lineCap = "round";
-ctx.beginPath();
-ctx.moveTo(2, -3);
-ctx.lineTo(reach * 0.8, -gap);
-ctx.moveTo(2, 3);
-ctx.lineTo(reach * 0.8, gap);
-ctx.stroke();
-ctx.fillStyle = "#f4fff0";
-for (let i = 0; i < 3; i++) {
-  const tx = reach * (0.35 + i * 0.16);
+
+// Fossilized bone jaw armor (upper & lower)
+for (const sign of [-1, 1]) {
+  const jy = sign * gap;
+  ctx.fillStyle = sign === -1 ? "#8e856c" : "#b29b74";
+  ctx.strokeStyle = "#433522";
+  ctx.lineWidth = 1.8;
   ctx.beginPath();
-  ctx.moveTo(tx, -gap * 0.82);
-  ctx.lineTo(tx + 6, -gap * 0.35);
-  ctx.lineTo(tx - 3, -gap * 0.45);
-  ctx.fill();
+  ctx.moveTo(0, sign * 2);
+  ctx.quadraticCurveTo(reach * 0.45, jy * 0.6, reach * 0.86, jy);
+  ctx.lineTo(reach * 0.84, jy + sign * 6);
+  ctx.quadraticCurveTo(reach * 0.42, jy * 0.8 + sign * 4, 0, sign * 5);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // 4 razor-sharp fossil ivory fangs
+  for (let i = 0; i < 4; i++) {
+    const tx = reach * (0.28 + i * 0.18);
+    const fangH = (8 + (i % 2) * 4) * (0.8 + snap * 0.4);
+    ctx.fillStyle = "#fffdf2";
+    ctx.strokeStyle = "#9e8e74";
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(tx - 3.5, jy);
+    ctx.lineTo(tx, jy - sign * fangH);
+    ctx.lineTo(tx + 3.5, jy);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // Tooth specular reflection
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.moveTo(tx - 1, jy);
+    ctx.lineTo(tx, jy - sign * fangH * 0.8);
+    ctx.lineTo(tx + 1, jy);
+    ctx.fill();
+  }
+}
+
+// Impact crunch flash and sparks on snap
+if (snap > 0.65) {
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.moveTo(tx, gap * 0.82);
-  ctx.lineTo(tx + 6, gap * 0.35);
-  ctx.lineTo(tx - 3, gap * 0.45);
+  ctx.arc(reach * 0.82, 0, 5, 0, TAU);
   ctx.fill();
+  ctx.strokeStyle = "#c8f04a";
+  ctx.lineWidth = 1.6;
+  for (let s = 0; s < 4; s++) {
+    const a = s * Math.PI * 0.5 + 0.25;
+    ctx.beginPath();
+    ctx.moveTo(reach * 0.82, 0);
+    ctx.lineTo(reach * 0.82 + Math.cos(a) * 12, Math.sin(a) * 12);
+    ctx.stroke();
+  }
 }
 ctx.restore();
 },
@@ -4418,59 +4520,81 @@ for (let i = -1; i <= 1; i++) {
 }
 ctx.restore();
 } else if (kind === "flame") {
-swingArc(ctx, reach * 0.72, a0, a1, 20, "#ff5a1f", 0.34 * fade);
-swingArc(ctx, reach * 0.72, a0, a1, 8, "#ffe14a", 0.95 * fade);
-for (let i = 1; i <= 5; i++) {
-  const ang = a0 + (a1 - a0) * (i / 5);
+// Dragon roaring inferno breath wave with volcanic orange mantle and incandescent white plasma core
+swingArc(ctx, reach * 0.82, a0, a1, 26, "#9e1c10", 0.32 * fade);
+swingArc(ctx, reach * 0.78, a0, a1, 16, "#ff5722", 0.65 * fade);
+swingArc(ctx, reach * 0.74, a0, a1, 8, "#ffd700", 0.88 * fade);
+swingArc(ctx, reach * 0.72, a0, a1, 3, "#ffffff", 0.98 * fade);
+// Flickering fire tongue plumes licking along the leading edge
+for (let i = 1; i <= 6; i++) {
+  const ang = a0 + (a1 - a0) * (i / 6.5);
   ctx.save();
-  ctx.translate(Math.cos(ang) * reach * 0.72, Math.sin(ang) * reach * 0.72);
+  ctx.translate(Math.cos(ang) * reach * 0.75, Math.sin(ang) * reach * 0.75);
   ctx.rotate(ang);
-  ctx.globalAlpha = 0.9 * fade;
-  ctx.fillStyle = i % 2 ? "#ff7a32" : "#fff0a0";
+  ctx.globalAlpha = 0.92 * fade;
+  ctx.fillStyle = i % 2 ? "#ff7a29" : "#ffe680";
   ctx.beginPath();
-  ctx.moveTo(-2, 0);
-  ctx.quadraticCurveTo(10, -9, 18, 0);
-  ctx.quadraticCurveTo(10, 8, -2, 0);
+  ctx.moveTo(-3, 0);
+  ctx.quadraticCurveTo(12, -11, 22, 0);
+  ctx.quadraticCurveTo(12, 11, -3, 0);
   ctx.fill();
+  // White-hot flame tip
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath(); ctx.arc(10, 0, 2.5, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
 } else if (kind === "bite") {
+// Dino primal Rex fossil jaw snap with ivory fangs and seismic crunch
 const snap = 1 - open;
-const gap = 0.12 + snap * 0.9;
+const gap = 0.10 + snap * 0.85;
 ctx.save();
 ctx.globalAlpha = fade;
-ctx.fillStyle = "#2a120c";
+// Deep interior mouth shadow
+ctx.fillStyle = "#1e130c";
 ctx.beginPath();
 ctx.moveTo(10, 0);
-ctx.lineTo(reach * 0.7, -gap * reach * 0.4);
-ctx.lineTo(reach * 0.7, gap * reach * 0.4);
+ctx.lineTo(reach * 0.75, -gap * reach * 0.42);
+ctx.lineTo(reach * 0.75, gap * reach * 0.42);
 ctx.closePath();
 ctx.fill();
 const jaw = (sign) => {
   ctx.beginPath();
   ctx.moveTo(6, sign * 3);
-  ctx.lineTo(reach * 0.82, sign * (4 + gap * reach * 0.36));
-  ctx.quadraticCurveTo(reach * 0.5, sign * (gap * reach * 0.12), reach * 0.2, sign * 2);
+  ctx.lineTo(reach * 0.85, sign * (4 + gap * reach * 0.38));
+  ctx.quadraticCurveTo(reach * 0.52, sign * (gap * reach * 0.14), reach * 0.22, sign * 2);
   ctx.closePath();
-  ctx.fillStyle = "#3f8f3a";
+  ctx.fillStyle = sign === -1 ? "#8e856c" : "#b29b74";
   ctx.fill();
-  ctx.strokeStyle = "#1d4a22";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#433522";
+  ctx.lineWidth = 1.8;
   ctx.stroke();
-  ctx.fillStyle = "#f4fff0";
+  // 4 razor-sharp fossil ivory fangs with 3D beveling
   for (let i = 0; i < 4; i++) {
-    const u = 0.32 + i * 0.14;
-    const px = reach * 0.78 * u;
-    const py = sign * (3 + gap * reach * 0.32 * u);
+    const u = 0.28 + i * 0.16;
+    const px = reach * 0.80 * u;
+    const py = sign * (3 + gap * reach * 0.34 * u);
+    ctx.fillStyle = "#fffdf0";
     ctx.beginPath();
-    ctx.moveTo(px, py);
-    ctx.lineTo(px + 7, py + sign * 8);
-    ctx.lineTo(px - 4, py + sign * 2);
+    ctx.moveTo(px - 3.5, py);
+    ctx.lineTo(px + 7, py + sign * 9);
+    ctx.lineTo(px + 4, py + sign * 2);
+    ctx.closePath();
     ctx.fill();
+    ctx.strokeStyle = "#a8997a";
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
   }
 };
 jaw(-1);
 jaw(1);
+// Seismic crunch spark on jaw closure
+if (snap < 0.35) {
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath(); ctx.arc(reach * 0.75, 0, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#c8f04a";
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(reach * 0.75, 0, 12, 0, Math.PI * 2); ctx.stroke();
+}
 ctx.restore();
 } else if (kind === "slice") {
 const len = reach * (0.32 + open * 0.72);

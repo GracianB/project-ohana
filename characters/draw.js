@@ -586,20 +586,95 @@ case "paw": {
   ctx.lineWidth = lw0; ctx.globalAlpha = a0; ctx.strokeStyle = color;
   break;
 }
-case "flame":
-  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(f * reach * (0.45 + i * 0.08), -H * (0.38 + i * 0.08), H * (0.10 + k * 0.04), -1.5, 1.1); ctx.stroke(); }
+case "flame": {
+  // Dragon roaring fire breath strike
+  const lw0 = ctx.lineWidth, a0 = ctx.globalAlpha;
+  const flameCols = ["#d8301a", "#ff6a2a", "#ffb347", "#fff3b0"];
+  for (let l = 0; l < 4; l++) {
+    ctx.strokeStyle = flameCols[l];
+    ctx.lineWidth = Math.max(1.4, lw0 * (2.8 - l * 0.6));
+    ctx.globalAlpha = a0 * (0.35 + l * 0.2);
+    ctx.beginPath();
+    ctx.arc(f * reach * (0.42 + l * 0.12), -H * (0.46 - l * 0.02), H * (0.12 + k * 0.06), -1.4 + l * 0.1, 1.2 - l * 0.1);
+    ctx.stroke();
+  }
+  // Flickering fire tongue plumes
+  for (let i = 0; i < 4; i++) {
+    const ang = -0.8 + i * 0.52;
+    const fx = f * reach * (0.55 + i * 0.08);
+    const fy = -H * 0.46 + Math.sin(ang) * H * 0.18;
+    ctx.fillStyle = i % 2 === 0 ? "#ff8833" : "#ffe066";
+    ctx.globalAlpha = a0 * 0.85;
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.quadraticCurveTo(fx + f * H * 0.06, fy - H * 0.03, fx + f * H * 0.10, fy);
+    ctx.quadraticCurveTo(fx + f * H * 0.06, fy + H * 0.03, fx, fy);
+    ctx.fill();
+  }
+  // Sparks and embers
+  ctx.fillStyle = "#ffffff";
+  for (let s = 0; s < 3; s++) {
+    const sx = f * reach * (0.62 + s * 0.12);
+    const sy = -H * (0.40 + (s % 2 ? 0.08 : -0.08));
+    ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.lineWidth = lw0; ctx.globalAlpha = a0; ctx.strokeStyle = color;
   break;
+}
 case "byte":
   for (let i = 0; i < 5; i++) { ctx.fillStyle = i % 2 ? "#ff7f6e" : "#4ff0c8"; const x = f * (reach * 0.40 + H * i * 0.05), y = -H * (0.50 - (i % 3) * 0.05); ctx.fillRect(x - H * 0.02, y - H * 0.02, H * 0.04, H * 0.04); }
   break;
 case "bite":
-case "fang":
-  ctx.beginPath(); ctx.arc(f * reach * 0.52, -H * 0.46, H * 0.15, -0.8, 0.8); ctx.stroke();
-  for (let i = 0; i < 3; i++) {
-    const x = f * (reach * 0.52 + H * (0.08 + i * 0.05));
-    ctx.beginPath(); ctx.moveTo(x, -H * 0.50); ctx.lineTo(x, -H * (0.42 - i * 0.03)); ctx.stroke();
+case "fang": {
+  // Dino primal Rex crushing jaws snap
+  const lw0 = ctx.lineWidth, a0 = ctx.globalAlpha;
+  const snapK = Math.sin(k * Math.PI);
+  const cxB = f * reach * 0.62, cyB = -H * 0.48;
+  const jawGap = H * (0.22 - snapK * 0.16);
+
+  // Outer primal shockwave ring
+  ctx.strokeStyle = "#c8f04a"; ctx.lineWidth = lw0 * 1.8; ctx.globalAlpha = a0 * 0.38;
+  ctx.beginPath(); ctx.arc(cxB, cyB, H * (0.24 + snapK * 0.08), -1.1, 1.1); ctx.stroke();
+
+  // Upper & lower fossilized jaw bone arcs
+  const jawCols = ["#8e856c", "#b29b74"];
+  for (const sign of [-1, 1]) {
+    const jy = cyB + sign * jawGap;
+    ctx.fillStyle = jawCols[sign === -1 ? 0 : 1];
+    ctx.strokeStyle = "#4c5347";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(cxB - f * H * 0.14, cyB + sign * (jawGap * 0.3));
+    ctx.quadraticCurveTo(cxB, jy - sign * H * 0.04, cxB + f * H * 0.18, jy);
+    ctx.lineTo(cxB + f * H * 0.16, jy + sign * H * 0.03);
+    ctx.quadraticCurveTo(cxB, jy + sign * (jawGap * 0.2), cxB - f * H * 0.14, cyB);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    // 4 razor-sharp fossil ivory fangs per jaw
+    for (let t = 0; t < 4; t++) {
+      const u = 0.2 + t * 0.24;
+      const tx = cxB - f * H * 0.10 + f * H * 0.26 * u;
+      const ty = jy;
+      ctx.fillStyle = "#fffdf0";
+      ctx.beginPath();
+      ctx.moveTo(tx - f * 2.5, ty);
+      ctx.lineTo(tx, ty - sign * H * 0.07);
+      ctx.lineTo(tx + f * 2.5, ty);
+      ctx.closePath();
+      ctx.fill();
+    }
   }
+  // Impact spark at jaw collision point
+  if (snapK > 0.6) {
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(cxB + f * H * 0.16, cyB, H * 0.035, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.lineWidth = lw0; ctx.globalAlpha = a0; ctx.strokeStyle = color;
   break;
+}
 case "salt":
   ctx.fillStyle = "#fff3c0";
   for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(f * reach * (0.24 + i * 0.10), -H * (0.56 - i * 0.03), H * 0.022, 0, Math.PI * 2); ctx.fill(); }

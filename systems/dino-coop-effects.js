@@ -87,19 +87,44 @@ export function drawDinoPeerEffects(ctx,list,cam={},t=0,reduceMotion=false){
     }else if(f.kind==="dinoFossil"){
       const r=clamp(f.r||12,4,35);
       ctx.translate(x,y);ctx.rotate(reduceMotion?0:f.rot||0);
-      ctx.fillStyle="#8fa65c";ctx.strokeStyle="#dcfca5";ctx.lineWidth=2;
+      // Outer crystalline bone facet
+      ctx.fillStyle="#8fa65c";ctx.strokeStyle="#dcfca5";ctx.lineWidth=2.2;
       ctx.beginPath();ctx.moveTo(0,-r);ctx.lineTo(r*.88,0);
       ctx.lineTo(0,r);ctx.lineTo(-r*.88,0);ctx.closePath();ctx.fill();ctx.stroke();
+      // Sunlit inner facet
+      ctx.fillStyle="#c2e67a";
+      ctx.beginPath();ctx.moveTo(0,-r*.8);ctx.lineTo(r*.65,0);ctx.lineTo(0,r*.2);ctx.closePath();ctx.fill();
+      // Amber stardust core
+      ctx.fillStyle="#ffffff";ctx.beginPath();ctx.arc(0,0,r*.22,0,TAU);ctx.fill();
     }else if(f.kind==="dinoFossilBlast"||f.kind==="dinoSplat"){
       const k=1-clamp(f.life/Math.max(1,f.max),0,1);
-      ctx.globalAlpha=(1-k)*.8;ctx.strokeStyle=f.color;ctx.lineWidth=3;
+      ctx.globalAlpha=(1-k)*.85;ctx.strokeStyle=f.color;ctx.lineWidth=3;
       const r=clamp((f.r||f.radius||32)*(0.5+k),3,120);
       ctx.beginPath();ctx.ellipse(x,y,r,r*.42,0,0,TAU);ctx.stroke();
+      // Seismic secondary shockwave ripple
+      ctx.strokeStyle="#ffffff";ctx.lineWidth=1.5;ctx.globalAlpha=(1-k)*.6;
+      ctx.beginPath();ctx.ellipse(x,y,r*0.75,r*.30,0,0,TAU);ctx.stroke();
+      // Ground fracture debris
+      if(!reduceMotion){
+        for(let s=0;s<4;s++){
+          const sa=s*Math.PI*0.5+k*2;
+          const sx=x+Math.cos(sa)*r*0.9,sy=y+Math.sin(sa)*r*0.38;
+          ctx.fillStyle="#ffd57a";ctx.beginPath();ctx.arc(sx,sy,2.2*(1-k),0,TAU);ctx.fill();
+        }
+      }
     }else if(f.kind==="dinoSpit"){
       const r=clamp(f.radius||10,3,22);
-      ctx.fillStyle="#c8f04a";ctx.strokeStyle="#3a794b";ctx.lineWidth=1.5;
+      ctx.fillStyle="#c8f04a";ctx.strokeStyle="#3a794b";ctx.lineWidth=1.8;
       ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();ctx.stroke();
-      ctx.fillStyle="#fffbe6";ctx.beginPath();ctx.arc(x-r*.3,y-r*.25,r*.18,0,TAU);ctx.fill();
+      ctx.fillStyle="#fffbe6";ctx.beginPath();ctx.arc(x-r*.3,y-r*.25,r*.22,0,TAU);ctx.fill();
+      // Trailing spore droplets
+      if(!reduceMotion){
+        for(let i=0;i<3;i++){
+          const d=(i+1)*6;
+          ctx.fillStyle="#b6f58c";ctx.globalAlpha=0.6-i*0.18;
+          ctx.beginPath();ctx.arc(x-(f.vx||0)*0.4*i-d*0.3,y-(f.vy||0)*0.4*i,r*(0.4-i*0.08),0,TAU);ctx.fill();
+        }
+      }
     }
     ctx.restore();
   }
