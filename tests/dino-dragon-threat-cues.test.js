@@ -87,6 +87,8 @@ test('role symbols are truly different, both themes work, and no cue appears whi
  const e=makeEnemy('dragon','escoria','pursuer');
  const palette=['volcanic','fossil'];
  for(const theme of palette){
+  e._campaign.wind=0;
+  e._campaign.active=0;
   const empty=trace(ctx=>assert.equal(drawChapterThreatCue(ctx,e,12,false,theme),false));
   assert.equal(empty,'[]');
   const symbols=new Set();
