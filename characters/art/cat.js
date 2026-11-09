@@ -1,10 +1,11 @@
 import {drawMichiEye} from '../michi-eyes.js';
 import {drawMoonKitten} from '../michi-kitten.js';
+import {drawMichiLanternKitten,drawMichiTideStar,drawMichiAstralCapybara,drawMichiLivingHalo} from '../michi-lumina.js';
 import {drawMoonHare} from '../michi-moon-hare.js';
 import {michiMotion} from "../michi-motion.js";
 import {michiGenome,jellyPulse,drawJellyBell,drawTentacle} from "../michi-jelly.js";
 import {michiLaunchKick,michiLaunchFrame,drawCatTail,drawFairyWing} from "../michi-anatomy.js";
-// Michicornio: kitten → fairy cat → moon jelly → lunar hare → winged nine-tail guardian.
+// Michicornio: luminous kitten → sky fairy → living jelly → tide star → astral capybara.
 export const MICHI_VISUAL_H=[60,72,84,94,106];
 const TAU = Math.PI * 2;
 
@@ -635,12 +636,9 @@ function draw(ctx, pose, R) {
   for(const key of ['t','phase','speed','atk','cast','flourish','flourishN','hurt','bounce','land','turnPulse','brake','bodyTilt','michiSeed'])safe[key]=finite(src[key]);
   if(safe.reduceMotion){safe.t=0;safe.phase=0;safe.atk=safe.state==='attack'?.5:0;safe.cast=safe.state==='cast'?.5:0;safe.land=0;safe.bounce=0;safe.bodyTilt=0;safe.flourish=0;safe.hurt=.5;}
   const f = Math.max(0, Math.min(4, Math.round(finite(Number(safe.form)))));
-  if(f===0){ // MOON KITTEN: its own connected, soft kitten anatomy.
-    drawMoonKitten(ctx,safe);return;
-  }
-  if(f===3){ // MOON HARE: its own rabbit rig replaces feline overlays.
-    drawMoonHare(ctx,safe);return;
-  }
+  if(f===0){drawMichiLanternKitten(ctx,safe);return;}
+  if(f===3){drawMichiTideStar(ctx,safe);return;}
+  if(f===4){drawMichiAstralCapybara(ctx,safe);return;}
   const r = solve(safe);
   if(!Number.isFinite(safe.michiDuetAge)){
     r.motion=michiMotion(safe,f);
@@ -655,6 +653,7 @@ function draw(ctx, pose, R) {
     r.michiWing=welcome.wing;r.mood=welcome.mood;
     r.michiHaunch=welcome.haunch;r.michiPaw=welcome.paw;r.michiLook=welcome.look;
   }
+  drawMichiLivingHalo(ctx,safe,f);
   ctx.save();
   drawMichiFootwork(ctx,safe,f,safe.t||0);
   // Each form owns its accents; no shared halo obscures the face.

@@ -1,0 +1,34 @@
+name: Michi Biolumina Visual Acceptance
+on:
+  push:
+    branches:
+      - 'feature/michi-bioluminescent-world-*'
+  pull_request:
+    paths:
+      - 'characters/art/cat.js'
+      - 'characters/michi-lumina.js'
+      - 'worlds/michi-reactive-night.js'
+      - 'help-odyssey.css'
+      - 'tests/browser/michi-biolumina.mjs'
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - name: Validate Michi's five forms and responsive help
+        run: node tests/browser/michi-biolumina.mjs
+      - name: Publish Michi visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: michi-biolumina-evidence
+          path: test-results/michi-biolumina/
+          if-no-files-found: ignore
