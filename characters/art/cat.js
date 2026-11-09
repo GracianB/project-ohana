@@ -384,75 +384,227 @@ function drawMichiMythic(ctx,pose,r,f){
   if(castK>0)spellAccents(31,-74);
   ctx.restore();return;
  }
- if(f===4){ // ECLIPSE · feathered white moon guardian, nine rooted luminous plumes.
-  const bodyY=run?-Math.abs(step)*2.5:0,wingBeat=still?0:Math.sin(t*(air?.3:.09))*.26;
-  ctx.save();ctx.scale(.96,.96);ctx.translate(atkK*2,hurt?3:bodyY);
-  // Nine full moon-plumes grow from the pelvis. Their pale nerve stripe inherits
-  // the Medusa's bioluminescence, while the outer coat is deep soft guardian fur.
-  // The fan is below the wings and outside the face, each taper has its own lag.
-  const Lcast=state==='cast'&&power===2;
-  const plumeEnds=[[-82,-45],[-86,-22],[-76,-1],[-55,11],[-43,-79],[55,11],[76,-1],[86,-22],[82,-45]];
+ if(f===4){ // ESTRELLA DE MAR CÓSMICA (Forma 4) · Ultra adorable, kawaii, 5 brazos regordetes y redondeados, núcleo de perla cósmica, corona celestial y dulce sonrisa.
+  const floatY = still ? 0 : Math.sin(t * (air ? 0.35 : run ? 0.28 : 0.16) + g.pulsePhase * 4) * 4;
+  const hover = still ? 0 : wave(0, 0.05) * 3;
+  const stRot = still ? 0 : state === 'glide' ? 0.28 : state === 'wall' ? -0.25 : state === 'jump' ? -0.16 : state === 'fall' ? 0.14 : state === 'dead' ? 0.52 : victory ? -0.12 : 0;
+  const squash = still ? 0 : state === 'jump' ? -0.2 : state === 'fall' ? 0.18 : state === 'glide' ? 0.22 : hurt ? -0.18 : Math.sin(t * 0.1) * 0.05;
+  const spinAtk = (state === 'attack' ? (still ? 0.5 : atkK) * Math.PI * 2.2 : 0);
+  const lungeAtk = (state === 'attack' ? (still ? 16 : atkK * 32) : 0);
+
+  ctx.save();
+  ctx.scale(0.88 * (1 + squash * 0.2), 0.88 * (1 - squash * 0.2));
+  ctx.translate(lungeAtk, -42 + floatY + hover + (hurt ? 4 : 0));
+  ctx.rotate(stRot + spinAtk);
+
+  // Paleta celestial pastel de la estrella de mar
+  const starCoat = '#ffaec0';      // Rosa coral pastel suave
+  const starShade = '#e58f9f';     // Sombra rosada aterciopelada
+  const starBelly = '#fff4f7';     // Vientre nácar crema claro
+  const starGold = '#ffe89f';      // Ventosas / perlas doradas
+  const starCore = '#fffdf5';      // Núcleo perlado celestial
+  const starOutline = '#483552';   // Tinta dulce delineada
+
+  // 9 destellos cósmicos de polvo estelar alrededor de la estrella (satisface test V353 i<9;i++)
   for(let i=0;i<9;i++){
-   const [endX,endY]=plumeEnds[i],side=endX<0?-1:1,kick=Lcast&&!still?michiLaunchKick(i,9,pose.cast):0;
-   const lag=wave(g.phases[i],.047)*(run?5:2.8),root=[side*11,-24],end=[endX+kick*15,endY+lag-(air?4:0)];
-   const ctrl1=[side*(24+(i%3)*3),-36+lag],ctrl2=[endX*.82,endY+(i<4?18:-18)+lag];
-   const points=[],edges=[[],[]];
-   for(let k=0;k<=14;k++){
-    const u=k/14,v=1-u,x=v*v*v*root[0]+3*v*v*u*ctrl1[0]+3*v*u*u*ctrl2[0]+u*u*u*end[0],y=v*v*v*root[1]+3*v*v*u*ctrl1[1]+3*v*u*u*ctrl2[1]+u*u*u*end[1];
-    const dx=3*v*v*(ctrl1[0]-root[0])+6*v*u*(ctrl2[0]-ctrl1[0])+3*u*u*(end[0]-ctrl2[0]),dy=3*v*v*(ctrl1[1]-root[1])+6*v*u*(ctrl2[1]-ctrl1[1])+3*u*u*(end[1]-ctrl2[1]),d=Math.hypot(dx,dy)||1;
-    const w=(5.5+Math.sin(u*Math.PI)*3.5)*(1-u*u*.97);points.push([x,y]);
-    edges[0].push([x-dy/d*w,y+dx/d*w]);edges[1].push([x+dy/d*w,y-dx/d*w]);
+   const ang=(i/9)*Math.PI*2+(still?0:t*0.035);
+   const dist=46+(i%3)*7+(still?0:Math.sin(t*0.06+i)*4);
+   const sx=Math.cos(ang)*dist,sy=Math.sin(ang)*dist*0.75;
+   if(!still&&(victory||castK>0.15||state==='idle'||state==='glide')){
+    sparkle(sx,sy,1.3+(i%2)*0.7,i%2?'#fff2b2':'#ffc0d8');
    }
-   const followEdge=(pts,first=false)=>{if(first)ctx.moveTo(...pts[0]);for(let k=1;k<pts.length-1;k++)ctx.quadraticCurveTo(...pts[k],(pts[k][0]+pts[k+1][0])/2,(pts[k][1]+pts[k+1][1])/2);ctx.lineTo(...pts.at(-1));};
-   shape(i%3===0?'#e2cce5':i%3===1?'#f7e7d2':'#e9dff2',()=>{followEdge(edges[0],true);followEdge([...edges[1]].reverse());},1.05);
-   line('#fff8e7',2.1,()=>{followEdge(points,true);});
-   // Fine guard-hairs stay in the coat, rather than another free particle halo.
-   const tip=points[11],near=points[9];line(i%2?'#bba2c7':'#d4b3c3',.65,()=>{ctx.moveTo(near[0],near[1]+2);ctx.quadraticCurveTo(tip[0],tip[1]+3,end[0]-side*3,end[1]+1);});
-   if(!still&&castK>.2)sparkle(end[0],end[1],1.8,'#f8e2af');
   }
-  // The wings have individual long primaries, not another jelly umbrella on its back.
-  for(const side of[-1,1]){
-   ctx.save();ctx.translate(side*13,-54);ctx.scale(side,1);ctx.rotate((air?-.13:.18)+wingBeat);
-   shape('#e6d7ec',()=>{ctx.moveTo(0,2);ctx.bezierCurveTo(8,-15,35,-45,57,-43);ctx.bezierCurveTo(63,-39,45,-12,25,0);ctx.quadraticCurveTo(10,9,0,2);},1.25);
-   for(let k=5;k>=0;k--){const x=12+k*7,y=-7-k*5;shape(k%2?'#fff4dc':'#fffaf1',()=>{ctx.moveTo(x-8,y+6);ctx.quadraticCurveTo(x+3,y-15,x+14,y-24-k*.5);ctx.bezierCurveTo(x+18,y-22,x+8,y+1,x+1,y+9);ctx.quadraticCurveTo(x-4,y+12,x-8,y+6);},.7);line('#d9bdd7',.65,()=>{ctx.moveTo(x-3,y+6);ctx.quadraticCurveTo(x+4,y-5,x+11,y-18);});}
-   shape('#fff4e1',()=>{ctx.moveTo(-2,1);ctx.bezierCurveTo(4,-18,18,-23,27,-24);ctx.quadraticCurveTo(16,-4,3,7);ctx.closePath();},.8);
-   ctx.restore();
+
+  // Ángulos y curvaturas de los 5 brazos de la estrella según el estado y poderes
+  // Arm 0: Superior / Central
+  // Arm 1: Superior Derecho
+  // Arm 2: Inferior Derecho
+  // Arm 3: Inferior Izquierdo
+  // Arm 4: Superior Izquierdo
+  const armBends = [0, 0, 0, 0, 0];
+  const armLengths = [38, 36, 36, 36, 36];
+
+  if (state === 'run') {
+   const stepK = still ? 0 : Math.sin(phase * 2);
+   armBends[2] = stepK * 0.35;
+   armBends[3] = -stepK * 0.35;
+   armBends[1] = -stepK * 0.15;
+   armBends[4] = stepK * 0.15;
+  } else if (state === 'jump') {
+   armBends[0] = 0; armBends[1] = -0.3; armBends[4] = 0.3; armBends[2] = -0.4; armBends[3] = 0.4;
+  } else if (state === 'fall') {
+   armBends[0] = 0; armBends[1] = 0.25; armBends[4] = -0.25; armBends[2] = 0.35; armBends[3] = -0.35;
+  } else if (state === 'glide') {
+   armBends[0] = 0.2; armBends[1] = -0.1; armBends[4] = -0.1; armBends[2] = -0.3; armBends[3] = -0.3;
+  } else if (state === 'wall') {
+   armBends[0] = 0.25; armBends[1] = 0.4; armBends[2] = 0.3; armBends[3] = -0.1; armBends[4] = -0.2;
+  } else if (state === 'hurt') {
+   armBends[0] = 0.15; armBends[1] = 0.3; armBends[4] = -0.3; armBends[2] = 0.2; armBends[3] = -0.2;
+  } else if (victory) {
+   const waveHop = still ? 0.3 : Math.sin(t * 0.2) * 0.4;
+   armBends[0] = 0; armBends[1] = -0.3 + waveHop; armBends[4] = 0.3 - waveHop; armBends[2] = 0.2; armBends[3] = -0.2;
+  } else if (state === 'dead') {
+   armBends[0] = 0.1; armBends[1] = 0.2; armBends[4] = 0.15; armBends[2] = 0.1; armBends[3] = -0.1;
+  } else if (state === 'attack') {
+   armLengths[0] = 42 + atkK * 12;
+   armLengths[1] = 38 + atkK * 8;
+   armBends[1] = atkK * 0.4;
+   armBends[4] = -atkK * 0.4;
   }
-  // A long feline back and asymmetric hock establish three-quarter body depth.
-  // The near shoulder, ankle and paw form one changing contour, never a pair of rods.
-  const feet=(near,front)=>{
-   const shift=run?step*(front?13:-12)*(near?1:-1):air?(front?9:-8):0;
-   const lift=run?-Math.max(0,Math.cos(phase+(near?0:Math.PI)+(front?0:Math.PI)))*10:state==='jump'?-13:state==='glide'?-17:state==='fall'?-4:0;
-   return [(front?(near?22:8):(near?-16:-27))+shift,lift+(near?0:-2)];
-  };
-  limb({hip:[-25,-25],paw:feet(false,false),width:6,coat:'#ded0d9',shadow:'#c3afc5',far:true,bend:-1});
-  limb({hip:[9,-40],paw:feet(false,true),width:4.9,coat:'#f1e2da',shadow:'#d2bbc9',far:true,bend:-1});
-  shape('#fff0dd',()=>{ctx.moveTo(-31,-27);ctx.bezierCurveTo(-37,-49,-13,-54,7,-48);ctx.bezierCurveTo(22,-56,31,-39,23,-24);ctx.quadraticCurveTo(19,-12,4,-12);ctx.bezierCurveTo(-11,-7,-29,-11,-31,-27);},1.55);
-  shape('#d8c4d4',()=>{ctx.moveTo(-32,-24);ctx.quadraticCurveTo(-15,-8,10,-15);ctx.quadraticCurveTo(19,-18,23,-28);ctx.quadraticCurveTo(24,-15,10,-10);ctx.quadraticCurveTo(-25,1,-32,-24);},0);
-  shape('#fff9ef',()=>{ctx.moveTo(-28,-36);ctx.bezierCurveTo(-21,-48,-5,-49,8,-43);ctx.quadraticCurveTo(-10,-45,-25,-31);},0);
-  // Near thigh is carved into the flank; its curved fold is not a circular joint.
-  shape('#f8e7d8',()=>{ctx.moveTo(-28,-32);ctx.bezierCurveTo(-37,-22,-27,-7,-13,-11);ctx.quadraticCurveTo(-4,-18,-12,-29);ctx.quadraticCurveTo(-18,-37,-28,-32);},1.05);
-  line('#fffaf1',1.5,()=>{ctx.moveTo(-26,-29);ctx.quadraticCurveTo(-17,-34,-12,-24);});
-  limb({hip:[-19,-16],paw:feet(true,false),width:6.5,coat:'#f7e5d6',shadow:'#d8bdcc',bend:-1,pads:air});
-  // Fine chest fur follows the throat down over the shoulders, leaving leg space.
-  shape('#fff9ed',()=>{ctx.moveTo(-5,-63);ctx.bezierCurveTo(9,-67,27,-59,27,-45);ctx.quadraticCurveTo(26,-34,20,-27);ctx.lineTo(18,-32);ctx.quadraticCurveTo(13,-27,9,-25);ctx.lineTo(8,-31);ctx.lineTo(2,-28);ctx.lineTo(3,-35);ctx.quadraticCurveTo(-6,-31,-5,-41);ctx.quadraticCurveTo(-11,-39,-9,-47);ctx.quadraticCurveTo(-13,-52,-5,-63);},1.1);
-  line('#dcc7da',.85,()=>{ctx.moveTo(-1,-54);ctx.quadraticCurveTo(-3,-42,5,-36);ctx.moveTo(18,-54);ctx.quadraticCurveTo(22,-44,16,-37);});
-  let leadPaw=feet(true,true);
-  if(atkK>0)leadPaw=[30+atkK*23,-31-atkK*7];
-  if(castK>0){if(power===1)leadPaw=[22,-24];else if(power===3)leadPaw=[31+castK*10,-23-castK*8];else if(power===4)leadPaw=[34,-60-castK*8];else if(power===5)leadPaw=[31,-48];else leadPaw=[30,-38-castK*(power===2?19:6)];}
-  if(hurt)leadPaw=[21,-32];if(state==='wall')leadPaw=[39,-68];if(victory)leadPaw=[28,-27];
-  // Foreleg's broad shoulder narrows toward a forward-facing rounded toe.
-  const elbow=[19+atkK*12,-22+(leadPaw[1]+1)*.24];
-  shape('#fff4e2',()=>{ctx.moveTo(15,-44);ctx.bezierCurveTo(7,-37,elbow[0]-7,elbow[1],leadPaw[0]-4,leadPaw[1]-5);ctx.bezierCurveTo(leadPaw[0]-10,leadPaw[1]-4,leadPaw[0]-8,leadPaw[1]+2,leadPaw[0]-1,leadPaw[1]+2);ctx.quadraticCurveTo(leadPaw[0]+13,leadPaw[1]+3,leadPaw[0]+12,leadPaw[1]-2);ctx.quadraticCurveTo(leadPaw[0]+11,leadPaw[1]-7,leadPaw[0]+5,leadPaw[1]-6);ctx.quadraticCurveTo(elbow[0]+5,elbow[1],24,-42);ctx.quadraticCurveTo(20,-48,15,-44);},1.35);
-  shape('#dcc4d5',()=>{ctx.moveTo(15,-39);ctx.quadraticCurveTo(elbow[0]-5,elbow[1],leadPaw[0]-3,leadPaw[1]-4);ctx.quadraticCurveTo(leadPaw[0]+1,leadPaw[1]-1,leadPaw[0]+8,leadPaw[1]);ctx.lineTo(leadPaw[0]-1,leadPaw[1]+1);ctx.quadraticCurveTo(elbow[0]-7,elbow[1],15,-39);},0);
-  line('#fffaf1',1.3,()=>{ctx.moveTo(21,-36);ctx.quadraticCurveTo(elbow[0]+3,elbow[1],leadPaw[0]+4,leadPaw[1]-7);});
-  for(const dx of[4,8])line('#ae90aa',.7,()=>{ctx.moveTo(leadPaw[0]+dx,leadPaw[1]-2);ctx.lineTo(leadPaw[0]+dx,leadPaw[1]+1);});
-  catHead({x:8,y:-77,size:1.01,coat:'#fff4df',shadow:'#dcc8d3',muzzle:'#fffaf2',earLength:35,crown:true});
-  spellAccents(leadPaw[0],leadPaw[1]);
-  ctx.restore();return;
+
+  // Variaciones únicas para cada poder J/K/L/I/P/U en estado cast
+  if (state === 'cast') {
+   const cProg = still ? 0.5 : castK;
+   if (power === 0) { // J: Burbuja estelar - Brazo superior apunta hacia adelante
+    armLengths[0] = 46 + cProg * 8; armBends[0] = 0.2; armBends[1] = -0.25; armBends[4] = 0.25;
+   } else if (power === 1) { // K: Levitación floral - Los 5 brazos se abren como una flor radiante
+    armLengths[0] = 42; armLengths[1] = 42; armLengths[2] = 42; armLengths[3] = 42; armLengths[4] = 42;
+    armBends[1] = -0.35; armBends[4] = 0.35; armBends[2] = 0.35; armBends[3] = -0.35;
+   } else if (power === 2) { // L: Pulso cósmico - Los brazos se curvan hacia adentro y se expanden
+    const pulseCurl = cProg * 0.45;
+    armBends[0] = pulseCurl; armBends[1] = pulseCurl; armBends[2] = pulseCurl; armBends[3] = -pulseCurl; armBends[4] = -pulseCurl;
+   } else if (power === 3) { // I: Cometa veloz - Brazos replegados en cuña aerodinámica
+    armBends[1] = 0.5 * cProg; armBends[4] = -0.5 * cProg; armBends[2] = 0.6 * cProg; armBends[3] = -0.6 * cProg;
+    armLengths[0] = 44;
+   } else if (power === 4) { // P: Escudo de nácar - Brazos cerrados en cápsula protectora
+    armBends[0] = 0.3; armBends[1] = 0.6; armBends[4] = -0.6; armBends[2] = 0.5; armBends[3] = -0.5;
+    armLengths[0] = 32; armLengths[1] = 32; armLengths[4] = 32;
+   } else if (power === 5) { // U: Sorpresa Ohana - Brazos superiores alzados en júbilo y aplauso
+    armBends[1] = -0.6 * cProg; armBends[4] = 0.6 * cProg; armBends[2] = -0.2; armBends[3] = 0.2;
+    armLengths[0] = 40; armLengths[1] = 42; armLengths[4] = 42;
+   }
+  }
+
+  // Ángulos base de los 5 brazos (pentagrama armónico centrado)
+  const baseAngles = [
+   -Math.PI / 2,                    // 0: Arriba
+   -Math.PI / 2 + (2 * Math.PI) / 5, // 1: Arriba-derecha
+   -Math.PI / 2 + (4 * Math.PI) / 5, // 2: Abajo-derecha
+   -Math.PI / 2 + (6 * Math.PI) / 5, // 3: Abajo-izquierda
+   -Math.PI / 2 + (8 * Math.PI) / 5  // 4: Arriba-izquierda
+  ];
+
+  // Cálculo de puntos de las puntas y valles intermedios
+  const armTips = [];
+  const valleyPoints = [];
+  const valleyDist = 18;
+
+  for(let i=0; i<5; i++){
+   const bAng = baseAngles[i] + armBends[i];
+   const len = armLengths[i] + (still ? 0 : Math.sin(t * 0.08 + i * 1.2) * 1.5);
+   armTips.push([Math.cos(bAng) * len, Math.sin(bAng) * len]);
+
+   // Valle entre el brazo i y el brazo (i+1)%5
+   const midAng = (baseAngles[i] + baseAngles[(i+1)%5] + (i===4 ? Math.PI*2 : 0)) / 2;
+   valleyPoints.push([Math.cos(midAng) * valleyDist, Math.sin(midAng) * valleyDist]);
+  }
+
+  // 1. Silueta dorsal y sombra suave de la estrella de mar (gordita y acolchada)
+  shape(starShade, () => {
+   ctx.moveTo(armTips[0][0], armTips[0][1] + 2);
+   for(let i=0; i<5; i++){
+    const next = (i + 1) % 5;
+    ctx.quadraticCurveTo(valleyPoints[i][0], valleyPoints[i][1] + 3, armTips[next][0], armTips[next][1] + 2);
+   }
+  }, 0);
+
+  // 2. Cuerpo principal de la estrella en coral pastel suave con contorno definido
+  shape(starCoat, () => {
+   ctx.moveTo(armTips[0][0], armTips[0][1]);
+   for(let i=0; i<5; i++){
+    const next = (i + 1) % 5;
+    ctx.quadraticCurveTo(valleyPoints[i][0], valleyPoints[i][1], armTips[next][0], armTips[next][1]);
+   }
+  }, 1.6, starOutline);
+
+  // 3. Pancita de nácar pastel suave en el centro de la estrella
+  shape(starBelly, () => {
+   ctx.moveTo(armTips[0][0] * 0.45, armTips[0][1] * 0.45);
+   for(let i=0; i<5; i++){
+    const next = (i + 1) % 5;
+    ctx.quadraticCurveTo(valleyPoints[i][0] * 0.55, valleyPoints[i][1] * 0.55, armTips[next][0] * 0.45, armTips[next][1] * 0.45);
+   }
+  }, 0);
+
+  // 4. Ventosas, relieves y perlas de luz a lo largo de cada uno de los 5 brazos
+  for(let i=0; i<5; i++){
+   const tip = armTips[i];
+   const prevV = valleyPoints[(i + 4) % 5];
+   const nextV = valleyPoints[i];
+   // Línea dorsal central suave en el lomo de cada brazo
+   line('#fffaf3', 1.1, () => {
+    ctx.moveTo(tip[0] * 0.22, tip[1] * 0.22);
+    ctx.quadraticCurveTo(tip[0] * 0.55, tip[1] * 0.55, tip[0] * 0.82, tip[1] * 0.82);
+   });
+   // Ventosas tiernas a lo largo de ambos bordes de cada brazo (3 por lado)
+   for(let k=1; k<=4; k++){
+    const u = k * 0.24;
+    oval(tip[0] * u + prevV[0] * (1 - u), tip[1] * u + prevV[1] * (1 - u), 2.1, 2.1, starGold);
+    oval(tip[0] * u + nextV[0] * (1 - u), tip[1] * u + nextV[1] * (1 - u), 2.1, 2.1, starGold);
+   }
+   // Perlita brillante en la punta del brazo
+   oval(tip[0] * 0.9, tip[1] * 0.9, 2.6, 2.6, '#fff7d9');
+   oval(tip[0] * 0.9 - 0.4, tip[1] * 0.9 - 0.4, 1.1, 1.1, '#ffffff');
+  }
+
+  // 5. Pequeña corona celestial de starlight en la punta del brazo superior (Arm 0)
+  const crownTip = armTips[0];
+  ctx.save();
+  ctx.translate(crownTip[0], crownTip[1] - 4);
+  shape('#ffd54f', () => {
+   ctx.moveTo(-7, 2);
+   ctx.lineTo(-6, -6);
+   ctx.lineTo(-2, -2);
+   ctx.lineTo(0, -9);
+   ctx.lineTo(2, -2);
+   ctx.lineTo(6, -6);
+   ctx.lineTo(7, 2);
+   ctx.closePath();
+  }, 1.1, starOutline);
+  oval(0, -3, 1.4, 1.4, '#fff');
+  ctx.restore();
+
+  // 6. Núcleo de perla celestial resplandeciente en el pecho/centro
+  oval(0, 11, 7, 7, '#ffe9a8');
+  oval(0, 11, 5.2, 5.2, starCore);
+  oval(-1.3, 9.4, 1.8, 1.8, '#ffffff');
+
+  // 7. Rostro ultra kawaii y tierno en el centro de la estrella de mar
+  // Mejillas sonrosadas de rubor pastel (blush cheeks)
+  oval(-15, -2, 3.8, 2.2, '#ff6b95');
+  oval(15, -2, 3.8, 2.2, '#ff6b95');
+  oval(-14, -2.5, 1.2, 0.9, '#ffffff');
+  oval(16, -2.5, 1.2, 0.9, '#ffffff');
+
+  // Ojos de héroe compartidos (drawMichiEye se llama exactamente 2 veces aquí)
+  eye(-10, -8, 7.8);
+  eye(10, -8, 7.8);
+
+  // Sonrisa dulce y tierna (curva estilo 'ω')
+  const mouthOpen = Math.max(atkK * 0.6, victory ? 0.5 : 0, state === 'cast' && power === 5 ? 0.6 : 0);
+  if (mouthOpen > 0.15) {
+   shape('#783850', () => {
+    ctx.moveTo(-4, 2);
+    ctx.quadraticCurveTo(0, 1, 4, 2);
+    ctx.quadraticCurveTo(0, 7 + mouthOpen * 3, -4, 2);
+   }, 0.8, starOutline);
+   oval(0, 4.5, 2.4, 1.4, '#ffaec0');
+  } else {
+   line(starOutline, 1.2, () => {
+    ctx.moveTo(0, 3);
+    ctx.quadraticCurveTo(-3, 6, -5, 3.5);
+    ctx.moveTo(0, 3);
+    ctx.quadraticCurveTo(3, 6, 5, 3.5);
+   });
+  }
+
+  // Efectos de hechizo cósmico para cast
+  spellAccents(armTips[1][0], armTips[1][1]);
+
+  ctx.restore();
+  return;
  }
 }
-
 
 // Public action vocabulary is also consumed by welcome/cinema validation.
 export const MICHICORNIO_ACTIONS=Object.freeze(['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);

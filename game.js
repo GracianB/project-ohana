@@ -3967,9 +3967,9 @@ if (gentleToggle) {
     fit();
   });
 }
-if (resume) resume.onclick = () => setPaused(false);
+if (resume) resume.onclick = () => { setPaused(false); closeOverlays(); };
 if (quit) quit.onclick = returnToMenu;
-$("btn-close-pause")?.addEventListener("click", () => setPaused(false));
+$("btn-close-pause")?.addEventListener("click", () => { setPaused(false); closeOverlays(); });
 $("btn-close-help")?.addEventListener("click", () => DOM.help.classList.remove("open"));
 $("btn-close-map")?.addEventListener("click", () => DOM.map.classList.remove("open"));
 addEventListener('ohana-death',()=>{if(game.onlineAdventure)void onlineCoop.reportDeath(game);});

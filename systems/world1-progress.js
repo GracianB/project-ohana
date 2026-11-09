@@ -20,9 +20,9 @@ export function world1RoomUnlocked(room, seals = []) {
 // Cada héroe empieza en SU sala si ya está abierta; si no, en la primera sala
 // abierta sin sello. La carta elegida en la selección manda si está abierta.
 export function world1StartRoom(heroId, seals = [], requested = null) {
-  if (requested && world1RoomUnlocked(requested, seals)) return requested;
+  if (requested) return requested;
   const own = "w1-" + heroId;
-  if (WORLD1_ORDER.includes(heroId) && world1RoomUnlocked(own, seals)) return own;
+  if (WORLD1_ORDER.includes(heroId)) return own;
   const s = new Set(cleanWorld1Seals(seals));
   const next = WORLD1_ORDER.find((h) => !s.has(h));
   return next ? "w1-" + next : "w1-final";

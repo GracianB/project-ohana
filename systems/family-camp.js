@@ -125,10 +125,8 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
   globalThis.__ohanaStartForm=form;
   if(w1sel){
    const currentCard=w1sel.cards[w1sel.index];
-   if(currentCard&&currentCard.unlocked){
-    globalThis.__ohanaWorld1Start=currentCard.room;
-   }
-   w1enter(world1SelectKey(w1sel,'Enter'));
+   globalThis.__ohanaWorld1Start=(currentCard&&currentCard.room)?currentCard.room:('w1-'+selected);
+   w1enter({action:'enter',room:globalThis.__ohanaWorld1Start,hero:selected,card:currentCard});
   }else onBegin();
  };
  function position(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/view.scale+view.x,y:(e.clientY-r.top)/view.scale};}
