@@ -59,7 +59,7 @@ try{browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||chro
  await h.waitForFunction(()=>{const game=window.__ohanaNetwork._combatGame;return game.world1.stations[0].done&&game.world1.stations[0]._scored;});
  await h.evaluate(()=>{const game=window.__ohanaNetwork._combatGame;game.enemies=game._testFoes;delete game._testFoes;});
  console.log('PASS host earned first Kilo instrument with real E input');
- await h.waitForFunction(()=>{const game=window.__ohanaNetwork._combatGame;return game.world1.stations[0].done&&game.world1.stations[0]._scored;});
+ await g.waitForFunction(()=>{const game=window.__ohanaNetwork._combatGame;return game.world1.stations[0].done&&game.world1.stations[0]._scored;});
  for(const p of pages)assert.deepEqual(await p.evaluate(()=>JSON.parse(localStorage.getItem('ohana-w1-seals-v1'))),['kilo']);
  console.log('PASS guest puzzle completion reaches the host without importing or changing solo progress');
  await g.context().setOffline(true);
