@@ -522,13 +522,70 @@ case "claws": {
   ctx.lineWidth = lw0; ctx.globalAlpha = a0; ctx.strokeStyle = color;
   break;
 }
-case "bolt":
-  ctx.beginPath(); ctx.moveTo(f * H * 0.08, -H * 0.56); ctx.lineTo(f * H * 0.30, -H * 0.74); ctx.lineTo(f * H * 0.22, -H * 0.50); ctx.lineTo(f * H * 0.48, -H * 0.62); ctx.stroke();
+case "bolt": {
+  // Chispín electric tail whip & high-voltage discharge
+  const lw0 = ctx.lineWidth, a0 = ctx.globalAlpha;
+  const pts = [
+    [f * H * 0.06, -H * 0.52],
+    [f * H * 0.22, -H * 0.72],
+    [f * H * 0.16, -H * 0.48],
+    [f * H * 0.38, -H * 0.66],
+    [f * H * 0.30, -H * 0.44],
+    [f * (reach * 0.72), -H * 0.56]
+  ];
+  // Outer cyan plasma glow
+  ctx.strokeStyle = "#00f0ff"; ctx.lineWidth = lw0 * 2.8; ctx.globalAlpha = a0 * 0.42;
+  ctx.beginPath(); pts.forEach(([x, y], idx) => idx === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)); ctx.stroke();
+  // Radiant golden core
+  ctx.strokeStyle = "#ffe742"; ctx.lineWidth = lw0 * 1.5; ctx.globalAlpha = a0 * 0.95;
+  ctx.beginPath(); pts.forEach(([x, y], idx) => idx === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)); ctx.stroke();
+  // Blinding white filament
+  ctx.strokeStyle = "#ffffff"; ctx.lineWidth = Math.max(1.2, lw0 * 0.7); ctx.globalAlpha = a0;
+  ctx.beginPath(); pts.forEach(([x, y], idx) => idx === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)); ctx.stroke();
+  // Tip explosion: 4-point solar diamond star and plasma sparks
+  const [tipX, tipY] = pts[pts.length - 1];
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.moveTo(tipX, tipY - H * 0.06); ctx.lineTo(tipX + f * H * 0.04, tipY);
+  ctx.lineTo(tipX, tipY + H * 0.06); ctx.lineTo(tipX - f * H * 0.04, tipY);
+  ctx.closePath(); ctx.fill();
+  for (let s = 0; s < 3; s++) {
+    const ang = -0.6 + s * 0.6;
+    ctx.strokeStyle = s % 2 ? "#00f0ff" : "#ffe742"; ctx.lineWidth = lw0 * 0.6;
+    ctx.beginPath(); ctx.moveTo(tipX, tipY); ctx.lineTo(tipX + f * Math.cos(ang) * H * 0.08, tipY + Math.sin(ang) * H * 0.08); ctx.stroke();
+  }
+  ctx.lineWidth = lw0; ctx.globalAlpha = a0; ctx.strokeStyle = color;
   break;
-case "paw":
-  ctx.beginPath(); ctx.arc(f * reach * 0.58, -H * 0.48, H * 0.12, 0, Math.PI * 2); ctx.stroke();
-  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(f * (reach * 0.58 + H * (0.10 + i * 0.04)), -H * 0.57 + i * H * 0.04, H * 0.035, 0, Math.PI * 2); ctx.stroke(); }
+}
+case "paw": {
+  // Michi celestial starlight paw / fairy fin sweep
+  const lw0 = ctx.lineWidth, a0 = ctx.globalAlpha;
+  const cxP = f * reach * 0.68, cyP = -H * 0.48;
+  // Iridescent pastel rainbow sweep
+  const ribbonCols = ["#ffb6e4", "#cbf1f7", "#ffe59a"];
+  for (let r = 0; r < 3; r++) {
+    ctx.strokeStyle = ribbonCols[r]; ctx.lineWidth = Math.max(1.2, lw0 * (2.2 - r * 0.6)); ctx.globalAlpha = a0 * (0.35 + r * 0.22);
+    ctx.beginPath(); ctx.arc(cxP - f * H * (0.12 - r * 0.04), cyP + (r - 1) * H * 0.03, H * 0.16, -1.2, 0.9); ctx.stroke();
+  }
+  // Central heart-shaped palm pad
+  ctx.globalAlpha = a0 * 0.92; ctx.fillStyle = "#ffb6e4";
+  ctx.beginPath();
+  ctx.moveTo(cxP, cyP + H * 0.04);
+  ctx.bezierCurveTo(cxP - H * 0.06, cyP - H * 0.02, cxP - H * 0.04, cyP - H * 0.07, cxP, cyP - H * 0.03);
+  ctx.bezierCurveTo(cxP + H * 0.04, cyP - H * 0.07, cxP + H * 0.06, cyP - H * 0.02, cxP, cyP + H * 0.04);
+  ctx.fill();
+  // Pearl center highlight
+  ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(cxP, cyP - H * 0.015, H * 0.018, 0, Math.PI * 2); ctx.fill();
+  // 3 floating toe pads with pearl gloss
+  for (let i = -1; i <= 1; i++) {
+    const toeX = cxP + f * H * 0.07 + i * f * H * 0.018;
+    const toeY = cyP - H * 0.06 + i * H * 0.035;
+    ctx.fillStyle = "#ffd0ee"; ctx.beginPath(); ctx.ellipse(toeX, toeY, H * 0.028, H * 0.022, i * 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(toeX - 1, toeY - 1, H * 0.01, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.lineWidth = lw0; ctx.globalAlpha = a0; ctx.strokeStyle = color;
   break;
+}
 case "flame":
   for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(f * reach * (0.45 + i * 0.08), -H * (0.38 + i * 0.08), H * (0.10 + k * 0.04), -1.5, 1.1); ctx.stroke(); }
   break;

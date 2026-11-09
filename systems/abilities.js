@@ -3476,44 +3476,120 @@ trail(ctx,f,cam,t,g){drawChispaTrail(ctx,f,cam,t,!!g?.reduceMotion);},
 storm(ctx,f,cam,t,g){drawChispaStorm(ctx,f,cam,t,!!g?.reduceMotion);},
 
 yarn(ctx, f, cam, t, g, p) {
-const x=f.x-cam.x,y=f.y-cam.y,dir=Math.sign(f.vx)||1;
+const x=f.x-cam.x,y=f.y-cam.y,dir=Math.sign(f.vx)||1,reduced=!!g?.reduceMotion;
+const rot=reduced?0:(t*0.12*dir);
 ctx.save();ctx.translate(x,y);ctx.scale(dir,1);
-ctx.strokeStyle='#d7bbff';ctx.lineWidth=3;ctx.lineCap='round';
-for(let i=0;i<3;i++){ctx.globalAlpha=.24+i*.16;ctx.beginPath();ctx.moveTo(-f.r-10-i*9,(i-1)*6);ctx.quadraticCurveTo(-10,-9+(i-1)*6,0,(i-1)*3);ctx.stroke();}
-ctx.globalAlpha=1;ctx.fillStyle='#ffe5f4';ctx.strokeStyle='#9273b6';ctx.lineWidth=1.5;
-ctx.beginPath();ctx.ellipse(0,3,f.r*.75,f.r*.6,-.2,0,TAU);ctx.fill();ctx.stroke();
-for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(-7+i*7,-f.r*.48,3.4,4.6,(i-1)*.22,0,TAU);ctx.fill();ctx.stroke();}
-ctx.fillStyle='#d8a9d8';ctx.beginPath();ctx.ellipse(0,4,f.r*.35,f.r*.26,0,0,TAU);ctx.fill();ctx.restore();
+// Trailing cosmic starlight wool ribbon
+ctx.lineCap='round';ctx.lineJoin='round';
+for(let i=0;i<4;i++){
+  const trailFrac=(i+1)/4;
+  ctx.globalAlpha=(0.2+trailFrac*0.25);
+  ctx.strokeStyle=i%2?'#d7bbff':'#ffc4ec';
+  ctx.lineWidth=Math.max(1.5,4-i*0.7);
+  ctx.beginPath();
+  const tx=-f.r*(1.2+i*0.6),ty=(Math.sin((reduced?0:t*0.2)+i)*6);
+  ctx.moveTo(tx,ty);
+  ctx.quadraticCurveTo(-f.r*0.6,ty*0.5,0,0);
+  ctx.stroke();
+  // Tiny stardust knots along the thread
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath();ctx.arc(tx,ty,1.5,0,TAU);ctx.fill();
+}
+// Outer gentle fairy wool glow
+ctx.globalAlpha=0.28;
+ctx.fillStyle='#e8b6ff';
+ctx.beginPath();ctx.arc(0,0,f.r*1.15,0,TAU);ctx.fill();
+// Volumetric lunar yarn sphere base
+ctx.globalAlpha=1;
+ctx.fillStyle='#fcedf8';
+ctx.strokeStyle='#7a5598';
+ctx.lineWidth=1.8;
+ctx.beginPath();ctx.arc(0,0,f.r*0.9,0,TAU);ctx.fill();ctx.stroke();
+// Winding starlight yarn loops spiraling around the core
+ctx.save();
+ctx.rotate(rot);
+const strandCols=['#d8a2ec','#ffb4d9','#aae5f7','#ffe49e'];
+for(let s=0;s<4;s++){
+  const ang=s*Math.PI*0.5;
+  ctx.strokeStyle=strandCols[s];
+  ctx.lineWidth=2.2;
+  ctx.beginPath();
+  ctx.ellipse(0,0,f.r*0.82,f.r*0.48,ang,0,TAU);
+  ctx.stroke();
+}
+// Central soft wool swirl
+ctx.fillStyle='#d89cd8';
+ctx.beginPath();ctx.ellipse(0,0,f.r*0.35,f.r*0.35,0,0,TAU);ctx.fill();
+ctx.fillStyle='#ffffff';
+ctx.beginPath();ctx.arc(-f.r*0.25,-f.r*0.25,f.r*0.16,0,TAU);ctx.fill();
+ctx.restore();
+// Playful kitten-ear yarn tufts on top
+ctx.fillStyle='#ffbfe8';ctx.strokeStyle='#7a5598';ctx.lineWidth=1.4;
+for(const side of [-1,1]){
+  ctx.beginPath();
+  ctx.moveTo(side*f.r*0.3,-f.r*0.7);
+  ctx.quadraticCurveTo(side*f.r*0.7,-f.r*1.2,side*f.r*0.65,-f.r*0.6);
+  ctx.closePath();
+  ctx.fill();ctx.stroke();
+}
+ctx.restore();
 },
 purr(ctx, f, cam, t, g, p) {
 const x = cx(p) - cam.x, y = cy(p) - cam.y;
 const u = 1 - f.life / (f.max || 72);
 const rad = Math.min(f.R, 36 + u * f.R);
+const reduced = !!g?.reduceMotion;
 ctx.save();
+ctx.lineCap = "round";
+ctx.lineJoin = "round";
+// Outer celestial harmonic resonance glow
 ctx.globalCompositeOperation = "lighter";
-ctx.globalAlpha = 0.18 * (1 - u * 0.35);
+ctx.globalAlpha = 0.22 * (1 - u * 0.4);
 ctx.fillStyle = "#ffb6e4";
 ctx.beginPath(); ctx.arc(x, y, rad, 0, TAU); ctx.fill();
-ctx.globalAlpha = 0.9;
-ctx.lineWidth = 4;
-ctx.strokeStyle = "#fff";
-ctx.beginPath(); ctx.arc(x, y, Math.max(1, rad), 0, TAU); ctx.stroke();
-ctx.globalAlpha = 0.45;
-ctx.lineWidth = 10;
-ctx.strokeStyle = "#ff8ad4";
-ctx.beginPath(); ctx.arc(x, y, Math.max(1, rad * 0.62), 0, TAU); ctx.stroke();
-ctx.globalAlpha = 0.85;
-ctx.fillStyle = "#ffd0ee";
+// Concentric oceanic harmonic rings: outer, mid, inner
+const ringConfigs = [
+  { r: rad, w: 4.2, col: "#ffffff", a: 0.95 * (1 - u * 0.3) },
+  { r: rad * 0.76, w: 6.5, col: "#7ef0e5", a: 0.65 * (1 - u * 0.25) },
+  { r: rad * 0.52, w: 8.5, col: "#ffb0d8", a: 0.45 * (1 - u * 0.2) },
+  { r: rad * 0.28, w: 10, col: "#fff0a8", a: 0.35 * (1 - u * 0.15) }
+];
+for (const rc of ringConfigs) {
+  ctx.globalAlpha = rc.a;
+  ctx.lineWidth = rc.w;
+  ctx.strokeStyle = rc.col;
+  ctx.beginPath(); ctx.arc(x, y, Math.max(1, rc.r), 0, TAU); ctx.stroke();
+}
+// Floating celestial heart stars orbiting the harmonic wave
+ctx.globalAlpha = 0.92 * (1 - u * 0.35);
 const n = 8;
+const spin = reduced ? 0 : t * 0.035;
 for (let i = 0; i < n; i++) {
-  const a = (i / n) * TAU + t * 0.04;
+  const a = (i / n) * TAU + spin;
   const hx = x + Math.cos(a) * rad * 0.92;
   const hy = y + Math.sin(a) * rad * 0.92;
+  ctx.fillStyle = i % 2 === 0 ? "#ffd0ee" : "#cbf1f7";
+  // Sweet gentle heart shape
   ctx.beginPath();
   ctx.moveTo(hx, hy + 5);
-  ctx.bezierCurveTo(hx - 8, hy - 2, hx - 5, hy - 9, hx, hy - 3);
-  ctx.bezierCurveTo(hx + 5, hy - 9, hx + 8, hy - 2, hx, hy + 5);
+  ctx.bezierCurveTo(hx - 7, hy - 2, hx - 5, hy - 8, hx, hy - 3);
+  ctx.bezierCurveTo(hx + 5, hy - 8, hx + 7, hy - 2, hx, hy + 5);
   ctx.fill();
+  // Star twinkle highlight at center
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath(); ctx.arc(hx, hy - 1, 1.3, 0, TAU); ctx.fill();
+}
+// Inner harmonic wave vibration ripples
+if (!reduced) {
+  ctx.globalAlpha = 0.4 * (1 - u);
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1.6;
+  for (let w = 0; w < 3; w++) {
+    const wr = rad * (0.35 + w * 0.22);
+    ctx.beginPath();
+    ctx.ellipse(x, y, wr, wr * 0.88, t * 0.05 + w, 0, TAU);
+    ctx.stroke();
+  }
 }
 ctx.restore();
 },
@@ -4244,43 +4320,103 @@ for (let i = 0; i < 4; i++) {
   ctx.stroke();
 }
 } else if (kind === "spark") {
-swingArc(ctx, reach * 0.82, a0, a1, 14, col, 0.22 * fade);
+// Chispín high-voltage lightning slash with cyan mantle, thunder gold, and white core
+swingArc(ctx, reach * 0.84, a0, a1, 18, "#00e5ff", 0.32 * fade);
+swingArc(ctx, reach * 0.82, a0, a1, 9, "#ffe742", 0.65 * fade);
 ctx.save();
-ctx.globalAlpha = 0.95 * fade;
-ctx.strokeStyle = col;
-ctx.lineWidth = 3.4;
+ctx.globalAlpha = 0.98 * fade;
 ctx.lineJoin = "round";
 ctx.lineCap = "round";
-ctx.beginPath();
-const steps = 7;
+const steps = 9;
+const pts = [];
 for (let i = 0; i <= steps; i++) {
   const u = i / steps;
   const ang = a0 + (a1 - a0) * u;
-  const jag = (i % 2 ? 1 : -1) * reach * 0.14;
-  const px = Math.cos(ang) * (reach * 0.74) + Math.cos(ang + 1.2) * jag;
-  const py = Math.sin(ang) * (reach * 0.74) + Math.sin(ang + 1.2) * jag;
-  if (i === 0) ctx.moveTo(px, py);
-  else ctx.lineTo(px, py);
+  const jag = (i % 2 ? 1 : -1) * reach * (0.12 + (i % 3) * 0.04);
+  const px = Math.cos(ang) * (reach * 0.78) + Math.cos(ang + 1.2) * jag;
+  const py = Math.sin(ang) * (reach * 0.78) + Math.sin(ang + 1.2) * jag;
+  pts.push([px, py]);
 }
+// Outer radiant gold
+ctx.strokeStyle = "#ffe742";
+ctx.lineWidth = 4.2;
+ctx.beginPath();
+pts.forEach(([px, py], idx) => idx === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py));
 ctx.stroke();
-ctx.strokeStyle = "#fffbe8";
-ctx.lineWidth = 1.5;
+// Blinding white-hot core filament
+ctx.strokeStyle = "#ffffff";
+ctx.lineWidth = 1.8;
+ctx.beginPath();
+pts.forEach(([px, py], idx) => idx === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py));
 ctx.stroke();
+// Branching electric forks at midpoints
+for (let b = 2; b < pts.length - 1; b += 3) {
+  const [bx, by] = pts[b];
+  ctx.strokeStyle = "#7af0ff";
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(bx, by);
+  ctx.lineTo(bx + (b % 2 ? 14 : -14), by + 12);
+  ctx.stroke();
+}
+// Impact detonation spark at tip
+const [tipX, tipY] = pts[pts.length - 1];
+ctx.fillStyle = "#ffffff";
+ctx.beginPath();
+ctx.moveTo(tipX, tipY - 8); ctx.lineTo(tipX + 6, tipY);
+ctx.lineTo(tipX, tipY + 8); ctx.lineTo(tipX - 6, tipY);
+ctx.closePath(); ctx.fill();
+ctx.strokeStyle = "#00e5ff";
+ctx.lineWidth = 1.4;
+for (let s = 0; s < 4; s++) {
+  const a = s * Math.PI * 0.5 + 0.35;
+  ctx.beginPath();
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(tipX + Math.cos(a) * 11, tipY + Math.sin(a) * 11);
+  ctx.stroke();
+}
 ctx.restore();
 } else if (kind === "paw") {
-swingArc(ctx, reach * 0.8, a0, a1, 18, col, 0.32 * fade);
-swingArc(ctx, reach * 0.8, a0, a1, 7, "#fff", 0.92 * fade);
-for (let i = -1; i <= 1; i++) {
+// Michi celestial stardust paw sweep with iridescent silk ribbon and floating pearl pads
+swingArc(ctx, reach * 0.82, a0, a1, 22, "#ffb6e4", 0.28 * fade);
+swingArc(ctx, reach * 0.80, a0, a1, 12, "#cbf1f7", 0.55 * fade);
+swingArc(ctx, reach * 0.78, a0, a1, 4.5, "#ffffff", 0.95 * fade);
+// Iridescent pearl bubbles drifting along the slash arc
+for (let b = 1; b <= 4; b++) {
+  const u = b / 5;
+  const ang = a0 + (a1 - a0) * u;
+  const bx = Math.cos(ang) * reach * 0.80, by = Math.sin(ang) * reach * 0.80;
   ctx.save();
-  ctx.rotate(a1);
-  ctx.translate(reach * 0.8, i * 9);
-  ctx.globalAlpha = fade;
-  ctx.fillStyle = "#fff";
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 8, 3.4, 0.35, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.globalAlpha = fade * 0.85;
+  ctx.fillStyle = b % 2 ? "#ffe59a" : "#ffb0d8";
+  ctx.beginPath(); ctx.arc(bx, by, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath(); ctx.arc(bx - 0.9, by - 0.9, 1.2, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
+// Floating paw pads at the tip of the sweep
+const tipX = Math.cos(a1) * reach * 0.80, tipY = Math.sin(a1) * reach * 0.80;
+ctx.save();
+ctx.translate(tipX, tipY);
+ctx.rotate(a1);
+ctx.globalAlpha = fade;
+// Central heart palm
+ctx.fillStyle = "#ffb6e4";
+ctx.beginPath();
+ctx.moveTo(0, 4);
+ctx.bezierCurveTo(-6, -2, -4, -7, 0, -3);
+ctx.bezierCurveTo(4, -7, 6, -2, 0, 4);
+ctx.fill();
+ctx.fillStyle = "#ffffff";
+ctx.beginPath(); ctx.arc(0, -1, 1.8, 0, Math.PI * 2); ctx.fill();
+// 3 toe pads
+for (let i = -1; i <= 1; i++) {
+  ctx.fillStyle = "#ffd0ee";
+  ctx.beginPath(); ctx.ellipse(7, i * 7, 3.6, 2.6, i * 0.25, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath(); ctx.arc(6.5, i * 7 - 0.7, 1.1, 0, Math.PI * 2); ctx.fill();
+}
+ctx.restore();
 } else if (kind === "flame") {
 swingArc(ctx, reach * 0.72, a0, a1, 20, "#ff5a1f", 0.34 * fade);
 swingArc(ctx, reach * 0.72, a0, a1, 8, "#ffe14a", 0.95 * fade);

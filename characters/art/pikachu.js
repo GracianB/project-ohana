@@ -417,28 +417,28 @@ function opts(pose, f, S) {
     o.tailAxis = -2.7; o.tailLen = 0.95; o.tailAmp = 1.3; o.earA = 0.25; o.gillFlare = 0.6; o.mouth = "o";
   } else if (st === "attack") {
     const k = pose.atk;
-    o.eyes = "angry"; o.mouth = "grin"; o.charge = 0.7;
+    o.eyes = "angry"; o.mouth = "grin"; o.charge = 1.0; o.sparks = 0.8;
     if (k < 0.2) { const u = k / 0.2; o.rot = -0.12 * u; o.tailLen = 0.7; o.tailAmp = 1.3; o.headRot = -0.1; o.footX = -2; }
     else if (k < 0.55) {
       const u = (k - 0.2) / 0.35;
       o.spinX = Math.cos(u * TAU); o.lift = -Math.sin(u * Math.PI) * 8;
-      o.tailAxis = -2.55 + u * 2.4; o.tailLen = 1.2;
+      o.tailAxis = -2.55 + u * 2.4; o.tailLen = 1.3; o.sparks = 1.0;
     } else {
       const u = Math.min(1, (k - 0.55) / 0.3);
       o.tailAxis = Math.PI * (1 + u * 1.05); // barre por encima hacia delante
-      o.tailLen = 1.8; o.tailAmp = 0.4; o.whip = u; o.tailGlow = 1; o.rot = 0.12; o.armA = 1.4;
+      o.tailLen = 1.9; o.tailAmp = 0.35; o.whip = u; o.tailGlow = 1.4; o.rot = 0.14; o.armA = 1.4; o.sparks = 1.2;
     }
   } else if (st === "cast") {
     const k = pose.cast;
     if (pose.castSlot === 0) {
-      o.charge = 1.3; o.gillFlare = 0.8; o.mouth = "open"; o.eyes = "angry"; o.mouthSpark = k;
-      o.headRot = 0.08; o.armA = 1.2; o.armB = 0.9; o.rot = 0.06; o.gillK = 1.15;
+      o.charge = 1.4; o.gillFlare = 0.9; o.mouth = "open"; o.eyes = "angry"; o.mouthSpark = Math.max(0.5, k);
+      o.headRot = 0.08; o.armA = 1.25; o.armB = 0.95; o.rot = 0.06; o.gillK = 1.2; o.sparks = 1.0;
     } else if (pose.castSlot === 1) {
       o.stretchY = 1 + Math.sin(k * Math.PI) * 0.45; o.spinX = 1 - Math.sin(k * Math.PI) * 0.35;
-      o.eyes = "closed"; o.mouth = "o"; o.charge = 1; o.armA = 1.9; o.armB = -2.8; o.footY = -2;
+      o.eyes = "closed"; o.mouth = "o"; o.charge = 1.2; o.armA = 1.9; o.armB = -2.8; o.footY = -2; o.sparks = 1.2;
     } else {
-      o.tailAxis = -Math.PI / 2 + 0.25; o.tailLen = 1.25; o.tailAmp = 0.6; o.tailGlow = 1.2; o.skyBolt = k;
-      o.armA = 2.0; o.armB = -2.7; o.eyes = "closed"; o.mouth = "open"; o.charge = 1.2; o.gillFlare = 0.7; o.headRot = -0.15;
+      o.tailAxis = -Math.PI / 2 + 0.25; o.tailLen = 1.35; o.tailAmp = 0.55; o.tailGlow = 1.5; o.skyBolt = Math.max(0.6, k);
+      o.armA = 2.0; o.armB = -2.7; o.eyes = "closed"; o.mouth = "open"; o.charge = 1.4; o.gillFlare = 0.85; o.headRot = -0.15; o.sparks = 1.3;
     }
   } else if (st === "hurt") {
     o.eyes = "closed"; o.mouth = "o"; o.headRot = -.3*(pose.hurt||.5); o.headDX = -4*(pose.hurt||.5); o.rot = -.15*(pose.hurt||.5); o.armA = 1.8; o.armB = -2.2;

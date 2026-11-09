@@ -19,13 +19,28 @@ export function chapterMapDetail(id,g){
  const current=id===g.roomId,album=g.world1Collect?.rooms?.[r.hero],n=album?.found.length||0,sealed=g.world1Seals?.includes(r.hero),goal=current?world1NextObjective(g):null;
  const progress=current?Math.round((g.player.x+g.player.w/2)/r.width*100):0;
  const currentProgress=r.fusionBoss?(g.world1Won?'Campaña completada · la familia ha vuelto a casa':`Recuerdos personales a salvo: ${g.finalGauntlet?.found?.length||0}/10`):'Tu capítulo actual · '+progress+'% del recorrido';
- const platforms=r.plats.map(p=>`<rect x="${p[0]/r.width*1000}" y="${p[1]/1260*210}" width="${Math.max(1,p[2]/r.width*1000)}" height="${p[3]>40?8:3}" fill="${p[3]>40?'#8cbfa9':'#d4e8c9'}"/>`).join('');
- const stations=(r.seal?.stations||[]).map(s=>`<circle cx="${s.x/r.width*1000}" cy="${(s.y-35)/1260*210}" r="5" fill="#ffd598"/>`).join('');
- const trials=(r.expedition?.nodes||[]).map(s=>`<circle cx="${s.x/r.width*1000}" cy="${s.y/1260*210}" r="6" fill="#c5a6ee"/>`).join('');
- const destination=goal?`<circle class="wm-current-objective" cx="${goal.x/r.width*1000}" cy="${goal.y/1260*210}" r="8" fill="#ffb479" stroke="#fff1ce" stroke-width="2"><title>${goal.label}</title></circle>`:'';
- const you=current?`<circle cx="${(g.player.x+g.player.w/2)/r.width*1000}" cy="${(g.player.y+g.player.h/2)/1260*210}" r="6" fill="white" stroke="#143543" stroke-width="2"/>`:'';
+ 
+ // Topographical nautical atlas platform rendering
+ const platforms=r.plats.map(p=>{
+  const px=p[0]/r.width*1000, py=p[1]/1260*210, pw=Math.max(2,p[2]/r.width*1000), isFloor=p[3]>40;
+  if(isFloor){
+   return `<rect x="${px}" y="${py}" width="${pw}" height="10" fill="#2d5248" rx="2"/><rect x="${px}" y="${py}" width="${pw}" height="3" fill="#8cbfa9" rx="1"/>`;
+  }
+  return `<rect x="${px}" y="${py}" width="${pw}" height="4" fill="#1e3a47" rx="1"/><rect x="${px}" y="${py}" width="${pw}" height="2" fill="#d4e8c9" rx="1"/>`;
+ }).join('');
+
+ // Cartographic graticule grid lines
+ const grid=`<defs><pattern id="nm-grid" width="100" height="42" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 42" fill="none" stroke="#163852" stroke-width="0.8" stroke-dasharray="2,4"/></pattern></defs><rect width="1000" height="220" fill="#0d1f30"/><rect width="1000" height="220" fill="url(#nm-grid)"/><path d="M 0 180 Q 250 165 500 178 T 1000 170" fill="none" stroke="#1a425f" stroke-width="1.2" stroke-dasharray="4,8"/>`;
+ 
+ // Compass rose in the top-right corner
+ const compass=`<g transform="translate(955 35)"><circle r="18" fill="#132a3e" stroke="#2c5c7d" stroke-width="1.2"/><path d="M 0 -14 L 3 -3 L 14 0 L 3 3 L 0 14 L -3 3 L -14 0 L -3 -3 Z" fill="#ffd36a" stroke="#fff1ce" stroke-width="0.6"/><text x="0" y="-17" text-anchor="middle" fill="#ffd36a" font-size="8" font-family="Outfit,sans-serif" font-weight="700">N</text></g>`;
+
+ const stations=(r.seal?.stations||[]).map(s=>`<g transform="translate(${s.x/r.width*1000} ${(s.y-35)/1260*210})"><circle r="7" fill="#ffd598" opacity="0.35"/><circle r="4.5" fill="#ffd598" stroke="#ffffff" stroke-width="1.2"/><circle r="1.5" fill="#ffffff"/></g>`).join('');
+ const trials=(r.expedition?.nodes||[]).map(s=>`<g transform="translate(${s.x/r.width*1000} ${s.y/1260*210})"><polygon points="0,-7 6,0 0,7 -6,0" fill="#c5a6ee" stroke="#ffffff" stroke-width="1.2"/><circle r="1.5" fill="#ffffff"/></g>`).join('');
+ const destination=goal?`<g transform="translate(${goal.x/r.width*1000} ${goal.y/1260*210})"><circle r="14" fill="#ffb479" opacity="0.25"/><circle class="wm-current-objective" cx="0" cy="0" r="8" fill="#ffb479" stroke="#fff1ce" stroke-width="2"><title>${goal.label}</title></circle><circle r="2.5" fill="#ffffff"/></g>`:'';
+ const you=current?`<g transform="translate(${(g.player.x+g.player.w/2)/r.width*1000} ${(g.player.y+g.player.h/2)/1260*210})"><circle r="10" fill="#ffffff" opacity="0.2"/><circle cx="0" cy="0" r="6" fill="white" stroke="#143543" stroke-width="2.2"/><circle r="2" fill="#ffd36a"/></g>`:'';
  return `<h3>${r.name}</h3><p>${sealed?'Sello recuperado · exploración libre':current?currentProgress:'Cada historia tiene su héroe y sus herramientas'}</p>
- <svg style="width:100%;height:auto" viewBox="0 0 1000 220" role="img" aria-label="Terreno, destino actual ámbar, objetivos dorados${r.expedition?', descubrimientos violetas':''} y tu posición blanca"><rect width="1000" height="220" fill="#102b40"/>${platforms}${stations}${trials}${destination}${you}</svg>
+ <svg style="width:100%;height:auto;border-radius:10px;border:1px solid #234863;box-shadow:inset 0 0 20px rgba(0,0,0,0.5)" viewBox="0 0 1000 220" role="img" aria-label="Terreno, destino actual ámbar, objetivos dorados${r.expedition?', descubrimientos violetas':''} y tu posición blanca">${grid}${platforms}${stations}${trials}${destination}${you}${compass}</svg>
  <p>${r.fusionBoss?'● Ámbar: destino actual · ● Blanco: tú':`● Dorado: ${r.kiloEncounterVersion?'instrumento':'crecimiento'}${r.expedition?' · ● Violeta: descubrimiento':''} · ● Ámbar: destino actual · ● Blanco: tú`}</p>
  ${goal?`<h4>Ahora: ${goal.label}</h4><p>${goal.action}</p>`:''}
  ${r.expedition?`<h4>Acto I · Despertar y guardián</h4><p>${r.hint}</p><h4>Acto II · ${r.expedition.name}</h4><p>${r.expedition.verb}. Tres descubrimientos para llevar la canción hasta el santuario final.</p>`:''}

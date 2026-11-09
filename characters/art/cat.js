@@ -185,7 +185,9 @@ function drawMichiMythic(ctx,pose,r,f){
   const stRot=still?0:(state==='glide'?0.26:state==='run'?0.14:state==='jump'?-0.15:state==='fall'?0.12:state==='wall'?-0.2:state==='dead'?0.48:state==='victory'?-0.1:0);
   const squash=still?0:(state==='jump'?-0.18:state==='fall'?0.14:state==='glide'?0.2:hurt?-0.15:Math.sin(t*.12)*.06);
 
-  ctx.save();ctx.scale(.74,.74);ctx.translate(atkK*5,-hover+(hurt?3:0));ctx.rotate(stRot);
+  const lunge = atkK * 18;
+  const attackTilt = atkK * 0.16;
+  ctx.save();ctx.scale(.74,.74);ctx.translate(lunge,-hover+(hurt?3:0));ctx.rotate(stRot + attackTilt);
 
   // Aletas de hada translúcidas en la espalda que aletean grácilmente
   const wingFlap=still?0:Math.sin(t*(air?.46:run?.38:.22)+g.pulsePhase*6);
