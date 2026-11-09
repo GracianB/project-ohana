@@ -27,8 +27,14 @@ await p.locator('.char-card[data-id="kilo"]').click();
 await p.locator('#camp-canvas').focus();
 await p.keyboard.press('ArrowRight');
 assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'stitcho','ArrowRight from Kilo must focus Stitcho');
-await p.keyboard.press('Enter');
-assert.match(await p.locator('#camp-line').textContent(),/sello de Kilo/i,'locked World 1 room must explain which seal unlocks it');
+// Chapter entry is intentionally open for all ten heroes. Completing seals
+// gates Quimera, not the right to choose whose story to explore.
+const access=await p.evaluate(async()=>{
+ const {createWorld1Select}=await import('/systems/world1-select.js');
+ return createWorld1Select({seals:[],start:'stitcho'}).cards.find(c=>c.hero==='stitcho');
+});
+assert.equal(access.unlocked,true,'Stitcho has direct chapter access');
+assert.match(await p.locator('#camp-start').innerText(),/Entrar en su capítulo/i,'actual selected portal can be entered');
 await fs.mkdir('test-results/visual',{recursive:true});
 for(const [name,width,height] of [['desktop',1440,1050],['mobile',390,844],['landscape',844,390]]){await p.setViewportSize({width,height});await p.locator('.char-card[data-id="cuerno"]').click();await p.waitForTimeout(600);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' overflow');
  const cards=await p.locator('.char-card').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height,x:r.x,right:r.right}}));assert.equal(cards.length,10);assert.ok(cards.every(r=>r.w>=40&&r.h>=44&&r.x>=0&&r.right<=width+1));await p.screenshot({path:`test-results/visual/v410-camp-${name}.png`,fullPage:true,timeout:20000});}
