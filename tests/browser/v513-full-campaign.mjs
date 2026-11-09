@@ -144,8 +144,17 @@ try{
   assert.notEqual(s.roomId,'w1-'+hero,'earned east exit crosses physically');await films();s=await state();
   await fs.writeFile('test-results/v600/campaign-progress.json',JSON.stringify({journal,current:s.roomId},null,2));
  }
- assert.equal(s.roomId,'w1-final');assert.equal(s.hero,'kilo');assert.equal(s.evo,4);
- const gauntlet=await playGauntlet(page);s=await state();assert.equal(s.gauntlet.found.length,10);journal.push({gauntlet});
+ // Entering the Heart preserves Yomi, the tenth earned hero. The ritual,
+ // not the east doorway, allows a deliberate fighter choice for Quimera.
+ assert.equal(s.roomId,'w1-final');
+ assert.equal(s.hero,order.at(-1),'final-room entry must preserve the last earned hero until the ritual');
+ assert.equal(s.evo,4);
+ const gauntlet=await playGauntlet(page);s=await state();
+ assert.equal(s.gauntlet.found.length,10);
+ assert.ok(gauntlet.fighterChoices.some(choice=>choice.guardian==='quimera'&&choice.fighter==='kilo'),
+  'Kilo must be selected through the authored final ritual, not forced on room entry');
+ assert.equal(s.hero,'kilo','the selected Quimera fighter is now the active hero');
+ journal.push({gauntlet});
  let deaths=0;const phases=new Set(),filmsSeen=new Set(),hudPhases=new Set();
  await fs.mkdir('test-results/v494',{recursive:true});
  for(let i=0;i<11000&&!s.world1Won;i++){
