@@ -53,6 +53,22 @@ export function drawTheatreStage(ctx,W,H,hero='kilo',t=0,{opening=false,reduceMo
  let map=plates.get(ctx);if(!map)plates.set(ctx,map=new Map());const key=[Math.round(W),Math.round(H),hero,opening].join(':');let plate=map.get(key);
  if(!plate&&typeof OffscreenCanvas!=='undefined'){plate=new OffscreenCanvas(Math.ceil(W),Math.ceil(H));paint(plate.getContext('2d'),W,H,hero,opening);if(map.size>=3)map.delete(map.keys().next().value);map.set(key,plate);}
  if(plate)ctx.drawImage(plate,0,0,W,H);else paint(ctx,W,H,hero,opening);
+ if(opening&&!reduceMotion){
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  for(let b=0;b<4;b++){
+   const bx=W*(0.18+b*0.24)+Math.sin(t*0.008+b)*18;
+   const grad=ctx.createLinearGradient(bx,0,bx+W*0.12,H);
+   grad.addColorStop(0,'rgba(255,230,160,0.06)');
+   grad.addColorStop(0.55,'rgba(255,200,120,0.025)');
+   grad.addColorStop(1,'rgba(255,200,120,0)');
+   ctx.fillStyle=grad;
+   ctx.beginPath();
+   ctx.moveTo(bx-15,0);ctx.lineTo(bx+W*0.14,H);ctx.lineTo(bx+W*0.05,H);ctx.lineTo(bx-35,0);
+   ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+ }
  ctx.save();for(let i=0;i<13;i++){const at=reduceMotion?0:t;const x=((i*173+at*.11)%(W+80))-40,y=H*(.18+(i%5)*.11)+Math.sin(at*.012+i)*6;ctx.globalAlpha=.17;oval(ctx,x,y,3,1.2,i%3?'#fff0bf':'#b9f2d1',i*.7);}ctx.restore();
 }
 export function openingCastSpot(id,W,H,direction=null){

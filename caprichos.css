@@ -77,12 +77,16 @@ body.comfort-readable #notification-container p,body.comfort-readable #guide-pag
 body.comfort-readable #hud .hud-meta{font-size:12px;}
 body.comfort-contrast.playing :is(#hud .hud-block,#top-actions,.ability-slot,#notification-container .game-notification){background:#061827;border-color:#d8e9df;color:#fff;}
 /* Lettering is live type with individual optical angles, never an image. */
-#ohana-intro.family-welcome .oi-welcome strong.ohana-wordmark{display:flex;align-items:baseline;font:700 clamp(62px,8vw,128px)/.92 Fredoka,sans-serif;letter-spacing:-.065em;color:#fff0c7;text-shadow:0 3px 0 #b57c4b,0 6px 0 #1c394b,0 12px 28px #051a3570;-webkit-text-stroke:1px #ffe6aa;overflow:visible;}
-.ohana-wordmark i{font-style:normal;display:inline-block;transform:rotate(-5deg);}
-.ohana-wordmark i:nth-child(2){transform:rotate(3deg) translateY(-.025em);color:#e4f4ce;}
-.ohana-wordmark i:nth-child(3){transform:rotate(-3deg) translateY(-.045em);}
-.ohana-wordmark i:nth-child(4){transform:rotate(5deg);color:#d4eee8;}
-.ohana-wordmark i:nth-child(5){transform:rotate(-4deg) translateY(-.02em);}
+#ohana-intro.family-welcome .oi-welcome strong.ohana-wordmark{
+  display:flex;align-items:baseline;font:800 clamp(66px,9vw,132px)/.92 Fredoka,Outfit,sans-serif;
+  letter-spacing:-.03em;gap:clamp(2px,.35vw,5px);
+  background:linear-gradient(180deg,#fffdf0 0%,#ffe082 40%,#ffb74d 75%,#f57c00 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 4px 14px rgba(255,160,40,0.4)) drop-shadow(0 12px 32px rgba(4,16,28,0.85));
+  overflow:visible;
+}
+.ohana-wordmark i{font-style:normal;display:inline-block;transform:none;transition:transform .2s ease;}
+.ohana-wordmark i:hover{transform:translateY(-3px);}
 #ohana-intro .oi-story-chapter{font-size:0;}
 #ohana-intro .oi-story-chapter::after{content:'MIENTRAS TANTO, EN OHANA…';font:600 9px Outfit,sans-serif;letter-spacing:.15em;}
 @media(min-width:1001px){body.playing #top-actions{max-width:calc(100vw - 530px);}body.playing #top-actions button{padding-inline:9px;}}
