@@ -58,7 +58,11 @@ try{
  async function approach(x,done){
   let state=await step(1),lastX=state.player.x;
   for(let n=0;n<400&&!await done(state);n++){
-   assert.ok(state.hp>0,'route must not require injected healing or a death bypass');
+   assert.ok(state.hp>0,'route must not require injected healing or a death bypass: '+
+     JSON.stringify({x:state.player.x,y:state.player.y,vx:state.player.vx,
+       vy:state.player.vy,grounded:state.player.grounded,hp:state.hp,
+       room:state.roomId,done:state.world1.done,target:x,step:n,
+       lastFault:state.lastRuntimeFault}));
    const dx=x-state.player.x-state.player.w/2;
    await page.keyboard.up('d');await page.keyboard.up('a');
    if(Math.abs(dx)>18)await page.keyboard.down(dx>0?'d':'a');
