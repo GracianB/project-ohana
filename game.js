@@ -3309,7 +3309,7 @@ for (const e of game.enemies) {
   else if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
-  else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t);
+  else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._dinoBoss)drawDinoBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._pizzaBoss)drawPizzaBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._fritaBoss)drawFritaBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);

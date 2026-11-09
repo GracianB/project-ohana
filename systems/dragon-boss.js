@@ -230,15 +230,16 @@ export function drawDragonBossSignals(ctx,e,cam,t=0,reduced=false){
  ctx.restore();
 }
 
-export function drawDragonBoss(ctx,e,cam,t){
+export function drawDragonBoss(ctx,e,cam,t,reduceMotion=false){
  if(!e?._dragonBoss)return false;
  const b=e._igneousDragon,x=e.x-cam.x,y=e.y-cam.y;
+ const artTick=reduceMotion?0:t;
  ctx.save();
  // Dibujar visualmente más grande (w=160, h=130) pero hitbox sigue siendo w=124 h=100
  ctx.translate(x+e.w/2,y+e.h);
  const flip=b.aim||1;ctx.scale(flip,1);
 
- const pulse=Math.sin(t*0.14)*4;
+ const pulse=Math.sin(artTick*0.14)*4;
  const tier3=b.tier===3;
 
  // Aura de llamas ambiental
@@ -248,8 +249,8 @@ export function drawDragonBoss(ctx,e,cam,t){
  ctx.fillStyle=glowGrad;ctx.fillRect(-100,-145,200,165);
 
  // Cola de látigo ondulante (dibujada detrás del cuerpo)
- const tailWave=Math.sin(t*0.16)*10;
- const tailWave2=Math.sin(t*0.12+1)*8;
+ const tailWave=Math.sin(artTick*0.16)*10;
+ const tailWave2=Math.sin(artTick*0.12+1)*8;
  ctx.strokeStyle=tier3?'#ffaa00':'#cc4400';ctx.lineWidth=12;ctx.lineCap='round';
  ctx.beginPath();
  ctx.moveTo(-50,-30);
@@ -340,7 +341,7 @@ export function drawDragonBoss(ctx,e,cam,t){
  ctx.beginPath();ctx.moveTo(42,-74);ctx.quadraticCurveTo(56,-106+pulse,70,-112+pulse);ctx.lineTo(54,-72);ctx.fill();ctx.stroke();
  // Llamas en punta de cuernos
  const flameCol=tier3?'#ffee44':'#ff6600';
- ctx.fillStyle=flameCol;ctx.globalAlpha=0.8+Math.sin(t*0.25)*0.2;
+ ctx.fillStyle=flameCol;ctx.globalAlpha=0.8+Math.sin(artTick*0.25)*0.2;
  ctx.beginPath();ctx.arc(82,-120+pulse,5+pulse*0.2,0,TAU);ctx.fill();
  ctx.beginPath();ctx.arc(70,-112+pulse,4+pulse*0.15,0,TAU);ctx.fill();
  ctx.globalAlpha=1;
@@ -355,7 +356,7 @@ export function drawDragonBoss(ctx,e,cam,t){
 
  // Resplandor incandescente en las fauces anticipando ataque de fuego
  if(b.phase==='warn'||e.telegraph){
-  ctx.fillStyle='rgba(255,235,59,'+(0.6+Math.sin(t*0.3)*0.3)+')';
+  ctx.fillStyle='rgba(255,235,59,'+(0.6+Math.sin(artTick*0.3)*0.3)+')';
   ctx.beginPath();ctx.arc(72,-56,9,0,TAU);ctx.fill();
  }
 
@@ -369,7 +370,7 @@ export function drawDragonBoss(ctx,e,cam,t){
   ctx.fillStyle=coreGlow;
   ctx.beginPath();ctx.arc(8,-50,22,0,TAU);ctx.fill();
   ctx.strokeStyle='#fff9c4';ctx.lineWidth=2;
-  ctx.beginPath();ctx.arc(8,-50,8+Math.sin(t*0.25)*2,0,TAU);ctx.stroke();
+  ctx.beginPath();ctx.arc(8,-50,8+Math.sin(artTick*0.25)*2,0,TAU);ctx.stroke();
  }
 
  // Efecto tier 3: brillo total del cuerpo
@@ -381,6 +382,6 @@ export function drawDragonBoss(ctx,e,cam,t){
  ctx.restore();
 
  // Dibujar siempre HUD táctico
- drawDragonBossSignals(ctx,e,cam,t);
+ drawDragonBossSignals(ctx,e,cam,artTick,reduceMotion);
  return true;
 }
