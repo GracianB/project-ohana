@@ -672,7 +672,7 @@ const PRECACHE_REVISIONS = {
   "assets/fonts/outfit-latin-ext.woff2": "c54ceec800d486b63e4812d54f0d62d83eeacd4f",
   "engine/camera.js": "b21bd3aa6c6f3984184f404046d6bbecb5b09c3c",
   "systems/welcome-story.js": "c45fcfb2e3d8894b8e77519ee01755534b82b433",
-  "family-camp.css": "10a01ec52113e0889af9c669bb899cbc50320abc",
+  "family-camp.css": "b2448b9cec9118c1dc012781382738934901a82e",
   "systems/family-camp.js": "0cf17397196a2ecda3f4800e49000d6aca8ad695",
   "systems/family-camp-model.js": "d49f1bf31d2d8bbca5a797da20abcc2b1e972c60",
   "systems/evo-cine/real-actor.js": "fcdecf739d6fef4c266d66be67a6da9edec4531e",
