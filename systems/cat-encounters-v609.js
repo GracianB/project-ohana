@@ -60,7 +60,9 @@ export function authorCatEncounters(room){
  room.catUpdrafts=[
   {id:'up-1',x:1850,y:FLOOR-320,w:120,h:360,power:10},
   {id:'up-2',x:3600,y:FLOOR-360,w:120,h:380,power:10},
-  {id:'up-3',x:6300,y:FLOOR-380,w:120,h:400,power:10}
+  {id:'up-3',x:6300,y:FLOOR-380,w:120,h:400,power:10},
+  {id:'up-4',x:4500,y:FLOOR-420,w:120,h:440,power:12},
+  {id:'up-5',x:7800,y:FLOOR-440,w:120,h:460,power:12}
  ];
 
  // Perlas de Selenita: reliquias de recarga y salud en rutas altas y cornisas
@@ -76,31 +78,39 @@ export function authorCatEncounters(room){
   {id:8,x:7350,y:FLOOR-480,r:10,label:'Perla de Selenita IX'},
   {id:9,x:7750,y:FLOOR-440,r:10,label:'Perla de Selenita X'},
   {id:10,x:8500,y:FLOOR-480,r:10,label:'Perla de Selenita XI'},
-  {id:11,x:9150,y:FLOOR-450,r:10,label:'Perla de Selenita XII'}
+  {id:11,x:9150,y:FLOOR-450,r:10,label:'Perla de Selenita XII'},
+  {id:12,x:1450,y:210,r:12,label:'Gran Perla Astral del Cénit I'},
+  {id:13,x:3650,y:190,r:12,label:'Gran Perla Astral del Cénit II'},
+  {id:14,x:6100,y:190,r:12,label:'Gran Perla Astral del Cénit III'},
+  {id:15,x:8450,y:210,r:12,label:'Gran Perla Astral del Cénit IV'}
  ];
 
  // Plataformas de cristal lunar aerodinámicas: despejadas, sin sobrecargar el suelo,
- // y aprovechando al máximo el espacio aéreo superior (y: 380 - 620) para vuelo y planeo.
+ // y aprovechando al máximo el espacio aéreo superior (y: 220 - 620) para vuelo y planeo vertical.
  const shelves=[
   // Sector 0 — Umbral del sueño (x: 0 – 2400): saltos rítmicos y balcón alto
   [450,960,180],[850,840,190],[1350,720,180],
   // Balcones superiores del umbral (aprovechando el espacio aéreo alto)
   [700,540,160],[1150,440,180],[1650,480,160],
+  [950,320,160],[1450,240,190],
 
   // Sector 1 — Estanque de lunas (x: 2400 – 4800): plataformas flotantes y pasarela celestial
   [2600,940,180],[3050,820,180],[3750,780,180],[4250,740,180],
   // Vías aéreas del estanque
   [2850,560,170],[3350,460,190],[3950,420,180],[4400,520,160],
+  [3150,320,170],[3650,220,190],[4150,270,180],
 
   // Sector 2 — Santuario de medusas (x: 4800 – 7200): cornisas limpias y arcos de altura
   [5000,920,180],[5550,800,180],[6150,740,180],[6750,720,180],
   // Pasarelas superiores del santuario
   [5300,540,170],[5850,440,180],[6450,420,190],
+  [5550,300,180],[6100,220,190],[6650,280,170],
 
   // Sector 3 — Sagrario de las Nueve Corrientes (x: 7200 – 9600): terrazas majestuosas
   [7400,900,190],[8000,780,180],[8600,720,180],
   // Terrazas celestiales del sagrario
   [7600,540,170],[8250,460,190],[8850,420,180],
+  [7900,320,180],[8450,240,190],
 
   // Sector 4 — Altar del sueño (pre-arena, x: 9200 – 9600)
   [9320,880,200],[9480,760,180]
@@ -150,6 +160,12 @@ export function authorCatEncounters(room){
   [8200,'medusa',  140,4],
   [8350,'ufo',     142,4],
   [8500,'arana',   144,4],
+
+  // ─ Guardianes Celestes de las Cúpulas Superiores (rutas aéreas) ─
+  [1450,'phosquito', 68,0],
+  [3650,'medusa',    92,1],
+  [6100,'ufo',      118,2],
+  [8450,'murcielago',138,3]
  ];
 
  const expFoes=(room.foes||[]).filter(f=>f[4]?.expedition).map(f=>{
@@ -184,7 +200,9 @@ export function authorCatEncounters(room){
   [500,809],[950,749],[1330,709],[1680,669],
   [2730,789],[3280,729],[3880,689],[4180,669],
   [5080,749],[5380,669],[5930,629],[6230,609],[6530,629],
-  [7380,749],[7680,669],[8030,629],[8580,609],[8880,589]
+  [7380,749],[7680,669],[8030,629],[8580,609],[8880,589],
+  // Cúspides Celestes Superiores
+  [950,299],[1450,219],[3150,299],[3650,199],[4150,249],[5550,279],[6100,199],[6650,259],[7900,299],[8450,219]
  ])room.orbs.push([x,y]);
 
  return room;

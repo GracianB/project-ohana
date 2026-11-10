@@ -70,10 +70,12 @@ export function updateCatChapter(g,hurt){
   const dx=p.x+p.w/2-pearl.x,dy=p.y+p.h/2-pearl.y;
   if(Math.hypot(dx,dy)<32){
    taken.push(pearl.id);
-   g.score=(g.score||0)+120;
-   p.health=Math.min(100,(p.health||100)+25);
-   g.nums?.add?.(pearl.x,pearl.y-24,'¡PERLA DE SELENITA! +120','#ffe8a0',true);
-   g.fx?.emit?.(pearl.x,pearl.y,{color:'#ffe8a0',count:16,size:3.5,star:true,life:30});
+   const bonus = (pearl.r >= 12 ? 250 : 120);
+   g.score=(g.score||0)+bonus;
+   p.health=Math.min(100,(p.health||100)+(pearl.r >= 12 ? 40 : 25));
+   const label = pearl.r >= 12 ? '¡GRAN PERLA ASTRAL! +' + bonus : '¡PERLA DE SELENITA! +' + bonus;
+   g.nums?.add?.(pearl.x,pearl.y-24,label,'#ffe8a0',true);
+   g.fx?.emit?.(pearl.x,pearl.y,{color:'#ffe8a0',count:pearl.r >= 12 ? 24 : 16,size:3.5,star:true,life:35});
   }
  }
 

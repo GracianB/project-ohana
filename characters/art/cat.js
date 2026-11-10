@@ -673,6 +673,21 @@ function drawMichiMythic(ctx,pose,r,f){
   }, 0.8, capiOutline);
   sparkle(yuzuX + 8, yuzuY - 8, 1.4, '#ffffff');
 
+  // Efectos de ataque celestial zen bioluminiscente
+  if (atkK > 0.08) {
+   ctx.save();
+   ctx.globalAlpha = atkK * 0.85;
+   line('#7ef3ff', 3.2, () => {
+    ctx.arc(38, 2, 28, -Math.PI * 0.45, Math.PI * 0.45);
+   });
+   line('#ffffff', 1.8, () => {
+    ctx.arc(42, 2, 22, -Math.PI * 0.35, Math.PI * 0.35);
+   });
+   sparkle(52, -10, 2.2, '#ffe66d');
+   sparkle(54, 12, 1.8, '#7ef3ff');
+   ctx.restore();
+  }
+
   // Efectos de conjuros cósmicos según power (J/K/L/I/P/U)
   spellAccents(28, 4);
 
