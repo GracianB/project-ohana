@@ -430,236 +430,255 @@ function drawMichiMythic(ctx,pose,r,f){
   if(castK>0)spellAccents(31,-74);
   ctx.restore();return;
  }
- if(f===4){ // ESTRELLA DE MAR CÓSMICA (Forma 4) · Ultra adorable, kawaii, 5 brazos regordetes y redondeados, núcleo de perla cósmica, corona celestial y dulce sonrisa.
-  const floatY = still ? 0 : Math.sin(t * (air ? 0.35 : run ? 0.28 : 0.16) + g.pulsePhase * 4) * 4;
-  const hover = still ? 0 : wave(0, 0.05) * 3;
-  const stRot = still ? 0 : state === 'glide' ? 0.28 : state === 'wall' ? -0.25 : state === 'jump' ? -0.16 : state === 'fall' ? 0.14 : state === 'dead' ? 0.52 : victory ? -0.12 : 0;
-  const squash = still ? 0 : state === 'jump' ? -0.2 : state === 'fall' ? 0.18 : state === 'glide' ? 0.22 : hurt ? -0.18 : Math.sin(t * 0.1) * 0.05;
-  const spinAtk = (state === 'attack' ? (still ? 0.5 : atkK) * Math.PI * 2.2 : 0);
-  const lungeAtk = (state === 'attack' ? (still ? 16 : atkK * 32) : 0);
+ if(f===4){ // CAPIBARA CÓSMICO ZEN BIOLUMINISCENTE · Ultra adorable, barriguita regordeta, yuzu/flor celestial en la cabeza, pasitos serenos y aura cósmica.
+  const floatY = still ? 0 : Math.sin(t * (air ? 0.35 : run ? 0.28 : 0.16) + g.pulsePhase * 4) * 3;
+  const hover = still ? 0 : wave(0, 0.05) * 2;
+  const stRot = still ? 0 : state === 'glide' ? 0.12 : state === 'wall' ? -0.15 : state === 'jump' ? -0.12 : state === 'fall' ? 0.10 : state === 'dead' ? 0.45 : victory ? -0.08 : 0;
+  const squash = still ? 0 : state === 'jump' ? -0.15 : state === 'fall' ? 0.12 : state === 'glide' ? 0.15 : hurt ? -0.12 : Math.sin(t * 0.1) * 0.04;
+  const lungeAtk = (state === 'attack' ? (still ? 14 : atkK * 28) : 0);
 
   ctx.save();
-  ctx.scale(0.88 * (1 + squash * 0.2), 0.88 * (1 - squash * 0.2));
-  ctx.translate(lungeAtk, -42 + floatY + hover + (hurt ? 4 : 0));
-  ctx.rotate(stRot + spinAtk);
+  ctx.scale(0.85 * (1 + squash * 0.15), 0.85 * (1 - squash * 0.15));
+  ctx.translate(lungeAtk, -40 + floatY + hover + (hurt ? 4 : 0));
+  ctx.rotate(stRot);
 
-  // V636 · Bioluminescent radiant spirit aura for Celestial Star
+  // Paleta celestial bioluminiscente del Capibara Zen
+  const capiFur = '#dcd0f4';        // Pelaje lavanda pastel suave
+  const capiShade = '#b6a3de';      // Sombra aterciopelada
+  const capiBelly = '#fbf5ff';      // Vientre nácar luminoso
+  const capiMuzzle = '#cbb8eb';     // Hocico suave característico
+  const capiNose = '#4b3558';       // Naricita botón zen
+  const capiOutline = '#3e2a4a';    // Delineado rico y dulce
+  const capiGold = '#ffe066';       // Yuzu / flor de loto dorada
+  const capiLeaf = '#7af0e0';       // Hoja de néctar menta luminosa
+
+  // 1. Aura bioluminiscente cósmica zen envolvente
   if (state !== 'dead') {
    ctx.save();
-   ctx.globalAlpha = still ? 0.20 : 0.18 + Math.sin(t * 0.08) * 0.05;
-   shape('#ff9ebb', () => { ctx.ellipse(0, 0, 48, 48, 0, 0, TAU); }, 0);
-   ctx.globalAlpha = still ? 0.30 : 0.26 + Math.sin(t * 0.08) * 0.07;
-   line('#ffe066', 1.3, () => { ctx.ellipse(0, 0, 44, 44, 0, 0, TAU); });
+   ctx.globalAlpha = still ? 0.22 : 0.18 + Math.sin(t * 0.08) * 0.05;
+   shape('#7ef3ff', () => { ctx.ellipse(2, 4, 46, 36, 0, 0, TAU); }, 0);
+   ctx.globalAlpha = still ? 0.32 : 0.26 + Math.sin(t * 0.08) * 0.07;
+   line('#d4b5ff', 1.4, () => { ctx.ellipse(2, 4, 42, 32, 0, 0, TAU); });
    ctx.restore();
   }
 
-  // Paleta celestial pastel de la estrella de mar
-  const starCoat = '#ffaec0';      // Rosa coral pastel suave
-  const starShade = '#e58f9f';     // Sombra rosada aterciopelada
-  const starBelly = '#fff4f7';     // Vientre nácar crema claro
-  const starGold = '#ffe89f';      // Ventosas / perlas doradas
-  const starCore = '#fffdf5';      // Núcleo perlado celestial
-  const starOutline = '#483552';   // Tinta dulce delineada
-
-  // 9 destellos cósmicos de polvo estelar alrededor de la estrella (satisface test V353 i<9;i++)
+  // 2. 9 destellos cósmicos de polvo estelar alrededor del Capibara (cumple test V353 i<9;i++)
   for(let i=0;i<9;i++){
    const ang=(i/9)*Math.PI*2+(still?0:t*0.035);
-   const dist=46+(i%3)*7+(still?0:Math.sin(t*0.06+i)*4);
+   const dist=46+(i%3)*8+(still?0:Math.sin(t*0.06+i)*4);
    const sx=Math.cos(ang)*dist,sy=Math.sin(ang)*dist*0.75;
-   if(!still&&(victory||castK>0.15||state==='idle'||state==='glide')){
-    sparkle(sx,sy,1.3+(i%2)*0.7,i%2?'#fff2b2':'#ffc0d8');
+   if(!still&&(victory||castK>0.15||state==='idle'||state==='glide'||state==='run')){
+    sparkle(sx,sy,1.3+(i%2)*0.7,i%2?'#ffe66d':'#7ef3ff');
    }
   }
 
-  // Ángulos y curvaturas de los 5 brazos de la estrella según el estado y poderes
-  // Arm 0: Superior / Central
-  // Arm 1: Superior Derecho
-  // Arm 2: Inferior Derecho
-  // Arm 3: Inferior Izquierdo
-  // Arm 4: Superior Izquierdo
-  const armBends = [0, 0, 0, 0, 0];
-  const armLengths = [38, 36, 36, 36, 36];
+  // 3. Patitas regordetas traseras y delanteras lejanas (far limbs)
+  const stepK = still ? 0 : Math.sin(phase * 2);
+  const backLegX = -24 + (state === 'run' ? -stepK * 10 : state === 'jump' ? -12 : 0);
+  const frontLegX = 18 + (state === 'run' ? stepK * 10 : state === 'jump' ? 10 : 0);
+  // Patita trasera lejana
+  shape(capiShade, () => {
+   ctx.moveTo(backLegX - 6, 22);
+   ctx.quadraticCurveTo(backLegX - 8, 38, backLegX - 2, 40);
+   ctx.quadraticCurveTo(backLegX + 8, 40, backLegX + 6, 36);
+   ctx.quadraticCurveTo(backLegX + 4, 22, backLegX - 6, 22);
+  }, 1.1, capiOutline);
+  // Patita delantera lejana
+  shape(capiShade, () => {
+   ctx.moveTo(frontLegX - 5, 20);
+   ctx.quadraticCurveTo(frontLegX - 7, 36, frontLegX - 1, 38);
+   ctx.quadraticCurveTo(frontLegX + 7, 38, frontLegX + 5, 34);
+   ctx.quadraticCurveTo(frontLegX + 3, 20, frontLegX - 5, 20);
+  }, 1.1, capiOutline);
 
-  if (state === 'run') {
-   const stepK = still ? 0 : Math.sin(phase * 2);
-   armBends[2] = stepK * 0.35;
-   armBends[3] = -stepK * 0.35;
-   armBends[1] = -stepK * 0.15;
-   armBends[4] = stepK * 0.15;
-  } else if (state === 'jump') {
-   armBends[0] = 0; armBends[1] = -0.3; armBends[4] = 0.3; armBends[2] = -0.4; armBends[3] = 0.4;
-  } else if (state === 'fall') {
-   armBends[0] = 0; armBends[1] = 0.25; armBends[4] = -0.25; armBends[2] = 0.35; armBends[3] = -0.35;
-  } else if (state === 'glide') {
-   armBends[0] = 0.2; armBends[1] = -0.1; armBends[4] = -0.1; armBends[2] = -0.3; armBends[3] = -0.3;
-  } else if (state === 'wall') {
-   armBends[0] = 0.25; armBends[1] = 0.4; armBends[2] = 0.3; armBends[3] = -0.1; armBends[4] = -0.2;
-  } else if (state === 'hurt') {
-   armBends[0] = 0.15; armBends[1] = 0.3; armBends[4] = -0.3; armBends[2] = 0.2; armBends[3] = -0.2;
-  } else if (victory) {
-   const waveHop = still ? 0.3 : Math.sin(t * 0.2) * 0.4;
-   armBends[0] = 0; armBends[1] = -0.3 + waveHop; armBends[4] = 0.3 - waveHop; armBends[2] = 0.2; armBends[3] = -0.2;
-  } else if (state === 'dead') {
-   armBends[0] = 0.1; armBends[1] = 0.2; armBends[4] = 0.15; armBends[2] = 0.1; armBends[3] = -0.1;
-  } else if (state === 'attack') {
-   armLengths[0] = 42 + atkK * 12;
-   armLengths[1] = 38 + atkK * 8;
-   armBends[1] = atkK * 0.4;
-   armBends[4] = -atkK * 0.4;
-  }
+  // 4. Cuerpo de Capibara zen regordete, redondeado y suave (chubby body)
+  shape(capiFur, () => {
+   ctx.moveTo(-34, -4);
+   // Lomo arqueado y suave
+   ctx.bezierCurveTo(-38, -26, -12, -32, 12, -26);
+   // Cuello y transición al pecho
+   ctx.quadraticCurveTo(32, -18, 36, 0);
+   // Pecho y pancita redondeada
+   ctx.bezierCurveTo(40, 20, 24, 32, 4, 33);
+   ctx.bezierCurveTo(-18, 34, -36, 26, -34, -4);
+  }, 1.6, capiOutline);
 
-  // Variaciones únicas para cada poder J/K/L/I/P/U en estado cast
-  if (state === 'cast') {
-   const cProg = still ? 0.5 : castK;
-   if (power === 0) { // J: Burbuja estelar - Brazo superior apunta hacia adelante
-    armLengths[0] = 46 + cProg * 8; armBends[0] = 0.2; armBends[1] = -0.25; armBends[4] = 0.25;
-   } else if (power === 1) { // K: Levitación floral - Los 5 brazos se abren como una flor radiante
-    armLengths[0] = 42; armLengths[1] = 42; armLengths[2] = 42; armLengths[3] = 42; armLengths[4] = 42;
-    armBends[1] = -0.35; armBends[4] = 0.35; armBends[2] = 0.35; armBends[3] = -0.35;
-   } else if (power === 2) { // L: Pulso cósmico - Los brazos se curvan hacia adentro y se expanden
-    const pulseCurl = cProg * 0.45;
-    armBends[0] = pulseCurl; armBends[1] = pulseCurl; armBends[2] = pulseCurl; armBends[3] = -pulseCurl; armBends[4] = -pulseCurl;
-   } else if (power === 3) { // I: Cometa veloz - Brazos replegados en cuña aerodinámica
-    armBends[1] = 0.5 * cProg; armBends[4] = -0.5 * cProg; armBends[2] = 0.6 * cProg; armBends[3] = -0.6 * cProg;
-    armLengths[0] = 44;
-   } else if (power === 4) { // P: Escudo de nácar - Brazos cerrados en cápsula protectora
-    armBends[0] = 0.3; armBends[1] = 0.6; armBends[4] = -0.6; armBends[2] = 0.5; armBends[3] = -0.5;
-    armLengths[0] = 32; armLengths[1] = 32; armLengths[4] = 32;
-   } else if (power === 5) { // U: Sorpresa Ohana - Brazos superiores alzados en júbilo y aplauso
-    armBends[1] = -0.6 * cProg; armBends[4] = 0.6 * cProg; armBends[2] = -0.2; armBends[3] = 0.2;
-    armLengths[0] = 40; armLengths[1] = 42; armLengths[4] = 42;
-   }
-  }
-
-  // Ángulos base de los 5 brazos (pentagrama armónico centrado)
-  const baseAngles = [
-   -Math.PI / 2,                    // 0: Arriba
-   -Math.PI / 2 + (2 * Math.PI) / 5, // 1: Arriba-derecha
-   -Math.PI / 2 + (4 * Math.PI) / 5, // 2: Abajo-derecha
-   -Math.PI / 2 + (6 * Math.PI) / 5, // 3: Abajo-izquierda
-   -Math.PI / 2 + (8 * Math.PI) / 5  // 4: Arriba-izquierda
-  ];
-
-  // Cálculo de puntos de las puntas y valles intermedios
-  const armTips = [];
-  const valleyPoints = [];
-  const valleyDist = 18;
-
-  for(let i=0; i<5; i++){
-   const bAng = baseAngles[i] + armBends[i];
-   const len = armLengths[i] + (still ? 0 : Math.sin(t * 0.08 + i * 1.2) * 1.5);
-   armTips.push([Math.cos(bAng) * len, Math.sin(bAng) * len]);
-
-   // Valle entre el brazo i y el brazo (i+1)%5
-   const midAng = (baseAngles[i] + baseAngles[(i+1)%5] + (i===4 ? Math.PI*2 : 0)) / 2;
-   valleyPoints.push([Math.cos(midAng) * valleyDist, Math.sin(midAng) * valleyDist]);
-  }
-
-  // 1. Silueta dorsal y sombra suave de la estrella de mar (gordita y acolchada)
-  shape(starShade, () => {
-   ctx.moveTo(armTips[0][0], armTips[0][1] + 2);
-   for(let i=0; i<5; i++){
-    const next = (i + 1) % 5;
-    ctx.quadraticCurveTo(valleyPoints[i][0], valleyPoints[i][1] + 3, armTips[next][0], armTips[next][1] + 2);
-   }
+  // Sombra suave en la parte inferior del cuerpo
+  shape(capiShade, () => {
+   ctx.moveTo(-34, 12);
+   ctx.bezierCurveTo(-18, 30, 16, 30, 36, 12);
+   ctx.quadraticCurveTo(24, 33, 4, 33);
+   ctx.bezierCurveTo(-18, 34, -30, 26, -34, 12);
   }, 0);
 
-  // 2. Cuerpo principal de la estrella en coral pastel suave con contorno definido
-  shape(starCoat, () => {
-   ctx.moveTo(armTips[0][0], armTips[0][1]);
-   for(let i=0; i<5; i++){
-    const next = (i + 1) % 5;
-    ctx.quadraticCurveTo(valleyPoints[i][0], valleyPoints[i][1], armTips[next][0], armTips[next][1]);
-   }
-  }, 1.6, starOutline);
-
-  // 3. Pancita de nácar pastel suave en el centro de la estrella
-  shape(starBelly, () => {
-   ctx.moveTo(armTips[0][0] * 0.45, armTips[0][1] * 0.45);
-   for(let i=0; i<5; i++){
-    const next = (i + 1) % 5;
-    ctx.quadraticCurveTo(valleyPoints[i][0] * 0.55, valleyPoints[i][1] * 0.55, armTips[next][0] * 0.45, armTips[next][1] * 0.45);
-   }
+  // Vientre nácar luminoso
+  shape(capiBelly, () => {
+   ctx.moveTo(-16, 8);
+   ctx.quadraticCurveTo(4, 4, 20, 8);
+   ctx.quadraticCurveTo(16, 26, 2, 28);
+   ctx.quadraticCurveTo(-12, 26, -16, 8);
   }, 0);
 
-  // 4. Ventosas, relieves y perlas de luz a lo largo de cada uno de los 5 brazos
-  for(let i=0; i<5; i++){
-   const tip = armTips[i];
-   const prevV = valleyPoints[(i + 4) % 5];
-   const nextV = valleyPoints[i];
-   // Línea dorsal central suave en el lomo de cada brazo
-   line('#fffaf3', 1.1, () => {
-    ctx.moveTo(tip[0] * 0.22, tip[1] * 0.22);
-    ctx.quadraticCurveTo(tip[0] * 0.55, tip[1] * 0.55, tip[0] * 0.82, tip[1] * 0.82);
-   });
-   // Ventosas tiernas a lo largo de ambos bordes de cada brazo (3 por lado)
-   for(let k=1; k<=4; k++){
-    const u = k * 0.24;
-    oval(tip[0] * u + prevV[0] * (1 - u), tip[1] * u + prevV[1] * (1 - u), 2.1, 2.1, starGold);
-    oval(tip[0] * u + nextV[0] * (1 - u), tip[1] * u + nextV[1] * (1 - u), 2.1, 2.1, starGold);
-   }
-   // Perlita brillante en la punta del brazo
-   oval(tip[0] * 0.9, tip[1] * 0.9, 2.6, 2.6, '#fff7d9');
-   oval(tip[0] * 0.9 - 0.4, tip[1] * 0.9 - 0.4, 1.1, 1.1, '#ffffff');
-  }
+  // 5. Constelación de 3 motas de luz estelar en el flanco
+  oval(-10, 2, 2.2, 2.2, capiGold);
+  oval(-2, -4, 1.8, 1.8, capiGold);
+  oval(6, 2, 2.0, 2.0, capiGold);
+  line('#ffffff', 0.9, () => {
+   ctx.moveTo(-10, 2); ctx.lineTo(-2, -4); ctx.lineTo(6, 2);
+  });
 
-  // 5. Pequeña corona celestial de starlight en la punta del brazo superior (Arm 0)
-  const crownTip = armTips[0];
+  // 6. Patitas cercanas (near limbs) regordetas con almohadillas zen
+  const nearBackX = -18 + (state === 'run' ? stepK * 10 : state === 'jump' ? -8 : 0);
+  const nearFrontX = 24 + (state === 'run' ? -stepK * 10 : state === 'jump' ? 8 : 0);
+  // Pata trasera cercana
+  shape(capiFur, () => {
+   ctx.moveTo(nearBackX - 8, 18);
+   ctx.quadraticCurveTo(nearBackX - 10, 38, nearBackX - 3, 41);
+   ctx.quadraticCurveTo(nearBackX + 9, 42, nearBackX + 8, 36);
+   ctx.quadraticCurveTo(nearBackX + 6, 18, nearBackX - 8, 18);
+  }, 1.4, capiOutline);
+  // Almohadilla y dedos traseros
+  line(capiOutline, 1.1, () => {
+   ctx.moveTo(nearBackX - 1, 38); ctx.lineTo(nearBackX - 1, 41);
+   ctx.moveTo(nearBackX + 3, 38); ctx.lineTo(nearBackX + 3, 41);
+  });
+  oval(nearBackX + 1, 37, 2, 1.2, '#ffe066');
+
+  // Pata delantera cercana
+  let frontLimbTip = [nearFrontX, 40];
+  if (atkK > 0) frontLimbTip = [nearFrontX + atkK * 16, 28 - atkK * 12];
+  if (castK > 0) {
+   if (power === 0) frontLimbTip = [nearFrontX + 8, 24];
+   else if (power === 1) frontLimbTip = [nearFrontX + 14, 16];
+   else if (power === 2) frontLimbTip = [nearFrontX + 16, 30];
+   else if (power === 3) frontLimbTip = [nearFrontX + 18, 34];
+   else if (power === 4) frontLimbTip = [nearFrontX + 10, 20];
+   else if (power === 5) frontLimbTip = [nearFrontX + 15, 14];
+  }
+  shape(capiFur, () => {
+   ctx.moveTo(nearFrontX - 7, 16);
+   ctx.quadraticCurveTo(nearFrontX - 9, frontLimbTip[1] - 4, frontLimbTip[0] - 3, frontLimbTip[1]);
+   ctx.quadraticCurveTo(frontLimbTip[0] + 9, frontLimbTip[1] + 1, frontLimbTip[0] + 7, frontLimbTip[1] - 5);
+   ctx.quadraticCurveTo(nearFrontX + 6, 16, nearFrontX - 7, 16);
+  }, 1.4, capiOutline);
+  line(capiOutline, 1.1, () => {
+   ctx.moveTo(frontLimbTip[0] - 1, frontLimbTip[1] - 2); ctx.lineTo(frontLimbTip[0] - 1, frontLimbTip[1]);
+   ctx.moveTo(frontLimbTip[0] + 3, frontLimbTip[1] - 2); ctx.lineTo(frontLimbTip[0] + 3, frontLimbTip[1]);
+  });
+  oval(frontLimbTip[0] + 1, frontLimbTip[1] - 2, 2, 1.2, '#ffe066');
+
+  // 7. Cabecita característica de Capibara (noble, alargada con esquinas suaves, ultra zen)
+  const headBob = still ? 0 : Math.sin(t * 0.08) * 1.5;
+  const headX = 28 + headBob * 0.5, headY = -20 + headBob;
   ctx.save();
-  ctx.translate(crownTip[0], crownTip[1] - 4);
-  shape('#ffd54f', () => {
-   ctx.moveTo(-7, 2);
-   ctx.lineTo(-6, -6);
-   ctx.lineTo(-2, -2);
-   ctx.lineTo(0, -9);
-   ctx.lineTo(2, -2);
-   ctx.lineTo(6, -6);
-   ctx.lineTo(7, 2);
+  ctx.translate(headX, headY);
+  ctx.rotate(finite(r.michiHead) * 0.15 + (hurt ? -0.1 : 0));
+
+  // Orejita lejana (far ear)
+  shape(capiShade, () => {
+   ctx.moveTo(-8, -20);
+   ctx.bezierCurveTo(-14, -28, -2, -32, 2, -22);
    ctx.closePath();
-  }, 1.1, starOutline);
-  oval(0, -3, 1.4, 1.4, '#fff');
-  ctx.restore();
+  }, 1.2, capiOutline);
+  oval(-4, -24, 2.5, 3.5, '#efbad3');
 
-  // 6. Núcleo de perla celestial resplandeciente en el pecho/centro
-  oval(0, 11, 8.5, 8.5, '#ffe9a8');
-  oval(0, 11, 7, 7, '#ffc0d8');
-  oval(0, 11, 5.2, 5.2, starCore);
-  oval(-1.3, 9.4, 2.0, 2.0, '#ffffff');
-  sparkle(0, 11, 1.6, '#ffffff');
+  // Cabeza principal: hocico rectangular zen con contornos dulces y redondeados
+  shape(capiFur, () => {
+   ctx.moveTo(-18, -12);
+   ctx.quadraticCurveTo(-4, -24, 12, -22);
+   ctx.bezierCurveTo(24, -20, 32, -14, 34, -4);
+   ctx.quadraticCurveTo(36, 8, 30, 16);
+   ctx.quadraticCurveTo(18, 22, 2, 18);
+   ctx.bezierCurveTo(-12, 16, -20, 4, -18, -12);
+  }, 1.6, capiOutline);
 
-  // 7. Rostro ultra kawaii y tierno en el centro de la estrella de mar
-  // Mejillas sonrosadas de rubor pastel (blush cheeks)
-  oval(-15, -2, 3.8, 2.2, '#ff6b95');
-  oval(15, -2, 3.8, 2.2, '#ff6b95');
-  oval(-14, -2.5, 1.2, 0.9, '#ffffff');
-  oval(16, -2.5, 1.2, 0.9, '#ffffff');
+  // Sombra del hocico y mandíbula
+  shape(capiMuzzle, () => {
+   ctx.moveTo(14, -10);
+   ctx.quadraticCurveTo(28, -6, 31, -2);
+   ctx.quadraticCurveTo(33, 10, 27, 15);
+   ctx.quadraticCurveTo(14, 18, 8, 12);
+   ctx.quadraticCurveTo(10, -2, 14, -10);
+  }, 0);
 
-  // Ojos de héroe compartidos (drawMichiEye se llama exactamente 2 veces aquí)
-  eye(-10, -8, 7.8);
-  eye(10, -8, 7.8);
+  // Orejita cercana (near ear)
+  shape(capiFur, () => {
+   ctx.moveTo(-2, -18);
+   ctx.bezierCurveTo(-8, -28, 4, -32, 8, -20);
+   ctx.closePath();
+  }, 1.4, capiOutline);
+  oval(2, -23, 2.8, 3.8, '#ff9dbb');
+  oval(2, -23, 1.2, 1.6, '#ffffff');
 
-  // Sonrisa dulce y tierna (curva estilo 'ω')
-  const mouthOpen = Math.max(atkK * 0.6, victory ? 0.5 : 0, state === 'cast' && power === 5 ? 0.6 : 0);
-  if (mouthOpen > 0.15) {
+  // Naricita botón zen de capibara
+  shape(capiNose, () => {
+   ctx.moveTo(27, -4);
+   ctx.quadraticCurveTo(32, -6, 35, -2);
+   ctx.quadraticCurveTo(34, 4, 30, 4);
+   ctx.quadraticCurveTo(26, 2, 27, -4);
+  }, 0.8, capiOutline);
+  oval(29, -1, 1, 1.5, '#1d1222');
+  oval(33, 0, 1, 1.5, '#1d1222');
+
+  // Boquita serena / sonrisa en 'ω'
+  const capiMouthOpen = Math.max(atkK * 0.5, victory ? 0.45 : 0, state === 'cast' && power === 5 ? 0.5 : 0);
+  if (capiMouthOpen > 0.15) {
    shape('#783850', () => {
-    ctx.moveTo(-4, 2);
-    ctx.quadraticCurveTo(0, 1, 4, 2);
-    ctx.quadraticCurveTo(0, 7 + mouthOpen * 3, -4, 2);
-   }, 0.8, starOutline);
-   oval(0, 4.5, 2.4, 1.4, '#ffaec0');
+    ctx.moveTo(25, 6);
+    ctx.quadraticCurveTo(29, 6, 32, 7);
+    ctx.quadraticCurveTo(28, 13 + capiMouthOpen * 3, 24, 7);
+   }, 0.8, capiOutline);
+   oval(28, 9, 2.2, 1.2, '#ff9dbb');
   } else {
-   line(starOutline, 1.2, () => {
-    ctx.moveTo(0, 3);
-    ctx.quadraticCurveTo(-3, 6, -5, 3.5);
-    ctx.moveTo(0, 3);
-    ctx.quadraticCurveTo(3, 6, 5, 3.5);
+   line(capiOutline, 1.2, () => {
+    ctx.moveTo(30, 4); ctx.lineTo(29, 7);
+    ctx.quadraticCurveTo(26, 10, 23, 8);
+    ctx.moveTo(29, 7);
+    ctx.quadraticCurveTo(32, 10, 34, 7);
    });
   }
 
-  // Efectos de hechizo cósmico para cast
-  spellAccents(armTips[1][0], armTips[1][1]);
+  // Mofletes sonrosados de rubor ultra kawaii con destello blanco
+  oval(12, 6, 4.5, 2.8, '#ff9dbb');
+  oval(13, 5.5, 1.4, 1.0, '#ffffff');
+  oval(-2, 4, 3.6, 2.2, '#ff9dbb');
 
-  ctx.restore();
+  // Bigotitos zen delicados
+  line('#a990b3', 0.65, () => {
+   ctx.moveTo(24, 6); ctx.lineTo(16, 8);
+   ctx.moveTo(24, 9); ctx.lineTo(17, 13);
+  });
+
+  // Ojos de héroe compartidos
+  const capiEyeOpts = {
+   closed: dead || hurt || r.mood === 'closed',
+   happy: victory || r.mood === 'happy' || state === 'idle',
+   blink: finite(r.motion?.blink),
+   mood: atkK > 0.3 ? 'angry' : 'normal',
+   look: { x: Math.max(-1, Math.min(1, finite(pose.look?.x) + finite(r.motion?.lookX) * 0.3)), y: finite(pose.look?.y) }
+  };
+  eye(-1, -6, 7.2);
+  eye(15, -4, 8.0);
+
+  // 8. El legendario YUZU / MANDARINA CELESTIAL sobre la cabecita
+  const yuzuX = 6, yuzuY = -27;
+  shape(capiGold, () => {
+   ctx.ellipse(yuzuX, yuzuY, 6.5, 5.5, 0, 0, TAU);
+  }, 1.2, capiOutline);
+  oval(yuzuX - 1.5, yuzuY - 1.5, 2.2, 1.6, '#ffffff');
+  shape(capiLeaf, () => {
+   ctx.moveTo(yuzuX, yuzuY - 5.5);
+   ctx.quadraticCurveTo(yuzuX + 4, yuzuY - 10, yuzuX + 8, yuzuY - 8);
+   ctx.quadraticCurveTo(yuzuX + 5, yuzuY - 5, yuzuX, yuzuY - 5.5);
+  }, 0.8, capiOutline);
+  sparkle(yuzuX + 8, yuzuY - 8, 1.4, '#ffffff');
+
+  // Efectos de conjuros cósmicos según power (J/K/L/I/P/U)
+  spellAccents(28, 4);
+
+  ctx.restore(); // restore head
+
+  ctx.restore(); // restore body
   return;
  }
 }

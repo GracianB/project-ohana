@@ -759,13 +759,15 @@ export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
  const vw=g.viewW||1280;
  const vh=g.viewH||720;
 
- // ── OSCURECIMIENTO GENERAL: velo abisal que se intensifica con el eclipse ──
- const darkPulse=reduced?0.08:0.06+Math.sin(t*0.012)*0.03;
- ctx.fillStyle='rgba(8,2,18,'+darkPulse+')';
+ // ── OSCURECIMIENTO PROFUNDO NOCTURNO: caverna abisal oscura ──
+ const isFlare=reduced?0:Math.sin((t*0.006)%TAU);
+ const flareLight=!reduced&&isFlare>0.6?Math.pow((isFlare-0.6)/0.4,2):0;
+ const darkLevel=reduced?0.58:0.58-flareLight*0.32;
+ ctx.fillStyle='rgba(5,2,14,'+darkLevel+')';
  ctx.fillRect(0,0,vw,vh);
 
  // ── ECLIPSE LUNAR DINÁMICO MÓVIL Y RAYOS CELESTIALES ────────────────────
- // El eclipse se desplaza majestuosamente por la bóveda astral y modula la luz del reino
+ // El eclipse se desplaza majestuosamente por la bóveda astral y de vez en cuando emite un destello de luz
  const driftRate=0.0025;
  const drift=reduced?0:(t*driftRate)%TAU;
  const eclipX=(vw*0.5)+Math.cos(drift)*(vw*0.38);
@@ -777,7 +779,7 @@ export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
  // 1. Cono de luz celestial y rayos proyectados desde el eclipse hacia el escenario
  const rayAngle=Math.PI*0.5+Math.cos(drift)*0.22;
  const rayLength=vh*1.15;
- const rayAlpha=reduced?0.12:0.07+(1-eclipseCycle)*0.16+Math.sin(t*0.04)*0.03;
+ const rayAlpha=reduced?0.14:0.08+(1-eclipseCycle)*0.16+flareLight*0.35+Math.sin(t*0.04)*0.03;
  const lightCone=ctx.createLinearGradient(eclipX,eclipY,eclipX,vh);
  lightCone.addColorStop(0,'rgba(200,245,255,'+(rayAlpha*1.6)+')');
  lightCone.addColorStop(0.35,'rgba(170,145,255,'+rayAlpha+')');
@@ -1008,35 +1010,54 @@ export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
   ctx.globalAlpha=1;
  }
 
- // ── ILUMINACIÓN BIOLUMINISCENTE DINÁMICA DEL FONDO AL PASAR EL JUGADOR ─────
+ // ── ILUMINACIÓN BIOLUMINISCENTE DINÁMICA DEL FONDO AL PASAR Y ATACAR ─────
  if(g?.player&&cam){
   const p=g.player;
   const plx=(p.x||0)+(p.w||24)*0.5-cam.x;
   const ply=(p.y||0)+(p.h||26)*0.5-cam.y;
-  if(plx>-180&&plx<vw+180&&ply>-180&&ply<vh+180){
-   const pulseLight=reduced?1:1+Math.sin(t*0.08)*0.14;
-   const heroR=(120+(p.evo||0)*22)*pulseLight;
+  if(plx>-220&&plx<vw+220&&ply>-220&&ply<vh+220){
+   // Estado de ataque o lanzamiento de habilidades
+   const attacking=!!(p.melee>0||(p._cast&&p._cast.t>0)||p.state==='attack'||p.state==='cast'||p.invuln>0);
+   const attackBoost=attacking?1.8:1;
+   const pulseLight=reduced?1:1+Math.sin(t*0.09)*0.15;
+   const heroR=(140+(p.evo||0)*26)*pulseLight*attackBoost;
    const heroGlow=ctx.createRadialGradient(plx,ply,0,plx,ply,heroR);
-   heroGlow.addColorStop(0,'rgba(122,240,224,0.32)');
-   heroGlow.addColorStop(0.35,'rgba(190,140,255,0.18)');
-   heroGlow.addColorStop(0.75,'rgba(80,200,240,0.06)');
+   const glowAlpha=attacking?0.55:0.35;
+   heroGlow.addColorStop(0,'rgba(122,240,224,'+glowAlpha+')');
+   heroGlow.addColorStop(0.35,'rgba(190,140,255,'+(glowAlpha*0.65)+')');
+   heroGlow.addColorStop(0.75,'rgba(80,200,240,'+(glowAlpha*0.25)+')');
    heroGlow.addColorStop(1,'rgba(0,0,0,0)');
    ctx.fillStyle=heroGlow;
    ctx.beginPath();
    ctx.arc(plx,ply,heroR,0,TAU);
    ctx.fill();
 
-   // Estela de luz bioluminiscente en el suelo al desplazarse
-   if(!reduced&&(Math.abs(p.vx||0)>1||Math.abs(p.vy||0)>1)){
+   // Anillo expansivo de impacto que ilumina el entorno durante el ataque
+   if(attacking){
+    ctx.strokeStyle='rgba(255,255,255,0.6)';
+    ctx.lineWidth=2.5;
+    ctx.beginPath();
+    ctx.arc(plx,ply,heroR*0.75,0,TAU);
+    ctx.stroke();
+    ctx.strokeStyle='rgba(122,240,224,0.4)';
+    ctx.lineWidth=4.5;
+    ctx.beginPath();
+    ctx.arc(plx,ply,heroR*0.5,0,TAU);
+    ctx.stroke();
+   }
+
+   // Al pisar y desplazarse (su paso): estela de luz bioluminiscente en el suelo
+   if(!reduced&&(Math.abs(p.vx||0)>0.6||Math.abs(p.vy||0)>0.6||p.state==='run'||p.state==='jump')){
     const trailX=plx-(p.facing||1)*26;
-    const trailY=ply+(p.grounded?12:20);
-    const trailGlow=ctx.createRadialGradient(trailX,trailY,0,trailX,trailY,68);
-    trailGlow.addColorStop(0,'rgba(122,240,224,0.22)');
-    trailGlow.addColorStop(0.6,'rgba(200,160,255,0.07)');
+    const trailY=ply+(p.grounded?14:22);
+    const trailR=(80+(attacking?40:0))*pulseLight;
+    const trailGlow=ctx.createRadialGradient(trailX,trailY,0,trailX,trailY,trailR);
+    trailGlow.addColorStop(0,'rgba(122,240,224,0.32)');
+    trailGlow.addColorStop(0.5,'rgba(200,160,255,0.14)');
     trailGlow.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=trailGlow;
     ctx.beginPath();
-    ctx.arc(trailX,trailY,68,0,TAU);
+    ctx.arc(trailX,trailY,trailR,0,TAU);
     ctx.fill();
    }
   }
