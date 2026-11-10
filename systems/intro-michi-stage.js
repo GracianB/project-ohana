@@ -56,8 +56,72 @@ export function michiWelcomeBeat(seconds,reducedMotion=false){
   reduced:false});
 }
 export function drawMichiWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){ // Begin custom eclipse effect
-  // Draw a full‑screen dark background that brightens with bioluminescent glow
+  // ---- Cinematic Intro ----
+  // 0‑2 s: fade‑in from black with a pulsating logo
+  if (seconds < 2) {
+    const progress = seconds / 2; // 0‑1
+    ctx.save();
+    ctx.fillStyle = `rgba(0,0,0,${1 - progress})`;
+    ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    const logoSize = 80 + 140 * progress;
+    ctx.fillStyle = `rgba(255,204,255,${0.5 + 0.5 * progress})`;
+    ctx.fillRect((ctx.canvas.width - logoSize)/2, (ctx.canvas.height - logoSize)/2, logoSize, logoSize);
+    ctx.restore();
+    return;
+  }
+  // Existing bioluminescent eclipse background
+
   if (layer === "back") {
+  // ---- Cinematic Intro ----
+  // 0‑2 s: fade‑in from black with a pulsating logo
+  if (seconds < 2) {
+    const progress = seconds / 2; // 0‑1
+    ctx.save();
+    ctx.fillStyle = `rgba(0,0,0,${1 - progress})`;
+    ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    const logoSize = 80 + 140 * progress;
+    ctx.fillStyle = `rgba(255,204,255,${0.5 + 0.5 * progress})`;
+    ctx.fillRect((ctx.canvas.width - logoSize)/2, (ctx.canvas.height - logoSize)/2, logoSize, logoSize);
+    ctx.restore();
+    return;
+  }
+  // ---- Bioluminescent Eclipse (starts after 2 s) ----
+  const canvas = ctx.canvas;
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const progress = ((seconds % 14) + 14) % 14 / 14;
+  // Base dark background
+  ctx.save();
+  ctx.fillStyle = "#000011";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Bioluminescent radial glow (soft pastel cyan)
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(canvas.width, canvas.height) * 0.6);
+  const glowAlpha = 0.15 + 0.35 * ease(progress);
+  glow.addColorStop(0, `rgba(0,255,200,${glowAlpha})`);
+  glow.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.globalCompositeOperation = "lighter";
+  ctx.fillStyle = glow;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  const isBio = beat && beat.group === "bio";
+  if (isBio) {
+    const moonProgress = Math.min(1, progress * 2);
+    const radius = Math.max(canvas.width, canvas.height) * 0.2 * ease(moonProgress);
+    const moon = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+    moon.addColorStop(0, "rgba(180,200,255,0.4)");
+    moon.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = moon;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+  } else {
+    const sunProgress = Math.max(0, progress - 0.5) * 2;
+    const radius = Math.max(canvas.width, canvas.height) * 0.15 * ease(sunProgress);
+    const sun = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+    sun.addColorStop(0, "rgba(255,220,100,0.4)");
+    sun.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = sun;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+  }
+  ctx.restore();
+}
     const canvas = ctx.canvas;
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
