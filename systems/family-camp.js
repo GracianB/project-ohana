@@ -158,15 +158,29 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  // The canvas and HTML hit-targets share one positioned stage.
  // Fixed buttons drift when an ancestor is transformed. Clicks on Dino's
  // painted portal could otherwise activate an unrelated hero.
- const geometryKey=[width,height].map(n=>Math.round(n*2)/2).join(':');
+ const bounds=canvas.getBoundingClientRect(),
+   sx=bounds.width/Math.max(1,width),sy=bounds.height/Math.max(1,height);
+ // The buttons' containing block is not guaranteed to start at the Canvas
+ // origin: nested title layers can be positioned independently on phones.
+ // Map the actual painted rectangle into each button's real offsetParent.
+ const geometryKey=[bounds.left,bounds.top,bounds.width,bounds.height,width,height]
+   .map(n=>Math.round(n*2)/2).join(':');
  if(railSize!==geometryKey){
   railSize=geometryKey;
   for(const button of menu.querySelectorAll('.char-card')){
    const cardIndex=w1sel.cards.findIndex(c=>c.hero===button.dataset.id),r=w1sel.rects[cardIndex];
    if(!r)continue;
-   for(const [key,value] of Object.entries({x:r.x,y:r.y,w:r.w,h:Math.max(44,r.h)}))button.style.setProperty('--hit-'+key,value+'px');
+   const anchor=button.offsetParent||host.querySelector('.camp-scene');
+   const parentBounds=anchor.getBoundingClientRect();
+   const x=bounds.left+r.x*sx-parentBounds.left-(anchor.clientLeft||0);
+   const y=bounds.top+r.y*sy-parentBounds.top-(anchor.clientTop||0);
+   const w=r.w*sx,h=Math.max(44,r.h*sy);
+   // Inline important wins over legacy carousel CSS and always follows the
+   // visible Canvas, regardless of viewport, wrapping or a scrolling title.
+   for(const [key,value] of Object.entries({x,y,w,h}))button.style.setProperty('--hit-'+key,value+'px');
    button.style.setProperty('position','absolute','important');
-   for(const name of ['left','top','width','height'])button.style.removeProperty(name);
+   for(const [name,value] of Object.entries({left:x,top:y,width:w,height:h}))
+     button.style.setProperty(name,value+'px','important');
    button.style.setProperty('pointer-events','auto','important');
   }
  }
