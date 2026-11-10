@@ -681,7 +681,7 @@ const PRECACHE_REVISIONS = {
   "engine/camera.js": "b21bd3aa6c6f3984184f404046d6bbecb5b09c3c",
   "systems/welcome-story.js": "c45fcfb2e3d8894b8e77519ee01755534b82b433",
   "family-camp.css": "b2448b9cec9118c1dc012781382738934901a82e",
-  "systems/family-camp.js": "cfb82a50e6760dfd8117c0c38b5dc9ac660a8ed1",
+  "systems/family-camp.js": "b4cffca97e4a2320801c1c60b7db127a06dd70da",
   "systems/family-camp-model.js": "d49f1bf31d2d8bbca5a797da20abcc2b1e972c60",
   "systems/evo-cine/real-actor.js": "c88c1bc78277e559869c3ded755da36e8426a1d4",
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
