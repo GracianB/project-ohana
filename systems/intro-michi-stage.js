@@ -74,6 +74,14 @@ export function drawMichiWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
   ctx.beginPath();ctx.arc(x-h*.025,foot-h*.66,h*.31,Math.PI*.38,Math.PI*1.42);ctx.stroke();
   ctx.globalAlpha=.28;ctx.strokeStyle="#ffc1db";ctx.lineWidth=1.4;
   ctx.beginPath();ctx.ellipse(x,foot+2,h*.24,h*.047,0,0,TAU);ctx.stroke();
+  if(!beat.reduced){
+   ctx.globalAlpha=.28*(beat.halo||.2);ctx.fillStyle="#b6f7ff";
+   for(let i=0;i<4;i++){
+    const ang=seconds*1.2+i*TAU/4;
+    const mx=x+Math.cos(ang)*h*.32,my=foot-h*.5+Math.sin(ang)*h*.16;
+    ctx.beginPath();ctx.arc(mx,my,Math.max(1,h*.016),0,TAU);ctx.fill();
+   }
+  }
  }else if(layer==="front"&&!beat.reduced){
   // Silhouette-attached stars, horn glints and a distinct 5-beat reveal.
   // All amplitudes are bounded to the existing intro stage slot.
