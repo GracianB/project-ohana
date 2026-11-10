@@ -55,7 +55,52 @@ export function michiWelcomeBeat(seconds,reducedMotion=false){
   shimmer:clip(.11+purr*.65+flick*.35+melody*.2+spark*.3),
   reduced:false});
 }
-export function drawMichiWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
+export function drawMichiWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){ // Begin custom eclipse effect
+  // Draw a full‑screen dark background that brightens with bioluminescent glow
+  if (layer === "back") {
+    const canvas = ctx.canvas;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    // Progress of the intro (0‑14 s). Map to 0‑1 for glow intensity.
+    const progress = ((seconds % 14) + 14) % 14 / 14;
+    // Base dark background
+    ctx.save();
+    ctx.fillStyle = "#000011";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Bioluminescent radial glow (soft pastel cyan)
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(canvas.width, canvas.height) * 0.6);
+    const glowAlpha = 0.15 + 0.35 * ease(progress);
+    glow.addColorStop(0, `rgba(0,255,200,${glowAlpha})`);
+    glow.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Dynamic moon (for bio group) or sun (for other group)
+    const isBio = beat && beat.group === "bio"; // custom flag set by caller
+    if (isBio) {
+      // Moon – pale blue-white, fades in then out
+      const moonProgress = Math.min(1, progress * 2);
+      const radius = Math.max(canvas.width, canvas.height) * 0.2 * ease(moonProgress);
+      const moon = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      moon.addColorStop(0, "rgba(180,200,255,0.4)");
+      moon.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = moon;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      // Sun – warm gold, appears later in the sequence
+      const sunProgress = Math.max(0, progress - 0.5) * 2; // start at 0.5
+      const radius = Math.max(canvas.width, canvas.height) * 0.15 * ease(sunProgress);
+      const sun = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      sun.addColorStop(0, "rgba(255,220,100,0.4)");
+      sun.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = sun;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.restore();
+    // Original back‑layer effects (moon iris, halo, etc.) follow after the eclipse background.
+  }
+  // Preserve original behavior for the rest of the function
+
  if(!ctx||!beat||![x,foot,height,seconds].every(Number.isFinite)||height<=0)return;
  const h=height;ctx.save();
  if(layer==="back"){
