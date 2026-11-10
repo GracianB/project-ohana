@@ -1,0 +1,8 @@
+{
+  "release": "ohana-636",
+  "stage": "not_deployed",
+  "pull_request": 459,
+  "target_branch": "main",
+  "url": "https://gracianb.github.io/project-ohana/",
+  "note": "Publication requires all release gates, merge, and successful Pages deployment for the merged SHA. Previous main repair was successfully deployed separately."
+}
