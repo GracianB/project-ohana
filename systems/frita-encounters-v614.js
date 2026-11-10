@@ -31,8 +31,10 @@ export function authorFritaEncounters(room) {
   [0, FLOOR, 1080, 126],
   [1340, FLOOR, 1520, 126],
   [3060, FLOOR, 2040, 126],
-  [5400, FLOOR, 640, 126],
-  [6310, FLOOR, 3290, 126],
+  // Three authored oil pits are the only lethal floor breaks. The old
+  // 5400–6040 / 6310–9600 split left a fourth *unmarked* 270px void:
+  // players died at x≈6280 despite no hazard, warning, or route lesson.
+  [5400, FLOOR, 4200, 126],
   [9600, FLOOR, 4800, 126] // Contrato de v2-adventure.test.js
  ];
 

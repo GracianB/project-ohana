@@ -1,0 +1,33 @@
+name: V509 Pizza Dino Presentation
+on:
+  push:
+    branches:
+      - 'integration/dino-dragon-ready-20261109'
+      - 'integration/ohana-michi-full-20261109'
+  pull_request:
+    paths:
+      - 'game.js'
+      - 'systems/world1-cine.js'
+      - 'tests/browser/v509-pizza-dino-presentation.mjs'
+      - '.github/workflows/v509-presentation.yml'
+permissions:
+  contents: read
+jobs:
+  cinematic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Pizza and Dino real room-entry films, mobile controls and boss visuals
+        run: node tests/browser/v509-pizza-dino-presentation.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v509-pizza-dino-cinematic
+          path: test-results/v509/
+          if-no-files-found: ignore

@@ -150,7 +150,29 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  // Update attributes on selection/form changes, never on every animation tick.
  const featured=w1sel.cards[w1sel.index],paintKey=(featured?.hero||'final')+':'+form;
  if(featuredPaintKey!==paintKey){featuredPaintKey=paintKey;canvas.dataset.paintedHero=featured?.hero||'final';canvas.dataset.paintedForm=String(form);}
- if(railSize!==width+':'+height){railSize=width+':'+height;for(const button of menu.querySelectorAll('.char-card')){const cardIndex=w1sel.cards.findIndex(c=>c.hero===button.dataset.id),r=w1sel.rects[cardIndex];if(!r)continue;for(const [key,value] of Object.entries({x:r.x,y:r.y,w:r.w,h:r.h}))button.style.setProperty('--hit-'+key,value+'px');}}
+ // World 1 portal hit targets use the actual viewport rectangle of the Canvas.
+ // CSS ancestors may flex, clip or reposition the stage on mobile; absolute
+ // hitboxes inside the title shell previously ended up behind that shell.
+ // Fixed, viewport-aligned native buttons preserve real touch/mouse/keyboard
+ // activation without synthesizing clicks or bypassing accessibility.
+ const bounds=canvas.getBoundingClientRect(),sx=bounds.width/Math.max(1,width),sy=bounds.height/Math.max(1,height);
+ const geometryKey=[bounds.left,bounds.top,bounds.width,bounds.height,width,height].map(n=>Math.round(n*2)/2).join(':');
+ if(railSize!==geometryKey){
+  railSize=geometryKey;
+  for(const button of menu.querySelectorAll('.char-card')){
+   const cardIndex=w1sel.cards.findIndex(c=>c.hero===button.dataset.id),r=w1sel.rects[cardIndex];
+   if(!r)continue;
+   for(const [key,value] of Object.entries({x:r.x,y:r.y,w:r.w,h:r.h}))button.style.setProperty('--hit-'+key,value+'px');
+   button.style.setProperty('position','fixed','important');
+   button.style.setProperty('left',(bounds.left+r.x*sx)+'px','important');
+   button.style.setProperty('top',(bounds.top+r.y*sy)+'px','important');
+   button.style.setProperty('width',(r.w*sx)+'px','important');
+   button.style.setProperty('height',(Math.max(44,r.h)*sy)+'px','important');
+   button.style.setProperty('z-index','40','important');
+   button.style.setProperty('pointer-events','auto','important');
+  }
+ }
+
  }
  else{ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);ctx.scale(view.scale,view.scale);ctx.translate(-view.x,0);ctx.drawImage(scenery,0,0);
  for(const def of ROSTER){const p=CAMP_HEROES[def.id],hot=def.id===selected,beat=film?.id===def.id?campPresentation(def.id,time-film.start):null;

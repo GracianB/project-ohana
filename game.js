@@ -1631,7 +1631,16 @@ if (hazard.type === HAZARD_TYPES.DEATH) {
   dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
     type: hazard.type, id: hazard.id, room: game.roomId, hero: p.id
   }}));
-  // ¡ÚLTIMA BATIDA!
+  // ¡ÚLTIMA BATIDA! Dragón puede escapar una sola vez de este pozo mientras permanece sobre él.
+  // La batida usa velocidad física real; el siguiente contacto vuelve a ser mortal.
+  if (p.id === "dragon" && p.evo >= 4 && p._hazardEscapeKey !== hazardKey) {
+    p._hazardEscapeKey = hazardKey;
+    p.vy = -Math.max(16, Math.abs(Number(p.vy) || 0) + 12);
+    p.grounded = false;
+    p.y = Math.min(p.y, hazard.y - p.h - 1);
+    game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ffb347", count: 18, size: 4, up: 3 });
+    return;
+  }
   dieVoid(p);
   return;
 }
@@ -3309,7 +3318,7 @@ for (const e of game.enemies) {
   else if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
-  else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t);
+  else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._dinoBoss)drawDinoBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._pizzaBoss)drawPizzaBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._fritaBoss)drawFritaBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);

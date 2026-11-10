@@ -154,3 +154,31 @@ test('dragon-v611: drawDragonBossSignals no lanza excepciones', ()=>{
   };
   assert.doesNotThrow(()=>drawDragonBossSignals(ctx,e,{x:8000,y:0},60,false));
 });
+
+test('dragon-v611: cada brasero ganado persiste antes del guardado y vuelve tras Continue', async()=>{
+ const {packSave,unpackSave}=await import('../systems/save.js');
+ const g={
+  roomId:'w1-dragon',roomDef:{id:'w1-dragon',growthChapter:'dragon',dragonChapter:true},
+  player:{id:'dragon',x:1980,y:1094,w:40,h:40,grounded:true,xp:0,health:100,
+   _cast:{id:'breath',slot:0,t:92}},
+  world1:{tick:105,stations:DRAGON_BRAZIERS_V611.map(s=>({...s,done:false}))},
+  world1Stations:{},world1Seals:[],roomAlbums:{},keepsakes:[],score:0,t:100,
+  save(){this.lastSaved=packSave(this);this.saveCount=(this.saveCount||0)+1;}
+ };
+ updateDragonChapter(g);
+ assert.deepStrictEqual(g.world1Stations['w1-dragon'],[0]);
+ assert.deepStrictEqual(g.lastSaved.world1Stations['w1-dragon'],[0]);
+ assert.equal(g.player.xp,55);
+ g.player.x=4380;g.player._cast={id:'breath',slot:0,t:125};g.t=130;g.world1.tick=130;
+ updateDragonChapter(g);
+ assert.deepStrictEqual(g.world1Stations['w1-dragon'],[0,1]);
+ assert.deepStrictEqual(g.lastSaved.world1Stations['w1-dragon'],[0,1]);
+ const resumed=unpackSave(g.lastSaved,'dragon');
+ assert.deepStrictEqual(resumed.world1Stations['w1-dragon'],[0,1],'Continue must restore both physical braziers');
+ assert.equal(g.score,300,'a physical brazier scores only once');
+ updateDragonChapter(g);
+ assert.equal(g.saveCount,2,'completed braziers cannot write duplicate saves');
+ g.player.x=6780;g.t=200;
+ updateDragonChapter(g);
+ assert.deepStrictEqual(g.world1Stations['w1-dragon'],[0,1],'an expired breath cannot light the next brazier');
+});

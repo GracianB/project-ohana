@@ -32,7 +32,29 @@ try{
   const forms=new Set([0]);let deaths=0,iterations=0,minHp=s.hp,railRun=false;
   for(let i=0;i<7000&&!s.world1.sealed;i++){
    iterations=i;
-   if(s.hp<=0){assert.ok(++deaths<=12,'natural retries exhausted '+hero);await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();s=await step(90);}
+   if(s.hp<=0){
+    const attempt=++deaths, p=s.player||{};
+    const hazard=await page.evaluate(async()=>{
+     const id=window.__OHANA_E2E.state().roomId;
+     const room=(await import('/systems/world1-rooms.js')).WORLD1_ROOMS[id];
+     const player=window.__OHANA_E2E.state().player;
+     if(!room||!player)return null;
+     return (room.hazards||[]).filter(h=>h.type==='death').map(h=>({
+      id:h.id,x:h.x,w:h.w,distance:Math.round(h.x-(player.x+player.w))
+     })).sort((a,b)=>Math.abs(a.distance)-Math.abs(b.distance))[0]||null;
+    });
+    const evidence={hero,iteration:i,attempt,room:s.roomId,evo:s.evo,
+     x:Math.round(p.x),y:Math.round(p.y),vx:p.vx,vy:p.vy,
+     jumps:p.jumps,maxJumps:p.maxJumps,grounded:p.grounded,
+     xp:s.xp,hp:s.hp,done:s.world1?.done,nearestLethalGap:hazard,
+     lastRuntimeFault:s.lastRuntimeFault};
+    await fs.writeFile('test-results/v600/death-'+hero+'-'+attempt+'.json',
+     JSON.stringify(evidence,null,2)+'\\n');
+    if(attempt<=2||attempt===8||attempt===12||attempt===13)
+     await page.screenshot({path:'test-results/v600/death-'+hero+'-'+attempt+'.png'});
+    assert.ok(attempt<=12,'natural retries exhausted '+JSON.stringify(evidence));
+    await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();s=await step(90);
+   }
    await films();s=await state();forms.add(s.evo);minHp=Math.min(minHp,s.hp);
    if(hero==='kilo'){
     // Same physical controller as the isolated V606 journey. Stay on this page,
@@ -107,7 +129,10 @@ try{
    if(!node&&p.grounded&&p.y<1000&&hero!=='cat')await hold('s');else await release('s');
    s=await step(node&&jump?16:Math.abs(dx)>24?Math.min(14,Math.max(1,Math.floor(Math.abs(dx)/7))):20);
    await release('d');await release('a');if(node&&hero==='kilo'){await release('w');await release('s');}if(jump){await release('w');s=await step(1);}
-   assert.equal(s.runtimeFaults,0);
+   assert.equal(s.runtimeFaults,0,
+     'First runtime exception '+JSON.stringify({hero,iteration:i,room:s.roomId,
+       x:Math.round(s.player.x),evo:s.evo,phase:s.world1Cine,
+       fault:s.lastRuntimeFault}));
    if(i%150===0){await fs.writeFile('test-results/v600/campaign-debug.json',JSON.stringify({s,expedition,node}));await page.screenshot({path:'test-results/v600/campaign-current.png'});}
    if(i%150===0)console.log('CAMPAIGN',JSON.stringify({hero,i,x:Math.round(s.player.x),hp:s.hp,done:s.world1.done,evo:s.evo,boss:boss?.hp,expedition:expedition?.done.length,target:node?.id,y:Math.round(s.player.y)}));
   }
@@ -119,8 +144,17 @@ try{
   assert.notEqual(s.roomId,'w1-'+hero,'earned east exit crosses physically');await films();s=await state();
   await fs.writeFile('test-results/v600/campaign-progress.json',JSON.stringify({journal,current:s.roomId},null,2));
  }
- assert.equal(s.roomId,'w1-final');assert.equal(s.hero,'kilo');assert.equal(s.evo,4);
- const gauntlet=await playGauntlet(page);s=await state();assert.equal(s.gauntlet.found.length,10);journal.push({gauntlet});
+ // Entering the Heart preserves Yomi, the tenth earned hero. The ritual,
+ // not the east doorway, allows a deliberate fighter choice for Quimera.
+ assert.equal(s.roomId,'w1-final');
+ assert.equal(s.hero,order.at(-1),'final-room entry must preserve the last earned hero until the ritual');
+ assert.equal(s.evo,4);
+ const gauntlet=await playGauntlet(page);s=await state();
+ assert.equal(s.gauntlet.found.length,10);
+ assert.ok(gauntlet.fighterChoices.some(choice=>choice.guardian==='quimera'&&choice.fighter==='kilo'),
+  'Kilo must be selected through the authored final ritual, not forced on room entry');
+ assert.equal(s.hero,'kilo','the selected Quimera fighter is now the active hero');
+ journal.push({gauntlet});
  let deaths=0;const phases=new Set(),filmsSeen=new Set(),hudPhases=new Set();
  await fs.mkdir('test-results/v494',{recursive:true});
  for(let i=0;i<11000&&!s.world1Won;i++){

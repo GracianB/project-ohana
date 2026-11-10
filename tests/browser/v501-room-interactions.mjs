@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
+import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 import {startServer} from './server.mjs';
 const server=await startServer(0);let browser;
 try{
@@ -15,7 +16,9 @@ try{
  await page.clock.install({time:new Date('2026-10-24T12:00:00Z')});
  await page.clock.pauseAt(new Date('2026-10-24T12:00:01Z'));
  const step=async n=>{
-  await page.evaluate(n=>window.__OHANA_E2E.step(n),n);
+  // Preserve the physical jump required by authored oil/void pits.
+  // No position, HP, objective or world-state injection.
+  await advanceTerrainControls(page,n);
   await page.clock.runFor(16);
   // A truly earned evolution pauses the game and intentionally hides the
   // objective card. Resume through the actual UI before movement continues.
@@ -55,7 +58,11 @@ try{
  async function approach(x,done){
   let state=await step(1),lastX=state.player.x;
   for(let n=0;n<400&&!await done(state);n++){
-   assert.ok(state.hp>0,'route must not require injected healing or a death bypass');
+   assert.ok(state.hp>0,'route must not require injected healing or a death bypass: '+
+     JSON.stringify({x:state.player.x,y:state.player.y,vx:state.player.vx,
+       vy:state.player.vy,grounded:state.player.grounded,hp:state.hp,
+       room:state.roomId,done:state.world1.done,target:x,step:n,
+       lastFault:state.lastRuntimeFault}));
    const dx=x-state.player.x-state.player.w/2;
    await page.keyboard.up('d');await page.keyboard.up('a');
    if(Math.abs(dx)>18)await page.keyboard.down(dx>0?'d':'a');
@@ -122,6 +129,11 @@ try{
  // preempt (not delete) the delivery objective. Dismiss through the actual
  // clickable announcement, then prove the live heat objective reappears.
  const goalCard=page.locator('#notification-container .game-notification[data-persistent="1"]');
+ // The oven can schedule an evolution one animation frame AFTER the timer
+ // notification becomes visible. Flush real browser timers before checking
+ // visibility; an active evolution correctly hides the HUD until dismissed.
+ await page.clock.runFor(500);
+ await step(1);
  const interstitials=[];
  for(let n=0;n<18;n++){
    if(await goalCard.isVisible())break;
