@@ -102,6 +102,7 @@ function face(c, r) {
   }, 0);
   eye(c, -10, -3.5, .94, r); eye(c, 11, -3.5, 1, r);
   oval(c, -17, 7.4, 3.9, 1.8, P.rose); oval(c, 19, 7.2, 3.7, 1.8, P.rose);
+  oval(c, -15, 6.4, 1.1, 1.1, '#ffffff'); oval(c, 21, 6.2, 1.1, 1.1, '#ffffff');
   // Nose, philtrum and paired muzzle lobes are one centered construction.
   shape(c, '#d697ae', () => {
     c.moveTo(-1, 7.8); c.quadraticCurveTo(2.4, 5.4, 6, 7.8);
@@ -138,6 +139,7 @@ function face(c, r) {
     c.moveTo(.1, -30.3); c.quadraticCurveTo(3.7, -28.9, 6.7, -31);
   });
   line(c, P.light, .8, () => { c.moveTo(1.6, -30); c.quadraticCurveTo(1.6, -33, 3.3, -35.3); });
+  oval(c, 3.4, -38, 1.4, 1.4, '#ffffff');
   shape(c, P.gold, () => {
     c.moveTo(3, -20); c.bezierCurveTo(-4.8, -21, -4.8, -12.5, 3, -13.5);
     c.bezierCurveTo(-1.6, -15, -1.6, -18.4, 3, -20);
@@ -195,6 +197,9 @@ export function drawMoonKitten(c, p = {}) {
     c.quadraticCurveTo(-20, -22 + lag, -25, -23 + lag);
   }, 0);
   line(c, '#e6d6ed', .8, () => { c.moveTo(-21, -9); c.quadraticCurveTo(-15, -3, -3, -1); });
+  // Bioluminescent starry spark at tail tip
+  shape(c, '#7ef3ff', () => { c.ellipse(-14, -25 + lag, 2.2, 2.2, 0, 0, TAU); }, 0);
+  shape(c, '#ffffff', () => { c.ellipse(-14, -25 + lag, 1.1, 1.1, 0, 0, TAU); }, 0);
   c.restore();
   const hind = {x: -15 + step * 8, y: jump ? -10 : fall ? -1 : -1 - Math.max(0, Math.cos(phase)) * run * 5};
   let fore = {x: 15 - step * 7 + reach * 19, y: jump ? -15 : fall ? 1 : victory ? -21 : -1 - Math.max(0, Math.cos(phase + .8)) * run * 5};
@@ -207,6 +212,24 @@ export function drawMoonKitten(c, p = {}) {
     fore = {x: fore.x + (target[0] - fore.x) * spell, y: fore.y + (target[1] - fore.y) * spell};
   }
   fore.y -= groom * 14;
+  // Bioluminescent spirit corona and starlight halo
+  if (!dead) {
+    c.save();
+    c.globalAlpha = reduced ? .16 : .15 + Math.sin(t * .08) * .04;
+    shape(c, '#bdf4ff', () => { c.ellipse(1, -26, 30, 21, 0, 0, TAU); }, 0);
+    c.globalAlpha = reduced ? .25 : .22 + Math.sin(t * .08) * .06;
+    line(c, '#6ee7ff', 1.1, () => { c.ellipse(1, -26, 27, 18, 0, 0, TAU); });
+    c.restore();
+    if (!reduced) {
+      c.save();
+      for (let k = 0; k < 3; k++) {
+        const a = k * (TAU / 3) + t * .04;
+        const sx = Math.cos(a) * 26 + 1, sy = -27 + Math.sin(a) * 16;
+        oval(c, sx, sy, 1.2, 1.2, k === 0 ? '#7ef3ff' : k === 1 ? '#ffbde8' : '#fff494');
+      }
+      c.restore();
+    }
+  }
   limb(c, {x:-17,y:-20}, {x:hind.x-6,y:hind.y-1}, true, true, air ? 2 : 0);
   limb(c, {x:10,y:-27}, {x:fore.x-6,y:fore.y-2}, true, false, air ? 2 : 0);
   // The pear-shaped haunch, spine, breast and belly share one continuous mass.

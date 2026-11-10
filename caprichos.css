@@ -124,8 +124,8 @@ body.playing .ability-slot.locked{opacity:.68!important;filter:saturate(.35);}
 #help #btn-close-help{position:sticky;bottom:0;z-index:2;display:block;margin-left:auto;box-shadow:0 0 0 7px #f4efdf;}
 
 /* V606 · the hero, two resources, one glance. Canvas art keeps its real shape. */
-body.playing #hud .hud-block.player{padding:10px 12px 11px;background:linear-gradient(135deg,#284953f7,#0a2436f7 72%);border:1px solid #d4e6cc50;border-top:2px solid var(--tint,#b6e6ce);box-shadow:0 7px 20px #03172255,inset 0 1px #fff2ca14;}
-body.playing #hud .hud-ident{gap:10px;margin-bottom:8px;}
+body.playing #hud .hud-block.player{padding:7px 12px 8px;background:linear-gradient(135deg,#284953f7,#0a2436f7 72%);border:1px solid #d4e6cc50;border-top:2px solid var(--tint,#b6e6ce);box-shadow:0 7px 20px #03172255,inset 0 1px #fff2ca14;}
+body.playing #hud .hud-ident{gap:10px;margin-bottom:4px;}
 body.playing #hud .hud-avatar{position:relative;width:52px;height:52px;flex:0 0 52px;overflow:visible;border-radius:15px;border:1px solid #e8d6a799;box-shadow:0 3px 0 #061b2b80,0 0 0 3px #e0dbad0c;background:#14303f;}
 body.playing #hud .hud-avatar canvas{border-radius:14px;}
 body.playing #hud .hud-avatar::after{content:attr(data-form);inset:auto -4px -3px auto;width:17px;height:17px;display:grid;place-items:center;background:#f1d693;border:2px solid #153242;border-radius:5px;color:#1b3944;font:700 10px/1 Outfit,sans-serif;z-index:2;}

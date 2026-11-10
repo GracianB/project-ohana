@@ -93,7 +93,11 @@ function tail(c,r){
  c.save();c.translate(-36,-27);c.rotate(r.tail);
  path(c,P.shadow,()=>{c.moveTo(0,8);c.bezierCurveTo(-15,10,-19,0,-12,-4);c.bezierCurveTo(-15,-12,-4,-17,0,-10);c.bezierCurveTo(7,-14,14,-6,10,1);c.quadraticCurveTo(12,10,0,8);});
  path(c,P.ivory,()=>{c.moveTo(-2,5);c.bezierCurveTo(-12,5,-15,-2,-8,-5);c.quadraticCurveTo(-8,-13,0,-9);c.bezierCurveTo(6,-11,10,-4,5,0);c.quadraticCurveTo(6,5,-2,5);},0);
- line(c,P.light,1.7,()=>{c.moveTo(-10,-3);c.quadraticCurveTo(-7,-8,-3,-6);});c.restore();
+ line(c,P.light,1.7,()=>{c.moveTo(-10,-3);c.quadraticCurveTo(-7,-8,-3,-6);});
+ // Luminous starry spark at tail tip
+ oval(c, -8, -5, 2.2, 2.2, '#7eeaff', 0, 0);
+ oval(c, -8, -5, 1.1, 1.1, '#ffffff', 0, 0);
+ c.restore();
 }
 function ear(c,x,y,angle,far,r){
  c.save();c.translate(x,y);c.rotate(angle);
@@ -173,6 +177,25 @@ export function drawMoonHare(c,pose={}){
  const r=moonHarePose(pose),rearHip={x:-22,y:-23},frontHip={x:17,y:-32+r.chest};
  c.save();c.lineCap='round';c.lineJoin='round';c.translate(r.bodyX,r.bodyY);c.rotate(r.lean);
  if(r.dead)c.translate(-4,-18);
+
+ // V636 · Bioluminescent astral spirit aura for Moon Hare
+ if (!r.dead) {
+  c.save();
+  c.globalAlpha = r.reduced ? 0.18 : 0.16 + Math.sin(r.t * 0.07) * 0.05;
+  path(c, '#c8b4ff', () => { c.ellipse(-2, -32, 42, 30, -0.08, 0, TAU); }, 0);
+  c.globalAlpha = r.reduced ? 0.28 : 0.24 + Math.sin(r.t * 0.07) * 0.07;
+  line(c, '#7eeaff', 1.2, () => { c.ellipse(-2, -32, 38, 26, -0.08, 0, TAU); });
+  c.restore();
+  if (!r.reduced) {
+   c.save();
+   for (let k = 0; k < 3; k++) {
+    const a = k * (TAU / 3) + r.t * 0.04;
+    const sx = Math.cos(a) * 36 - 2, sy = -32 + Math.sin(a) * 20;
+    oval(c, sx, sy, 1.3, 1.3, k === 0 ? '#7eeaff' : k === 1 ? '#ffbde8' : '#ffe9a8', 0, 0);
+   }
+   c.restore();
+  }
+ }
  magic(c,{...r,charge:0,attack:0});tail(c,r);
  leg(c,{hip:{x:rearHip.x-5,y:rearHip.y},paw:{x:r.backX-5+r.farOffset,y:r.backY-1},rear:true,far:true,fold:r.air?-.25:0});
  leg(c,{hip:{x:frontHip.x-5,y:frontHip.y},paw:{x:r.frontX-7,y:r.frontY-r.pawLift-2},far:true});
