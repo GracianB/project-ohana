@@ -25,6 +25,9 @@ try {
   }setLook('vector');return result;
  });
 
+ // Output all optical measurements BEFORE any assertion, so a failure
+ // exposes the complete five-stage curve instead of hiding later regressions.
+ console.log('Michi optical size matrix:',JSON.stringify(audit.filter(r=>r.id==='cat').map(({look,evo,height})=>({look,evo,height}))));
  for(const row of audit){assert.deepEqual(row.before,row.after,'hitbox changed');const target=heroHeightTarget(row.id,row.evo);
   // V463 «quita límites»: only a floor (forms never shrink below the curve) and a
   // generous sanity ceiling, so big chunky forms like Trueno Gordo may grow.
