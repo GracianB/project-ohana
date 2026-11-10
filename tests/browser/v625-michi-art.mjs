@@ -12,10 +12,27 @@ try{
  await fs.mkdir(dir,{recursive:true});
  const page=await browser.newPage(),errors=[],selection=[];
  page.on('pageerror',e=>errors.push(e.message));
- await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await page.keyboard.press('Escape');
+ await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);
+ // Enter through the actual opening gate before interacting with the stage.
+ // Escape alone does not guarantee the family portal is mounted and painted.
+ await page.locator('.oi-enter').click();
+ await page.locator('#family-camp').waitFor({state:'visible'});
  for(const [width,height]of[[1280,900],[390,844],[320,568]]){
-  await page.setViewportSize({width,height});await page.waitForTimeout(180);
-  await page.locator('.char-card[data-id="cat"]').click();
+  await page.setViewportSize({width,height});
+  const catCard=page.locator('.char-card[data-id="cat"]');
+  await catCard.scrollIntoViewIfNeeded();
+  // Verify that the real pointer target is the character card, rather than
+  // silently substituting keyboard activation for a broken mouse/touch hitbox.
+  const hit=await page.evaluate(()=>{
+    const e=document.querySelector('.char-card[data-id="cat"]'),r=e.getBoundingClientRect();
+    const x=r.left+r.width/2,y=r.top+r.height/2,node=document.elementFromPoint(x,y);
+    return {id:node?.closest('.char-card')?.dataset.id||null,
+      tag:node?.tagName||'',className:String(node?.className||''),
+      point:{x,y},rect:{x:r.x,y:r.y,w:r.width,h:r.height},
+      camp:document.querySelector('#family-camp')?.getBoundingClientRect().toJSON()};
+  });
+  assert.equal(hit.id,'cat','Michi must receive physical pointer input: '+JSON.stringify(hit));
+  await catCard.click();
   for(let form=0;form<5;form++){
    const button=page.locator(`[data-camp-form="${form}"]`);await button.click();await page.waitForTimeout(90);
    assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),'cat');
