@@ -29,7 +29,18 @@ try{
     return {id:node?.closest('.char-card')?.dataset.id||null,
       tag:node?.tagName||'',className:String(node?.className||''),
       point:{x,y},rect:{x:r.x,y:r.y,w:r.width,h:r.height},
-      camp:document.querySelector('#family-camp')?.getBoundingClientRect().toJSON()};
+      camp:document.querySelector('#family-camp')?.getBoundingClientRect().toJSON(),
+      layout:Object.fromEntries(['#char-select','.title-shell','#family-camp','.camp-scene',
+        '#camp-canvas','.hero-stage','#chars','#chars-grid'].map(sel=>{
+          const n=document.querySelector(sel),b=n?.getBoundingClientRect(),css=n?getComputedStyle(n):null;
+          return [sel,n?{rect:{x:b.x,y:b.y,w:b.width,h:b.height},
+            position:css.position,transform:css.transform,display:css.display,z:css.zIndex,
+            pointer:css.pointerEvents,offsetParent:n.offsetParent?.id||n.offsetParent?.className}:null];
+        })),
+      target:{position:getComputedStyle(e).position,left:getComputedStyle(e).left,top:getComputedStyle(e).top,
+        width:getComputedStyle(e).width,height:getComputedStyle(e).height,
+        hitX:e.style.getPropertyValue('--hit-x'),hitY:e.style.getPropertyValue('--hit-y'),
+        offsetParent:e.offsetParent?.id||e.offsetParent?.className}};
   });
   assert.equal(hit.id,'cat','Michi must receive physical pointer input: '+JSON.stringify(hit));
   await catCard.click();
