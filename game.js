@@ -51,6 +51,7 @@ import {createChispinBoss,updateChispinBoss,drawChispinBossSignals,drawChispinBo
 import {createMichiRoom,drawMichicornioPlatformTrim} from "./systems/michi-room.js";
 import {drawMichicornioFoe} from "./systems/michicornio-foes.js";
 import {drawMichiGardens} from "./worlds/michi-gardens.js";
+import {drawMichiReactiveNight} from "./worlds/michi-reactive-night.js";
 import {enterMichiTrail,interactMichiTrail,michiTrailPrompt,updateMichiTrail,drawMichiTrail,michiTrailSnapshot,michiAbility} from './systems/michi-trail.js';
 import {createMichiBoss,updateMichiBoss,drawMichiBossSignals,drawMichiBossBody,MICHI_BOSS_ID} from './systems/michi-boss.js';
 import {createDragonRoom} from "./systems/dragon-room.js";
@@ -3344,6 +3345,8 @@ for (const e of game.enemies) {
   else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
+// Lighting belongs to Michi’s chapter only; real enemies and terrain remain unchanged.
+drawMichiReactiveNight(ctx,game,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
 if (!game.finale) {
   ctx.save(); ctx.translate(-game.cam.x, -game.cam.y);
   drawDinoHazards(ctx, dinoPuddles, dinoSparks, t); drawDinoAbductFx(ctx, game.player, t);

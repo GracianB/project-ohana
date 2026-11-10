@@ -1,0 +1,39 @@
+name: Michi Optical Growth Acceptance
+
+on:
+  push:
+    branches:
+      - 'feature/michi-bioluminescent-world-*'
+    paths:
+      - 'characters/**'
+      - 'tests/browser/character-size.mjs'
+      - '.github/workflows/michi-optical-growth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: michi-optical-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  optical:
+    name: 100 real sizes · five increasing Michi forms · unchanged hitboxes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install chromium
+      - name: Verify all 100 rendered poses and monotonic optical growth
+        run: npm run test:browser:characters
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: michi-optical-growth
+          path: test-results/visual/
+          if-no-files-found: ignore
