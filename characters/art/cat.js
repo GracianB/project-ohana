@@ -189,6 +189,16 @@ function drawMichiMythic(ctx,pose,r,f){
   const attackTilt = atkK * 0.16;
   ctx.save();ctx.scale(.74,.74);ctx.translate(lunge,-hover+(hurt?3:0));ctx.rotate(stRot + attackTilt);
 
+  // V636 · Bioluminescent spirit aura for Seahorse
+  if (state !== 'dead') {
+   ctx.save();
+   ctx.globalAlpha = still ? 0.18 : 0.16 + Math.sin(t * 0.08) * 0.05;
+   shape('#7ee8dc', () => { ctx.ellipse(2, -48, 36, 48, 0.1, 0, TAU); }, 0);
+   ctx.globalAlpha = still ? 0.28 : 0.25 + Math.sin(t * 0.08) * 0.07;
+   line('#39ffea', 1.2, () => { ctx.ellipse(2, -48, 32, 44, 0.1, 0, TAU); });
+   ctx.restore();
+  }
+
   // Aletas de hada translúcidas en la espalda que aletean grácilmente
   const wingFlap=still?0:Math.sin(t*(air?.46:run?.38:.22)+g.pulsePhase*6);
   const wingOpen=hurt?.35:state==='glide'?.98:Math.min(1,.82+castK*.15);
@@ -374,6 +384,25 @@ function drawMichiMythic(ctx,pose,r,f){
   const float=air?1:0,trail=run?-11:state==='glide'?-6:0,Lcast=state==='cast'&&power===2;
   ctx.save();ctx.scale(.72,.72);ctx.translate(0,-5-contraction*5+wave(0,.06));
   const rimY=-57,bellH=57,bellW=40;
+
+  // V636 · Bioluminescent abyssal aura for Medusa
+  if (state !== 'dead') {
+   ctx.save();
+   ctx.globalAlpha = still ? 0.18 : 0.16 + Math.sin(t * 0.09) * 0.05;
+   shape(pal.glow || '#7ef3ff', () => { ctx.ellipse(0, rimY - bellH * 0.45, bellW * 1.08, bellH * 0.58, 0, 0, TAU); }, 0);
+   ctx.globalAlpha = still ? 0.28 : 0.24 + Math.sin(t * 0.09) * 0.07;
+   line(pal.rim || '#ffffff', 1.2, () => { ctx.ellipse(0, rimY - bellH * 0.45, bellW * 1.02, bellH * 0.54, 0, 0, TAU); });
+   ctx.restore();
+   if (!still) {
+    ctx.save();
+    for (let k = 0; k < 3; k++) {
+     const a = k * (TAU / 3) + t * 0.045;
+     const sx = Math.cos(a) * 34, sy = rimY - 30 + Math.sin(a) * 22;
+     oval(sx, sy, 1.3, 1.3, k === 0 ? '#38bdf8' : k === 1 ? '#ff60d0' : '#fff3d7');
+    }
+    ctx.restore();
+   }
+  }
   const tent=(i,front)=>{
    const lane=i-3,kick=Lcast&&!still?michiLaunchKick(i,7,pose.cast):0,lash=front&&lane>0?atkK:0;
    const end=drawTentacle(ctx,{x:lane*bellW*.27*(1-.1*contraction),y:rimY+3,len:(50+i%3*4)*g.lengths[i]*(1-float*.14),phase:g.phases[i],t,still,
@@ -413,6 +442,16 @@ function drawMichiMythic(ctx,pose,r,f){
   ctx.scale(0.88 * (1 + squash * 0.2), 0.88 * (1 - squash * 0.2));
   ctx.translate(lungeAtk, -42 + floatY + hover + (hurt ? 4 : 0));
   ctx.rotate(stRot + spinAtk);
+
+  // V636 · Bioluminescent radiant spirit aura for Celestial Star
+  if (state !== 'dead') {
+   ctx.save();
+   ctx.globalAlpha = still ? 0.20 : 0.18 + Math.sin(t * 0.08) * 0.05;
+   shape('#ff9ebb', () => { ctx.ellipse(0, 0, 48, 48, 0, 0, TAU); }, 0);
+   ctx.globalAlpha = still ? 0.30 : 0.26 + Math.sin(t * 0.08) * 0.07;
+   line('#ffe066', 1.3, () => { ctx.ellipse(0, 0, 44, 44, 0, 0, TAU); });
+   ctx.restore();
+  }
 
   // Paleta celestial pastel de la estrella de mar
   const starCoat = '#ffaec0';      // Rosa coral pastel suave
@@ -582,9 +621,11 @@ function drawMichiMythic(ctx,pose,r,f){
   ctx.restore();
 
   // 6. Núcleo de perla celestial resplandeciente en el pecho/centro
-  oval(0, 11, 7, 7, '#ffe9a8');
+  oval(0, 11, 8.5, 8.5, '#ffe9a8');
+  oval(0, 11, 7, 7, '#ffc0d8');
   oval(0, 11, 5.2, 5.2, starCore);
-  oval(-1.3, 9.4, 1.8, 1.8, '#ffffff');
+  oval(-1.3, 9.4, 2.0, 2.0, '#ffffff');
+  sparkle(0, 11, 1.6, '#ffffff');
 
   // 7. Rostro ultra kawaii y tierno en el centro de la estrella de mar
   // Mejillas sonrosadas de rubor pastel (blush cheeks)

@@ -104,10 +104,23 @@ export function drawKineticSignature(ctx,p,H,pose,t=0,reduced=false){
   case "yarn":
    for(let i=0;i<n;i++){
     const rr=radius*(.42+i*.20),xx=x+i*h*.08;
-    ctx.beginPath();ctx.strokeStyle=i%2?a.alt:a.accent;ctx.lineWidth=width;
-    ctx.arc(xx,y-h*.06,rr,-.8,Math.PI*1.16);ctx.stroke();
-    if(i%2===0)diamond(ctx,xx+rr*.9,y-h*.12,radius*.22,a.glint);
-   }break;
+    const wobble=a.reduced?0:Math.sin(stamp*.08+i)*h*.02;
+    ctx.beginPath();ctx.strokeStyle=i%2?a.alt:a.accent;ctx.lineWidth=width*(i===0?1.3:1);
+    ctx.arc(xx,y-h*.06+wobble,rr,-.8,Math.PI*1.16);ctx.stroke();
+    diamond(ctx,xx+rr*.85,y-h*.10+wobble,radius*(.18+.04*(i%2)),a.glint);
+    if(!a.reduced&&i===0){
+     ctx.fillStyle=a.accent;
+     ctx.beginPath();ctx.arc(xx-rr*.5,y-h*.04+wobble,Math.max(1,radius*.12),0,TAU);ctx.fill();
+    }
+   }
+   if(air||attack){
+    curve(ctx,x-h*.24,y+h*.08,x+h*.10,y-h*.36,x+h*.38,y-h*.18,a.alt,width*1.4);
+    curve(ctx,x-h*.18,y+h*.12,x+h*.18,y-h*.28,x+h*.44,y-h*.08,a.accent,width);
+   }
+   if(turn||brake){
+    curve(ctx,x-h*.20,y+h*.02,x-h*.34,y-h*.18,x-h*.10,y-h*.26,a.alt,width*1.2);
+   }
+   break;
   case "embers":
    for(let i=0;i<n;i++){
     const xx=x+i*h*.085,yy=y-(i%3)*h*.08-(air?h*.12:0);
