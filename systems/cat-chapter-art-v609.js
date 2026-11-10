@@ -493,7 +493,28 @@ export function drawCatCreature(c,e,cam,t,reduced=false){
  else if(active)c.rotate(aim*.08);
  else if(hurt)c.rotate(-aim*.14);
 
+ // Aura bioluminiscente nocturna: los enemigos brillan en la oscuridad
+ const auraR=36+(active?14:0);
+ const auraGlow=c.createRadialGradient(0,-24,0,0,-24,auraR);
+ const glowCol=e.kind==='medusa'?'122,240,224':e.kind==='phosquito'?'180,140,255':e.kind==='platillo'?'255,180,220':e.kind==='murcielago'?'160,210,255':'215,160,255';
+ const alphaVal=reduced?0.24:0.20+Math.sin(time*0.08+(e.spawnIndex||0))*0.08+(active?0.16:0);
+ auraGlow.addColorStop(0,'rgba('+glowCol+','+alphaVal+')');
+ auraGlow.addColorStop(0.5,'rgba('+glowCol+','+(alphaVal*0.5)+')');
+ auraGlow.addColorStop(1,'rgba(0,0,0,0)');
+ c.fillStyle=auraGlow;
+ c.beginPath();
+ c.arc(0,-24,auraR,0,TAU);
+ c.fill();
+
  drawFn(c,{time,step,active,hurt,aim});
+
+ // Ojos y fotóforos bioluminiscentes que resaltan en la oscuridad
+ if(!hurt){
+  c.fillStyle='#ffffff';
+  c.beginPath();
+  c.arc(aim*2,-27,1.2,0,TAU);
+  c.fill();
+ }
 
  c.restore();
  return true;
@@ -743,6 +764,80 @@ export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
  ctx.fillStyle='rgba(8,2,18,'+darkPulse+')';
  ctx.fillRect(0,0,vw,vh);
 
+ // ── ECLIPSE LUNAR DINÁMICO MÓVIL Y RAYOS CELESTIALES ────────────────────
+ // El eclipse se desplaza majestuosamente por la bóveda astral y modula la luz del reino
+ const driftRate=0.0025;
+ const drift=reduced?0:(t*driftRate)%TAU;
+ const eclipX=(vw*0.5)+Math.cos(drift)*(vw*0.38);
+ const eclipY=95+Math.sin(drift)*28;
+ const eclipR=44;
+ const cycleRate=0.012;
+ const eclipseCycle=reduced?0.5:(Math.sin(t*cycleRate)+1)*0.5;
+
+ // 1. Cono de luz celestial y rayos proyectados desde el eclipse hacia el escenario
+ const rayAngle=Math.PI*0.5+Math.cos(drift)*0.22;
+ const rayLength=vh*1.15;
+ const rayAlpha=reduced?0.12:0.07+(1-eclipseCycle)*0.16+Math.sin(t*0.04)*0.03;
+ const lightCone=ctx.createLinearGradient(eclipX,eclipY,eclipX,vh);
+ lightCone.addColorStop(0,'rgba(200,245,255,'+(rayAlpha*1.6)+')');
+ lightCone.addColorStop(0.35,'rgba(170,145,255,'+rayAlpha+')');
+ lightCone.addColorStop(0.75,'rgba(122,240,224,'+(rayAlpha*0.5)+')');
+ lightCone.addColorStop(1,'rgba(10,4,28,0)');
+ ctx.fillStyle=lightCone;
+ ctx.beginPath();
+ ctx.moveTo(eclipX-22,eclipY);
+ ctx.lineTo(eclipX+Math.cos(rayAngle-0.34)*rayLength,vh);
+ ctx.lineTo(eclipX+Math.cos(rayAngle+0.34)*rayLength,vh);
+ ctx.lineTo(eclipX+22,eclipY);
+ ctx.closePath();
+ ctx.fill();
+
+ // 2. Corona exterior resplandeciente del eclipse
+ const coronaR=eclipR*(1.7+(1-eclipseCycle)*0.8);
+ const coronaGrad=ctx.createRadialGradient(eclipX,eclipY,eclipR*0.7,eclipX,eclipY,coronaR);
+ coronaGrad.addColorStop(0,'rgba(255,248,225,0.92)');
+ coronaGrad.addColorStop(0.25,'rgba(122,240,224,0.65)');
+ coronaGrad.addColorStop(0.55,'rgba(190,130,255,0.32)');
+ coronaGrad.addColorStop(0.85,'rgba(140,90,240,0.10)');
+ coronaGrad.addColorStop(1,'rgba(0,0,0,0)');
+ ctx.fillStyle=coronaGrad;
+ ctx.beginPath();
+ ctx.arc(eclipX,eclipY,coronaR,0,TAU);
+ ctx.fill();
+
+ // 3. Disco lunar oscuro del eclipse que oculta el núcleo astral
+ const moonOffsetX=(eclipseCycle-0.5)*14;
+ const moonOffsetY=(eclipseCycle-0.5)*7;
+ ctx.fillStyle='#090314';
+ ctx.beginPath();
+ ctx.arc(eclipX+moonOffsetX,eclipY+moonOffsetY,eclipR,0,TAU);
+ ctx.fill();
+ ctx.strokeStyle='rgba(122,240,224,0.65)';
+ ctx.lineWidth=1.8;
+ ctx.stroke();
+
+ // 4. Anillo de diamante y destello de luz estelar en el borde
+ if(eclipseCycle<0.75){
+  const ringAng=drift+Math.PI*0.25;
+  const ringX=eclipX+Math.cos(ringAng)*eclipR;
+  const ringY=eclipY+Math.sin(ringAng)*eclipR;
+  const ringGlow=ctx.createRadialGradient(ringX,ringY,0,ringX,ringY,24);
+  ringGlow.addColorStop(0,'#ffffff');
+  ringGlow.addColorStop(0.3,'rgba(255,240,185,0.9)');
+  ringGlow.addColorStop(0.7,'rgba(122,240,224,0.38)');
+  ringGlow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ringGlow;
+  ctx.beginPath();
+  ctx.arc(ringX,ringY,24,0,TAU);
+  ctx.fill();
+  ctx.strokeStyle='#ffffff';
+  ctx.lineWidth=1.4;
+  ctx.beginPath();
+  ctx.moveTo(ringX-10,ringY);ctx.lineTo(ringX+10,ringY);
+  ctx.moveTo(ringX,ringY-10);ctx.lineTo(ringX,ringY+10);
+  ctx.stroke();
+ }
+
  // ── AURORAS ABISALES más profundas y dinámicas ────────────────────────────
  const cur1=reduced?0:Math.sin(t*0.025)*35;
  const cur2=reduced?0:Math.cos(t*0.02)*40;
@@ -911,6 +1006,40 @@ export function drawCatAtmosphere(ctx,g,cam,t=0,reduced=false){
    }
   }
   ctx.globalAlpha=1;
+ }
+
+ // ── ILUMINACIÓN BIOLUMINISCENTE DINÁMICA DEL FONDO AL PASAR EL JUGADOR ─────
+ if(g?.player&&cam){
+  const p=g.player;
+  const plx=(p.x||0)+(p.w||24)*0.5-cam.x;
+  const ply=(p.y||0)+(p.h||26)*0.5-cam.y;
+  if(plx>-180&&plx<vw+180&&ply>-180&&ply<vh+180){
+   const pulseLight=reduced?1:1+Math.sin(t*0.08)*0.14;
+   const heroR=(120+(p.evo||0)*22)*pulseLight;
+   const heroGlow=ctx.createRadialGradient(plx,ply,0,plx,ply,heroR);
+   heroGlow.addColorStop(0,'rgba(122,240,224,0.32)');
+   heroGlow.addColorStop(0.35,'rgba(190,140,255,0.18)');
+   heroGlow.addColorStop(0.75,'rgba(80,200,240,0.06)');
+   heroGlow.addColorStop(1,'rgba(0,0,0,0)');
+   ctx.fillStyle=heroGlow;
+   ctx.beginPath();
+   ctx.arc(plx,ply,heroR,0,TAU);
+   ctx.fill();
+
+   // Estela de luz bioluminiscente en el suelo al desplazarse
+   if(!reduced&&(Math.abs(p.vx||0)>1||Math.abs(p.vy||0)>1)){
+    const trailX=plx-(p.facing||1)*26;
+    const trailY=ply+(p.grounded?12:20);
+    const trailGlow=ctx.createRadialGradient(trailX,trailY,0,trailX,trailY,68);
+    trailGlow.addColorStop(0,'rgba(122,240,224,0.22)');
+    trailGlow.addColorStop(0.6,'rgba(200,160,255,0.07)');
+    trailGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=trailGlow;
+    ctx.beginPath();
+    ctx.arc(trailX,trailY,68,0,TAU);
+    ctx.fill();
+   }
+  }
  }
 
  ctx.restore();
