@@ -60,7 +60,7 @@ try{
  assert.ok(current.world1.done>=1,'Michi must actually rescue a jellyfish before Pulse');
  assert.equal(current.ohanaPulse.state,'resonant');
  assert.equal(current.ohanaPulse.level,current.world1.done,'Pulse follows only earned stations');
- assert.ok(current.ohanaPulse.ledges>=1,'rescued jelly must produce actual new solid platforms');
+ assert.ok(current.ohanaPulse.ledges>=1,'rescued jelly must produce actual new solid platforms: '+JSON.stringify({room:current.roomId,stations:current.world1,pulse:current.ohanaPulse,worldW:current.worldW}));
  assert.equal(current.world1Seals.length,0,'one jellyfish must not grant a seal');
  for(const [width,height]of[[1280,900],[390,844],[320,568]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(90);

@@ -137,7 +137,6 @@ export function authorCatEncounters(room){
  ];
  for(const [x,y,w,h] of room.catFirstLightRoute){
   room.plats.push([x,y,w,h]);
-  room.orbs.push([x+w/2,y-45]);
  }
 
  // ── Fauna y Encuentros ───────────────────────────────────────────────────────
@@ -216,6 +215,9 @@ export function authorCatEncounters(room){
   // Cúspides Celestes Superiores
   [950,299],[1450,219],[3150,299],[3650,199],[4150,249],[5550,279],[6100,199],[6650,259],[7900,299],[8450,219]
  ])room.orbs.push([x,y]);
+ // Keep the V653 lesson lights: the V609 author replaces room.orbs at the
+ // end of layout creation, so these must be added AFTER its canonical pass.
+ for(const [x,y,w] of room.catFirstLightRoute||[])room.orbs.push([x+w/2,y-45]);
 
  return room;
 }

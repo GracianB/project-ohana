@@ -208,6 +208,9 @@ function complete(g, s, label) {
   // Each physical station grants score only once, including after a reload.
   if (!s._scored) { g.score = (g.score || 0) + 150; s._scored = true; }
   kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);catGrowth(g);cuernoGrowth(g);dragonGrowth(g);dinoGrowth(g);nextChapterGrowth(g);
+  // A newly earned jelly MUST produce its real platforms during the same
+  // authoritative station-completion tick, not on the next animation frame.
+  if(w.room==='w1-cat')syncMichiPulse(g);
   g.onWorld1Beat?.("station", w.hero);
   g.world1Stations = cleanWorld1Stations({ ...(g.world1Stations || {}),
     [w.room]: w.stations.filter(x => x.done && x.kind !== "oven").map(x => x.id) });
