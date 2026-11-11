@@ -112,9 +112,9 @@
       "title": "Tiempo de gracia al abandonar bordes",
       "module": "game.js",
       "proof": "v646-coyote.test.js",
-      "status": "planned",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "Caducidad real de coyote time al salir del suelo, sin salto infinito tardío; integración y regresiones V646 pendientes de certificación."
     },
     {
       "version": 647,

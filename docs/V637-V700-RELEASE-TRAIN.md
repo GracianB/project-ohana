@@ -22,7 +22,7 @@ La orden de trabajo no es saltar directamente a V700: **hay que construir una me
 | **V643** | Restablecimiento de cámara entre salas | Motor | `game.js` | `tests/v700-camera-feel.test.js` | Código candidato; verificar gates |
 | **V644** | Huella offline y precarga Versus coherentes | Motor | `sw.js` | `release:check + OHANA CI` | Código candidato; verificar gates |
 | **V645** | Salto en búfer verificado en diez héroes | Motor | `game.js` | `tests/v645-buffer.test.js` | Código candidato; verificar gates |
-| **V646** | Tiempo de gracia al abandonar bordes | Motor | `game.js` | `v646-coyote.test.js` | Pendiente |
+| **V646** | Tiempo de gracia al abandonar bordes | Motor | `game.js` | `tests/v646-coyote.test.js` | Código candidato; verificar gates |
 | **V647** | Altura variable y control de salto corto | Motor | `systems/player-movement.js` | `v647-variable-jump.test.js` | Pendiente |
 | **V648** | Aire: aceleración y frenado por personaje | Motor | `systems/player-movement.js` | `v648-air-control.test.js` | Pendiente |
 | **V649** | Esquinas, colisiones y escalones sin enganches | Motor | `engine/collide.js` | `v649-collision-edges.test.js` | Pendiente |

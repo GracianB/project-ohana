@@ -22,3 +22,19 @@ export function queueJumpPress(p,pressed=false,frames=10){
  p.buffer=pressed?ticks:Math.max(0,old-1);
  return p.buffer;
 }
+
+// V646: walking off a ledge preserves the ground jump ONLY for the genuine
+// coyote window. Without this, jumps=0 persists after coyote expires, so a
+// single-jump hero can jump from thin air arbitrarily late.
+export function tickWalkoffCoyote(p,wasGrounded=false){
+ if(!p)return {remaining:0,consumed:false};
+ if(p.grounded){p._walkoffPending=false;return {remaining:p.coyote||0,consumed:false};}
+ if(wasGrounded&&p.jumps===0)p._walkoffPending=true;
+ if(p.coyote>0)p.coyote--;
+ if(p._walkoffPending&&p.coyote<=0){
+  p.jumps=Math.max(1,Number.isFinite(p.jumps)?Math.floor(p.jumps):0);
+  p._walkoffPending=false;
+  return {remaining:0,consumed:true};
+ }
+ return {remaining:Math.max(0,p.coyote||0),consumed:false};
+}
