@@ -96,7 +96,7 @@ export function updateCatChapter(g,hurt){
 }
 
 export function catObjective(g){
- if(!catChapter(g)||g.world1?.sealed||!g.world1?.stations.every(s=>s.done))return null;
+ if(!catChapter(g)||g.world1?.sealed||!g.world1?.stations?.every(s=>s.done)||catBossDefeated(g))return null;
  return {
   x:8750,y:1134,label:'Oráculo Medusaluna',
   action:'Las cinco medusas están despiertas · esquiva sus 4 fases de aviso y ataca en recuperación cuando abra el núcleo'
