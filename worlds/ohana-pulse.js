@@ -17,7 +17,7 @@ const overlap=(a,b)=>a.x<b.x+b.w&&b.x<a.x+a.w&&Math.abs(a.y-b.y)<22;
 // The awakened jelly itself is a solid bridge (cat-chapter.js). The
 // new ledges rise from that bridge, creating an OPTIONAL new path.
 export function planMichiPulseLedges(g){
- const done=doneJellies(g),worldW=finite(g?.worldW)?g.worldW:14400;
+ const done=doneJellies(g),worldW=finite(g?.worldW)&&g.worldW>0?g.worldW:0;
  const base=(g?.platforms||[]).filter(p=>p&&!p._ohanaPulse),planned=[];
  for(const s of done)for(const [index,o] of [{x:95,y:-112,w:124},{x:244,y:-180,w:136}].entries()){
   const p={x:Math.round(s.x+o.x),y:Math.round(s.y+o.y),w:o.w,h:18,
@@ -31,7 +31,7 @@ export function planMichiPulseLedges(g){
 }
 export function syncMichiPulse(g){
  if(!isMichi(g)||!Array.isArray(g.platforms))return null;
- const w=g.world1,done=doneJellies(g),key=done.map(s=>s.id).sort((a,b)=>a-b).join(',');
+ const w=g.world1,done=doneJellies(g),key=done.map(s=>`${s.id}:${s.x}:${s.y}`).sort().join(',')+`|${g.worldW}`;
  if(w._ohanaPulseKey!==key){
   const previous=w._ohanaPulseKey;
   const lastCount=Number.isInteger(w._ohanaPulseCount)?w._ohanaPulseCount:done.length;
