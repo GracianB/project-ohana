@@ -96,7 +96,7 @@ import {updateNestArena,drawNestArena,nestArenaSnapshot} from './systems/nest-ar
 import {updateIslandSprings,drawIslandSprings,islandSpringsSnapshot} from './systems/island-springs.js';
 import {updateChampions,drawChampionSignals} from './systems/enemy-champions.js';
 import {enterAdventure,adventurePrompt,interactAdventure,updateAdventure,drawAdventure,adventureSnapshot} from './systems/room-adventures.js';
-import { horizontalLook, clearBufferedActions } from "./engine/camera.js";
+import { horizontalLook, smoothCameraLook, clearBufferedActions } from "./engine/camera.js";
 import { sanitizeRuntimeState } from "./systems/runtime-state.js";
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
@@ -683,6 +683,7 @@ const first = !game.visited[id];
 game.world1Cine = null;game._pendingWorld1Cine=null;
 game.roomId = id;
 resetKiloCombo(game);resetPlayerLocomotion(game.player);stopKiloFlight(game.player);
+ game._camCalm=null;
 game.islandSprings=null;game.nestArena=null;
 game._evolutionAttacks = null;
 game._assist = null;
@@ -3090,14 +3091,14 @@ function updateCam() {
 const p = game.player; if (!p) return;
 const vw = camW(), vh = camH();
 let lerp = 0.24;
-const look = horizontalLook(p);
-let tx = p.x + p.w / 2 + look - vw / 2;
+const pcY = p.y + p.h / 2;
+const cs = game._camCalm || (game._camCalm = {anchor:pcY,look:0});
+cs.look = smoothCameraLook(cs.look,horizontalLook(p));
+let tx = p.x + p.w / 2 + cs.look - vw / 2;
 // V468 calm camera: Y follows a platform anchor, not every jump. The anchor
 // re-centres only when the hero lands on a new height or leaves the vertical
 // dead zone (top 28% / bottom 30% of the view), so normal jumps don't bob the view.
-const pcY = p.y + p.h / 2;
 const wingCamera=p.id==="cat"&&!p.dead&&!p.grounded&&!!p._michiWingAir;
-const cs = game._camCalm || (game._camCalm = { anchor: pcY });
 if (!Number.isFinite(cs.anchor) || p.dead) cs.anchor = pcY;
 if (p.grounded||wingCamera) cs.anchor = pcY;
 else {
