@@ -64,3 +64,19 @@ test('V656 lunar oracle recovery opens a real damage window, then closes outside
  mind.phase='warn';prepareChapterBossV2(boss,g);
  assert.equal(boss.damageTakenScale,0,'next warning closes vulnerability');
 });
+
+test('V656 lunar recovery preserves a native spent budget and never refills exhausted windows',async()=>{
+ const {prepareChapterBossV2}=await import('../systems/chapter-boss-v2.js');
+ const mind={phase:'attack',timer:40,attack:0};
+ const boss={miniBoss:true,roomId:'w1-cat',hp:480,max:480,x:500,y:500,w:160,h:180,_astralCat:mind,_combatHealthScaled:true,_growthChapter:true};
+ const g={player:{x:100,y:600,w:40,h:60,vx:0},projectiles:[]};
+ prepareChapterBossV2(boss,g);
+ boss.damageWindowRemaining=90;
+ mind.phase='rest';prepareChapterBossV2(boss,g);
+ assert.equal(boss.damageWindowRemaining,90,'native recovery budget must not be overwritten');
+ assert.equal(boss.damageTakenScale,1);
+ boss.damageWindowRemaining=0;
+ prepareChapterBossV2(boss,g);
+ assert.equal(boss.damageWindowRemaining,0,'spent recovery cannot be refilled');
+ assert.equal(boss.damageTakenScale,0);
+});
