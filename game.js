@@ -1929,7 +1929,8 @@ p.facing = axisX;
 p.vx *= p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake;
 if (Math.abs(p.vx) < 0.04) p.vx = 0;
 }
-queueJumpPress(p,jumpPressed,CONTROL_FEEL.jumpBufferFrames);
+if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
+else queueJumpPress(p,false,CONTROL_FEEL.jumpBufferFrames);
 const masteryPlatforms = playerMasteryPlatforms(game);
 const allPlayerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
 const playerPlatforms=p._kiloFlightT>0?allPlayerPlatforms.filter(plat=>plat.h>40):allPlayerPlatforms;
