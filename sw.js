@@ -497,7 +497,7 @@ const PRECACHE_REVISIONS = {
   "systems/memory-pickup-art.js": "f85aa423441c0efa82ee158246b2e64ea47cc216",
   "startup.css": "546f7e36e6d84813d5498ed70e66ca8272f14db4",
   "systems/cat-chapter-art-v609.js": "ed3533278cc610e783375862a460455d5e496ff4",
-  "systems/cat-chapter.js": "7816471651bc7812eb7e94870ee77a1092d82cc5",
+  "systems/cat-chapter.js": "51f680aa459663ab3d4d6cc1de1001f08a732509",
   "systems/cat-encounters-v609.js": "8cfb998db626c9357300ca4b6ba739ba6cec922d",
   "systems/cuerno-chapter-art-v610.js": "a70e68b06a4d37f0fe6a3d17bd80abd96e655ae8",
   "systems/cuerno-chapter.js": "8712ed36dff06b7fd821494982ef177b111098fd",
