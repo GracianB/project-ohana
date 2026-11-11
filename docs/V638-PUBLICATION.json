@@ -1,0 +1,8 @@
+{
+  "release": "ohana-638",
+  "stage": "not_deployed",
+  "branch": "codex/quimera-final-redesign",
+  "target_branch": "main",
+  "url": "https://gracianb.github.io/project-ohana/",
+  "note": "Independent of the unmerged Michi redesign in PR #461. Prepared for review; no production deployment claimed."
+}

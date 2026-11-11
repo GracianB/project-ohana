@@ -20,7 +20,7 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; la comprobación remota entre dispositivos sigue pendiente.
 
-Registro de entrega: `ohana-636` / candidato de Michi bioluminiscente, sujeto a controles de publicación. [Validación](docs/V636-VALIDATION.json) · [Publicación](docs/V636-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+Registro de entrega: `ohana-638` / candidato de Quimera y combate final, sujeto a controles de publicación. [Validación](docs/V638-VALIDATION.json) · [Publicación](docs/V638-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
 
 ## Historial de desarrollo
 

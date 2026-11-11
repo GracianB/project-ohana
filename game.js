@@ -127,7 +127,7 @@ import { updateFusionProjectilesOnly, fusionShotHitsPlayer, createFusionBoss, up
 import { FUSION_STORY } from "./systems/world1-story.js";
 import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, syncWorld1Album, toggleWorld1Album, world1AlbumKey, world1AlbumFor } from "./systems/world1-collect.js";
 import { readWorld1Seals, storeWorld1Seals, world1StartRoom, world1ChapterEntry } from "./systems/world1-progress.js";
-import { createWorld1BossDirector, world1BossFilterDamage, updateWorld1BossDirector, drawWorld1BossBackdrop, drawWorld1BossTelegraphs, drawWorld1BossOverlay, world1BossAccessibleText } from "./systems/world1-boss.js";
+import { createWorld1BossDirector, world1BossFilterDamage, updateWorld1BossDirector, drawWorld1BossBackdrop, drawWorld1BossTelegraphs, drawWorld1BossOverlay, world1BossAccessibleText, quimeraCameraZoom } from "./systems/world1-boss.js";
 import { playWorld1Cine, flushWorld1CineQueue, updateWorld1Cine, skipWorld1Cine, drawWorld1Cine, world1CineActive, syncWorld1CineControls } from "./systems/world1-cine.js";
 import { makeDummy as w1MakeDummy, drawDummy as w1DrawDummy, baseHeight as w1BaseHeight } from "./systems/cinema-kit.js";
 // V468: Mundo 1 (diez salas de héroe + Corazón de Ohana) convive con el Mundo 2 (salas clásicas).
@@ -310,7 +310,7 @@ function boundedFinite(value, fallback, min, max) { return runtimeBoundedFinite(
 
 let viewW = 1280, viewH = 720, viewDpr = 1;
 const CAM_ZOOM = 1.02;
-function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
+function camZoom() { return quimeraCameraZoom(game,viewW,getLook() === "paint" ? 1 : CAM_ZOOM); }
 function camW() { return viewW / camZoom(); }
 function camH() { return viewH / camZoom(); }
 function fit() {
@@ -2370,7 +2370,7 @@ if (e.boss) {
   }
   if (e.invuln > 0) e.invuln--;
   try {
-    if (e._fusionBoss) updateFusionBoss(e, game, { hurtPlayer, showBossMessage, beep, reduceMotion: game.reduceMotion || reduceMotion });
+    if (e._fusionBoss) updateFusionBoss(e, game, { hurtPlayer, beep, reduceMotion: game.reduceMotion || reduceMotion });
     else updateBossNido(e, game, {
       t, hurtPlayer, showBossMessage, makeFoe,
       ROOM_W: game.worldW, ROOM_H: game.worldH,
@@ -3118,6 +3118,11 @@ const by = boss.y + boss.h * 0.28;
 const px = p.x + p.w / 2;
 const py = p.y + p.h * 0.35;
 tx = (px + bx) / 2 - vw / 2;
+if(boss._fusionBoss){
+ tx=(Math.min(px-55,bx-255)+Math.max(px+55,bx+255)-vw)/2;
+ const margin=viewW<700?60:100;
+ tx=Math.max(px-vw+margin,Math.min(tx,px-margin));
+}
 ty = (py * 0.45 + by * 0.55) - vh * 0.42;
 lerp = 0.18;
 }
@@ -3216,16 +3221,20 @@ const world = WORLDS[game.worldIndex] || WORLDS[0];
 // logic are unchanged; bounds no longer get recomputed per enemy/projectile.
 const viewportW=camW(),viewportH=camH();
 const shake = reduceMotion ? 0 : game.shake;
-const z = camZoom() * (game.experience?.zoomPulse(game) || 1);
+const fusionView=game.boss?._fusionBoss&&!world1CineActive(game);
+const z = camZoom() * (fusionView?1:(game.experience?.zoomPulse(game) || 1));
 const centerX = viewW / 2;
 const centerY = viewH / 2;
 const shakeX = (vfxRandom(5) - 0.5) * shake;
 const shakeY = (vfxRandom(6) - 0.5) * shake;
 
 ctx.save();
+if(fusionView){ctx.translate(shakeX,shakeY);ctx.scale(z,z);}
+else {
 ctx.translate(centerX + shakeX, centerY + shakeY);
 ctx.scale(z, z);
 ctx.translate(-centerX, -centerY);
+}
 if (paintedHubOn(game.roomId)) {
 drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, viewportW,viewportH);
 drawLivingWorld(ctx, game, t, viewportW,viewportH);
