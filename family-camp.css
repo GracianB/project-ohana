@@ -246,9 +246,14 @@ body.playing #char-select.camp-on {display:none!important;}
     flex:1 1 auto!important;
   }
   #char-select.camp-on #family-camp[data-world="1"] .camp-dossier {
-    flex:0 0 auto!important;
+    /* The title-controls are outside this flex panel. Keep the dossier
+       inside the available height, scrolling its contents instead of
+       spilling over the real Play/New Game buttons on touch screens. */
+    flex:1 1 0%!important;
     height:auto!important;
     min-height:0!important;
-    overflow:visible!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain;
   }
 }
