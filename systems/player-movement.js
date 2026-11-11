@@ -11,3 +11,14 @@ export function updatePlayerLocomotion(p,{axisX=0,pressedLeft=false,pressedRight
  return p._sprinting?Math.min(Math.abs(p.speed)*1.4,12):Math.abs(p.speed);
 }
 export function resetPlayerLocomotion(p){if(p){p._locomotion=null;p._sprinting=false;}}
+
+// V645: a tap up to ten frames before landing remains an actual future jump.
+// Sanitizing the queue keeps corrupted/stale values from producing phantom
+// jumps after an input reset; keyboard/touch/gamepad share this code path.
+export function queueJumpPress(p,pressed=false,frames=10){
+ if(!p)return 0;
+ const ticks=Number.isFinite(frames)?Math.max(1,Math.min(20,Math.trunc(frames))):10;
+ const old=Number.isFinite(p.buffer)?Math.max(0,Math.min(20,Math.trunc(p.buffer))):0;
+ p.buffer=pressed?ticks:Math.max(0,old-1);
+ return p.buffer;
+}

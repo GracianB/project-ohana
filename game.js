@@ -35,7 +35,7 @@ import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianBody,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight,stopKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
-import {updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
+import {updatePlayerLocomotion,resetPlayerLocomotion,queueJumpPress} from './systems/player-movement.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
@@ -1929,8 +1929,7 @@ p.facing = axisX;
 p.vx *= p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake;
 if (Math.abs(p.vx) < 0.04) p.vx = 0;
 }
-if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
-else if (p.buffer > 0) p.buffer--;
+queueJumpPress(p,jumpPressed,CONTROL_FEEL.jumpBufferFrames);
 const masteryPlatforms = playerMasteryPlatforms(game);
 const allPlayerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
 const playerPlatforms=p._kiloFlightT>0?allPlayerPlatforms.filter(plat=>plat.h>40):allPlayerPlatforms;
