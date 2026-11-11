@@ -187,11 +187,11 @@
       "label": "V653",
       "domain": "Michi",
       "title": "Michi: primer acto que enseña luz y rutas",
-      "module": "systems/world1-rooms.js",
-      "proof": "v653-michi-act1.test.js",
-      "status": "planned",
+      "module": "systems/cat-encounters-v609.js",
+      "proof": "tests/v653-michi-act1.test.js",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "Cinco plataformas físicas escalonadas y orbes en la primera ruta, respetando los tres abismos. Pendiente CI total."
     },
     {
       "version": 654,

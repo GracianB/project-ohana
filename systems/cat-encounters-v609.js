@@ -128,6 +128,18 @@ export function authorCatEncounters(room){
   }
  }
 
+ // V653: first authored low-route lesson, real collision-backed baby jumps.
+ // Teach the player to reach sleeping jellyfish at x=1680 y=914 while
+ // keeping the three later death pits unobstructed.
+ room.catFirstLightRoute=[
+  [300,1070,170,18],[560,1020,180,18],[840,980,170,18],
+  [1120,940,190,18],[1420,936,180,18]
+ ];
+ for(const [x,y,w,h] of room.catFirstLightRoute){
+  room.plats.push([x,y,w,h]);
+  room.orbs.push([x+w/2,y-45]);
+ }
+
  // ── Fauna y Encuentros ───────────────────────────────────────────────────────
  // 5 especies: medusa (flyer), phosquito (gunner), ufo (gunner),
  // murcielago (jumper), arana (pursuer).

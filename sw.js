@@ -498,7 +498,7 @@ const PRECACHE_REVISIONS = {
   "startup.css": "546f7e36e6d84813d5498ed70e66ca8272f14db4",
   "systems/cat-chapter-art-v609.js": "ed3533278cc610e783375862a460455d5e496ff4",
   "systems/cat-chapter.js": "7816471651bc7812eb7e94870ee77a1092d82cc5",
-  "systems/cat-encounters-v609.js": "f9751ba094afc367e532d8e4873f0565f1e340a9",
+  "systems/cat-encounters-v609.js": "b567935b1edde0d7d78cd86c1fcb27785bac52c5",
   "systems/cuerno-chapter-art-v610.js": "a70e68b06a4d37f0fe6a3d17bd80abd96e655ae8",
   "systems/cuerno-chapter.js": "8712ed36dff06b7fd821494982ef177b111098fd",
   "systems/cuerno-encounters-v610.js": "4e65603c4b3621184246c8246cd8d5e9e6ac62ff",
