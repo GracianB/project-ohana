@@ -528,7 +528,7 @@ const PRECACHE_REVISIONS = {
   "caprichos.css": "7d395b7b53c6b2ca31f553eb5c65d33a4126c916",
   "systems/field-guide.js": "f326c4c9624d1c046251776aecf47ace99e427cc",
   "worlds/living-realms.js": "665bdbf783583d65bf4a0ee4919a051280df4f8e",
-  "versus.html": "ae1d2d16ab4e6d05f285e09d7215feb168d83d84",
+  "versus.html": "aab53348255258b7b21c5b27188bb9422059934a",
   "versus.css": "1342f8b77b943437a13eba326cb3d0f0dd948991",
   "multiplayer/versus-client.js": "1bc9f1f41d54ed74ca137e0e15f44b2cd41e1509",
   "multiplayer/match-rules-v604.js": "22e0ec2591bf777b323edbd5b854aae0fa10f6e1",
