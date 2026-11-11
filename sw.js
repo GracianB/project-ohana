@@ -617,7 +617,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-rooms.js": "b069f94d44820a39e9e0c7aa68cc3026b90bb791",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
   "worlds/chapter-stagecraft.js": "8a8aa3e6006cf2e72cabd381268951fc1fc380a1",
-  "systems/world1-play.js": "45ed3b6bc0197222dd4a341e552e6689e68e6faa",
+  "systems/world1-play.js": "81a2d4dd45bbbe4ab732c0647e8c0fdcb96e6895",
   "systems/yomi-trail.js": "d39306a5ada636f9c9b2dee5107e7990da01134c",
   "systems/yomi-boss.js": "d92183bb60f4193a0a66875e4ff57f78b2189042",
   "worlds/yomi-observatory.js": "bbc3e453a487d67ec7ae8f51dde1b58d959cc2ce",

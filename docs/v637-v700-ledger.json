@@ -167,9 +167,9 @@
       "title": "Muerte justa y reinicio rápido con checkpoints",
       "module": "systems/world1-play.js",
       "proof": "v651-respawn-checkpoints.test.js",
-      "status": "planned",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "Al entrar o recuperar checkpoint en Michi se reconstruye el coral físico inmediatamente; no espera a un tick y no regala progreso. CI pendiente."
     },
     {
       "version": 652,

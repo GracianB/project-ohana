@@ -15,6 +15,7 @@ import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact,din
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
 import {catGrowth,updateCatChapter,catChapterReady,catObjective,drawCatChapter} from './cat-chapter.js';
+import {syncMichiPulse} from '../worlds/ohana-pulse.js';
 import {cuernoGrowth,updateCuernoChapter,cuernoChapterReady,cuernoObjective,drawCuernoChapter} from './cuerno-chapter.js';
 import {dragonGrowth,updateDragonChapter,dragonChapterReady,dragonObjective,drawDragonChapter} from './dragon-chapter.js';
 import {drawDragonBrazier} from './dragon-chapter-art-v611.js';
@@ -59,6 +60,9 @@ export function enterWorld1(g) {
   };
   kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);catGrowth(g);cuernoGrowth(g);dragonGrowth(g);dinoGrowth(g);nextChapterGrowth(g);enterKiloAirTrail(g);
   enterExpedition(g);
+  // V651: saved jellyfish must already own their real platforms before the
+  // first respawn frame. No physics tick or extra rescue reward is required.
+  if(r.id==='w1-cat')syncMichiPulse(g);
   return g.world1;
 }
 
@@ -106,6 +110,8 @@ export function restoreWorld1DeathCheckpoint(g, checkpoint) {
   }
   // A life retry never transports an item, extends Pizza's timer, or continues
   // a timed journey. All these variables are reset by enterWorld1().
+  // The restored rescue instantly produces its solid path, before movement.
+  if(w.room==='w1-cat')syncMichiPulse(g);
   return true;
 }
 
