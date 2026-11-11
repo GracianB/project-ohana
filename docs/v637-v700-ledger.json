@@ -222,9 +222,11 @@
       "title": "Michi: jefe astral con anticipación clara",
       "module": "systems/cat-chapter.js",
       "proof": "v656-michi-boss.test.js",
-      "status": "planned",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "Corrección funcional del Oráculo Medusaluna y regresiones V621/V656 presentes en HEAD 8597c8a; 15 workflows de PR en ese SHA concluyeron success (OHANA CI, quality, V600 y gates visuales/físicos). Pendiente aceptación jugable específica documentada; NO accepted.",
+      "implementation_sha": "8597c8a75f8fa0a1e8ed008c25f642d62430d722",
+      "ci_verified_sha": "8597c8a75f8fa0a1e8ed008c25f642d62430d722"
     },
     {
       "version": 657,
