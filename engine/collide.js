@@ -61,7 +61,11 @@ export function resolveBody(body, platforms, opts) {
       const previousFeet = prevY + body.h;
       const currentFeet = body.y + body.h;
       if (previousFeet > plat.y + 2 || currentFeet < plat.y - 1) continue;
-      if (!overlapX(body, plat, 1)) continue;
+      // V649: a controlled 1–2px forgiving toe-landing near a thin ledge.
+      // Explicitly opt-in from game.js for Michi/Dino only and only at
+      // walking speed. Solid walls and drop-through are never affected.
+      const grace=Number.isFinite(o.cornerForgiveness)?Math.max(0,Math.min(3,o.cornerForgiveness)):0;
+      if (!overlapX(body, plat, 1-grace)) continue;
       if (currentFeet >= plat.y - 1) {
         body.y = plat.y - body.h;
         body.vy = Math.min(0, body.vy || 0);

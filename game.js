@@ -2006,6 +2006,7 @@ const hit = resolveBody(p, playerPlatforms, {
   prevX: sx,
   prevY: sy,
   dropThroughY,
+  cornerForgiveness:(p.id==='cat'||p.id==='dino')&&Math.abs(p.vx)<4?3:0,
 });
 if (hit.grounded) {
   if (!p.grounded && incoming > 7) beep("land");

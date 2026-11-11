@@ -25,7 +25,7 @@ La orden de trabajo no es saltar directamente a V700: **hay que construir una me
 | **V646** | Tiempo de gracia al abandonar bordes | Motor | `game.js` | `tests/v646-coyote.test.js` | Código candidato; verificar gates |
 | **V647** | Altura variable y control de salto corto | Motor | `systems/player-movement.js` | `tests/v647-variable-jump.test.js` | Código candidato; verificar gates |
 | **V648** | Aire: aceleración y frenado por personaje | Motor | `systems/player-movement.js` | `tests/v648-air-control.test.js` | Código candidato; verificar gates |
-| **V649** | Esquinas, colisiones y escalones sin enganches | Motor | `engine/collide.js` | `v649-collision-edges.test.js` | Pendiente |
+| **V649** | Esquinas, colisiones y escalones sin enganches | Motor | `engine/collide.js` | `tests/v649-collision-edges.test.js` | Código candidato; verificar gates |
 | **V650** | Aterrizaje con señales visuales y auditivas | Motor | `game.js` | `v650-landing-feedback.test.js` | Pendiente |
 | **V651** | Muerte justa y reinicio rápido con checkpoints | Motor | `systems/world1-play.js` | `v651-respawn-checkpoints.test.js` | Pendiente |
 | **V652** | Paridad de teclado, táctil y mando | Motor | `systems/input.js` | `v652-input-parity.test.js` | Pendiente |
