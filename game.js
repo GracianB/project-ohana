@@ -52,6 +52,7 @@ import {createMichiRoom,drawMichicornioPlatformTrim} from "./systems/michi-room.
 import {drawMichicornioFoe} from "./systems/michicornio-foes.js";
 import {drawMichiGardens} from "./worlds/michi-gardens.js";
 import {drawMichiReactiveNight} from "./worlds/michi-reactive-night.js";
+import {drawMichiPulse,michiPulseSnapshot} from "./worlds/ohana-pulse.js";
 import {enterMichiTrail,interactMichiTrail,michiTrailPrompt,updateMichiTrail,drawMichiTrail,michiTrailSnapshot,michiAbility} from './systems/michi-trail.js';
 import {createMichiBoss,updateMichiBoss,drawMichiBossSignals,drawMichiBossBody,MICHI_BOSS_ID} from './systems/michi-boss.js';
 import {createDragonRoom} from "./systems/dragon-room.js";
@@ -3276,6 +3277,7 @@ drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,ga
 const realmTerrain={frita:{id:'frita-market',groundTop:'#e5cfa5',ground:'#9c8492',edge:'#f7e8c4'},yomi:{id:'yomi-observatory',groundTop:'#d7e6de',ground:'#8ca7af',edge:'#e8f4eb'},pizza:{id:'pizza-harbor',groundTop:'#eacba5',ground:'#b09179',edge:'#fff0cd'},dino:{id:'fossil-valley',groundTop:'#d9deb9',ground:'#90a48a',edge:'#eff1ce'},cat:{id:'lunar-garden',groundTop:'#e4d5e4',ground:'#a598ab',edge:'#f3e6e5'},cuerno:{id:'prism-grove',groundTop:'#cbdca9',ground:'#93a684',edge:'#edf1cb'},dragon:{id:'ember-forge',groundTop:'#e4c4a4',ground:'#9c8070',edge:'#f5dbb3'}}[game.roomDef?.hero];
 const heroTerrain=realmTerrain?{...world,...realmTerrain}:game.roomDef?.hero==='stitcho'?{...world,id:'dock',groundTop:'#e2c6a0',ground:'#a78f77',edge:'#efe0b9',platOutline:'#466577'}:game.roomDef?.hero==='chispin'?{...world,id:'sanctuary',groundTop:'#f1e5ca',ground:'#a3b8bf',edge:'#fff3d8',platOutline:'#5a788e'}:world;
 game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
+drawMichiPulse(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 if(game.roomDef?.kiloChapter&&!game.roomDef?.composition){ctx.save();ctx.strokeStyle='#273329';ctx.lineWidth=2;for(const pl of game.platforms){if(pl.h>24||!visibleForRender(pl,game.cam,viewportW,viewportH))continue;const px=pl.x-game.cam.x,py=pl.y-game.cam.y;ctx.fillStyle='#e0c67f';ctx.fillRect(px,py,pl.w,5);ctx.strokeRect(px,py,pl.w,pl.h);}ctx.restore();}
 if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
 }
@@ -4284,6 +4286,7 @@ state() {
     roomId: game.roomId,
     // Read-only campaign snapshots: no grant, bypass, or victory injection.
     world1: world1Snapshot(game),
+    ohanaPulse: michiPulseSnapshot(game),
     kiloInstruments:game.roomDef?.kiloEncounterVersion?game.world1?.stations.map(s=>({id:s.id,name:s.name,x:s.x,y:s.y,done:s.done,tones:s.tones||0,threatened:!!s.threatened})):null,
     world1Won: !!game.world1Won,
     combatReport:{...(game.combatReport||{hits:0,damage:0})},

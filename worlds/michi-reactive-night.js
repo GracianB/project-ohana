@@ -1,6 +1,7 @@
 // OHANA Michi · reactive bioluminescent ecosystem. Never changes physics/AI.
 // Rendering is screen-space, deterministic, budgeted and respects reduced motion.
 import {MICHI_BIOLUM_FORMS} from '../characters/michi-lumina.js';
+import {michiPulseSnapshot} from './ohana-pulse.js';
 const TAU=Math.PI*2,finite=(v,d=0)=>Number.isFinite(v)?v:d;
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,finite(v)));
 const palette=['#9cffd9','#96f7ff','#f3a5ff','#ffd9a0','#c0fcdf'];
@@ -19,8 +20,9 @@ export function planMichiLights(game,viewport={width:1280,height:720}){
   const camX=finite(game.cam?.x),camY=finite(game.cam?.y),p=game.player;
   const form=Math.max(0,Math.min(4,Math.floor(finite(p.evo))));
   const width=Math.max(1,finite(viewport.width,1280)),height=Math.max(1,finite(viewport.height,720));
+  const resonance=michiPulseSnapshot(game).level;
   const hero={x:finite(p.x)+finite(p.w)/2-camX,y:finite(p.y)+finite(p.h)*.45-camY,
-    radius:MICHI_BIOLUM_FORMS[form].radius*(form===4?1.15:1),color:palette[form]};
+    radius:MICHI_BIOLUM_FORMS[form].radius*(form===4?1.15:1)+resonance*11,color:palette[form]};
   const enemies=(game.enemies||[]).filter(e=>e&&!e.dead&&!e.dying&&(e.hp??1)>0)
     .map(e=>({x:finite(e.x)+finite(e.w)/2-camX,y:finite(e.y)+finite(e.h)/2-camY,
       radius:e.boss?105:42,color:EYE_COLORS[e.kind]||palette[2],boss:!!e.boss}))
@@ -52,7 +54,7 @@ export function planMichiLights(game,viewport={width:1280,height:720}){
       pathlights.push({x,y,near,id:index*4+k,color:palette[(index+k+form)%5]});
     }
   }
-  return {hero,enemies,flowers,pathlights,form,width,height,darkness:clamp(.70-form*.025,.5,.72)};
+  return {hero,enemies,flowers,pathlights,form,width,height,darkness:clamp(.70-form*.025-resonance*.018,.42,.72)};
 }
 let buffer=null,bufferCtx=null,bufferW=0,bufferH=0;
 function darkenBuffer(plan,t,reduced){
