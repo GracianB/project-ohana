@@ -123,9 +123,9 @@
       "title": "Altura variable y control de salto corto",
       "module": "systems/player-movement.js",
       "proof": "v647-variable-jump.test.js",
-      "status": "planned",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "El salto variable para Michi bebé y Dino está conectado a la física; Kilo conserva el coeficiente histórico. Tests pendientes de CI."
     },
     {
       "version": 648,

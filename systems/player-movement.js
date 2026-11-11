@@ -38,3 +38,12 @@ export function tickWalkoffCoyote(p,wasGrounded=false){
  }
  return {remaining:Math.max(0,p.coyote||0),consumed:false};
 }
+
+// V647: baby Michi has finer short hops; Dino has a weighted release.
+// Finalised Kilo and the other eight heroes retain their original 0.55 cut.
+export function heroJumpCut(p){
+ const held=Number.isFinite(p?._jumpHoldTicks)?Math.max(0,Math.min(30,p._jumpHoldTicks)):0;
+ if(p?.id==='cat'&&(Number(p.evo)||0)<3)return Math.min(.55,.47+held*.005);
+ if(p?.id==='dino')return Math.min(.55,.51+held*.0025);
+ return .55;
+}

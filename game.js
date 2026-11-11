@@ -35,7 +35,7 @@ import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianBody,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight,stopKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
-import {updatePlayerLocomotion,resetPlayerLocomotion,queueJumpPress,tickWalkoffCoyote} from './systems/player-movement.js';
+import {updatePlayerLocomotion,resetPlayerLocomotion,queueJumpPress,tickWalkoffCoyote,heroJumpCut} from './systems/player-movement.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
@@ -1949,13 +1949,16 @@ const cuernoAirJump = !(p.coyote > 0 || p.wall);
 p.vy = -p.jumpPower; p.jumps = p.coyote > 0 || p.wall ? 1 : p.jumps + 1;
 if (p.id === "cuerno" && cuernoAirJump && p.jumps === 2 && cuernoFormMods((Number(p.evo) || 0) + 1)?.unlock?.rainbowJump) cuernoDoubleJump(game.cuernoFx, p);
 if (p.wall) p.vx = 8 * p.wall;
-p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; beep("jump");
+p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; p._jumpHoldTicks=0; beep("jump");
 game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: p.color || "#fff", count: 10, size: 2.6, up: 1.4, speed: 2.2, life: 14 });
 }
 if (!jump) {
-if (p._jumpHeld && p.vy < -4) p.vy *= 0.55;
-p._jumpHeld = false;
+if (p._jumpHeld && p.vy < -4) {
+ if(p.id==='cat'||p.id==='dino')p.vy *= heroJumpCut(p);
+ else p.vy *= 0.55;
 }
+p._jumpHeld = false;p._jumpHoldTicks=0;
+}else if(p._jumpHeld)p._jumpHoldTicks=Math.min(30,(p._jumpHoldTicks||0)+1);
 if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
 if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
 {
