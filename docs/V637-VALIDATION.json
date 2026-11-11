@@ -4,11 +4,13 @@
   "verified": [
     "159 character/offline unit checks passed",
     "9 lineage/preload/offline accounting checks passed",
-    "Browser acceptance: five forms, 17 poses, three scales, both facings, reduced motion, 1280/390/320 selection and desktop/mobile chapter HUD"
+    "Browser acceptance: five forms, 17 poses, three scales, both facings, reduced motion, 1280/390/320 selection and desktop/mobile chapter HUD",
+    "Full unit suite: 1860 passed, zero failures",
+    "release:check: PASS, 395 runtime modules and 462 offline resources"
   ],
   "pending": [
-    "Final full unit suite",
     "Remote CI and production deployment"
   ],
-  "scope": "Only Michi artwork and presentation copy; physics, combat, hitboxes and other heroes unchanged."
+  "scope": "Only Michi artwork and presentation copy; physics, combat, hitboxes and other heroes unchanged.",
+  "source_pr": 461
 }
