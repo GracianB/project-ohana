@@ -1,0 +1,18 @@
+{
+  "release": "ohana-636",
+  "stage": "candidate",
+  "source_pr": 459,
+  "source_head": "d3842adf02ad5594a39d0f607f9a80bc99066326",
+  "evidence": "GitHub Actions for candidate commit",
+  "verified": [
+    "Michi Biolumina Visual Acceptance passed on d3842adf",
+    "Michi Optical Growth Acceptance passed on d3842adf"
+  ],
+  "pending": [
+    "OHANA CI",
+    "quality",
+    "V511 geometry/physical controls",
+    "GitHub Pages on merged release"
+  ],
+  "note": "This document is a candidate tracking record, not a claim of production deployment."
+}

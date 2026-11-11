@@ -55,12 +55,13 @@ test('V459: all five feline shapes survive 10 gestures and reduced-motion contex
 test('V459: character lineage is cat->lunar lynx->cat-eared jelly->moon hare->jelly-tail guardian',()=>{
  const src=readFileSync(new URL('../characters/art/cat.js',import.meta.url),'utf8');
  const name=ROSTER.find(x=>x.id==='cat');
- assert.equal(name.forms[1].name,'Hada Felina');
+ assert.equal(name.forms[1].name,'Hada del Firmamento');
  assert.ok(name.forms[2].name.includes('Medusa'));
- assert.equal(name.forms[3].name,'Conejornio Lunar');
- assert.equal(name.forms[4].name,'Michicornio Eclipse');
- assert.equal(name.forms[0].name,'Michicornio Bebé');
+ assert.equal(name.forms[3].name,'Estrella de Marea');
+ assert.equal(name.forms[4].name,'Capibara Astral');
+ assert.equal(name.forms[0].name,'Michi · Luciérnaga Lunar');
  // Each evolution has a dedicated anatomical rendering path after V625.
- for(const form of [0,1,2,3,4])assert.match(src,new RegExp('if\\(f==='+form+'\\)\\{'));
+ for(const form of [0,3,4])assert.ok(src.includes('if(f==='+form+'){'),'missing authored F'+form);
+ assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/,'Hada and Medusa remain separate crafted silhouettes');
  assert.deepEqual(MICHICORNIO_ACTIONS,['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);
 });

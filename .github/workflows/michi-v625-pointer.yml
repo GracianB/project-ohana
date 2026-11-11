@@ -1,0 +1,45 @@
+name: Michi V625 Pointer Acceptance
+
+on:
+  push:
+    branches:
+      - 'feature/michi-bioluminescent-world-*'
+    paths:
+      - 'tests/browser/v625-michi-art.mjs'
+      - 'family-camp.css'
+      - 'systems/family-camp.js'
+      - '.github/workflows/michi-v625-pointer.yml'
+  pull_request:
+    paths:
+      - 'tests/browser/v625-michi-art.mjs'
+      - 'family-camp.css'
+      - 'systems/family-camp.js'
+      - '.github/workflows/michi-v625-pointer.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pointer:
+    name: Real Michi pointer, five forms, hitboxes and HUD
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Real mouse and touch targeting at three viewports
+        run: |
+          CHROMIUM_BIN="$(node -p "require('playwright').chromium.executablePath()")" npm run test:browser:michi-art
+      - name: Preserve visual proof and hitbox diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: michi-v625-pointer-evidence
+          path: test-results/v625/
+          if-no-files-found: ignore

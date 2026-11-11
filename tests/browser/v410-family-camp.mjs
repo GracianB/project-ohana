@@ -19,6 +19,12 @@ const rect=await p.evaluate(async({width,height})=>{
  return cards[sel.cards.findIndex(card=>card.hero==='dino')];
 },{width:r.width,height:r.height});
 assert.ok(rect&&rect.w>0&&rect.h>0,'Dino must have a real selectable portal');
+const domRect=await p.locator('.char-card[data-id="dino"]').boundingBox();
+assert.ok(domRect && Math.abs(domRect.x-(r.x+rect.x))<6
+ && Math.abs(domRect.y-(r.y+rect.y))<6
+ && Math.abs(domRect.width-rect.w)<6
+ && Math.abs(domRect.height-Math.max(44,rect.h))<6,
+ 'Dino native target must align with its Canvas portal: '+JSON.stringify({domRect,r,rect}));
 await p.mouse.click(r.x+rect.x+rect.w/2,r.y+rect.y+rect.h/2);
 assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'dino','Canvas portal must select Dino');
 // Selecting Kilo from the HTML cards must reset keyboard navigation to Kilo,

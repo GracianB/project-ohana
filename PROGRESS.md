@@ -2885,3 +2885,8 @@ Validación de ohana-438: 1250/1250 pruebas unitarias; puerta de publicación co
 # OHANA · Pizza & Frita
 - Tallas estándar 64/82/100/120/140; Pizza tricolor elástica (brazos marrones con manoplas, F5 volcánica) vs Frita superhéroe diner azul marino (F5 Centella eléctrica).
 - Cinemáticas propias de 4 actos (Horno de leña / Al punto) enrutadas por presentation.js; fondos Puerto del Horno y Mercado Centella con gradientes cacheados; isla Puerto del banquete con horno, kiosco, guirnaldas y muelle.
+
+
+## OHANA 636 · Michi Biolumina (10 noviembre 2026)
+
+Release candidate: Luciérnaga Lunar, Hada del Firmamento, Medusa de las Mareas, Estrella de Marea y Capibara Astral. Sustituye Conejornio en el dibujo real manteniendo los diez personajes, sus cinco formas, hitboxes y guardados. Bosque nocturno reactivo y atlas de ayuda; cache offline `ohana-636`. Publicar únicamente después de CI, navegador y release gate.

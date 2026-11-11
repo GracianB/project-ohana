@@ -6,7 +6,7 @@
 
 **Diez historias. Una familia.**
 
-[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=635) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=636) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
 
@@ -20,7 +20,7 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; la comprobación remota entre dispositivos sigue pendiente.
 
-Registro de entrega: `ohana-635` / acceso al multijugador. [Validación](docs/V635-VALIDATION.json) · [Publicación](docs/V635-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
+Registro de entrega: `ohana-636` / candidato de Michi bioluminiscente, sujeto a controles de publicación. [Validación](docs/V636-VALIDATION.json) · [Publicación](docs/V636-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md).
 
 ## Historial de desarrollo
 

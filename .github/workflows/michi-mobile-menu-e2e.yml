@@ -1,0 +1,41 @@
+name: OHANA Mobile Menu E2E
+on:
+  push:
+    branches:
+      - 'feature/michi-bioluminescent-world-*'
+    paths:
+      - 'family-camp.css'
+      - 'sw.js'
+      - 'systems/family-camp.js'
+      - 'tests/browser/e2e.mjs'
+      - '.github/workflows/michi-mobile-menu-e2e.yml'
+  pull_request:
+    paths:
+      - 'family-camp.css'
+      - 'sw.js'
+      - 'systems/family-camp.js'
+      - 'tests/browser/e2e.mjs'
+      - '.github/workflows/michi-mobile-menu-e2e.yml'
+permissions:
+  contents: read
+jobs:
+  mobile-menu:
+    name: Complete browser E2E incl. non-overlapping mobile controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: CHROMIUM_BIN="$(node -p "require('playwright').chromium.executablePath()")" npm run test:browser
+      - name: Save E2E proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ohana-mobile-menu-e2e
+          path: test-results/
+          if-no-files-found: ignore

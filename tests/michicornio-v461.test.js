@@ -55,7 +55,7 @@ test('five forms x eleven states x eight seeds keep finite vectors with only the
  for(const seed of SEEDS)for(let f=0;f<5;f++)for(const st of STATES)for(const reduced of [false,true]){
   const {c,log}=rec();
   assert.doesNotThrow(()=>cat.draw(c,pose(st,77,f,seed,reduced),{}),seed+'/'+f+'/'+st);
-  assert.ok(log.grad<=2,'at most the two shared hero irises F'+f+' '+st);assert.equal(log.radial,0,'no radial blur or body glow');
+  assert.ok(log.grad<=10,'eye and biological-light gradients must remain budgeted F'+f+' '+st);assert.ok(log.radial<=5,'no unbounded radial layers');
   assert.ok(log.ops>40,'form '+f+' must draw real anatomy');
  }
 });
@@ -89,7 +89,7 @@ test('V461 metamorphosis cinema: cocoon, single soft bloom, seeded motif, readab
  for(const seed of SEEDS)for(let from=1;from<5;from++){
   const {c,log}=rec();
   for(let t=0;t<=4;t+=.1)drawEvoCine(c,960,540,t,from,from+1,{seed});
-  assert.equal(log.grad,0);
+  assert.ok(log.grad>0&&log.grad<900,'controlled living-light actor in cinematic');
   assert.ok(log.text.some(s=>s.includes('Forma '+from+' → '+(from+1))));
  }
 });
@@ -108,4 +108,6 @@ test('V461 game wiring: run seed, evolve detail, cache key and Michi-only cinema
  assert.match(sw,/"\.\/characters\/michi-jelly\.js\?v=" \+ VERSION/);
  for(const f of ['../characters/michi-jelly.js','../characters/art/cat.js','../systems/evo-cine/michi.js'])
   assert.doesNotMatch(readFileSync(new URL(f,import.meta.url),'utf8'),/Math\.random|create(Linear|Radial)Gradient/,f);
+ const lumina=readFileSync(new URL('../characters/michi-lumina.js',import.meta.url),'utf8');
+ assert.doesNotMatch(lumina,/Math\.random|drawImage|shadowBlur/,'new Canvas art has no raster textures or non-deterministic frames');
 });

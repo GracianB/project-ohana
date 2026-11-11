@@ -211,3 +211,49 @@ body.playing #char-select.camp-on {display:none!important;}
   pointer-events:auto!important;
   touch-action:manipulation;
 }
+
+/* OHANA 636 · Small-screen World 1 portal geometry.
+   A prior align-self:start plus a 100%-height flex child collapsed the
+   320px screen to a 147×115 canvas, putting the first row of portals ABOVE
+   the canvas and blocking real touch/pointer selection.
+   Keep a full-width stage tall enough for two rows plus the finale portal;
+   the dossier scrolls naturally below it instead of shrinking the stage. */
+@media (max-width:760px) {
+  #char-select.camp-on #family-camp[data-world="1"] {
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain;
+  }
+  #char-select.camp-on #family-camp[data-world="1"] .camp-scene {
+    align-self:stretch!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    flex:0 0 clamp(240px,45vh,420px)!important;
+    height:clamp(240px,45vh,420px)!important;
+    min-height:240px!important;
+    max-height:none!important;
+  }
+  #char-select.camp-on #family-camp[data-world="1"] #camp-canvas {
+    display:block!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    flex:1 1 auto!important;
+  }
+  #char-select.camp-on #family-camp[data-world="1"] .camp-dossier {
+    /* The title-controls are outside this flex panel. Keep the dossier
+       inside the available height, scrolling its contents instead of
+       spilling over the real Play/New Game buttons on touch screens. */
+    flex:1 1 0%!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain;
+  }
+}
