@@ -100,14 +100,10 @@ test("V353 authentic cat.js drawing, baby-to-guardian anatomy and eight existing
  const art=readFileSync(new URL("../characters/art/cat.js",import.meta.url),"utf8");
  const intro=readFileSync(new URL("../systems/intro.js",import.meta.url),"utf8");
  const draw=readFileSync(new URL("../characters/draw.js",import.meta.url),"utf8");
- for(const part of ["function solve(","function drawMichiMythic(","drawMichiLanternKitten(ctx,safe)","drawMichiTideStar(ctx,safe)","drawMichiAstralCapybara(ctx,safe)"])
-    assert.ok(art.includes(part),"cat anatomy missing "+part);
- assert.match(art,/const welcome=michiWelcomeRig\(safe,f\)/);
- assert.match(art,/if\(f===4\)\{drawMichiAstralCapybara/);
- assert.match(art,/i<9;i\+\+/);
- const lumina=readFileSync(new URL("../characters/michi-lumina.js",import.meta.url),"utf8");
- assert.match(lumina,/drawMoonKitten\(c,/,"original baby anatomy is inside the light lantern");
- assert.match(lumina,/drawMichiEye\(c,/,"new evolved forms reuse hero iris system");
+ assert.match(art,/drawRebelCat\(ctx,\{\.\.\.safe,form:f\}\)/);
+ const rebel=readFileSync(new URL("../characters/michi-rebel.js",import.meta.url),"utf8");
+ assert.match(rebel,/michiWelcome/,'welcome gestures reach the new cat rig');
+ assert.doesNotMatch(rebel,/drawImage|Math\.random/,'the cat remains deterministic vector art');
  assert.match(intro,/michiWelcomeBeat\(loop,reduce\)/);
  assert.match(intro,/michiWelcome:michiBeat/);
  assert.match(draw,/pose\.michiWelcome=p\._introMichi/);

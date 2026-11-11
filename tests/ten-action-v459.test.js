@@ -52,16 +52,10 @@ test('V459: all five feline shapes survive 10 gestures and reduced-motion contex
   assert.doesNotThrow(()=>cat.draw(c,pose(action,112,f,reduced),{}),f+'/'+action+'/'+reduced);
  }
 });
-test('V459: character lineage is cat->lunar lynx->cat-eared jelly->moon hare->jelly-tail guardian',()=>{
+test('rebel cat lineage keeps five feline forms and the public action contract',()=>{
  const src=readFileSync(new URL('../characters/art/cat.js',import.meta.url),'utf8');
  const name=ROSTER.find(x=>x.id==='cat');
- assert.equal(name.forms[1].name,'Hada del Firmamento');
- assert.ok(name.forms[2].name.includes('Medusa'));
- assert.equal(name.forms[3].name,'Estrella de Marea');
- assert.equal(name.forms[4].name,'Capibara Astral');
- assert.equal(name.forms[0].name,'Michi · Luciérnaga Lunar');
- // Each evolution has a dedicated anatomical rendering path after V625.
- for(const form of [0,3,4])assert.ok(src.includes('if(f==='+form+'){'),'missing authored F'+form);
- assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/,'Hada and Medusa remain separate crafted silhouettes');
+ assert.deepEqual(name.forms.map(f=>f.name),['Michi · Cachorro Rebelde','Michi · Alas de Asfalto','Michi · Garra Nocturna','Michi · Sombra Callejera','Michi · Leyenda de Nueve Colas']);
+ assert.match(src,/drawRebelCat\(ctx,\{\.\.\.safe,form:f\}\)/);
  assert.deepEqual(MICHICORNIO_ACTIONS,['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);
 });

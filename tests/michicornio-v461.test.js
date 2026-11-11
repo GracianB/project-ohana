@@ -60,13 +60,10 @@ test('five forms x eleven states x eight seeds keep finite vectors with only the
  }
 });
 
-test('V461 randomness is visible but identity-safe: palette changes jelly forms, not the cat base',()=>{
+test('rebel identity stays recognizable across saved seeds and evolves its accents',()=>{
  const colours=(seed,f)=>{const {c,log}=rec();cat.draw(c,pose('idle',60,f,seed),{});return [...log.fills].sort().join('|');};
- const jelly=new Set(SEEDS.slice(0,6).map(s=>colours(s,2)));
- assert.ok(jelly.size>=3,'seeds must visibly vary the Medusa Onírica');
- const base=(seed)=>{const {c,log}=rec();cat.draw(c,pose('idle',60,1,seed),{});return log.fills.has('#efe4ff')&&log.fills.has('#fff8ff');};
- // V462: F1 became the Hada Felina; its fur stays canonical, only wings/dust take the dream palette.
- assert.ok(SEEDS.every(base),'fairy-cat fur colours are canonical for every seed');
+ for(let f=0;f<5;f++)assert.equal(new Set(SEEDS.map(s=>colours(s,f))).size,1,'saved seed cannot change the costume');
+ assert.equal(new Set([0,1,2,3,4].map(f=>colours(42,f))).size,5,'each evolution has its own palette');
 });
 
 test('V461 reduced motion is clock independent for every form',()=>{
@@ -89,7 +86,7 @@ test('V461 metamorphosis cinema: cocoon, single soft bloom, seeded motif, readab
  for(const seed of SEEDS)for(let from=1;from<5;from++){
   const {c,log}=rec();
   for(let t=0;t<=4;t+=.1)drawEvoCine(c,960,540,t,from,from+1,{seed});
-  assert.ok(log.grad>0&&log.grad<900,'controlled living-light actor in cinematic');
+  assert.ok(log.grad===0,'flat vector actor in cinematic');
   assert.ok(log.text.some(s=>s.includes('Forma '+from+' → '+(from+1))));
  }
 });

@@ -46,23 +46,23 @@ test('V462 cat mouth opens with tongue and fangs; closed mouth still reads as ω
 
 test('Hada Felina retains its winged, luminous identity after the V625 anatomy review',()=>{
  const p=ROSTER.find(x=>x.id==='cat');
- assert.equal(p.forms[1].name,'Hada del Firmamento');assert.equal(p.evoNames[1],'Hada del Firmamento');
+ assert.equal(p.forms[1].name,'Michi · Alas de Asfalto');assert.equal(p.evoNames[1],'Michi · Alas de Asfalto');
  const ops=f=>{const r=rec();cat.draw(r.c,pose('idle',60,f),{});return r.log;};
  const kitten=ops(0),fairy=ops(1);
  const curves=o=>(o.ops.bezierCurveTo||0)+(o.ops.quadraticCurveTo||0)+(o.ops.ellipse||0);
  assert.ok(curves(fairy)>20&&curves(kitten)>20,'both bodies use articulated curved silhouettes');
- assert.ok([...fairy.fills].filter(x=>!kitten.fills.has(x)).length>=6,'fairy palette differs from kitten');
+ assert.ok([...fairy.fills].filter(x=>!kitten.fills.has(x)).length>=2,'fairy palette differs from kitten');
  // Wing beat: airborne flaps faster than idle hover.
  const wing=t=>{const tr=[];const c=new Proxy({},{get:(_,k)=>k==='scale'||k==='rotate'?(...a)=>tr.push(a.map(v=>v.toFixed(3)).join()):()=>{},set:()=>true});
   drawFairyWing(c,{x:0,y:0,side:1,size:60,open:1,flap:Math.sin(t*.3)});return tr.join('|');};
  assert.notEqual(wing(3),wing(8),'wings beat');
 });
 
-test('fourth-form tide star retains five luminous arms during attack',()=>{
+test('fourth-form rebel cat retains its coat during attack',()=>{
  const idle=rec(),atk=rec();
  cat.draw(idle.c,pose('idle',30,3),{});cat.draw(atk.c,pose('attack',30,3),{});
- assert.ok(idle.log.fills.has('#85eddb')&&atk.log.fills.has('#85eddb'),'starfish anatomy stays luminous through attack');
- assert.ok((atk.log.ops.ellipse||0)>20,'independently sculpted arms, pearls and shared face');
+ assert.ok(idle.log.fills.has('#30384e')&&atk.log.fills.has('#30384e'),'street-cat coat stays recognizable through attack');
+ assert.ok((atk.log.ops.ellipse||0)>10,'separate paws, muzzle and eyes');
 });
 
 test('every form x state retains articulated vectors and permits only shared eye iris gradients',()=>{
@@ -75,9 +75,9 @@ test('every form x state retains articulated vectors and permits only shared eye
  assert.doesNotMatch(readFileSync(new URL('../characters/michi-anatomy.js',import.meta.url),'utf8'),/Math\.random|create(Linear|Radial)Gradient/);
 });
 
-test('tide star replaces the archived moon hare in the fourth evolution slot',()=>{
- assert.match(src,/if\(f===3\)\{drawMichiTideStar/);
- assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Estrella de Marea');
+test('street cat replaces the archived tide star in the fourth evolution slot',()=>{
+ assert.match(src,/drawRebelCat/);
+ assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Michi · Sombra Callejera');
  const a=rec();cat.draw(a.c,pose('run',30,3),{});assert.ok(a.log.grad<=10);assert.ok(a.log.radial<=5);
 });
 
@@ -86,9 +86,7 @@ test('fairy materials remain deterministic for the saved Michi seed',()=>{
  assert.equal(fills(7),fills(7),'deterministic per seed');
 });
 
-test('baby and fourth form use their own anatomical renderers through the canonical cat dispatcher',()=>{
- assert.match(src,/drawMichiLanternKitten\(ctx,safe\)/,'baby is a living light capsule around its own anatomy');
- assert.match(src,/drawMichiTideStar\(ctx,safe\)/,'fourth form is a new starfish anatomy');
- assert.match(src,/drawMichiAstralCapybara\(ctx,safe\)/,'final form is a new capybara anatomy');
+test('all rebel forms use the canonical cat dispatcher',()=>{
+ assert.match(src,/drawRebelCat\(ctx,\{\.\.\.safe,form:f\}\)/,'all forms use the same street-cat identity');
  for(const f of [0,1,3]){const a=rec(),b=rec();cat.draw(a.c,pose('run',10,f),{});cat.draw(b.c,pose('run',30,f),{});assert.ok(a.log.grad<=10);assert.ok(a.log.radial<=5);}
 });

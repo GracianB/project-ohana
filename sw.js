@@ -1,6 +1,7 @@
-const VERSION = "ohana-636";
+const VERSION = "ohana-637";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./characters/michi-rebel.js?v=" + VERSION,
   "./multiplayer/entry.js",
   "./multiplayer/entry-route.js",
   "./final-ritual.css?v=" + VERSION,
@@ -472,10 +473,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/michi-field-manual.js": "ae18461211658d7e2df45033d66d1aece8fb9fbe",
-  "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
-  "worlds/michi-reactive-night.js": "9b1ed6bababa47ca8e79689f6584072457a4436a",
-  "characters/michi-lumina.js": "92d4aa6ca82d6ac87b3fe984cf5ceb7d45b98461",
+  "characters/michi-rebel.js": "95f4232ef41eab636a3aa24b9711afb853197d71",
   "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
   "multiplayer/entry-route.js": "41d98a5b44ec9d397c4677de0c83f6017f373b5d",
   "final-ritual.css": "cb3fa260f55cd948ce875311f33f0adffcdfb16a",
@@ -487,6 +485,10 @@ const PRECACHE_REVISIONS = {
   "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
   "characters/michi-flight.js": "f76733588d2d43bfc6b8d696e5faffb027cf3a22",
   "characters/michi-kitten.js": "0b28dc3a4d648c476092f7655c65001ed6db40f7",
+  "systems/michi-field-manual.js": "a8c5d280894f7bc33a29c1acd081c0ac901795ea",
+  "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
+  "worlds/michi-reactive-night.js": "9b1ed6bababa47ca8e79689f6584072457a4436a",
+  "characters/michi-lumina.js": "f26a71eb2069e010dc0834e16cbe91d0042cb592",
   "engine/foes/creature-finish.js": "5eef8f7c348cfed6bd3739db70fa7ecea1ac6f5b",
   "systems/open-chapter-pits.js": "8ab9008a7e82758bf836e01493b9b85c0dbdac54",
   "characters/michi-moon-hare.js": "a1277d29bd3b184ef5f68ebad936fa492cf9e9cd",
@@ -526,7 +528,7 @@ const PRECACHE_REVISIONS = {
   "caprichos.css": "7d395b7b53c6b2ca31f553eb5c65d33a4126c916",
   "systems/field-guide.js": "f326c4c9624d1c046251776aecf47ace99e427cc",
   "worlds/living-realms.js": "665bdbf783583d65bf4a0ee4919a051280df4f8e",
-  "versus.html": "ae1d2d16ab4e6d05f285e09d7215feb168d83d84",
+  "versus.html": "d9c7014a774615db0e3ec3db509a7315c340f375",
   "versus.css": "1342f8b77b943437a13eba326cb3d0f0dd948991",
   "multiplayer/versus-client.js": "1bc9f1f41d54ed74ca137e0e15f44b2cd41e1509",
   "multiplayer/match-rules-v604.js": "22e0ec2591bf777b323edbd5b854aae0fa10f6e1",
@@ -687,7 +689,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3ec310ed762b14ba11fec3f2ba4cc356296cd612",
-  "index.html": "7d372933252f14566fefec6454ce4528516a5a28",
+  "index.html": "a949ec7ccf1f8bd109cafdef5024ded447c399f6",
   "multiplayer.html": "778d4e60ca9b94799d52206d48c7e8827c72510b",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
@@ -715,7 +717,7 @@ const PRECACHE_REVISIONS = {
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
   "game.js": "9fb824d89ca7f63c4663ef00a0e4c69bea19064e",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
-  "characters/art/cat.js": "124e18abe3e4be9d82f7e34cb74f01a35a8af768",
+  "characters/art/cat.js": "71a63ad4f6842602f56a8edd3d373f622065710d",
   "characters/ten-action-acting.js": "8c56db05f0625ebce31e10abbba5305be881d0ff",
   "previews/animation-lab.html": "d12d4213dc7952102701c8ea5741f41523de105e",
   "previews/michi-design.html": "ba6f32aef28b06966e4871c981eb9f4e4bab77ac",
@@ -740,7 +742,7 @@ const PRECACHE_REVISIONS = {
   "characters/definitive.js": "de08a60a9ae7198707cb68f557a6d7be15b2ea3a",
   "characters/look.js": "f9e1d610ba74bec6823cc8fcc093d3b2875f7c07",
   "characters/rig.js": "39d9896105813a416dd38b46b2ef92668b3d7d00",
-  "characters/roster.js": "a0501cada4f7d9db5fb585a666d0461efe793808",
+  "characters/roster.js": "fa9573685b8b5b2ef3e15b0b74b3b9361c3a22d6",
   "characters/signature.js": "77c787347a7eb94b7f0e869ed4b7f89b3a23831f",
   "characters/sprites.js": "3c1785be5f0da46f16d277ca56091fa35f6f764a",
   "engine/audio.js": "f1bf4e2766876b53b355b1426b8f8647a8d66359",

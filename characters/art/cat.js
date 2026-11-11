@@ -1,3 +1,4 @@
+import {drawRebelCat} from '../michi-rebel.js';
 import {drawMichiEye} from '../michi-eyes.js';
 import {drawMoonKitten} from '../michi-kitten.js';
 import {drawMichiLanternKitten,drawMichiTideStar,drawMichiAstralCapybara,drawMichiLivingHalo} from '../michi-lumina.js';
@@ -636,43 +637,7 @@ function draw(ctx, pose, R) {
   for(const key of ['t','phase','speed','atk','cast','flourish','flourishN','hurt','bounce','land','turnPulse','brake','bodyTilt','michiSeed'])safe[key]=finite(src[key]);
   if(safe.reduceMotion){safe.t=0;safe.phase=0;safe.atk=safe.state==='attack'?.5:0;safe.cast=safe.state==='cast'?.5:0;safe.land=0;safe.bounce=0;safe.bodyTilt=0;safe.flourish=0;safe.hurt=.5;}
   const f = Math.max(0, Math.min(4, Math.round(finite(Number(safe.form)))));
-  if(f===0){drawMichiLanternKitten(ctx,safe);return;}
-  if(f===3){drawMichiTideStar(ctx,safe);return;}
-  if(f===4){drawMichiAstralCapybara(ctx,safe);return;}
-  const r = solve(safe);
-  if(!Number.isFinite(safe.michiDuetAge)){
-    r.motion=michiMotion(safe,f);
-    if(r.motion.mood)r.mood=r.motion.mood;
-  }
-  if(Number.isFinite(safe.michiDuetAge)){r.mood=safe.michiDuetAge<36?'happy':'angry';r.tail=2.1;r.arm=safe.michiDuetAge<36?-1.7:.4;}
-  const welcome=michiWelcomeRig(safe,f);
-  if(welcome.active){
-    r.arm+=welcome.arm;r.leg+=welcome.leg;
-    r.tail+=welcome.tail;r.bob+=welcome.bob;
-    r.michiHead=welcome.head+welcome.look;r.michiEar=welcome.ear;
-    r.michiWing=welcome.wing;r.mood=welcome.mood;
-    r.michiHaunch=welcome.haunch;r.michiPaw=welcome.paw;r.michiLook=welcome.look;
-  }
-  drawMichiLivingHalo(ctx,safe,f);
-  ctx.save();
-  drawMichiFootwork(ctx,safe,f,safe.t||0);
-  // Each form owns its accents; no shared halo obscures the face.
-  ctx.translate(0, r.bob + (safe.bounce || 0) * 2);
-  // One connected original cat silhouette per form: tail, feet, shoulder
-  // roots, ears and (F4 only) feathered wings expand together from the paws.
-  if(welcome.active)ctx.scale(welcome.torsoX,welcome.torsoY);
-  if(r.motion){ctx.translate(0,r.motion.lift+r.motion.crouch);ctx.rotate(r.motion.lean);ctx.scale(r.motion.sx,r.motion.sy);}
-  if (r.st === "dead") {
-    ctx.rotate(.60);
-    ctx.translate(8, -10);
-  } else if (r.st === "hurt") ctx.rotate(-0.18);
-  else if (r.st === "jump") ctx.scale(0.94, 1.08);
-  else if (r.st === "fall") ctx.scale(1.05, 0.92);
-  else if (r.slot === 1) ctx.scale(1.08, 0.9);
-  else if (safe.bodyTilt) ctx.rotate(safe.bodyTilt * 0.8);
-  drawMichiMythic(ctx,safe,r,f);
-  // The articulated body already performs the action; avoid doubled gesture FX.
-  ctx.restore();
+  drawRebelCat(ctx,{...safe,form:f});
 }
 
 export default { id: "cat", draw };
