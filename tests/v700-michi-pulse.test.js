@@ -63,3 +63,19 @@ test('reversed fixture progress removes the coral without moving existing platfo
  syncMichiPulse(g);g.world1.stations[0].done=false;syncMichiPulse(g);
  assert.equal(g.platforms.length,n);
 });
+
+test('room station coordinate changes rebuild physical coral without duplicates',()=>{
+ const g=fixture([0]);syncMichiPulse(g);
+ const first=g.platforms.filter(p=>p._ohanaPulse).map(p=>p.x);
+ const count=g.platforms.filter(p=>!p._ohanaPulse).length;
+ g.world1.stations.find(s=>s.id===0).x+=35;
+ syncMichiPulse(g);
+ const second=g.platforms.filter(p=>p._ohanaPulse).map(p=>p.x);
+ assert.equal(g.platforms.filter(p=>!p._ohanaPulse).length,count);
+ assert.deepEqual(second,first.map(x=>x+35));
+ assert.equal(new Set(g.platforms.filter(p=>p._ohanaPulse).map(p=>p._ohanaPulse)).size,second.length);
+});
+test('unknown world bounds cannot spawn speculative platforms',()=>{
+ const g=fixture([0]);delete g.worldW;
+ assert.deepEqual(planMichiPulseLedges(g),[]);
+});
