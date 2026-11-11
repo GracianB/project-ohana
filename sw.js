@@ -545,7 +545,7 @@ const PRECACHE_REVISIONS = {
   "systems/keepsakes.js": "e691b3201582f6dc9b86178c6bff936ae3ceaa39",
   "systems/final-gauntlet.js": "73f2708315ae224a9cd72fc77dfd8d477eda16db",
   "systems/fauna-morphs.js": "6d9852b2263dfc1803d29c451f84d4e09da65f01",
-  "systems/chapter-boss-v2.js": "09b57402975f5eebbc0560103299d3b17deb46d4",
+  "systems/chapter-boss-v2.js": "560e844f5eec01b6da465698f6df7170074c90f6",
   "systems/chapter-boss-art-v2.js": "1367233553735fae35dd532b642bf7357bb3f628",
   "systems/chapter-expedition-v2.js": "029124d1032e429df2fdab6e791f19d54003905e",
   "systems/memory-rewards-v2.js": "1d41604b4c3d42f278c61370c71412f918d0ba00",
