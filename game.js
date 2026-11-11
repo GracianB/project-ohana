@@ -35,7 +35,7 @@ import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianBody,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight,stopKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
-import {updatePlayerLocomotion,resetPlayerLocomotion,queueJumpPress,tickWalkoffCoyote,heroJumpCut,heroAirControl} from './systems/player-movement.js';
+import {updatePlayerLocomotion,resetPlayerLocomotion,queueJumpPress,tickWalkoffCoyote,heroJumpCut,heroAirControl,heroLandingImpact} from './systems/player-movement.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
@@ -2009,7 +2009,11 @@ const hit = resolveBody(p, playerPlatforms, {
   cornerForgiveness:(p.id==='cat'||p.id==='dino')&&Math.abs(p.vx)<4?3:0,
 });
 if (hit.grounded) {
-  if (!p.grounded && incoming > 7) beep("land");
+  if (!p.grounded && incoming > 7) {
+  beep("land");
+  const landing=heroLandingImpact(p,incoming,game.reduceMotion||reduceMotion);
+  if(landing)game.fx?.emit?.(p.x+p.w/2,p.y+p.h,landing);
+}
   p.vy = 0;
   p.grounded = true;
   p.jumps = 0;

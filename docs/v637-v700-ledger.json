@@ -156,9 +156,9 @@
       "title": "Aterrizaje con señales visuales y auditivas",
       "module": "game.js",
       "proof": "v650-landing-feedback.test.js",
-      "status": "planned",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "Aterrizajes con impacto visible únicamente tras colisión real en Michi/Dino; cantidad acotada y movimiento reducido; tests pendientes de quality."
     },
     {
       "version": 651,

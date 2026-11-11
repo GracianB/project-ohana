@@ -56,3 +56,13 @@ export function heroAirControl(p){
  if(p.id==='dino')return .86;
  return 1;
 }
+
+// V650: visual landing feedback follows real collision, never a fake raycast.
+// Kilo and the eight other kits keep the established audio/physics behavior.
+export function heroLandingImpact(p,fallSpeed,reduced=false){
+ const v=Number.isFinite(fallSpeed)?fallSpeed:0;
+ if(v<=7||!p||!['cat','dino'].includes(p.id))return null;
+ const heavy=p.id==='dino',strength=Math.min(2,Math.max(.5,(v-7)/7));
+ return {count:reduced?2:Math.min(20,Math.max(4,Math.round((heavy?10:7)*strength))),
+  color:heavy?'#d6ebb4':'#93f8eb',size:heavy?3.5:2.2,life:heavy?20:16};
+}
