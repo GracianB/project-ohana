@@ -37,6 +37,16 @@ export function planMichiPulseLedges(g){
   if([...base,...planned].some(q=>overlap(q,p)))continue;
   planned.push(p);
  }
+ // V655: only the fifth earned rescue completes the Moon Halo, a secret
+ // returnable sky route before the oracle. No boss arena shortcut, no
+ // collision over the final lethal chasm and no artificial seal.
+ const allFive=[0,1,2,3,4].every(id=>done.some(s=>s.id===id));
+ if(allFive)for(const [i,[x,y]] of [[7220,860],[7440,810],[7660,760],[7890,705]].entries()){
+  const p={x,y,w:160,h:18,_ohanaPulse:'cat:final:'+i,_ohanaPulseColor:'#ffe3b2'};
+  if(p.x<7150||p.x+p.w>=8260||p.x+p.w>worldW)continue;
+  if([...base,...planned].some(q=>overlap(q,p)))continue;
+  planned.push(p);
+ }
  return planned;
 }
 export function syncMichiPulse(g){
@@ -76,6 +86,22 @@ export function drawMichiPulse(ctx,g,cam,t=0,reduced=false){
    const fx=x+(i+.5)*p.w/5,fy=y-8-(i%2)*5+phase;
    ctx.globalAlpha=.52;ctx.fillStyle=col;ctx.beginPath();
    ctx.arc(fx,fy,1.5+(i%2),0,Math.PI*2);ctx.fill();
+  }
+ }
+ // A completed Moon Halo is a real, optional viewpoint over the forest.
+ // Its portal motif marks the end of the learn/combine/surprise progression.
+ if(ledges.some(p=>p._ohanaPulse?.startsWith('cat:final:'))){
+  const x=8080-(cam?.x||0),y=540-(cam?.y||0),radius=41;
+  if(x>-80&&x<w+80&&y>-80&&y<h+80){
+   ctx.save();
+   ctx.globalAlpha=.4;ctx.strokeStyle='#fce8b9';ctx.lineWidth=3;
+   ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.stroke();
+   ctx.globalAlpha=.7;ctx.fillStyle='#fff1c6';
+   for(let i=0;i<5;i++){
+    const a=(i/5)*Math.PI*2-(Math.PI/2)+(reduced?0:Math.sin(t*.014)*.07);
+    ctx.beginPath();ctx.arc(x+Math.cos(a)*radius,y+Math.sin(a)*radius,4,0,Math.PI*2);ctx.fill();
+   }
+   ctx.restore();
   }
  }
  ctx.restore();return ledges.length>0;

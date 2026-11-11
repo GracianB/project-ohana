@@ -209,11 +209,11 @@
       "label": "V655",
       "domain": "Michi",
       "title": "Michi: culminación de bosque y secretos",
-      "module": "systems/cat-chapter.js",
-      "proof": "v655-michi-act3.test.js",
-      "status": "planned",
+      "module": "worlds/ohana-pulse.js",
+      "proof": "tests/v655-michi-act3.test.js",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "El quinto rescate real revela el Halo Lunar: cuatro plataformas físicas opcionales con portal luminoso, sin saltar la arena del jefe ni cubrir pozos. Pendiente CI."
     },
     {
       "version": 656,

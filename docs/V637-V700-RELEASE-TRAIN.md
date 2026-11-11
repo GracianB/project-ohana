@@ -31,7 +31,7 @@ La orden de trabajo no es saltar directamente a V700: **hay que construir una me
 | **V652** | Paridad de teclado, táctil y mando | Motor | `engine/input.js` | `tests/v652-input-parity.test.js` | Código candidato; verificar gates |
 | **V653** | Michi: primer acto que enseña luz y rutas | Michi | `systems/cat-encounters-v609.js` | `tests/v653-michi-act1.test.js` | Código candidato; verificar gates |
 | **V654** | Michi: segundo acto que combina medusas | Michi | `worlds/ohana-pulse.js` | `tests/v654-michi-act2.test.js` | Código candidato; verificar gates |
-| **V655** | Michi: culminación de bosque y secretos | Michi | `systems/cat-chapter.js` | `v655-michi-act3.test.js` | Pendiente |
+| **V655** | Michi: culminación de bosque y secretos | Michi | `worlds/ohana-pulse.js` | `tests/v655-michi-act3.test.js` | Código candidato; verificar gates |
 | **V656** | Michi: jefe astral con anticipación clara | Michi | `systems/cat-chapter.js` | `v656-michi-boss.test.js` | Pendiente |
 | **V657** | Dino: impacto real y respuesta del terreno | Dino | `systems/dino-chapter.js` | `v657-dino-impact.test.js` | Pendiente |
 | **V658** | Dino: Pulso tectónico y plataformas sólidas | Dino | `systems/dino-chapter.js` | `v658-dino-pulse.test.js` | Pendiente |
