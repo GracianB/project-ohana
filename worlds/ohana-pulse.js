@@ -27,6 +27,16 @@ export function planMichiPulseLedges(g){
   if([...base,...planned].some(q=>overlap(q,p)))continue;
   planned.push(p);
  }
+ // V654: an optional real route unlocks when the first TWO jellies wake.
+ // All geometry is one-way, deterministic and ends before the lethal pit.
+ const first=done.some(s=>s.id===0),pond=done.find(s=>s.id===1);
+ if(first&&pond)for(const [i,[dx,dy]] of [[310,-220],[490,-260],[670,-250],[860,-200]].entries()){
+  const p={x:Math.round(pond.x+dx),y:Math.round(pond.y+dy),w:142,h:18,
+   _ohanaPulse:'cat:duet:'+i,_ohanaPulseColor:'#a5eaff'};
+  if(p.x<0||p.x+p.w>worldW||p.y<100||p.y+p.h>1130)continue;
+  if([...base,...planned].some(q=>overlap(q,p)))continue;
+  planned.push(p);
+ }
  return planned;
 }
 export function syncMichiPulse(g){

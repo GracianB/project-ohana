@@ -476,7 +476,7 @@ const PRECACHE_REVISIONS = {
   "systems/michi-field-manual.js": "ae18461211658d7e2df45033d66d1aece8fb9fbe",
   "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
   "worlds/michi-reactive-night.js": "275250b77d54092a0de2055bbdc2b0a139246933",
-  "worlds/ohana-pulse.js": "a94fc7ca5504dfdb6e80d9d2d0ce82dcdafc2961",
+  "worlds/ohana-pulse.js": "95a7cfb47d01c384e133380e50aa24d0e1bc5b4d",
   "characters/michi-lumina.js": "92d4aa6ca82d6ac87b3fe984cf5ceb7d45b98461",
   "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
   "multiplayer/entry-route.js": "41d98a5b44ec9d397c4677de0c83f6017f373b5d",
