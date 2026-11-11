@@ -1,0 +1,45 @@
+name: V700 Pulso OHANA Physical Acceptance
+on:
+  pull_request:
+    paths:
+      - 'worlds/ohana-pulse.js'
+      - 'systems/cat-chapter.js'
+      - 'worlds/michi-reactive-night.js'
+      - 'game.js'
+      - 'engine/camera.js'
+      - 'tests/browser/v700-pulse.mjs'
+      - '.github/workflows/v700-pulse.yml'
+  push:
+    branches:
+      - 'feature/ohana-v700-*'
+    paths:
+      - 'worlds/ohana-pulse.js'
+      - 'systems/cat-chapter.js'
+      - 'worlds/michi-reactive-night.js'
+      - 'game.js'
+      - 'engine/camera.js'
+      - 'tests/browser/v700-pulse.mjs'
+      - '.github/workflows/v700-pulse.yml'
+permissions:
+  contents: read
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    name: Earned jelly rescue, real coral physics and responsive visual
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Earn physical Pulse without granting progress
+        run: CHROMIUM_BIN="$(node -p "require('playwright').chromium.executablePath()")" node tests/browser/v700-pulse.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v700-pulse-physical-evidence
+          path: test-results/v700/
+          if-no-files-found: ignore
