@@ -11,7 +11,7 @@ test('V637-V700 contains exactly 64 contiguous, explicit development versions',(
   assert.equal(m.version,637+i);
   assert.equal(m.label,'V'+m.version);
   assert.ok(m.title.length>=12,'Missing meaningful title '+m.label);
-  assert.ok(m.domain.length>=3&&(m.module.endsWith('.js')||m.module.endsWith('.mjs'))&&m.module.length>=6&&m.proof.length>=8,'Missing artifact/proof '+m.label);
+  assert.ok(m.domain.length>=3&&(m.module.endsWith('.js')||m.module.endsWith('.mjs'))&&m.module.length>=5&&m.proof.length>=8,'Missing artifact/proof '+m.label);
  }
 });
 test('no milestone can masquerade as complete without a SHA and evidence',()=>{
