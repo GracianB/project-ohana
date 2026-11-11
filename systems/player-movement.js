@@ -47,3 +47,12 @@ export function heroJumpCut(p){
  if(p?.id==='dino')return Math.min(.55,.51+held*.0025);
  return .55;
 }
+
+// V648: preserve Kilo/other completed hero profiles and scripted flight,
+// while giving baby Michi agile air steering and Dino believable inertia.
+export function heroAirControl(p){
+ if(!p||p._kiloFlightT>0||p._specialFlightT>0||p._michiWingAir)return 1;
+ if(p.id==='cat'&&(Number(p.evo)||0)<3)return 1.09;
+ if(p.id==='dino')return .86;
+ return 1;
+}

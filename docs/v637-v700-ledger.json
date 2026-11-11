@@ -134,9 +134,9 @@
       "title": "Aire: aceleración y frenado por personaje",
       "module": "systems/player-movement.js",
       "proof": "v648-air-control.test.js",
-      "status": "planned",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "Aceleración aérea propia para Michi bebé y Dino; resto del elenco y vuelos especiales conservan la física anterior. Pendiente de gates en el HEAD final."
     },
     {
       "version": 649,

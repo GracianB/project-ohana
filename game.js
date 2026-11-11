@@ -35,7 +35,7 @@ import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianBody,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight,stopKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
-import {updatePlayerLocomotion,resetPlayerLocomotion,queueJumpPress,tickWalkoffCoyote,heroJumpCut} from './systems/player-movement.js';
+import {updatePlayerLocomotion,resetPlayerLocomotion,queueJumpPress,tickWalkoffCoyote,heroJumpCut,heroAirControl} from './systems/player-movement.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
@@ -1919,9 +1919,10 @@ if (oppose) {
 } else if (axisX !== 0) {
 const target = axisX * moveSpeed;
 const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
-const accel = p.grounded
+const accel = (p.grounded
   ? (reversing ? CONTROL_FEEL.reverseGroundAccel : CONTROL_FEEL.groundAccel)
-  : (reversing ? CONTROL_FEEL.reverseAirAccel : CONTROL_FEEL.airAccel);
+  : (reversing ? CONTROL_FEEL.reverseAirAccel : CONTROL_FEEL.airAccel))
+  * (p.grounded ? 1 : heroAirControl(p));
 p.vx += (target - p.vx) * accel;
 if (Math.abs(target - p.vx) < 0.06) p.vx = target;
 p.facing = axisX;
