@@ -47,3 +47,20 @@ test('V656 astral telegraph locks direction at warning onset and does not spam',
  assert.equal(cues.length,2);
  assert.match(cues[1],/→$/);
 });
+
+
+test('V656 lunar oracle recovery opens a real damage window, then closes outside rest',async()=>{
+ const {prepareChapterBossV2}=await import('../systems/chapter-boss-v2.js');
+ const mind={phase:'warn',timer:40,attack:0};
+ const boss={miniBoss:true,roomId:'w1-cat',hp:480,max:480,x:500,y:500,w:160,h:180,_astralCat:mind,_combatHealthScaled:true,_growthChapter:true};
+ const g={player:{x:100,y:600,w:40,h:60,vx:0},projectiles:[]};
+ prepareChapterBossV2(boss,g);
+ assert.equal(boss.damageTakenScale,0,'warning must not be vulnerable');
+ mind.phase='attack';prepareChapterBossV2(boss,g);
+ assert.equal(boss.damageTakenScale,0,'attack must not be vulnerable');
+ mind.phase='rest';prepareChapterBossV2(boss,g);
+ assert.ok(boss.damageWindowRemaining>0,'recovery must open a real damage window');
+ assert.equal(boss.damageTakenScale,1,'recovery must accept damage');
+ mind.phase='warn';prepareChapterBossV2(boss,g);
+ assert.equal(boss.damageTakenScale,0,'next warning closes vulnerability');
+});
