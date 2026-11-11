@@ -23,7 +23,8 @@ export function prepareChapterBossV2(e,g){
    // the strike. The warning is a gameplay cue, not a random particle effect.
    if(e._astralCat){
     const cue=b.attack===3?'¡ATAQUE AÉREO!':b.attack===1?'¡ONDA LUNAR!':b.attack===2?'¡EMBESTIDA!':'¡PULSO ASTRAL!';
-    g.nums?.add?.(e.x+e.w/2,e.y-28,cue,'#ffe6a4',true);
+    const direction=b.aim<0?'←':'→';
+    g.nums?.add?.(e.x+e.w/2,e.y-28,`${cue} ${direction}`,'#ffe6a4',true);
    }
    v.target={x:p.x+p.w/2+Math.max(-55,Math.min(55,(p.vx||0)*9)),y:p.y+p.h/2};
    b[clockKey]=Math.max(28,Math.round((b[clockKey]||50)*d.windup));
