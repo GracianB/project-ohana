@@ -1,0 +1,14 @@
+{
+  "release": "ohana-637",
+  "stage": "candidate",
+  "verified": [
+    "159 character/offline unit checks passed",
+    "9 lineage/preload/offline accounting checks passed",
+    "Browser acceptance: five forms, 17 poses, three scales, both facings, reduced motion, 1280/390/320 selection and desktop/mobile chapter HUD"
+  ],
+  "pending": [
+    "Final full unit suite",
+    "Remote CI and production deployment"
+  ],
+  "scope": "Only Michi artwork and presentation copy; physics, combat, hitboxes and other heroes unchanged."
+}
