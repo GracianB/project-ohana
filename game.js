@@ -96,7 +96,7 @@ import {updateNestArena,drawNestArena,nestArenaSnapshot} from './systems/nest-ar
 import {updateIslandSprings,drawIslandSprings,islandSpringsSnapshot} from './systems/island-springs.js';
 import {updateChampions,drawChampionSignals} from './systems/enemy-champions.js';
 import {enterAdventure,adventurePrompt,interactAdventure,updateAdventure,drawAdventure,adventureSnapshot} from './systems/room-adventures.js';
-import { horizontalLook, smoothCameraLook, clearBufferedActions } from "./engine/camera.js";
+import { horizontalLook, adaptiveCameraLook, smoothCameraLook, clearBufferedActions } from "./engine/camera.js";
 import { sanitizeRuntimeState } from "./systems/runtime-state.js";
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
@@ -3093,7 +3093,7 @@ const vw = camW(), vh = camH();
 let lerp = 0.24;
 const pcY = p.y + p.h / 2;
 const cs = game._camCalm || (game._camCalm = {anchor:pcY,look:0});
-cs.look = smoothCameraLook(cs.look,horizontalLook(p));
+cs.look = smoothCameraLook(cs.look,adaptiveCameraLook(p));
 let tx = p.x + p.w / 2 + cs.look - vw / 2;
 // V468 calm camera: Y follows a platform anchor, not every jump. The anchor
 // re-centres only when the hero lands on a new height or leaves the vertical

@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {horizontalLook,smoothCameraLook,clearBufferedActions} from '../engine/camera.js';
+import {horizontalLook,adaptiveCameraLook,smoothCameraLook,clearBufferedActions} from '../engine/camera.js';
 test('camera gives velocity-scaled preview only while moving',()=>{
- assert.equal(horizontalLook({vx:0,facing:1}),0);
- assert.equal(horizontalLook({vx:NaN,facing:-1}),0);
- assert.equal(horizontalLook({vx:6,facing:-1})>horizontalLook({vx:2,facing:1}),true);
- assert.equal(horizontalLook({vx:-6,facing:1})<0,true);
- assert.equal(horizontalLook({vx:500})<=86,true);
- assert.equal(horizontalLook({vx:-500})>=-86,true);
- assert.equal(horizontalLook({vx:9,dead:true}),0);
+ assert.equal(adaptiveCameraLook({vx:0,facing:1}),0);
+ assert.equal(adaptiveCameraLook({vx:NaN,facing:-1}),0);
+ assert.equal(adaptiveCameraLook({vx:6,facing:-1})>adaptiveCameraLook({vx:2,facing:1}),true);
+ assert.equal(adaptiveCameraLook({vx:-6,facing:1})<0,true);
+ assert.equal(adaptiveCameraLook({vx:500})<=86,true);
+ assert.equal(adaptiveCameraLook({vx:-500})>=-86,true);
+ assert.equal(adaptiveCameraLook({vx:9,dead:true}),0);
 });
 test('dash cue keeps its existing 48px contract',()=>{
- assert.equal(horizontalLook({_dashGo:1,_dashFace:1,vx:12}),48);
- assert.equal(horizontalLook({_dashGo:2,_dashFace:-1,vx:12}),-48);
+ assert.equal(adaptiveCameraLook({_dashGo:1,_dashFace:1,vx:12}),48);
+ assert.equal(adaptiveCameraLook({_dashGo:2,_dashFace:-1,vx:12}),-48);
 });
 test('look-ahead changes are gradual, stable and never overshoot',()=>{
  let value=0;
