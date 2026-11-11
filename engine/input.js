@@ -4,7 +4,7 @@ const ACTIONS = { h: "attack", f: "attack", shift: "dash", e: "interact", r: "re
 const LEFT_KEYS = new Set(["a", "arrowleft"]);
 const RIGHT_KEYS = new Set(["d", "arrowright"]);
 
-export function bindInput({ target, canvas, buttons = [], canAct, actions, isRunning = canAct }) {
+export function bindInput({ target, canvas, buttons = [], canAct, actions, isRunning = canAct, getGamepads = () => globalThis.navigator?.getGamepads?.() || [] }) {
   const keys = Object.create(null);
   const held = new Map();
   const heldOrder = new Map();
@@ -12,6 +12,9 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   const pointerButtons = new Map();
   const listeners = [];
   let pressSerial = 0;
+  let padAxis=0,padJumpHeld=false,padSuppress=false;
+  let previousPad={jump:false,attack:false,dash:false};
+  const padPressed=new Set();
 
   function listen(el, event, handler, options) {
     el.addEventListener(event, handler, options);
@@ -58,7 +61,32 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
     keys[key] = logicalDown(key);
   }
 
+
+  // V652: Standard Gamepad API, polled on the same physics ticks as keyboard
+  // and touch. No timers or synthetic key events; button edges never repeat.
+  function pollGamepad(){
+    let candidates=[];
+    try{candidates=Array.from(getGamepads?.()||[]);}catch(_){candidates=[];}
+    const pad=candidates.find(p=>p&&p.connected!==false);
+    if(!pad){padAxis=0;padJumpHeld=false;previousPad={jump:false,attack:false,dash:false};padSuppress=false;return;}
+    const heldButton=i=>!!pad.buttons?.[i]?.pressed;
+    const axis=Number(pad.axes?.[0]);
+    const analog=Number.isFinite(axis)&&Math.abs(axis)>.22?Math.max(-1,Math.min(1,axis)):0;
+    padAxis=(heldButton(14)?-1:heldButton(15)?1:analog);
+    const now={jump:heldButton(0),attack:heldButton(1),dash:heldButton(2)};
+    padJumpHeld=now.jump;
+    if(padSuppress){
+      if(!now.jump&&!now.attack&&!now.dash)padSuppress=false;
+    }else{
+      if(now.jump&&!previousPad.jump)padPressed.add('w');
+      if(canAct()&&now.attack&&!previousPad.attack)actions.attack?.();
+      if(canAct()&&now.dash&&!previousPad.dash)actions.dash?.();
+    }
+    previousPad=now;
+  }
+
   function axisX() {
+    pollGamepad();
     let bestOrder = -1;
     let axis = 0;
     for (const [source, key] of held) {
@@ -70,15 +98,17 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
         axis = candidate;
       }
     }
-    return axis;
+    // A physical keyboard or touch direction wins while it is held.
+    return bestOrder>=0?axis:padAxis;
   }
 
   function consumePress(candidates) {
+    pollGamepad();
     const wanted = Array.isArray(candidates) ? candidates.map(normalize) : [normalize(candidates)];
     let hit = false;
     for (const key of wanted) {
-      if (pressed.has(key)) hit = true;
-      pressed.delete(key);
+      if (pressed.has(key)||padPressed.has(key)) hit = true;
+      pressed.delete(key);padPressed.delete(key);
     }
     return hit;
   }
@@ -108,6 +138,8 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
     heldOrder.clear();
     pressed.clear();
     pointerButtons.clear();
+    padPressed.clear();padAxis=0;padJumpHeld=false;padSuppress=true;
+    previousPad={jump:false,attack:false,dash:false};
     for (const key of Object.keys(keys)) keys[key] = false;
     for (const button of buttons) {
       button.classList.remove("held");
@@ -227,6 +259,7 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
     keys,
     axisX,
     consumePress,
+    gamepadJumpHeld(){pollGamepad();return padJumpHeld;},
     reset,
     destroy() {
       reset();

@@ -1889,7 +1889,7 @@ const rawRight = !!(keys["d"] || keys["arrowright"]);
 const axisX = input?.axisX?.() ?? (rawLeft === rawRight ? 0 : rawRight ? 1 : -1);
 const left = axisX < 0;
 const right = axisX > 0;
-const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
+const jump = !!(keys["w"] || keys["arrowup"] || keys[" "] || input?.gamepadJumpHeld?.());
 const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
 const drop = !!(keys["s"] || keys["arrowdown"]);
 const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
@@ -4318,7 +4318,7 @@ state() {
     input: {
       left: !!(input?.keys?.a || input?.keys?.arrowleft),
       right: !!(input?.keys?.d || input?.keys?.arrowright),
-      jump: !!(input?.keys?.w || input?.keys?.arrowup || input?.keys?.[" "]),
+      jump: !!(input?.keys?.w || input?.keys?.arrowup || input?.keys?.[" "] || input?.gamepadJumpHeld?.()),
       down: !!(input?.keys?.s || input?.keys?.arrowdown),
       axisX: input?.axisX?.() || 0,
     },
