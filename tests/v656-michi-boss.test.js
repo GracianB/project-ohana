@@ -25,3 +25,25 @@ test('V656 missing station data cannot show a phantom boss objective',()=>{
  delete g.world1.stations;
  assert.equal(catObjective(g),null);
 });
+
+test('V656 astral telegraph locks direction at warning onset and does not spam',async()=>{
+ const {prepareChapterBossV2}=await import('../systems/chapter-boss-v2.js');
+ const cues=[];
+ const mind={phase:'warn',timer:45,attack:0};
+ const boss={miniBoss:true,roomId:'w1-cat',hp:480,max:480,x:500,y:500,w:160,h:180,_astralCat:mind,_combatHealthScaled:true,_growthChapter:true};
+ const g={player:{x:100,y:600,w:40,h:60,vx:0},nums:{add:(x,y,label)=>cues.push(label)},projectiles:[]};
+ prepareChapterBossV2(boss,g);
+ assert.equal(cues.length,1);
+ assert.match(cues[0],/←$/);
+ const committed=mind.aim;
+ g.player.x=1000;
+ prepareChapterBossV2(boss,g);
+ assert.equal(cues.length,1);
+ assert.equal(mind.aim,committed);
+ mind.phase='attack';
+ prepareChapterBossV2(boss,g);
+ mind.phase='warn';
+ prepareChapterBossV2(boss,g);
+ assert.equal(cues.length,2);
+ assert.match(cues[1],/→$/);
+});
