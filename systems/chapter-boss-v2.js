@@ -30,7 +30,10 @@ export function prepareChapterBossV2(e,g){
    b[clockKey]=Math.max(28,Math.round((b[clockKey]||50)*d.windup));
   }
   if(b.phase==='rest'){
-   if(!e._growthChapter||e._astralCat)e.damageWindowRemaining=Math.round(125*(d.budget===1?1.35:1));
+   // Native growth bosses already receive a 160-point budget in chapterBossFinish.
+   // Only initialize the lunar fallback when no native budget was supplied.
+   // Never replenish a partially spent or exhausted recovery window.
+   if(!e._growthChapter||(e._astralCat&&e.damageWindowRemaining==null))e.damageWindowRemaining=Math.round(125*(d.budget===1?1.35:1));
    b[clockKey]=Math.max(30,Math.round((b[clockKey]||60)*d.cooldown));
   }
   if((b.phase==='attack'||b.phase==='strike')&&v.target&&v.turn>1){
