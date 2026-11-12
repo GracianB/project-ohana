@@ -247,9 +247,10 @@
       "title": "Dino: Pulso tectónico y plataformas sólidas",
       "module": "systems/dino-chapter.js",
       "proof": "v658-dino-pulse.test.js",
-      "status": "planned",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "Candidata: plataformas tectónicas físicas desde placas completadas, reconstrucción tras carga/muerte, sin XP extra ni invadir arena del jefe. Pruebas V658 añadidas; pendientes Actions del HEAD y aceptación jugable. No accepted.",
+      "implementation_sha": "0ac9c0d4ea9ffbe7729bba73454a51be17eab3d0"
     },
     {
       "version": 659,
