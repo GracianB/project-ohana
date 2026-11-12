@@ -11,7 +11,7 @@ import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaCha
 import {drawPizzaOvenV615,drawPizzaGuestV615,drawPizzaAtmosphere} from './pizza-chapter-art-v615.js';
 import {drawFritaVentV614,drawFritaAtmosphere} from './frita-chapter-art-v614.js';
 import {drawYomiTerminalV616,drawYomiAtmosphere} from './yomi-chapter-art-v616.js';
-import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact,dinoGrowth,updateDinoChapter,dinoChapterReady,dinoObjective,drawDinoChapter} from './dino-chapter.js';
+import {dinoLanding,trackDinoAir,updateDinoDive,syncDinoTectonicPulse,drawDinoPlate,drawDinoImpact,dinoGrowth,updateDinoChapter,dinoChapterReady,dinoObjective,drawDinoChapter} from './dino-chapter.js';
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
 import {catGrowth,updateCatChapter,catChapterReady,catObjective,drawCatChapter} from './cat-chapter.js';
@@ -63,6 +63,7 @@ export function enterWorld1(g) {
   // V651: saved jellyfish must already own their real platforms before the
   // first respawn frame. No physics tick or extra rescue reward is required.
   if(r.id==='w1-cat')syncMichiPulse(g);
+  if(r.id==='w1-dino')syncDinoTectonicPulse(g);
   return g.world1;
 }
 
@@ -112,6 +113,7 @@ export function restoreWorld1DeathCheckpoint(g, checkpoint) {
   // a timed journey. All these variables are reset by enterWorld1().
   // The restored rescue instantly produces its solid path, before movement.
   if(w.room==='w1-cat')syncMichiPulse(g);
+  if(w.room==='w1-dino')syncDinoTectonicPulse(g);
   return true;
 }
 
@@ -211,6 +213,7 @@ function complete(g, s, label) {
   // A newly earned jelly MUST produce its real platforms during the same
   // authoritative station-completion tick, not on the next animation frame.
   if(w.room==='w1-cat')syncMichiPulse(g);
+  if(w.room==='w1-dino')syncDinoTectonicPulse(g);
   g.onWorld1Beat?.("station", w.hero);
   g.world1Stations = cleanWorld1Stations({ ...(g.world1Stations || {}),
     [w.room]: w.stations.filter(x => x.done && x.kind !== "oven").map(x => x.id) });
