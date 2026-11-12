@@ -589,7 +589,7 @@ const PRECACHE_REVISIONS = {
   "systems/dino-room.js": "a7520e867de3034d528dfbb1b93495f102d089a4",
   "systems/dino-trail.js": "b79b2662571b85d8b958e0657210d56846423845",
   "systems/dino-boss.js": "19030456a7502d8dfa8960c6b712a05ebc85725a",
-  "systems/dino-chapter.js": "d3b26d8198fc0f513bdf17b8c0db9d03a771246c",
+  "systems/dino-chapter.js": "d0412d1f3f39977f614df5454ca62ce6beb659cb",
   "worlds/dino-crater.js": "a554da9704d8d2920868c5cd4b6b0e3c65f23279",
   "systems/frita-room.js": "976d48432a73dc3b5ddff37005c67950f123d02c",
   "systems/frita-trail.js": "f83bcb504fd0aed2ce4f1db8e74d7648df3552b0",
