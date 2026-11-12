@@ -70,6 +70,18 @@ export function dinoChapterAbility(g, p, index) {
 
 export function drawDinoPlate(ctx, s, cam, done, t, reduce) {
  drawDinoPlateV613(ctx, s, cam, t, reduce);
+ // The shockwave is visible on the actual fossil plate, not just in HUD text.
+ if (!s.done && s.quakeCueUntil > t) {
+  const remaining = Math.min(30, s.quakeCueUntil - t);
+  ctx.save();
+  ctx.strokeStyle = '#fff0bd';
+  ctx.globalAlpha = reduce ? 0.8 : 0.35 + remaining / 60;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.ellipse(s.x - cam.x, s.y - cam.y - 5, 24 + (30 - remaining) * 0.3, 8, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+ }
 }
 
 export function drawDinoImpact(ctx, g, cam) {
