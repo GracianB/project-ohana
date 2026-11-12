@@ -3,6 +3,38 @@
 import {XP_NEED} from './xp.js';
 import {drawDinoPlateV613, drawDinoAtmosphere} from './dino-chapter-art-v613.js';
 
+
+/* V658: completed fossil stations grow real, deterministic one-way tectonic
+ * footholds. They live in the authoritative platform array used by physics.
+ * No new save key, seal, XP or station completion is ever manufactured. */
+const tectonicFinite=n=>typeof n==='number'&&Number.isFinite(n);
+const tectonicRoom=g=>g?.roomDef?.id==='w1-dino'&&g?.world1?.room==='w1-dino'&&g?.roomDef?.hero==='dino';
+export function planDinoTectonicLedges(g) {
+ if(!tectonicRoom(g))return [];
+ const base=(g.platforms||[]).filter(p=>p&&!p._dinoTectonic),planned=[];
+ const width=tectonicFinite(g.worldW)?g.worldW:0;
+ for(const s of g.world1.stations||[]) {
+  if(!s?.done||!Number.isInteger(s.id)||!tectonicFinite(s.x)||!tectonicFinite(s.y))continue;
+  for(const [i,[dx,dy,w]] of [[105,-118,136],[280,-185,146]].entries()) {
+   const p={x:Math.round(s.x+dx),y:Math.round(s.y+dy),w,h:18,_dinoTectonic:'dino:'+s.id+':'+i};
+   if(p.x<0||p.x+p.w>=Math.min(width,8260)||p.y<120||p.y+p.h>=1134)continue;
+   if([...base,...planned].some(q=>p.x<q.x+q.w&&q.x<p.x+p.w&&Math.abs(p.y-q.y)<24))continue;
+   planned.push(p);
+  }
+ }
+ return planned;
+}
+export function syncDinoTectonicPulse(g) {
+ if(!tectonicRoom(g)||!Array.isArray(g.platforms))return null;
+ const w=g.world1;
+ const key=(w.stations||[]).filter(s=>s.done).map(s=>s.id+':'+s.x+':'+s.y).sort().join('|')+'@'+g.worldW;
+ if(w._dinoTectonicKey!==key) {
+  g.platforms=g.platforms.filter(p=>!p._dinoTectonic).concat(planDinoTectonicLedges(g));
+  w._dinoTectonicKey=key;
+ }
+ return {ledges:g.platforms.filter(p=>p._dinoTectonic).length};
+}
+
 export const DINO_CHAPTER_BOSS_ID = 'w1-dino-colossus-v1';
 export const DINO_CHAPTER_ARENA = Object.freeze({ left: 8260, right: 9320, floor: 1134, hp: 640 });
 
