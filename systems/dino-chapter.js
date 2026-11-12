@@ -96,6 +96,15 @@ export function updateDinoDive(g) {
  const x = p.x + p.w / 2, y = p.y + p.h, radius = 150 + Math.max(0, p.evo || 0) * 20;
  w.dinoImpact = { x, y, t: 32, radius };
  w.dinoQuakes = (w.dinoQuakes || 0) + 1;
+ // A real grounded dive transfers energy to nearby dormant fossil plates.
+ // Only plates physically inside the shockwave receive a brief readable cue;
+ // station completion still requires its existing landing/checkpoint contract.
+ for (const plate of w.stations || []) {
+  if (plate.done || !Number.isFinite(plate.x) || !Number.isFinite(plate.y)) continue;
+  if (Math.hypot(plate.x - x, plate.y - y) > radius) continue;
+  plate.quakeCueUntil = Math.max(plate.quakeCueUntil || 0, (w.tick || 0) + 30);
+ }
+
  for (const e of g.enemies || []) {
   if (e.hp <= 0 || e.dying || Math.abs(e.y + e.h - y) > 65 || x + radius < e.x || x - radius > e.x + e.w) continue;
   if (!e.miniBoss && !e.boss) { e._shieldFacing = 0; e._guardBreak = Math.max(e._guardBreak || 0, 45); }
