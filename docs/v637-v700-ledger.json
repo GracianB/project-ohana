@@ -235,9 +235,10 @@
       "title": "Dino: impacto real y respuesta del terreno",
       "module": "systems/dino-chapter.js",
       "proof": "v657-dino-impact.test.js",
-      "status": "planned",
+      "status": "implemented_pending_full_validation",
       "accepted_sha": null,
-      "note": "Requiere implementación funcional y prueba real, no basta con el documento."
+      "note": "Impacto real tras aterrizaje: placas fósiles cercanas reciben señal sísmica visual de 30 ticks sin completar estaciones ni saltarse checkpoints. Pruebas V657 de alcance, consumo único y muerte; CI y aceptación jugable pendientes. No accepted.",
+      "implementation_sha": "0e559db8368e62ae6faa6c613b3bc7cbf1f7d65f"
     },
     {
       "version": 658,
