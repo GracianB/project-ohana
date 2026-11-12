@@ -14,7 +14,7 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);
  const stations=await page.evaluate(async hero=>{localStorage.clear();const e=window.__OHANA_E2E;e.setSeed(73);e.startWorld1(hero);e.loadRoom('w1-'+hero);return (await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-'+hero].seal.stations;},hero);
  const step=async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return page.evaluate(()=>window.__OHANA_E2E.state());};
- let s=await step(600),deaths=0,resumed=false,attacks=0,quakeVerified=false,quakeHitCount=0;const forms=new Set([s.evo]),patterns=new Set();
+ let s=await step(600),deaths=0,resumed=false,attacks=0,quakeVerified=false,quakeHitCount=0,landingsBeforeResume=0;const forms=new Set([s.evo]),patterns=new Set();
  await page.locator('#game').focus();
  for(const foe of await page.evaluate(()=>window.__OHANA_E2E.roomCast()))assert.ok(foe.y+foe.h<=1134.1,'no enemy spawned through the floor');
  for(let i=0;i<2500&&!s.world1.sealed;i++){
@@ -57,11 +57,11 @@ try{
   if(p.grounded&&p.y<1000)await page.keyboard.down('s');else await page.keyboard.up('s');
   if(b?.phase==='warn'&&!station)await page.screenshot({path:`test-results/v508/${hero}-boss-warning-${b.attack}.png`});
   s=await step(Math.abs(dx)>24?Math.min(14,Math.max(1,Math.floor(Math.abs(dx)/7))):20);await page.keyboard.up('d');await page.keyboard.up('a');if(jumpHeld){await page.keyboard.up('w');s=await step(1);}
-  if(!resumed&&s.world1.done===2){await page.evaluate(()=>{localStorage.setItem('ohana-resume','1');window.__OHANA_E2E.startWorld1('kilo');});s=await step(600);assert.equal(s.hero,hero);assert.equal(s.world1.done,2);resumed=true;await page.locator('#game').focus();}
+  if(!resumed&&s.world1.done===2){landingsBeforeResume=(await page.evaluate(()=>window.__OHANA_E2E.nextChapterState().dinoLandings))||0;console.log('V658_LANDINGS_BEFORE_RESUME',JSON.stringify({landings:landingsBeforeResume,done:s.world1.done}));await page.evaluate(()=>{localStorage.setItem('ohana-resume','1');window.__OHANA_E2E.startWorld1('kilo');});s=await step(600);assert.equal(s.hero,hero);assert.equal(s.world1.done,2);resumed=true;console.log('V658_LANDINGS_AFTER_RESUME',JSON.stringify(await page.evaluate(()=>({landings:window.__OHANA_E2E.nextChapterState().dinoLandings,done:window.__OHANA_E2E.state().world1.done}))));await page.locator('#game').focus();}
   if(i%100===0){console.log('PILOT',JSON.stringify({hero,i,x:s.player.x,y:s.player.y,hp:s.hp,xp:s.xp,evo:s.evo,done:s.world1.done,boss:boss?.hp,phase:b?.phase,attacks}));await page.screenshot({path:`test-results/v508/${hero}-debug.png`});}
  }
  assert.equal(s.world1.sealed,true,hero+' must earn its seal');assert.equal(resumed,true);assert.deepEqual([...forms].sort(),[0,1,2,3,4]);assert.ok(attacks>=4);assert.ok(patterns.size>=2,'adaptive boss must execute distinct warnings');assert.ok([...patterns].every(n=>[0,1,2,3].includes(n))); /* V2 counter-patterns; full native cycle is unit-tested. */
- const data=await page.evaluate(()=>window.__OHANA_E2E.nextChapterState());assert.ok(data.dinoLandings>=2);assert.ok(data.dinoDives>0);assert.ok(data.dinoQuakes>0);assert.equal(quakeVerified,true);
+ const data=await page.evaluate(()=>window.__OHANA_E2E.nextChapterState());console.log('V658_LANDINGS_FINAL',JSON.stringify({landings:data.dinoLandings,dives:data.dinoDives,quakes:data.dinoQuakes,resumed}));// A full room restart intentionally resets transient chapter counters. Count actual\n // physical landings on both sides of the required save/reload, never station\n // completions or synthetic input. Keep the original two-landing threshold.\n assert.ok(landingsBeforeResume+(data.dinoLandings||0)>=2,'two real Dino landings across the save/reload');assert.ok(data.dinoDives>0);assert.ok(data.dinoQuakes>0);assert.equal(quakeVerified,true);
  await page.screenshot({path:'test-results/v508/dino-complete.png'});
  const mobile=await browser.newContext({storageState:await page.context().storageState(),viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce'}),phone=await mobile.newPage();
  phone.on('pageerror',e=>errors.push(e.message));

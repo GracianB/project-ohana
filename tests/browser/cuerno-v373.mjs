@@ -31,10 +31,13 @@ try {
  const play=await page.evaluate(async()=>{
   const api=window.__OHANA_E2E;api.start('cuerno');api.setEvo(4);api.cast(3);api.step(30);
   const m=await import('/systems/cuerno-play-v373.js');const duo=m.readCuernoPlay().duo;
-  m.queueCuernoPlay('dream');api.step(12);const sky=m.readCuernoPlay().sky;
+  const beforeDream=m.readCuernoPlay();const playerBefore=api.state().player;
+  m.queueCuernoPlay('dream');api.step(1);const firstDream=m.readCuernoPlay();
+  api.step(11);const afterDream=m.readCuernoPlay();const sky=afterDream.sky;
   api.loadRoom('jungle');const reset=m.readCuernoPlay();
-  return {duo,sky,reset,cuerno:api.state().cuerno};
+  return {duo,sky,beforeDream,firstDream,afterDream,playerBefore,reset,cuerno:api.state().cuerno};
  });
+ console.log('V373_DREAM_DIAGNOSTIC',JSON.stringify({before:play.beforeDream,first:play.firstDream,after:play.afterDream,player:play.playerBefore}));
  assert.ok(play.duo,'U reaches integrated visual duo');assert.ok(play.sky,'dream paints sky near duo');
  assert.equal(play.reset.duo,null);assert.equal(play.reset.sky,null);assert.equal(play.cuerno.trails,0);
  assert.deepEqual(errors,[]);console.log('PASS V373: five runtime forms, J/K/L trail, U duo, dream sky and room reset');

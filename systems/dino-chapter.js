@@ -3,6 +3,38 @@
 import {XP_NEED} from './xp.js';
 import {drawDinoPlateV613, drawDinoAtmosphere} from './dino-chapter-art-v613.js';
 
+
+/* V658: completed fossil stations grow real, deterministic one-way tectonic
+ * footholds. They live in the authoritative platform array used by physics.
+ * No new save key, seal, XP or station completion is ever manufactured. */
+const tectonicFinite=n=>typeof n==='number'&&Number.isFinite(n);
+const tectonicRoom=g=>g?.roomDef?.id==='w1-dino'&&g?.world1?.room==='w1-dino'&&g?.roomDef?.hero==='dino';
+export function planDinoTectonicLedges(g) {
+ if(!tectonicRoom(g))return [];
+ const base=(g.platforms||[]).filter(p=>p&&!p._dinoTectonic),planned=[];
+ const width=tectonicFinite(g.worldW)?g.worldW:0;
+ for(const s of g.world1.stations||[]) {
+  if(!s?.done||!Number.isInteger(s.id)||!tectonicFinite(s.x)||!tectonicFinite(s.y))continue;
+  for(const [i,[dx,dy,w]] of [[105,-118,136],[280,-185,146]].entries()) {
+   const p={x:Math.round(s.x+dx),y:Math.round(s.y+dy),w,h:18,_dinoTectonic:'dino:'+s.id+':'+i};
+   if(p.x<0||p.x+p.w>=Math.min(width,8260)||p.y<120||p.y+p.h>=1134)continue;
+   if([...base,...planned].some(q=>p.x<q.x+q.w&&q.x<p.x+p.w&&Math.abs(p.y-q.y)<24))continue;
+   planned.push(p);
+  }
+ }
+ return planned;
+}
+export function syncDinoTectonicPulse(g) {
+ if(!tectonicRoom(g)||!Array.isArray(g.platforms))return null;
+ const w=g.world1;
+ const key=(w.stations||[]).filter(s=>s.done).map(s=>s.id+':'+s.x+':'+s.y).sort().join('|')+'@'+g.worldW;
+ if(w._dinoTectonicKey!==key) {
+  g.platforms=g.platforms.filter(p=>!p._dinoTectonic).concat(planDinoTectonicLedges(g));
+  w._dinoTectonicKey=key;
+ }
+ return {ledges:g.platforms.filter(p=>p._dinoTectonic).length};
+}
+
 export const DINO_CHAPTER_BOSS_ID = 'w1-dino-colossus-v1';
 export const DINO_CHAPTER_ARENA = Object.freeze({ left: 8260, right: 9320, floor: 1134, hp: 640 });
 
@@ -70,6 +102,18 @@ export function dinoChapterAbility(g, p, index) {
 
 export function drawDinoPlate(ctx, s, cam, done, t, reduce) {
  drawDinoPlateV613(ctx, s, cam, t, reduce);
+ // The shockwave is visible on the actual fossil plate, not just in HUD text.
+ if (!s.done && s.quakeCueUntil > t) {
+  const remaining = Math.min(30, s.quakeCueUntil - t);
+  ctx.save();
+  ctx.strokeStyle = '#fff0bd';
+  ctx.globalAlpha = reduce ? 0.8 : 0.35 + remaining / 60;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.ellipse(s.x - cam.x, s.y - cam.y - 5, 24 + (30 - remaining) * 0.3, 8, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+ }
 }
 
 export function drawDinoImpact(ctx, g, cam) {
@@ -96,6 +140,15 @@ export function updateDinoDive(g) {
  const x = p.x + p.w / 2, y = p.y + p.h, radius = 150 + Math.max(0, p.evo || 0) * 20;
  w.dinoImpact = { x, y, t: 32, radius };
  w.dinoQuakes = (w.dinoQuakes || 0) + 1;
+ // A real grounded dive transfers energy to nearby dormant fossil plates.
+ // Only plates physically inside the shockwave receive a brief readable cue;
+ // station completion still requires its existing landing/checkpoint contract.
+ for (const plate of w.stations || []) {
+  if (plate.done || !Number.isFinite(plate.x) || !Number.isFinite(plate.y)) continue;
+  if (Math.hypot(plate.x - x, plate.y - y) > radius) continue;
+  plate.quakeCueUntil = Math.max(plate.quakeCueUntil || 0, (w.tick || 0) + 30);
+ }
+
  for (const e of g.enemies || []) {
   if (e.hp <= 0 || e.dying || Math.abs(e.y + e.h - y) > 65 || x + radius < e.x || x - radius > e.x + e.w) continue;
   if (!e.miniBoss && !e.boss) { e._shieldFacing = 0; e._guardBreak = Math.max(e._guardBreak || 0, 45); }

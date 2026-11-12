@@ -45,6 +45,19 @@ try{
   await films();current=await state();earned.add(current.evo);
   if(current.evo===1&&!fairyFlight){
    await page.keyboard.down('s');for(let n=0;n<40&&!current.player.grounded;n++)current=await step(8);await page.keyboard.up('s');
+   if(!current.player.grounded){
+    // Keep the real landing assertion. Capture the physical state before failing,
+    // so CI distinguishes a missing floor, an updraft, and a navigation overshoot.
+    const landing={iteration:i,room:current.roomId,done:current.world1?.done,evo:current.evo,
+      player:current.player,flight:current.michiFlight,camera:current.camera,
+      nearbyPlatforms:await page.evaluate(()=>{const g=window.__OHANA_E2E.state();
+        return {room:g.roomId,player:g.player};})};
+    await fs.writeFile('test-results/v624/fairy-landing-failure.json',JSON.stringify(landing,null,2));
+    await page.screenshot({path:'test-results/v624/fairy-landing-failure.png'});
+    console.error('HARE_LANDING_FAILURE',JSON.stringify({iteration:i,room:landing.room,
+      done:landing.done,evo:landing.evo,x:current.player.x,y:current.player.y,
+      vy:current.player.vy,grounded:current.player.grounded,flight:landing.flight}));
+   }
    assert.equal(current.player.grounded,true);const from=current.player.y;
    await page.keyboard.down('w');current=await step(60);await page.keyboard.up('w');
    assert.equal(current.michiFlight?.mode,'ascend');assert.ok(current.player.y<from-100);

@@ -35,7 +35,7 @@ import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianBody,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight,stopKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
-import {updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
+import {updatePlayerLocomotion,resetPlayerLocomotion,queueJumpPress,tickWalkoffCoyote,heroJumpCut,heroAirControl,heroLandingImpact} from './systems/player-movement.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
@@ -52,6 +52,7 @@ import {createMichiRoom,drawMichicornioPlatformTrim} from "./systems/michi-room.
 import {drawMichicornioFoe} from "./systems/michicornio-foes.js";
 import {drawMichiGardens} from "./worlds/michi-gardens.js";
 import {drawMichiReactiveNight} from "./worlds/michi-reactive-night.js";
+import {drawMichiPulse,michiPulseSnapshot} from "./worlds/ohana-pulse.js";
 import {enterMichiTrail,interactMichiTrail,michiTrailPrompt,updateMichiTrail,drawMichiTrail,michiTrailSnapshot,michiAbility} from './systems/michi-trail.js';
 import {createMichiBoss,updateMichiBoss,drawMichiBossSignals,drawMichiBossBody,MICHI_BOSS_ID} from './systems/michi-boss.js';
 import {createDragonRoom} from "./systems/dragon-room.js";
@@ -95,7 +96,7 @@ import {updateNestArena,drawNestArena,nestArenaSnapshot} from './systems/nest-ar
 import {updateIslandSprings,drawIslandSprings,islandSpringsSnapshot} from './systems/island-springs.js';
 import {updateChampions,drawChampionSignals} from './systems/enemy-champions.js';
 import {enterAdventure,adventurePrompt,interactAdventure,updateAdventure,drawAdventure,adventureSnapshot} from './systems/room-adventures.js';
-import { horizontalLook, clearBufferedActions } from "./engine/camera.js";
+import { horizontalLook, adaptiveCameraLook, smoothCameraLook, clearBufferedActions } from "./engine/camera.js";
 import { sanitizeRuntimeState } from "./systems/runtime-state.js";
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
@@ -682,6 +683,7 @@ const first = !game.visited[id];
 game.world1Cine = null;game._pendingWorld1Cine=null;
 game.roomId = id;
 resetKiloCombo(game);resetPlayerLocomotion(game.player);stopKiloFlight(game.player);
+ game._camCalm=null;
 game.islandSprings=null;game.nestArena=null;
 game._evolutionAttacks = null;
 game._assist = null;
@@ -1887,7 +1889,7 @@ const rawRight = !!(keys["d"] || keys["arrowright"]);
 const axisX = input?.axisX?.() ?? (rawLeft === rawRight ? 0 : rawRight ? 1 : -1);
 const left = axisX < 0;
 const right = axisX > 0;
-const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
+const jump = !!(keys["w"] || keys["arrowup"] || keys[" "] || input?.gamepadJumpHeld?.());
 const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
 const drop = !!(keys["s"] || keys["arrowdown"]);
 const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
@@ -1917,9 +1919,10 @@ if (oppose) {
 } else if (axisX !== 0) {
 const target = axisX * moveSpeed;
 const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
-const accel = p.grounded
+const accel = (p.grounded
   ? (reversing ? CONTROL_FEEL.reverseGroundAccel : CONTROL_FEEL.groundAccel)
-  : (reversing ? CONTROL_FEEL.reverseAirAccel : CONTROL_FEEL.airAccel);
+  : (reversing ? CONTROL_FEEL.reverseAirAccel : CONTROL_FEEL.airAccel))
+  * (p.grounded ? 1 : heroAirControl(p));
 p.vx += (target - p.vx) * accel;
 if (Math.abs(target - p.vx) < 0.06) p.vx = target;
 p.facing = axisX;
@@ -1928,7 +1931,7 @@ p.vx *= p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake;
 if (Math.abs(p.vx) < 0.04) p.vx = 0;
 }
 if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
-else if (p.buffer > 0) p.buffer--;
+else queueJumpPress(p,false,CONTROL_FEEL.jumpBufferFrames);
 const masteryPlatforms = playerMasteryPlatforms(game);
 const allPlayerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
 const playerPlatforms=p._kiloFlightT>0?allPlayerPlatforms.filter(plat=>plat.h>40):allPlayerPlatforms;
@@ -1947,13 +1950,16 @@ const cuernoAirJump = !(p.coyote > 0 || p.wall);
 p.vy = -p.jumpPower; p.jumps = p.coyote > 0 || p.wall ? 1 : p.jumps + 1;
 if (p.id === "cuerno" && cuernoAirJump && p.jumps === 2 && cuernoFormMods((Number(p.evo) || 0) + 1)?.unlock?.rainbowJump) cuernoDoubleJump(game.cuernoFx, p);
 if (p.wall) p.vx = 8 * p.wall;
-p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; beep("jump");
+p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; p._jumpHoldTicks=0; beep("jump");
 game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: p.color || "#fff", count: 10, size: 2.6, up: 1.4, speed: 2.2, life: 14 });
 }
 if (!jump) {
-if (p._jumpHeld && p.vy < -4) p.vy *= 0.55;
-p._jumpHeld = false;
+if (p._jumpHeld && p.vy < -4) {
+ if(p.id==='cat'||p.id==='dino')p.vy *= heroJumpCut(p);
+ else p.vy *= 0.55;
 }
+p._jumpHeld = false;p._jumpHoldTicks=0;
+}else if(p._jumpHeld)p._jumpHoldTicks=Math.min(30,(p._jumpHoldTicks||0)+1);
 if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
 if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
 {
@@ -2000,9 +2006,14 @@ const hit = resolveBody(p, playerPlatforms, {
   prevX: sx,
   prevY: sy,
   dropThroughY,
+  cornerForgiveness:(p.id==='cat'||p.id==='dino')&&Math.abs(p.vx)<4?3:0,
 });
 if (hit.grounded) {
-  if (!p.grounded && incoming > 7) beep("land");
+  if (!p.grounded && incoming > 7) {
+  beep("land");
+  const landing=heroLandingImpact(p,incoming,game.reduceMotion||reduceMotion);
+  if(landing)game.fx?.emit?.(p.x+p.w/2,p.y+p.h,landing);
+}
   p.vy = 0;
   p.grounded = true;
   p.jumps = 0;
@@ -2031,7 +2042,7 @@ Magic.update(game);
 updateKiloFritaInteractions(game);
 
 if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
-if (!p.grounded && p.coyote > 0) p.coyote--;
+tickWalkoffCoyote(p,wasGrounded);
 if (p._specialFlightT > 0) {
 p.grounded = false;
 p.coyote = 0;
@@ -3089,14 +3100,14 @@ function updateCam() {
 const p = game.player; if (!p) return;
 const vw = camW(), vh = camH();
 let lerp = 0.24;
-const look = horizontalLook(p);
-let tx = p.x + p.w / 2 + look - vw / 2;
+const pcY = p.y + p.h / 2;
+const cs = game._camCalm || (game._camCalm = {anchor:pcY,look:0});
+cs.look = smoothCameraLook(cs.look,adaptiveCameraLook(p));
+let tx = p.x + p.w / 2 + cs.look - vw / 2;
 // V468 calm camera: Y follows a platform anchor, not every jump. The anchor
 // re-centres only when the hero lands on a new height or leaves the vertical
 // dead zone (top 28% / bottom 30% of the view), so normal jumps don't bob the view.
-const pcY = p.y + p.h / 2;
 const wingCamera=p.id==="cat"&&!p.dead&&!p.grounded&&!!p._michiWingAir;
-const cs = game._camCalm || (game._camCalm = { anchor: pcY });
 if (!Number.isFinite(cs.anchor) || p.dead) cs.anchor = pcY;
 if (p.grounded||wingCamera) cs.anchor = pcY;
 else {
@@ -3276,6 +3287,7 @@ drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,ga
 const realmTerrain={frita:{id:'frita-market',groundTop:'#e5cfa5',ground:'#9c8492',edge:'#f7e8c4'},yomi:{id:'yomi-observatory',groundTop:'#d7e6de',ground:'#8ca7af',edge:'#e8f4eb'},pizza:{id:'pizza-harbor',groundTop:'#eacba5',ground:'#b09179',edge:'#fff0cd'},dino:{id:'fossil-valley',groundTop:'#d9deb9',ground:'#90a48a',edge:'#eff1ce'},cat:{id:'lunar-garden',groundTop:'#e4d5e4',ground:'#a598ab',edge:'#f3e6e5'},cuerno:{id:'prism-grove',groundTop:'#cbdca9',ground:'#93a684',edge:'#edf1cb'},dragon:{id:'ember-forge',groundTop:'#e4c4a4',ground:'#9c8070',edge:'#f5dbb3'}}[game.roomDef?.hero];
 const heroTerrain=realmTerrain?{...world,...realmTerrain}:game.roomDef?.hero==='stitcho'?{...world,id:'dock',groundTop:'#e2c6a0',ground:'#a78f77',edge:'#efe0b9',platOutline:'#466577'}:game.roomDef?.hero==='chispin'?{...world,id:'sanctuary',groundTop:'#f1e5ca',ground:'#a3b8bf',edge:'#fff3d8',platOutline:'#5a788e'}:world;
 game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
+drawMichiPulse(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 if(game.roomDef?.kiloChapter&&!game.roomDef?.composition){ctx.save();ctx.strokeStyle='#273329';ctx.lineWidth=2;for(const pl of game.platforms){if(pl.h>24||!visibleForRender(pl,game.cam,viewportW,viewportH))continue;const px=pl.x-game.cam.x,py=pl.y-game.cam.y;ctx.fillStyle='#e0c67f';ctx.fillRect(px,py,pl.w,5);ctx.strokeRect(px,py,pl.w,pl.h);}ctx.restore();}
 if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
 }
@@ -4284,6 +4296,7 @@ state() {
     roomId: game.roomId,
     // Read-only campaign snapshots: no grant, bypass, or victory injection.
     world1: world1Snapshot(game),
+    ohanaPulse: michiPulseSnapshot(game),
     kiloInstruments:game.roomDef?.kiloEncounterVersion?game.world1?.stations.map(s=>({id:s.id,name:s.name,x:s.x,y:s.y,done:s.done,tones:s.tones||0,threatened:!!s.threatened})):null,
     world1Won: !!game.world1Won,
     combatReport:{...(game.combatReport||{hits:0,damage:0})},
@@ -4305,7 +4318,7 @@ state() {
     input: {
       left: !!(input?.keys?.a || input?.keys?.arrowleft),
       right: !!(input?.keys?.d || input?.keys?.arrowright),
-      jump: !!(input?.keys?.w || input?.keys?.arrowup || input?.keys?.[" "]),
+      jump: !!(input?.keys?.w || input?.keys?.arrowup || input?.keys?.[" "] || input?.gamepadJumpHeld?.()),
       down: !!(input?.keys?.s || input?.keys?.arrowdown),
       axisX: input?.axisX?.() || 0,
     },

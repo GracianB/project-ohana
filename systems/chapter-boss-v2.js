@@ -19,11 +19,21 @@ export function prepareChapterBossV2(e,g){
    // Every third turn keeps the native cycle so baiting never freezes the boss.
    if(!e._drummer)b.attack=v.turn%3===0?(Math.floor(v.turn/3)-1)%4:air?3:far?1:2;
    b.aim=Math.sign(p.x+p.w/2-e.x-e.w/2)||1;
+   // V656: the lunar guardian announces its committed attack direction before
+   // the strike. The warning is a gameplay cue, not a random particle effect.
+   if(e._astralCat){
+    const cue=b.attack===3?'¡ATAQUE AÉREO!':b.attack===1?'¡ONDA LUNAR!':b.attack===2?'¡EMBESTIDA!':'¡PULSO ASTRAL!';
+    const direction=b.aim<0?'←':'→';
+    g.nums?.add?.(e.x+e.w/2,e.y-28,`${cue} ${direction}`,'#ffe6a4',true);
+   }
    v.target={x:p.x+p.w/2+Math.max(-55,Math.min(55,(p.vx||0)*9)),y:p.y+p.h/2};
    b[clockKey]=Math.max(28,Math.round((b[clockKey]||50)*d.windup));
   }
   if(b.phase==='rest'){
-   if(!e._growthChapter)e.damageWindowRemaining=Math.round(125*(d.budget===1?1.35:1));
+   // Native growth bosses already receive a 160-point budget in chapterBossFinish.
+   // Only initialize the lunar fallback when no native budget was supplied.
+   // Never replenish a partially spent or exhausted recovery window.
+   if(!e._growthChapter||(e._astralCat&&e.damageWindowRemaining==null))e.damageWindowRemaining=Math.round(125*(d.budget===1?1.35:1));
    b[clockKey]=Math.max(30,Math.round((b[clockKey]||60)*d.cooldown));
   }
   if((b.phase==='attack'||b.phase==='strike')&&v.target&&v.turn>1){

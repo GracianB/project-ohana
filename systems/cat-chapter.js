@@ -1,4 +1,5 @@
 import {XP_NEED} from './xp.js';
+import {syncMichiPulse} from '../worlds/ohana-pulse.js';
 import {drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust,drawCatPitVortex,drawCatPlatformDecor,drawCatBossArena,drawCatPearl,drawCatUpdraft} from './cat-chapter-art-v609.js';
 export const MICHI_CHAPTER_BOSS_ID='w1-cat-astral-v1';
 export const MICHI_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134,hp:480});
@@ -30,6 +31,8 @@ export function catTrapSilenced(g,id){
 export function updateCatChapter(g,hurt){
  if(!catChapter(g)||!g.world1||!g.player||g.player.dead)return;
  catGrowth(g);
+ // V700: awaken REAL solid paths from actual rescued jellyfish.
+ syncMichiPulse(g);
 
  const p=g.player;
 
@@ -93,7 +96,7 @@ export function updateCatChapter(g,hurt){
 }
 
 export function catObjective(g){
- if(!catChapter(g)||g.world1?.sealed||!g.world1?.stations.every(s=>s.done))return null;
+ if(!catChapter(g)||g.world1?.sealed||!g.world1?.stations?.every(s=>s.done)||catBossDefeated(g))return null;
  return {
   x:8750,y:1134,label:'Oráculo Medusaluna',
   action:'Las cinco medusas están despiertas · esquiva sus 4 fases de aviso y ataca en recuperación cuando abra el núcleo'
