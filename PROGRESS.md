@@ -1,3 +1,7 @@
+## ohana-647 · Animación conectada al movimiento real
+
+Contacto H desde el primer fotograma y recuperación, patas con apoyo y elevación de retorno, aterrizaje, frenada, giro y reacciones de cola/alas/sombrero/libro/fantasma. Velocidad de V646 conservada. [Validación](docs/V647-VALIDATION.json) · [publicación](docs/V647-PUBLICATION.json).
+
 ## ohana-646 · Cinco formas más expresivas y ágiles
 
 Proporciones y materiales revisados en las cinco formas; libro conectado a la mano del hechicero, alas curvadas, cachorro suave, pantera más estilizada y fantasma perlado. Velocidad de Michi 5,8/6,5/7,2/7,6/9,2; brillos mediante trazos superpuestos sin desenfoque costoso. [Validación](docs/V646-VALIDATION.json) · [publicación](docs/V646-PUBLICATION.json).
