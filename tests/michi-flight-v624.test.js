@@ -17,11 +17,11 @@ test('fairy effort runs out, cannot be restored by releasing jump and refills on
  for(let i=0;i<5;i++){steerMichiFlight(p,{jump:false});steerMichiFlight(p,{jump:true});}assert.equal(p._michiWingFuel,0);
  p.grounded=true;steerMichiFlight(p);assert.equal(p._michiWingFuel,MICHI_FAIRY_FLIGHT_FRAMES);
 });
-test('Eclipse sustains ascent, glides on release, and descends deliberately on Down',()=>{
+test('Ghost sustains ascent, hovers on release, and descends deliberately on Down',()=>{
  const p=actor(4);steerMichiFlight(p);p.grounded=false;p.vy=0;
  for(let i=0;i<1200;i++){steerMichiFlight(p,{jump:true});assert.ok(p.vy<0);}
  assert.equal(michiFlightState(p).unlimited,true);assert.equal(michiFlightState(p).remaining,null);
- steerMichiFlight(p,{});assert.equal(michiFlightState(p).mode,'glide');assert.ok(p.vy>0&&p.vy<1);
+ steerMichiFlight(p,{});assert.equal(michiFlightState(p).mode,'hover');assert.equal(p.vy,0);
  steerMichiFlight(p,{jump:true,drop:true});assert.equal(michiFlightState(p).mode,'descend');assert.ok(p.vy>=4.5);
  p.evo=3;assert.equal(steerMichiFlight(p,{jump:true}),false);assert.equal(p._gliding,false);
 });

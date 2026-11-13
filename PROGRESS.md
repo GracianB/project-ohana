@@ -1,3 +1,7 @@
+## ohana-642 · Michi vivo y fantasma
+
+Quinta forma: gato fantasma flotante con manos independientes y nueve estelas. Segunda: vuelo sostenido de 210 ticks, planeo, descenso y reserva visible. Las cinco formas tienen mirada contextual, gestos propios y efectos diferenciados por poder. Guardado y cajas físicas conservados. Ver [validación](docs/V642-VALIDATION.json) y [publicación](docs/V642-PUBLICATION.json).
+
 ## ohana-641 · Cinco metamorfosis reales para Michi
 
 Cachorro cuadrúpedo, planeador alado, pantera con tres colas, lince digitígrado y soberano de nueve colas. Cinco cuerpos articulados propios, siluetas verificadas sin color, crecimiento visual y encuadre de evolución calibrados. Identidad, controles, estadísticas y cajas de colisión conservados. Publicado en Pages y Netlify. Estado de validación y publicación en docs/V641-VALIDATION.json y docs/V641-PUBLICATION.json.

@@ -1,0 +1,23 @@
+{
+  "release": "ohana-642",
+  "scope": "Michi: floating cat ghost, sustained glider flight and five responsive rigs",
+  "passed": [
+    "Native held-key production physics: form 2 ascent, 210-tick finite reserve, glide and descent; form 5 ascent, release at zero vertical velocity and descent",
+    "Five actual body plans and ten monochrome silhouette comparisons, all IoU below 0.80",
+    "Production optical heights 66/82/99/121/142 px; 100 checks across 50 hero forms with unchanged hitboxes",
+    "Five forms × seventeen poses × three scales; both facings, frozen poses and reduced-motion stability; 1280/390/320 selection and desktop/mobile baby HUD",
+    "Visual attention tests: threats/objects, bounded look, idle reset, no automatic collection or simulation changes",
+    "1883 unit tests passed, zero failures",
+    "Atlas: native 1280/390/320 flow, saved evolution start and Continue",
+    "400 evolution frames and 80 reduced-motion reveals",
+    "Five forms × six distinct acting/attention/flight/power poses",
+    "Release gate: 403 runtime modules and 472 offline resources"
+  ],
+  "pending": [
+    "Public deployment verification"
+  ],
+  "limits": [
+    "Flight test uses isolated airborne start positions; it does not claim full campaign completion.",
+    "Contextual attention is local visual behavior; no invulnerability, wall phasing or automatic attacks are added."
+  ]
+}

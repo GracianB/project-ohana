@@ -13,7 +13,7 @@ test("michi evo-cine: formas bioluminiscentes, luces acotadas y lectura accesibl
     assert.ok(!calls.text.some((s) => /god/i.test(s)));
   }
   const { c, calls } = mock(); drawEvoCine(c, 960, 540, 3.6, 4, 5);
-  assert.ok(calls.text.some((s) => s.includes("Michi · Leyenda de Nueve Colas")));
+  assert.ok(calls.text.some((s) => s.includes("Michi · Espectro de Nueve Vidas")));
 });
 test("michi evo-cine: sin gradientes ni Math.random en el código", () => {
   const src = readFileSync(new URL("../systems/evo-cine/michi.js", import.meta.url), "utf8");

@@ -1,5 +1,6 @@
 import {drawKiloLivingGrove} from './worlds/kilo-living-grove.js';
 import {skillIcon,mountCompactHud} from './systems/compact-hud.js';
+import {updateMichiPresence} from './systems/michi-presence.js';
 import {steerMichiFlight,michiFlightState} from './characters/michi-flight.js';
 import {drawRealmSignatures} from './systems/realm-signatures.js';
 import {drawHudPortrait} from './systems/hud-portrait-v606.js';
@@ -1986,6 +1987,7 @@ const kiloStep=game._evolutionAttacks?.moves?.find(m=>m.id==='kilo'&&m.index===4
 if(p.id==='kilo'&&kiloStep&&!(p._dashGo>0)){inputState.kiloBurst=kiloStep.face*(kiloStep.age<6?3:kiloStep.speed);p.vx=inputState.kiloBurst;p.facing=kiloStep.face;}
 const kiloFlight=steerKiloFlight(p,inputState);
 const michiFlight=steerMichiFlight(p,inputState);
+updateMichiPresence(game,inputState);
 const wasGrounded = !!p.grounded;
 const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
 const incoming = p.vy;
