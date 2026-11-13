@@ -71,3 +71,7 @@ hasta usarlo, sin cuenta atrás. El mismo lanzamiento no cuenta varias veces.
 Guardianes L son brotes/espíritus de hojas con geometría de daño conservada.
 Las flores usan pétalos curvos, hojas y un progreso real; la entrada muestra al
 actor animado y el paisaje claro. Se requiere nueva aceptación humana.
+
+## Reapertura explícita V643
+
+El usuario vuelve a pedir mejoras de trajes y especiales y señala que el aro de L parece inmóvil. Las cinco formas reciben sastrería y bordados que siguen el torso existente. El aro mantiene sus dos mitades de profundidad y añade joyas asimétricas que hacen visible el giro. Su reloj independiente usa el inicio local o la duración replicada: lanzar J no lo reinicia. Se conservan daño, curación por impactos, tiempos, vuelo, combo y controles.

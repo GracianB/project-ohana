@@ -1,14 +1,24 @@
-// Draw the far semicircle before the body, the near semicircle afterwards.
-export function drawHulaDepth(ctx,p,H,t,front=false,reduceMotion=false){
+// Independent ceremonial clock: local casts and replicated remaining duration agree.
+export function kiloHoopPose(p,H,t,reduced=false){
  const duet=p._kiloDuetT>0&&p._kiloDuetAge>=30&&p._kiloDuetAge<108;
- const powerAge=t-(p._powerPerformance?.start??-9999),finale=p._powerPerformance?.index===5&&powerAge>=0&&powerAge<120;
- const aloha=p._kiloOhanaT>0;
- // K has its own foot trail. A waist hoop belongs only to the ceremonial
- // performances, with a clock that another J cast cannot reset.
- if(p.id!=='kilo'||p.dead||(!duet&&!finale&&!aloha))return;
- const time=reduceMotion?0:duet?p._kiloDuetAge:finale?powerAge:Math.max(0,t-(p._kiloOhanaAt??t)), sway=Math.sin(time*.16)*H*.035;
- ctx.save();ctx.lineWidth=Math.max(2,H*.028);ctx.strokeStyle=front?(aloha||finale?'#fff0b0':'#ffcf75'):'#b67b83';
- ctx.beginPath();ctx.ellipse(sway,-H*.39,H*(aloha?.56:.43),H*.12,Math.sin(time*.08)*.12,front?0:Math.PI,front?Math.PI:Math.PI*2);ctx.stroke();ctx.restore();
+ const powerAge=t-(p._powerPerformance?.start??-9999),finale=p._powerPerformance?.index===5&&powerAge>=0&&powerAge<120,aloha=p._kiloOhanaT>0;
+ if(p.id!=='kilo'||p.dead||(!duet&&!finale&&!aloha))return null;
+ const age=duet?p._kiloDuetAge:finale?powerAge:Number.isFinite(p._kiloOhanaAt)?t-p._kiloOhanaAt:180+(p.evo||0)*30-p._kiloOhanaT;
+ const time=reduced?0:Math.max(0,Number.isFinite(age)?age:0);
+ return{time,phase:time*.095,radius:H*(aloha?.56:.43),sway:Math.sin(time*.16)*H*.035,tilt:Math.sin(time*.08)*.12,ceremonial:aloha||finale};
+}
+// Draw the far semicircle and moving ornaments behind the body, then the near half.
+export function drawHulaDepth(ctx,p,H,t,front=false,reduceMotion=false){
+ const hoop=kiloHoopPose(p,H,t,reduceMotion);if(!hoop)return;
+ const{radius,sway,tilt,phase}=hoop,y=-H*.39;
+ ctx.save();ctx.lineWidth=Math.max(2,H*.028);ctx.strokeStyle=front?(hoop.ceremonial?'#fff0b0':'#ffcf75'):'#b67b83';
+ ctx.beginPath();ctx.ellipse(sway,y,radius,H*.12,tilt,front?0:Math.PI,front?Math.PI:Math.PI*2);ctx.stroke();
+ // Asymmetric jewels make rotation visible even when the hoop's contour is circular.
+ for(let i=0;i<8;i++){const a=phase+i*Math.PI/4,near=Math.sin(a)>=0;if(near!==front)continue;
+  const ox=Math.cos(a)*radius,oy=Math.sin(a)*H*.12,x=sway+ox*Math.cos(tilt)-oy*Math.sin(tilt),yy=y+ox*Math.sin(tilt)+oy*Math.cos(tilt),r=H*(i===0?.043:.024);
+  ctx.strokeStyle=i===0?'#fff7cf':i%2?'#ffb1ba':'#b7ffe3';ctx.lineWidth=i===0?2:1.4;ctx.beginPath();ctx.moveTo(x-r,yy);ctx.lineTo(x,yy-r);ctx.lineTo(x+r,yy);ctx.lineTo(x,yy+r);ctx.lineTo(x-r,yy);ctx.stroke();
+ }
+ ctx.restore();
 }
 
 // A quiet stream below the feet identifies actual flight, even after the

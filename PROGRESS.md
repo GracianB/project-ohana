@@ -1,3 +1,7 @@
+## ohana-643 · Cinco formas, revisión de diseño y poses
+
+Cachorro con chaleco remendado y luna; aviador con arnés y membranas articuladas; pantera con rosetas y zarpazo extendido; lince con abrigo partido y medias lunas móviles; fantasma con luces felinas orbitando. Saltos con patas recogidas y ataques con articulación propia. Última dirección del usuario: gato más espectral y neón, fantasma un 11 % más pequeño y burlón; Kilo reabierto con cinco trajes bordados y el aro L con joyas giratorias y reloj independiente. [Validación](docs/V643-VALIDATION.json) · [publicación](docs/V643-PUBLICATION.json).
+
 ## ohana-642 · Michi vivo y fantasma
 
 Quinta forma: gato fantasma flotante con manos independientes y nueve estelas. Segunda: vuelo sostenido de 210 ticks, planeo, descenso y reserva visible. Las cinco formas tienen mirada contextual, gestos propios y efectos diferenciados por poder. Guardado y cajas físicas conservados. Ver [validación](docs/V642-VALIDATION.json) y [publicación](docs/V642-PUBLICATION.json).
