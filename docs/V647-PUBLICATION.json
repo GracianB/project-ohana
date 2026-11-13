@@ -1,5 +1,17 @@
 {
   "release": "ohana-647",
-  "status": "verification",
-  "scope": "Five-form immediate-contact choreography, planted gait, landing/brake/turn and articulated props"
+  "status": "published and verified",
+  "sourceCommit": "a67ca62213de226c31870be8a87545c72d68533f",
+  "mainMerge": "414c566cb8fce9219f02cf7970e24746428d352f",
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/478",
+  "githubPages": "https://gracianb.github.io/project-ohana/",
+  "netlify": "https://project-ohana-multiplayer.netlify.app/",
+  "netlifyDeploy": "6af7a215f0ccaf001691cc53",
+  "pagesWorkflow": 43530028396,
+  "publishedAt": "2026-11-13T23:54:54.092Z",
+  "verified": [
+    "Sixteen runtime files on GitHub Pages and Netlify match tested source",
+    "Candidate native Atlas and two-browser desktop/mobile movement with Michi host in adventure and versus",
+    "Production version and two-player create/join/choose/ready/poll verified in both modes; own sessions disconnected"
+  ]
 }

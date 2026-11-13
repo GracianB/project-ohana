@@ -9,15 +9,20 @@
     "Production art matrix: five forms × seventeen poses × three scales, both facings and reduced-motion stability; native 1280/390/320 selection and desktop/mobile HUD",
     "100 production size checks across fifty hero forms; Michi 70/89/64/129/76 px; unchanged physical boxes",
     "Native five-form movement and direction reversal retained at V646 speeds",
-    "Slow-motion production-renderer studio recorded: 373 frames, zero uncaught errors",
-    "Release gate: 404 runtime modules and 473 offline resources"
+    "Motion studio rendered 373 frames without uncaught errors; quarter-speed WebM and MP4 viewing export",
+    "Release gate: 404 runtime modules and 473 offline resources",
+    "GitHub Pages release CI and deployment succeeded",
+    "Netlify candidate: native five-form Atlas and sixteen public runtime files match tested source",
+    "GitHub Pages: sixteen public runtime files match tested source",
+    "Netlify candidate: Michi host, native desktop/mobile lobbies and two-browser movement in adventure and versus",
+    "Same tested deploy promoted intact; production ohana-647 and sixteen runtime files match source",
+    "Production API: two connected players ready in adventure and versus; own test sessions disconnected"
   ],
-  "pending": [
-    "Public candidate and deployment verification"
-  ],
+  "pending": [],
   "limits": [
     "Renderer, position and stationary-enemy fixtures do not claim earned campaign progression.",
     "Motion film is a quarter-speed renderer studio, not a campaign recording.",
-    "Damage timing, cooldowns, speed, health and physical boxes are preserved; only drawing behavior changes."
+    "Damage timing, cooldowns, speed, health and physical boxes are preserved; only drawing behavior changes.",
+    "The first remote movement run timed out waiting for connection bootstrap; the diagnostic retry passed both modes. No network-latency acceptance is claimed."
   ]
 }
