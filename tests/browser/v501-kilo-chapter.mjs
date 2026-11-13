@@ -12,7 +12,7 @@ try{
  page.on('pageerror',e=>errors.push(e.message));
  await page.clock.install({time:new Date('2026-10-27T12:00:00Z')});await page.clock.pauseAt(new Date('2026-10-27T12:00:01Z'));
  await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});
- await page.keyboard.press('Escape');await page.locator('#difficulty [data-diff="normal"]').click();
+ await page.keyboard.press('Escape');await page.locator('[data-atlas-dialog="settings"]').click();await page.locator('#difficulty [data-diff="normal"]').click();await page.locator('#atlas-settings-dialog .atlas-dialog-close').click();
  await page.evaluate(()=>window.__OHANA_E2E.startWorld1('kilo'));
  const state=()=>page.evaluate(()=>window.__OHANA_E2E.state());
  const step=async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return state();};

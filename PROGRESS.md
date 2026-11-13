@@ -1,6 +1,6 @@
 ## ohana-640 · Publicación conjunta y crecimiento felino
 
-Integra los PR 461–463. Calibración óptica del gato rebelde: las cinco formas crecen sin encoger en la segunda y tercera. El objetivo persistente se verifica en la nueva zona del HUD compacto. Netlify conserva su despliegue anterior hasta disponer de acceso a ese alojamiento.
+Integra los PR 461–463. Calibración óptica del gato rebelde: las cinco formas crecen sin encoger en la segunda y tercera. El objetivo persistente se verifica en la nueva zona del HUD compacto. Pages y Netlify publicados en ohana-640; las dos funciones de servidor y Aventura/Versus comprobadas con dos navegadores y salas reales.
 
 ## ohana-639 · Atlas, interfaz y Kilo (candidato)
 

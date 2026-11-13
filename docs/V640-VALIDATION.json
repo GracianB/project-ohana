@@ -10,12 +10,16 @@
     "100 rendered optical checks across fifty forms: rebel Michi grows 65/80/97/112/133 px; collision boxes unchanged",
     "Physical Frita prize, Stitcho repair, Yomi connection and hot Pizza delivery: PASS, persistent objective visible in compact HUD",
     "V640 release gate PASS: 400 runtime modules, 469 content-addressed precached resources",
-    "GitHub V600 Normal campaign on integrated release: all ten earned chapters, boss and ending passed; subsequent V640 changes only normalize visual size"
+    "GitHub V600 Normal campaign on integrated release: all ten earned chapters, boss and ending passed; subsequent V640 changes only normalize visual size",
+    "Netlify production ohana-640: all 13 checked client files match committed source byte-for-byte; game and rtc-config deployed with real dependency files",
+    "Real Netlify API: adventure and versus each create/join/choose/ready/poll with two authenticated players; test rooms disconnected afterwards",
+    "Two live Netlify browsers: native lobby, desktop/mobile, adventure peer movement and canonical versus movement; zero uncaught errors",
+    "Current-interface CI follow-up: native difficulty menu and first Kilo instrument/retry, touch power drawer and cooldown/charge feedback passed"
   ],
   "pending": [
     "Remote quality matrix"
   ],
   "limits": [
-    "Netlify deployment unavailable: this environment has no Netlify deployment credentials or connector."
+    "Netlify HTTP fallback verified with two browser contexts; this does not certify every network/NAT or direct WebRTC path."
   ]
 }

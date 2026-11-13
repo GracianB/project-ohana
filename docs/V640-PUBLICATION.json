@@ -1,6 +1,6 @@
 {
   "release": "ohana-640",
-  "stage": "published_pages",
+  "stage": "published_pages_and_netlify",
   "production_url": "https://gracianb.github.io/project-ohana/",
   "runtime_commit": "62055cf51fd88ece92e61c8a58ff7bf0e6c6aac7",
   "observed_at": "2026-11-13T14:35:32.806116+00:00",
@@ -77,6 +77,125 @@
       "sha256": "c8276ebc1eb3fb3050f84e9f30e077c58e0d846dd2d648e6b056f3cc167c4249"
     }
   ],
-  "netlify_release": "ohana-630",
-  "netlify_status": "not_updated_no_deployment_access"
+  "netlify_release": "ohana-640",
+  "netlify_status": "published",
+  "netlify_url": "https://project-ohana-multiplayer.netlify.app/",
+  "netlify_deploy_id": "6af73735fc1efb195129f6dd",
+  "netlify_runtime_commit": "710d3f0bf566384ab4ad4e683d9cba9750e53013",
+  "netlify_observed_at": "2026-11-13T16:28:41.170434+00:00",
+  "netlify_functions": [
+    "game",
+    "rtc-config"
+  ],
+  "netlify_verified_files": [
+    {
+      "path": "index.html",
+      "matches": true,
+      "sha256": "bb9b066317eea884e83a25ec3a34c670c1f25b38c1b0c7cbb27e6bfbcaa13d2c"
+    },
+    {
+      "path": "sw.js",
+      "matches": true,
+      "sha256": "a8b880667a50f52bd96b4a659a57dbc642ff68c0bd918281e99d8b80535818cf"
+    },
+    {
+      "path": "game.js",
+      "matches": true,
+      "sha256": "b4323085a748cb1ccea3fa630ae77fd52bc776a55865f8fc47cc7875d3137c05"
+    },
+    {
+      "path": "systems/hoku-atlas.js",
+      "matches": true,
+      "sha256": "7c46d361d1495f714b30f11082f07211cb6fc27c9290bc45d3c62bca848efab0"
+    },
+    {
+      "path": "hoku-atlas.css",
+      "matches": true,
+      "sha256": "6533853d1b9e47160d1ffd3ea982dcfdddbae85efd76584f5d0805bccd972179"
+    },
+    {
+      "path": "compact-play.css",
+      "matches": true,
+      "sha256": "fad3fe43be2a279bfb834a0ebb5cf6c81192536736eec6ff6f72b3aae489a6ca"
+    },
+    {
+      "path": "systems/compact-hud.js",
+      "matches": true,
+      "sha256": "b2455b3ac1503ce8d4d3eadcc35ac7987089a85f900e673a38a52b24732105f1"
+    },
+    {
+      "path": "characters/art/cat.js",
+      "matches": true,
+      "sha256": "10d708b704170f267e2ae9213870d4c15a88fd177757e8552d1841a134ae96af"
+    },
+    {
+      "path": "characters/michi-rebel.js",
+      "matches": true,
+      "sha256": "b394b7ba6f7329feb2b89ad2b120aec02033eb328a91b07689057c502d601d10"
+    },
+    {
+      "path": "characters/visual-size.js",
+      "matches": true,
+      "sha256": "b354218e2e79eba9fa817300a6bdcba8dac1bcdefeebc4f0902e9b7b1cb7cb5a"
+    },
+    {
+      "path": "systems/kilo-chapter.js",
+      "matches": true,
+      "sha256": "e2d383ffb4d1ca69b45043653981e9c7d9ff6e6c935fecdbca4b1cfdab961750"
+    },
+    {
+      "path": "systems/quimera-art.js",
+      "matches": true,
+      "sha256": "c8276ebc1eb3fb3050f84e9f30e077c58e0d846dd2d648e6b056f3cc167c4249"
+    },
+    {
+      "path": "multiplayer/lobby-ux.js",
+      "matches": true,
+      "sha256": "a469d1ce05cd4ce61765b28b46ed341f071706f6fb812057091cc1e00868bcca"
+    }
+  ],
+  "netlify_api_verification": {
+    "version": "ohana-640",
+    "reports": [
+      {
+        "mode": "adventure",
+        "phase": "playing",
+        "players": 2,
+        "heroes": [
+          "kilo",
+          "stitcho"
+        ]
+      },
+      {
+        "mode": "versus",
+        "phase": "playing",
+        "players": 2,
+        "heroes": [
+          "kilo",
+          "stitcho"
+        ]
+      }
+    ]
+  },
+  "netlify_browser_verification": [
+    {
+      "mode": "adventure",
+      "phase": "playing",
+      "players": 2,
+      "serverMovement": -153.87837351922514,
+      "peerMovement": -153.85077589996527,
+      "transport": "server",
+      "errors": []
+    },
+    {
+      "mode": "versus",
+      "phase": "playing",
+      "players": 2,
+      "serverMovement": 86.40000000000873,
+      "peerMovement": null,
+      "transport": "canonical-http",
+      "errors": []
+    }
+  ],
+  "netlify_verification_scope": "Two native browsers on this exact Netlify deploy before promotion; both modes and player movement. Public production API rechecked after promotion. HTTP fallback verified, not every Internet/NAT or direct WebRTC path."
 }
