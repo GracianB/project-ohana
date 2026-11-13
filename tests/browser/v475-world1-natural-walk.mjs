@@ -16,7 +16,7 @@ export async function earnFirstKiloInstrument(page,root,{difficulty='easy'}={}){
  await page.goto(root+'/?e2e=1',{waitUntil:'load'});
  await page.waitForFunction(()=>!!window.__OHANA_E2E);
  await page.keyboard.press('Escape');
- await page.locator('#difficulty [data-diff="'+difficulty+'"]').click();
+ await page.locator('[data-atlas-dialog="settings"]').click();await page.locator('#difficulty [data-diff="'+difficulty+'"]').click();await page.locator('#atlas-settings-dialog .atlas-dialog-close').click();
  const initial=await page.evaluate(()=>window.__OHANA_E2E.startWorld1('kilo'));
  assert.equal(initial.roomId,'w1-kilo');assert.equal(initial.world1.done,0);
  assert.deepEqual(initial.world1Seals,[]);assert.equal(initial.evo,0);

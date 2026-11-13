@@ -34,7 +34,7 @@ try{
  await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});
  await page.evaluate(()=>window.__OHANA_E2E.startWorld1('kilo'));await step(600);await step(600);
  await page.keyboard.press('j');await step(1);
- await page.locator('.touch-btn[data-k="j"]').tap();await step(1);
+ await page.locator('#touch-power-toggle').tap();await page.locator('.touch-btn[data-k="j"]').tap();await step(1);
  assert.match(await notice(),/Recargando/);assert.match(await page.locator('.touch-btn[data-k="j"]').innerText(),/s$/);
  assert.equal((await state()).lastAbilityId,'ukulele','locked touch input must not cast');
  await fs.mkdir('test-results/v501',{recursive:true});
