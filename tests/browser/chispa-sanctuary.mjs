@@ -5,6 +5,7 @@ try{
  browser=await chromium.launch();const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));const base=`http://127.0.0.1:${server.address().port}`;
  await page.goto(base+'/?e2e=1',{waitUntil:'networkidle'});
+ await page.locator('[data-welcome="story"]').click();
  await page.evaluate(async()=>{await (await import('/characters/art/chispa-sprite.js')).preloadChispaAtlas();window.__OHANA_WELCOME_SET_FRAME(1.72);});
  await page.waitForTimeout(100);assert.equal(await page.locator('#ohana-intro').getAttribute('data-chispin-welcome-phase'),'charge');
  await fs.mkdir('test-results/chispa-sanctuary',{recursive:true});

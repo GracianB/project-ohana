@@ -45,14 +45,14 @@ try{
  await page.locator('#enemy-board').screenshot({path:'test-results/direction/enemies.png'});
  await page.evaluate(()=>document.querySelector('#enemy-board').remove());
  await page.evaluate(()=>window.__OHANA_E2E.setEvo(2));
- await page.locator('#btn-help').focus();
+ await page.locator('#play-options summary').focus();
  await page.evaluate(async()=>{const {playEvolution}=await import('/systems/evo-cinema.js');playEvolution({id:'chispin',evo:2});});
  await page.locator('#evo-stage.show .evo-skip').waitFor();
  await page.waitForTimeout(900);await page.keyboard.press('ArrowRight');
  assert.equal(await page.locator('#evo-stage.show').count(),1,'movement must not skip evolution');
  assert.equal(await page.locator('.evo-skip').evaluate(el=>document.activeElement===el),true);
  await page.keyboard.press('Escape');await page.locator('#evo-stage.show').waitFor({state:'hidden'});
- assert.equal(await page.locator('#btn-help').evaluate(el=>document.activeElement===el),true);
+ assert.equal(await page.locator('#play-options summary').evaluate(el=>document.activeElement===el),true);
  await page.screenshot({path:'test-results/direction/gameplay.png'});
  assert.deepEqual(errors,[]);
  console.log('PASS 400 evolution frames, 80 static reduced-motion reveals, ten backdrops, 30 immutable enemy renders and real cinematic keyboard/focus lifecycle');

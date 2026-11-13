@@ -825,7 +825,7 @@ try {
 
   await page.evaluate(() => window.__OHANA_E2E.start('kilo'));
   await page.waitForTimeout(80);
-  await page.locator('#btn-map').click();
+  await page.locator('#play-options summary').click();await page.locator('[data-play-action="btn-map"]').click();
   await page.waitForTimeout(80);
   assert.equal(await page.locator('#map-overlay').getAttribute('aria-hidden'), 'false', '06-map: mapa no visible');
   assert.equal(await page.locator('#map-grid .world-map-v40').count(), 1, '06-map: World Graph V40 ausente');
