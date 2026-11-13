@@ -1,5 +1,20 @@
 {
   "release": "ohana-643",
-  "status": "in verification",
-  "scope": "Five feline designs: materials, expressive threat faces, articulated airborne legs, attack reach, flight membranes, crescent gauntlets and orbiting feline soul-lights"
+  "status": "published and verified",
+  "sourceCommit": "ae309b3a78dc95e9a2e581a59b99c878f6d775f9",
+  "mainMerge": "71f809edfad4e981c2505e295cc5cebeeafd7d70",
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/470",
+  "githubPages": "https://gracianb.github.io/project-ohana/",
+  "pagesWorkflow": 43484926528,
+  "netlify": "https://project-ohana-multiplayer.netlify.app/",
+  "netlifyDeploy": "6af759751729fe27ec242fe1",
+  "method": "Clean tracked release with actual dependency files; offline function build; candidate tested before promoting the same deploy",
+  "verified": [
+    "GitHub Pages: fifteen runtime files match source",
+    "Netlify candidate: fifteen runtime files match source, native five-form Atlas and both server game modes",
+    "Local: 1884 unit tests, native desktop/mobile L/J, solar flight and real damage cancellation",
+    "Native candidate two-browser desktop/mobile movement passed for adventure and versus",
+    "Tested Netlify deployment promoted intact; production fifteen runtime files match source and both two-player APIs pass"
+  ],
+  "publishedAt": "2026-11-13T18:43:46.257Z"
 }
