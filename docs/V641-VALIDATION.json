@@ -1,0 +1,22 @@
+{
+  "release": "ohana-641",
+  "scope": "Five anatomically distinct rebel-cat forms and their actual in-game, Atlas, manual and evolution rendering",
+  "verified": [
+    "Real production art: ten pairwise monochrome silhouette comparisons, each below 0.80 overlap after normalization",
+    "100 rendered growth checks across all fifty hero forms: Michi approximately 66/81/100/120/142 px, unchanged physical boxes",
+    "Michi matrix: five forms \u00d7 seventeen poses \u00d7 three scales, both facings, frozen input and reduced-motion stability; responsive Atlas and gameplay HUD",
+    "Focused eye, fourth-form coat and welcome choreography regressions passed",
+    "Full unit suite: 1881 passed, zero failures",
+    "Atlas: native character/destination/form selection, saved-form start and Continue at desktop/390/320",
+    "Cinematics: 400 evolution frames, 80 reduced-motion reveals and native focus lifecycle passed",
+    "Final optical curve measured on the production renderer: 66/82/99/120/142 px",
+    "Final release gate PASS: 400 runtime modules and 469 precached resources"
+  ],
+  "pending": [
+    "GitHub Pages and Netlify publication"
+  ],
+  "limits": [
+    "Silhouette/artwork galleries use explicit renderer fixtures, not newly earned campaign progress.",
+    "Abilities, collision boxes, saved hero/form IDs and combat statistics are preserved."
+  ]
+}

@@ -13,26 +13,26 @@ export const MICHI_FIELD_NOTES=Object.freeze([
    gesture:'Oreja mellada · ojos ámbar · pañuelo rojo',tone:'#adfff1'
  }),
  Object.freeze({
-   title:'02 · Alas sobre el agua',subtitle:'Michi · Alas de Asfalto',
-   description:'El mismo gato callejero despliega dos alas oscuras. Su mirada desafiante sigue marcando el rumbo.',
+   title:'02 · Dueño de los tejados',subtitle:'Michi · Alas de Asfalto',
+   description:'El cuerpo se alarga y se alza sobre dos patas. Dos membranas rasgadas se articulan desde sus hombros; el pañuelo flamea entre ellas.',
    secret:'Mantén el salto para ascender. Al tocar tierra, el impulso vuelve a estar disponible.',
    gesture:'Alas oscuras · cola en gancho · vuelo',tone:'#98f8ff'
  }),
  Object.freeze({
-   title:'03 · El mar recuerda',subtitle:'Michi · Garra Nocturna',
-   description:'Chaleco oscuro, tachuelas y garras listas. Cada hechizo nace de un gesto distinto de sus patas.',
+   title:'03 · La pantera despierta',subtitle:'Michi · Pantera del Eclipse',
+   description:'Una pantera baja y musculosa, con colmillos de sable, tres colas y enormes garras delanteras. Sus hombros preparan cada zarpazo.',
    secret:'Aprovecha los cambios de altura y vigila los brillos propios de cada enemigo.',
-   gesture:'Garras · chaleco · hechizos malva',tone:'#f6a7ff'
+   gesture:'Cuatro patas · tres colas · colmillos de sable',tone:'#f6a7ff'
  }),
  Object.freeze({
-   title:'04 · Cinco caminos',subtitle:'Michi · Sombra Callejera',
-   description:'Un felino de paso seguro y cola en gancho. Se mueve bajo la luna con la calma de quien conoce cada tejado.',
+   title:'04 · El filo de la sombra',subtitle:'Michi · Lince Espectral',
+   description:'Un lince erguido sobre patas digitígradas. Sus penachos y dos colas cortan la silueta; las medias lunas de sus brazos siguen cada golpe.',
    secret:'No confundas el resplandor con una plataforma: sigue mirando sus contornos reales.',
-   gesture:'Mirada afilada · pasos felinos · acentos menta',tone:'#ffe8ad'
+   gesture:'Penachos · dos colas · garras de media luna',tone:'#ffe8ad'
  }),
  Object.freeze({
-   title:'05 · El guardián sereno',subtitle:'Michi · Leyenda de Nueve Colas',
-   description:'Nueve colas y alas desplegadas coronan al gato rebelde. Conserva su pañuelo, su piercing y su media sonrisa.',
+   title:'05 · El soberano de los nueve ecos',subtitle:'Michi · Leyenda de Nueve Colas',
+   description:'Una gran bestia felina: melena angular, corona quebrada, alas y nueve colas que se abren en abanico. La cicatriz y el pañuelo revelan al cachorro que fue.',
    secret:'Puedes sostener el salto para volar, soltar para planear y pulsar abajo para descender.',
    gesture:'Nueve colas · alas · tachuelas doradas',tone:'#9effcd'
  })

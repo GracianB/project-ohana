@@ -61,7 +61,7 @@ test('Hada Felina retains its winged, luminous identity after the V625 anatomy r
 test('fourth-form rebel cat retains its coat during attack',()=>{
  const idle=rec(),atk=rec();
  cat.draw(idle.c,pose('idle',30,3),{});cat.draw(atk.c,pose('attack',30,3),{});
- assert.ok(idle.log.fills.has('#30384e')&&atk.log.fills.has('#30384e'),'street-cat coat stays recognizable through attack');
+ assert.ok(idle.log.fills.has('#293c50')&&atk.log.fills.has('#293c50'),'spectral lynx coat stays recognizable through attack');
  assert.ok((atk.log.ops.ellipse||0)>10,'separate paws, muzzle and eyes');
 });
 
@@ -77,7 +77,7 @@ test('every form x state retains articulated vectors and permits only shared eye
 
 test('street cat replaces the archived tide star in the fourth evolution slot',()=>{
  assert.match(src,/drawRebelCat/);
- assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Michi · Sombra Callejera');
+ assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Michi · Lince Espectral');
  const a=rec();cat.draw(a.c,pose('run',30,3),{});assert.ok(a.log.grad<=10);assert.ok(a.log.radial<=5);
 });
 

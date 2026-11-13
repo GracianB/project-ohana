@@ -36,7 +36,7 @@ export const CALIBRATED_VISUAL_H = Object.freeze(Object.fromEntries(
 ));
 
 // Optical normalization of the remaining Canvas silhouettes; hitboxes stay physical.
-// Rebel Michi measured 65/48/62/131/133 px with the previous light-form factors.
-// Recalibrated body growth: approximately 65/80/96/112/133 px.
+// Five different Michi anatomies, measured through the production draw path.
+// Calibrated visible growth: approximately 65/82/100/120/142 px.
 // Visual normalization only; gameplay collision boxes remain unchanged.
-export const OPTICAL_SCALE = Object.freeze({"kilo": [0.8594, 0.8537, 0.8854, 0.9189, 0.8451], "stitcho": [0.8594, 0.7955, 0.9444, 0.8793, 0.8571], "chispin": [1.10, 0.975, 0.865, 0.875, 0.935], "cat": [1.2222, 1.25, 1.30, 1.334, 1.39], "cuerno": [1.0185, 1.129, 1.0241, 1.0408, 1.0256]});
+export const OPTICAL_SCALE = Object.freeze({"kilo": [0.8594, 0.8537, 0.8854, 0.9189, 0.8451], "stitcho": [0.8594, 0.7955, 0.9444, 0.8793, 0.8571], "chispin": [1.10, 0.975, 0.865, 0.875, 0.935], "cat": [1.3937, 1.1517, 1.413, .9881, .9355], "cuerno": [1.0185, 1.129, 1.0241, 1.0408, 1.0256]});

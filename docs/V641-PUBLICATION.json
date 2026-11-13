@@ -1,0 +1,9 @@
+{
+  "release": "ohana-641",
+  "stage": "candidate",
+  "branch": "codex/michi-five-metamorphoses",
+  "target": "main",
+  "pages_url": "https://gracianb.github.io/project-ohana/",
+  "netlify_url": "https://project-ohana-multiplayer.netlify.app/",
+  "previous_live_release": "ohana-640"
+}

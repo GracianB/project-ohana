@@ -1,3 +1,7 @@
+## ohana-641 · Cinco metamorfosis reales para Michi
+
+Cachorro cuadrúpedo, planeador alado, pantera con tres colas, lince digitígrado y soberano de nueve colas. Cinco cuerpos articulados propios, siluetas verificadas sin color, crecimiento visual y encuadre de evolución calibrados. Identidad, controles, estadísticas y cajas de colisión conservados. Estado de validación y publicación en docs/V641-VALIDATION.json y docs/V641-PUBLICATION.json.
+
 ## ohana-640 · Publicación conjunta y crecimiento felino
 
 Integra los PR 461–463. Calibración óptica del gato rebelde: las cinco formas crecen sin encoger en la segunda y tercera. El objetivo persistente se verifica en la nueva zona del HUD compacto. Pages y Netlify publicados en ohana-640; las dos funciones de servidor y Aventura/Versus comprobadas con dos navegadores y salas reales.

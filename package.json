@@ -76,7 +76,8 @@
     "test:browser:ritual-native": "node tests/browser/v630-ritual-native.mjs",
     "test:browser:public-entry": "node tests/browser/v635-public-entry.mjs",
     "test:browser:atlas": "node tests/browser/v639-atlas.mjs",
-    "test:browser:compact-hud": "node tests/browser/v639-hud.mjs"
+    "test:browser:compact-hud": "node tests/browser/v639-hud.mjs",
+    "test:browser:michi-metamorphoses": "node tests/browser/v641-michi-metamorphoses.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"
