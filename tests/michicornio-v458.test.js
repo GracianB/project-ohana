@@ -15,7 +15,7 @@ const ctx=()=>new Proxy({canvas:{height:960,width:1440},globalAlpha:1}, {
 test('Michicornio visible name and evolved forms preserve canonical cat ID and old save aliases',()=>{
  const p=ROSTER.find(x=>x.id==='cat');
  assert.ok(p);assert.equal(p.name,'Michicornio');
- assert.deepEqual(p.evoNames,['Michi · Cachorro Rebelde','Michi · Alas de Asfalto','Michi · Garra Nocturna','Michi · Sombra Callejera','Michi · Leyenda de Nueve Colas']);
+ assert.deepEqual(p.evoNames,['Michi · Cachorro Rebelde','Michi · Alas de Asfalto','Michi · Pantera del Eclipse','Michi · Lince Espectral','Michi · Leyenda de Nueve Colas']);
  assert.deepEqual(p.forms.map(f=>f.name),p.evoNames);
  for(const id of ['michi','michicornio','cat'])assert.equal(aliasId(id),'cat');
  assert.equal(ART.cat,ART.michi);assert.equal(ART.michi,ART.michicornio);

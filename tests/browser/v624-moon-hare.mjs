@@ -16,7 +16,7 @@ try{
  for(const [width,height]of[[1280,900],[390,844],[320,568]]){
   await page.setViewportSize({width,height});await page.locator('[data-atlas-step="0"]').click();await page.locator('.char-card[data-id="cat"]').focus();await page.keyboard.press('Enter');await page.locator('[data-atlas-step="2"]').click();await page.locator('[data-atlas-form="0"]').click();await page.waitForTimeout(150);if(width===390)await page.locator('#atlas-stage').screenshot({path:'test-results/v624/baby-selection-390.png'});await page.locator('[data-atlas-form="3"]').click();await page.waitForTimeout(250);
   assert.equal(await page.locator('#hoku-atlas').getAttribute('data-hero'),'cat');assert.equal(await page.locator('#hoku-atlas').getAttribute('data-form'),'3');
-  assert.match(await page.locator('#atlas-form-name').textContent(),/Sombra Callejera/);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  assert.match(await page.locator('#atlas-form-name').textContent(),/Lince Espectral/);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await page.locator('#atlas-stage').screenshot({path:`test-results/v624/selection-${width}.png`});selection.push({width,height,realFourthFormPreview:true,noOverflow:true});
  }
  const artwork=await page.evaluate(async()=>{

@@ -5,12 +5,26 @@ on:
     branches:
       - 'feature/michi-bioluminescent-world-*'
     paths:
+      - 'characters/michi-rebel.js'
+      - 'characters/art/cat.js'
+      - 'characters/visual-size.js'
+      - 'characters/roster.js'
+      - 'hoku-atlas.css'
+      - 'systems/hoku-atlas.js'
+      - 'tests/browser/v641-michi-metamorphoses.mjs'
       - 'tests/browser/v625-michi-art.mjs'
       - 'family-camp.css'
       - 'systems/family-camp.js'
       - '.github/workflows/michi-v625-pointer.yml'
   pull_request:
     paths:
+      - 'characters/michi-rebel.js'
+      - 'characters/art/cat.js'
+      - 'characters/visual-size.js'
+      - 'characters/roster.js'
+      - 'hoku-atlas.css'
+      - 'systems/hoku-atlas.js'
+      - 'tests/browser/v641-michi-metamorphoses.mjs'
       - 'tests/browser/v625-michi-art.mjs'
       - 'family-camp.css'
       - 'systems/family-camp.js'
@@ -35,11 +49,15 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Real mouse and touch targeting at three viewports
         run: |
-          CHROMIUM_BIN="$(node -p "require('playwright').chromium.executablePath()")" npm run test:browser:michi-art
+          export CHROMIUM_BIN="$(node -p "require('playwright').chromium.executablePath()")"
+          npm run test:browser:michi-art
+          npm run test:browser:michi-metamorphoses
       - name: Preserve visual proof and hitbox diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: michi-v625-pointer-evidence
-          path: test-results/v625/
+          path: |
+            test-results/v625/
+            test-results/v641/
           if-no-files-found: ignore
