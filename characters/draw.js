@@ -1,3 +1,4 @@
+import {drawMichiAura} from './michi-aura.js';
 import {articulateStride} from './anatomical-stride.js';
 import {drawHulaDepth,drawKiloFlightTrail} from './hula-depth.js';
 import {applyTenActionPose} from './ten-action-acting.js';
@@ -1266,6 +1267,7 @@ q(pose.chispinWelcome?.breath,12),q(pose.chispinWelcome?.dragon,12),
 q(pose.chispinWelcome?.chase,12),q(pose.chispinWelcome?.yomi,12),
 q(pose.chispinWelcome?.dino,12),
 // V353 Michi cat: real form-specific ears/eyes/tail/wings invalidate canvas.
+pose.michiPresence?.kind||'',q(pose.michiPresence?.lookX,8),q(pose.michiPresence?.lookY,8),q(pose.michiPresence?.attention,8),q(pose.michiPresence?.idleTicks,8),pose.michiMotion?.flight||'',q(pose.michiMotion?.vx,4),q(pose.michiMotion?.vy,4),
 pose.michiWelcome?.phase || "",q(pose.michiWelcome?.inspect,12),
 q(pose.michiWelcome?.sideeye,12),q(pose.michiWelcome?.groom,12),
 q(pose.michiWelcome?.flick,12),q(pose.michiWelcome?.purr,12),
@@ -1417,6 +1419,7 @@ const duetProtected=isDuetProtected(p,t)||(p.id==='chispin'&&Number(p._chispaEva
 const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p),
   reduceMotion: options.reduceMotion===true,theatreHQ:!!p._theatreHQ};
 articulateStride(pose,p.id);
+if(michiRig){pose.michiPresence=p._michiPresence;pose.michiMotion={vx:p.vx||0,vy:p.vy||0,flight:p._michiWingMode||'ground',fuel:(p._michiWingFuel||0)/(p._michiWingMax||210)};}
 if(p.id==="yomi")pose.yomiKnowledge=p._yomiKnowledge||0;
 if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;
 if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDino;
@@ -1530,7 +1533,7 @@ const airK = air ? 0.62 + Math.min(0.2, Math.abs(p.vy || 0) / 40) : 1;
 
 ctx.save();
 ctx.translate(footX, footY);
-drawShadow(ctx, 0, 2 + (air ? 3 : 0), H * 0.3 * airK * sx, H * 0.06 * airK);
+drawShadow(ctx, 0, 2 + (air ? 3 : 0), H * (michiRig&&evo===4?.21:.3) * airK * sx, H * (michiRig&&evo===4?.035:.06) * airK);
 ctx.scale(facing, 1);
 ctx.translate(recoilX + lunge, -formLift-(pose.powerLift||0)*H);
 
@@ -1578,6 +1581,7 @@ ctx.scale(sx,sy);
 drawHulaDepth(ctx,p,H,t,true,options.reduceMotion===true);
 ctx.restore();
 
+drawMichiAura(ctx,p,H,t,options.reduceMotion===true);
 if(!michiRig&&p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, true);
 if(!michiRig&&p.id!=="chispin")drawEvolutionSignatureFX(ctx, p, H, pose, t);
 if(!michiRig)drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);

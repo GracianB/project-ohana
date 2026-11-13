@@ -6,13 +6,13 @@
 
 **Diez historias. Una familia.**
 
-[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=636) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=642) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
 
 Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, más el Corazón de Ohana. Recupera sus sellos, rescata los diez recuerdos personales y enfréntate a Quimera. Los mil recuerdos del álbum son opcionales y conservan tu progreso entre partidas. Escenarios, héroes y efectos se dibujan en Canvas.
 
-- **Michi:** sus cinco formas usan los mismos ojos de Kilo, Chispín, Dino y Cuerno; Hada y Eclipse ganan altura manteniendo salto. Eclipse mantiene el vuelo, suelta para planear y abajo para descender.
+- **Michi:** cinco cuerpos propios con miradas, gestos y efectos por poder. Alas de Asfalto vuela con una reserva de 3,5 segundos. Espectro de Nueve Vidas es un gato fantasma flotante: mantén salto para ascender, suelta para suspenderte y pulsa abajo para descender.
 - **Corazón:** diez núcleos de energía con tres objetos propios a sus pies. Reúne sus resonancias y elige qué héroe invoca al guardián; vuelve a elegir antes de Quimera.
 - **Objetos:** los tres descubrimientos obligatorios de cada sala tienen arte propio de Canvas y reaparecen en su núcleo final. Cada capítulo entrega un único sello.
 - **Combate:** H de cerca, J a distancia y poderes distintos por héroe. El libro explica los enlaces, I, P y el compañero U.
@@ -20,7 +20,7 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; la comprobación remota entre dispositivos sigue pendiente.
 
-Registro de entrega: `ohana-641` / publicación conjunta de Atlas, Michi rebelde, Quimera, interfaz y Kilo. [Validación](docs/V641-VALIDATION.json) · [Publicación](docs/V641-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
+Registro de entrega: `ohana-642` / publicación conjunta de Atlas, Michi rebelde, Quimera, interfaz y Kilo. [Validación](docs/V642-VALIDATION.json) · [Publicación](docs/V642-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
 
 ## Historial de desarrollo
 

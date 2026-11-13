@@ -15,7 +15,7 @@ export const MICHI_FIELD_NOTES=Object.freeze([
  Object.freeze({
    title:'02 · Dueño de los tejados',subtitle:'Michi · Alas de Asfalto',
    description:'El cuerpo se alarga y se alza sobre dos patas. Dos membranas rasgadas se articulan desde sus hombros; el pañuelo flamea entre ellas.',
-   secret:'Mantén el salto para ascender. Al tocar tierra, el impulso vuelve a estar disponible.',
+   secret:'Mantén salto para volar durante 3,5 segundos; suelta para planear. La barra muestra la reserva, que se recarga al aterrizar.',
    gesture:'Alas oscuras · cola en gancho · vuelo',tone:'#98f8ff'
  }),
  Object.freeze({
@@ -31,10 +31,10 @@ export const MICHI_FIELD_NOTES=Object.freeze([
    gesture:'Penachos · dos colas · garras de media luna',tone:'#ffe8ad'
  }),
  Object.freeze({
-   title:'05 · El soberano de los nueve ecos',subtitle:'Michi · Leyenda de Nueve Colas',
-   description:'Una gran bestia felina: melena angular, corona quebrada, alas y nueve colas que se abren en abanico. La cicatriz y el pañuelo revelan al cachorro que fue.',
-   secret:'Puedes sostener el salto para volar, soltar para planear y pulsar abajo para descender.',
-   gesture:'Nueve colas · alas · tachuelas doradas',tone:'#9effcd'
+   title:'05 · El fantasma de las nueve vidas',subtitle:'Michi · Espectro de Nueve Vidas',
+   description:'Un gato fantasma translúcido que flota, con manos espectrales independientes y nueve estelas. Conserva la oreja mellada, la cicatriz y su pañuelo rebelde.',
+   secret:'Puedes sostener el salto para volar, soltar para mantenerte suspendido y pulsar abajo para descender.',
+   gesture:'Cuerpo flotante · manos espectrales · nueve estelas',tone:'#9effcd'
  })
 ]);
 
