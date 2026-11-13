@@ -12,13 +12,15 @@ try{
  await fs.mkdir(dir,{recursive:true});
  const page=await browser.newPage(),errors=[],selection=[];
  page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>localStorage.setItem('ohana-atlas-earned-v1',JSON.stringify({cat:4})));
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);
  // Enter through the actual opening gate before interacting with the stage.
  // Escape alone does not guarantee the family portal is mounted and painted.
  await page.locator('.oi-enter').click();
- await page.locator('#family-camp').waitFor({state:'visible'});
+ await page.locator('#hoku-atlas').waitFor({state:'visible'});
  for(const [width,height]of[[1280,900],[390,844],[320,568]]){
   await page.setViewportSize({width,height});
+  await page.locator('[data-atlas-step="0"]').click();
   const catCard=page.locator('.char-card[data-id="cat"]');
   await catCard.scrollIntoViewIfNeeded();
   // Verify that the real pointer target is the character card, rather than
@@ -29,9 +31,9 @@ try{
     return {id:node?.closest('.char-card')?.dataset.id||null,
       tag:node?.tagName||'',className:String(node?.className||''),
       point:{x,y},rect:{x:r.x,y:r.y,w:r.width,h:r.height},
-      camp:document.querySelector('#family-camp')?.getBoundingClientRect().toJSON(),
-      layout:Object.fromEntries(['#char-select','.title-shell','#family-camp','.camp-scene',
-        '#camp-canvas','.hero-stage','#chars','#chars-grid'].map(sel=>{
+      camp:document.querySelector('#hoku-atlas')?.getBoundingClientRect().toJSON(),
+      layout:Object.fromEntries(['#char-select','.title-shell','#hoku-atlas','.camp-scene',
+        '#atlas-stage','.hero-stage','#chars','#chars-grid'].map(sel=>{
           const n=document.querySelector(sel),b=n?.getBoundingClientRect(),css=n?getComputedStyle(n):null;
           return [sel,n?{rect:{x:b.x,y:b.y,w:b.width,h:b.height},
             position:css.position,transform:css.transform,display:css.display,z:css.zIndex,
@@ -44,15 +46,16 @@ try{
   });
   assert.equal(hit.id,'cat','Michi must receive physical pointer input: '+JSON.stringify(hit));
   await catCard.click();
+  await page.locator('[data-atlas-step="2"]').click();
   for(let form=0;form<5;form++){
-   const button=page.locator(`[data-camp-form="${form}"]`);await button.click();await page.waitForTimeout(90);
-   assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),'cat');
-   assert.equal(await page.locator('#family-camp').getAttribute('data-form'),String(form));
-   assert.ok((await page.locator('#camp-form-name').innerText()).trim().length>5);
+   const button=page.locator(`[data-atlas-form="${form}"]`);await button.click();await page.waitForTimeout(90);
+   assert.equal(await page.locator('#hoku-atlas').getAttribute('data-hero'),'cat');
+   assert.equal(await page.locator('#hoku-atlas').getAttribute('data-form'),String(form));
+   assert.ok((await page.locator('#atlas-form-name').textContent()).trim().length>0);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'selection horizontal overflow');
-   if(form===3)await page.locator('#camp-canvas').screenshot({path:`${dir}/hare-selection-${width}.png`});
+   if(form===3)await page.locator('#atlas-stage').screenshot({path:`${dir}/hare-selection-${width}.png`});
   }
-  await page.locator('#camp-canvas').screenshot({path:`${dir}/eclipse-selection-${width}.png`});
+  await page.locator('#atlas-stage').screenshot({path:`${dir}/eclipse-selection-${width}.png`});
   selection.push({width,height,allFiveRealButtons:true,noOverflow:true});
  }
  const fixtures=await page.evaluate(async()=>{
@@ -73,6 +76,7 @@ try{
    bounds.push({scale,form,state:sample.state,power:sample.michiPowerIndex,count,
     left:minX/scale-200,top:minY/scale-280,right:maxX/scale-200,bottom:maxY/scale-280});
   }
+
   for(let form=0;form<5;form++){
    for(const sample of cases){
     const snapshots=[];for(const [t,phase]of[[73,1.8],[212,4.4]]){

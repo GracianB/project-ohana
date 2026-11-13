@@ -1,3 +1,5 @@
+import {drawKiloLivingGrove} from './worlds/kilo-living-grove.js';
+import {skillIcon,mountCompactHud} from './systems/compact-hud.js';
 import {steerMichiFlight,michiFlightState} from './characters/michi-flight.js';
 import {drawRealmSignatures} from './systems/realm-signatures.js';
 import {drawHudPortrait} from './systems/hud-portrait-v606.js';
@@ -3152,7 +3154,7 @@ game.nums.update();
 }
 
 function drawMinimap() {
-drawLocalMap(ctx,game,viewW,viewH);
+if(game.showLocalMap)drawLocalMap(ctx,game,viewW,viewH);
 }
 function drawCrystal(o) {
 const x = o.x - game.cam.x;
@@ -3180,7 +3182,7 @@ ctx.restore();
 function drawWorld1Backdrop(world,W,H){
  const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
  if(h!=="kilo"&&drawLivingRealm(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H,t,{reduceMotion:rd})){drawChapterLandmarks(ctx,game,game.cam,t,W,H);drawRealmSignatures(ctx,h,game.cam,W,H,t,rd);return;}
- if(h==="kilo")drawKiloBayBackdrop(ctx,game.cam,t,W,H,rd);
+ if(h==="kilo"){if(game.roomDef.kiloExperienceVersion)drawKiloLivingGrove(ctx,game,game.cam,t,W,H);else drawKiloBayBackdrop(ctx,game.cam,t,W,H,rd);}
  else if(h==="stitcho")drawStitchoArchipelago(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:game.world1?.stations?.filter(s=>s.done).length||0});
  else if(h==="chispin")drawOhanaPlace(ctx,game,game.cam,t,W,H);
  else if(h==="cat")drawMichiGardens(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
@@ -3573,7 +3575,7 @@ const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
 const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
 const bond=slot.supreme?uBondProgress(game.player):null;
 const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante "+(game.player.id==="kilo"?"2 s":"6 s")) : d.name + (d.desc ? " · " + d.desc : "");
-return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
+return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="skill-icon">'+skillIcon(d.key)+'</span><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
 slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
@@ -3778,12 +3780,13 @@ for(const item of abilitySlots){
  const index=Number(item.slot.dataset.index),status=powerStatus(game,index,index===3?supremeOf(p.id):null);
  if(!status||!item.fill)continue;
  const width=status.pct+"%";if(item.fill.style.width!==width)item.fill.style.width=width;
- if(item.sec?.textContent!==status.short)item.sec.textContent=status.short;
+ const short=status.kind==='cooldown'?status.short:status.kind==='charge'?Math.floor(status.pct)+'%':status.kind==='combo'?status.short.split(' ')[0]:status.kind==='flight'?'↓':status.kind==='locked'?'◇':'';if(item.sec?.textContent!==short)item.sec.textContent=short;
  item.slot.classList.toggle("cooling",!status.available&&status.kind!=="locked");
  item.slot.dataset.powerState=status.kind;
  item.slot.setAttribute("aria-label",status.def.key+" · "+status.def.name+" · "+status.label);
  item.slot.title=status.def.name+" · "+status.label+(status.def.desc?" · "+status.def.desc:"");
 }
+const powerToggle=document.getElementById('touch-power-toggle');if(powerToggle){const charge=powerStatus(game,5);if(charge){powerToggle.dataset.powerState=charge.kind;powerToggle.style.setProperty('--charge',charge.pct+'%');powerToggle.title='Poderes · '+charge.def.name+' · '+charge.label;}}
 const PWIDX = { j: 0, k: 1, l: 2, u: 3, i:4, p:5 };
 for(const btn of touchPowers){
  const index=PWIDX[btn.dataset.k],status=powerStatus(game,index,index===3?supremeOf(p.id):null);
@@ -4499,6 +4502,9 @@ die(reason = "hurt") {
 },
 };
 }
+
+mountCompactHud();
+addEventListener('ohana-minimap',e=>{game.showLocalMap=!!e.detail?.show;game.renderDirty=true;});
 
 bindDialogs({
 document,

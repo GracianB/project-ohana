@@ -1,0 +1,29 @@
+import {ROSTER} from '../../characters/roster.js';
+import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {chromium} from 'playwright';import {startServer} from './server.mjs';
+const server=await startServer(0),browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'}),dir='test-results/v639';
+try{await fs.mkdir(dir,{recursive:true});const reports=[];
+for(const [width,height]of[[1280,900],[390,844],[320,700]]){
+ const context=await browser.newContext({viewport:{width,height},hasTouch:width<500,isMobile:width<500});const p=await context.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));
+ await p.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await p.locator('.atlas-welcome .oi-enter').waitFor();await p.screenshot({path:`${dir}/welcome-${width}.png`});
+ assert.equal(await p.locator('.atlas-welcome .atlas-resume').count(),0);
+ await p.locator('.atlas-welcome .atlas-online').click();assert.equal(await p.locator('.atlas-modes[open] .atlas-mode').count(),2);await p.locator('.atlas-modes .atlas-dialog-close').click();
+ await p.locator('.oi-enter').click();await p.locator('#hoku-atlas').waitFor();
+ for(const id of ['kilo','stitcho','chispin','cat','cuerno','dragon','dino','frita','pizza','yomi']){await p.locator(`.char-card[data-id="${id}"]`).click();assert.equal(await p.locator('#hoku-atlas').getAttribute('data-hero'),id);}
+ const boxes=await p.locator('#chars-grid .char-card').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};}));for(const b of boxes)assert.ok(b.w>=44&&b.h>=44);for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i],b=boxes[j];assert.ok(a.x+a.w<=b.x+1||b.x+b.w<=a.x+1||a.y+a.h<=b.y+1||b.y+b.h<=a.y+1,'hero hit targets overlap');}
+ await p.locator('.char-card[data-id="kilo"]').click();await p.keyboard.press('ArrowRight');assert.equal(await p.locator('#hoku-atlas').getAttribute('data-hero'),'stitcho');await p.keyboard.press('ArrowLeft');await p.screenshot({path:`${dir}/hero-${width}.png`,fullPage:true});
+ await p.locator('#atlas-next').click();assert.equal(await p.locator('#hoku-atlas').getAttribute('data-step'),'1');assert.equal(await p.locator('[data-atlas-room="w1-final"]').getAttribute('aria-disabled'),'true');
+ await p.locator('[data-atlas-room="w1-stitcho"]').click();assert.equal(await p.locator('#hoku-atlas').getAttribute('data-hero'),'stitcho');await p.screenshot({path:`${dir}/destinations-${width}.png`,fullPage:true});
+ await p.locator('#atlas-next').click();assert.equal(await p.locator('[data-atlas-form="0"]').isEnabled(),true);assert.equal(await p.locator('[data-atlas-form="4"]').isDisabled(),true);await p.screenshot({path:`${dir}/forms-${width}.png`,fullPage:true});
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.locator('#atlas-next').click();await p.waitForFunction(()=>document.body.classList.contains('playing'));
+ const state=await p.evaluate(()=>window.__OHANA_E2E.state());assert.equal(state.hero,'stitcho');assert.equal(state.roomId,'w1-stitcho');assert.equal(state.evo,0);assert.equal(state.runtimeFaults,0);assert.deepEqual(errors,[]);reports.push({width,height,hero:state.hero,room:state.roomId,errors});await context.close();
+}
+const context=await browser.newContext({viewport:{width:1280,height:900}});await context.addInitScript(()=>localStorage.setItem('ohana',JSON.stringify({v:3,id:'kilo',evo:2,xp:140,roomId:'w1-kilo',visited:{'w1-kilo':true},hp:100})));
+const p=await context.newPage();await p.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await p.locator('.atlas-resume').waitFor();await p.locator('.oi-enter').click();await p.locator('[data-atlas-step="2"]').click();assert.equal(await p.locator('[data-atlas-form="2"]').isEnabled(),true);assert.equal(await p.locator('[data-atlas-form="3"]').isDisabled(),true);await p.locator('[data-atlas-form="2"]').click();await p.locator('#atlas-next').click();await p.waitForFunction(()=>document.body.classList.contains('playing'));assert.equal(await p.evaluate(()=>window.__OHANA_E2E.state().evo),2);await p.reload();await p.locator('.atlas-resume').click();await p.waitForFunction(()=>document.body.classList.contains('playing'));assert.equal(await p.evaluate(()=>window.__OHANA_E2E.state().evo),2);await context.close();
+// Presentation-only earned fixture: exercise all fifty real forms without claiming campaign completion.
+const matrix=await browser.newContext({viewport:{width:1280,height:900}});await matrix.addInitScript(ids=>localStorage.setItem('ohana-atlas-earned-v1',JSON.stringify(Object.fromEntries(ids.map(id=>[id,4])))),ROSTER.map(d=>d.id));
+const q=await matrix.newPage();await q.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await q.locator('.oi-enter').click();
+const before=await q.evaluate(()=>localStorage.getItem('ohana'));
+for(const def of ROSTER){await q.locator('[data-atlas-step="0"]').click();await q.locator(`.char-card[data-id="${def.id}"]`).click();await q.locator('[data-atlas-step="2"]').click();for(let f=0;f<5;f++){await q.locator(`[data-atlas-form="${f}"]`).click();assert.equal(await q.locator('#hoku-atlas').getAttribute('data-form'),String(f));assert.equal(await q.locator('#atlas-form-name').textContent(),def.forms[f].name);}}
+assert.equal(await q.evaluate(()=>localStorage.getItem('ohana')),before,'preview never modifies active progress');await matrix.close();
+await fs.writeFile(`${dir}/atlas-validation.json`,JSON.stringify({reports,savedFormStart:true},null,2));console.log('PASS Atlas: native hero/destination/form flow, locked forms and finale, online modes, three viewports and selected saved evolution starts');
+}finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

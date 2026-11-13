@@ -28,7 +28,7 @@ try{
   assert.equal(await page.locator('#char-select').getAttribute('inert'),null);
   assert.equal(await page.locator('#chars-grid .char-card canvas').count(),10);
   await page.locator('#ohana-intro.ready .oi-enter').click();
-  await page.locator('.char-card[data-id="kilo"]').click();await page.locator('#btn-play').click();
+  await page.locator('.char-card[data-id="kilo"]').click();for(let step=0;step<3;step++)await page.locator('#atlas-next').click();
   // The start animation calls the campaign asynchronously. Wait for its
   // first actual story, rather than a transient "playing" class before it.
   await page.locator('#world1-cine-controls').waitFor({state:'visible'});
@@ -79,7 +79,7 @@ try{
   const time=new Date('2026-10-28T12:00:00Z');await early.clock.install({time});await early.clock.pauseAt(new Date(+time+1000));
   await early.goto(base,{waitUntil:'networkidle'});
   assert.equal(await early.evaluate(()=>document.documentElement.dataset.ohanaBoot),'ready');
-  assert.equal(await early.locator('#ohana-intro.ready').count(),0,'first animation frame has not run');
+  assert.equal(await early.locator('.atlas-welcome.ready').count(),1,'welcome is ready without waiting for its first paint');
   await early.keyboard.press('Enter');
   assert.equal(await early.evaluate(()=>document.body.classList.contains('intro-complete')),true,'one early Enter must reach selection');
   assert.equal(await early.evaluate(()=>document.body.classList.contains('playing')),false,'the same Enter cannot also start a game');

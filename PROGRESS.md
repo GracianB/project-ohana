@@ -1,3 +1,7 @@
+## ohana-639 · Atlas, interfaz y Kilo (candidato)
+
+Puntos 2–5: portada y Atlas con Aventura/Versus, selección por pasos, HUD compacto, notas dirigidas durante levitación, defensa musical precisa, Claro de 9.600 px con recorrido alto y viento, y recuperación explícita de los enemigos. Conserva IDs de objetivos, colecciones, salas y guardados. Publicación pendiente.
+
 ## ohana-638 · Quimera, el devorador de ecos (candidato)
 
 Nuevo cuerpo de obsidiana y núcleo de diez voces. Cada poder articula su órgano de emisión. Objetivos fijados al avisar, embestida acotada, columnas y barridos con geometría compartida entre daño y dibujo, y limpieza segura de fase. Avisos de al menos un segundo y recuperación de 78–110 ticks. Movimiento reducido conserva la simulación. Validación y publicación: docs/V638-VALIDATION.json y docs/V638-PUBLICATION.json.

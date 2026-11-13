@@ -1,3 +1,5 @@
+> Implementación candidata de los puntos 2–5: [V639-EXPERIENCIA.md](V639-EXPERIENCIA.md). Alcance y límites de las comprobaciones: [V639-VALIDATION.json](V639-VALIDATION.json). Publicación pendiente; el punto 6 continúa abierto.
+
 # Ohana · rediseño de la experiencia
 
 Estado: plan de la siguiente entrega. Las secciones 1–6 describen trabajo pendiente, no funcionalidades ya publicadas. El rediseño de Quimera está implementado y validado en el candidato ohana-638. El cambio de Michi continúa en la PR #461.

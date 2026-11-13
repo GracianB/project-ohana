@@ -1,3 +1,4 @@
+import {mountAtlasWelcome} from './hoku-atlas.js';
 import {drawTheatreStage,openingCastSpot,openingHeroHeight} from './theatre-stage.js';
 import {drawFamilyWelcomeBackdrop} from "../worlds/ohana-environments.js";
 import {shouldSkipCoopWelcome} from './coop-welcome.js';
@@ -60,7 +61,7 @@ function iris(ctx, W, H, cx, cy, k) {
 // ---------------------------------------------------------------------------
 export function playTitleIntro(options = {}) {
   let el = document.getElementById("ohana-intro");
-  if (!el && options.replay) {
+  if (!el && (options.replay||options.home)) {
     el = document.createElement("div"); el.id = "ohana-intro";
     document.getElementById("char-select")?.prepend(el);
   }
@@ -77,6 +78,7 @@ export function playTitleIntro(options = {}) {
     document.body.classList.add("intro-complete");
     return;
   }
+  if(!options.replay){mountAtlasWelcome(el,finishClasses);return;}
   if (el._played) return;
   el._played = true;
   el.innerHTML =

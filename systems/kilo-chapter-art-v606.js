@@ -441,6 +441,7 @@ export function drawKiloCreature(c,e,cam,t,reduced=false){
  }
  if(e.campaignRole==='captain')flower(c,4,-66,7,'#e3b57d');
  // A grounded contact shadow and a committed pose communicate the warning.
+ if(a.recover>0){c.save();c.globalAlpha=.85;stroke(c,'#a8e9c3',1.7,()=>{c.moveTo(-12,-74);c.lineTo(-7,-67);c.lineTo(0,-75);c.lineTo(7,-67);c.lineTo(12,-74);});c.restore();}
  if(wind){c.save();c.globalAlpha=.35;ellipse(c,0,2,e.kind==='rana'?32:25,3.3,'#ffe0a5',0,0);c.restore();}
  c.restore();
  if(e._alertT>0){

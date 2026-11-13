@@ -45,6 +45,22 @@ export function authorKiloEncounters(room){
  room.checkpoints=room.sectors.map((s,i)=>({id:s.id,x:i===8?12480:s.x+160,y:topAt(i===8?12480:s.x+160),sector:i}));
  room.nooks=[{id:'w1-kilo-secret-0',x:2060,y:880},{id:'w1-kilo-secret-1',x:7650,y:690}];
  room.hint='Devuelve su voz a la caracola, toca el bambú, alcanza el arpa del dosel y remata el hibisco con I. Cada instrumento despierta una forma. El gran Tambor protege la salida.';
+ // V639: keep earned IDs, compress the empty travel, and add an optional
+ // elevated route. Every actor, support, collectible and checkpoint moves together.
+ const compact=x=>Math.round(x*2/3);
+ room.width=9600;room.kiloExperienceVersion=639;
+ room.plats=room.plats.map(([x,y,w,h])=>[compact(x),y,Math.max(1,compact(x+w)-compact(x)),h]);
+ room.terraces=room.terraces.map(b=>({...b,x:compact(b.x),w:compact(b.w)}));
+ room.foes=room.foes.map(([x,y,kind,elite,meta])=>[compact(x),y,kind,elite,{...meta,
+  ...(meta.homeX!=null?{homeX:compact(meta.homeX)}:{}),
+  ...(meta.leash?{leash:{left:compact(meta.leash.left),right:compact(meta.leash.right)}}:{})}]);
+ room.seal.stations=room.seal.stations.map(s=>({...s,x:compact(s.x)}));room.seal.altar.x=compact(room.seal.altar.x);
+ room.orbs=room.orbs.map(([x,y])=>[compact(x),y]);room.sectors=room.sectors.map(s=>({...s,x:compact(s.x),w:compact(s.w)}));
+ room.checkpoints=room.checkpoints.map(s=>({...s,x:compact(s.x)}));room.nooks=room.nooks.map(s=>({...s,x:compact(s.x)}));
+ room.plats.push([4150,834,180,22],[4430,754,190,22],[4730,754,190,22],[5030,834,180,22]);
+ room.windColumns=[{x:4410,y:610,w:180,h:480},{x:6980,y:650,w:170,h:440}];
+ room.windBridge={x:3470,y:834,w:630,h:22};
+ room.experienceActs=['El arroyo de las primeras notas','Los guardianes de corteza','El dosel del viento','El jardín del gran compás'];
  return room;
 }
 export function kiloUnlockedForm(g){

@@ -10,7 +10,7 @@ on:
         default: false
   pull_request:
     # Stacked character PRs also need Browser/Visual/Release gates.
-    branches: [main, 'feat/**', 'fix/**']
+    branches: [main, 'feat/**', 'fix/**', 'codex/**']
   workflow_dispatch:
     inputs:
       run_multiplayer:
@@ -74,8 +74,8 @@ jobs:
         run: node tests/browser/v500-constellation.mjs
 
       # Check the chapter selector before the slow campaign and art matrix.
-      - name: V410 family camp · ten heroes and fifty real forms
-        run: node tests/browser/v410-family-camp.mjs
+      - name: V639 Atlas · native selection, fifty earned form previews and compact HUD
+        run: node tests/browser/v639-atlas.mjs && node tests/browser/v639-hud.mjs
 
       # Catch presentation/selector regressions before the long campaign gates.
       - name: Story bubbles, character sizes and surprise encore
@@ -335,8 +335,8 @@ jobs:
           npm run test:browser:guardian-art
           OHANA_TEST_DIFFICULTY=normal npm run test:browser:gauntlet
 
-      - name: V629 final portal return and native hero selection
-        run: npm run test:browser:selection-return
+      # V629 audited the retired mirror selector; V639 above checks its replacement,
+      # including the locked final destination and selection/progress isolation.
 
       - name: V628 safe actor adapters and final encounter replay
         run: |

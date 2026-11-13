@@ -1,3 +1,4 @@
+import {KILO_CHAPTER_ARENA} from '../systems/kilo-chapter.js';
 import {updateCampaignEnemy} from '../systems/campaign-enemies.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {WORLD1_ORDER,WORLD1_ROOMS,WORLD1_FLOOR} from '../systems/world1-rooms.js';
@@ -6,7 +7,7 @@ test('ten authored rooms have distinct materials, continuous recoverable terrain
  const materials=new Set();
  for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];assert.ok(r.composition);materials.add(r.composition.material);assert.ok(r.terraces.length>=2,hero+' needs meaningful relief');
   const floors=r.plats.filter(p=>p[3]>40).sort((a,b)=>a[0]-b[0]);assert.ok(floors.length>=1,hero+' has floor segments');for(const p of floors)assert.ok(WORLD1_FLOOR-p[1]<=160,"banks must remain within the late-form physical jump envelope");
-  for(const px of (hero==='kilo'?[12600,13280,14099]:[8260,8750,9320]))assert.equal(floors.find(p=>px>=p[0]&&px<p[0]+p[2])[1],1134);
+  for(const px of (hero==='kilo'?[KILO_CHAPTER_ARENA.left,KILO_CHAPTER_ARENA.left+400,KILO_CHAPTER_ARENA.right-1]:[8260,8750,9320]))assert.equal(floors.find(p=>px>=p[0]&&px<p[0]+p[2])[1],1134);
   for(const s of r.seal.stations){const floor=floors.find(p=>s.x>=p[0]&&s.x<p[0]+p[2]);if(floor)assert.equal(floor[1],1134,hero+' objective floor stays reachable');}
  }
  assert.equal(materials.size,10);
@@ -27,6 +28,6 @@ test('ground enemies stop and hop at real banks rather than walking through them
 });
 
 test('an enemy that grows on the floor keeps its feet planted instead of warping through a bank',()=>{
- const r=WORLD1_ROOMS['w1-kilo'],e={x:700,y:1104,w:25,h:30,hp:100,vx:0,vy:0,grounded:true,campaignRole:'pursuer',stun:0,invuln:0},g={roomDef:r,player:{x:900,y:1094,w:40,h:40,vx:0},cam:{x:0,y:400},viewW:1000,viewH:800,worldW:9600,worldH:1260,enemies:[e],projectiles:[],platforms:r.plats.map(p=>({x:p[0],y:p[1],w:p[2],h:p[3]}))};
- e.h+=6;e.w+=10;updateCampaignEnemy(e,g,()=>{});assert.ok(e.x>=700&&e.x<720);assert.equal(e.y+e.h,1134);assert.equal(e.grounded,true);
+ const r=WORLD1_ROOMS['w1-kilo'],e={x:400,y:1104,w:25,h:30,hp:100,vx:0,vy:0,grounded:true,campaignRole:'pursuer',stun:0,invuln:0},g={roomDef:r,player:{x:900,y:1094,w:40,h:40,vx:0},cam:{x:0,y:400},viewW:1000,viewH:800,worldW:9600,worldH:1260,enemies:[e],projectiles:[],platforms:r.plats.map(p=>({x:p[0],y:p[1],w:p[2],h:p[3]}))};
+ e.h+=6;e.w+=10;updateCampaignEnemy(e,g,()=>{});assert.ok(e.x>=400&&e.x<420);assert.equal(e.y+e.h,1134);assert.equal(e.grounded,true);
 });

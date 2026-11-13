@@ -17,7 +17,7 @@ try{
  await page.clock.install({time:new Date('2026-10-27T12:00:00Z')});await page.clock.pauseAt(new Date('2026-10-27T12:00:01Z'));
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`,{waitUntil:'load'});
  await page.waitForFunction(()=>window.__OHANA_E2E);await page.keyboard.press('Escape');
- await page.locator('#difficulty [data-diff="normal"]').click();
+ await page.locator('[data-atlas-dialog="settings"]').click();await page.locator('#difficulty [data-diff="normal"]').click();await page.locator('#atlas-settings-dialog .atlas-dialog-close').click();
  const stations=await page.evaluate(async()=>{
   window.__OHANA_E2E.startWorld1('kilo');
   return (await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-kilo'].seal.stations;
@@ -33,7 +33,7 @@ try{
   await page.locator('#game').focus();
  }
  let s=await step(600);await films();s=await state();assert.equal(s.roomId,'w1-kilo');assert.equal(s.evo,0);
- assert.equal(stations.length,4);assert.ok(stations[3].x-stations[0].x>8500,'growth is spread through the real route');
+ assert.equal(stations.length,4);assert.ok(stations[3].x-stations[0].x>5500,'growth is spread through the real route');
  const milestones=[],forms=new Set([0]),guardianPhases=new Set(),guardianPatterns=new Set(),journal=[];
  let deaths=0,minimumHp=s.hp,minimumHealthRatio=s.hp/s.maxHealth,guardianAttacks=0,iterations=0,previousDone=0;
  const bossCaptures=new Set();

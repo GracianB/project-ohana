@@ -1,3 +1,4 @@
+import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRoomService} from '../netlify/lib/room-service.mjs';
@@ -7,7 +8,7 @@ async function team(){let time=100000;const service=createRoomService(new LocalR
 const pose=(sequence,overrides={})=>({mode:'engine',worldRoomId:'w1-kilo',positionX:420,positionY:1094,sequence,actionId:'move:'+sequence,health:71,maxHealth:140,evolution:0,experience:12,grounded:true,...overrides});
 test('relevo uses only a chapter owner or the chosen hero and only at authored camps',()=>{
  assert.equal(adventureRoleAllowed({characterId:'dino'},'w1-kilo','kilo'),true);assert.equal(adventureRoleAllowed({characterId:'kilo',homeCharacterId:'dino'},'w1-kilo','dino'),true);assert.equal(adventureRoleAllowed({characterId:'dino'},'w1-kilo','yomi'),false);
- assert.equal(adventureCamp('w1-kilo',420,1094),true);assert.equal(adventureCamp('w1-kilo',2400,1094),false);assert.equal(adventureCamp('w1-kilo',2400,1094,{stations:{'w1-kilo':[0]}}),true);assert.equal(adventureCamp('w1-kilo',420,400),false);
+ assert.equal(adventureCamp('w1-kilo',420,1094),true);assert.equal(adventureCamp('w1-kilo',WORLD1_ROOMS['w1-kilo'].seal.stations[0].x,1094),false);assert.equal(adventureCamp('w1-kilo',WORLD1_ROOMS['w1-kilo'].seal.stations[0].x,1094,{stations:{'w1-kilo':[0]}}),true);assert.equal(adventureCamp('w1-kilo',420,400),false);
 });
 test('relevo preserves both heroes health and progress; stale movement cannot overwrite it',async()=>{
  const t=await team(),{service,h}=t;await service.move(h.roomId,h.identity,pose(1));let state=await service.role(h.roomId,h.identity,'kilo');let p=state.players.find(p=>p.isYou);assert.equal(p.characterId,'kilo');assert.equal(p.evolution,0);assert.equal(p.homeCharacterId,'dino');assert.equal(p.roleEpoch,1);

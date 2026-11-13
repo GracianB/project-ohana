@@ -1910,6 +1910,8 @@ for (const pr of g.projectiles) {
   }
   pr.owner = "player";
   pr.reflected = true;
+  // One deliberate opening deflection rewards timing, never passive aura ticks.
+  if(p.id==='kilo'&&f.pulse<=12&&!f.precision){f.precision=true;p.cds.hula=Math.max(0,(p.cds.hula||0)-900);g.nums?.add?.(cx(p),p.y-55,'¡ACENTO PERFECTO!','#d1ffe2',true);}
   if(f.pulse<=12&&earnKiloPetal(g,f))g.nums?.add(cx(p),p.y-40,"¡DEFENSA A COMPÁS!","#fff1b0");
   pr._hulaReflectUntil = (g.t || 0) + 8;
   if (pr.hit && typeof pr.hit.clear === "function") pr.hit.clear();
