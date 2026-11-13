@@ -27,7 +27,7 @@ try{
   assert.match(await page.locator('#pause-save-status').innerText(),/Progreso guardado/);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true);
   await page.screenshot({path:`test-results/v623/pause-${width}.png`});
-  await page.locator('#btn-resume').click();await page.locator('#btn-help').click();
+  await page.locator('#btn-resume').click();await page.locator('#play-options summary').click();await page.locator('[data-play-action="btn-help"]').click();
   await page.locator('#field-guide [data-guide="stitcho"]').click();await page.locator('.fg-combat-rules summary').click();
   assert.equal(await page.locator('.fg-combat-rules h5').count(),4);
   assert.match(await page.locator('.fg-combat-rules').innerText(),/Rebote 626/);

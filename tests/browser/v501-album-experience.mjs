@@ -19,7 +19,7 @@ try{
  await page.locator('#game').focus();await page.keyboard.down('d');
  for(let i=0;i<60&&(await memories()).length===0;i++)await step(8);
  await page.keyboard.up('d');const earned=await memories();assert.ok(earned.length>0);
- await page.locator('#btn-festival').tap();await page.clock.runFor(32);
+ await page.locator('#play-options summary').tap();await page.locator('[data-play-action="btn-festival"]').tap();await page.clock.runFor(32);
  const album=page.locator('#world1-album');assert.ok(await album.evaluate(el=>el.classList.contains('open')));
  assert.equal(await page.locator('#festival-album').evaluate(el=>el.classList.contains('open')),false);
  assert.match(await album.innerText(),new RegExp(earned.length+'/100 recuerdos'));

@@ -17,7 +17,7 @@ try {
    const tracks=await page.locator('.ability-slot .cd').evaluateAll(nodes=>nodes.map(n=>({track:n.getBoundingClientRect().height,fill:n.firstElementChild.getBoundingClientRect().height})));
    assert.ok(tracks.every(r=>r.track===0?r.fill===0:r.track<=4&&r.fill<=r.track+1),name+': cooldown tracks must not expand into blocks '+JSON.stringify(tracks));
    await page.screenshot({path:`test-results/presentation/${name}-play.png`});
-   await page.locator('#btn-map').click();
+   await page.locator('#play-options summary').click();await page.locator('[data-play-action="btn-map"]').click();
    await page.locator('#map-overlay.open').waitFor();
    assert.equal(await page.locator('.wm-node').count(),10);
    const room=await page.evaluate(()=>window.__OHANA_E2E.state().roomId);
@@ -34,7 +34,7 @@ try {
    await page.locator('.map-intro').click();
    await page.screenshot({path:`test-results/presentation/${name}-map.png`});
    await page.locator('#btn-close-map').click();
-   await page.locator('#btn-help').click();
+   await page.locator('#play-options summary').click();await page.locator('[data-play-action="btn-help"]').click();
    await page.locator('#help.open').waitFor();
    assert.equal(await page.locator('.help-steps li').count(),3);
    await page.locator('#help .panel').evaluate(async el=>{await Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{})));});
@@ -42,7 +42,7 @@ try {
    await page.locator('#btn-close-help').click();
  }
  await page.emulateMedia({reducedMotion:'reduce'});
- await page.locator('#btn-map').click();
+ await page.locator('#play-options summary').click();await page.locator('[data-play-action="btn-map"]').click();
  assert.equal(await page.locator('.wm-node.here').evaluate(el=>getComputedStyle(el).animationName),'none');
  assert.deepEqual(errors,[]);
  console.log('PASS play presentation: 10 interactive map locations, true routes, no teleport, keyboard access, three-step help and compact HUD at 1280/390/320px');
