@@ -12,12 +12,20 @@
     "Final full unit suite: 1884 passed, zero failures",
     "Refreshed neon art matrix: five forms × seventeen poses × three scales, both facings, frozen input and reduced-motion stability; 1280/390/320 native selector and desktop/mobile baby HUD",
     "Final smaller-ghost optical height measured at 127 px",
-    "Native Atlas regression: saved evolution start/Continue and all fifty hero forms"
+    "Native Atlas regression: saved evolution start/Continue and all fifty hero forms",
+    "Kilo: five costume gallery, fifteen production poses, unchanged hitboxes",
+    "Native desktop/touch L and J: active L persists through J with zero uncaught errors",
+    "Kilo native airplay: sustained solar flight, aimed J damage, K descent, real damage cancellation and touch toggle",
+    "Netlify candidate: five real native form buttons paint distinct production bodies; no uncaught errors",
+    "Netlify candidate: fifteen public runtime files match tested source byte-for-byte",
+    "Netlify candidate API: two connected players ready in both adventure and versus; own sessions disconnected",
+    "GitHub Pages CI: full unit/offline release checks and deploy succeeded",
+    "GitHub Pages: fifteen runtime files match tested source byte-for-byte",
+    "Live Netlify candidate: native desktop/mobile lobbies and two-browser movement in adventure and versus; no runtime errors; own sessions disconnected",
+    "Same tested candidate promoted to production: fifteen public runtime files match source and version is ohana-643",
+    "Netlify production API: create/join/choose/ready/poll with two connected players in adventure and versus; own sessions disconnected"
   ],
-  "pending": [
-    "Final native Kilo controls/costume captures completing",
-    "Public candidate and deployment verification"
-  ],
+  "pending": [],
   "limits": [
     "Renderer/airborne start fixtures do not claim earned progression or a complete campaign.",
     "Visual details, soul-lights and contextual attention never apply damage or collect objects."
