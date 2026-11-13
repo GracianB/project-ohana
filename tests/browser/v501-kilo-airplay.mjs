@@ -15,7 +15,7 @@ try{
  await page.locator('#game').focus();await page.keyboard.press('k');assert.equal((await step(1)).kiloFlight.mode,'solar');await page.keyboard.down('s');await step(5);await page.keyboard.up('s');await step(25);
  let s=await step(600);s=await step(300);assert.equal(s.kiloFlight.mode,'solar');assert.ok(s.player.y<850,'solar flight must not expire like levitation');
  assert.equal((await page.evaluate(()=>window.__OHANA_E2E.kiloAirState())).effects.some(f=>f.kind==='hula'),false,'offensive field must expire separately');
- assert.match(await page.locator('#ability-bar [data-index="1"]').innerText(),/Vuelo/);
+ assert.match(await page.locator('#ability-bar [data-index="1"]').getAttribute('aria-label'),/Vuelo/);
  const before=await page.evaluate(()=>window.__OHANA_E2E.roomCast()[0].hp);
  await page.keyboard.press('j');await step(45);
  const after=await page.evaluate(()=>window.__OHANA_E2E.roomCast()[0].hp);assert.ok(after<before,'aimed downward J must damage a real target below');
@@ -42,7 +42,7 @@ try{
  const mobile=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});const phone=await mobile.newPage();phone.on('pageerror',e=>errors.push(e.message));
  await phone.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});
  await phone.evaluate(()=>{const e=window.__OHANA_E2E;e.startWorld1('kilo');e.step(600);e.step(600);e.setEvo(4);e.setPlayer(300,700);});
- await phone.locator('.touch-btn[data-k="k"]').tap();await phone.waitForFunction(()=>window.__OHANA_E2E.state().kiloFlight.mode==='solar');
+ await phone.locator('#touch-power-toggle').tap(); await phone.locator('.touch-btn[data-k="k"]').tap();await phone.waitForFunction(()=>window.__OHANA_E2E.state().kiloFlight.mode==='solar');
  await phone.screenshot({path:'test-results/v501/kilo-solar-flight-mobile.png'});
  await phone.locator('.touch-btn[data-k="k"]').tap();assert.equal((await phone.evaluate(()=>window.__OHANA_E2E.state())).kiloFlight.mode,null);
  assert.deepEqual(errors,[]);console.log('PASS Kilo airplay: sustained flight, bounded aura, aimed J damage, K descent, real damage cancellation and touch toggle. Advanced form/position/target and Lab rain are explicit fixtures.');
