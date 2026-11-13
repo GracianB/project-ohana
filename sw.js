@@ -1,4 +1,4 @@
-const VERSION = "ohana-639";
+const VERSION = "ohana-640";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./characters/kilo-virtuoso.js?v=" + VERSION,
@@ -702,8 +702,8 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/real-actor.js": "c88c1bc78277e559869c3ded755da36e8426a1d4",
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
-  "characters/visual-size.js": "3ec310ed762b14ba11fec3f2ba4cc356296cd612",
-  "index.html": "aa4b4831dd4f976a4e632530ba7de5033318bd49",
+  "characters/visual-size.js": "92f5fd335aa6d26c1088c08711d3d0d4f24168ed",
+  "index.html": "f1da13c37df619acbe5e02e8b5ea3f00f4634144",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
