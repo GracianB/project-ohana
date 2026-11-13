@@ -1,4 +1,4 @@
-const VERSION = "ohana-636";
+const VERSION = "ohana-638";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./multiplayer/entry.js",
@@ -472,10 +472,6 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/michi-field-manual.js": "ae18461211658d7e2df45033d66d1aece8fb9fbe",
-  "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
-  "worlds/michi-reactive-night.js": "9b1ed6bababa47ca8e79689f6584072457a4436a",
-  "characters/michi-lumina.js": "92d4aa6ca82d6ac87b3fe984cf5ceb7d45b98461",
   "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
   "multiplayer/entry-route.js": "41d98a5b44ec9d397c4677de0c83f6017f373b5d",
   "final-ritual.css": "cb3fa260f55cd948ce875311f33f0adffcdfb16a",
@@ -487,6 +483,10 @@ const PRECACHE_REVISIONS = {
   "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
   "characters/michi-flight.js": "f76733588d2d43bfc6b8d696e5faffb027cf3a22",
   "characters/michi-kitten.js": "0b28dc3a4d648c476092f7655c65001ed6db40f7",
+  "systems/michi-field-manual.js": "ae18461211658d7e2df45033d66d1aece8fb9fbe",
+  "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
+  "worlds/michi-reactive-night.js": "9b1ed6bababa47ca8e79689f6584072457a4436a",
+  "characters/michi-lumina.js": "92d4aa6ca82d6ac87b3fe984cf5ceb7d45b98461",
   "engine/foes/creature-finish.js": "5eef8f7c348cfed6bd3739db70fa7ecea1ac6f5b",
   "systems/open-chapter-pits.js": "8ab9008a7e82758bf836e01493b9b85c0dbdac54",
   "characters/michi-moon-hare.js": "a1277d29bd3b184ef5f68ebad936fa492cf9e9cd",
@@ -608,9 +608,9 @@ const PRECACHE_REVISIONS = {
   "systems/theatre-stage.js": "7b40f52e5515069f19fe5af803c0724077da5319",
   "systems/world1-progress.js": "5d6d7a21ee772f57f6491be4471f1c1f6f0ddd70",
   "systems/world1-collect.js": "cc3223c710bddeb8f1587dd462292f8fb60956eb",
-  "systems/world1-boss.js": "3b913abb4bcb2f59c4f55ca15325fd654fdff877",
-  "systems/fusion-boss.js": "ed5b248a1e33315cb063b92b049e64d479393242",
-  "systems/quimera-art.js": "b320aeff3660c6aa859dc545acd2778bc4fdf80a",
+  "systems/world1-boss.js": "a7dcb7473998fc33f6b4178c953263a46e86e24f",
+  "systems/fusion-boss.js": "b33d9af7309ae11dc55ea0c401029b0c75388a44",
+  "systems/quimera-art.js": "5f221130f776e521d8d9374c7c016f2524e8f8c0",
   "systems/world1-story.js": "e1324becee767e794b86580bc3b5534c7a647e87",
   "systems/world1-rooms.js": "b069f94d44820a39e9e0c7aa68cc3026b90bb791",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
@@ -687,7 +687,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3ec310ed762b14ba11fec3f2ba4cc356296cd612",
-  "index.html": "7d372933252f14566fefec6454ce4528516a5a28",
+  "index.html": "ce16bca6fd34a78cd3284a65e8f87f5c0967098d",
   "multiplayer.html": "778d4e60ca9b94799d52206d48c7e8827c72510b",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
@@ -713,7 +713,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "9fb824d89ca7f63c4663ef00a0e4c69bea19064e",
+  "game.js": "a8a89e640363a3602a1f2dcb5a2841e6455432b6",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "124e18abe3e4be9d82f7e34cb74f01a35a8af768",
   "characters/ten-action-acting.js": "8c56db05f0625ebce31e10abbba5305be881d0ff",
@@ -876,7 +876,7 @@ const PRECACHE_REVISIONS = {
   "systems/frame-pressure.js": "0386d6604ecfaa482a482eb9216962bf7413c720",
   "systems/hero-mastery.js": "830da8e6a6b2eb2352024b22b2b10cd69373c020",
   "systems/hazards.js": "f3b2c2825f8fdf134d8fe71611ed66de71e9922a",
-  "systems/intro.js": "2b9a8765e92d23c6d5d5b497229a525a85b40101",
+  "systems/intro.js": "2a44c3c031f56ccc7b254b704915151bf5d3a918",
   "systems/intro-cast-fit.js": "e23ad877d1deadb5769d639d5fa2200fb69573c6",
   "systems/welcome-spotlight.js": "bde0b1deb3a2f1fc80eb182dd761fc09c93014bc",
   "systems/intro-dragon-stage.js": "d7a0d895dc6406011b408fc16c4ae6a0a9566eed",

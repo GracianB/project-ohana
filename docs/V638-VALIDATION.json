@@ -1,0 +1,18 @@
+{
+  "release": "ohana-638",
+  "stage": "candidate",
+  "scope": "Final boss anatomy, ten attacks, phase clarity, authoritative telegraphs and responsive combat HUD.",
+  "verified": [
+    "Full unit suite: 1871 passed, zero failures",
+    "Browser: four phases, ten warning/active attack pairs, pure vector drawing and stable reduced motion",
+    "Real production arena fixtures: 1280x900, 390x844 and 320x700; fighter and boss remain visible",
+    "Pixel inspection: solid lightning/geyser/beam footprints remain inside the authoritative damage bands",
+    "release:check PASS: 394 JS modules and 461 resources"
+  ],
+  "pending": [
+    "Remote CI and production deployment"
+  ],
+  "limitations": [
+    "Browser integration uses synthetic saved access and boss HP fixtures; no new earned campaign completion is claimed."
+  ]
+}

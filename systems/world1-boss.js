@@ -20,7 +20,7 @@
 //   dibujo tras el jefe         → W1B.drawWorld1BossTelegraphs(ctx, g, cam, t)
 //   HUD / pantalla              → W1B.drawWorld1BossOverlay(ctx, g, W, H, t)
 import { WORLD1_ORDER, WORLD1_THEMES, WORLD1_ARENA, WORLD1_FLOOR } from "./world1-rooms.js";
-import { FUSION_ATTACKS, FUSION_SPECIALS } from "./fusion-boss.js";
+import { FUSION_ATTACKS, FUSION_SPECIALS, drawFusionAttackTelegraphs } from "./fusion-boss.js";
 import { drawHeroEmblem, heroDisplayName } from "./world1-select.js";
 
 export const BOSS_FAIRNESS = Object.freeze({ capPerAttack: 34, grace: 50, mercyHp: 0.3, mercyWarn: 22, maxMercy: 12 });
@@ -30,12 +30,12 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // Frase de rótulo por ataque: de quién es el eco y cómo esquivarlo.
 export const ATTACK_CARDS = Object.freeze({
   ola:       "Salta la ola cuando cruce el suelo",
-  plasma:    "Agáchate o cambia de altura: va recto",
+  plasma:    "Cambia de altura: apunta a tu última posición",
   rayos:     "Sal de las columnas marcadas",
   medusas:   "Busca los huecos entre medusas",
   embestida: "Salta por encima o sube al balcón",
   aliento:   "Ponte detrás de la Quimera",
-  terremoto: "Estate en el aire al caer",
+  terremoto: "Sal de la marca y salta la onda al caer",
   geiseres:  "Evita los círculos del suelo",
   ruedas:    "Salta las ruedas una a una",
   red:       "Sal del anillo antes de que se cierre"
@@ -76,7 +76,7 @@ export function updateWorld1BossDirector(g) {
   }
   d.prevMode = b.mode;
   // Especial de fase → coro de ecos (los diez emblemas giran alrededor).
-  if (b.mode === "special" && b.special && !d.special) { d.special = { t: 0, id: b.special.id, name: b.special.name, line: b.special.line, phase: b.special.phase }; g.onWorld1Beat?.("boss-special", b.special.id); }
+  if (b.mode === "special" && b.special && !d.special) { d.attackDmg=0; d.card=null; d.special = { t: 0, id: b.special.id, name: b.special.name, line: b.special.line, phase: b.special.phase }; g.onWorld1Beat?.("boss-special", b.special.id); }
   if (d.special) { d.special.t++; if (b.mode !== "special") d.special = null; }
   // Derrota: 10 luces salen del cuerpo hacia las estatuas / el jugador.
   if (!d.defeat && (num(e.hp, 1) <= 0 || e.dying > 0)) {
@@ -109,33 +109,29 @@ export function drawWorld1BossBackdrop(ctx, g, cam, t = 0) {
 export function drawWorld1BossTelegraphs(ctx, g, cam, t = 0) {
   const e = fusion(g); if (!e) return; const b = e._fusion || {};
   if (b.mode !== "warn") return;
-  const ox = num(cam?.x), oy = num(cam?.y), A = WORLD1_ARENA, hero = FUSION_ATTACKS[b.attack]?.hero, col = WORLD1_THEMES[hero]?.color || "#fff";
-  const blink = g.reduceMotion ? 0.5 : 0.35 + 0.3 * ((Math.floor(num(t) / 6) % 2));
-  ctx.save(); ctx.globalAlpha = blink; ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 3;
-  const floor = WORLD1_FLOOR - oy, ex = num(e.x) + num(e.w) / 2 - ox, aim = num(b.aim, -1) || -1;
-  switch (b.attack) {
-    case "rayos": for (const x of b.marks || []) ctx.fillRect(num(x) - ox - 34, 0, 68, floor); break;
-    case "geiseres": for (const x of b.marks || []) { ctx.beginPath(); ctx.ellipse(num(x) - ox, floor, 46, 12, 0, 0, Math.PI * 2); ctx.fill(); } break;
-    case "red": for (const m of b.marks || []) { ctx.beginPath(); ctx.arc(num(m.x) - ox, num(m.y) - oy, 18, 0, Math.PI * 2); ctx.stroke(); } break;
-    case "ola": case "ruedas": ctx.fillRect(aim > 0 ? ex : A.left - ox, floor - 26, Math.abs(aim > 0 ? A.right - ox - ex : ex - (A.left - ox)), 26); break;
-    case "plasma": case "aliento": { const y = num(e.y) + num(e.h) * 0.4 - oy; ctx.fillRect(aim > 0 ? ex : ex - 1400, y - 30, 1400, 60); break; }
-    case "embestida": ctx.fillRect(aim > 0 ? ex : ex - 2400, floor - num(e.h) * 0.7, 2400, num(e.h) * 0.7); break;
-    case "terremoto": ctx.fillRect(A.left - ox, floor - 12, A.right - A.left, 12); break;
-    case "medusas": for (let i = 0; i < 9; i++) ctx.fillRect(A.left - ox + (i + 0.5) * (A.right - A.left) / 9 - 24, floor - 8, 48, 8); break;
-  }
-  // Carril seguro: siempre hay un sitio marcado en blanco.
-  const safe = safeLaneX(e, b); if (safe != null) { ctx.globalAlpha = 0.8; ctx.fillStyle = "#ffffff"; ctx.fillRect(safe - ox - 50, floor - 4, 100, 4); ctx.font = "bold 14px sans-serif"; ctx.textAlign = "center"; ctx.fillText("A SALVO", safe - ox, floor - 16); }
-  ctx.restore();
+  drawFusionAttackTelegraphs(ctx,e,cam,t,!!g.reduceMotion);
+  // A safe marker is shown only for stationary, locked ground columns.
+  const safe=safeLaneX(e,b);if(safe==null)return;
+  ctx.save();ctx.fillStyle='#b5f2db';ctx.textAlign='center';ctx.font='700 12px sans-serif';
+  ctx.fillRect(safe-num(cam?.x)-40,WORLD1_FLOOR-num(cam?.y)-4,80,4);
+  ctx.fillText('SIN COLUMNA',safe-num(cam?.x),WORLD1_FLOOR-num(cam?.y)-17);ctx.restore();
 }
 
 export function safeLaneX(e, b) {
-  const A = WORLD1_ARENA, ex = num(e.x) + num(e.w) / 2, aim = num(b.aim, -1) || -1;
+  const A = WORLD1_ARENA, ex = num(e.x) + num(e.w) / 2;
   if (b.attack === "rayos" || b.attack === "geiseres") {
-    const marks = (b.marks || []).map(num).sort((x, y) => x - y); if (!marks.length) return null;
-    let best = A.left + 80, gap = -1, prev = A.left; for (const m of [...marks, A.right]) { if (m - prev > gap) { gap = m - prev; best = (m + prev) / 2; } prev = m; }
-    return clamp(best, A.left + 60, A.right - 60);
+    const marks=(b.marks||[]).filter(Number.isFinite).sort((x,y)=>x-y);if(!marks.length)return null;
+    const target=clamp(num(b.target?.x,ex),A.left+60,A.right-60),candidates=[];
+    let left=A.left+60;
+    for(const mark of [...marks,A.right+20]){
+      const right=Math.min(A.right-60,mark-80);
+      if(right>=left)candidates.push(clamp(target,left,right));
+      left=mark+80;
+    }
+    candidates.sort((x,y)=>Math.abs(x-target)-Math.abs(y-target));
+    return candidates[0]??null;
   }
-  if (b.attack === "plasma" || b.attack === "aliento") return clamp(ex - aim * 260, A.left + 60, A.right - 60);
+
   return null;
 }
 
@@ -150,7 +146,16 @@ export function world1BossAccessibleText(e) {
   const phase = Math.max(1, Math.min(4, Math.floor(num(e.phase,1))));
   const health = Math.max(0, Math.min(100,
     Math.ceil(clamp(num(e.hp) / Math.max(1, num(e.max,1)),0,1)*10)*10));
-  return `Quimera Ohana. Fase ${phase} de 4. Vida aproximada: ${health} por ciento.`;
+  const b=e._fusion||{},hint=b.mode==='warn'?`${FUSION_ATTACKS[b.attack]?.name||''}. ${ATTACK_CARDS[b.attack]||''}.`:b.mode==='special'?`${b.special?.name||''}. Lee las zonas marcadas.`:b.mode==='rest'?'Núcleo abierto. Contraataca.':'';
+  return `Quimera Ohana. Fase ${phase} de 4. Vida aproximada: ${health} por ciento.`+(hint?' '+hint:'');
+}
+
+// Only the final encounter may widen a compact viewport. The player and the
+// Quimera's wing tips need room together; no actor or hitbox is rescaled.
+export function quimeraCameraZoom(g,width,base=1.02){
+ if(!g?.boss?._fusionBoss||g.world1Cine||!g.player||width>=700)return base;
+ const p=g.player,b=g.boss,distance=Math.abs((p.x+p.w/2)-(b.x+b.w/2));
+ return Math.min(base,.82,Math.max(.48,width/(distance+430)));
 }
 
 export function world1BossHealthLayout(W, H) {
@@ -177,24 +182,27 @@ export function drawWorld1BossOverlay(ctx, g, W, H, t = 0) {
     WORLD1_ORDER.forEach((h, i) => { const x0 = bx + bw * i / 10, x1 = Math.min(bx + bw * k, bx + bw * (i + 1) / 10); if (x1 > x0) { ctx.fillStyle = WORLD1_THEMES[h].color; ctx.fillRect(x0, by, x1 - x0, 14); } });
     ctx.fillStyle = "#fff"; for (const c of [0.7, 0.45, 0.2]) ctx.fillRect(bx + bw * c - 1, by - 4, 2, 22);
     ctx.font = "bold 15px sans-serif"; ctx.fillText(`QUIMERA OHANA · FASE ${num(e.phase, 1)}/4`, W / 2, by - 16);
+    if(b.mode==='rest'){ctx.fillStyle='#b5f2db';ctx.font='700 11px sans-serif';ctx.fillText('NÚCLEO ABIERTO · CONTRAATACA',W/2,by+30);}
+
   }
   // Rótulo de ataque (cinemático, breve): emblema del héroe imitado + consejo.
   if (d.card) {
-    const c = d.card, a = Math.min(1, c.t / 8, (c.max - c.t) / 12), y = H * 0.16;
-    ctx.globalAlpha = a; ctx.fillStyle = "rgba(10,6,20,.75)"; ctx.fillRect(W / 2 - 260, y - 34, 520, 68);
-    ctx.fillStyle = c.color; ctx.fillRect(W / 2 - 260, y + 30, 520 * (1 - c.t / c.max), 4);
-    drawHeroEmblem(ctx, c.hero, W / 2 - 220, y, 54, c.color, t);
-    ctx.font = "bold 20px sans-serif"; ctx.fillText(`ECO DE ${heroDisplayName(c.hero).toUpperCase()} · ${c.name}`, W / 2 + 20, y - 10);
-    ctx.fillStyle = "#fff"; ctx.font = "14px sans-serif"; ctx.fillText(c.tip, W / 2 + 20, y + 14);
+    const c=d.card,a=Math.min(1,c.t/8,(c.max-c.t)/12),y=W<640?218:H*.16,cw=Math.min(560,W-24),left=(W-cw)/2;
+    ctx.globalAlpha=a;ctx.fillStyle='rgba(10,6,20,.88)';ctx.fillRect(left,y-34,cw,68);
+    ctx.fillStyle=c.color;ctx.fillRect(left,y+30,cw*(1-c.t/c.max),3);
+    drawHeroEmblem(ctx,c.hero,left+28,y,36,c.color,t);
+    ctx.font='700 '+(W<500?14:18)+'px sans-serif';ctx.fillText(c.name.toUpperCase(),W/2+14,y-10,cw-76);
+    ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.fillText(c.tip,W/2+14,y+13,cw-76);
     ctx.globalAlpha = 1;
   }
   // Especial: bandas + coro de los diez ecos girando + nombre de fase.
   if (d.special) {
-    const s = d.special, k = Math.min(1, s.t / 20); bars(ctx, W, H, k);
-    const r = Math.min(W, H) * 0.32, spin = g.reduceMotion ? 0 : s.t * 0.02;
-    ctx.globalAlpha = 0.85 * k; WORLD1_ORDER.forEach((h, i) => { const a = spin + i / 10 * Math.PI * 2; drawHeroEmblem(ctx, h, W / 2 + Math.cos(a) * r, H / 2 + Math.sin(a) * r * 0.55, 46, WORLD1_THEMES[h].color, t); });
-    ctx.globalAlpha = k; ctx.fillStyle = "#ff7ad0"; ctx.font = `bold ${Math.round(H * 0.06)}px sans-serif`; ctx.fillText(s.name || "", W / 2, H * 0.08);
-    ctx.fillStyle = "#fff"; ctx.font = `${Math.round(H * 0.026)}px sans-serif`; ctx.fillText(s.line || "", W / 2, H * 0.93);
+    const s = d.special, k = Math.min(1, s.t / 20);
+    ctx.globalAlpha=k;ctx.fillStyle='rgba(10,6,20,.86)';ctx.fillRect(16,W<640?184:H*.10,Math.max(0,W-32),54);
+    ctx.fillStyle='#ffd79c';ctx.font='700 '+Math.min(20,Math.round(W/22))+'px sans-serif';ctx.fillText(s.name||'',W/2,(W<640?184:H*.10)+17);
+    ctx.fillStyle='#fff1dc';ctx.font='12px sans-serif';
+    const tip=s.id==='eco'?'Sal de las columnas antes del impacto':s.id==='erupcion'?'Haz caso a las bandas: salta la baja, evita la alta':'Salta los ecos bajos; pasa bajo los altos';
+    ctx.fillText(tip,W/2,(W<640?184:H*.10)+39,Math.max(1,W-48));
   }
   // Derrota: destellos que vuelan a cada héroe.
   if (d.defeat) {

@@ -865,7 +865,7 @@ export function playIntro(kind, name, done, id) {
   const reduce = reducedMotion();
   const def = ROSTER.find((r) => r.id === id) || ROSTER.find((r) => r.forms && r.forms[0] && r.forms[0].name === name) || ROSTER[0];
   sfx("start");
-  let evo = 0;
+  let evo = kind === "new" && globalThis.__ohanaStartHero===def.id ? Math.max(0,Math.min(4,Math.floor(Number(globalThis.__ohanaStartForm)||0))) : 0;
   if (kind === "resume") {
     try {
       const sv = saveStore.readRaw();
@@ -880,7 +880,7 @@ export function playIntro(kind, name, done, id) {
   const parts = new Particles();
   const title = String(form.name || name || "Ohana");
   const kicker = kind === "resume" ? "CONTINUAR" : "NUEVA PARTIDA";
-  const sub = kind === "resume" ? "Se recupera tu forma y tu sala" : "Empiezas como bebé · Rumbo al Claro";
+  const sub = kind === "resume" ? "Se recupera tu forma y tu sala" : evo>0 ? "Forma "+(evo+1)+" seleccionada · Tu aventura empieza aquí" : "Empiezas como bebé · Tu aventura empieza aquí";
   el.querySelector(".intro-sr").textContent = kicker + ": " + title + ". " + sub;
   const T = reduce ? { in: 0.07, out: 0.14, end: 0.24 } : { in: 0.14, out: 0.31, end: 0.46 };
 
