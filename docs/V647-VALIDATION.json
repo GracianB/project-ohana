@@ -1,0 +1,23 @@
+{
+  "release": "ohana-647",
+  "scope": "Five-form movement and immediate-contact visual choreography",
+  "passed": [
+    "Full unit suite: 1888 passed, zero failures",
+    "Final cadence/tail refinements: 104 focused Michi regressions passed",
+    "Native keyboard H deals immediate damage in all five forms, without advancing the simulation clock",
+    "Five forms × eight distinct actual gait/landing/brake/ready/contact/recovery poses; frozen input preserved",
+    "Production art matrix: five forms × seventeen poses × three scales, both facings and reduced-motion stability; native 1280/390/320 selection and desktop/mobile HUD",
+    "100 production size checks across fifty hero forms; Michi 70/89/64/129/76 px; unchanged physical boxes",
+    "Native five-form movement and direction reversal retained at V646 speeds",
+    "Slow-motion production-renderer studio recorded: 373 frames, zero uncaught errors",
+    "Release gate: 404 runtime modules and 473 offline resources"
+  ],
+  "pending": [
+    "Public candidate and deployment verification"
+  ],
+  "limits": [
+    "Renderer, position and stationary-enemy fixtures do not claim earned campaign progression.",
+    "Motion film is a quarter-speed renderer studio, not a campaign recording.",
+    "Damage timing, cooldowns, speed, health and physical boxes are preserved; only drawing behavior changes."
+  ]
+}

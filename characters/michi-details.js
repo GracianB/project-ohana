@@ -44,7 +44,7 @@ export function drawMichiNeon(a,p,form){
 
 // Bound to the far hand; pages and runes are visual, never autonomous attacks.
 export function drawMichiGrimoire(a,p,x,y){const{c,shape,stroke,oval}=a;
- c.save();c.translate(x,y-2);c.rotate(p.still?-.12:-.12+Math.sin(p.t*.04)*.035);
+ c.save();c.translate(x,y-2);c.rotate(p.still?-.12:-.12+Math.sin(p.t*.04)*.035-(p.charge||0)*.1+(p.brake||0)*.08);
  shape('#342b50',()=>{c.moveTo(-12,-15);c.lineTo(0,-12);c.lineTo(12,-15);c.lineTo(12,6);c.lineTo(0,9);c.lineTo(-12,6);},'#15263a');
  shape('#d9d8ba',()=>{c.moveTo(-10,-13);c.lineTo(-1,-10);c.lineTo(-1,6);c.lineTo(-10,4);},null);shape('#f0e7c8',()=>{c.moveTo(1,-10);c.lineTo(10,-13);c.lineTo(10,4);c.lineTo(1,6);},null);
  stroke('#80718f',.75,()=>{for(let i=0;i<3;i++){c.moveTo(-8,-8+i*4);c.lineTo(-3,-6+i*4);c.moveTo(3,-6+i*4);c.lineTo(8,-8+i*4);}});oval(0,6,1.2,2.4,'#e7bd81');c.restore();

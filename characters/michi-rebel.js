@@ -1,5 +1,5 @@
 import {drawMichiDetails,drawMichiNeon,drawMichiGrimoire} from './michi-details.js';
-import {michiActing} from './michi-acting.js';
+import {michiActing,michiChoreography,michiPawCycle} from './michi-acting.js';
 // Five anatomical metamorphoses. Pose-only art: never changes simulation or hitboxes.
 const TAU=Math.PI*2;
 const number=(v,d=0)=>Number.isFinite(v)?v:d;
@@ -41,18 +41,18 @@ function face(a,p,{x=0,y=-50,size=1,fur='#45516b',kind='kitten',accent='#ff725f'
  c.restore();
 }
 function scarf(a,x,y,color='#d54d54',length=21,sway=0){const{c,shape,stroke}=a;shape(color,()=>{c.moveTo(x-17,y-6);c.quadraticCurveTo(x,y+4,x+18,y-5);c.lineTo(x+6,y+9);c.lineTo(x-4,y+15);c.lineTo(x-10,y+5);c.lineTo(x-length,y+9+sway);});stroke('#ffab81',1,()=>{c.moveTo(x-11,y-3);c.lineTo(x+1,y+3);});}
-function tail(a,p,{x=-15,y=-20,tipX=-48,tipY=-50,color='#45516b',accent='#ff725f',width=8}={}){const{c,stroke}=a,sw=Math.sin(p.t*.06)*3;stroke('#101727',width+3,()=>{c.moveTo(x,y);c.bezierCurveTo(tipX-15,y+6,tipX-12,tipY+10,tipX,tipY+sw);});stroke(color,width,()=>{c.moveTo(x,y);c.bezierCurveTo(tipX-15,y+6,tipX-12,tipY+10,tipX,tipY+sw);});stroke(accent,Math.max(2,width*.4),()=>{c.moveTo(tipX-8,tipY+8+sw);c.quadraticCurveTo(tipX-7,tipY,tipX,tipY+sw);});}
+function tail(a,p,{x=-15,y=-20,tipX=-48,tipY=-50,color='#45516b',accent='#ff725f',width=8}={}){const{c,stroke}=a,sw=Math.sin(p.t*.06)*3+(p.tailLag||0);stroke('#101727',width+3,()=>{c.moveTo(x,y);c.bezierCurveTo(tipX-15,y+6,tipX-12,tipY+10,tipX,tipY+sw);});stroke(color,width,()=>{c.moveTo(x,y);c.bezierCurveTo(tipX-15,y+6,tipX-12,tipY+10,tipX,tipY+sw);});stroke(accent,Math.max(2,width*.4),()=>{c.moveTo(tipX-8,tipY+8+sw);c.quadraticCurveTo(tipX-7,tipY,tipX,tipY+sw);});}
 function paw(a,p,x,y,width=7,color='#66768d',long=false){const{c,oval,stroke}=a;oval(x,y,width,4.5,color);for(let k=0;k<3;k++)stroke('#d6dedf',long?1.5:.8,()=>{c.moveTo(x+width-2,y-2+k*2);c.lineTo(x+width+(long?10:1),y-4+k*3);});}
 function kitten(a,p){const{c,shape,oval}=a;
  tail(a,p,{tipX:-39,tipY:-42,width:7});
  // Small four-legged rascal: big head, compact rump, oversized front paws.
  oval(-12,-20,23,16,'#4b5971',-.12);oval(-5,-15,16,8,'#758399',.1);shape('#253244',()=>{c.moveTo(-29,-25);c.quadraticCurveTo(-10,-36,11,-22);c.lineTo(4,-11);c.lineTo(-23,-12);});
- for(const [x,phase]of[[-25,0],[-10,Math.PI],[7,Math.PI],[22,0]]){const step=(p.air?(x>0?7:-5):p.run?Math.sin(p.phase*2+phase)*4:0)+(x===22?p.strike*15:0),lift=p.air?9:x===22?p.strike*18:0;c.save();c.translate(0,-lift);shape('#46536d',()=>{c.moveTo(x-4,-20);c.lineTo(x+3,-18);c.lineTo(x+4+step,-3);c.lineTo(x-5+step,-3);});paw(a,p,x+step,0,8,'#8290a3',x===22&&p.strike>.1);oval(x+step+1,1,2.4,1.4,'#e7b9c6');c.restore();}
+ for(const [x,phase]of[[-25,0],[-10,Math.PI],[7,Math.PI],[22,0]]){const gait=michiPawCycle(p,phase,5,4),step=(p.air?(x>0?7:-5):gait.step)+(x===22?p.strike*15:0),lift=p.air?9:(x===22?p.strike*18:0)+gait.lift;if(x===22&&p.groom>.15){shape('#46536d',()=>{c.moveTo(18,-23);c.quadraticCurveTo(31,-17,27,-20-p.groom*8);c.lineTo(22,-23-p.groom*8);c.quadraticCurveTo(23,-16,18,-23);});continue;}c.save();c.translate(0,-lift);shape('#46536d',()=>{c.moveTo(x-4,-20);c.lineTo(x+3,-18);c.lineTo(x+4+step,-3);c.lineTo(x-5+step,-3);});paw(a,p,x+step,0,8,'#8290a3',x===22&&p.strike>.1);oval(x+step+1,1,2.4,1.4,'#e7b9c6');c.restore();}
  drawMichiDetails(a,p,0);
  face(a,p,{x:13+p.strike*4,y:-46,size:1.02});if(p.groom){paw(a,p,24,-20-p.groom*9,6);if(p.groom>.4)oval(20,-26,2,3,'#df94a7');};scarf(a,9,-27,'#e36c82',19,p.run*2);
 
 }
-function glider(a,p){const{c,shape,stroke,oval}=a,air=p.state!=='dead',beat=p.still?0:Math.sin(p.t*(p.wing==='ascend'?.25:.09)),fold=air?(p.wing==='ascend'?.83+beat*.17:p.wing==='descend'?.55:.9+beat*.08):.36;
+function glider(a,p){const{c,shape,stroke,oval}=a,air=p.state!=='dead',beat=p.still?0:Math.sin(p.t*(p.wing==='ascend'?.25:.09)),fold=(air?(p.wing==='ascend'?.83+beat*.17:p.wing==='descend'?.55:.9+beat*.08):.36)+(p.wingFlare||0);
  c.translate(0,p.still?-8:-8+Math.sin(p.t*.07)*2);c.rotate(p.still?0:Math.min(.1,Math.abs(p.vx)*.012));
  // A lean, long-legged bat-cat. The membranes articulate from the shoulders.
  for(const side of[-1,1]){const tip=side*(46+fold*25),lift=-69-fold*26;
@@ -84,8 +84,8 @@ function pantherHead(a,p){const{c,shape,stroke,oval}=a;
 }
 function panther(a,p){const{c,shape,stroke,oval}=a;c.translate(0,p.threat*2-p.gesture-(p.state==='run'?Math.abs(p.run)*2:0));
  // Low stalking melanistic cat; layered haunches and shoulders drive the gait.
- stroke('#30383c',8,()=>{c.moveTo(-27,-29);c.bezierCurveTo(-51,-18,-73,-26,-64,-48);});stroke('#07090b',6,()=>{c.moveTo(-27,-29);c.bezierCurveTo(-51,-18,-73,-26,-64,-48);});
- for(const [x,phase,front]of[[-25,0,false],[-11,Math.PI,false],[17,Math.PI,true],[30,0,true]]){const step=p.air?(front?8:-6):p.run?Math.sin(p.phase*2+phase)*7:0,reach=front?p.strike*18:0,lift=p.air?10:front?p.strike*12:0;
+ stroke('#30383c',8,()=>{c.moveTo(-27,-29);c.bezierCurveTo(-51,-18,-73,-26,-64-p.tailLag*.25,-48+p.tailLag*.7+(p.still?0:Math.sin(p.t*.045)*2));});stroke('#07090b',6,()=>{c.moveTo(-27,-29);c.bezierCurveTo(-51,-18,-73,-26,-64-p.tailLag*.25,-48+p.tailLag*.7+(p.still?0:Math.sin(p.t*.045)*2));});
+ for(const [x,phase,front]of[[-25,0,false],[-11,Math.PI,false],[17,Math.PI,true],[30,0,true]]){const gait=michiPawCycle(p,phase+(front?.35:0),9,5),step=p.air?(front?8:-6):gait.step,reach=front?p.strike*18:0,lift=p.air?10:(front?p.strike*12:0)+gait.lift;
   c.save();c.translate(0,-lift);shape(front?'#101418':'#080b0e',()=>{c.moveTo(x-7,-34);c.bezierCurveTo(x+11,-36,x+10,-20,x+3,-14);c.quadraticCurveTo(x+1+step+reach,-7,x+7+step+reach,-4);c.quadraticCurveTo(x+7+step+reach,1,x-6+step+reach,-2);c.quadraticCurveTo(x-8+step+reach,-11,x-7,-18);c.quadraticCurveTo(x-12,-26,x-7,-34);},'#30383d');oval(x+step+reach,-1,8,3.8,'#0b0e11');for(let i=0;i<3;i++)stroke(p.strike>.2&&front?'#b9c4c7':'#394146',.7,()=>{c.moveTo(x+step+reach+2+i*2,-2);c.lineTo(x+step+reach+3+i*2+(p.strike>.2&&front?4:0),0);});c.restore();
  }
  shape('#080b0e',()=>{c.moveTo(-39,-37);c.bezierCurveTo(-38,-52,-21,-57,-3,-49);c.bezierCurveTo(5,-45,13,-50,23,-47);c.quadraticCurveTo(35,-43,32,-29);c.bezierCurveTo(19,-19,5,-23,-6,-23);c.quadraticCurveTo(-34,-21,-39,-37);},'#333d44');
@@ -98,21 +98,21 @@ function panther(a,p){const{c,shape,stroke,oval}=a;c.translate(0,p.threat*2-p.ge
 function lynx(a,p){const{c,shape,stroke,oval}=a;
  // Upright digitigrade spectre, long ear tufts and asymmetric crescent gauntlets.
  for(let i=0;i<2;i++)tail(a,p,{x:-9,y:-29,tipX:-48-i*13,tipY:-65+i*28,color:'#254455',accent:'#85ebd7',width:5});
- for(const side of[-1,1]){const x=side*(12+p.run*4+p.strike*4),lift=p.air?(side>0?17:10):0;c.save();c.translate(0,-lift);shape('#30475a',()=>{c.moveTo(side*7,-34);c.lineTo(side*19,-24);c.lineTo(side*10,-13);c.lineTo(x+side*6,-3);c.lineTo(x-side*5,-3);c.lineTo(side*3,-20);});paw(a,p,x,0,7,'#86b1b9');c.restore();}
+ for(const side of[-1,1]){const gait=michiPawCycle(p,side<0?Math.PI:0,5,4),x=side*(12+p.strike*4)+gait.step,lift=p.air?(side>0?17:10):gait.lift;c.save();c.translate(0,-lift);shape('#30475a',()=>{c.moveTo(side*7,-34);c.lineTo(side*19,-24);c.lineTo(side*10,-13);c.lineTo(x+side*6,-3);c.lineTo(x-side*5,-3);c.lineTo(side*3,-20);});paw(a,p,x,0,7,'#86b1b9');c.restore();}
  shape('#302b4b',()=>{c.moveTo(-17,-72);c.lineTo(21,-69);c.lineTo(14,-44);c.lineTo(4,-30);c.lineTo(-13,-38);c.lineTo(-22,-58);});
  shape('#628f9b',()=>{c.moveTo(-16,-66);c.lineTo(-2,-52);c.lineTo(16,-67);c.lineTo(9,-44);c.lineTo(-2,-38);c.lineTo(-14,-48);});
  drawMichiDetails(a,p,3);
- for(const side of[-1,1]){const reach=side>0?p.strike*24+p.curious*6:0,x=side*(28+reach),y=-39-p.cast*12-p.gesture*side*10-p.strike*side*9;stroke('#172838',10,()=>{c.moveTo(side*16,-65);c.lineTo(side*23,-52);c.lineTo(x,y);});stroke('#42687b',7,()=>{c.moveTo(side*16,-65);c.lineTo(side*23,-52);c.lineTo(x,y);});
+ for(const side of[-1,1]){const reach=side>0?p.strike*24+p.curious*6:0,x=side*(28+reach),y=-39-p.cast*12-p.gesture*side*10-p.strike*side*9+(side<0?p.offhand:0);stroke('#172838',10,()=>{c.moveTo(side*16,-65);c.lineTo(side*23,-52);c.lineTo(x,y);});stroke('#42687b',7,()=>{c.moveTo(side*16,-65);c.lineTo(side*23,-52);c.lineTo(x,y);});
   c.save();c.translate(x,y);c.rotate((p.state==='cast'?p.cast*.6:0)*side+p.strike*side*.45);c.translate(-x,-y);if(side>0){const tx=x+12+p.cast*10,ty=y-39-p.strike*6;stroke('#1b2639',5,()=>{c.moveTo(x-3,y+9);c.lineTo(tx,ty);});stroke('#ba8fce',2.4,()=>{c.moveTo(x-3,y+9);c.lineTo(tx,ty);});shape('#eeefba',()=>{for(let i=0;i<10;i++){const q=-Math.PI/2+i*Math.PI/5,r=i%2?3.5:8;if(i===0)c.moveTo(tx+Math.cos(q)*r,ty+Math.sin(q)*r);else c.lineTo(tx+Math.cos(q)*r,ty+Math.sin(q)*r);}},'#685985');const theta=(p.state==='cast'?p.cast*.6:0)+p.strike*.45;p.castOrigin={x:x+Math.cos(theta)*(tx-x)-Math.sin(theta)*(ty-y),y:y+Math.sin(theta)*(tx-x)+Math.cos(theta)*(ty-y)};}else drawMichiGrimoire(a,p,x,y);paw(a,p,x,y+3,6,'#65969f',true);c.restore();
  }
  face(a,p,{x:0,y:-83,size:.8,fur:'#3c6073',kind:'lynx',accent:'#8ae8dc'});scarf(a,-1,-65,'#b95e74',54,Math.sin(p.t*.05)*5);
- c.save();c.translate(p.look,-96+p.breath);c.rotate(p.still?0:p.ear*.3);c.scale(.72,.72);c.translate(0,112);shape('#302b51',()=>{c.moveTo(-24,-112);c.quadraticCurveTo(-13,-142,-10,-166);c.quadraticCurveTo(0,-177,25,-153);c.lineTo(9,-156);c.quadraticCurveTo(5,-138,24,-112);},'#111e31');shape('#69598c',()=>{c.moveTo(-19,-120);c.lineTo(-15,-130);c.quadraticCurveTo(0,-123,17,-128);c.lineTo(21,-118);},null);shape('#4d3b70',()=>{c.moveTo(-18,-119);c.quadraticCurveTo(-9,-145,-10,-163);c.lineTo(-5,-161);c.quadraticCurveTo(-7,-137,2,-119);},null);oval(0,-112,36,6,'#43365f',-.04);stroke('#b7a2d5',1.4,()=>{c.moveTo(-32,-111);c.quadraticCurveTo(0,-104,32,-113);});oval(-4,-141,5,6,'#ece7b6');oval(-1,-144,4.5,5.5,'#302b51');c.restore();
+ c.save();c.translate(p.look,-96+p.breath);c.rotate(p.still?0:p.ear*.3-p.turn*.08+p.land*.06);c.scale(.72,.72);c.translate(0,112);shape('#302b51',()=>{c.moveTo(-24,-112);c.quadraticCurveTo(-13,-142,-10,-166);c.quadraticCurveTo(0,-177,25,-153);c.lineTo(9,-156);c.quadraticCurveTo(5,-138,24,-112);},'#111e31');shape('#69598c',()=>{c.moveTo(-19,-120);c.lineTo(-15,-130);c.quadraticCurveTo(0,-123,17,-128);c.lineTo(21,-118);},null);shape('#4d3b70',()=>{c.moveTo(-18,-119);c.quadraticCurveTo(-9,-145,-10,-163);c.lineTo(-5,-161);c.quadraticCurveTo(-7,-137,2,-119);},null);oval(0,-112,36,6,'#43365f',-.04);stroke('#b7a2d5',1.4,()=>{c.moveTo(-32,-111);c.quadraticCurveTo(0,-104,32,-113);});oval(-4,-141,5,6,'#ece7b6');oval(-1,-144,4.5,5.5,'#302b51');c.restore();
 }
 function ghost(a,p){const{c,shape,stroke,oval}=a;
  // Compact mischievous spirit: a big expressive head over a tiny curled soul.
  const float=p.still?0:Math.sin(p.t*.046)*3,reach=p.curious*10+p.cast*12+p.strike*20;
- c.save();c.translate(-p.vx*.28,-17+float);c.rotate(p.still?0:Math.max(-.09,Math.min(.09,-p.vx*.018))+p.gesture*.06);
- for(let i=0;i<9;i++){const side=i<4?-1:1,k=i%5,w=p.still?0:Math.sin(p.t*.055+i)*4;
+ c.save();c.globalAlpha=(Number.isFinite(c.globalAlpha)?c.globalAlpha:1)*p.ghostFade;c.translate(-p.vx*.28,-17+float);c.scale(1+Math.min(.05,Math.abs(p.vx)*.005),1-Math.min(.04,Math.abs(p.vx)*.004));c.rotate(p.still?0:Math.max(-.09,Math.min(.09,-p.vx*.018))+p.gesture*.06);
+ for(let i=0;i<9;i++){const side=i<4?-1:1,k=i%5,w=p.still?0:Math.sin(p.t*.055+i)*4+p.tailLag*.25;
   c.save();c.globalAlpha=.2+k*.06;stroke(i%2?'#88fff0':'#c8a6ff',3.5-k*.3,()=>{c.moveTo(side*10,-34+k*2);c.bezierCurveTo(side*(28+k*3),-48+k*5,side*(33+k*3),-18+k*3+w,side*(17+k*5),-14-k*3+w);});c.restore();
  }
  c.save();c.globalAlpha=.9;
@@ -135,12 +135,12 @@ const RIGS=[kitten,glider,panther,lynx,ghost];
 export function drawRebelCat(c,pose={}){
  const form=Math.max(0,Math.min(4,Math.round(number(Number(pose.form))))),state=pose.state||'idle',still=!!pose.reduceMotion||state==='dead';
  const p={state,still,t:still?0:number(pose.t),phase:still?0:number(pose.phase),atk:still?.5:clamp(pose.atk),cast:still?.5:clamp(pose.cast),look:Math.max(-1,Math.min(1,number(pose.look?.x))),power:Math.max(0,Math.min(5,Math.trunc(number(pose.michiPowerIndex,number(pose.castSlot)))))};
- Object.assign(p,michiActing(pose,form));p.look=p.lookX;p.inspect=0;p.groom=0;
+ Object.assign(p,michiActing(pose,form),michiChoreography(pose,form));p.look=p.lookX;p.inspect=0;p.groom=0;
  const welcome=state==='idle'&&!still?pose.michiWelcome||{}:{};p.inspect=Math.max(clamp(welcome.inspect),p.curious*.5);p.groom=Math.max(clamp(welcome.groom),form===0?p.gesture:0);p.look=Math.max(-1,Math.min(1,p.look-clamp(welcome.sideeye)*.6));
- p.run=state==='run'?Math.sin(p.phase*2):0;p.air=['jump','fall','glide'].includes(state);p.strike=state==='attack'?Math.sin(p.atk*Math.PI):0;const a=tools(c);
+ p.run=state==='run'?Math.sin(p.phase*.95):0;p.air=['jump','fall','glide'].includes(state);p.strike=p.extension;const a=tools(c);
  c.save();c.lineCap='round';c.lineJoin='round';
  const bob=state==='jump'?-5:state==='fall'?3:state==='glide'?-4:state==='hurt'?5:state==='victory'?-7:Math.sin(p.t*.07+form)*.8;
- c.translate(state==='attack'?p.atk*(form===2?14:7):0,bob);c.rotate(state==='dead'?.7:state==='hurt'?-.12:state==='wall'?-.17:p.run*.025);c.scale(1,state==='jump'?1.04:state==='fall'?.95:1);
+ c.translate(p.reach,bob);c.scale(1+p.widen,1-p.compress);c.rotate(p.lean);c.rotate(state==='dead'?.7:state==='hurt'?-.12:state==='wall'?-.17:p.run*.025);c.scale(1,state==='jump'?1.04:state==='fall'?.95:1);
  if(form===2)c.scale(.74,.74);
  if(form===4)c.scale(.62,.62);
  RIGS[form](a,p);drawMichiNeon(a,p,form);
