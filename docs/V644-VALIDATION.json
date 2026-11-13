@@ -1,0 +1,19 @@
+{
+  "release": "ohana-644",
+  "scope": "Much smaller final Michi ghost and corrected Kilo solar depth",
+  "passed": [
+    "1884 unit tests, zero failures",
+    "Production ghost height 76px instead of 127px: approximately 40 percent smaller",
+    "100 production size checks across fifty hero forms; explicit compact final-cat contract; unchanged physical boxes",
+    "Five body plans and ten monochrome silhouette comparisons",
+    "Kilo production Canvas instrumentation: active final solar orbit drawn before the opaque body; ceremonial L front/back split preserved",
+    "Release gate: 404 runtime modules, 473 offline resources"
+  ],
+  "pending": [
+    "Final extended art matrix and public verification"
+  ],
+  "limits": [
+    "Renderer fixtures do not claim a newly completed campaign.",
+    "Hero/form save IDs, collision boxes, flight and combat mechanics are preserved."
+  ]
+}

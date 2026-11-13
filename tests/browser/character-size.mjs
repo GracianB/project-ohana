@@ -35,6 +35,7 @@ try {
  for(const id of new Set(audit.map(r=>r.id)))for(let evo=1;evo<5;evo++){
   const before=audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo-1);
   const after=audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo);
+  if(id==='cat'&&evo===4){assert.ok(after.height>=65&&after.height<=95&&after.height<before.height*.8,'final ghost must be deliberately compact');continue;}
   assert.ok(after.height>before.height,`${id} vector F${evo-1}→F${evo}: ${before.height}→${after.height}px (must grow)`);
  }
  console.log('Optical size matrix:',JSON.stringify(audit.filter(row=>row.id==='cat').map(({look,evo,height})=>({look,evo,height}))));
@@ -44,5 +45,5 @@ try {
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'mobile horizontal overflow');
  await page.emulateMedia({reducedMotion:'reduce'});await page.selectOption('#pose','idle');
  const pixels=()=>page.evaluate(()=>[...document.querySelectorAll('.evolutions canvas')].map(c=>c.toDataURL()));const first=await pixels();await page.waitForTimeout(150);assert.deepEqual(await pixels(),first);
- assert.deepEqual(errors,[]);console.log('PASS: 100 rendered size checks across all 50 forms, increasing evolutions, unchanged hitboxes, Cuerno expressions and mobile/reduced-motion preview');
+ assert.deepEqual(errors,[]);console.log('PASS: 100 rendered size checks across all 50 forms, growth curves plus compact final cat, unchanged hitboxes, Cuerno expressions and mobile/reduced-motion preview');
 }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

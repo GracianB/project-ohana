@@ -23,7 +23,7 @@ export function drawMichiDetails(a,p,form){
   oval(-2,-42,4,4,'#e4d6ac');oval(0,-44,3,3,'#293c50');
  }else{
   // Three small feline soul-lights follow the nine trailing ribbons.
-  for(let i=0;i<3;i++){const phase=p.still?i*2:p.t*.025+i*2,x=Math.cos(phase)*(44+i*5),y=-75+Math.sin(phase)*20;
+  for(let i=0;i<3;i++){const phase=p.still?i*2:p.t*.025+i*2,x=Math.cos(phase)*(34+i*3),y=-65+Math.sin(phase)*15;
    c.save();c.globalAlpha=.35+i*.12;c.translate(x,y);shape('#c1fae7',()=>{c.moveTo(-5,1);c.lineTo(-6,-8);c.lineTo(-1,-5);c.lineTo(5,-9);c.lineTo(6,1);c.quadraticCurveTo(5,8,1,6);c.lineTo(-3,9);c.lineTo(-2,5);c.quadraticCurveTo(-7,6,-5,1);},null);oval(-2,-1,.7,1.3,'#486c83');oval(3,-1,.7,1.3,'#486c83');c.restore();
   }
  }
@@ -37,6 +37,6 @@ export function drawMichiNeon(a,p,form){
  // Three luminous fur marks, contained on the actor rather than a screen veil.
  const x=form===2?-13:form===4?-12:form===0?-15:-7,y=form===2?-34:form===4?-43:form===0?-21:form===3?-52:-35;
  for(let i=0;i<3;i++)stroke(col,1.1,()=>{c.moveTo(x+i*5,y);c.lineTo(x+i*5-2,y+5);});
- if(form===4){oval(0,-59,1.6,3,'#f1ffd9');}
+ if(form===4){oval(0,-46,1.6,3,'#f1ffd9');}
  c.restore();
 }
