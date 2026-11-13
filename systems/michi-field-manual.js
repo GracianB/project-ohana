@@ -15,20 +15,20 @@ export const MICHI_FIELD_NOTES=Object.freeze([
  Object.freeze({
    title:'02 · Dueño de los tejados',subtitle:'Michi · Alas de Asfalto',
    description:'El cuerpo se alarga y se alza sobre dos patas. Dos membranas rasgadas se articulan desde sus hombros; el pañuelo flamea entre ellas.',
-   secret:'Mantén salto para volar durante 3,5 segundos; suelta para planear. La barra muestra la reserva, que se recarga al aterrizar.',
+   secret:'Despega automáticamente al adoptar esta forma. Mantén salto para volar durante 3,5 segundos; suelta para planear. La barra muestra la reserva, que se recarga al aterrizar.',
    gesture:'Alas oscuras · cola en gancho · vuelo',tone:'#98f8ff'
  }),
  Object.freeze({
-   title:'03 · La pantera despierta',subtitle:'Michi · Pantera del Eclipse',
-   description:'Una pantera baja y musculosa, con colmillos de sable, tres colas y enormes garras delanteras. Sus hombros preparan cada zarpazo.',
+   title:'03 · La pantera despierta',subtitle:'Michi · Pantera Negra',
+   description:'Una pantera negra compacta y musculosa, con orejas redondeadas, una larga cola y reflejos de carbón sobre el pelaje negro.',
    secret:'Aprovecha los cambios de altura y vigila los brillos propios de cada enemigo.',
-   gesture:'Cuatro patas · tres colas · colmillos de sable',tone:'#f6a7ff'
+   gesture:'Pelaje negro · orejas redondas · una cola',tone:'#f6a7ff'
  }),
  Object.freeze({
-   title:'04 · El filo de la sombra',subtitle:'Michi · Lince Espectral',
-   description:'Un lince erguido sobre patas digitígradas. Sus penachos y dos colas cortan la silueta; las medias lunas de sus brazos siguen cada golpe.',
+   title:'04 · El filo de la sombra',subtitle:'Michi · Lince Hechicero',
+   description:'Un lince hechicero con sombrero puntiagudo, capa y varita de estrella. La varita sigue la mano y prepara cada hechizo.',
    secret:'No confundas el resplandor con una plataforma: sigue mirando sus contornos reales.',
-   gesture:'Penachos · dos colas · garras de media luna',tone:'#ffe8ad'
+   gesture:'Sombrero de brujo · varita · luna',tone:'#ffe8ad'
  }),
  Object.freeze({
    title:'05 · El fantasma de las nueve vidas',subtitle:'Michi · Espectro de Nueve Vidas',

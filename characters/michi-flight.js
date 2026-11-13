@@ -11,14 +11,18 @@ export function steerMichiFlight(p,input={}){
   if(p._michiWingForm!=null){p._michiWingForm=null;p._michiWingMode=null;p._michiWingAir=false;p._gliding=false;}
   return false;
  }
- if(p._michiWingForm!==p.evo){p._michiWingForm=p.evo;p._michiWingFuel=MICHI_FAIRY_FLIGHT_FRAMES;p._michiWingMax=MICHI_FAIRY_FLIGHT_FRAMES;p._michiWingAir=false;}
+ if(p._michiWingForm!==p.evo){p._michiWingForm=p.evo;p._michiWingFuel=MICHI_FAIRY_FLIGHT_FRAMES;p._michiWingMax=MICHI_FAIRY_FLIGHT_FRAMES;p._michiWingAir=false;p._michiTakeoff=p.evo===1?30:0;}
+ // First entry/evolution to the glider launches once; landing never retriggers it.
+ const automatic=p.evo===1&&p._michiTakeoff>0&&!input.drop;
+ if(automatic){p._michiTakeoff--;p.grounded=false;p._michiWingAir=true;}
+ else if(input.drop)p._michiTakeoff=0;
  if(p.grounded){p._michiWingFuel=MICHI_FAIRY_FLIGHT_FRAMES;p._michiWingMax=MICHI_FAIRY_FLIGHT_FRAMES;p._michiWingAir=false;p._michiWingMode='ground';p._gliding=false;return false;}
  // Keep the ordinary takeoff impulse before the wings assume control.
  if(!p._michiWingAir&&(!input.jump||p.vy< -3.6))return false;
  p._michiWingAir=true;p._gliding=true;
  const unlimited=p.evo===4;
  if(input.drop){p._michiWingMode='descend';p.vy=Math.max(4.5,p.vy);}
- else if(input.jump&&(unlimited||p._michiWingFuel>0)){
+ else if((input.jump||automatic)&&(unlimited||p._michiWingFuel>0)){
   p._michiWingMode='ascend';if(!unlimited)p._michiWingFuel--;
   const target=unlimited?-3.8:-3.1;p.vy+=(target-p.vy)*.3;
  }else{p._michiWingMode=unlimited?'hover':'glide';p.vy=unlimited?0:1.25;}

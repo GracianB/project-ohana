@@ -1,3 +1,7 @@
+## ohana-645 · Cachorro, aviador, pantera negra y hechicero
+
+Cuatro formas revisadas: cachorro más adorable, aviador con despegue automático único, pantera negra real de una cola y tamaño compacto, y lince hechicero con sombrero y varita. [Validación](docs/V645-VALIDATION.json) · [publicación](docs/V645-PUBLICATION.json).
+
 ## ohana-644 · Fantasma compacto y profundidad solar
 
 Michi final reduce sustancialmente su tamaño y condensa el cuerpo, con cabeza expresiva, manos flotantes, pañuelo y nueve estelas. El segundo aro solar de Kilo pasa detrás del cuerpo; L conserva sus dos mitades de profundidad. [Validación](docs/V644-VALIDATION.json) · [publicación](docs/V644-PUBLICATION.json).

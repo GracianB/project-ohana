@@ -77,7 +77,7 @@ test('every form x state retains articulated vectors and permits only shared eye
 
 test('street cat replaces the archived tide star in the fourth evolution slot',()=>{
  assert.match(src,/drawRebelCat/);
- assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Michi · Lince Espectral');
+ assert.equal(ROSTER.find(x=>x.id==='cat').forms[3].name,'Michi · Lince Hechicero');
  const a=rec();cat.draw(a.c,pose('run',30,3),{});assert.ok(a.log.grad<=10);assert.ok(a.log.radial<=5);
 });
 

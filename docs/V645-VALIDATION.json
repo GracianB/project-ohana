@@ -1,0 +1,21 @@
+{
+  "release": "ohana-645",
+  "scope": "Four requested Michi forms: adorable kitten, automatic glider launch, actual black compact panther and wizard hat/wand",
+  "passed": [
+    "1885 unit tests, zero failures",
+    "Six flight-controller tests: automatic entry/evolution launch, finite reserve, no repeated automatic launch after landing, deliberate descent, ordinary later jumps and ghost hover",
+    "100 production size checks across fifty hero forms; cat 72/89/69/129/76 px; unchanged physical boxes",
+    "Five distinct body plans and thirty distinct acting/attention/flight/power poses",
+    "Release gate: 404 runtime modules and 473 offline resources",
+    "Native browser: form 2 ascends through actual production physics without jump input, then glides and responds to held jump",
+    "Panther colour acceptance: approximately 80 percent of opaque raw body pixels are neutral near-black",
+    "Final panther has independent smooth big-cat head/body anatomy, one tail and rounded ears; hat reduced and seated on head"
+  ],
+  "pending": [
+    "Final extended art/launch acceptance and public candidate verification"
+  ],
+  "limits": [
+    "Artwork and movement fixtures do not claim earned campaign progression.",
+    "Saved hero/form indices and combat statistics remain stable; automatic takeoff is specific to Michi form 2."
+  ]
+}

@@ -13,8 +13,8 @@ export function drawMichiDetails(a,p,form){
   oval(0,-39,3,4,'#e2c196');stroke('#ced4d1',1,()=>{c.moveTo(-8,-28);c.lineTo(8,-28);});
  }else if(form===2){
   // Irregular eclipse rosettes sit on the flank rather than floating outside it.
-  for(let i=0;i<4;i++){const x=-24+i*12,y=-39+(i%2)*5;stroke('#252740',2.8,()=>{c.moveTo(x-3,y+4);c.quadraticCurveTo(x-8,y-5,x+2,y-5);c.moveTo(x+4,y-3);c.lineTo(x+5,y+2);});}
-  stroke('#d4b8ee',1,()=>{c.moveTo(-27,-47);c.quadraticCurveTo(-13,-55,1,-47);});
+  for(let i=0;i<4;i++){const x=-24+i*12,y=-39+(i%2)*5;stroke('#050608',2.2,()=>{c.moveTo(x-3,y+4);c.quadraticCurveTo(x-8,y-5,x+2,y-5);c.moveTo(x+4,y-3);c.lineTo(x+5,y+2);});}
+  stroke('#30383e',.8,()=>{c.moveTo(-27,-47);c.quadraticCurveTo(-13,-55,1,-47);});
  }else if(form===3){
   // Asymmetric split coat and a crescent clasp anchor the duellist silhouette.
   shape('#243344',()=>{c.moveTo(-13,-47);c.lineTo(-2,-40);c.lineTo(-12,-18);c.lineTo(-26,-25);c.lineTo(-20,-36);});
@@ -30,6 +30,7 @@ export function drawMichiDetails(a,p,form){
 }
 
 export function drawMichiNeon(a,p,form){
+ if(form===2)return; // Melanistic coat stays black, without violet/neon body paint.
  const{c,stroke,oval}=a,colors=['#77ffe5','#ff88df','#ce94ff','#67fff0','#baffed'],col=colors[form];
  c.save();c.globalAlpha=.68+p.breath*.09;c.strokeStyle=col;c.shadowColor=col;c.shadowBlur=p.still?3:5;c.lineCap='round';
  const paths=[[-24,-29,-10,-31,0,-25],[-12,-50,0,-42,12,-50],[-31,-43,-15,-51,4,-46],[-14,-63,-1,-50,13,-63],[-15,-45,-8,-30,2,-19]],q=paths[form];

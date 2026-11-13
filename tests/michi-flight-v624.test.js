@@ -6,12 +6,12 @@ test('only the two accepted winged forms gain flight; other heroes are untouched
  const kilo=Object.freeze({id:'kilo',evo:4,grounded:false,vy:2});assert.equal(steerMichiFlight(kilo,{jump:true}),false);
 });
 test('ordinary takeoff remains ballistic; the wings take over near the apex',()=>{
- const p=actor(1);steerMichiFlight(p);p.grounded=false;p.vy=-13;
+ const p=actor(1);steerMichiFlight(p);p._michiTakeoff=0;p._michiWingAir=false;p.grounded=true;steerMichiFlight(p);p.grounded=false;p.vy=-13;
  assert.equal(steerMichiFlight(p,{jump:true}),false);assert.equal(p.vy,-13);
  p.vy=-3;assert.equal(steerMichiFlight(p,{jump:true}),true);assert.equal(p._gliding,true);assert.equal(michiFlightState(p).mode,'ascend');assert.ok(p.vy<0);
 });
 test('fairy effort runs out, cannot be restored by releasing jump and refills on landing',()=>{
- const p=actor(1);steerMichiFlight(p);p.grounded=false;p.vy=0;
+ const p=actor(1);steerMichiFlight(p);p.grounded=true;p._michiTakeoff=0;steerMichiFlight(p);p.grounded=false;p.vy=0;
  for(let i=0;i<MICHI_FAIRY_FLIGHT_FRAMES;i++){assert.equal(steerMichiFlight(p,{jump:true}),true);assert.ok(p.vy<0);}
  steerMichiFlight(p,{jump:true});assert.equal(p._michiWingFuel,0);assert.ok(p.vy>0);
  for(let i=0;i<5;i++){steerMichiFlight(p,{jump:false});steerMichiFlight(p,{jump:true});}assert.equal(p._michiWingFuel,0);
@@ -28,4 +28,11 @@ test('Ghost sustains ascent, hovers on release, and descends deliberately on Dow
 test('authoritative versus actors use characterId and keep their identity and XP',()=>{
  const p={...actor(4),id:'authenticated-actor',characterId:'cat',hp:100,xp:420};steerMichiFlight(p);p.grounded=false;p.vy=0;
  assert.equal(steerMichiFlight(p,{jump:true}),true);assert.ok(p.vy<0);assert.equal(p.id,'authenticated-actor');assert.equal(p.xp,420);
+});
+
+test('glider takes off automatically once, can descend immediately, and never auto-relaunches on landing',()=>{
+ const p=actor(1);assert.equal(steerMichiFlight(p,{}),true);assert.equal(p.grounded,false);assert.ok(p.vy<0);assert.equal(p._michiWingMode,'ascend');
+ for(let i=0;i<35;i++)steerMichiFlight(p,{});assert.equal(p._michiWingMode,'glide');
+ p.grounded=true;p.vy=0;assert.equal(steerMichiFlight(p,{}),false);assert.equal(p._michiWingMode,'ground');
+ const q=actor(1);steerMichiFlight(q,{drop:true});assert.equal(q._michiTakeoff,0);assert.equal(q.grounded,true);
 });
