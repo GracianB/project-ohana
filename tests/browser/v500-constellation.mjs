@@ -9,7 +9,7 @@ try{
  await page.goto(base);await page.waitForFunction(()=>window.__OHANA_E2E);
  assert.equal(await page.locator('#btn-family-memory').isVisible(),false,'locked before any memory');
  await page.evaluate(()=>{localStorage.setItem('ohana-family-memory-v500',JSON.stringify({v:1,world:1,hero:'kilo',lights:[]}));localStorage.setItem('ohana-gentle-motion','1');});
- await page.reload();await page.locator('.oi-enter').click();await page.locator('#btn-family-memory').click();
+ await page.reload();await page.locator('.oi-enter').click();await page.locator('[data-atlas-dialog="settings"]').click();await page.locator('#atlas-memory').click();
  await page.locator('#family-constellation.open').waitFor();
  assert.equal(await page.locator('.constellation-stars button').count(),10);
  for(const button of await page.locator('.constellation-stars button').all())await button.click();
@@ -37,7 +37,7 @@ try{
  assert.equal(await page.evaluate(()=>document.activeElement?.dataset.constellationHero),'cuerno');
  await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement?.className),'constellation-close');
  await page.keyboard.press('Escape');assert.equal(await page.locator('#family-constellation').isVisible(),false);
- await page.reload();await page.locator('.oi-enter').click();await page.locator('#btn-family-memory').click();
+ await page.reload();await page.locator('.oi-enter').click();await page.locator('[data-atlas-dialog="settings"]').click();await page.locator('#atlas-memory').click();
  assert.equal(await page.locator('#family-constellation').evaluate(e=>e.classList.contains('all-lit')),true,'memory survives reload');
  assert.deepEqual(errors,[]);console.log('PASS V500 UI: lock, ten rendered heroes, full constellation, mobile, landscape, focus, reduced motion and reload. Physical unlock belongs to V493.');
 }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

@@ -1,0 +1,29 @@
+{
+  "release": "ohana-639",
+  "stage": "candidate",
+  "scope": "Plan points 2\u20135: Atlas, HUD, Kilo, Claro and multiplayer entry/presentation",
+  "verified": [
+    "Full unit suite: 1881 passed, zero failures",
+    "Atlas at 1280/390/320: native selection, keyboard, final/form locks, saved evolution start and Continue; fifty earned form previews in an isolated presentation fixture",
+    "Compact HUD at three sizes: native movement and actions, touch drawer, guide, album, focus restoration and bounded combo chip",
+    "Native startup: delayed module, failed download, manual mobile retry and preservation of an actually earned memory/save",
+    "Physical Kilo chapter: four earned instruments, all five forms and defeated Tambor using controls only, zero natural deaths in this pilot",
+    "Two local HTTP cooperative browsers: individual heroes, voluntary role swap, shared instrument, offline/death retry, checkpoint preservation, declined and accepted atomic travel",
+    "Two local Versus browsers: movement, attacks, own statistics, five enemy species, guardian and responsive arena",
+    "Visible online access at 1280/390/320, native keyboard/touch, invitation routing and query-selected lobby mode",
+    "Michi shared art regression: five forms, seventeen poses, three scales, both facings, reduced motion, responsive selection and baby HUD",
+    "Family constellation: lock, ten heroes, focus, mobile/landscape, persistence and reduced motion",
+    "release:check PASS: 400 runtime JS modules and 469 precached resources",
+    "Combined historical browser audit PASS: desktop/mobile gameplay, native touch power drawer, dialogs, pause and offline startup",
+    "Integrated rebel Michi from #461: combined unit suite 1881/1881, five-form shared-art matrix and responsive field manual smoke passed"
+  ],
+  "pending": [
+    "Remote CI and production deployment"
+  ],
+  "limitations": [
+    "No new complete ten-chapter campaign or human difficulty-balancing certification is claimed.",
+    "Network matches use the real local HTTP service; public entry tests intercept Netlify navigation. No remote two-device match or live deployment is claimed.",
+    "Gamepad edge logic is unit-tested; no physical controller was attached.",
+    "Fifty-form selection and shared-art matrices use explicitly synthetic earned fixtures, distinct from the control-only Kilo journey."
+  ]
+}

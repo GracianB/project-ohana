@@ -1,0 +1,7 @@
+{
+  "release": "ohana-639",
+  "stage": "not_deployed",
+  "branch": "codex/hoku-atlas",
+  "target_branch": "main",
+  "note": "Quimera #462 merged; Atlas and rebel Michi integrated in #463. Combined validation and production publication in progress."
+}

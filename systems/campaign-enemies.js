@@ -66,6 +66,7 @@ export function updateCampaignEnemy(e,g,hurt){
   if(e.kind==='abeja'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#ffb300',count:4,size:2.2,life:12});
   if(e.kind==='libelula'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#80deea',count:4,size:2.2,life:12});
  }
+ const kiloEncounter=!!g.roomDef?.kiloExperienceVersion&&!!e.roomPersona?.kiloEncounter;
  const difficulty=g.combatDifficulty||readCombatDifficulty(g.roomId);
  const variant=e.roomPersona?.variant||0,pace=[.85,1,1.12,.95][variant%4],reach=[1,.85,1.15,1.05][variant%4];
  // Feed the articulated creature rigs the actual combat state, not a cosmetic clock.
@@ -94,8 +95,10 @@ export function updateCampaignEnemy(e,g,hurt){
     g.fx?.emit?.(cx(e),cy(e),{color:'#ffd598',count:8,size:3,life:22});
    }
   }
+ }else if(kiloEncounter&&a.recover>0){
+  a.recover--;e.telegraph=false;e.vx*=.65;e._guardBreak=Math.max(e._guardBreak||0,2);
  }else if(a.active>0){
-  a.active--;
+  a.active--;if(kiloEncounter&&a.active===0)a.recover=role==='shield'?42:role==='flyer'?32:28;
   if(e._counterBash){e.vx=a.aim*9.5;e._counterBash=false;}
   else if(role==='captain'||role==='shooter'||role==='gunner')e.vx*=.8;
  }else{
@@ -127,7 +130,7 @@ export function updateCampaignEnemy(e,g,hurt){
  }
  e._shieldFacing=role==='shield'&&!a.active&&!a.wind&&!e._guardBreak?dir:0;
  const flying=role==='flyer'||!!e.roomPersona?.flightBand,oldFeet=e.y+e.h;
- if(flying){if(!a.active)e.vy=Math.max(-2,Math.min(2,(p.y-(e.aiAirPressure>.45?130:80)-e.y)*.02));}
+ if(flying){if(kiloEncounter&&a.recover>0)e.vy=-1.8;else if(!a.active)e.vy=Math.max(-2,Math.min(2,(p.y-(e.aiAirPressure>.45?130:80)-e.y)*.02));}
  else e.vy=Math.min(14,(e.vy||0)+.5);
  // Raised chapter banks are real solids for creatures as well as the hero.
  // Ground creatures stop at a face and can make a short hop; they never sink

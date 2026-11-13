@@ -11,12 +11,13 @@ try{
  await fs.mkdir('test-results/v624',{recursive:true});
  const page=await browser.newPage(),errors=[],selection=[];
  page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>localStorage.setItem('ohana-atlas-earned-v1',JSON.stringify({cat:4})));
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await page.keyboard.press('Escape');
  for(const [width,height]of[[1280,900],[390,844],[320,568]]){
-  await page.setViewportSize({width,height});await page.locator('.char-card[data-id="cat"]').focus();await page.keyboard.press('Enter');await page.locator('[data-camp-form="0"]').click();await page.waitForTimeout(150);if(width===390)await page.locator('#camp-canvas').screenshot({path:'test-results/v624/baby-selection-390.png'});await page.locator('[data-camp-form="3"]').click();await page.waitForTimeout(250);
-  assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),'cat');assert.equal(await page.locator('#family-camp').getAttribute('data-form'),'3');
-  assert.match(await page.locator('#camp-form-name').innerText(),/Estrella de Marea/);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-  await page.locator('#camp-canvas').screenshot({path:`test-results/v624/selection-${width}.png`});selection.push({width,height,realFourthFormPreview:true,noOverflow:true});
+  await page.setViewportSize({width,height});await page.locator('[data-atlas-step="0"]').click();await page.locator('.char-card[data-id="cat"]').focus();await page.keyboard.press('Enter');await page.locator('[data-atlas-step="2"]').click();await page.locator('[data-atlas-form="0"]').click();await page.waitForTimeout(150);if(width===390)await page.locator('#atlas-stage').screenshot({path:'test-results/v624/baby-selection-390.png'});await page.locator('[data-atlas-form="3"]').click();await page.waitForTimeout(250);
+  assert.equal(await page.locator('#hoku-atlas').getAttribute('data-hero'),'cat');assert.equal(await page.locator('#hoku-atlas').getAttribute('data-form'),'3');
+  assert.match(await page.locator('#atlas-form-name').textContent(),/Sombra Callejera/);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await page.locator('#atlas-stage').screenshot({path:`test-results/v624/selection-${width}.png`});selection.push({width,height,realFourthFormPreview:true,noOverflow:true});
  }
  const artwork=await page.evaluate(async()=>{
   const {drawMoonHare}=await import('/characters/michi-moon-hare.js');

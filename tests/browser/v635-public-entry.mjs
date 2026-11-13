@@ -31,24 +31,23 @@ try{
    assert.equal(await page.evaluate(()=>!!window.__OHANA_E2E),false);
   };
   await open();
-  const online=page.locator('.oi-online');assert.equal(await online.getAttribute('href'),destination);assert.ok(await online.isVisible());
+  const online=page.locator('.atlas-online');assert.ok(await online.isVisible());
   const geometry=await page.evaluate(()=>{
-   const nodes=['.oi-online','.oi-pause','.oi-enter'];
-   const boxes=nodes.map(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {selector,x:r.x,y:r.y,width:r.width,height:r.height};});
-   return {boxes,viewport:{width:innerWidth,height:innerHeight}};
+   const nodes=['.atlas-online','.oi-enter'];
+   return nodes.map(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {selector,x:r.x,y:r.y,width:r.width,height:r.height};});
   });
-  for(const b of geometry.boxes)assert.ok(b.x>=-1&&b.y>=-1&&b.x+b.width<=width+1&&b.y+b.height<=height+1,JSON.stringify(b));
-  const [a,b,c]=geometry.boxes,overlap=(x,y)=>x.x<y.x+y.width&&x.x+x.width>y.x&&x.y<y.y+y.height&&x.y+x.height>y.y;
-  assert.equal(overlap(a,b),false);assert.equal(overlap(a,c),false);
+  for(const box of geometry)assert.ok(box.x>=-1&&box.y>=-1&&box.x+box.width<=width+1&&box.y+box.height<=height+1,JSON.stringify(box));
+  const [a,b]=geometry;assert.ok(a.x+a.width<=b.x||b.x+b.width<=a.x||a.y+a.height<=b.y||b.y+b.height<=a.y);
   await page.screenshot({path:dir+'/'+prefix+'welcome-online-'+width+'.png'});
-  if(touch)await online.tap();else{
-   await page.locator('.oi-pause').focus();await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement.className),'oi-online');await page.keyboard.press('Enter');
-  }
-  await page.waitForURL(destination);assert.equal(navigations.at(-1),destination);
+  await online.focus();if(touch)await online.tap();else await page.keyboard.press('Enter');
+  await page.locator('.atlas-modes[open]').waitFor();
+  const coop=page.locator('.atlas-modes .atlas-mode').first();assert.equal(await coop.getAttribute('href'),destination+'?mode=adventure');
+  await activate(coop);await page.waitForURL(destination+'?mode=adventure');assert.equal(navigations.at(-1),destination+'?mode=adventure');
   await open();await activate(page.locator('.oi-enter'));
-  const menu=page.locator('#btn-coop');await menu.scrollIntoViewIfNeeded();assert.ok(await menu.isVisible());assert.equal(await menu.getAttribute('href'),destination);assert.equal(await menu.getAttribute('disabled'),null);
+  const menu=page.locator('[data-atlas-dialog="online"]');await menu.scrollIntoViewIfNeeded();assert.ok(await menu.isVisible());await activate(menu);
+  const versus=page.locator('#atlas-online-dialog .atlas-mode').nth(1);assert.equal(await versus.getAttribute('href'),destination+'?mode=versus');
   await page.screenshot({path:dir+'/'+prefix+'selector-online-'+width+'.png'});
-  await activate(menu);await page.waitForURL(destination);assert.equal(navigations.at(-1),destination);
+  await activate(versus);await page.waitForURL(destination+'?mode=versus');assert.equal(navigations.at(-1),destination+'?mode=versus');
   assert.deepEqual(errors,[]);assert.deepEqual(api,[]);
   reports.push({width,height,welcomeInput:touch?'native touch':'native Tab/Enter',visibleWelcomeAndMenuLinks:true,noOverlap:true,noTestHooks:true,destination,apiRequests:api,errors});
   await context.close();console.log('PASS online entry',width);

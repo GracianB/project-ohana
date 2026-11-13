@@ -8,12 +8,12 @@ test("michi evo-cine: formas bioluminiscentes, luces acotadas y lectura accesibl
   for (const [a, b] of [[1, 2], [2, 3], [3, 4], [4, 5]]) {
     const { c, calls } = mock();
     for (let t = 0; t <= EVO_CINE_DURATION; t += 0.05) drawEvoCine(c, 960, 540, t, a, b);
-    assert.ok(calls.grad>0&&calls.grad<1200,'bounded light gradients of living actors');
+    assert.ok(calls.grad===0,'bounded light gradients of living actors');
     assert.ok(calls.text.some((s) => s.includes("Forma " + a + " → " + b)));
     assert.ok(!calls.text.some((s) => /god/i.test(s)));
   }
   const { c, calls } = mock(); drawEvoCine(c, 960, 540, 3.6, 4, 5);
-  assert.ok(calls.text.some((s) => s.includes("Capibara Astral")));
+  assert.ok(calls.text.some((s) => s.includes("Michi · Leyenda de Nueve Colas")));
 });
 test("michi evo-cine: sin gradientes ni Math.random en el código", () => {
   const src = readFileSync(new URL("../systems/evo-cine/michi.js", import.meta.url), "utf8");

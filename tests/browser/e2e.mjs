@@ -14,6 +14,8 @@ async function auditPage(page, label) {
   page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
   page.on('response', (response) => { if (response.status() >= 400 && response.url().startsWith(base)) errors.push('response: ' + response.status() + ' ' + response.url()); });
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
+  // Retain the archived family-film audit through its voluntary entry.
+  await page.locator('[data-welcome="story"]').click();
   const titleIntroState = await page.evaluate(() => {
     const el = document.querySelector('#ohana-intro');
     const style = el ? getComputedStyle(el) : null;
@@ -390,7 +392,7 @@ async function auditPage(page, label) {
   assert.match(gameSource.source, /CombatFX,\s*combatTier/, label + ': game.js servido no contiene combatTier');
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
+  await page.waitForSelector('#atlas-next', { state:'visible', timeout:2500 });
   const titleLayout = await page.evaluate(() => {
     const rect = (selector) => {
       const r = document.querySelector(selector)?.getBoundingClientRect();
@@ -403,11 +405,11 @@ async function auditPage(page, label) {
       return style.display !== 'none' && style.visibility !== 'hidden' && box.width > 2 && box.height > 2;
     });
     const selected = rect('#chars-grid .char-card.selected');
-    const title = rect('.title-stack');
-    const hero = rect('.hero-stage');
-    const controls = rect('.title-controls');
-    const dossier = rect('#family-camp .camp-dossier') || rect('.hero-dossier');
-    const camp = rect('#family-camp');
+    const title = rect('.atlas-header');
+    const hero = rect('.atlas-stage-wrap');
+    const controls = rect('.atlas-confirm');
+    const dossier = rect('.atlas-choice');
+    const camp = rect('#hoku-atlas');
     const menu = rect('#char-select');
     const center = (box) => box ? box.left + box.width / 2 : NaN;
     return {
@@ -429,7 +431,8 @@ async function auditPage(page, label) {
   assert.ok(titleLayout.title.top < titleLayout.hero.top + titleLayout.hero.height * 0.35, label + ': título cae dentro del carrusel');
   assert.ok(titleLayout.controls.top > titleLayout.title.bottom, label + ': controles invaden la cabecera');
   if (titleLayout.camp) assert.ok(titleLayout.hero.top >= titleLayout.camp.top && titleLayout.hero.bottom <= titleLayout.camp.bottom+2,label+': casting rails must sit inside the new stage');
-  assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, label + ': dossier invade los controles');
+  // On narrow screens the choice panel deliberately scrolls beneath a sticky confirmation.
+  if(titleLayout.viewport.width>640)assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, label + ': dossier invade los controles');
   assert.ok(titleLayout.scrollWidth <= titleLayout.viewport.width + 2, label + ': portada desborda horizontalmente');
   // V100 Especial: all ten portraits are visible whether Atrium exists or not.
   // while using filter-free Canvas and a low-frequency effects layer.
@@ -493,7 +496,7 @@ async function auditPage(page, label) {
     assert.equal(carouselAudit.staticBackdrop,true,label+': fondo Canvas sigue consumiendo GPU');
   }
   // V100.2: a real visitor can open, read and close all ten album chapters.
-  await page.locator('#btn-festival-title').click();
+  await page.locator('[data-atlas-action="album"]').click();
   assert.equal(await page.locator('#festival-album').getAttribute('aria-hidden'), 'false', label + ': album inaccessible');
   assert.equal(await page.locator('#festival-album .festival-chapter').count(), 10, label + ': ten-world album missing');
   assert.equal(await page.locator('#festival-album li').count(), 100, label + ': a hundred discoveries not rendered');
@@ -567,7 +570,7 @@ async function auditPage(page, label) {
   assert.ok(sw.active, label + ': Service Worker no activo');
   assert.ok(sw.scope.endsWith('/'), label + ': scope PWA incorrecto');
   await page.waitForTimeout(700);
-  await page.locator('#btn-play').click();
+  for(let step=0;step<3;step++)await page.locator('#atlas-next').click();
   // The public game now starts in World 1. This historical end-to-end suite
   // explicitly audits the original Claro/Festival/Mundo 2 mechanics; use the
   // E2E-only legacy entry rather than silently changing public progression.
@@ -597,7 +600,7 @@ async function auditPage(page, label) {
   assert.equal(foundMoment.toast,true,label+': collection reward not displayed');
 
   // V106 museum: only previously earned memories are replayable.
-  await page.locator('#btn-festival').click();
+  await page.locator('#play-options summary').click();await page.locator('[data-play-action="btn-festival"]').click();
   const museumEntry=page.locator('#festival-album [data-festival-memory="hub-0"]');
   assert.equal(await museumEntry.count(),1,label+': earned memory lacks museum entry');
   const lockedId=await page.evaluate(async()=>{const {Festival,FESTIVAL_CATALOG}=await import('/systems/v1002-festival.js');return FESTIVAL_CATALOG.find(m=>!Festival.claimed.has(m.id))?.id;});
@@ -923,8 +926,8 @@ try {
     await reloadOpening.click();
     await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
   }
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
-  await page.locator('#btn-play').click();
+  await page.waitForSelector('#atlas-next', { state:'visible', timeout:2500 });
+  for(let step=0;step<3;step++)await page.locator('#atlas-next').click();
   await page.waitForTimeout(500);
 
   assert.notEqual(await page.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: HUD no aparece');
@@ -1226,7 +1229,7 @@ try {
   assert.ok(dragonPit.player?.vy < 0, 'desktop: última batida de Dragón no lo expulsa del pozo');
 
   // V40 — World Graph avanzado reemplaza la vieja cuadrícula.
-  await page.locator('#btn-map').click();
+  await page.locator('#play-options summary').click();await page.locator('[data-play-action="btn-map"]').click();
   await page.waitForTimeout(80);
   assert.equal(await page.locator('#map-overlay').getAttribute('aria-hidden'), 'false', 'desktop: mapa V40 no abre');
   assert.equal(await page.locator('#map-grid .world-map-v40').count(), 1, 'desktop: World Graph V40 ausente');
@@ -1246,7 +1249,7 @@ try {
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'true', 'desktop: la pausa no se cierra al reanudar');
   assert.equal(await page.locator('#pause-overlay').evaluate((el) => el.classList.contains('open')), false, 'desktop: overlay de pausa sigue abierto al reanudar');
 
-  const helpButton = page.locator('#btn-help');
+  await page.locator('#play-options summary').click();const helpButton = page.locator('[data-play-action="btn-help"]');
   await helpButton.click();
   await page.waitForTimeout(80);
   assert.equal(await page.locator('#help').getAttribute('aria-hidden'), 'false', 'desktop: ayuda');
@@ -1258,7 +1261,7 @@ try {
   await page.locator('#btn-close-help').click();
   await page.waitForTimeout(80);
   assert.equal(await page.locator('#help').getAttribute('aria-hidden'), 'true', 'desktop: ayuda no se cierra');
-  assert.equal(await page.evaluate(() => document.activeElement?.id || ''), 'btn-help', 'desktop: foco no vuelve al disparador');
+  assert.equal(await page.evaluate(() => document.activeElement?.closest('#play-options')?.id || ''), 'play-options', 'desktop: foco no vuelve al disparador');
 
   const reducedPage = page;
   await reducedPage.emulateMedia({ reducedMotion: 'reduce' });
@@ -1269,9 +1272,9 @@ try {
     await reducedOpening.click();
     await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
   }
-  await reducedPage.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
+  await reducedPage.waitForSelector('#atlas-next', { state:'visible', timeout:2500 });
   assert.equal(await reducedPage.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches), true, 'desktop: reduced motion no emulado');
-  await reducedPage.locator('#btn-play').click();
+  for(let step=0;step<3;step++)await reducedPage.locator('#atlas-next').click();
   await reducedPage.waitForTimeout(250);
   assert.notEqual(await reducedPage.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: reduced motion no inicia');
 
@@ -1314,7 +1317,7 @@ try {
   await page.waitForTimeout(1350);
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
+  await page.waitForSelector('#atlas-next', { state:'visible', timeout:2500 });
   const offline = await offlineBoot();
   assert.equal(offline.controller, true, 'desktop: SW no controla la recarga offline');
   assert.match(offline.title, /PROJECT OHANA/i, 'desktop: título offline ausente');
@@ -1323,7 +1326,7 @@ try {
   assert.equal(secondaryErrors.length, offlineErrorStart, 'desktop: errores durante arranque offline\\n' + secondaryErrors.slice(offlineErrorStart).join('\\n'));
   assert.equal(secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length, offlineRequestStart, 'desktop: request fallida durante arranque offline');
 
-  await page.locator('#btn-play').click();
+  for(let step=0;step<3;step++)await page.locator('#atlas-next').click();
   await page.waitForTimeout(500);
   assert.notEqual(await page.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: gameplay no arranca offline');
   const offlineGame = await page.evaluate(() => ({
@@ -1342,11 +1345,12 @@ try {
   assert.ok(await mobilePage.locator('#touch').isVisible(), 'mobile: controles táctiles');
   for(const hero of ['kilo','stitcho','chispin','cat']){
     await mobilePage.evaluate(id=>{const api=window.__OHANA_E2E;api.start(id);api.setEvo(0);api.resetInput();},hero);
+    if(await mobilePage.locator('#touch-power-toggle').getAttribute('aria-expanded')!=='true')await mobilePage.locator('#touch-power-toggle').tap();
     assert.equal(await mobilePage.locator('.touch-btn[data-k="u"]').evaluate(el=>el.classList.contains('off')),false,'baby '+hero+' U must be available on touch');
     await mobilePage.locator('.touch-btn[data-k="u"]').tap();
     await mobilePage.waitForFunction(()=>window.__OHANA_E2E.state().lastAbilitySlot===3,null,{timeout:2500});
   }
-  await mobilePage.locator('.touch-btn[data-k="e"]').tap();
+  assert.equal(await mobilePage.locator('.touch-btn[data-k="e"]').isVisible(),false,'interaction stays contextual when no prompt is active');
   await mobilePage.locator('.touch-btn[data-k="j"]').tap();
   await mobile.close();
 

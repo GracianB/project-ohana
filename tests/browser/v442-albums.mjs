@@ -3,7 +3,7 @@ const server=await startServer(0);let browser;
 try{
  browser=await chromium.launch();const page=await browser.newPage({viewport:{width:1440,height:950}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await page.waitForFunction(()=>window.__OHANA_E2E);
- await page.locator('.oi-enter').click();await page.locator('#family-camp').waitFor();
+ await page.locator('.oi-enter').click();await page.locator('#hoku-atlas').waitFor();
  await fs.mkdir('test-results/v442',{recursive:true});
  const collected=await page.evaluate(()=>{localStorage.removeItem('ohana-room-albums-v1');const e=window.__OHANA_E2E;e.start('cat');e.loadRoom('hub');e.step(12);e.setInvulnerable(600);const count=e.roomCast().length;
   for(const item of e.albumItems()){e.setInvulnerable(600);e.setPlayer(item.x-10,item.y-14);e.step(1);if(e.state().roomId!=='hub')throw new Error('collectible triggered room exit');}

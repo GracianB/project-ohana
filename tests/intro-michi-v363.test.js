@@ -47,10 +47,7 @@ test("V363 five family responses: music, sparks, food chase, lantern and dino",(
 
 test("V457 five distinct mythic silhouettes retain the welcome rig and game collision contract",()=>{
  const src=readFileSync(new URL("../characters/art/cat.js",import.meta.url),"utf8");
- assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/);
- for(const form of [0,3,4])
-   assert.ok(src.includes('if(f==='+form+'){'),'Michi new silhouette F'+form);
- assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/,'Hada and Medusa keep their authored gameplay rigs');
+ assert.match(src,/drawRebelCat\(ctx,\{\.\.\.safe,form:f\}\)/);
  // V625 reauthors the drawings; identity is checked from their real geometry,
  // rather than frozen English comments about the removed renderer.
  const signatures=[];
@@ -60,8 +57,7 @@ test("V457 five distinct mythic silhouettes retain the welcome rig and game coll
  }
  assert.equal(new Set(signatures).size,5,'five anatomical silhouettes');
  assert.doesNotMatch(src,/if \(f===0\) drawMichiPortrait/,"F0 must not fall back to the previous cat art");
- assert.match(src,/const welcome=michiWelcomeRig\(safe,f\)/);
- assert.match(src,/if\(welcome\.active\)ctx\.scale/);
+ assert.match(src,/drawRebelCat/);
  assert.equal(typeof michiFootwork,"function");
 });
 

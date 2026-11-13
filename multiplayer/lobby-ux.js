@@ -222,7 +222,7 @@ $("change-character")?.addEventListener("click", () => {
 
 applyStatic(); observeDynamic(); inviteInit();
 if (lang === "en") for (const id of dynamicIds) translateNode($(id));
-setMode($("room-mode")?.value || "adventure", false);
+setMode(["adventure","versus"].includes(params.get("mode"))?params.get("mode"):$("room-mode")?.value || "adventure", false);
 const heroObserver = new MutationObserver(decorateHeroCards);
 if ($("character-grid")) heroObserver.observe($("character-grid"), { childList: true, subtree: true });
 if ($("player-slots")) heroObserver.observe($("player-slots"), { childList: true, subtree: true, characterData: true });

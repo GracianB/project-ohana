@@ -7,34 +7,34 @@ import {R} from '../characters/rig.js';
 
 export const MICHI_FIELD_NOTES=Object.freeze([
  Object.freeze({
-   title:'01 · El primer latido',subtitle:'Michi · Luciérnaga Lunar',
-   description:'Un gatito recién nacido protegido por una membrana de luz. Cada respiración despierta esporas a su alrededor.',
+   title:'01 · El primer latido',subtitle:'Michi · Cachorro Rebelde',
+   description:'Pequeño y descarado: pelaje de carbón, oreja mellada y un pañuelo rojo que nunca se quita.',
    secret:'Camina despacio: el bosque se ilumina al acercarte, incluso antes de ver el siguiente salto.',
-   gesture:'Respiración suave · ojos curiosos · pulsos turquesa',tone:'#adfff1'
+   gesture:'Oreja mellada · ojos ámbar · pañuelo rojo',tone:'#adfff1'
  }),
  Object.freeze({
-   title:'02 · Alas sobre el agua',subtitle:'Hada del Firmamento',
-   description:'Un caballito-hada que flota como una luciérnaga marina; sus aletas se despliegan en distintos tiempos.',
+   title:'02 · Alas sobre el agua',subtitle:'Michi · Alas de Asfalto',
+   description:'El mismo gato callejero despliega dos alas oscuras. Su mirada desafiante sigue marcando el rumbo.',
    secret:'Mantén el salto para ascender. Al tocar tierra, el impulso vuelve a estar disponible.',
-   gesture:'Aleteo de seda · estela celeste · vuelo',tone:'#98f8ff'
+   gesture:'Alas oscuras · cola en gancho · vuelo',tone:'#98f8ff'
  }),
  Object.freeze({
-   title:'03 · El mar recuerda',subtitle:'Medusa de las Mareas',
-   description:'Su campana respira y los tentáculos responden uno a uno. Las corrientes de luz revelan enemigos cercanos.',
+   title:'03 · El mar recuerda',subtitle:'Michi · Garra Nocturna',
+   description:'Chaleco oscuro, tachuelas y garras listas. Cada hechizo nace de un gesto distinto de sus patas.',
    secret:'Aprovecha los cambios de altura y vigila los brillos propios de cada enemigo.',
-   gesture:'Campana elástica · siete tentáculos · destellos malva',tone:'#f6a7ff'
+   gesture:'Garras · chaleco · hechizos malva',tone:'#f6a7ff'
  }),
  Object.freeze({
-   title:'04 · Cinco caminos',subtitle:'Estrella de Marea',
-   description:'Una estrella de mar de brazos flexibles y perlados. Cada brazo se dobla a su propio ritmo.',
+   title:'04 · Cinco caminos',subtitle:'Michi · Sombra Callejera',
+   description:'Un felino de paso seguro y cola en gancho. Se mueve bajo la luna con la calma de quien conoce cada tejado.',
    secret:'No confundas el resplandor con una plataforma: sigue mirando sus contornos reales.',
-   gesture:'Puntas redondeadas · brazos vivos · perlas',tone:'#ffe8ad'
+   gesture:'Mirada afilada · pasos felinos · acentos menta',tone:'#ffe8ad'
  }),
  Object.freeze({
-   title:'05 · El guardián sereno',subtitle:'Capibara Astral',
-   description:'Una capibara amplia y tranquila. Su lomo es un jardín de constelaciones que alumbra el camino completo.',
+   title:'05 · El guardián sereno',subtitle:'Michi · Leyenda de Nueve Colas',
+   description:'Nueve colas y alas desplegadas coronan al gato rebelde. Conserva su pañuelo, su piercing y su media sonrisa.',
    secret:'Puedes sostener el salto para volar, soltar para planear y pulsar abajo para descender.',
-   gesture:'Pisada orgánica · hocico real · constelaciones vivas',tone:'#9effcd'
+   gesture:'Nueve colas · alas · tachuelas doradas',tone:'#9effcd'
  })
 ]);
 
@@ -88,7 +88,7 @@ export function mountMichiFieldManual(page,options={}){
  const heading=document.createElement('div');heading.className='mfm-heading';
  const eyebrow=document.createElement('span');eyebrow.className='fg-eyebrow';
  eyebrow.textContent='BESTIARIO VIVO · CINCO METAMORFOSIS';
- const title=document.createElement('h5');title.textContent='Michi cambia de forma. Su luz nunca se apaga.';
+ const title=document.createElement('h5');title.textContent='Cinco vidas de leyenda. La misma actitud rebelde.';
  heading.append(eyebrow,title);
  const tabs=document.createElement('div');tabs.className='mfm-forms';
  tabs.setAttribute('role','group');tabs.setAttribute('aria-label','Elige una forma para verla');
@@ -103,7 +103,7 @@ export function mountMichiFieldManual(page,options={}){
  const content=document.createElement('div');content.className='mfm-content';
  const stage=document.createElement('div');stage.className='mfm-stage';
  const canvas=document.createElement('canvas');canvas.width=280;canvas.height=238;
- canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Forma 1: gatito bebé bioluminiscente');
+ canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Forma 1: gatito rebelde con pañuelo rojo');
  stage.append(canvas);
  const caption=document.createElement('p');caption.className='mfm-caption';
  caption.textContent='Arte del juego en tiempo real · No es una imagen estática';

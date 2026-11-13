@@ -47,10 +47,11 @@ try {
   const host = await hostCtx.newPage(), guest = await guestCtx.newPage();
   const langCtx = await browser.newContext();
   const langPage = await langCtx.newPage();
-  await langPage.goto(origin + "/multiplayer.html?lang=en");
+  await langPage.goto(origin + "/multiplayer.html?lang=en&mode=versus");
   await langPage.waitForFunction(() => document.body.dataset.lobbyReady === 'true');
   assert.equal(await langPage.evaluate(() => document.documentElement.lang), "en", "?lang=en selects English");
   assert.equal(await langPage.evaluate(() => localStorage.getItem("ohana-lobby-lang")), "en", "language choice is remembered");
+  assert.equal(await langPage.locator('#room-mode').inputValue(),'versus','Atlas query preselects the native mode');assert.equal(await langPage.locator('.mode-card[data-mode="versus"]').getAttribute('aria-checked'),'true');
   await langCtx.close();
   const errors = []; for (const p of [host, guest]) p.on("pageerror", (e) => errors.push(e.message));
 

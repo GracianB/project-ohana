@@ -1,3 +1,4 @@
+import {kiloVirtuosoRig,drawKiloVirtuoso} from '../kilo-virtuoso.js';
 // KILO · niña hawaiana (diseño original) · characters/art/lilo.js
 // pose.move === "float" (o state "glide"): falda en paracaídas, brazos abiertos.
 
@@ -962,6 +963,8 @@ function draw(ctx, pose, R) {
       r.flare += beat * .5; r.hairUp += beat * .25;
     }
   }
+  const virtuoso=kiloVirtuosoRig(pose,f);
+  if(virtuoso.active&&!dead){r.lean+=virtuoso.lean;r.footF[0]+=virtuoso.plant;r.footB[0]-=virtuoso.plant*.4;if(virtuoso.focus)r.mood='angry';}
   const hipY = -d.ll, sy = hipY - d.th, al = d.al;
   const hx = 1 + r.hipX * 0.3, hy = sy - d.hr * 0.9;
   if (dead) {
@@ -1020,6 +1023,7 @@ function draw(ctx, pose, R) {
   ctx.save();
   bodyT();
   torso(ctx, R, pose, f, d, r);
+  drawKiloVirtuoso(ctx,pose,f,d,r);
   // V462: the back-slung ukulele hangs from a visible strap across the chest,
   // so it no longer floats beside Kilo as a stray stick.
   if (r.uke === "back") kiloUkeStrap(ctx, sy, d, f);

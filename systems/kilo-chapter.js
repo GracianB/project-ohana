@@ -3,7 +3,7 @@ import {recordKiloHit} from './kilo-combo.js';
 // repeatedly and never lower experience gained through combat/exploration.
 import {XP_NEED} from './xp.js';
 export const KILO_CHAPTER_BOSS_ID='w1-kilo-tambor-v1';
-export const KILO_CHAPTER_ARENA=Object.freeze({left:12600,right:14100,floor:1134});
+export const KILO_CHAPTER_ARENA=Object.freeze({left:8400,right:9400,floor:1134});
 export function kiloChapter(g){return g?.roomDef?.id==='w1-kilo'&&!!g.roomDef.kiloChapter;}
 export function kiloNoteGrowth(g){
  if(!kiloChapter(g)||!g.player||!g.world1)return 0;
@@ -28,16 +28,16 @@ export function kiloFlowerThreat(g,s){
 }
 
 export const KILO_AIR_CHIMES=Object.freeze([
- Object.freeze({id:'w1-kilo-wind-chime-1',x:11850,y:760}),
- Object.freeze({id:'w1-kilo-wind-chime-2',x:12140,y:540}),
- Object.freeze({id:'w1-kilo-wind-chime-3',x:12450,y:680})
+ Object.freeze({id:'w1-kilo-wind-chime-1',x:7900,y:760}),
+ Object.freeze({id:'w1-kilo-wind-chime-2',x:8093,y:540}),
+ Object.freeze({id:'w1-kilo-wind-chime-3',x:8300,y:680})
 ]);
 export const KILO_SKY_RINGS=Object.freeze([
- {id:'w1-kilo-sky-ring-1',x:6600,y:760},
- {id:'w1-kilo-sky-ring-2',x:7200,y:600},
- {id:'w1-kilo-sky-ring-3',x:7800,y:400},
- {id:'w1-kilo-sky-ring-4',x:10000,y:500},
- {id:'w1-kilo-sky-ring-5',x:11000,y:350}
+ {id:'w1-kilo-sky-ring-1',x:4400,y:760},
+ {id:'w1-kilo-sky-ring-2',x:4800,y:600},
+ {id:'w1-kilo-sky-ring-3',x:5200,y:400},
+ {id:'w1-kilo-sky-ring-4',x:6667,y:500},
+ {id:'w1-kilo-sky-ring-5',x:7333,y:350}
 ].map(Object.freeze));
 export function updateKiloSkyRoute(g){
  const p=g.player,w=g.world1;if(!kiloChapter(g)||!p||p.dead||!w||!(p._kiloFlightT>0))return;
@@ -56,6 +56,14 @@ export function enterKiloAirTrail(g){
 }
 export function updateKiloAirTrail(g){
  updateKiloSkyRoute(g);
+ if(g.roomDef?.kiloExperienceVersion&&g.player&&!g.player.dead){
+  const p=g.player,w=g.world1,bridge=g.roomDef.windBridge;
+  if(w?.stations?.[1]?.done&&bridge&&Array.isArray(g.platforms)&&!g.platforms.some(pl=>pl.kiloWindBridge))g.platforms.push({...bridge,kiloWindBridge:true});
+  if(p._kiloFlightT>0&&g.roomDef.windColumns?.some(c=>p.x+p.w>c.x&&p.x<c.x+c.w&&p.y+p.h>c.y&&p.y<c.y+c.h)){
+   if(p._kiloFlightMode!=='solar')p._kiloFlightT=Math.min(p._kiloFlightMax||360,p._kiloFlightT+2);
+  }
+ }
+
  const p=g.player,w=g.world1;
  if(!kiloChapter(g)||!w||!p||p.dead||p.evo<4||p._kiloFlightMode!=='solar'||!(p._kiloFlightT>0))return;
  for(const ch of w.airChimes||[]){

@@ -18,7 +18,7 @@ test('Kilo gems lead through the full physical route without granting an evoluti
  assert.ok(early.length*4<55,'early pickups alone cannot grant form two');
  assert.ok(r.orbs.length*4<420,'gems do not bypass the instrument route');
  assert.ok(r.orbs.filter(([,y])=>y<900).length>=6,'the canopy has an actual aerial pickup route');
- assert.ok(r.orbs.some(([x,y])=>x>10000&&y<900),'the late route also rewards aerial exploration');
+ assert.ok(r.orbs.some(([x,y])=>x>r.width*.7&&y<900),'the late route also rewards aerial exploration');
  for(const [x,y] of r.orbs)assert.ok(Number.isFinite(x)&&Number.isFinite(y)&&x>0&&x<r.width&&y>0&&y<1134);
 });
 

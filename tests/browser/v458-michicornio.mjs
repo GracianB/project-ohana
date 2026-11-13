@@ -22,7 +22,7 @@ try{
  await page.selectOption('#pose','idle');
  await page.screenshot({path:'test-results/v458/michicornio-five-forms.png',fullPage:true});
  await page.goto(root+'/?e2e=1');
- await page.locator('.oi-enter').click();await page.locator('#family-camp').waitFor();
+ await page.locator('.oi-enter').click();await page.locator('#hoku-atlas').waitFor();
  const state=await page.evaluate(()=>window.__OHANA_E2E.start('cat'));
  assert.equal(state.running,true);
  assert.match(state.roomName,/Michicornio/);

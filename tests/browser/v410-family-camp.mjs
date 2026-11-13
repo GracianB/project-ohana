@@ -1,3 +1,4 @@
+// Historical mirror-selector contract. The active replacement is v639-atlas.mjs.
 import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {chromium} from 'playwright';import {startServer} from './server.mjs';import {ROSTER} from '../../characters/roster.js';
 const s=await startServer(0);let browser;
 try{browser=await chromium.launch();const p=await browser.newPage({viewport:{width:1440,height:1050}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(`http://127.0.0.1:${s.address().port}/?e2e=1`,{waitUntil:'domcontentloaded'});await p.locator('.oi-enter').click();await p.locator('#family-camp').waitFor();

@@ -19,6 +19,7 @@ try{
   await page.evaluate(()=>{const e=window.__OHANA_E2E;e.step(600);e.setEvo(4);e.setPlayer(3500,950);e.step(15);});await page.clock.runFor(32);
   await page.screenshot({path:`test-results/v509/${hero}-landscape.png`});
   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.__OHANA_E2E.step(60));await page.clock.runFor(32);
+  if(await page.locator('#touch-power-toggle').getAttribute('aria-expanded')!=='true')await page.locator('#touch-power-toggle').tap();
   await page.locator('.touch-btn[data-k="j"]').tap();
   const s=await page.evaluate(()=>window.__OHANA_E2E.state());assert.equal(s.lastAbilitySlot,0,hero+' touch J invokes its real ability');assert.ok(s.lastAbilityId);assert.equal(s.runtimeFaults,0);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));

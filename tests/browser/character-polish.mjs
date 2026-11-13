@@ -9,6 +9,7 @@ try{
  const base=`http://127.0.0.1:${server.address().port}/`;
  await fs.mkdir('test-results/polish',{recursive:true});
  await page.goto(base+'?e2e=1',{waitUntil:'networkidle'});
+ await page.locator('[data-welcome="story"]').click();
  await page.locator('.oi-story-line').filter({hasText:/./}).waitFor();
  for(const width of [1280,390,320]){
   await page.setViewportSize({width,height:900});await page.waitForTimeout(120);

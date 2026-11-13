@@ -25,8 +25,8 @@ export function steerKiloFlight(p,input){
 // Solar notes follow the last steering direction; grounded notes retain their
 // original gravity, homing and three bounces. Damage and note count are shared.
 export function kiloNoteTrajectory(p,index){
- const directed=p.evo>=4&&p._kiloFlightMode==='solar'&&p._kiloFlightT>0;
+ const directed=['hover','solar'].includes(p._kiloFlightMode)&&p._kiloFlightT>0;
  if(!directed)return {vx:(6.4+index*1.4)*(p.facing||1),vy:-3.2-index*1.2,home:p.evo>=4,directed:false,life:220,maxB:3};
- const angle=Math.atan2(p._kiloAimY||0,p._kiloAimX||((p._kiloAimY||0)?0:(p.facing||1)))+(index-1)*.12,speed=8+index*.5;
+ const angle=Math.atan2(p._kiloAimY||0,p._kiloAimX||((p._kiloAimY||0)?0:(p.facing||1)))+(index-((p.evo>=4?3:p.evo>=2?2:1)-1)/2)*.12,speed=8+index*.5;
  return {vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,home:false,directed:true,life:90,maxB:0};
 }

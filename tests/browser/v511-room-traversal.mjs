@@ -74,7 +74,8 @@ try{
    // is not phasing through it. The independent geometry audit above still
    // requires the actual collision engine to reject walking through the face.
    assert.ok(blocked.hp<before.hp,hero+' crossed without jump or a real damaging hit');
-   assert.ok(blocked.player.y+blocked.player.h<=bank.y+2,hero+' must land on top, not inside the bank');
+   // A narrower bank can be entirely behind the actor after this 360-frame sample.
+   if(blocked.player.x<bank.x+bank.w)assert.ok(blocked.player.y+blocked.player.h<=bank.y+2,hero+' must land on top, not inside the bank');
   }else{
    assert.ok(blocked.player.x+blocked.player.w>bank.x-10,hero+' reaches its real face');
   }

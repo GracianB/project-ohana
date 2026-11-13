@@ -18,7 +18,7 @@ import { difficulty } from "../characters/signature.js";
 import { masteryOf } from "./hero-mastery.js";
 import { rosterIndex } from "./roster-navigation.js";
 import { CALIBRATED_VISUAL_H, heroHeightTarget } from "../characters/visual-size.js";
-import { mountFamilyCamp } from "./family-camp.js";
+import { mountHokuAtlas } from "./hoku-atlas.js";
 
 // Jingle de portada al primer toque/tecla (los navegadores no dejan sonar antes).
 let titleJingle = false;
@@ -558,7 +558,7 @@ applyLook();
 buildDots();
 // V100 Especial: native grid selection, no carousel arrow controls.
 mark(selectedId);
-mountFamilyCamp({select:id=>dispatchEvent(new CustomEvent("ohana-select",{detail:{id}})),onBegin:()=>begin("new")});
+mountHokuAtlas({select:id=>dispatchEvent(new CustomEvent("ohana-select",{detail:{id}})),onBegin:()=>begin("new"),onContinue:()=>document.getElementById('btn-continue')?.click(),onStory:()=>playTitleIntro({replay:true}),onHome:()=>playTitleIntro({home:true})});
 const replay = document.createElement("button");
 replay.id = "btn-replay-welcome"; replay.type = "button"; replay.className = "cta ghost";
 replay.textContent = "Ver la bienvenida";
@@ -587,7 +587,7 @@ function refreshContinue() {
 }
 refreshContinue();
 addEventListener("keydown", (e) => {
-  if (document.body.classList.contains("playing")) return;
+  if (document.body.classList.contains("playing")||document.body.classList.contains("hoku-atlas-on")) return;
   if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)) {
     if (!document.body.classList.contains("intro-complete")) return;
     if (document.querySelector("#start-intro.show, [data-dialog].open, [data-dialog].show")) return;

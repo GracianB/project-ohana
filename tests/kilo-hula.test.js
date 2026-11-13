@@ -20,8 +20,8 @@ test('dance strikes on four beats only, reflects immediately and rewards one ope
   clearAbilityFx();const g=game(evo),near={x:110,y:200,w:24,h:24,hp:1000},far={x:900,y:200,w:24,h:24,hp:1000};
   g.enemies=[near,far];for(let i=0;i<3;i++)earnKiloPetal(g,{});
   g.projectiles=Array.from({length:3},()=>({x:110,y:210,w:6,h:6,vx:-4,vy:0,life:100,owner:'enemy'}));
-  const hits=[];g.onAbilityHit=()=>hits.push(g.t);useAbility(g,1);
-  for(let i=1;i<=96;i++){g.t=i;updateAbilityFx(g);if(i===1){assert.equal(kiloPetals(g),1);assert.ok(g.projectiles.every(p=>p.owner==='player'&&p.vx===4));}}
+  const hits=[];g.onAbilityHit=()=>hits.push(g.t);useAbility(g,1);const openingCooldown=g.player.cds.hula;
+  for(let i=1;i<=96;i++){g.t=i;updateAbilityFx(g);if(i===1){assert.equal(g.player.cds.hula,openingCooldown-900,'one precise opening refunds 900 ms once despite three reflected shots');assert.equal(kiloPetals(g),1);assert.ok(g.projectiles.every(p=>p.owner==='player'&&p.vx===4));}}
   assert.deepEqual(hits,[24,48,72,96]);assert.equal(far.hp,1000);assert.ok(g.kiloAbilityFx.some(f=>f.kind==='hula'));
  }
  clearAbilityFx();

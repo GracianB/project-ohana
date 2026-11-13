@@ -1,3 +1,4 @@
+// Historical mirror-selector contract. The active replacement is v639-atlas.mjs.
 // Native selection inputs only: no E2E hooks, save fixtures or progress grants.
 // Returning from the final portal must restore the same hero's dossier and
 // stop any casting scene before it can overwrite the final portal's message.
