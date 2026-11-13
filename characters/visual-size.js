@@ -39,6 +39,6 @@ export const CALIBRATED_VISUAL_H = Object.freeze(Object.fromEntries(
 
 // Optical normalization of the remaining Canvas silhouettes; hitboxes stay physical.
 // Five different Michi anatomies, measured through the production draw path.
-// Visible heights approximately 72/89/69/129/76 px; compact panther and ghost are intentional.
+// Visible heights approximately 70/89/64/129/76 px; compact panther and ghost are intentional.
 // Visual normalization only; gameplay collision boxes remain unchanged.
 export const OPTICAL_SCALE = Object.freeze({"kilo": [0.8594, 0.8537, 0.8854, 0.9189, 0.8451], "stitcho": [0.8594, 0.7955, 0.9444, 0.8793, 0.8571], "chispin": [1.10, 0.975, 0.865, 0.875, 0.935], "cat": [1.3937, 1.1517, 1.413, .94, 1.089], "cuerno": [1.0185, 1.129, 1.0241, 1.0408, 1.0256]});

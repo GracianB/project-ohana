@@ -1,4 +1,4 @@
-const VERSION = "ohana-645";
+const VERSION = "ohana-646";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./characters/michi-details.js?v=" + VERSION,
@@ -484,7 +484,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "characters/michi-details.js": "46b2187a3f8d255731d62aa89b109127cc14fc37",
+  "characters/michi-details.js": "cd370a885bd66839ad952f97395088c10554ebd3",
   "characters/michi-acting.js": "884d5416cb4f54344576cd31f46b61ab7e3a24db",
   "characters/michi-aura.js": "ada330d47a15329cb427136ffb3a14690b213c01",
   "systems/michi-presence.js": "30b6f86ebaeab0e8c5e6614da06778495dbf34fa",
@@ -505,7 +505,7 @@ const PRECACHE_REVISIONS = {
   "systems/family-actor.js": "782f8cad723e7eea0398c55ffa8fd9e05342b967",
   "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
   "characters/michi-flight.js": "44c6065434bc48b105f929e4f08321b72e22b56f",
-  "characters/michi-rebel.js": "0282950f1fe0cc8bdf97894944915777c3c0cf0a",
+  "characters/michi-rebel.js": "65cdc53a9e46bb6efeb6ad2a2c7957170d6ac40a",
   "characters/michi-kitten.js": "0b28dc3a4d648c476092f7655c65001ed6db40f7",
   "systems/michi-field-manual.js": "39a82537e9da3d8ffb18a590e87350c10bd1419e",
   "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
@@ -573,7 +573,7 @@ const PRECACHE_REVISIONS = {
   "systems/memory-rewards-v2.js": "1d41604b4c3d42f278c61370c71412f918d0ba00",
   "systems/adventure-guide-v2.js": "2d7c5fa6c731649e23bb05856ac295d18b3bfea6",
   "systems/enemy-hero-counterplay.js": "3ed7df907f0a349cdb92aab12c7e539ad566ca78",
-  "characters/identity-v2.js": "1200f339e2612f597607d48dbd6c5419dbe9b60f",
+  "characters/identity-v2.js": "49c89197d82068ff48b90d3416cdbdfb028f3c88",
   "characters/anatomical-stride.js": "3a0bb654e3f7d8cc65c28a6c86f07c5bf0169b1d",
   "systems/chapter-encounters.js": "457d07ff55d9fa992e81cefc66a7a80451a4c9f7",
   "systems/campaign-creature-art.js": "6dc8ba3849d83754e35e85d870610dd13329dce8",
@@ -710,8 +710,8 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/real-actor.js": "83631db7ee750595a45ca35200b8331198a7742d",
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
-  "characters/visual-size.js": "499179b6c60661cacdda4487803b627ee303c21a",
-  "index.html": "fdcd9c683141b28a1f7aaecd413631245fd48571",
+  "characters/visual-size.js": "8648e6a2822aa81f92c43a873d5592c585a541ea",
+  "index.html": "e9ca67c17029be6a3c92c5d2bbbf45ea1d3065b6",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
@@ -757,14 +757,14 @@ const PRECACHE_REVISIONS = {
   "characters/art/stitch.js": "691b89d590591229f957c1e678a083c601dab006",
   "characters/art/stitcho.js": "cdc8f5ec3158c79ca9600bcd5b40dbd8b3e94cdc",
   "characters/art/yomi.js": "c03df62b1a9979c9c61b865b7566ba7d599e64ef",
-  "characters/draw.js": "c1a5f49411f596e625cc50d568742910416cf875",
+  "characters/draw.js": "34719425b04c7c25347af31a613ae047281b9790",
   "characters/kinetic-stagecraft.js": "8c57247462c7ed4c1129196887e75369167bd764",
   "characters/evolution.js": "712e99af5f39429eb2f38222ad8d015e0d9ce80a",
   "characters/costume.js": "ac0a620099244df844bee9cddac6c68149a0a960",
   "characters/definitive.js": "de08a60a9ae7198707cb68f557a6d7be15b2ea3a",
   "characters/look.js": "f9e1d610ba74bec6823cc8fcc093d3b2875f7c07",
   "characters/rig.js": "39d9896105813a416dd38b46b2ef92668b3d7d00",
-  "characters/roster.js": "7b9c686450e8d07bbb98301350e806d43772b01f",
+  "characters/roster.js": "986bfeb7b089c44ad0c4dd52fc16a5f8875f6fbd",
   "characters/signature.js": "77c787347a7eb94b7f0e869ed4b7f89b3a23831f",
   "characters/sprites.js": "3c1785be5f0da46f16d277ca56091fa35f6f764a",
   "engine/audio.js": "f1bf4e2766876b53b355b1426b8f8647a8d66359",

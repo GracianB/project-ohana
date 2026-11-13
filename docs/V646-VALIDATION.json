@@ -1,0 +1,20 @@
+{
+  "release": "ohana-646",
+  "scope": "Five revised Michi designs, faster movement and lighter attached glow",
+  "passed": [
+    "Five production body plans and ten monochrome silhouette comparisons; compact panther stays neutral black",
+    "Thirty real acting/attention/flight/power poses",
+    "100 production size checks across fifty hero forms; Michi 70/89/64/129/76 px; unchanged physical boxes",
+    "Native keyboard and production physics: five top speeds 5.8/6.5/7.2/7.6/9.2 and deliberate direction reversal",
+    "25 focused identity/evolution regressions passed; other hero speed curves preserved"
+  ],
+  "pending": [
+    "Final unit suite and art matrix",
+    "Public candidate and deployment verification"
+  ],
+  "limits": [
+    "Renderer/position fixtures do not claim earned campaign completion.",
+    "Glow rendering removes repeated shadow blur; no benchmarked FPS increase is claimed.",
+    "Michi movement increases approximately 13–21 percent; combat damage, HP and collision boxes are preserved."
+  ]
+}

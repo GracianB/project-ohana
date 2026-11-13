@@ -70,16 +70,16 @@ export const ALL_ROSTER = [
   {
     id: "cat", name: "Michicornio", role: "esquiva", tag: "Espíritu rebelde · Nueve vidas",
     color: "#ffb6e4",
-    speed: 5.0, jumpPower: 12.0, maxJumps: 2, health: 72, w: 22, h: 22,
+    speed: 5.8, jumpPower: 12.0, maxJumps: 2, health: 72, w: 22, h: 22,
     abilities: ["yarn", "purr", "ninetails"],
     passive: { id: "ninelives", name: "Nueve vidas", desc: "Sobrevive una vez por sala a un golpe mortal." },
     evoNames: ["Michi · Cachorro Rebelde", "Michi · Alas de Asfalto", "Michi · Pantera Negra", "Michi · Lince Hechicero", "Michi · Espectro de Nueve Vidas"],
     forms: [
-      { name: "Michi · Cachorro Rebelde", color: "#a9ffe8", speed: 5.0, jump: 12.0, jumps: 2, hp: 72, w: 22, h: 22 },
-      { name: "Michi · Alas de Asfalto", color: "#98eeff", speed: 5.5, jump: 12.7, jumps: 2, hp: 90, w: 28, h: 26, glide: true },
-      { name: "Michi · Pantera Negra", color: "#161b20", speed: 6.1, jump: 13.4, jumps: 3, hp: 110, w: 32, h: 30 },
-      { name: "Michi · Lince Hechicero", color: "#ffe6b0", speed: 6.7, jump: 14.2, jumps: 3, hp: 135, w: 36, h: 34 },
-      { name: "Michi · Espectro de Nueve Vidas", color: "#9dffd0", speed: 7.8, jump: 15.6, jumps: 4, hp: 185, w: 40, h: 42, aura: true, glide: true },
+      { name: "Michi · Cachorro Rebelde", color: "#a9ffe8", speed: 5.8, jump: 12.0, jumps: 2, hp: 72, w: 22, h: 22 },
+      { name: "Michi · Alas de Asfalto", color: "#98eeff", speed: 6.5, jump: 12.7, jumps: 2, hp: 90, w: 28, h: 26, glide: true },
+      { name: "Michi · Pantera Negra", color: "#161b20", speed: 7.2, jump: 13.4, jumps: 3, hp: 110, w: 32, h: 30 },
+      { name: "Michi · Lince Hechicero", color: "#ffe6b0", speed: 7.6, jump: 14.2, jumps: 3, hp: 135, w: 36, h: 34 },
+      { name: "Michi · Espectro de Nueve Vidas", color: "#9dffd0", speed: 9.2, jump: 15.6, jumps: 4, hp: 185, w: 40, h: 42, aura: true, glide: true },
     ],
   },
   {
