@@ -42,10 +42,12 @@ test('Michi uses the exact existing hero eye renderer, including white sclera, i
  }
 });
 
-test('all five real Michi forms render both shared hero eyes when awake',()=>{
+test('all five rebel forms use flat vector eyes without gradient cost',()=>{
  for(let form=0;form<5;form++){
   const drawing=record(ctx=>cat.draw(ctx,{form,state:'idle',t:73,phase:1.3,speed:0,look:{x:.25,y:0},michiSeed:42},{}));
-  assert.equal(drawing.gradients,form===1?4:2,`form ${form}: original eye/coat gradients plus exactly two new bounded fae wing membranes`);
+  assert.equal(drawing.gradients,0,`form ${form}: flat amber eyes remain cheap at gameplay scale`);
+  assert.equal(drawing.ops.filter(op=>op[0]==='set'&&op[1]==='fillStyle'&&op[2]==='#ecd48b').length,2,'exactly two amber eyes');
+  assert.equal(drawing.ops.filter(op=>op[0]==='ellipse'&&op[3]===1.5&&op[4]===4).length,2,'each eye has a vertical feline pupil');
  }
 });
 

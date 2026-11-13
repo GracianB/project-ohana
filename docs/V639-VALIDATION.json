@@ -13,8 +13,9 @@
     "Visible online access at 1280/390/320, native keyboard/touch, invitation routing and query-selected lobby mode",
     "Michi shared art regression: five forms, seventeen poses, three scales, both facings, reduced motion, responsive selection and baby HUD",
     "Family constellation: lock, ten heroes, focus, mobile/landscape, persistence and reduced motion",
-    "release:check PASS: 399 runtime JS modules and 468 precached resources",
-    "Combined historical browser audit PASS: desktop/mobile gameplay, native touch power drawer, dialogs, pause and offline startup"
+    "release:check PASS: 400 runtime JS modules and 469 precached resources",
+    "Combined historical browser audit PASS: desktop/mobile gameplay, native touch power drawer, dialogs, pause and offline startup",
+    "Integrated rebel Michi from #461: combined unit suite 1881/1881, five-form shared-art matrix and responsive field manual smoke passed"
   ],
   "pending": [
     "Remote CI and production deployment"

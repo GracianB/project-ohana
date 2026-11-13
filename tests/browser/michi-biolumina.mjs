@@ -11,19 +11,21 @@ try{
  const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];
  page.on('pageerror',err=>errors.push(err.message));
  const url='http://127.0.0.1:'+server.address().port+'/?e2e=1';
+ await page.addInitScript(()=>localStorage.setItem('ohana-atlas-earned-v1',JSON.stringify({cat:4})));
  await page.goto(url,{waitUntil:'domcontentloaded'});
  await page.locator('.oi-enter').click();
  await page.locator('.char-card[data-id="cat"]').click();
- const names=['Michi · Luciérnaga Lunar','Hada del Firmamento','Medusa de las Mareas','Estrella de Marea','Capibara Astral'];
+ const names=await page.evaluate(async()=>(await import('/characters/michi-lumina.js')).MICHI_BIOLUM_FORMS.map(f=>f.name));
+ await page.locator('[data-atlas-step="2"]').click();
  const selections=[];
  for(const [width,height]of[[1280,900],[390,844]]){
   await page.setViewportSize({width,height});
   for(let form=0;form<5;form++){
-   await page.locator('[data-camp-form="'+form+'"]').click();
-   const actual=(await page.locator('#camp-form-name').innerText()).trim();
+   await page.locator('[data-atlas-form="'+form+'"]').click();
+   const actual=(await page.locator('#atlas-form-name').textContent()).trim();
    assert.equal(actual,names[form]);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no horizontal overflow at '+width);
-   if(width===390)await page.locator('#camp-canvas').screenshot({path:output+'/selector-'+form+'.png'});
+   if(width===390)await page.locator('#atlas-stage').screenshot({path:output+'/selector-'+form+'.png'});
    selections.push({width,form,name:actual});
   }
  }
@@ -75,10 +77,10 @@ try{
  for(let form=0;form<5;form++){
   await page.evaluate(form=>window.__OHANA_E2E.setEvo(form),form);
   await page.evaluate(()=>window.__OHANA_E2E.step(2));
-  await page.locator('#game').screenshot({path:output+'/world-form-'+form+'.png'});
+  await page.screenshot({path:output+'/world-form-'+form+'.png'});
  }
  const help=page.locator('#help');
- await page.locator('#btn-help').click();
+ await page.locator('#play-options summary').click();await page.locator('[data-play-action="btn-help"]').click();
  await help.waitFor({state:'visible'});
  assert.equal(await page.locator('#help-title').innerText(),'Un mundo por descubrir');
  assert.ok(await page.locator('#field-guide').isVisible());

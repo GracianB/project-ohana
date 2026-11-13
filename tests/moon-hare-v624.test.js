@@ -34,7 +34,7 @@ test('reduced motion freezes every action and malformed clocks never reach Canva
 test('rabbit renderer keeps body vectors pure; its eyes use the shared hero iris renderer',()=>{
  const pose=Object.freeze({state:'run',t:44,phase:1,speed:1,look:Object.freeze({x:1,y:0})});assert.doesNotThrow(()=>record(pose));
  const src=fs.readFileSync(new URL('../characters/michi-moon-hare.js',import.meta.url),'utf8');assert.doesNotMatch(src,/create(?:Linear|Radial)Gradient|shadowBlur|drawImage|Math\.random|localStorage/);
- const def=ROSTER.find(x=>x.id==='cat');assert.equal(def.forms[3].name,'Estrella de Marea');assert.equal(def.forms[3].w,36);assert.equal(def.forms[3].h,34);
+ const def=ROSTER.find(x=>x.id==='cat');assert.equal(def.forms[3].name,'Michi · Sombra Callejera');assert.equal(def.forms[3].w,36);assert.equal(def.forms[3].h,34);
 });
 // V625 explicitly reopens the artwork of all five forms. The old trace hashes
 // are retained as historical evidence, not as a freeze on the user's redesign.

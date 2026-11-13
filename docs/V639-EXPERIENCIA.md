@@ -1,6 +1,6 @@
 # Ohana 639 · Atlas, interfaz, Kilo y acceso online
 
-Implementa los puntos 2–5 de PLAN-OHANA-EXPERIENCIA.md sobre el rediseño de Quimera de PR #462. No incorpora la rama independiente del gato rebelde (#461) ni rediseña las otras nueve salas (punto 6).
+Implementa los puntos 2–5 de PLAN-OHANA-EXPERIENCIA.md sobre el rediseño de Quimera de PR #462. Integra también el gato rebelde de #461. No rediseña las otras nueve salas (punto 6).
 
 ## Entrada y selección
 

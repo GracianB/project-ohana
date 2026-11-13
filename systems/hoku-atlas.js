@@ -77,7 +77,7 @@ export function mountHokuAtlas({select,onBegin,onContinue,onStory,onHome,documen
  }
  function drawForms(){const d=ROSTER.find(r=>r.id===hero),max=atlasEarnedForm(hero,progress);$('atlas-forms').innerHTML=d.forms.map((f,i)=>`<button type="button" data-atlas-form="${i}" class="atlas-form ${i===form?'is-selected':''}" aria-pressed="${i===form}" ${i>max?'disabled':''}><span>${i>max?'◇':String(i+1).padStart(2,'0')}</span><strong>${f.name}</strong><small>${i>max?'Consíguela durante su aventura':i===0?'Tu primera forma':'Conseguida'}</small></button>`).join('');}
  function update(){
-  refresh();$('atlas-memory').hidden=!localStorage.getItem('ohana-family-memory-v500');const def=ROSTER.find(r=>r.id===hero);form=Math.min(form,atlasEarnedForm(hero,progress));host.dataset.hero=hero;host.dataset.form=String(form);host.dataset.step=String(step);host.style.setProperty('--atlas-accent',def.color);
+  refresh();$('atlas-memory').hidden=!localStorage.getItem('ohana-family-memory-v500');const def=ROSTER.find(r=>r.id===hero);form=Math.min(form,atlasEarnedForm(hero,progress));host.dataset.hero=hero;host.dataset.final=String(room==='w1-final');host.dataset.world='1';host.dataset.form=String(form);host.dataset.step=String(step);host.style.setProperty('--atlas-accent',def.color);
   for(const button of host.querySelectorAll('[data-atlas-step]')){const active=Number(button.dataset.atlasStep)===step;button.setAttribute('aria-current',active?'step':'false');button.classList.toggle('is-current',active);}
   $('atlas-characters').hidden=step!==0;$('atlas-destinations').hidden=step!==1;$('atlas-forms').hidden=step!==2;
   $('atlas-kicker').textContent=['LA FAMILIA','TU PRÓXIMA HISTORIA','LO QUE HAS CONSEGUIDO'][step];
@@ -115,7 +115,7 @@ export function mountHokuAtlas({select,onBegin,onContinue,onStory,onHome,documen
    e.preventDefault();e.stopImmediatePropagation();buttons[n].focus();if(group.id==='chars-grid')buttons[n].click();
   }
  },true);
- const stop=animate($('atlas-stage'),(c,w,h,t)=>drawAtlasSky(c,w,h,t,hero,form),()=>menuPaintAllowedInDocument(doc));
+ const stop=animate($('atlas-stage'),(c,w,h,t)=>{drawAtlasSky(c,w,h,t,hero,form);const cv=$('atlas-stage');cv.dataset.paintedHero=hero;cv.dataset.paintedForm=String(form);},()=>menuPaintAllowedInDocument(doc));
  const observer=new MutationObserver(()=>{if(menuPaintAllowedInDocument(doc)){refresh();update();}});observer.observe(doc.body,{attributes:true,attributeFilter:['class']});update();
  return {choose,destroy(){stop();observer.disconnect();removeEventListener('ohana-title-hero',external);removeEventListener('ohana-atlas-open',open);host.remove();}};
 }

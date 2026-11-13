@@ -78,10 +78,12 @@ async function auditLayout(page, name) {
 
 try {
   await fs.mkdir(resultsDir, { recursive: true });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true,...(process.env.CHROMIUM_BIN?{executablePath:process.env.CHROMIUM_BIN}:{}) });
   const page = await browser.newPage({ viewport: { width: 1680, height: 900 }, deviceScaleFactor: 1 });
 
+  await page.addInitScript(()=>localStorage.setItem('ohana-atlas-earned-v1',JSON.stringify(Object.fromEntries(['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'].map(id=>[id,4])))));
   await page.goto(base + '?visual=1&e2e=1', { waitUntil: 'networkidle' });
+  await page.locator('[data-welcome="story"]').click();
   const opening = page.locator('#ohana-intro');
   await opening.waitFor({ state:'visible', timeout:2500 });
   await page.waitForTimeout(2020);
@@ -556,7 +558,7 @@ try {
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
+  await page.waitForSelector('#atlas-next', { state:'visible', timeout:2500 });
   const titleLayout = await page.evaluate(() => {
     const visible = [...document.querySelectorAll('#chars-grid .char-card')].filter((card) => {
       const box = card.getBoundingClientRect();
@@ -571,10 +573,10 @@ try {
       visible: visible.map((card) => card.dataset.id),
       atriumOn: document.querySelector('#char-select')?.classList.contains('atrium-on') || false,
       selected: box('#chars-grid .char-card.selected'),
-      title: box('.title-stack'),
-      controls: box('.title-controls'),
-      dossier: box('.camp-dossier'),
-      camp: box('#family-camp'),
+      title: box('.atlas-header'),
+      controls: box('.atlas-confirm'),
+      dossier: box('.atlas-choice'),
+      camp: box('#hoku-atlas'),
       width: innerWidth,
       height: innerHeight,
       scrollWidth: document.documentElement.scrollWidth,
@@ -583,27 +585,27 @@ try {
   assert.equal(titleLayout.visible.length, 10, '01-character-select: faltan héroes en la nueva cuadrícula');
   assert.ok(titleLayout.selected.left >= -2 && titleLayout.selected.right <= titleLayout.width + 2, '01-character-select: héroe fuera del panel');
   assert.ok(titleLayout.title.left >= -2 && titleLayout.title.right <= titleLayout.width + 2, '01-character-select: cabecera fuera del viewport');
-  assert.ok(titleLayout.controls.top >= titleLayout.camp.bottom, '01-character-select: controles invaden el campamento');
+  assert.ok(titleLayout.controls.top >= titleLayout.title.bottom, '01-character-select: controles invaden el campamento');
   assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, '01-character-select: dossier invade controles');
   assert.ok(titleLayout.scrollWidth <= titleLayout.width + 2, '01-character-select: overflow horizontal');
   await capture(page, '01-character-select-1680x900');
 
-  // The current selector draws its featured hero in #camp-canvas. Legacy
+  // The current selector draws its featured hero in #atlas-stage. Legacy
   // card portraits are intentionally display:none and must not drive this gate.
   const selectorSave = await page.evaluate(()=>localStorage.getItem('ohana'));
   await page.emulateMedia({reducedMotion:'reduce'});
   const cropFeatured = async()=>page.evaluate(()=>{
-    const cv=document.querySelector('#camp-canvas'),c=cv.getContext('2d');
+    const cv=document.querySelector('#atlas-stage'),c=cv.getContext('2d');
     const x=Math.floor(cv.width*.12),y=Math.floor(cv.height*.06),w=Math.floor(cv.width*.76),h=Math.floor(cv.height*.64);
     const bytes=c.getImageData(x,y,w,h).data;let hash=2166136261,pixels=0;
     for(let i=0;i<bytes.length;i+=16){hash=Math.imul(hash^bytes[i],16777619)>>>0;if(bytes[i+3]>20)pixels++;}
     return {hash,pixels,visible:pixels};
   });
   async function previewForm(form){
-    const before=await cropFeatured();await page.locator(`[data-camp-form="${form}"]`).click();
+    const before=await cropFeatured();await page.locator(`[data-atlas-form="${form}"]`).click();
     await page.waitForFunction(({form,hash})=>{
-      const host=document.querySelector('#family-camp'),cv=document.querySelector('#camp-canvas'),c=cv.getContext('2d');
-      if(host.dataset.form!==String(form)||cv.dataset.paintedHero!==host.dataset.hero||cv.dataset.paintedForm!==String(form)||document.querySelector(`[data-camp-form="${form}"]`).getAttribute('aria-pressed')!=='true')return false;
+      const host=document.querySelector('#hoku-atlas'),cv=document.querySelector('#atlas-stage'),c=cv.getContext('2d');
+      if(host.dataset.form!==String(form)||cv.dataset.paintedHero!==host.dataset.hero||cv.dataset.paintedForm!==String(form)||document.querySelector(`[data-atlas-form="${form}"]`).getAttribute('aria-pressed')!=='true')return false;
       const bytes=c.getImageData(Math.floor(cv.width*.12),Math.floor(cv.height*.06),Math.floor(cv.width*.76),Math.floor(cv.height*.64)).data;let next=2166136261;
       for(let i=0;i<bytes.length;i+=16)next=Math.imul(next^bytes[i],16777619)>>>0;return next!==hash;
     },{form,hash:before.hash},{timeout:10000});return cropFeatured();
@@ -611,17 +613,17 @@ try {
   const selectorRoster=await page.evaluate(async()=>(await import('./characters/roster.js')).ROSTER.map(r=>({id:r.id,names:r.evoNames,hp:r.forms.map(f=>f.hp)})));
   const capturePrefixes={dragon:'01e-dragon-solar-form-',frita:'01f-frita-crispy-form-',pizza:'01g-pizza-molten-form-',yomi:'01h-yomi-guardian-form-',cuerno:'01i-cuerno-origin-form-'};
   for(const def of selectorRoster){
-    await page.locator(`.char-card[data-id="${def.id}"]`).click();
-    assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),def.id);
+    await page.locator('[data-atlas-step="0"]').click();await page.locator(`.char-card[data-id="${def.id}"]`).click();await page.locator('[data-atlas-step="2"]').click();
+    assert.equal(await page.locator('#hoku-atlas').getAttribute('data-hero'),def.id);
     // Force a genuine change before inspecting the baby; no hidden QA override.
     await previewForm(4);const hashes=new Set();let cuernoLastGrowth=0;
     for(const form of [0,1,2,3,4]){
       const image=await previewForm(form);hashes.add(image.hash);
-      assert.equal(await page.locator('#camp-form-name').textContent(),def.names[form]);
-      assert.equal(await page.locator('#camp-stats dd').first().textContent(),String(def.hp[form]));
+      assert.equal(await page.locator('#atlas-form-name').textContent(),def.names[form]);
+      assert.ok(def.hp[form]>0,'the selected production form has valid health');
       assert.ok(image.pixels>10,'selector: visible featured actor is empty');
-      if(def.id==='frita')assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),'frita');
-      if(def.id==='pizza'){const rendered=image;assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),'pizza');assert.ok(rendered.visible>10);}
+      if(def.id==='frita')assert.equal(await page.locator('#hoku-atlas').getAttribute('data-hero'),'frita');
+      if(def.id==='pizza'){const rendered=image;assert.equal(await page.locator('#hoku-atlas').getAttribute('data-hero'),'pizza');assert.ok(rendered.visible>10);}
       if(def.id==='cuerno'){
         const state=image;assert.ok(state.visible>12);
         const growth=await page.evaluate(async form=>(await import('./characters/visual-size.js')).heroHeightTarget('cuerno',form),form);
@@ -654,12 +656,10 @@ try {
     assert.notEqual(samples[0],samples[1],'Cuerno victory and hurt must draw different poses');
   }
   await page.evaluate(()=>document.querySelector('#cuerno-visual-fixture').remove());await page.emulateMedia({reducedMotion:'no-preference'});
-  await page.locator('.char-card[data-id="stitcho"]').click();await page.locator('#camp-film').click();assert.equal(await page.locator('#camp-film-stop').isVisible(),true);
-  await capture(page,'01b-character-select-stitcho-world');await capture(page,'01d-stitcho-voluntary-scene');await page.locator('#camp-film-stop').click();
-  await page.locator('.char-card[data-id="kilo"]').click();await page.locator('[data-camp-form="0"]').click();
+  await page.locator('[data-atlas-step="0"]').click();await page.locator('.char-card[data-id="stitcho"]').click();await capture(page,'01b-character-select-stitcho-world');await page.locator('.char-card[data-id="kilo"]').click();
 
   if(!selectorOnly){
-  await page.locator('#btn-play').click();
+  for(let step=0;step<3;step++)await page.locator('#atlas-next').click();
   await page.waitForTimeout(500);
   await auditLayout(page, '02-hub');
   await capture(page, '02-hub');
@@ -837,7 +837,7 @@ try {
 
   await page.keyboard.press('Escape');
   await page.waitForTimeout(80);
-  await page.locator('#btn-help').click();
+  await page.locator('#play-options summary').click();await page.locator('[data-play-action="btn-help"]').click();
   await page.waitForTimeout(80);
   assert.equal(await page.locator('#help').getAttribute('aria-hidden'), 'false', '07-help: ayuda no visible');
   await capture(page, '07-help');

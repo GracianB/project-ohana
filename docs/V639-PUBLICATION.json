@@ -2,6 +2,6 @@
   "release": "ohana-639",
   "stage": "not_deployed",
   "branch": "codex/hoku-atlas",
-  "target_branch": "codex/quimera-final-redesign",
-  "note": "Builds on PR #462. Solo and multiplayer integration must be validated together. Live Netlify currently reports ohana-630; no remote publication claimed."
+  "target_branch": "main",
+  "note": "Quimera #462 merged; Atlas and rebel Michi integrated in #463. Combined validation and production publication in progress."
 }

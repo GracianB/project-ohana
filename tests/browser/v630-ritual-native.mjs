@@ -20,13 +20,12 @@ try{
   await page.waitForFunction(()=>document.documentElement.dataset.ohanaBoot==='ready',undefined,{timeout:120000});
   assert.equal(await page.evaluate(()=>!!window.__OHANA_E2E),false);
   await activate(page.locator('#ohana-intro.ready .oi-enter'));
-  await activate(page.locator('.char-card[data-id="yomi"]'));await page.locator('#camp-canvas').focus();await page.keyboard.press('ArrowRight');
-  await page.waitForFunction(()=>document.querySelector('#family-camp').dataset.final==='true'&&document.querySelector('#camp-canvas').dataset.paintedHero==='final');
+  await activate(page.locator('[data-atlas-step="1"]'));await activate(page.locator('[data-atlas-room="w1-final"]'));await page.locator('#atlas-details summary').click();
   await activate(page.locator('#camp-guide'));await page.locator('#help.open').waitFor({state:'visible'});
   await page.waitForFunction(()=>document.querySelector('#guide-page h4')?.textContent==='Tus objetos despiertan al guardián');
   assert.equal(await page.locator('[data-guide="heart"]').getAttribute('aria-pressed'),'true');await activate(page.locator('#btn-close-help'));
-  await page.waitForFunction(()=>document.querySelector('#family-camp').dataset.final==='true'&&document.querySelector('#camp-canvas').dataset.paintedHero==='final'&&document.activeElement?.id==='camp-guide');
-  await activate(page.locator('#camp-start'));
+  await page.waitForFunction(()=>document.querySelector('#hoku-atlas').dataset.final==='true'&&document.activeElement?.id==='camp-guide');
+  for(let step=0;step<2;step++)await activate(page.locator('#atlas-next'));
   await page.waitForFunction(()=>document.body.classList.contains('playing'),undefined,{timeout:30000});
   if(await page.locator('#start-intro.show').count())await page.keyboard.press('Enter');
   await page.waitForFunction(()=>!document.querySelector('#start-intro.show'),undefined,{timeout:30000});

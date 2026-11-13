@@ -8,12 +8,9 @@ try{
  page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await page.keyboard.press('Escape');
  for(const [width,height]of[[1280,900],[390,844],[320,568]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(180);
-  const canvas=page.locator('#camp-canvas'),box=await canvas.boundingBox();assert.ok(box);
-  const rs=await page.evaluate(async()=>{const {createWorld1Select,world1SelectCardRects}=await import('/systems/world1-select.js');const c=document.querySelector('#camp-canvas');return world1SelectCardRects(createWorld1Select(),c.clientWidth,c.clientHeight);});
-  const r=rs[10];assert.ok(r.y+r.h<=box.height);await canvas.scrollIntoViewIfNeeded();const visible=await canvas.boundingBox();
-  await page.mouse.click(visible.x+r.x+r.w/2,visible.y+r.y+r.h/2);assert.equal(await page.locator('#family-camp').getAttribute('data-final'),'true');
+  await page.locator('[data-atlas-step="1"]').click();const final=page.locator('[data-atlas-room="w1-final"]');await final.scrollIntoViewIfNeeded();await final.click();assert.equal(await final.getAttribute('aria-disabled'),'true');const canvas=page.locator('#atlas-stage');
   await page.waitForTimeout(180);await canvas.screenshot({path:`test-results/v623/final-selection-${width}.png`});
-  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));report.push({width,height,finalPortalVisible:true,pointerSelectsFinal:true});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));report.push({width,height,finalPortalVisible:true,lockedWithoutEarnedSeals:true});
  }
  const fixtures=await page.evaluate(async()=>{
   const {drawWorld1Cine,buildWorld1Scene}=await import('/systems/world1-cine.js');

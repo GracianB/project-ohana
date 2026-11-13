@@ -10,7 +10,7 @@ try {
  const errors=[];page.on('pageerror',e=>errors.push(e.stack||e.message));
  await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1');
  await page.locator('.oi-enter').click();
- await page.locator('#family-camp').waitFor();
+ await page.locator('#hoku-atlas').waitFor();
  await fs.mkdir('test-results/v453',{recursive:true});
  const stage=await page.evaluate(()=>window.__OHANA_E2E.start('stitcho'));
  assert.equal(stage.roomName,'Archipiélago del Caos');
