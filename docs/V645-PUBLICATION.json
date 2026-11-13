@@ -1,5 +1,17 @@
 {
   "release": "ohana-645",
-  "status": "verification",
-  "scope": "Adorable kitten, immediate glider takeoff, compact black panther and wizard with hat/wand"
+  "status": "published and verified",
+  "sourceCommit": "4a711c2df51fac5d8b2f15c58fd221b5990ded31",
+  "mainMerge": "b22ba00e3bd71fa145d8fda55d68d55ebe18e7aa",
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/474",
+  "githubPages": "https://gracianb.github.io/project-ohana/",
+  "netlify": "https://project-ohana-multiplayer.netlify.app/",
+  "netlifyDeploy": "6af76aa213b2f1f497ae9fc8",
+  "pagesWorkflow": 43496418328,
+  "publishedAt": "2026-11-13T22:41:43.767Z",
+  "verified": [
+    "Fifteen runtime files on GitHub Pages and Netlify match tested source",
+    "Candidate native Atlas and two-browser desktop/mobile movement in adventure and versus",
+    "Production version and two-player create/join/choose/ready/poll verified in both modes; own sessions disconnected"
+  ]
 }

@@ -9,13 +9,17 @@
     "Release gate: 404 runtime modules and 473 offline resources",
     "Native browser: form 2 ascends through actual production physics without jump input, then glides and responds to held jump",
     "Panther colour acceptance: approximately 80 percent of opaque raw body pixels are neutral near-black",
-    "Final panther has independent smooth big-cat head/body anatomy, one tail and rounded ears; hat reduced and seated on head"
+    "Final panther has independent smooth big-cat head/body anatomy, one tail and rounded ears; hat reduced and seated on head",
+    "Final art matrix: five forms × seventeen poses × three scales, both facings, immutable input and reduced-motion stability; native 1280/390/320 selector and desktop/mobile HUD",
+    "GitHub Pages release CI and deployment succeeded; fifteen public runtime files match source",
+    "Netlify candidate: native five-form Atlas and desktop/mobile two-browser movement in adventure and versus",
+    "Tested candidate promoted intact: production ohana-645 and fifteen runtime files match source",
+    "Production API: two connected players ready in adventure and versus; own test sessions disconnected"
   ],
-  "pending": [
-    "Final extended art/launch acceptance and public candidate verification"
-  ],
+  "pending": [],
   "limits": [
     "Artwork and movement fixtures do not claim earned campaign progression.",
-    "Saved hero/form indices and combat statistics remain stable; automatic takeoff is specific to Michi form 2."
+    "Saved hero/form indices and combat statistics remain stable; automatic takeoff is specific to Michi form 2.",
+    "Automatic takeoff acceptance uses the localhost-only E2E harness; production deliberately omits that debug API. Production runtime files were separately compared byte-for-byte."
   ]
 }
