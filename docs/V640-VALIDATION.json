@@ -1,0 +1,20 @@
+{
+  "release": "ohana-640",
+  "scope": "Integration of PRs 461\u2013463 with monotonic rebel-cat optical growth and compact goal-notice contract",
+  "baseline": "V639-VALIDATION.json",
+  "verified": [
+    "Combined pre-publication unit suite: 1881 passed",
+    "Rebel Michi shared-art matrix, field manual, fifty actual Atlas Canvas forms, native selection/Continue and terrain/touch probes passed",
+    "V639 publication release gate: 400 runtime modules and 469 precached resources",
+    "V640 full unit suite: 1881 passed, zero failures",
+    "100 rendered optical checks across fifty forms: rebel Michi grows 65/80/97/112/133 px; collision boxes unchanged",
+    "Physical Frita prize, Stitcho repair, Yomi connection and hot Pizza delivery: PASS, persistent objective visible in compact HUD",
+    "V640 release gate PASS: 400 runtime modules, 469 content-addressed precached resources"
+  ],
+  "pending": [
+    "Remote quality matrix"
+  ],
+  "limits": [
+    "Netlify deployment unavailable: this environment has no Netlify deployment credentials or connector."
+  ]
+}

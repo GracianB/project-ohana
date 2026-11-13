@@ -160,7 +160,7 @@ try{
       overlays:[...document.querySelectorAll('[role="dialog"]')].filter(x=>getComputedStyle(x).display!=='none').map(x=>({id:x.id,cls:x.className})).slice(0,7)};
  });
  assert.equal(hud.cardVisibility,'visible','earned Pizza delivery objective must remain visible: '+JSON.stringify(hud));
- const box=await goalCard.boundingBox();assert.ok(box&&box.y>=150&&box.y<210,'goal should stay in the notice area: '+JSON.stringify(hud));
+ const box=await goalCard.boundingBox();assert.ok(box&&box.y>=90&&box.y<150,'goal should stay in the notice area: '+JSON.stringify(hud));
  assert.equal(await goalCard.evaluate(el=>getComputedStyle(el).animationName),'none');
  assert.match(await goalCard.innerText(),/quedan [1-9]\d* s/,'Pizza heat must be readable: '+JSON.stringify(hud));
  await page.screenshot({path:'test-results/v501/pizza-heat.png'});

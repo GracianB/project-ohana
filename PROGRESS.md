@@ -1,3 +1,7 @@
+## ohana-640 · Publicación conjunta y crecimiento felino
+
+Integra los PR 461–463. Calibración óptica del gato rebelde: las cinco formas crecen sin encoger en la segunda y tercera. El objetivo persistente se verifica en la nueva zona del HUD compacto. Netlify conserva su despliegue anterior hasta disponer de acceso a ese alojamiento.
+
 ## ohana-639 · Atlas, interfaz y Kilo (candidato)
 
 Puntos 2–5: portada y Atlas con Aventura/Versus, selección por pasos, HUD compacto, notas dirigidas durante levitación, defensa musical precisa, Claro de 9.600 px con recorrido alto y viento, y recuperación explícita de los enemigos. Conserva IDs de objetivos, colecciones, salas y guardados. Publicación pendiente.

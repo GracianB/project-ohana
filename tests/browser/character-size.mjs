@@ -5,7 +5,7 @@ import {startServer} from './server.mjs';
 import {heroHeightTarget} from '../../characters/visual-size.js';
 const server=await startServer(0);let browser;
 try {
- browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1360,height:1100}});
+ browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_BIN?{executablePath:process.env.CHROMIUM_BIN}:{})});const page=await browser.newPage({viewport:{width:1360,height:1100}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`http://127.0.0.1:${server.address().port}/previews/cuerno-design.html`);
  await page.waitForFunction(()=>window.previewReady);await page.evaluate(()=>window.cuernoPreview.setFrame(40));
