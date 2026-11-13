@@ -1,3 +1,7 @@
+## ohana-644 · Fantasma compacto y profundidad solar
+
+Michi final reduce sustancialmente su tamaño y condensa el cuerpo, con cabeza expresiva, manos flotantes, pañuelo y nueve estelas. El segundo aro solar de Kilo pasa detrás del cuerpo; L conserva sus dos mitades de profundidad. [Validación](docs/V644-VALIDATION.json) · [publicación](docs/V644-PUBLICATION.json).
+
 ## ohana-643 · Cinco formas, revisión de diseño y poses
 
 Cachorro con chaleco remendado y luna; aviador con arnés y membranas articuladas; pantera con rosetas y zarpazo extendido; lince con abrigo partido y medias lunas móviles; fantasma con luces felinas orbitando. Saltos con patas recogidas y ataques con articulación propia. Última dirección del usuario: gato más espectral y neón, fantasma un 11 % más pequeño y burlón; Kilo reabierto con cinco trajes bordados y el aro L con joyas giratorias y reloj independiente. [Validación](docs/V643-VALIDATION.json) · [publicación](docs/V643-PUBLICATION.json).

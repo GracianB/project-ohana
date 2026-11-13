@@ -1539,6 +1539,8 @@ ctx.translate(recoilX + lunge, -formLift-(pose.powerLift||0)*H);
 
 if (!michiRig && p.id!=="chispin" && evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
 if(!michiRig&&p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, false);
+// Kilo's pale solar orbit belongs behind the body; the active L hoop keeps its own split depth.
+if(p.id==='kilo')drawEvolutionSignatureFX(ctx,p,H,pose,t);
 if (moving&&!michiRig) drawDust(ctx, H, t, speed);
 
 const s = H / 100;
@@ -1583,7 +1585,7 @@ ctx.restore();
 
 drawMichiAura(ctx,p,H,t,options.reduceMotion===true);
 if(!michiRig&&p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, true);
-if(!michiRig&&p.id!=="chispin")drawEvolutionSignatureFX(ctx, p, H, pose, t);
+if(!michiRig&&p.id!=="chispin"&&p.id!=="kilo")drawEvolutionSignatureFX(ctx, p, H, pose, t);
 if(!michiRig)drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);
 if (burstK > 0) {
 if(michiRig){

@@ -26,7 +26,7 @@ function face(a,p,{x=0,y=-50,size=1,fur='#45516b',kind='kitten',accent='#ff725f'
  const blink=p.state==='dead'||(!p.still&&Math.sin(p.t*.043)>.994);
  for(const side of[-1,1]){const ex=side*11,ey=-1+side;
   if(blink)stroke('#f4d28e',2,()=>{c.moveTo(ex-5,ey);c.lineTo(ex+5,ey+side);});
-  else{oval(ex,ey,kind==='kitten'?6.5:7,kind==='kitten'?5:4.6,'#ecd48b',side*.1);oval(ex+p.look*2,ey+p.lookY*1.4,1.5,4,'#131a2b');oval(ex+2,ey-1.6,.9,.9,'#fff5d2');stroke('#101728',2,()=>{c.moveTo(ex-7,ey-5-side);c.lineTo(ex+6,ey-4+side);});}
+  else{oval(ex,ey,kind==='ghost'?8:kind==='kitten'?6.5:7,kind==='ghost'?5.5:kind==='kitten'?5:4.6,'#ecd48b',side*.1);oval(ex+p.look*2,ey+p.lookY*1.4,1.5,4,'#131a2b');oval(ex+2,ey-1.6,.9,.9,'#fff5d2');stroke('#101728',2,()=>{c.moveTo(ex-7,ey-5-side);c.lineTo(ex+6,ey-4+side);});}
  }
  if(p.gesture>.1&&(panther||kind==='ghost')){oval(3,12,8,4+p.gesture*8,'#263147');oval(4,16,4,p.gesture*3,'#cd91a4');}
  if(p.threat>.4){shape('#283347',()=>{c.moveTo(-3,10);c.quadraticCurveTo(7,5,17,11);c.quadraticCurveTo(8,24,-3,10);},null);for(const x of[2,11])shape('#f1e2cc',()=>{c.moveTo(x,11);c.lineTo(x+4,11);c.lineTo(x+2,17);},null);}
@@ -90,26 +90,26 @@ function lynx(a,p){const{c,shape,stroke,oval}=a;
  face(a,p,{x:0,y:-83,size:.8,fur:'#3c6073',kind:'lynx',accent:'#8ae8dc'});scarf(a,-1,-65,'#b95e74',54,Math.sin(p.t*.05)*5);
 }
 function ghost(a,p){const{c,shape,stroke,oval}=a;
- // A levitating cat spirit: no planted legs, crown or borrowed wings.
- const float=p.still?0:Math.sin(p.t*.046)*3,reach=p.curious*12+p.cast*14+p.strike*20;
- c.save();c.translate(-p.vx*.28,-11+float);
- for(let i=0;i<9;i++){const side=i<4?-1:1,k=i%5,w=p.still?0:Math.sin(p.t*.055+i)*6;
-  c.save();c.globalAlpha=.28+k*.07;stroke(i%2?'#a0ebeb':'#d6c9ff',5-k*.45,()=>{c.moveTo(side*12,-43+k*4);c.bezierCurveTo(side*(42+k*5),-65+k*8,side*(48+k*5),-22+k*4+w,side*(25+k*8),-7-k*5+w);});c.restore();
+ // Compact mischievous spirit: a big expressive head over a tiny curled soul.
+ const float=p.still?0:Math.sin(p.t*.046)*3,reach=p.curious*10+p.cast*12+p.strike*20;
+ c.save();c.translate(-p.vx*.28,-17+float);c.rotate(p.still?0:Math.max(-.09,Math.min(.09,-p.vx*.018))+p.gesture*.06);
+ for(let i=0;i<9;i++){const side=i<4?-1:1,k=i%5,w=p.still?0:Math.sin(p.t*.055+i)*4;
+  c.save();c.globalAlpha=.2+k*.06;stroke(i%2?'#88fff0':'#c8a6ff',3.5-k*.3,()=>{c.moveTo(side*10,-34+k*2);c.bezierCurveTo(side*(28+k*3),-48+k*5,side*(33+k*3),-18+k*3+w,side*(17+k*5),-14-k*3+w);});c.restore();
  }
- c.save();c.globalAlpha=.87;
- shape('#a5dedb',()=>{c.moveTo(-22,-79);c.quadraticCurveTo(0,-96,22,-77);c.bezierCurveTo(31,-58,18,-42,26,-27);c.quadraticCurveTo(31,-17,40,-22);c.bezierCurveTo(25,4,5,-10,0,-1);c.quadraticCurveTo(-7,-16,-20,-10);c.quadraticCurveTo(-14,-22,-24,-29);c.bezierCurveTo(-35,-47,-21,-64,-22,-79);},'#355d72');
- shape('#daf7e6',()=>{c.moveTo(-10,-64);c.quadraticCurveTo(12,-75,15,-56);c.quadraticCurveTo(9,-35,17,-21);c.quadraticCurveTo(0,-30,-9,-16);c.quadraticCurveTo(-3,-35,-13,-43);},null);
- for(let i=0;i<3;i++)stroke('#76b6c2',1.2,()=>{c.moveTo(-18+i*12,-28);c.quadraticCurveTo(-20+i*12,-17,-15+i*12,-13);});
- c.restore();
- for(const side of[-1,1]){const x=side*(30+(side>0?reach:0)),y=-48+(side>0?p.lookY*7:0)+Math.sin(p.t*.05+side)*(!p.still?3:0)-p.gesture*side*10;
-  c.save();c.translate(x,y);c.rotate(side*.22+p.atk*side*.5);shape('#c6f8e5',()=>{c.moveTo(-8,-6);c.quadraticCurveTo(-13,-15,-6,-12);c.lineTo(-2,-6);c.quadraticCurveTo(0,-17,4,-12);c.lineTo(6,-5);c.quadraticCurveTo(14,-10,12,-2);c.quadraticCurveTo(10,12,0,10);c.quadraticCurveTo(-14,8,-8,-6);},'#527c90');oval(1,2,4,3,'#83bbc1');c.restore();
+ c.save();c.globalAlpha=.9;
+ shape('#a5e8de',()=>{c.moveTo(-18,-60);c.quadraticCurveTo(0,-71,18,-60);c.bezierCurveTo(25,-45,10,-34,19,-25);c.quadraticCurveTo(23,-21,29,-28);c.bezierCurveTo(31,-7,9,-7,3,-15);c.lineTo(-2,-8);c.lineTo(-8,-18);c.quadraticCurveTo(-23,-14,-21,-30);c.bezierCurveTo(-27,-41,-19,-48,-18,-60);},'#3a6680');
+ shape('#e2ffdf',()=>{c.moveTo(-7,-53);c.quadraticCurveTo(11,-58,10,-44);c.quadraticCurveTo(3,-31,13,-21);c.quadraticCurveTo(-2,-28,-7,-21);c.quadraticCurveTo(-1,-35,-10,-42);},null);c.restore();
+ // Detached paws wave, reach toward discoveries and wind up the real cast.
+ for(const side of[-1,1]){const x=side*(27+(side>0?reach:0)),y=-37+(side>0?p.lookY*6:0)+(p.still?0:Math.sin(p.t*.05+side)*3)-p.gesture*side*13;
+  c.save();c.translate(x,y);c.rotate(side*.2+p.strike*side*.7);shape('#caffec',()=>{c.moveTo(-7,-4);c.quadraticCurveTo(-11,-13,-5,-10);c.lineTo(-1,-5);c.quadraticCurveTo(1,-15,4,-10);c.lineTo(5,-4);c.quadraticCurveTo(13,-8,10,0);c.quadraticCurveTo(8,10,0,8);c.quadraticCurveTo(-12,6,-7,-4);},'#527c90');oval(1,1,3.5,2.5,'#82c2c0');c.restore();
  }
  drawMichiDetails(a,p,4);
- face(a,p,{x:p.strike*6,y:-88,size:1.04,fur:'#b1e6df',kind:'ghost'});scarf(a,0,-68,'#b75d83',40,Math.sin(p.t*.05)*(!p.still?7:0));
- // A small soul lantern at the scarf knot anchors the spectral palette.
- oval(0,-58,5,7,'#304c69');oval(0,-59,2,4,'#e6ffcb');
- if(p.gesture>.6){oval(9,-73,3,4,'#ea91bf');stroke('#516c85',1.2,()=>{c.moveTo(-18,-91);c.lineTo(-6,-88);});}
- if(p.friend>.1){c.save();c.globalAlpha=p.friend*.65;stroke('#e3f8db',1.1,()=>{c.moveTo(22,-87);c.quadraticCurveTo(32,-96,37,-89);c.moveTo(25,-80);c.quadraticCurveTo(36,-88,41,-79);});c.restore();}
+ face(a,p,{x:p.strike*5,y:-73,size:1.1,fur:'#b9f0e4',kind:'ghost'});scarf(a,0,-52,'#c65b9a',30,p.still?0:Math.sin(p.t*.07)*6);
+ oval(0,-45,4,5,'#365977');oval(0,-46,1.6,3,'#eeffce');
+ // A cheeky fang and an occasional tongue, staying below the expressive muzzle.
+ shape('#f5ffe0',()=>{c.moveTo(10,-57);c.lineTo(14,-58);c.lineTo(12,-52);},null);
+ if(p.gesture>.55){oval(7,-55,2.6,4,'#ed96c5');stroke('#466c80',1.4,()=>{c.moveTo(-18,-77);c.lineTo(-7,-74);});}
+ if(p.friend>.1){c.save();c.globalAlpha=p.friend*.6;stroke('#e3f8db',1.1,()=>{c.moveTo(22,-70);c.quadraticCurveTo(30,-78,35,-71);});c.restore();}
  c.restore();
 }
 const RIGS=[kitten,glider,panther,lynx,ghost];
@@ -122,7 +122,7 @@ export function drawRebelCat(c,pose={}){
  c.save();c.lineCap='round';c.lineJoin='round';
  const bob=state==='jump'?-5:state==='fall'?3:state==='glide'?-4:state==='hurt'?5:state==='victory'?-7:Math.sin(p.t*.07+form)*.8;
  c.translate(state==='attack'?p.atk*(form===2?14:7):0,bob);c.rotate(state==='dead'?.7:state==='hurt'?-.12:state==='wall'?-.17:p.run*.025);c.scale(1,state==='jump'?1.04:state==='fall'?.95:1);
- if(form===4)c.scale(.89,.89);
+ if(form===4)c.scale(.62,.62);
  RIGS[form](a,p);drawMichiNeon(a,p,form);
  if(state==='cast'){const x=form===2?45:form===4?42:28,y=form===0?-26:form===2?-34:form===3?-49:-40,color=['#f49a82','#f1b998','#b49aea','#93e8dc','#c4ffee'][form];
   if(p.power===0){a.oval(x,y,5,5,color);a.stroke(color,1.3,()=>{c.moveTo(x-3,y);c.bezierCurveTo(x-18,y+15,x+9,y+21,x+14,y+5);});}

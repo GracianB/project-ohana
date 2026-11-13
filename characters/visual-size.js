@@ -12,6 +12,8 @@ export const DINO_DRAGON_HEIGHT = STANDARD_HERO_HEIGHT;
 // same optical size as Dino's at every form instead of a shrunken torso.
 export const DRAGON_WING_ALLOWANCE = 1.30;
 export const HERO_HEIGHT_TARGET = Object.freeze({
+  // The final cat intentionally condenses into a small floating ghost.
+  cat: Object.freeze([55,70,85,102,80]),
   dino: DINO_DRAGON_HEIGHT,
   dragon: Object.freeze(DINO_DRAGON_HEIGHT.map(h => Math.round(h * DRAGON_WING_ALLOWANCE))),
   // Pizza & Frita follow the same standard curve: same size per form, told
@@ -37,6 +39,6 @@ export const CALIBRATED_VISUAL_H = Object.freeze(Object.fromEntries(
 
 // Optical normalization of the remaining Canvas silhouettes; hitboxes stay physical.
 // Five different Michi anatomies, measured through the production draw path.
-// Calibrated visible growth: approximately 65/82/100/120/142 px.
+// Calibrated visible growth: approximately 66/82/99/121/80 px.
 // Visual normalization only; gameplay collision boxes remain unchanged.
 export const OPTICAL_SCALE = Object.freeze({"kilo": [0.8594, 0.8537, 0.8854, 0.9189, 0.8451], "stitcho": [0.8594, 0.7955, 0.9444, 0.8793, 0.8571], "chispin": [1.10, 0.975, 0.865, 0.875, 0.935], "cat": [1.3937, 1.1517, 1.413, .9881, 1.089], "cuerno": [1.0185, 1.129, 1.0241, 1.0408, 1.0256]});
