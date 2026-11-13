@@ -1,5 +1,17 @@
 {
   "release": "ohana-644",
-  "status": "verification",
-  "scope": "Compact expressive final cat ghost and Kilo solar orbit behind body"
+  "status": "published and verified",
+  "sourceCommit": "a9cea29bb31c16dc1cdfcf2ed6039f866cd4bf7b",
+  "mainMerge": "2b343c2ebfcb6282caf16c0ea7267aca0467dff8",
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/472",
+  "githubPages": "https://gracianb.github.io/project-ohana/",
+  "netlify": "https://project-ohana-multiplayer.netlify.app/",
+  "netlifyDeploy": "6af7632ea608bdf22bbf7900",
+  "pagesWorkflow": 43491448247,
+  "publishedAt": "2026-11-13T19:23:47.732Z",
+  "verified": [
+    "Fifteen runtime files on GitHub Pages and Netlify match tested source",
+    "Native candidate Atlas and two-browser desktop/mobile movement in adventure and versus",
+    "Production version and two-player create/join/choose/ready/poll verified in both modes; own sessions disconnected"
+  ]
 }
