@@ -6,7 +6,7 @@ export function drawMichiAura(c,p,H,t,reduced=false){
  c.save();c.lineCap='round';
  if(!reduced&&(ghost||moving))for(let i=0;i<3;i++){
   const drift=Math.sin(t*.06+i)*H*.035,x=-H*(.25+i*.09),y=-H*(.35+i*.15);
-  c.globalAlpha=(ghost?.22:.18)-i*.035;c.strokeStyle=['#77ffe5','#ff88df','#ce94ff','#67fff0','#bbfff2'][p.evo||0];c.lineWidth=ghost?2:1.2;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x-H*.22,y+drift,x-H*.38,y+H*.08+drift);c.stroke();
+  c.globalAlpha=(ghost?.22:.18)-i*.035;c.strokeStyle=['#77ffe5','#ff88df','#89979e','#67fff0','#bbfff2'][p.evo||0];c.lineWidth=ghost?2:1.2;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x-H*.22,y+drift,x-H*.38,y+H*.08+drift);c.stroke();
  }
  if(p.evo===1&&flying){const pct=Math.max(0,Math.min(1,(p._michiWingFuel||0)/(p._michiWingMax||210))),w=32,y=-H-9;
   c.globalAlpha=.9;c.fillStyle='#122d40';c.fillRect(-w/2-2,y-2,w+4,6);c.fillStyle=pct>.25?'#b9e4e1':'#e9b080';c.fillRect(-w/2,y,w*pct,2);

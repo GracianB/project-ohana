@@ -1,4 +1,4 @@
-const VERSION = "ohana-644";
+const VERSION = "ohana-645";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./characters/michi-details.js?v=" + VERSION,
@@ -484,9 +484,9 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "characters/michi-details.js": "ceffe8c927d334ca6ddc62ba4543e01be6e016bf",
+  "characters/michi-details.js": "46b2187a3f8d255731d62aa89b109127cc14fc37",
   "characters/michi-acting.js": "884d5416cb4f54344576cd31f46b61ab7e3a24db",
-  "characters/michi-aura.js": "e6c0d821455b3076b601f2f94f5e6df21fb01dac",
+  "characters/michi-aura.js": "ada330d47a15329cb427136ffb3a14690b213c01",
   "systems/michi-presence.js": "30b6f86ebaeab0e8c5e6614da06778495dbf34fa",
   "characters/kilo-virtuoso.js": "dbfce07551531253a792e947c66df4df222de583",
   "worlds/kilo-living-grove.js": "b51daa4bf9533a84f2fc2957715fde4d799b90ac",
@@ -504,13 +504,13 @@ const PRECACHE_REVISIONS = {
   "systems/final-hero-choice.js": "feea8845ef0c866e2d46350bcd54fe795a2ca698",
   "systems/family-actor.js": "782f8cad723e7eea0398c55ffa8fd9e05342b967",
   "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
-  "characters/michi-flight.js": "406c8c252fecac7a9eff90208170c648fa5f6a04",
-  "characters/michi-rebel.js": "e3cb5f2242bdb1120ee178b4392626191f75531f",
+  "characters/michi-flight.js": "44c6065434bc48b105f929e4f08321b72e22b56f",
+  "characters/michi-rebel.js": "0282950f1fe0cc8bdf97894944915777c3c0cf0a",
   "characters/michi-kitten.js": "0b28dc3a4d648c476092f7655c65001ed6db40f7",
-  "systems/michi-field-manual.js": "f1084b9bf9fe0924d7be107be933477973983e80",
+  "systems/michi-field-manual.js": "39a82537e9da3d8ffb18a590e87350c10bd1419e",
   "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
   "worlds/michi-reactive-night.js": "9b1ed6bababa47ca8e79689f6584072457a4436a",
-  "characters/michi-lumina.js": "58e13761ff5f6fbab7052f6d6a5c5744b0af91a0",
+  "characters/michi-lumina.js": "25ed7c392406ce022b84679990f4ca026d1d4383",
   "engine/foes/creature-finish.js": "5eef8f7c348cfed6bd3739db70fa7ecea1ac6f5b",
   "systems/open-chapter-pits.js": "8ab9008a7e82758bf836e01493b9b85c0dbdac54",
   "characters/michi-moon-hare.js": "a1277d29bd3b184ef5f68ebad936fa492cf9e9cd",
@@ -710,8 +710,8 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/real-actor.js": "83631db7ee750595a45ca35200b8331198a7742d",
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
-  "characters/visual-size.js": "cba4ac1612c054fbf67530e6f54e2a8d8841e0bf",
-  "index.html": "e7f686b9a362519ee02d6456498b3570e62466a2",
+  "characters/visual-size.js": "499179b6c60661cacdda4487803b627ee303c21a",
+  "index.html": "fdcd9c683141b28a1f7aaecd413631245fd48571",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
@@ -764,7 +764,7 @@ const PRECACHE_REVISIONS = {
   "characters/definitive.js": "de08a60a9ae7198707cb68f557a6d7be15b2ea3a",
   "characters/look.js": "f9e1d610ba74bec6823cc8fcc093d3b2875f7c07",
   "characters/rig.js": "39d9896105813a416dd38b46b2ef92668b3d7d00",
-  "characters/roster.js": "3b8986fa1bfb374715d205b3322ed5524c235609",
+  "characters/roster.js": "7b9c686450e8d07bbb98301350e806d43772b01f",
   "characters/signature.js": "77c787347a7eb94b7f0e869ed4b7f89b3a23831f",
   "characters/sprites.js": "3c1785be5f0da46f16d277ca56091fa35f6f764a",
   "engine/audio.js": "f1bf4e2766876b53b355b1426b8f8647a8d66359",
