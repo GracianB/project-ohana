@@ -1,9 +1,134 @@
 {
   "release": "ohana-641",
-  "stage": "candidate",
-  "branch": "codex/michi-five-metamorphoses",
-  "target": "main",
+  "stage": "published_pages_and_netlify",
+  "runtime_commit": "a3463a8c6027bff8fb4a07407cd5e635a3688627",
+  "merged_commit": "7483beafbcc3f772ff96ae30b8463f31aec43085",
+  "observed_at": "2026-11-13T18:04:43.829974+00:00",
   "pages_url": "https://gracianb.github.io/project-ohana/",
+  "pages_workflow": "https://github.com/GracianB/project-ohana/actions/runs/43477898701",
   "netlify_url": "https://project-ohana-multiplayer.netlify.app/",
-  "previous_live_release": "ohana-640"
+  "netlify_deploy_id": "6af74fdb3cbcecd680e7db7a",
+  "verified_files": [
+    {
+      "origin": "Pages",
+      "path": "index.html",
+      "matches": true,
+      "sha256": "f75cf1f9175115a16bd05444e26425be4500232cc80f65e3235d3275536943e3"
+    },
+    {
+      "origin": "Pages",
+      "path": "sw.js",
+      "matches": true,
+      "sha256": "c0b12c9d910206dd35a0a2fa425d1169ca566c398f5913a716e0a49fbf274639"
+    },
+    {
+      "origin": "Pages",
+      "path": "characters/michi-rebel.js",
+      "matches": true,
+      "sha256": "9205db6dbf5cb971646e6594dbd1c92647b27272e30038056cd38d50644e3b08"
+    },
+    {
+      "origin": "Pages",
+      "path": "characters/art/cat.js",
+      "matches": true,
+      "sha256": "10d708b704170f267e2ae9213870d4c15a88fd177757e8552d1841a134ae96af"
+    },
+    {
+      "origin": "Pages",
+      "path": "characters/roster.js",
+      "matches": true,
+      "sha256": "0cc3f9305087740365f960589fd3d8a112e179bb8eb647e187e20d963d2f7170"
+    },
+    {
+      "origin": "Pages",
+      "path": "characters/visual-size.js",
+      "matches": true,
+      "sha256": "c01691d45c7bb05dc6c2a18fe946802f2d9af54666c1b77ae4adbadc6b100c7f"
+    },
+    {
+      "origin": "Pages",
+      "path": "systems/michi-field-manual.js",
+      "matches": true,
+      "sha256": "be071a8b8560598b8e760772becf3f777936f55066717bba196f3be4d82f6fa8"
+    },
+    {
+      "origin": "Pages",
+      "path": "systems/evo-cine/real-actor.js",
+      "matches": true,
+      "sha256": "3f4a56b774dff654a44e1f84e8325fc7300a68d31c67f4f8a6ad4ec0fe4e64d6"
+    },
+    {
+      "origin": "Netlify",
+      "path": "index.html",
+      "matches": true,
+      "sha256": "f75cf1f9175115a16bd05444e26425be4500232cc80f65e3235d3275536943e3"
+    },
+    {
+      "origin": "Netlify",
+      "path": "sw.js",
+      "matches": true,
+      "sha256": "c0b12c9d910206dd35a0a2fa425d1169ca566c398f5913a716e0a49fbf274639"
+    },
+    {
+      "origin": "Netlify",
+      "path": "characters/michi-rebel.js",
+      "matches": true,
+      "sha256": "9205db6dbf5cb971646e6594dbd1c92647b27272e30038056cd38d50644e3b08"
+    },
+    {
+      "origin": "Netlify",
+      "path": "characters/art/cat.js",
+      "matches": true,
+      "sha256": "10d708b704170f267e2ae9213870d4c15a88fd177757e8552d1841a134ae96af"
+    },
+    {
+      "origin": "Netlify",
+      "path": "characters/roster.js",
+      "matches": true,
+      "sha256": "0cc3f9305087740365f960589fd3d8a112e179bb8eb647e187e20d963d2f7170"
+    },
+    {
+      "origin": "Netlify",
+      "path": "characters/visual-size.js",
+      "matches": true,
+      "sha256": "c01691d45c7bb05dc6c2a18fe946802f2d9af54666c1b77ae4adbadc6b100c7f"
+    },
+    {
+      "origin": "Netlify",
+      "path": "systems/michi-field-manual.js",
+      "matches": true,
+      "sha256": "be071a8b8560598b8e760772becf3f777936f55066717bba196f3be4d82f6fa8"
+    },
+    {
+      "origin": "Netlify",
+      "path": "systems/evo-cine/real-actor.js",
+      "matches": true,
+      "sha256": "3f4a56b774dff654a44e1f84e8325fc7300a68d31c67f4f8a6ad4ec0fe4e64d6"
+    }
+  ],
+  "api_verification": {
+    "version": "ohana-641",
+    "reports": [
+      {
+        "mode": "adventure",
+        "phase": "playing",
+        "players": 2,
+        "heroes": [
+          "cat",
+          "stitcho"
+        ]
+      },
+      {
+        "mode": "versus",
+        "phase": "playing",
+        "players": 2,
+        "heroes": [
+          "cat",
+          "stitcho"
+        ]
+      }
+    ]
+  },
+  "art_verification": "Five native Atlas form buttons on this exact Netlify deploy painted five distinct production bodies, with zero uncaught errors; isolated earned-form fixture.",
+  "limits": "No new earned campaign or human difficulty certification is claimed for this visual redesign."
 }

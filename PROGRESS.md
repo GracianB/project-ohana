@@ -1,6 +1,6 @@
 ## ohana-641 · Cinco metamorfosis reales para Michi
 
-Cachorro cuadrúpedo, planeador alado, pantera con tres colas, lince digitígrado y soberano de nueve colas. Cinco cuerpos articulados propios, siluetas verificadas sin color, crecimiento visual y encuadre de evolución calibrados. Identidad, controles, estadísticas y cajas de colisión conservados. Estado de validación y publicación en docs/V641-VALIDATION.json y docs/V641-PUBLICATION.json.
+Cachorro cuadrúpedo, planeador alado, pantera con tres colas, lince digitígrado y soberano de nueve colas. Cinco cuerpos articulados propios, siluetas verificadas sin color, crecimiento visual y encuadre de evolución calibrados. Identidad, controles, estadísticas y cajas de colisión conservados. Publicado en Pages y Netlify. Estado de validación y publicación en docs/V641-VALIDATION.json y docs/V641-PUBLICATION.json.
 
 ## ohana-640 · Publicación conjunta y crecimiento felino
 
