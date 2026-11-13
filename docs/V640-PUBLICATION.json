@@ -1,14 +1,82 @@
 {
   "release": "ohana-640",
-  "stage": "publishing",
+  "stage": "published_pages",
   "production_url": "https://gracianb.github.io/project-ohana/",
-  "integrated_pull_requests": [
-    461,
-    462,
-    463
+  "runtime_commit": "62055cf51fd88ece92e61c8a58ff7bf0e6c6aac7",
+  "observed_at": "2026-11-13T14:35:32.806116+00:00",
+  "pages_workflow": "https://github.com/GracianB/project-ohana/actions/runs/43443968226",
+  "verified_files": [
+    {
+      "path": "index.html",
+      "matches": true,
+      "sha256": "bb9b066317eea884e83a25ec3a34c670c1f25b38c1b0c7cbb27e6bfbcaa13d2c"
+    },
+    {
+      "path": "sw.js",
+      "matches": true,
+      "sha256": "a8b880667a50f52bd96b4a659a57dbc642ff68c0bd918281e99d8b80535818cf"
+    },
+    {
+      "path": "game.js",
+      "matches": true,
+      "sha256": "b4323085a748cb1ccea3fa630ae77fd52bc776a55865f8fc47cc7875d3137c05"
+    },
+    {
+      "path": "systems/hoku-atlas.js",
+      "matches": true,
+      "sha256": "7c46d361d1495f714b30f11082f07211cb6fc27c9290bc45d3c62bca848efab0"
+    },
+    {
+      "path": "systems/hoku-atlas-model.js",
+      "matches": true,
+      "sha256": "c01eec28b2bc0138fe83035721a4919bfe6861b4efd1aae546e7cafe6263e656"
+    },
+    {
+      "path": "hoku-atlas.css",
+      "matches": true,
+      "sha256": "6533853d1b9e47160d1ffd3ea982dcfdddbae85efd76584f5d0805bccd972179"
+    },
+    {
+      "path": "compact-play.css",
+      "matches": true,
+      "sha256": "fad3fe43be2a279bfb834a0ebb5cf6c81192536736eec6ff6f72b3aae489a6ca"
+    },
+    {
+      "path": "systems/compact-hud.js",
+      "matches": true,
+      "sha256": "b2455b3ac1503ce8d4d3eadcc35ac7987089a85f900e673a38a52b24732105f1"
+    },
+    {
+      "path": "characters/art/cat.js",
+      "matches": true,
+      "sha256": "10d708b704170f267e2ae9213870d4c15a88fd177757e8552d1841a134ae96af"
+    },
+    {
+      "path": "characters/michi-rebel.js",
+      "matches": true,
+      "sha256": "b394b7ba6f7329feb2b89ad2b120aec02033eb328a91b07689057c502d601d10"
+    },
+    {
+      "path": "characters/visual-size.js",
+      "matches": true,
+      "sha256": "b354218e2e79eba9fa817300a6bdcba8dac1bcdefeebc4f0902e9b7b1cb7cb5a"
+    },
+    {
+      "path": "systems/kilo-chapter.js",
+      "matches": true,
+      "sha256": "e2d383ffb4d1ca69b45043653981e9c7d9ff6e6c935fecdbca4b1cfdab961750"
+    },
+    {
+      "path": "multiplayer/lobby-ux.js",
+      "matches": true,
+      "sha256": "a469d1ce05cd4ce61765b28b46ed341f071706f6fb812057091cc1e00868bcca"
+    },
+    {
+      "path": "systems/quimera-art.js",
+      "matches": true,
+      "sha256": "c8276ebc1eb3fb3050f84e9f30e077c58e0d846dd2d648e6b056f3cc167c4249"
+    }
   ],
-  "previous_pages_release": "ohana-639",
-  "netlify_url": "https://project-ohana-multiplayer.netlify.app/",
   "netlify_release": "ohana-630",
   "netlify_status": "not_updated_no_deployment_access"
 }
