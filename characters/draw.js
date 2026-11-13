@@ -1419,7 +1419,7 @@ const duetProtected=isDuetProtected(p,t)||(p.id==='chispin'&&Number(p._chispaEva
 const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p),
   reduceMotion: options.reduceMotion===true,theatreHQ:!!p._theatreHQ};
 articulateStride(pose,p.id);
-if(michiRig){pose.michiPresence=p._michiPresence;pose.michiMotion={vx:p.vx||0,vy:p.vy||0,flight:p._michiWingMode||'ground',fuel:(p._michiWingFuel||0)/(p._michiWingMax||210)};}
+if(michiRig){pose.michiPresence=p._michiPresence;pose.michiMotion={vx:(p.vx||0)*(p.facing||1),vy:p.vy||0,flight:p._michiWingMode||'ground',fuel:(p._michiWingFuel||0)/(p._michiWingMax||210)};}
 if(p.id==="yomi")pose.yomiKnowledge=p._yomiKnowledge||0;
 if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;
 if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDino;

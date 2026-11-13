@@ -1,3 +1,7 @@
+## ohana-646 · Cinco formas más expresivas y ágiles
+
+Proporciones y materiales revisados en las cinco formas; libro conectado a la mano del hechicero, alas curvadas, cachorro suave, pantera más estilizada y fantasma perlado. Velocidad de Michi 5,8/6,5/7,2/7,6/9,2; brillos mediante trazos superpuestos sin desenfoque costoso. [Validación](docs/V646-VALIDATION.json) · [publicación](docs/V646-PUBLICATION.json).
+
 ## ohana-645 · Cachorro, aviador, pantera negra y hechicero
 
 Cuatro formas revisadas: cachorro más adorable, aviador con despegue automático único, pantera negra real de una cola y tamaño compacto, y lince hechicero con sombrero y varita. [Validación](docs/V645-VALIDATION.json) · [publicación](docs/V645-PUBLICATION.json).
