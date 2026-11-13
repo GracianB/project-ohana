@@ -1,6 +1,7 @@
-const VERSION = "ohana-642";
+const VERSION = "ohana-643";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./characters/michi-details.js?v=" + VERSION,
   "./characters/michi-acting.js?v=" + VERSION,
   "./characters/michi-aura.js?v=" + VERSION,
   "./systems/michi-presence.js?v=" + VERSION,
@@ -483,10 +484,11 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "characters/michi-details.js": "cdc40c5ac5448a8ee16ae665d949f34e9fb2a22e",
   "characters/michi-acting.js": "884d5416cb4f54344576cd31f46b61ab7e3a24db",
-  "characters/michi-aura.js": "1a346a8d6ff09f8c55e64168762bfa811d0d12ea",
+  "characters/michi-aura.js": "d9b495eafd831b4a2f2eba5c7b7ebf8800bd1a9b",
   "systems/michi-presence.js": "30b6f86ebaeab0e8c5e6614da06778495dbf34fa",
-  "characters/kilo-virtuoso.js": "5b805ea5392fb1bd5b4d2d97c91be1af331d1785",
+  "characters/kilo-virtuoso.js": "dbfce07551531253a792e947c66df4df222de583",
   "worlds/kilo-living-grove.js": "b51daa4bf9533a84f2fc2957715fde4d799b90ac",
   "systems/compact-hud.js": "74ea11549989efe7245e6358771881567801ec06",
   "compact-play.css": "d4f92a9ce584abd258c4a30d8fbd525e7d228d0b",
@@ -503,7 +505,7 @@ const PRECACHE_REVISIONS = {
   "systems/family-actor.js": "782f8cad723e7eea0398c55ffa8fd9e05342b967",
   "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
   "characters/michi-flight.js": "406c8c252fecac7a9eff90208170c648fa5f6a04",
-  "characters/michi-rebel.js": "8101b490395fe15b719dd54f4007197bdb345959",
+  "characters/michi-rebel.js": "fc2ffdc8018a85555a006dfa537f3527583a22e0",
   "characters/michi-kitten.js": "0b28dc3a4d648c476092f7655c65001ed6db40f7",
   "systems/michi-field-manual.js": "f1084b9bf9fe0924d7be107be933477973983e80",
   "help-odyssey.css": "5a76357d0caf49aabb3b7d49fb4bc35d6ca3f758",
@@ -548,7 +550,7 @@ const PRECACHE_REVISIONS = {
   "caprichos.css": "7d395b7b53c6b2ca31f553eb5c65d33a4126c916",
   "systems/field-guide.js": "68296f6cb36d874524539397ccb0b2c3f8850053",
   "worlds/living-realms.js": "665bdbf783583d65bf4a0ee4919a051280df4f8e",
-  "versus.html": "cd51eaeef309b12bf426d4b33b547e1746d03e6b",
+  "versus.html": "85c1f3b91f5b68082c808ed7e0460f1d39b95c86",
   "versus.css": "1342f8b77b943437a13eba326cb3d0f0dd948991",
   "multiplayer/versus-client.js": "1bc9f1f41d54ed74ca137e0e15f44b2cd41e1509",
   "multiplayer/match-rules-v604.js": "22e0ec2591bf777b323edbd5b854aae0fa10f6e1",
@@ -657,7 +659,7 @@ const PRECACHE_REVISIONS = {
   "systems/relic-cinema.js": "0e1404bf7dcc086887657f5b643ce548f068a173",
   "systems/kilo-grove.js": "6e734822e55541f2b646d9ed59f694358fbe5266",
   "systems/moving-platforms.js": "eaa75c99c844cb3ff2bf598bbbc93990306fb085",
-  "characters/hula-depth.js": "9e0acf8b849e7b3e25817dd8a7b5c60c4c0f467d",
+  "characters/hula-depth.js": "f0be98007c8529b74e0593d4cfeabb2df06ecdee",
   "systems/world-bounds.js": "37e23d900d42b95fa9e9aa6273ace97d1f614fad",
   "systems/platform-layout.js": "3d5b15bbf71dda8749f63adcec11c44aedce3464",
   "characters/michi-motion.js": "354be1f07643966e91515952784d4fe414ec1dc9",
@@ -709,7 +711,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "2fa5621ebc8db767b36b437d8c1047b823be7d67",
-  "index.html": "645c695210cf4e438fc662908515a1647bbc578b",
+  "index.html": "4fbc4a180b63bb34c40b8e540067380bc962c02b",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",

@@ -1,0 +1,25 @@
+{
+  "release": "ohana-643",
+  "scope": "Michi: five neon/spectral rigs and a smaller mischievous ghost. Kilo: five tailored outfits and independently rotating L hoop.",
+  "passed": [
+    "Five actual body plans; ten monochrome silhouette pairs below 0.80 IoU",
+    "Thirty distinct gesture/attention/flight/power poses from the real renderer",
+    "Production size curve 66/82/99/121/127 px, unchanged collision boxes; 100 checks across all fifty hero forms",
+    "Native held-key flight: finite form-2 reserve, ascent, glide; form-5 true zero-velocity hover and Down descent",
+    "Focused Michi identity, physics and contextual visual-presence regressions passed",
+    "Release gate: 404 runtime modules, 473 precached resources",
+    "69 focused Kilo regressions: flight, combat, independent L rotation, J recast stability, replicated remaining-duration clock, reduced motion and death suppression",
+    "Final full unit suite: 1884 passed, zero failures",
+    "Refreshed neon art matrix: five forms × seventeen poses × three scales, both facings, frozen input and reduced-motion stability; 1280/390/320 native selector and desktop/mobile baby HUD",
+    "Final smaller-ghost optical height measured at 127 px",
+    "Native Atlas regression: saved evolution start/Continue and all fifty hero forms"
+  ],
+  "pending": [
+    "Final native Kilo controls/costume captures completing",
+    "Public candidate and deployment verification"
+  ],
+  "limits": [
+    "Renderer/airborne start fixtures do not claim earned progression or a complete campaign.",
+    "Visual details, soul-lights and contextual attention never apply damage or collect objects."
+  ]
+}

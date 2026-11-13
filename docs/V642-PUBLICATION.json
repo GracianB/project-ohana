@@ -1,1 +1,18 @@
-{"release":"ohana-642","status":"prepared","githubPages":"https://gracianb.github.io/project-ohana/","netlify":"https://project-ohana-multiplayer.netlify.app/","note":"Publication verification will be recorded after the tested candidate is promoted."}
+{
+  "release": "ohana-642",
+  "status": "published",
+  "sourceCommit": "d6a416965737cac7fddf270301e94f63da419ed1",
+  "mainMerge": "3684f1e85e051046871780c497e0b51f50ca29c6",
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/469",
+  "githubPages": "https://gracianb.github.io/project-ohana/",
+  "pagesWorkflow": 43482190538,
+  "netlify": "https://project-ohana-multiplayer.netlify.app/",
+  "netlifyDeploy": "6af7559690b8188c8ebf758a",
+  "method": "Clean tracked release, real dependency files, offline production function build, tested candidate promoted without rebuilding",
+  "verified": [
+    "GitHub Pages: thirteen runtime files match source",
+    "Netlify production: twelve runtime files match source; versus HTML only has Netlify-normalized multiplayer links",
+    "Production API: two connected players ready in adventure and versus, own sessions disconnected",
+    "Candidate native two-browser desktop/mobile movement passed for adventure and versus"
+  ]
+}

@@ -11,11 +11,14 @@
     "Atlas: native 1280/390/320 flow, saved evolution start and Continue",
     "400 evolution frames and 80 reduced-motion reveals",
     "Five forms × six distinct acting/attention/flight/power poses",
-    "Release gate: 403 runtime modules and 472 offline resources"
+    "Release gate: 403 runtime modules and 472 offline resources",
+    "CI GitHub Pages release checks and publication passed",
+    "Netlify candidate: native five-form Atlas, zero uncaught errors",
+    "Netlify candidate: live desktop/mobile native lobbies and two-browser movement in adventure and versus",
+    "Candidate backend: create/join/choose/ready/poll for Cat and Stitcho; own sessions disconnected",
+    "Published Netlify production version and live two-player API in both modes verified; twelve runtime files byte-identical. Netlify rewrites two multiplayer HTML links during postprocessing."
   ],
-  "pending": [
-    "Public deployment verification"
-  ],
+  "pending": [],
   "limits": [
     "Flight test uses isolated airborne start positions; it does not claim full campaign completion.",
     "Contextual attention is local visual behavior; no invulnerability, wall phasing or automatic attacks are added."
