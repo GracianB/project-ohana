@@ -6,12 +6,17 @@
     "Thirty real acting/attention/flight/power poses",
     "100 production size checks across fifty hero forms; Michi 70/89/64/129/76 px; unchanged physical boxes",
     "Native keyboard and production physics: five top speeds 5.8/6.5/7.2/7.6/9.2 and deliberate direction reversal",
-    "25 focused identity/evolution regressions passed; other hero speed curves preserved"
+    "25 focused identity/evolution regressions passed; other hero speed curves preserved",
+    "Final complete unit suite: 1885 passed, zero failures",
+    "Final art matrix: five forms × seventeen poses × three scales, both facings, immutable input and reduced-motion stability; native 1280/390/320 selector and desktop/mobile HUD",
+    "Release gate: 404 runtime modules and 473 precached resources",
+    "Netlify candidate: native five-form Atlas and sixteen public runtime files, including identity/speed data, match tested source",
+    "GitHub Pages release CI and deployment succeeded; sixteen public runtime files including identity/speed data match source",
+    "Netlify candidate: Michi as host, native desktop/mobile lobbies and two-browser movement in adventure and versus",
+    "Same tested deploy promoted intact; production ohana-646 and sixteen runtime files match source",
+    "Production API: two connected players ready in adventure and versus; own test sessions disconnected"
   ],
-  "pending": [
-    "Final unit suite and art matrix",
-    "Public candidate and deployment verification"
-  ],
+  "pending": [],
   "limits": [
     "Renderer/position fixtures do not claim earned campaign completion.",
     "Glow rendering removes repeated shadow blur; no benchmarked FPS increase is claimed.",

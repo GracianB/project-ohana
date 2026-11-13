@@ -1,5 +1,17 @@
 {
   "release": "ohana-646",
-  "status": "verification",
-  "scope": "Five Michi designs, faster movement and lighter glow rendering"
+  "status": "published and verified",
+  "sourceCommit": "e778fc24fb3c17f4b62b5de701882ad43ec13f52",
+  "mainMerge": "18ba04ad7192b8a39173fc5ce8c829622b662219",
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/476",
+  "githubPages": "https://gracianb.github.io/project-ohana/",
+  "netlify": "https://project-ohana-multiplayer.netlify.app/",
+  "netlifyDeploy": "6af797032a8d3d16d380e89d",
+  "pagesWorkflow": 43524172308,
+  "publishedAt": "2026-11-13T23:05:46.129Z",
+  "verified": [
+    "Sixteen runtime files on GitHub Pages and Netlify, including identity/speed definitions, match tested source",
+    "Candidate native Atlas and two-browser desktop/mobile movement with Michi host in adventure and versus",
+    "Production version and two-player create/join/choose/ready/poll verified in both modes; own sessions disconnected"
+  ]
 }
