@@ -54,6 +54,7 @@ try{
  const mobile=await browser.newContext({storageState:await page.context().storageState(),viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce'}),phone=await mobile.newPage();
  phone.on('pageerror',e=>errors.push(e.message));await phone.clock.install({time:new Date('2026-10-25T12:00:00Z')});await phone.clock.pauseAt(new Date('2026-10-25T12:00:01Z'));
  await phone.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await phone.evaluate(hero=>{localStorage.setItem('ohana-resume','1');const e=window.__OHANA_E2E;e.startWorld1(hero);e.step(600);},hero);
+ if(!await phone.locator('.touch-btn[data-k="j"]').isVisible())await phone.locator('#touch-power-toggle').tap();
  await phone.locator('.touch-btn[data-k="j"]').tap();await phone.evaluate(()=>window.__OHANA_E2E.step(1));assert.equal((await phone.evaluate(()=>window.__OHANA_E2E.state())).lastAbilitySlot,0);
  await phone.clock.runFor(32);await phone.screenshot({path:`test-results/v510/${hero}-mobile.png`});await mobile.close();
  for(let n=0;n<12&&s.world1Cine;n++){await page.keyboard.press('Enter');s=await step(120);}
