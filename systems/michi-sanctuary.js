@@ -11,7 +11,10 @@ export function authorMichiSanctuary(room){
  const ledges=[];for(const [base,y]of[[4040,1134],[1590,1860],[6790,1134],[6710,620],[1540,820]])for(let i=1;i<=2;i++)ledges.push([base+i*95,y-i*75,170,18]);
  // Real switchback routes, with recoverable floor beneath both paths.
  for(let i=0;i<7;i++)ledges.push([5900+i*260,1034-(i%3)*95,180,20]);
- ledges.push([6420,904,28,230],[6800,794,28,230],[7480,904,28,230],[5960,534,170,18],[6350,444,170,18],[7490,454,180,18],[780,734,180,18],[1160,634,180,18],[2310,634,180,18],[2650,734,180,18]);
+ // The maze's carved stone thresholds stay *jumpable* in onyx-mouse form (evo 2).
+ // Former 230px solid walls trapped the real runner at x≈6402 and x≈7462:
+ // visual arches must not demand fairy-flight before the third/fourth lantern.
+ ledges.push([6420,1012,28,122],[6800,914,28,110],[7480,1012,28,122],[5960,534,170,18],[6350,444,170,18],[7490,454,180,18],[780,734,180,18],[1160,634,180,18],[2310,634,180,18],[2650,734,180,18]);
  const species=['arana','murcielago','phosquito','ufo','medusa'];
  const entries=[[4620,1134,0,'pursuer'],[1220,1860,0,'pursuer'],[2320,1860,3,'shield'],[1640,1660,1,'flyer'],[1120,820,2,'gunner'],[2420,820,4,'flyer'],[6300,1134,0,'pursuer'],[7040,1134,3,'shield'],[7550,970,2,'gunner'],[6410,620,1,'flyer'],[7390,620,4,'flyer'],[7700,620,2,'gunner'],[10900,1134,0,'pursuer'],[12100,960,1,'flyer']];
  room.foes=entries.map(([x,floor,s,role],i)=>[x,floor-(['flyer','gunner'].includes(role)?130:45),species[s],false,{role,name:['Hiladora de raíces','Polilla del farol','Vigía de cobre','Caracola del umbral','Faroluna errante'][s],chapterHP:44+Math.min(i,8)*6,anchorFloor:floor,anchorY:floor-130,flightBand:['flyer','gunner'].includes(role)?{top:floor-270,bottom:floor-20}:null,catEncounter:true,michiSanctuary:true,leash:{left:x-170,right:x+240}}]);
