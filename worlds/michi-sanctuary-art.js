@@ -1,4 +1,5 @@
 import {drawMichiLivingBackdrop} from './michi-living-backdrop.js';
+import {drawMichiSanctuaryTerrain} from './michi-living-terrain.js';
 import {SANCTUARY_PALETTE as P,nearestSanctuaryPassage,passageReady,sanctuaryZone,sanctuaryGuardianDefeated} from '../systems/michi-sanctuary.js';
 const TAU=Math.PI*2;
 const oval=(c,x,y,rx,ry,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();};
@@ -31,11 +32,9 @@ export function drawMichiSanctuaryBackdrop(c,g,cam,t,W,H){
 }
 export function drawMichiSanctuary(c,g,cam,t=0){
  if(!g.roomDef?.michiSanctuary)return;const W=g.viewW||1280,H=g.viewH||720,r=g.roomDef.michiSanctuary,near=nearestSanctuaryPassage(g);c.save();c.lineCap='round';
- // Masonry grows from actual colliders, including ceilings and underground floors.
- for(const p of g.platforms||[]){if(p.x+p.w<cam.x-80||p.x>cam.x+W+80||p.y>cam.y+H+120||p.y+p.h<cam.y-120)continue;const x=p.x-cam.x,y=p.y-cam.y;
-  c.fillStyle=p.h>40?'#24434b':'#395b60';c.fillRect(x,y,p.w,p.h);c.fillStyle='#73978b';c.fillRect(x,y, p.w,4);c.fillStyle='#a2c5aa';for(let i=12;i<p.w;i+=44)c.fillRect(x+i,y-3,14,3);
-  if(p.h>40){c.strokeStyle='#45636a';c.lineWidth=1;for(let i=0;i<Math.min(24,p.w/65);i++){const bx=x+i*65;stroke(c,'#34525c',1,()=>{c.moveTo(bx,y+20);c.lineTo(bx+30,y+20);c.lineTo(bx+36,y+44);});}}
- }
+ // The real collision map owns the stones. A dedicated artist supplies the texture.
+ const lit=(g.world1?.stations||[]).filter(s=>s.done).length/5;
+ drawMichiSanctuaryTerrain(c,g.platforms||[],cam,W,H,sanctuaryZone(g)?.id,lit);
  const playerX=(g.player?.x||0)+(g.player?.w||0)*.5-cam.x;
  const playerY=(g.player?.y||0)+(g.player?.h||0)*.5-cam.y;
  for(const a of r.passages){
