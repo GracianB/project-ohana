@@ -17,7 +17,7 @@ function recorder(){
  const operations=[];let depth=0;
  const ctx={fillStyle:'',strokeStyle:'',lineWidth:1,globalAlpha:1,font:'',textAlign:''};
  const commands=['beginPath','moveTo','lineTo','bezierCurveTo','quadraticCurveTo','closePath',
-  'fill','stroke','arc','ellipse','fillRect','translate','scale','setTransform'];
+  'fill','stroke','arc','ellipse','fillRect','fillText','translate','scale','setTransform'];
  for(const cmd of commands)ctx[cmd]=(...args)=>operations.push([cmd,...args]);
  ctx.save=()=>{depth++;operations.push(['save']);};
  ctx.restore=()=>{depth--;assert.ok(depth>=0,'restore must balance save');operations.push(['restore']);};
