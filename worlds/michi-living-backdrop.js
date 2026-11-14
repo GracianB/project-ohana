@@ -186,7 +186,7 @@ function lanternAfterglow(c,g,cam,t,W,H,reduced){
   if(!s.done||!Number.isFinite(s.x)||!Number.isFinite(s.y))continue;
   const x=s.x-cx,y=s.y-cy-12,r=146;
   if(x<-r||x>W+r||y<-r||y>H+r)continue;
-  const pulse=reduced?1:1+Math.sin(t*.027+s.id*1.9)*.055;
+  const pulse=reduced?1:1+Math.sin(t*.027+(Number.isFinite(s.id)?s.id:0)*1.9)*.055;
   const halo=c.createRadialGradient(x,y,7,x,y,r*pulse);
   halo.addColorStop(0,'rgba(255,236,182,.20)');
   halo.addColorStop(.36,'rgba(232,193,151,.115)');
