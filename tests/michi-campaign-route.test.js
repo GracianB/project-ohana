@@ -22,6 +22,15 @@ test('Michi route follows authored lantern gates without skipping locked passage
  assert.equal(next('court','return',5,true,2),null);
  assert.equal(next('court','return',5,true,3)?.id,'court-exit');
 });
+test('Michi maze stone thresholds are passable before the fairy flight unlock',()=>{
+ const roomFloor=room.michiSanctuary.zones.find(z=>z.id==='maze').floor;
+ for(const x of [6420,7480]){
+  const wall=room.plats.find(q=>q[0]===x&&q[2]===28);
+  assert.ok(wall,'missing authored maze landmark '+x);
+  assert.equal(wall[1]+wall[3],roomFloor);
+  assert.ok(wall[3]<=130,'maze threshold must be jumpable as evo 2, not require evo 1/4 flight');
+ }
+});
 test('every legal Michi entrance arrives at a named chapter floor',()=>{
  for(const arch of room.michiSanctuary.passages){
   const zone=michiZoneAtArrival(room,arch);
