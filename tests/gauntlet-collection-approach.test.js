@@ -19,10 +19,13 @@ test('earned relic uses an actual off-balcony walking route before descending',(
  const v={phase:'released',object:{x:9360,y:1119}};
  const ghost={x:9284,y:812,w:80,h:42,grounded:true};
  const waypoint=gauntletRelicApproach(v,ghost);
- assert.ok(waypoint>9400,'first leave the authored 9000–9400 central terrace');
- assert.equal(gauntletRelicApproach(v,{...ghost,x:9440,y:880}),waypoint,
-  'do not turn back onto the balcony before physically clearing the ledge');
- assert.equal(gauntletRelicApproach(v,{...ghost,x:9440,y:1000}),9360,
+ const centerBalcony={left:(7000+11800)/2-200,right:(7000+11800)/2+200};
+ assert.ok(waypoint<centerBalcony.left||waypoint>centerBalcony.right,
+  'leave either edge of the real 9200–9600 authored terrace');
+ const outside={...ghost,x:waypoint-ghost.w/2,y:880};
+ assert.equal(gauntletRelicApproach(v,outside),waypoint,
+  'stay at the SAME edge until the character has physically cleared the ledge');
+ assert.equal(gauntletRelicApproach(v,{...outside,y:1000}),9360,
   'once below the balcony the real collectible is the target');
  assert.equal(gauntletRelicApproach({...v,phase:'fight'},ghost),9360);
 });
