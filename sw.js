@@ -1,8 +1,10 @@
-const VERSION = "ohana-649";
+const VERSION = "ohana-650";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/michi-sanctuary.js?v=" + VERSION,
   "./worlds/michi-sanctuary-art.js?v=" + VERSION,
+  "./worlds/michi-living-backdrop.js?v=" + VERSION,
+  "./worlds/michi-living-terrain.js?v=" + VERSION,
   "./systems/michi-sanctuary-combat.js?v=" + VERSION,
   "./systems/michi-sanctuary-spells.js?v=" + VERSION,
   "./systems/chapter-cinema.js?v=" + VERSION,
@@ -491,7 +493,9 @@ const PRECACHE = [
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
   "systems/michi-sanctuary.js": "279f159f8e75543dc3100827a26b53d9e7c4802f",
-  "worlds/michi-sanctuary-art.js": "468c7b71fb16a524514b1faa529d2550618ea755",
+  "worlds/michi-sanctuary-art.js": "9d4f8d2887f676a35d6466a9ba9b5f419fabac59",
+  "worlds/michi-living-backdrop.js": "f684c0d9fd89b8b2018e33ab28c8a94bd84f8d85",
+  "worlds/michi-living-terrain.js": "c96b6c8a96a1072c5f63b45f7a23f4887b8d46e9",
   "systems/michi-sanctuary-combat.js": "797b9feb6dc9e7a2596b346812b380c82ddbb01c",
   "systems/michi-sanctuary-spells.js": "482f3aa821df461a3b2f9803065c3f3a07976fdc",
   "systems/chapter-cinema.js": "662494bec8a46595a4bbfbcc33edaacc0cdb6812",
@@ -561,7 +565,7 @@ const PRECACHE_REVISIONS = {
   "caprichos.css": "7d395b7b53c6b2ca31f553eb5c65d33a4126c916",
   "systems/field-guide.js": "68296f6cb36d874524539397ccb0b2c3f8850053",
   "worlds/living-realms.js": "665bdbf783583d65bf4a0ee4919a051280df4f8e",
-  "versus.html": "d6157a5fc751d04d42dc7cefa7ea2d5634fccc08",
+  "versus.html": "2a6084a42d93fb15fcf43605e71afba21c26804f",
   "versus.css": "1342f8b77b943437a13eba326cb3d0f0dd948991",
   "multiplayer/versus-client.js": "1bc9f1f41d54ed74ca137e0e15f44b2cd41e1509",
   "multiplayer/match-rules-v604.js": "22e0ec2591bf777b323edbd5b854aae0fa10f6e1",
@@ -722,7 +726,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "77035c396a4c6f58aec6af1378ea3a1892433ef9",
-  "index.html": "dccaf26b52cf01a61544a9cf65c67ad6446c7ac7",
+  "index.html": "3b74441fefa571712c20370d9af050a10337a5e6",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
