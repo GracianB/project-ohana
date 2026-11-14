@@ -492,7 +492,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/michi-sanctuary.js": "279f159f8e75543dc3100827a26b53d9e7c4802f",
+  "systems/michi-sanctuary.js": "667cc3f85d91e048fb4b552ea5234795fad131d0",
   "worlds/michi-sanctuary-art.js": "9d4f8d2887f676a35d6466a9ba9b5f419fabac59",
   "worlds/michi-living-backdrop.js": "f684c0d9fd89b8b2018e33ab28c8a94bd84f8d85",
   "worlds/michi-living-terrain.js": "c96b6c8a96a1072c5f63b45f7a23f4887b8d46e9",
