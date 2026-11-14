@@ -1,5 +1,5 @@
 // Stitcho's campaign progression belongs to the workshop, never to the hub.
-import {XP_NEED} from './xp.js';
+import {XP_NEED,applyChapterXpFloor} from './xp.js';
 import {drawStitchoStarCruiser,drawStitchoMaintenanceRail} from './stitcho-chapter-art-v607.js';
 export const STITCHO_CHAPTER_BOSS_ID='w1-stitcho-glitch-v1';
 export const STITCHO_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134});
@@ -13,10 +13,10 @@ export const stitchoBossDefeated=g=>!!g.clearedEncounters?.['w1-stitcho']?.inclu
 export function stitchoChapterReady(g){return !stitchoChapter(g)||!!g.world1Seals?.includes('stitcho')||(g.world1?.stations.every(s=>s.done)&&stitchoRailDone(g)&&stitchoBossDefeated(g));}
 export function stitchoGrowth(g){
  if(!stitchoChapter(g)||!g.player||!g.world1)return 0;
- if(g.world1.sealed){g.player.xp=Math.max(Number(g.player.xp)||0,XP_NEED[4]);return XP_NEED[4];}
+ if(g.world1.sealed){return applyChapterXpFloor(g,XP_NEED[4]);}
  const s=g.world1.stations;
  const stage=s[0]?.done?(s[1]?.done?(s[2]?.done?4:3):(stitchoRailDone(g)?2:1)):0;
- const floor=XP_NEED[stage]||0;g.player.xp=Math.max(Number(g.player.xp)||0,floor);return floor;
+ const floor=XP_NEED[stage]||0;return applyChapterXpFloor(g,floor);
 }
 export function updateStitchoChapter(g){
  if(!stitchoChapter(g)||!g.world1||!g.player)return;

@@ -6,7 +6,7 @@
 
 **Diez historias. Una familia.**
 
-[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=648) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=649) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
 
@@ -18,11 +18,12 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Corazón:** diez núcleos de energía con tres objetos propios a sus pies. Reúne sus resonancias y elige qué héroe invoca al guardián; vuelve a elegir antes de Quimera.
 - **Objetos:** los tres descubrimientos obligatorios de cada sala tienen arte propio de Canvas y reaparecen en su núcleo final. Cada capítulo entrega un único sello.
 - **Combate:** H de cerca, J a distancia y poderes distintos por héroe. El libro explica los enlaces, I, P y el compañero U.
+- **Forma inicial:** puedes entrar con cualquiera de tus evoluciones desbloqueadas; el capítulo completado no sustituye tu elección por la última. Continue conserva esa partida.
 - **Continuidad:** pausa con confirmación del guardado y resumen de sellos/recuerdos; Continue retoma la aventura. Reintentar Quimera descarta el jefe y su barra anteriores.
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; Aventura y Versus comprobados entre dos navegadores con vistas de escritorio y móvil. La prueba con dispositivos físicos sigue pendiente.
 
-Registro de entrega: `ohana-648` / nuevo capítulo ramificado de Michi, Ratón de Ónice, Polilla del Farol y escenas nativas de historia. [Validación](docs/V648-VALIDATION.json) · [Publicación](docs/V648-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
+Registro de entrega: `ohana-649` / la forma inicial elegida se conserva al entrar en capítulos completados y al continuar. [Validación](docs/V649-VALIDATION.json) · [Publicación](docs/V649-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
 
 ## Historial de desarrollo
 

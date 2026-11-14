@@ -1,0 +1,19 @@
+{
+  "release": "ohana-649",
+  "status": "unit and focused native checks passed; full starting-form matrix in progress",
+  "passed": [
+    "Reproduced ohana-648 bug: selecting Michi form 2 started at form 5",
+    "1920 unit tests passed, including 17 starting-form growth/save regressions",
+    "Native desktop and 390px mobile: selected Michi form 2 remains selected at launch, after simulation and Continue",
+    "Release gate: 409 runtime modules and 478 offline resources"
+  ],
+  "pending": [
+    "Native ten heroes × five selected forms matrix",
+    "Candidate/public deployment verification"
+  ],
+  "limits": [
+    "Unlock/earned-seal fixtures exercise the real Atlas buttons and Continue; they do not claim earned campaign completion.",
+    "Actual new combat/exploration XP and newly completed objectives can still evolve the hero. Historical completed objectives do not grant their XP again.",
+    "Legacy saves without an explicit replay selection keep the previous restoration behavior."
+  ]
+}

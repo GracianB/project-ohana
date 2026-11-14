@@ -1,3 +1,4 @@
+import {selectedStartingForm,cleanStartingFormChoice} from './xp.js';
 import {cleanKeepsakes,mergeKeepsakes} from './keepsakes.js';
 import {cleanRoomAlbums} from './room-album.js';
 // Save v3 (reads v2). Ids viejos se canonizan para no romper partidas.
@@ -75,6 +76,7 @@ export function packSave(game, MagicMod) {
     world1Stations: cleanWorld1Stations(game.world1Stations),
     world1Won: !!game.world1Won,
     world1Visited: cleanVisited(game.world1Visited),
+    startFormChoice: cleanStartingFormChoice(selectedStartingForm(game),p?.id,game.roomId),
     evo: p ? p.evo : 0,
     id: p ? canonId(p.id) : "",
     xp: p ? p.xp : 0,
@@ -149,6 +151,7 @@ export function unpackSave(raw, defId) {
     world1Stations: cleanWorld1Stations(raw.world1Stations),
     world1Won: !!raw.world1Won,
     world1Visited: cleanVisited(raw.world1Visited),
+    startFormChoice: cleanStartingFormChoice(raw.startFormChoice,id,raw.roomId),
     evo: Math.max(0, Math.min(4, Math.floor(finiteNumber(raw.evo)))),
     xp: Math.max(0, finiteNumber(raw.xp)),
     uExp: Math.max(0, Math.min(200,Math.floor(finiteNumber(raw.uExp)))),

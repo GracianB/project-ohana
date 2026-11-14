@@ -1,6 +1,6 @@
 // Dino campaign landing mechanics and chapter loop.
 // V613 — Valle Fósil de Dino: pisotones colosales, placas fósiles y resonancia sísmica.
-import {XP_NEED} from './xp.js';
+import {XP_NEED,applyChapterXpFloor} from './xp.js';
 import {drawDinoPlateV613, drawDinoAtmosphere} from './dino-chapter-art-v613.js';
 
 export const DINO_CHAPTER_BOSS_ID = 'w1-dino-colossus-v1';
@@ -18,8 +18,7 @@ export function dinoGrowth(g) {
  const n = g.world1.stations.filter(s => s.done).length;
  const stage = Math.min(4, n);
  const floor = XP_NEED[stage] || 0;
- g.player.xp = Math.max(Number(g.player.xp) || 0, floor);
- return floor;
+ return applyChapterXpFloor(g,floor);
 }
 
 export function dinoLanding(g, s) {

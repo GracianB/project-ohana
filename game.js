@@ -152,7 +152,7 @@ import { sense, think } from "./engine/foe-brain.js";
 import { directEnemyEncounter, enemyCanCommit, enemySteering, enemyDirectorSnapshot } from "./systems/enemy-director.js";
 import { drawEncounterSignals } from "./systems/encounter-signals.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
-import { XP_NEED } from "./systems/xp.js";
+import { XP_NEED,selectedStartingForm } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
 import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill, addCombo as safeAddCombo } from "./systems/mutations.js";
 import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, compactLiveList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
@@ -654,6 +654,7 @@ beep("locked");
 bounceLocked(fromDir);
 return false;
 }
+if(game._startFormChoice&&game._startFormChoice.room!==id)game._startFormChoice=null;
 if(game.personalAdventureSolo&&!game._e2eLegacyStart){
  const finalEntry=id==="w1-final"&&world1SealsComplete(game.world1Seals);
  const chapter=finalEntry?{hero:game.finalRitualEnabled?(game.player?.id||'kilo'):'kilo',reset:game.finalRitualEnabled?game.player?.evo<4:game.roomId!==id||game.player?.id!=="kilo"}:world1ChapterEntry(id,{hero:game.player?.id,previousRoom:game.roomId,resume:!!game._resumeCheckpoint});
@@ -723,7 +724,7 @@ if(r.world1){if(game.roomAlbums)delete game.roomAlbums[id];game.roomAlbumItems=[
 enterWorld1Collect(game);enterWorld1(game);
 // A genuinely earned seal restores exploration tools quietly. First visits
 // still start as babies; revisits do not replay four evolution cinematics.
-if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4){
+if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4&&!selectedStartingForm(game)){
  game.player.xp=Math.max(game.player.xp||0,420);game.player.evo=4;
  applyForm(game.player,{silent:true});renderAbilityBar();
 }
@@ -995,13 +996,15 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
-if (typeof globalThis.__ohanaStartForm === "number") {
+game._chosenStartForm=null;game._startFormChoice=null;
+if (!resume&&!onlineMode&&typeof globalThis.__ohanaStartForm === "number") {
   const chosenForm = Math.max(0, Math.min(4, globalThis.__ohanaStartForm));
   game.player.evo = chosenForm;
   game.player.xp = XP_NEED[chosenForm] || 0;
   applyForm(game.player, { silent: true });
   paintFit(game.player);
   game._chosenStartForm = chosenForm;
+  game._startFormChoice={hero:def.id,room:"w1-"+def.id,baselineFloor:null,lastFloor:null};
 }
 if(def.id==='kilo')game.player._kiloEntranceAt=t;
 else game.player._ohanaEntranceAt=t;
@@ -1100,6 +1103,7 @@ if (resume) {
 try {
   const u = saveStore.read(def.id);
   if (u) {
+    game._startFormChoice=u.startFormChoice||null;
     game.player.evo = u.evo;
     game.player.xp = u.xp;
     // V313 saves contained one U EXP value. Migrate it to the equipped
