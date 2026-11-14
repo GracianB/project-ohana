@@ -15,7 +15,7 @@ const PAL=Object.freeze({
 export const MICHI_BIOLUM_FORMS=Object.freeze([
   {id:'kitten',name:'Michi · Cachorro Rebelde',glow:'#adfff1',radius:115},
   {id:'fae',name:'Michi · Alas de Asfalto',glow:'#98f8ff',radius:145},
-  {id:'jelly',name:'Michi · Pantera Negra',glow:'#f6a7ff',radius:175},
+  {id:'jelly',name:'Michi · Ratón de Ónice',glow:'#f6a7ff',radius:175},
   {id:'star',name:'Michi · Lince Hechicero',glow:'#ffe8ad',radius:190},
   {id:'capybara',name:'Michi · Espectro de Nueve Vidas',glow:'#9effcd',radius:240}
 ]);

@@ -1,3 +1,4 @@
+import {updateSanctuaryBoss,drawSanctuaryBoss,drawSanctuarySignals} from './michi-sanctuary-combat.js';
 import {chapterBossStart,chapterBossFinish} from './chapters-lunar-prism-embers.js';
 // LOS JARDINES DE LA LUNA — Oráculo Medusaluna (Michicornio's personal mini boss).
 // 100% vector Canvas drawing: colossal abyssal jellyfish deity with iridescent moon jelly mantle.
@@ -10,8 +11,10 @@ const TAU=Math.PI*2;
 export function createMichiBoss(makeFoe,rng=()=>.5,options={}){
  const arena=Object.freeze({...MICHI_BOSS,...options.arena}),roomId=options.roomId||'hub',x=options.x??3420;
  const e=makeFoe(x,arena.floor-96,'cangrejo',roomId,997,{rng});
+ e._michiSanctuary=!!options.sanctuary;
  e._chapterArena=arena;e._growthChapter=options.chapter||null;
  e.x=x;e.y=arena.floor-96;e.w=118;e.h=96;
+ if(e._michiSanctuary){e.w=180;e.h=176;e.y=arena.floor-e.h;}
  e.hp=e.max=arena.hp;if(e._growthChapter){e.damageTakenScale=0;e.damageWindowRemaining=0;}
  e.miniBoss=true;e._michiBoss=true;
  e._campaignOriginal=true;e.spawnIndex=999;
@@ -23,6 +26,7 @@ export function createMichiBoss(makeFoe,rng=()=>.5,options={}){
 
 export function updateMichiBoss(e,g,hurt){
  if(!e?._michiBoss)return false;
+ if(e._michiSanctuary)return updateSanctuaryBoss(e,g,hurt);
  const b=e._astralCat,p=g.player,arena=e._chapterArena||MICHI_BOSS,previous=b.phase;
  if(e.invuln>0)e.invuln--;
  e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x));
@@ -116,6 +120,7 @@ export function updateMichiBoss(e,g,hurt){
 // ─── HUD holográfico y señales tácticas del Oráculo Medusaluna ───────────────
 export function drawMichiBossSignals(ctx,e,cam,t=0,reduced=false){
  if(!e?._michiBoss)return;
+ if(e._michiSanctuary){drawSanctuarySignals(ctx,e,cam);return;}
  const b=e._astralCat,cx=e.x+e.w/2-cam.x,cy=e.y-cam.y;
  const panW=290,panH=72,px=cx-panW/2,py=cy-panH-20;
  ctx.save();
@@ -236,6 +241,7 @@ export function drawMichiBossSignals(ctx,e,cam,t=0,reduced=false){
 // ─── Cuerpo del Oráculo Medusaluna ───────────────────────────────────────────
 export function drawMichiBossBody(ctx,e,cam,t=0,reduced=false){
  if(!e?._michiBoss)return;
+ if(e._michiSanctuary){drawSanctuaryBoss(ctx,e,cam,t,reduced);return;}
  const b=e._astralCat,w=e.w,h=e.h;
  const beat=reduced?0:Math.sin(t*.066),swim=reduced?0:Math.sin(t*.095);
  const x=e.x+w/2-cam.x,y=e.y+h-cam.y;

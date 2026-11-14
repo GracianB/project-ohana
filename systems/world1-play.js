@@ -1,3 +1,4 @@
+import {sanctuaryObjective} from './michi-sanctuary.js';
 import {drawKiloResonator} from './kilo-chapter-art-v606.js';
 import {drawStitchoPart,drawStitchoPartStation} from './stitcho-chapter-art-v607.js';
 import {drawChispinRod} from './chispin-chapter-art-v608.js';
@@ -132,6 +133,7 @@ export function world1NextObjective(g) {
   const w = g?.world1, p = g?.player, r = g?.roomDef;
   if(r?.fusionBoss)return world1FinalObjective(g);
   if (!w || !p || !r) return null;
+  const sanctuary=sanctuaryObjective(g);if(sanctuary)return sanctuary;
   const expedition=expeditionObjective(g);if(expedition)return expedition;
   if(r?.growthChapter==='cuerno'){const co=cuernoObjective(g);if(co)return co;}
   if(r?.growthChapter==='dragon'){const dgo=dragonObjective(g);if(dgo)return dgo;}
@@ -274,7 +276,7 @@ export function updateWorld1(g,hurt) {
       }
       break; }
     case "medusas":
-      for (const s of w.stations) if (!s.done && airborne && near(p, s.x, s.y, 48, 52)) complete(g, s, "MEDUSA");
+      for (const s of w.stations) if (!s.done && airborne && (!r.michiSanctuary||w.stations.filter(a=>a.id<s.id).every(a=>a.done)) && near(p, s.x, s.y, 48, 52)) complete(g, s, r.michiSanctuary?"FAROL":"MEDUSA");
       break;
     case "prismas":
       for (const s of w.stations) if (!s.done && near(p, s.x, s.y - 40, 50, 90)) {
@@ -392,7 +394,7 @@ function drawEmblem(ctx, hero, x, y, s, color) {
 }
 
 export function drawWorld1(ctx, g, cam, t) {
-  drawExpedition(ctx,g,cam,t);
+  if(!g.roomDef?.michiSanctuary)drawExpedition(ctx,g,cam,t);
   const w = g.world1, r = g.roomDef; if (!w || !r) return;
   const reduce = !!g.reduceMotion, col = WORLD1_THEMES[w.hero]?.color || "#ffd6f2";
   const vis = (x) => x - cam.x > -200 && x - cam.x < (g.viewW || 1600) + 200;
@@ -404,7 +406,7 @@ export function drawWorld1(ctx, g, cam, t) {
   drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawCatChapter(ctx,g,cam);drawCuernoChapter(ctx,g,cam);drawDragonChapter(ctx,g,cam);drawDinoChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);drawFritaAtmosphere(ctx,g,cam,t,reduce);drawPizzaAtmosphere(ctx,g,cam,t,reduce);drawYomiAtmosphere(ctx,g,cam,t,reduce);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
-    drawStation(ctx, g, w, s, cam, t, reduce, col);
+    if(!r.michiSanctuary)drawStation(ctx, g, w, s, cam, t, reduce, col);
   }
   // This is wayfinding, not another altar the player must activate.
   const a = r.seal.altar, ax = a.x - cam.x, ay = a.y - cam.y;

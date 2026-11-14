@@ -35,7 +35,7 @@ try {
  for(const id of new Set(audit.map(r=>r.id)))for(let evo=1;evo<5;evo++){
   const before=audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo-1);
   const after=audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo);
-  if(id==='cat'&&evo===2){assert.ok(after.height>=50&&after.height<=75&&after.height<before.height*.85,'black panther must be compact');continue;}
+  if(id==='cat'&&evo===2){assert.ok(after.height>=30&&after.height<=55&&after.height<before.height*.7,'black mouse must be tiny');continue;}
   if(id==='cat'&&evo===4){assert.ok(after.height>=65&&after.height<=95&&after.height<before.height*.8,'final ghost must be deliberately compact');continue;}
   assert.ok(after.height>before.height,`${id} vector F${evo-1}→F${evo}: ${before.height}→${after.height}px (must grow)`);
  }

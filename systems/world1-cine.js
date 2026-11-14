@@ -1,3 +1,4 @@
+import {buildChapterFilm,drawChapterFilm,stopChapterMedia} from './chapter-cinema.js';
 import {drawFamilyActor,tryFamilyActorAdapter} from './family-actor.js';
 import {holdAdventureFinalScene} from '../multiplayer/adventure-finale.js';
 import {KEEPSAKES,drawKeepsake} from './keepsakes.js';
@@ -35,6 +36,7 @@ const ALL = WORLD1_ORDER;
 // Disposición de los héroes en cada plano.
 //  scatter: dispersos por el cielo · circle: reunidos · one: protagonista · fused: cosidos
 export function buildWorld1Scene(id, hero = null, ctx = {}) {
+  const film=buildChapterFilm(id,hero,ctx);if(film)return film;
   const th = hero ? WORLD1_THEMES[hero] : null, name = hero ? heroDisplayName(hero) : "", seals = new Set(ctx.seals || []);
   const restored = ALL.filter((h) => seals.has(h));
   switch (id) {
@@ -84,7 +86,7 @@ export function playWorld1Cine(g, id, hero = null) {
     g._pendingWorld1Cine={id,hero};g.resetInput?.();return true;
   }
   g._pendingWorld1Cine=null;
-  const shots = buildWorld1Scene(id, hero, { seals: g?.world1Seals,fighter:g?.finalRitualEnabled&&id==='keepsakeIntro'?g.finalGauntlet?.fighter:null });
+  const shots = buildWorld1Scene(id, hero, { form:g?.player?.evo, seals: g?.world1Seals,fighter:g?.finalRitualEnabled&&id==='keepsakeIntro'?g.finalGauntlet?.fighter:null });
   if (!shots.length) return false;
   if (g.reduceMotion) for (const s of shots) s.dur = Math.round(s.dur * 0.7);
   g.world1Cine = { id, hero, shots, i: 0, t: 0, total: 0, fade: 0 };
@@ -110,7 +112,7 @@ export function skipWorld1Cine(g) {
   if (!view?.canAdvance) return false;
   // First reveal a sentence that is still being typed; never throw it away.
   if (view.button === "Mostrar texto") { c.revealed = true; return true; }
-  if (c.i < c.shots.length - 1) { c.i++; c.t = 0; c.revealed = false; }
+  if (c.i < c.shots.length - 1) { stopChapterMedia();c.i++; c.t = 0; c.revealed = false; }
   else endScene(g);
   return true;
 }
@@ -137,12 +139,12 @@ export function syncWorld1CineControls(g, doc = globalThis.document, visible = t
   button.setAttribute("aria-disabled", String(!view.canAdvance));
   if (wasHidden) button.focus({preventScroll:true});
 }
-function endScene(g) { const c = g.world1Cine;if(!c)return;if(holdAdventureFinalScene(g,c))return; g.world1Cine = null; g.resetInput?.(); g.onWorld1CineEnd?.(c.id, c.hero); if (c.id === "bossDefeat"&&(!g.onlineAdventure||g.coopAuthority)) playWorld1Cine(g, "ending"); }
+function endScene(g) { const c = g.world1Cine;if(!c)return;if(holdAdventureFinalScene(g,c))return; stopChapterMedia();g.world1Cine = null; g.resetInput?.(); g.onWorld1CineEnd?.(c.id, c.hero); if (c.id === "bossDefeat"&&(!g.onlineAdventure||g.coopAuthority)) playWorld1Cine(g, "ending"); }
 
 export function updateWorld1Cine(g) {
   const c = g?.world1Cine; if (!c) return false;
   c.t++; c.total++;
-  const s = c.shots[c.i]; if (!s || c.t >= num(s.dur, 120)) { if (c.i < c.shots.length - 1) { c.i++; c.t = 0; c.revealed = false; } else endScene(g); }
+  const s = c.shots[c.i]; if (!s || c.t >= num(s.dur, 120)) { if (c.i < c.shots.length - 1) { stopChapterMedia();c.i++; c.t = 0; c.revealed = false; } else endScene(g); }
   if (c.total > 6000) endScene(g); // finito pase lo que pase
   g.renderDirty = true;
   return true;
@@ -188,6 +190,7 @@ export function world1CineTextLayout(ctx, shot, W, H) {
 export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   const c = g?.world1Cine; if (!c) return;
   const s = c.shots[c.i]; if (!s) return;
+  if(s.layout==='chapter-film'){drawChapterFilm(ctx,g,Math.max(1,num(W,1280)),Math.max(1,num(H,720)),t);return;}
   W = Math.max(1, num(W, 1280)); H = Math.max(1, num(H, 720)); t = num(t);
   const k = clamp(c.t / Math.max(1, s.dur), 0, 1), fadeIn = Math.min(1, c.t / 18), fadeOut = Math.min(1, (s.dur - c.t) / 18), reduce = !!g.reduceMotion;
   const shake = s.shake && !reduce ? Math.sin(c.t * 1.7) * 6 * (1 - k) : 0;

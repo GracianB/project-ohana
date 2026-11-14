@@ -66,7 +66,7 @@ export function updateCampaignEnemy(e,g,hurt){
   if(e.kind==='abeja'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#ffb300',count:4,size:2.2,life:12});
   if(e.kind==='libelula'&&a.wind===10)g.fx?.emit?.(cx(e),cy(e),{color:'#80deea',count:4,size:2.2,life:12});
  }
- const kiloEncounter=!!g.roomDef?.kiloExperienceVersion&&!!e.roomPersona?.kiloEncounter;
+ const kiloEncounter=(!!g.roomDef?.kiloExperienceVersion&&!!e.roomPersona?.kiloEncounter)||!!g.roomDef?.michiSanctuary;
  const difficulty=g.combatDifficulty||readCombatDifficulty(g.roomId);
  const variant=e.roomPersona?.variant||0,pace=[.85,1,1.12,.95][variant%4],reach=[1,.85,1.15,1.05][variant%4];
  // Feed the articulated creature rigs the actual combat state, not a cosmetic clock.

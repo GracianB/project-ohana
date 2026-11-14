@@ -12,7 +12,7 @@ const EYE_COLORS=Object.freeze({
 });
 export const MICHI_LIGHT_LIMIT=Object.freeze({enemies:18,fireflies:24,pathlights:24,bufferScale:.5});
 export function isMichiWorld(game){
-  return !!(game?.roomDef?.hero==='cat'&&game.roomDef.world1);
+  return !!(game?.roomDef?.hero==='cat'&&game.roomDef.world1&&!game.roomDef.michiSanctuary);
 }
 export function planMichiLights(game,viewport={width:1280,height:720}){
   if(!isMichiWorld(game)||!game?.player)return null;

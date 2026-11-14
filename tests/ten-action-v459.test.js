@@ -55,7 +55,7 @@ test('V459: all five feline shapes survive 10 gestures and reduced-motion contex
 test('rebel cat lineage keeps five feline forms and the public action contract',()=>{
  const src=readFileSync(new URL('../characters/art/cat.js',import.meta.url),'utf8');
  const name=ROSTER.find(x=>x.id==='cat');
- assert.deepEqual(name.forms.map(f=>f.name),['Michi · Cachorro Rebelde','Michi · Alas de Asfalto','Michi · Pantera Negra','Michi · Lince Hechicero','Michi · Espectro de Nueve Vidas']);
+ assert.deepEqual(name.forms.map(f=>f.name),['Michi · Cachorro Rebelde','Michi · Alas de Asfalto','Michi · Ratón de Ónice','Michi · Lince Hechicero','Michi · Espectro de Nueve Vidas']);
  assert.match(src,/drawRebelCat\(ctx,\{\.\.\.safe,form:f\}\)/);
  assert.deepEqual(MICHICORNIO_ACTIONS,['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);
 });

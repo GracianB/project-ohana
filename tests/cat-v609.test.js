@@ -1,13 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
-import {CAT_JELLIES_V609} from '../systems/cat-encounters-v609.js';
+import {authorCatEncounters,CAT_JELLIES_V609} from '../systems/cat-encounters-v609.js';
 import {catGrowth,catObjective,MICHI_CHAPTER_ARENA} from '../systems/cat-chapter.js';
 import {drawCatCreature,drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust,drawCatBossArena,drawCatPearl,drawCatUpdraft} from '../systems/cat-chapter-art-v609.js';
 import {updateCatChapter} from '../systems/cat-chapter.js';
 
+
+const legacyRoom=authorCatEncounters(structuredClone(WORLD1_ROOMS['w1-cat']));delete legacyRoom.michiSanctuary;
 test('V609 Cat room: single authored route of 14400 with lunar crystal terraces, pits and traps', () => {
- const room = WORLD1_ROOMS['w1-cat'];
+ const room = legacyRoom;
  assert.equal(room.catEncounterVersion, 609);
  assert.equal(room.width, 14400);
  assert.ok(room.plats?.length >= 25, 'must combine ground terraces and crystal bridges');
@@ -17,7 +19,7 @@ test('V609 Cat room: single authored route of 14400 with lunar crystal terraces,
 });
 
 test('V609 Cat stations: five sacred lunar jellyfish in ascending air layers', () => {
- const room = WORLD1_ROOMS['w1-cat'];
+ const room = legacyRoom;
  const stations = room.seal.stations;
  assert.equal(stations.length, 5);
 
@@ -37,7 +39,7 @@ test('V609 Cat stations: five sacred lunar jellyfish in ascending air layers', (
 });
 
 test('V609 Cat fauna ecology: 5 species with structured roles and escalation', () => {
- const room = WORLD1_ROOMS['w1-cat'];
+ const room = legacyRoom;
  const foes = room.foes;
  assert.ok(foes.length >= 18, 'must contain authored lunar creatures');
 
@@ -60,9 +62,9 @@ test('V609 Cat fauna ecology: 5 species with structured roles and escalation', (
 
 test('V609 Cat objective and progression: guides to jellies then to Oráculo Medusaluna', () => {
  const g = {
-  roomDef: WORLD1_ROOMS['w1-cat'],
+  roomDef: legacyRoom,
   world1: {
-   stations: WORLD1_ROOMS['w1-cat'].seal.stations.map(s => ({ ...s, done: false })),
+   stations: legacyRoom.seal.stations.map(s => ({ ...s, done: false })),
    sealed: false
   },
   player: { id: 'cat', xp: 0, evo: 0 }
@@ -125,7 +127,7 @@ test('V609 Cat vector art renderers: fauna and moon jelly callable without error
 });
 
 test('V609 Cat room: pearls and abyssal updrafts are present and interact with player', () => {
- const room = WORLD1_ROOMS['w1-cat'];
+ const room = legacyRoom;
  assert.ok(room.catPearls?.length >= 10, 'must contain collectible Selenite Pearls');
  assert.ok(room.catUpdrafts?.length >= 3, 'must contain updrafts over the 3 pits');
 

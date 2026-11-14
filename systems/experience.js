@@ -458,7 +458,7 @@ export class ExperienceDirector {
 
 
 
-    if (evo > 0.03) {
+    if (evo > 0.03 && !game?.roomDef?.michiSanctuary) {
       const k =
         1 - clamp(evo);
 
@@ -609,7 +609,7 @@ export class ExperienceDirector {
         ctx.fillRect(0, 0, W, H);
       }
 
-      if (item.kind === "evo") {
+      if (item.kind === "evo" && !game?.roomDef?.michiSanctuary) {
         ctx.globalCompositeOperation = "lighter";
         ctx.globalAlpha = fade * 0.35;
         ctx.strokeStyle = item.color;

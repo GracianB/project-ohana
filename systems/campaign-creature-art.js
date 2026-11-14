@@ -1,3 +1,4 @@
+import {drawSanctuaryFoe} from '../worlds/michi-sanctuary-art.js';
 import {drawKiloCreature} from './kilo-chapter-art-v606.js';
 import {drawStitchoCreature} from './stitcho-chapter-art-v607.js';
 import {drawChispinCreature} from './chispin-chapter-art-v608.js';
@@ -41,6 +42,7 @@ export function drawCampaignCreature(c,e,cam,t,reduced=false){
  if(drawKiloCreature(c,e,cam,t,reduced))return true;
  if(drawStitchoCreature(c,e,cam,t,reduced))return true;
  if(drawChispinCreature(c,e,cam,t,reduced))return true;
+ if(drawSanctuaryFoe(c,e,cam,t,reduced))return true;
  if(drawCatCreature(c,e,cam,t,reduced))return true;
  if(drawCuernoCreature(c,e,cam,t,reduced))return true;
  if(drawDragonCreature(c,e,cam,t,reduced))return true;

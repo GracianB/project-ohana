@@ -73,7 +73,7 @@ export function checkpointFor(room,id){return room?.checkpoints?.find(c=>c.id===
 export function updateCampaignProgress(g){
  const p=g.player,r=g.roomDef;if(!p||p.dead||!r?.sectors)return;
  g.explored||={};const explored=g.explored[r.id]||=[];
- const sector=r.sectors.find(s=>p.x+p.w/2>=s.x&&p.x+p.w/2<s.x+s.w);
+ const sector=r.sectors.find(s=>p.x+p.w/2>=s.x&&p.x+p.w/2<s.x+s.w&&(!r.michiSanctuary||(p.y+p.h>=s.y&&p.y+p.h<=s.y+s.h)));
  if(sector&&!explored.includes(sector.id))explored.push(sector.id);
  if(!p.grounded)return;
  const c=r.checkpoints.find(c=>Math.abs(p.x+p.w/2-c.x)<85&&Math.abs(p.y+p.h-c.y)<12);

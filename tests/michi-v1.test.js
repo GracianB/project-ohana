@@ -12,7 +12,7 @@ test('Michi V1: 5 forms include pure vector Canvas metadata and active roster en
   assert.equal(def.forms.length, 5, 'Must have exactly 5 forms');
   assert.equal(def.forms[0].name, 'Michi · Cachorro Rebelde');
   assert.equal(def.forms[1].name, 'Michi · Alas de Asfalto');
-  assert.equal(def.forms[2].name, 'Michi · Pantera Negra');
+  assert.equal(def.forms[2].name, 'Michi · Ratón de Ónice');
   assert.equal(def.forms[3].name, 'Michi · Lince Hechicero');
   assert.equal(def.forms[4].name, 'Michi · Espectro de Nueve Vidas');
   assert.equal(def.evoNames[4], 'Michi · Espectro de Nueve Vidas');

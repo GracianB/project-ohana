@@ -18,7 +18,7 @@ function fixture(hero){
 }
 function stand(g,x,y,air=false){const p=g.player;p.x=x-p.w/2;p.y=y-p.h/2;p.grounded=!air;p.vx=p.vy=0;}
 test('V2 keeps nine expedition chapters while Kilo uses the whole room for its four lessons',()=>{
- for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];assert.equal(r.width,hero==='kilo'?9600:14400);if(hero==='kilo'){assert.equal(r.expedition,null);assert.equal(r.seal.stations.length,4);assert.ok(r.seal.stations[3].x>r.width*.8);continue;}assert.equal(r.expedition.nodes.length,3);assert.ok(r.checkpoints.length>=9);assert.equal(r.seal.altar.x,13920);
+ for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];assert.equal(r.width,hero==='kilo'?9600:14400);if(hero==='kilo'){assert.equal(r.expedition,null);assert.equal(r.seal.stations.length,4);assert.ok(r.seal.stations[3].x>r.width*.8);continue;}assert.equal(r.expedition.nodes.length,3);if(r.michiSanctuary){assert.equal(r.checkpoints.length,7);assert.deepEqual(r.expedition.nodes.map(n=>n.id),[0,1,2].map(i=>'w1-cat-v2-trial-'+i));continue;}assert.ok(r.checkpoints.length>=9);assert.equal(r.seal.altar.x,13920);
   for(const n of r.expedition.nodes){assert.ok(n.x>9600&&n.x<14000);assert.ok(n.id.startsWith(r.id+'-'));}
   assert.ok(r.plats.some(p=>p[0]===9600&&p[2]===4800&&p[1]===1134));
  }

@@ -1,0 +1,29 @@
+{
+  "release": "ohana-648",
+  "status": "local validation passed; publication checks pending",
+  "passed": [
+    "1903 unit tests passed, zero failures",
+    "Release gate: 409 runtime modules, 478 verified offline resources",
+    "Native keyboard and production physics earned all five lamps and all five forms; no station, XP or health grants",
+    "Continue from that legitimately earned save defeated the guard boss with zero deaths; three real attack patterns observed",
+    "Continuation from the earned boss save physically collected 100 memories, all three echoes, relic and seal",
+    "Continue preserved 100 memories, relic, seal and defeated guardian; exit tunnel played the departure film",
+    "1280/390/320 native Continue, compact menu, album replay, accessible story button and ten-actor scene passed with reduced motion",
+    "Five distinct production silhouettes and ten pairwise monochrome comparisons passed",
+    "Five forms × eight gait, landing, brake, ready, attack and recovery poses passed",
+    "100 production optical checks across fifty hero forms: Michi 72/89/41/144/68 pixels",
+    "Native five-form speeds and deliberate direction reversal passed at 5.8/6.5/7.2/7.6/9.2",
+    "Native H deals immediate damage in all five forms without adding simulation frames"
+  ],
+  "pending": [
+    "GitHub Pages deployment and public source verification",
+    "Netlify candidate, two-browser network smoke and production promotion"
+  ],
+  "limits": [
+    "The physical traversal, boss and collection runs continue legitimately earned browser saves; they are separate runs, not a single continuous recording.",
+    "Michi is the only rebuilt chapter. The story registry supports further chapters; the other nine room layouts remain unchanged.",
+    "Renderer/position/target fixtures do not claim campaign progression.",
+    "The optional same-origin video adapter has a live Canvas fallback; no videos ship in this release.",
+    "Multiplayer checks will distinguish general connection/movement from a complete cooperative Michi campaign."
+  ]
+}

@@ -30,6 +30,7 @@ export function guardianPerformance(hero,b,t,reduced=false){
  return pose;
 }
 export function drawChapterBossV2(c,e,cam,t,reduced=false){
+ if(e._michiSanctuary)return false;
  if(!e.miniBoss||!e.roomId?.startsWith('w1-'))return false;
  const id=e.gauntletBoss||e.roomId.slice(3),P=PALETTES[id],b=chapterBossMind(e);if(!P||!b)return false;
  if(id==='kilo'&&!e.gauntletBoss)return drawKiloGuardian(c,e,cam,t,reduced);
