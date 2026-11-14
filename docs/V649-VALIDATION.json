@@ -1,15 +1,19 @@
 {
   "release": "ohana-649",
-  "status": "local validation passed; publication checks in progress",
+  "status": "local and candidate validation passed",
   "passed": [
     "Reproduced ohana-648 bug: selecting Michi form 2 started at form 5",
     "1920 unit tests passed, including 17 starting-form growth/save regressions",
     "Native desktop and 390px mobile: selected Michi form 2 remains selected at launch, after simulation and Continue",
     "Release gate: 409 runtime modules and 478 offline resources",
-    "Native Atlas: all ten heroes × five selected forms passed at launch, after simulation and after reload/Continue; earned seals retained"
+    "Native Atlas: all ten heroes × five selected forms passed at launch, after simulation and after reload/Continue; earned seals retained",
+    "Netlify candidate: 15 runtime files match tested source",
+    "Netlify candidate: native 390px Atlas selected Michi form 2 with all forms/seals earned; HUD, actual saved form, simulation and Continue retain form 2",
+    "Netlify candidate API: two players ready in adventure and versus; own sessions disconnected",
+    "Legacy Dino physical chapter/mobile dive and Kilo H-J-H mobile finisher passed after opening the existing power drawer in their browser controllers"
   ],
   "pending": [
-    "Candidate native launch/Continue and public deployment verification"
+    "Production promotion and GitHub Pages verification"
   ],
   "limits": [
     "Unlock/earned-seal fixtures exercise the real Atlas buttons and Continue; they do not claim earned campaign completion.",
