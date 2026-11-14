@@ -44,6 +44,7 @@ try{
  const phone=await mobile.newPage();phone.on('pageerror',e=>errors.push(e.message));
  await phone.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);
  await phone.evaluate(()=>{localStorage.setItem('ohana-resume','1');window.__OHANA_E2E.startWorld1('stitcho');window.__OHANA_E2E.step(600);});
+ if(!await phone.locator('.touch-btn[data-k="k"]').isVisible())await phone.locator('#touch-power-toggle').tap();
  await phone.locator('.touch-btn[data-k="k"]').tap();
  await phone.waitForFunction(()=>window.__OHANA_E2E.stitchoChapterState().move==='roll');
  await phone.screenshot({path:'test-results/v502/stitcho-mobile-roll.png'});await mobile.close();
