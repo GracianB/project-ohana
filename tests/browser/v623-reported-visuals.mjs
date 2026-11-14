@@ -8,7 +8,7 @@ try{
  page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await page.keyboard.press('Escape');
  for(const [width,height]of[[1280,900],[390,844],[320,568]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(180);
-  await page.locator('[data-atlas-step="1"]').click();const final=page.locator('[data-atlas-room="w1-final"]');await final.scrollIntoViewIfNeeded();await final.click();assert.equal(await final.getAttribute('aria-disabled'),'true');const canvas=page.locator('#atlas-stage');
+  await page.locator('[data-atlas-step="1"]').click();const final=page.locator('[data-atlas-room="w1-final"]');await final.scrollIntoViewIfNeeded();assert.equal(await final.getAttribute('aria-disabled'),'true');const box=await final.boundingBox();assert.ok(box,'locked final portal remains visible');await page.mouse.click(box.x+box.width/2,box.y+box.height/2);assert.equal(await final.getAttribute('aria-disabled'),'true','unearned final portal must stay locked');const canvas=page.locator('#atlas-stage');
   await page.waitForTimeout(180);await canvas.screenshot({path:`test-results/v623/final-selection-${width}.png`});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));report.push({width,height,finalPortalVisible:true,lockedWithoutEarnedSeals:true});
  }
