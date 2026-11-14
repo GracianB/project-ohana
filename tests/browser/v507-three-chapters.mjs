@@ -33,6 +33,14 @@ try{
    await page.screenshot({path:'test-results/v507/'+hero+'-death-'+failedAttempt+'.png'});
    assert.ok(failedAttempt<=8,'too many natural deaths in '+hero+': '+JSON.stringify(context));
    await page.evaluate(()=>window.__OHANA_E2E.respawn());s=await step(600);
+   if(hero==='cat'){
+    // Real checkpoint respawns may return to a different sanctuary floor.
+    // The route tracker must follow the saved position, never grant progress.
+    const foot=s.player.y+s.player.h,center=s.player.x+s.player.w/2;
+    const restored=sanctuary.michiSanctuary.zones.filter(z=>center>=z.x&&center<z.x+z.w)
+     .sort((a,b)=>Math.abs(a.floor-foot)-Math.abs(b.floor-foot))[0];
+    if(restored)michiZone=restored.id;
+   }
   }
   if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.clock.runFor(400);await page.locator('#game').focus();}
   forms.add(s.evo);
