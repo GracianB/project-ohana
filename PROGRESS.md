@@ -1,6 +1,6 @@
 ## ohana-648 · El jardín de las nueve vidas
 
-Sala ramificada de Michi, ratón negro diminuto, faroles y madrigueras, fauna de raíces y polillas, guardián de tres ataques con recuperación y escenas nativas de historia. IDs de evolución, estaciones y cien recuerdos conservados. Validación y publicación registradas en `docs/V648-VALIDATION.json` y `docs/V648-PUBLICATION.json`.
+Publicado y verificado en GitHub Pages y Netlify: 1.903 pruebas, cinco faroles ganados con física real, guardián vencido, cien recuerdos, tres ecos y Continue comprobados. Sala ramificada de Michi, ratón negro diminuto, faroles y madrigueras, fauna de raíces y polillas, guardián de tres ataques con recuperación y escenas nativas de historia. IDs de evolución, estaciones y cien recuerdos conservados. Validación y publicación registradas en `docs/V648-VALIDATION.json` y `docs/V648-PUBLICATION.json`.
 
 ## ohana-647 · Animación conectada al movimiento real
 

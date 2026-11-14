@@ -20,7 +20,7 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Combate:** H de cerca, J a distancia y poderes distintos por héroe. El libro explica los enlaces, I, P y el compañero U.
 - **Continuidad:** pausa con confirmación del guardado y resumen de sellos/recuerdos; Continue retoma la aventura. Reintentar Quimera descarta el jefe y su barra anteriores.
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
-- **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; la comprobación remota entre dispositivos sigue pendiente.
+- **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; Aventura y Versus comprobados entre dos navegadores con vistas de escritorio y móvil. La prueba con dispositivos físicos sigue pendiente.
 
 Registro de entrega: `ohana-648` / nuevo capítulo ramificado de Michi, Ratón de Ónice, Polilla del Farol y escenas nativas de historia. [Validación](docs/V648-VALIDATION.json) · [Publicación](docs/V648-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
 

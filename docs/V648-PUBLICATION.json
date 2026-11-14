@@ -1,10 +1,20 @@
 {
   "release": "ohana-648",
-  "status": "candidate tested; production promotion pending",
+  "status": "published and verified",
   "githubPages": "https://gracianb.github.io/project-ohana/",
   "netlify": "https://project-ohana-multiplayer.netlify.app/",
   "testedRuntimeCommit": "5c4cae73f91bece84286d767dac99b5121bbe50d",
   "pullRequest": "https://github.com/GracianB/project-ohana/pull/480",
   "candidateDeploy": "6af8574641ef105a92d3232f",
-  "candidate": "https://6af8574641ef105a92d3232f--project-ohana-multiplayer.netlify.app"
+  "candidate": "https://6af8574641ef105a92d3232f--project-ohana-multiplayer.netlify.app",
+  "sourceCommit": "3bc7e6125c439cdfef03acd22948738b4e22c8c5",
+  "mainMerge": "d9502c814070b018bd36020720a3c85311fb5810",
+  "netlifyDeploy": "6af8574641ef105a92d3232f",
+  "pagesWorkflow": 43596400066,
+  "publishedAt": "2026-11-14T12:48:06.690380+00:00",
+  "verified": [
+    "GitHub Pages and Netlify: 33 runtime files match tested source",
+    "Netlify candidate: native five-form Atlas and desktop/mobile two-browser movement in adventure and versus",
+    "Same tested candidate promoted intact; production version and two-player API checks passed in both modes"
+  ]
 }

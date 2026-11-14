@@ -1,6 +1,6 @@
 {
   "release": "ohana-648",
-  "status": "local and Netlify candidate validation passed",
+  "status": "published and verified",
   "passed": [
     "1903 unit tests passed, zero failures",
     "Release gate: 409 runtime modules, 478 verified offline resources",
@@ -18,17 +18,19 @@
     "Netlify candidate: 33 runtime files match tested source byte-for-byte",
     "Netlify candidate: native five-form Atlas paints five distinct bodies",
     "Netlify candidate API: two players connect and ready in adventure and versus; own sessions disconnected",
-    "Netlify candidate: native desktop/mobile lobbies and two-browser movement passed in adventure and versus"
+    "Netlify candidate: native desktop/mobile lobbies and two-browser movement passed in adventure and versus",
+    "GitHub Pages workflow 43596400066: unit tests, offline integrity and deployment succeeded",
+    "GitHub Pages: 33 public runtime files match tested source byte-for-byte",
+    "The exact tested Netlify deploy was promoted intact; 33 production runtime files match source",
+    "Production API: two players ready in adventure and versus; own sessions disconnected"
   ],
-  "pending": [
-    "GitHub Pages deployment and public source verification",
-    "Promote the exact tested Netlify deploy and verify production"
-  ],
+  "pending": [],
   "limits": [
     "The physical traversal, boss and collection runs continue legitimately earned browser saves; they are separate runs, not a single continuous recording.",
     "Michi is the only rebuilt chapter. The story registry supports further chapters; the other nine room layouts remain unchanged.",
     "Renderer/position/target fixtures do not claim campaign progression.",
     "The optional same-origin video adapter has a live Canvas fallback; no videos ship in this release.",
-    "Multiplayer checks will distinguish general connection/movement from a complete cooperative Michi campaign."
+    "Multiplayer checks will distinguish general connection/movement from a complete cooperative Michi campaign.",
+    "Observed two-browser transports were server fallback for adventure and canonical HTTP for versus. No peer-to-peer latency or complete cooperative Michi campaign acceptance is claimed."
   ]
 }
