@@ -22,3 +22,11 @@ export function michiNextPassage(room,source,target,lit=0,sealed=false,echoes=0)
 export function michiZoneAtArrival(room,passage){
  return zoneAt(room.michiSanctuary.zones,passage.toX,passage.toFloor);
 }
+
+
+export function michiShouldDescendToArch(player,passage){
+ if(!player||!passage||!player.grounded)return false;
+ const center=player.x+player.w/2,foot=player.y+player.h;
+ // A real DOWN keypress drops through the current thin ledge, never the solid floor.
+ return Math.abs(center-passage.x)<80&&foot<passage.floor-95;
+}
