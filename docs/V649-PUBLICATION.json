@@ -1,10 +1,20 @@
 {
   "release": "ohana-649",
-  "status": "candidate tested; production pending",
+  "status": "published and verified",
   "githubPages": "https://gracianb.github.io/project-ohana/",
   "netlify": "https://project-ohana-multiplayer.netlify.app/",
   "testedRuntimeCommit": "87d0a5c63b16b175c38c951812c585df79a8489b",
   "candidateDeploy": "6af860f745246021aebde150",
   "candidate": "https://6af860f745246021aebde150--project-ohana-multiplayer.netlify.app",
-  "pullRequest": "https://github.com/GracianB/project-ohana/pull/482"
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/482",
+  "sourceCommit": "fbd0e66fc3f3fe9f9533a23e57c04829501c32ff",
+  "mainMerge": "bd09bc5ce838a3b6d23b5ffc49c018212862e453",
+  "netlifyDeploy": "6af860f745246021aebde150",
+  "pagesWorkflow": 43600236366,
+  "publishedAt": "2026-11-14T13:37:27.039353+00:00",
+  "verified": [
+    "Both public origins serve all 15 checked runtime files byte-for-byte",
+    "Both public origins pass native mobile form-two selection and Continue with all evolutions/seals earned",
+    "Exact tested Netlify candidate promoted intact; production API ready/poll passed for adventure and versus"
+  ]
 }

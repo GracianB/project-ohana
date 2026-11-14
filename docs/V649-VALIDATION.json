@@ -1,6 +1,6 @@
 {
   "release": "ohana-649",
-  "status": "local and candidate validation passed",
+  "status": "published and verified",
   "passed": [
     "Reproduced ohana-648 bug: selecting Michi form 2 started at form 5",
     "1920 unit tests passed, including 17 starting-form growth/save regressions",
@@ -10,14 +10,18 @@
     "Netlify candidate: 15 runtime files match tested source",
     "Netlify candidate: native 390px Atlas selected Michi form 2 with all forms/seals earned; HUD, actual saved form, simulation and Continue retain form 2",
     "Netlify candidate API: two players ready in adventure and versus; own sessions disconnected",
-    "Legacy Dino physical chapter/mobile dive and Kilo H-J-H mobile finisher passed after opening the existing power drawer in their browser controllers"
+    "Legacy Dino physical chapter/mobile dive and Kilo H-J-H mobile finisher passed after opening the existing power drawer in their browser controllers",
+    "Chispin physical chapter and native mobile blink passed with the power drawer opened",
+    "GitHub Pages workflow 43600236366: unit tests, offline integrity and deployment passed",
+    "GitHub Pages and production Netlify: all 15 checked runtime files match tested source byte-for-byte",
+    "Both public origins: native mobile Atlas selects form 2 with all forms/seals earned; HUD, saved form and Continue retain form 2",
+    "Exact tested Netlify candidate promoted intact; production two-player API checks passed in both modes"
   ],
-  "pending": [
-    "Production promotion and GitHub Pages verification"
-  ],
+  "pending": [],
   "limits": [
     "Unlock/earned-seal fixtures exercise the real Atlas buttons and Continue; they do not claim earned campaign completion.",
     "Actual new combat/exploration XP and newly completed objectives can still evolve the hero. Historical completed objectives do not grant their XP again.",
-    "Legacy saves without an explicit replay selection keep the previous restoration behavior."
+    "Legacy saves without an explicit replay selection keep the previous restoration behavior.",
+    "One GitHub Pages probe encountered the startup error screen during deployment; a fresh load and native selection/Continue retry passed. No cold-network startup latency guarantee is claimed."
   ]
 }
