@@ -4,9 +4,8 @@ import {SANCTUARY_PALETTE as P,nearestSanctuaryPassage,passageReady,sanctuaryZon
 const TAU=Math.PI*2;
 const oval=(c,x,y,rx,ry,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();};
 const stroke=(c,col,w,fn)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();fn();c.stroke();};
-export function drawSanctuaryLantern(c,x,y,lit=false,t=0,small=false){
+export function drawSanctuaryLantern(c,x,y,lit=false,t=0,small=false,reduced=false){
  const k=small?.6:1;c.save();c.translate(x,y);c.scale(k,k);
- const reduced=!!(globalThis?.OHANA_REDUCED_MOTION); // visual hint only; progression is untouched
  stroke(c,'#54777c',3,()=>{c.moveTo(0,-45);c.quadraticCurveTo(-6,-36,0,-28);});
  // Finial, copper ribs and faceted handmade glass.
  c.fillStyle='#53767a';c.beginPath();c.moveTo(-20,-27);c.lineTo(0,-39);c.lineTo(20,-27);c.closePath();c.fill();
@@ -53,7 +52,7 @@ export function drawMichiSanctuary(c,g,cam,t=0){
    c.bezierCurveTo(x-38,y-106,x+38,y-106,x+38,y-62);c.lineTo(x+38,y-5);
   });
   // A single readable icon replaces distant repetitive signage.
-  drawSanctuaryLantern(c,x,y-100,ready,t,true);
+  drawSanctuaryLantern(c,x,y-100,ready,t,true,!!g.reduceMotion);
   if(nearby){
    const text=a.label,tagW=Math.min(W-24,Math.max(118,Math.min(266,text.length*7.1+24)));
    c.fillStyle='rgba(8,29,39,.91)';c.fillRect(x-tagW/2,y-166,tagW,31);
@@ -67,7 +66,7 @@ export function drawMichiSanctuary(c,g,cam,t=0){
   if(s.x<cam.x-150||s.x>cam.x+W+150||s.y<cam.y-160||s.y>cam.y+H+120)continue;
   const x=s.x-cam.x,y=s.y-cam.y;
   stroke(c,'#688b86',3,()=>{c.moveTo(x,y-74);c.quadraticCurveTo(x-20,y-150,x+30,y-176);});
-  drawSanctuaryLantern(c,x,y-14,s.done,t);
+  drawSanctuaryLantern(c,x,y-14,s.done,t,false,!!g.reduceMotion);
   const close=Math.hypot(x-playerX,y-30-playerY)<240;
   if(close&&!s.done){
    const tw=Math.min(235,W-24);
@@ -76,7 +75,7 @@ export function drawMichiSanctuary(c,g,cam,t=0){
   }
   if(s.done){c.fillStyle='#65998b';c.fillRect(x-45,y+25,90,5);}
  }
- if(g.expedition?.done&&(g.world1?.sealed||sanctuaryGuardianDefeated(g)))for(const n of g.roomDef.expedition.nodes){if(g.expedition.done.includes(n.id))continue;const x=n.x-cam.x,y=n.y-cam.y;drawSanctuaryLantern(c,x,y,true,t);c.fillStyle=P.ivory;c.font='11px sans-serif';c.textAlign='center';c.fillText('Eco del hogar',x,y-56);}
+ if(g.expedition?.done&&(g.world1?.sealed||sanctuaryGuardianDefeated(g)))for(const n of g.roomDef.expedition.nodes){if(g.expedition.done.includes(n.id))continue;const x=n.x-cam.x,y=n.y-cam.y;drawSanctuaryLantern(c,x,y,true,t,false,!!g.reduceMotion);c.fillStyle=P.ivory;c.font='11px sans-serif';c.textAlign='center';c.fillText('Eco del hogar',x,y-56);}
  const zone=sanctuaryZone(g);
  if(zone&&W>800){
   // Quiet level identification, tucked below the central safe area.
