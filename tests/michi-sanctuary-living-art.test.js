@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {drawMichiLivingBackdrop} from '../worlds/michi-living-backdrop.js';
-import {drawMichiSanctuaryBackdrop,drawMichiSanctuary,drawSanctuaryLantern} from '../worlds/michi-sanctuary-art.js';
+import {drawMichiSanctuaryBackdrop,drawMichiSanctuary,drawSanctuaryLantern,drawSanctuaryWayfinding} from '../worlds/michi-sanctuary-art.js';
 
 const ZONES=['court','crypt','gallery','maze','canopy','arena','return'];
 function fakeGame(index=0,reduceMotion=false,lit=0){
@@ -81,4 +81,15 @@ test('earned farols illuminate their actual position without adding invisible of
  drawMichiLivingBackdrop(offscreen.ctx,g,g.cam,20,1280,720);
  assert.equal(radials(offscreen),radials(dark),'offscreen farols are culled');
  assert.equal(light.depth(),0);
+});
+
+test('Michi focus marker tracks the earned objective, culls offscreen and stays still in reduced motion',()=>{
+ const g=fakeGame(6,true,0),a=recorder(),b=recorder(),outside=recorder();
+ assert.equal(drawSanctuaryWayfinding(a.ctx,g,g.cam,0,1280,720),true);
+ assert.equal(drawSanctuaryWayfinding(b.ctx,g,g.cam,400,1280,720),true);
+ assert.deepEqual(a.operations,b.operations);
+ assert.ok(a.operations.some(op=>op[0]==='radial'),'earned destination has a legible glow');
+ assert.equal(drawSanctuaryWayfinding(outside.ctx,g,{x:0,y:0},0,1280,720),false);
+ assert.equal(outside.operations.length,0,'no marker or painter work offscreen');
+ assert.equal(a.depth(),0);
 });
