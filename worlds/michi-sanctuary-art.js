@@ -1,6 +1,6 @@
 import {drawMichiLivingBackdrop} from './michi-living-backdrop.js';
 import {drawMichiSanctuaryTerrain} from './michi-living-terrain.js';
-import {SANCTUARY_PALETTE as P,nearestSanctuaryPassage,passageReady,sanctuaryZone,sanctuaryGuardianDefeated} from '../systems/michi-sanctuary.js';
+import {SANCTUARY_PALETTE as P,nearestSanctuaryPassage,passageReady,sanctuaryZone,sanctuaryGuardianDefeated,sanctuaryObjective} from '../systems/michi-sanctuary.js';
 const TAU=Math.PI*2;
 const oval=(c,x,y,rx,ry,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();};
 const stroke=(c,col,w,fn)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();fn();c.stroke();};
@@ -25,6 +25,31 @@ export function drawSanctuaryLantern(c,x,y,lit=false,t=0,small=false,reduced=fal
  if(lit&&!reduced){c.globalAlpha=.6;oval(c,0,-13+Math.sin(t*.04)*2,2.5,4,'#fff9df');c.globalAlpha=1;}
  oval(c,0,23,7,3,'#8c756a');c.restore();
 }
+// One compositional focal point, never a screenful of overlapping labels.
+// Reads the same earned objective as gameplay HUD and follows camera movement.
+export function drawSanctuaryWayfinding(c,g,cam,t=0,W=1280,H=720){
+ const goal=sanctuaryObjective(g);
+ if(!goal||!Number.isFinite(goal.x)||!Number.isFinite(goal.y))return false;
+ const x=goal.x-(cam?.x||0),y=goal.y-(cam?.y||0)-97;
+ if(x<28||x>W-28||y<38||y>H-44)return false;
+ const reduced=!!g.reduceMotion;
+ const pulse=reduced?0:Math.sin(t*.035)*2.5;
+ const size=13+pulse,glow=c.createRadialGradient(x,y,2,x,y,38+pulse);
+ glow.addColorStop(0,'rgba(255,242,198,.25)');
+ glow.addColorStop(.46,'rgba(147,232,203,.11)');
+ glow.addColorStop(1,'rgba(147,232,203,0)');
+ c.save();c.fillStyle=glow;c.fillRect(x-42,y-42,84,84);
+ c.fillStyle='#f5e2b5';c.strokeStyle='#244953';c.lineWidth=2;
+ c.beginPath();c.moveTo(x,y-size);c.lineTo(x+size*.62,y);
+ c.lineTo(x,y+size);c.lineTo(x-size*.62,y);c.closePath();c.fill();c.stroke();
+ oval(c,x,y,2.6,4.2,'#4f8d83');
+ // Balanced side glints orient the eye without replacing the game's markers.
+ c.strokeStyle='rgba(162,234,215,.7)';c.lineWidth=1.4;c.beginPath();
+ c.moveTo(x-24,y);c.lineTo(x-17,y);
+ c.moveTo(x+17,y);c.lineTo(x+24,y);c.stroke();
+ c.restore();return true;
+}
+
 // The living scenery is independent from colliders and chapter objectives.
 export function drawMichiSanctuaryBackdrop(c,g,cam,t,W,H){
  return drawMichiLivingBackdrop(c,g,cam,t,W,H);
@@ -76,6 +101,7 @@ export function drawMichiSanctuary(c,g,cam,t=0){
   if(s.done){c.fillStyle='#65998b';c.fillRect(x-45,y+25,90,5);}
  }
  if(g.expedition?.done&&(g.world1?.sealed||sanctuaryGuardianDefeated(g)))for(const n of g.roomDef.expedition.nodes){if(g.expedition.done.includes(n.id))continue;const x=n.x-cam.x,y=n.y-cam.y;drawSanctuaryLantern(c,x,y,true,t,false,!!g.reduceMotion);c.fillStyle=P.ivory;c.font='11px sans-serif';c.textAlign='center';c.fillText('Eco del hogar',x,y-56);}
+ drawSanctuaryWayfinding(c,g,cam,t,W,H);
  const zone=sanctuaryZone(g);
  if(zone&&W>800){
   // Quiet level identification, tucked below the central safe area.
