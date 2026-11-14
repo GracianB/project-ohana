@@ -36,7 +36,7 @@ try{
   }
   if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.clock.runFor(400);await page.locator('#game').focus();}
   forms.add(s.evo);
-  const data=await page.evaluate(()=>window.__OHANA_E2E.nextChapterState()),foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast()),boss=foes.find(e=>e.chapterBoss),b=boss?.chapterBoss;
+  const data=await page.evaluate(()=>window.__OHANA_E2E.nextChapterState()),foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast()),boss=foes.find(e=>hero==='cat'?e.michiBoss:e.chapterBoss),b=hero==='cat'?boss?.michiBoss:boss?.chapterBoss;
   thermal||=data.thermalFrames>0;
   if(b){attacks=Math.max(attacks,b.attacksExecuted||0);if(b.phase==='warn')patterns.add(b.attack);}
   const act2=hero==='cat'?null:await advanceExpeditionControls(page,s,hero,step);
@@ -44,7 +44,7 @@ try{
   const p=s.player,stage=s.world1.done,station=stations[stage];
   const michiDefeated=hero==='cat'&&!station
    ?await page.evaluate(()=>window.__OHANA_E2E.michiSanctuaryState().guardianDefeated):false;
-  const michiBoss=hero==='cat'?foes.find(e=>e.michiBoss):null;
+  const michiBoss=hero==='cat'?boss:null;
   const expedition=hero==='cat'?await page.evaluate(()=>window.__OHANA_E2E.expeditionState()):null;
   const node=hero==='cat'&&!station&&michiDefeated
    ?catExpedition.find(n=>!expedition?.done?.includes(n.id)):null;
@@ -91,7 +91,7 @@ try{
   if(catNodeJump){await page.keyboard.down('w');jumpHeld=true;}
   if(hero==='cat'&&station&&!michiPassage&&Math.abs(dx)<300&&(p.grounded||p.vy>=0&&p.jumps<p.maxJumps&&p.y+p.h>station.y+45)){await page.keyboard.down('w');jumpHeld=true;}
   if(hero==='dragon'&&!thermal&&s.evo>=1&&Math.abs(p.x+p.w/2-3050)<120){await page.keyboard.down('w');jumpHeld=true;}
-  if(near&&(!near.chapterBoss||b?.phase==='rest')){
+  if(near&&(!(near.chapterBoss||near.michiBoss)||b?.phase==='rest')){
    await page.keyboard.press('h');await page.keyboard.press('j');
    if(s.evo>=1&&i%18===0&&hero!=='dragon')await page.keyboard.press('k');
    if(s.evo>=2&&i%12===0)await page.keyboard.press('l');
