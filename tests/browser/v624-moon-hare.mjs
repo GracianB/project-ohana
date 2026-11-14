@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {startServer} from './server.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
+import {michiNextPassage,michiZoneAtArrival,michiShouldDescendToArch,MICHI_FAROL_ZONES} from './michi-campaign-route.mjs';
 const server=await startServer(0),browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
 try{
  await fs.mkdir('test-results/v624',{recursive:true});
@@ -16,7 +17,7 @@ try{
  for(const [width,height]of[[1280,900],[390,844],[320,568]]){
   await page.setViewportSize({width,height});await page.locator('[data-atlas-step="0"]').click();await page.locator('.char-card[data-id="cat"]').focus();await page.keyboard.press('Enter');await page.locator('[data-atlas-step="2"]').click();await page.locator('[data-atlas-form="0"]').click();await page.waitForTimeout(150);if(width===390)await page.locator('#atlas-stage').screenshot({path:'test-results/v624/baby-selection-390.png'});await page.locator('[data-atlas-form="3"]').click();await page.waitForTimeout(250);
   assert.equal(await page.locator('#hoku-atlas').getAttribute('data-hero'),'cat');assert.equal(await page.locator('#hoku-atlas').getAttribute('data-form'),'3');
-  assert.match(await page.locator('#atlas-form-name').textContent(),/Lince Espectral/);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  assert.match(await page.locator('#atlas-form-name').textContent(),/Lince Hechicero/);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await page.locator('#atlas-stage').screenshot({path:`test-results/v624/selection-${width}.png`});selection.push({width,height,realFourthFormPreview:true,noOverflow:true});
  }
  const artwork=await page.evaluate(async()=>{
@@ -39,10 +40,16 @@ try{
  const step=async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return state();};
  async function films(){for(let i=0;i<24;i++){if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.clock.runFor(400);continue;}if(!(await state()).world1Cine)break;await page.keyboard.press('Enter');await step(100);}await page.locator('#game').focus();}
  await films();let current=await step(5);await page.screenshot({path:'test-results/v624/baby-in-room.png'});assert.equal(current.evo,0);assert.equal(current.hero,'cat');assert.equal(current.roomId,'w1-cat');assert.equal(current.world1Seals.length,0);
- const stations=await page.evaluate(async()=>(await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-cat'].seal.stations);
- let deaths=0,fairyFlight=null;const earned=new Set([0]);
+ const sanctuary=await page.evaluate(async()=>(await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-cat']);
+ const stations=sanctuary.seal.stations;
+ let michiZone='court',deaths=0,fairyFlight=null;const earned=new Set([0]);
  for(let i=0;i<900&&current.evo<3;i++){
-  if(current.hp<=0){assert.ok(++deaths<=6);await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();current=await step(40);}
+  if(current.hp<=0){assert.ok(++deaths<=6);await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();current=await step(40);
+   const center=current.player.x+current.player.w/2,foot=current.player.y+current.player.h;
+   const zone=sanctuary.michiSanctuary.zones.filter(z=>center>=z.x&&center<z.x+z.w)
+    .sort((a,b)=>Math.abs(a.floor-foot)-Math.abs(b.floor-foot))[0];
+   if(zone)michiZone=zone.id;
+  }
   await films();current=await state();earned.add(current.evo);
   if(current.evo===1&&!fairyFlight){
    await page.keyboard.down('s');for(let n=0;n<40&&!current.player.grounded;n++)current=await step(8);await page.keyboard.up('s');
@@ -51,10 +58,33 @@ try{
    assert.equal(current.michiFlight?.mode,'ascend');assert.ok(current.player.y<from-100);
    fairyFlight={from,to:current.player.y,remaining:current.michiFlight.remaining};await page.screenshot({path:'test-results/v624/fairy-flight.png'});
   }
-  const p=current.player,station=stations[current.world1.done],dx=station.x-p.x-p.w/2;
-  const foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast());const near=foes.find(e=>e.hp>0&&Math.hypot(e.x+e.w/2-p.x-p.w/2,e.y+e.h/2-p.y-p.h/2)<400);
+  const p=current.player,station=stations[current.world1.done];
+  assert.ok(station,'real station must exist until the third earned evolution');
+  const dest=MICHI_FAROL_ZONES[current.world1.done];
+  const arch=michiNextPassage(sanctuary,michiZone,dest,current.world1.done);
+  assert.ok(michiZone===dest||arch,'real passage needed '+michiZone+' → '+dest);
+  let target=arch?.x??station.x;
+  if(arch){
+   if(michiShouldDescendToArch(p,arch)){
+    await page.keyboard.up('w');await page.keyboard.down('s');
+    current=await step(16);await page.keyboard.up('s');continue;
+   }
+   const center=p.x+p.w/2,foot=p.y+p.h;
+   if(Math.abs(center-arch.x)<55&&Math.abs(foot-arch.floor)<80){
+    await page.keyboard.up('d');await page.keyboard.up('a');
+    await page.keyboard.up('w');await page.keyboard.up('s');
+    await page.keyboard.press('e');
+    const next=await step(4),q=next.player;
+    if(Math.abs(q.x+q.w/2-arch.toX)<120&&Math.abs(q.y+q.h-arch.toFloor)<100){
+     michiZone=michiZoneAtArrival(sanctuary,arch);current=next;continue;
+    }
+   }
+  }
+  const dx=target-p.x-p.w/2;
+  const foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast());
+  const near=foes.find(e=>e.hp>0&&Math.hypot(e.x+e.w/2-p.x-p.w/2,e.y+e.h/2-p.y-p.h/2)<400);
   if(Math.abs(dx)>24)await page.keyboard.down(dx>0?'d':'a');
-  const jump=Math.abs(dx)<300&&(p.grounded||p.vy>=0&&p.jumps<p.maxJumps&&p.y+p.h>station.y+45);
+  const jump=!arch&&Math.abs(dx)<300&&(p.grounded||p.vy>=0&&p.jumps<p.maxJumps&&p.y+p.h>station.y+45);
   if(jump)await page.keyboard.down('w');
   if(near){await page.keyboard.press('h');await page.keyboard.press('j');if(current.evo>=2&&i%12===0)await page.keyboard.press('l');}
   current=await step(Math.abs(dx)>24?Math.min(14,Math.max(1,Math.floor(Math.abs(dx)/7))):20);
@@ -86,9 +116,9 @@ try{
   if(notice)assert.ok(screenFoot-145>notice.y+notice.height,'flight camera must keep the visible hero below the objective notice');
   await fly.screenshot({path:`test-results/v624/eclipse-flight-${mobile?'touch':'keyboard'}.png`});
   if(mobile)await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});else await fly.keyboard.up('Space');
-  a=await ft(20);assert.equal(a.michiFlight.mode,'glide');assert.ok(a.player.vy>0&&a.player.vy<1.1);
+  a=await ft(20);assert.equal(a.michiFlight.mode,'hover');assert.equal(a.player.vy,0);
   await fly.keyboard.down('s');a=await ft(15);await fly.keyboard.up('s');assert.equal(a.michiFlight.mode,'descend');assert.ok(a.player.vy>=4.5);
-  eclipseFlight.push({input:mobile?'touch hold':'Space hold',from,ascentY,sustainedFrames:100,heroClearOfObjective:true,glide:true,controlledDescent:true,earnedBackup:true});await context.close();
+  eclipseFlight.push({input:mobile?'touch hold':'Space hold',from,ascentY,sustainedFrames:100,heroClearOfObjective:true,hover:true,controlledDescent:true,earnedBackup:true});await context.close();
  }
  assert.deepEqual(errors,[]);
  await fs.writeFile('test-results/v624/moon-hare.json',JSON.stringify({selection,artwork:artwork.bounds,eclipseFlight,chapter:{room:'w1-cat',formsEarned:[...earned].sort(),stations:current.world1.done,deaths,physicalControls:true,directChapterAccessFixture:true,fairyFlight},errors},null,2));
