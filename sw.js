@@ -507,7 +507,7 @@ const PRECACHE_REVISIONS = {
   "worlds/kilo-living-grove.js": "b51daa4bf9533a84f2fc2957715fde4d799b90ac",
   "systems/compact-hud.js": "74ea11549989efe7245e6358771881567801ec06",
   "compact-play.css": "d4f92a9ce584abd258c4a30d8fbd525e7d228d0b",
-  "systems/hoku-atlas.js": "6a914d00b9d9af5f8f905ffbe4760c4fe813cbd6",
+  "systems/hoku-atlas.js": "aa503e2222cf13e160faf21df61851f3b7d63bfa",
   "systems/hoku-atlas-model.js": "1c8e2952857a6314040322b9a02e99c1100fb09f",
   "hoku-atlas.css": "08abbd1ef019f2fdd4d1b95c573da67bac32e58d",
   "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
