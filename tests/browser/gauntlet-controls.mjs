@@ -2,6 +2,13 @@
 import assert from 'node:assert/strict';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 import {selectFinalFighter} from './final-ritual-controls.mjs';
+// Physical descent is vital for Michi's final ghost: its hover remains
+// airborne even over the center balcony, so grounded-only DOWN cannot work.
+export function gauntletNeedsDescent(v,p){
+ if(!p)return false;
+ return !!(v?.phase==='released'&&v.object&&p.y+p.h/2<v.object.y-125)||
+  !!(p.grounded&&p.y<1000);
+}
 export async function playGauntlet(page,{onBeat=()=>{},state:readState,step:advance,films,onDeath}={}){
  const state=readState||(()=>page.evaluate(()=>window.__OHANA_E2E.state()));
  const step=advance||(async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return state();});
@@ -43,7 +50,7 @@ export async function playGauntlet(page,{onBeat=()=>{},state:readState,step:adva
    if(b.phase==='warn'&&b.clock<23&&p.grounded&&!['lightning','geysers'].includes(b.pattern))await down('w');
    if(b.phase==='attack'&&b.pattern==='quake'&&b.clock<28&&b.clock>17&&p.grounded)await down('w');
   }
-  if(p.grounded&&p.y<1000)await down('s');
+  if(gauntletNeedsDescent(v,p))await down('s');
   const dx=target-p.x-p.w/2;if(Math.abs(dx)>25)await down(dx>0?'d':'a');
   s=await step(10);await up('d');await up('a');await up('w');await up('s');
   assert.equal(s.runtimeFaults,0,JSON.stringify(s));
