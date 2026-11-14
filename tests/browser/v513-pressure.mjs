@@ -15,8 +15,30 @@ try{
   for(;frames<1200&&s.hp>0;frames+=20){
    if(policy==='active'){
     const foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast());
-    const near=foes.filter(e=>e.hp>0&&Math.abs(e.x-s.player.x)<430).sort((a,b)=>Math.abs(a.x-s.player.x)-Math.abs(b.x-s.player.x))[0];
-    if(near){await page.keyboard.down(near.x>s.player.x?'d':'a');await step(1);await page.keyboard.up('d');await page.keyboard.up('a');await page.keyboard.press('j');await page.keyboard.press('h');if(frames%80===0)await page.keyboard.down('w');}
+    const center=s.player.x+s.player.w/2;
+    const near=foes.filter(e=>e.hp>0&&Math.abs(e.x+e.w/2-center)<490)
+     .sort((a,b)=>Math.abs(a.x+a.w/2-center)-Math.abs(b.x+b.w/2-center))[0];
+    if(near){
+     // A one-frame turn and blind repeated leap puts baby Kilo INTO the
+     // pursuer; it is not evidence that active combat is worse than idling.
+     // Play a real ranged-and-dodge cadence while maintaining sight of the
+     // authored enemies. Never set actor, enemy or health state.
+     const dx=near.x+near.w/2-center,range=Math.abs(dx);
+     const kite=range<245&&center>900;
+     const close=range>350&&center<2800;
+     if(kite||close){
+      await page.keyboard.down(dx*(kite?-1:1)>0?'d':'a');
+      s=await step(kite?10:5);
+      await page.keyboard.up('d');await page.keyboard.up('a');
+     }
+     // Face the actual enemy before firing, without staying in contact.
+     await page.keyboard.down(near.x+near.w/2>s.player.x+s.player.w/2?'d':'a');
+     s=await step(1);await page.keyboard.up('d');await page.keyboard.up('a');
+     await page.keyboard.press('j');await page.keyboard.press('h');
+     if(frames%60===0)await page.keyboard.press('u');
+     if(range<175&&s.player.grounded&&near.y>950&&frames%100===0)
+      await page.keyboard.down('w');
+    }
    }
    s=await step(20);await page.keyboard.up('w');
   }
