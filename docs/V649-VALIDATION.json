@@ -1,15 +1,15 @@
 {
   "release": "ohana-649",
-  "status": "unit and focused native checks passed; full starting-form matrix in progress",
+  "status": "local validation passed; publication checks in progress",
   "passed": [
     "Reproduced ohana-648 bug: selecting Michi form 2 started at form 5",
     "1920 unit tests passed, including 17 starting-form growth/save regressions",
     "Native desktop and 390px mobile: selected Michi form 2 remains selected at launch, after simulation and Continue",
-    "Release gate: 409 runtime modules and 478 offline resources"
+    "Release gate: 409 runtime modules and 478 offline resources",
+    "Native Atlas: all ten heroes × five selected forms passed at launch, after simulation and after reload/Continue; earned seals retained"
   ],
   "pending": [
-    "Native ten heroes × five selected forms matrix",
-    "Candidate/public deployment verification"
+    "Candidate native launch/Continue and public deployment verification"
   ],
   "limits": [
     "Unlock/earned-seal fixtures exercise the real Atlas buttons and Continue; they do not claim earned campaign completion.",
