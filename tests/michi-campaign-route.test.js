@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
-import {michiNextPassage,michiZoneAtArrival,MICHI_FAROL_ZONES} from './browser/michi-campaign-route.mjs';
+import {michiNextPassage,michiZoneAtArrival,michiShouldDescendToArch,MICHI_FAROL_ZONES} from './browser/michi-campaign-route.mjs';
 
 const room=WORLD1_ROOMS['w1-cat'];
 const next=(from,to,lamps,sealed=false,echoes=0)=>
@@ -37,4 +37,13 @@ test('every legal Michi entrance arrives at a named chapter floor',()=>{
   assert.ok(zone,arch.id+' destination must be on authored floor');
   assert.ok(room.michiSanctuary.zones.some(z=>z.id===zone),arch.id);
  }
+});
+
+test('Michi approaches a lower native arch by dropping only through a real thin ledge',()=>{
+ const arch={x:6180,floor:1134},elevated={x:6153,y:905,w:22,h:34,grounded:true};
+ assert.equal(michiShouldDescendToArch(elevated,arch),true);
+ assert.equal(michiShouldDescendToArch({...elevated,grounded:false},arch),false);
+ assert.equal(michiShouldDescendToArch({...elevated,y:1080},arch),false);
+ assert.equal(michiShouldDescendToArch({...elevated,x:5840},arch),false);
+ assert.equal(michiShouldDescendToArch(elevated,null),false);
 });
