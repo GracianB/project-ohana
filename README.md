@@ -1,6 +1,6 @@
 ## ohana-650 · Michi, el santuario vivo (candidato)
 
-Rediseño visual propuesto en [PR #484](https://github.com/GracianB/project-ohana/pull/484): siete ambientes bioluminiscentes, terreno pintado sobre plataformas reales, señales de faroles contextuales, animación reducida y caché offline revisada. La versión 649 continúa siendo la última publicación verificada mientras 650 completa los controles de calidad y despliegue.
+Rediseño visual propuesto en [PR #484](https://github.com/GracianB/project-ohana/pull/484): siete ambientes bioluminiscentes, terreno pintado sobre plataformas reales, señales de faroles contextuales, animación reducida y caché offline revisada. La versión 649 continúa siendo la última publicación verificada mientras 650 completa los controles de calidad y despliegue. [Validación 650](docs/V650-VALIDATION.json) · [Publicación 650](docs/V650-PUBLICATION.json).
 
 <div align="center">
 
