@@ -493,7 +493,7 @@ const PRECACHE = [
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
   "systems/michi-sanctuary.js": "667cc3f85d91e048fb4b552ea5234795fad131d0",
-  "worlds/michi-sanctuary-art.js": "9d4f8d2887f676a35d6466a9ba9b5f419fabac59",
+  "worlds/michi-sanctuary-art.js": "1d9ccc793268a007bfdc98c3d92c2cc76fa7b5e8",
   "worlds/michi-living-backdrop.js": "6989081d909dbde74f5e287e5d25a743f1a3ced2",
   "worlds/michi-living-terrain.js": "c96b6c8a96a1072c5f63b45f7a23f4887b8d46e9",
   "systems/michi-sanctuary-combat.js": "797b9feb6dc9e7a2596b346812b380c82ddbb01c",
