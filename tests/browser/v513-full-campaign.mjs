@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';import fs from 'node:fs/promises';
 import {chromium} from 'playwright';import {startServer} from './server.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 import {advanceKiloEncounterControls} from './kilo-encounter-controls-v606.mjs';
-import {michiNextPassage,michiZoneAtArrival,MICHI_FAROL_ZONES} from './michi-campaign-route.mjs';
+import {michiNextPassage,michiZoneAtArrival,michiShouldDescendToArch,MICHI_FAROL_ZONES} from './michi-campaign-route.mjs';
 import {playGauntlet} from './gauntlet-controls.mjs';
 const server=await startServer(0);let browser;
 try{
@@ -131,6 +131,12 @@ try{
     if(michiPassage){
      target=michiPassage.x;jump=false;
      const center=p.x+p.w/2,foot=p.y+p.h;
+     if(michiShouldDescendToArch(p,michiPassage)){
+      // Drop from the actual one-way terrace using the real player DOWN key;
+      // running toward a doorway while standing above it cannot activate E.
+      await release('w');await hold('s');s=await step(16);await release('s');
+      continue;
+     }
      if(Math.abs(center-michiPassage.x)<55&&Math.abs(foot-michiPassage.floor)<80){
       await release('d');await release('a');await release('w');await release('s');
       await press('e');const arrived=await step(4),rp=arrived.player;
