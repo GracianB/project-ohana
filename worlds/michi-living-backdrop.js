@@ -176,6 +176,28 @@ function gardenArchitecture(c,zone,cam,t,W,H,p,reduced){
  }
 }
 
+
+// Each *earned* lantern lights the world at its actual authored coordinates.
+// Small, culled light pools keep the collision silhouettes and player readable.
+// No particles, state writes or unsaved timers: reduced motion is a still image.
+function lanternAfterglow(c,g,cam,t,W,H,reduced){
+ const cx=cam.x||0,cy=cam.y||0;
+ for(const s of g.world1?.stations||[]){
+  if(!s.done||!Number.isFinite(s.x)||!Number.isFinite(s.y))continue;
+  const x=s.x-cx,y=s.y-cy-12,r=146;
+  if(x<-r||x>W+r||y<-r||y>H+r)continue;
+  const pulse=reduced?1:1+Math.sin(t*.027+s.id*1.9)*.055;
+  const halo=c.createRadialGradient(x,y,7,x,y,r*pulse);
+  halo.addColorStop(0,'rgba(255,236,182,.20)');
+  halo.addColorStop(.36,'rgba(232,193,151,.115)');
+  halo.addColorStop(.72,'rgba(135,225,208,.036)');
+  halo.addColorStop(1,'rgba(135,225,208,0)');
+  c.fillStyle=halo;c.fillRect(x-r*1.08,y-r*1.08,r*2.16,r*2.16);
+  // A faint steady reflection ties the light to the actual lantern position.
+  ellipse(c,x,y,3.2,6.2,'rgba(255,242,209,.32)');
+ }
+}
+
 function starlight(c,cam,t,W,H,p,reduced,lit){
  const drift=reduced?0:t*.027;
  const count=Math.min(35,Math.max(16,Math.round(W/38)));
@@ -202,6 +224,7 @@ export function drawMichiLivingBackdrop(c,g,cam={},t=0,W=1280,H=720){
  distantTrees(c,cam,t,W,H,p,reduced);
  gardenArchitecture(c,zone,cam,t,W,H,p,reduced);
  starlight(c,cam,t,W,H,p,reduced,lit);
+ lanternAfterglow(c,g,cam,t,W,H,reduced);
  foregroundMist(c,cam,t,W,H,p,reduced);
  c.restore();return true;
 }
