@@ -1,0 +1,20 @@
+{
+  "release": "ohana-650",
+  "status": "candidate; verification in progress",
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/484",
+  "scope": "Michi visual overhaul",
+  "checks": {
+    "node": "pending final HEAD",
+    "quality": "pending final HEAD",
+    "browser": "pending final HEAD",
+    "releaseGate": "pending final HEAD"
+  },
+  "testedBy": "tests/michi-sanctuary-living-art.test.js",
+  "safety": [
+    "No gameplay or save schema changes",
+    "All sanctuary passage IDs preserved",
+    "Seven distinct zone palettes and geometry-culling test",
+    "Reduced motion and Canvas state tested"
+  ],
+  "published": false
+}
