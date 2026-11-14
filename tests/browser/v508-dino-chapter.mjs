@@ -70,6 +70,7 @@ try{
  await phone.evaluate(()=>{localStorage.setItem('ohana-resume','1');const e=window.__OHANA_E2E;e.startWorld1('dino');e.step(600);});
  await phone.locator('.touch-btn.jump').tap();await phone.evaluate(()=>window.__OHANA_E2E.step(5));
  assert.equal((await phone.evaluate(()=>window.__OHANA_E2E.state())).player.grounded,false,'touch jump leaves the ground');
+ if(!await phone.locator('.touch-btn[data-k="k"]').isVisible())await phone.locator('#touch-power-toggle').tap();
  await phone.locator('.touch-btn[data-k="k"]').tap();await phone.evaluate(()=>window.__OHANA_E2E.step(1));
  assert.ok((await phone.evaluate(()=>window.__OHANA_E2E.nextChapterState())).dinoDives>0,'touch jump + K executes a real dive from the earned save');
  await phone.clock.runFor(32);await phone.screenshot({path:'test-results/v508/dino-mobile-dive.png'});await mobile.close();

@@ -1,4 +1,4 @@
-import {XP_NEED} from './xp.js';
+import {XP_NEED,applyChapterXpFloor} from './xp.js';
 import {drawDragonBrazier,drawDragonThermal,drawDragonAtmosphere} from './dragon-chapter-art-v611.js';
 export const DRAGON_CHAPTER_BOSS_ID='w1-dragon-igneous-v1';
 export const DRAGON_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134,hp:640});
@@ -21,8 +21,7 @@ export function dragonGrowth(g){
  const n=g.world1.stations.filter(s=>s.done).length;
  const stage=Math.min(4,n);
  const floor=XP_NEED[stage]||0;
- g.player.xp=Math.max(Number(g.player.xp)||0,floor);
- return floor;
+ return applyChapterXpFloor(g,floor);
 }
 
 export function updateDragonChapter(g,hurt){

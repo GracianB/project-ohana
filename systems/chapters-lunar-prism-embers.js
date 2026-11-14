@@ -1,6 +1,6 @@
 import {fritaLaunched} from './frita-yomi-chapters.js';
 import {pizzaBaked} from './pizza-chapter.js';
-import {XP_NEED} from './xp.js';
+import {XP_NEED,applyChapterXpFloor} from './xp.js';
 export const NEXT_CHAPTERS=Object.freeze({
  frita:{bossId:'w1-frita-king-v1',name:'Rey Crujiente',color:'#f1d6a4',state:'_crispyKing',patterns:['SALTA LA CARRERA','ESQUIVA LAS BURBUJAS','SALTA EL ACEITE','BUSCA EL HUECO ENTRE GOTAS']},
  yomi:{bossId:'w1-yomi-custodian-v1',name:'Custodio del Observatorio',color:'#c5e4df',state:'_spiritGuide',patterns:['ESQUIVA LA DERIVA','APÁRTATE DE LOS ORBES','CAMBIA DE ALTURA','BUSCA EL HUECO ASTRAL']},
@@ -19,7 +19,7 @@ export function nextChapterGrowth(g){
  const hero=nextChapter(g),w=g?.world1,p=g?.player;if(!hero||!w||!p)return 0;
  const n=w.stations.filter(s=>s.done).length;
  const stage=w.sealed?4:hero==='frita'?Math.min(4,n+(fritaLaunched(g)?1:0)):hero==='pizza'?Math.min(4,n+(pizzaBaked(g)?1:0)):hero==='cat'?[0,1,2,3,3,4][Math.min(5,n)]:hero==='cuerno'?Math.min(4,n+(mirrorRestored(g)?1:0)):Math.min(4,n);
- const floor=XP_NEED[stage]||0;p.xp=Math.max(Number(p.xp)||0,floor);return floor;
+ const floor=XP_NEED[stage]||0;return applyChapterXpFloor(g,floor);
 }
 export function nextChapterReady(g){
  const hero=nextChapter(g);if(!hero)return true;

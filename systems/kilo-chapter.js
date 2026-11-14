@@ -1,7 +1,7 @@
 import {recordKiloHit} from './kilo-combo.js';
 // Kilo's campaign chapter. Earned notes set a minimum XP; they do not add XP
 // repeatedly and never lower experience gained through combat/exploration.
-import {XP_NEED} from './xp.js';
+import {XP_NEED,applyChapterXpFloor} from './xp.js';
 export const KILO_CHAPTER_BOSS_ID='w1-kilo-tambor-v1';
 export const KILO_CHAPTER_ARENA=Object.freeze({left:8400,right:9400,floor:1134});
 export function kiloChapter(g){return g?.roomDef?.id==='w1-kilo'&&!!g.roomDef.kiloChapter;}
@@ -9,7 +9,7 @@ export function kiloNoteGrowth(g){
  if(!kiloChapter(g)||!g.player||!g.world1)return 0;
  const n=g.world1.stations.filter(s=>s.kind==='flower'&&s.done).length;
  const floor=XP_NEED[Math.min(4,n)]||0;
- g.player.xp=Math.max(Number(g.player.xp)||0,floor);return floor;
+ return applyChapterXpFloor(g,floor);
 }
 export function kiloGuardianDefeated(g){
  return !!g?.clearedEncounters?.['w1-kilo']?.includes(KILO_CHAPTER_BOSS_ID);

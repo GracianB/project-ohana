@@ -1,0 +1,10 @@
+{
+  "release": "ohana-649",
+  "status": "candidate tested; production pending",
+  "githubPages": "https://gracianb.github.io/project-ohana/",
+  "netlify": "https://project-ohana-multiplayer.netlify.app/",
+  "testedRuntimeCommit": "87d0a5c63b16b175c38c951812c585df79a8489b",
+  "candidateDeploy": "6af860f745246021aebde150",
+  "candidate": "https://6af860f745246021aebde150--project-ohana-multiplayer.netlify.app",
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/482"
+}

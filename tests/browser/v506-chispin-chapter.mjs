@@ -45,6 +45,7 @@ try{
  const mobile=await browser.newContext({storageState:await page.context().storageState(),viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce'}),phone=await mobile.newPage();
  await phone.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await phone.evaluate(()=>{localStorage.setItem('ohana-resume','1');window.__OHANA_E2E.startWorld1('chispin');window.__OHANA_E2E.step(600);});
  const before=(await phone.evaluate(()=>window.__OHANA_E2E.state())).player.x;
+ if(!await phone.locator('.touch-btn[data-k="k"]').isVisible())await phone.locator('#touch-power-toggle').tap();
  await phone.locator('.touch-btn[data-k="k"]').tap();
  assert.ok(Math.abs((await phone.evaluate(()=>window.__OHANA_E2E.state())).player.x-before)>80,'touch K performs a real blink');
  await phone.screenshot({path:'test-results/v506/chispin-mobile-blink.png'});await mobile.close();

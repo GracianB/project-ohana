@@ -1,6 +1,6 @@
 import {updateMichiSanctuary} from './michi-sanctuary.js';
 import {drawMichiSanctuary} from '../worlds/michi-sanctuary-art.js';
-import {XP_NEED} from './xp.js';
+import {XP_NEED,applyChapterXpFloor} from './xp.js';
 import {drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust,drawCatPitVortex,drawCatPlatformDecor,drawCatBossArena,drawCatPearl,drawCatUpdraft} from './cat-chapter-art-v609.js';
 export const MICHI_CHAPTER_BOSS_ID='w1-cat-astral-v1';
 export const MICHI_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134,hp:480});
@@ -22,7 +22,7 @@ export function catGrowth(g){
  const n=g.world1.stations.filter(s=>s.done).length;
  const stage=[0,1,2,3,3,4][Math.min(5,n)];
  const floor=XP_NEED[stage]||0;
- g.player.xp=Math.max(Number(g.player.xp)||0,floor);return floor;
+ return applyChapterXpFloor(g,floor);
 }
 
 export function catTrapSilenced(g,id){

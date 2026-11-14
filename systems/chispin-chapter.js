@@ -1,4 +1,4 @@
-import {XP_NEED} from './xp.js';
+import {XP_NEED,applyChapterXpFloor} from './xp.js';
 import {drawChispinArcGate} from './chispin-chapter-art-v608.js';
 export const CHISPIN_CHAPTER_BOSS_ID='w1-chispin-titan-v1';
 export const CHISPIN_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134,hp:640});
@@ -9,7 +9,7 @@ export function chispinChapterReady(g){return !chispinChapter(g)||!!g.world1Seal
 export function chispinGrowth(g){
  if(!chispinChapter(g)||!g.world1||!g.player)return 0;
  const floor=XP_NEED[Math.min(4,g.world1.stations.filter(s=>s.done).length)]||0;
- g.player.xp=Math.max(Number(g.player.xp)||0,floor);return floor;
+ return applyChapterXpFloor(g,floor);
 }
 export function chispinGateState(g,index){
  const gate=CHISPIN_CHAPTER_GATES[index];if(!gate)return null;
