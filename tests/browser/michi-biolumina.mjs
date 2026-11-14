@@ -67,7 +67,8 @@ try{
  const planets=await page.evaluate(async()=>{
   const {planMichiLights,isMichiWorld}=await import('/worlds/michi-reactive-night.js');
   const s=window.__OHANA_E2E.state();
-  const mock={roomDef:{hero:'cat',world1:true},player:{...s.player,evo:0},worldH:s.worldH,cam:{x:s.camera.x,y:s.camera.y},enemies:[{x:s.player.x+110,y:s.player.y,w:24,h:28,hp:20,kind:'medusa'}]};
+  // This isolated light fixture has its own 390px camera, independent of the game's viewport/spawn.
+  const mock={roomDef:{hero:'cat',world1:true},player:{...s.player,evo:0},worldH:s.worldH,cam:{x:s.player.x-195,y:s.player.y-422},enemies:[{x:s.player.x+110,y:s.player.y,w:24,h:28,hp:20,kind:'medusa'}]};
   const p0=planMichiLights(mock,{width:390,height:844});
   const p4=planMichiLights({...mock,player:{...mock.player,evo:4}},{width:390,height:844});
   return {allowed:isMichiWorld(mock),radius:p0.hero.radius,finalRadius:p4.hero.radius,enemy:p0.enemies.length};

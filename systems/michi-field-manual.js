@@ -19,8 +19,8 @@ export const MICHI_FIELD_NOTES=Object.freeze([
    gesture:'Alas oscuras · cola en gancho · vuelo',tone:'#98f8ff'
  }),
  Object.freeze({
-   title:'03 · La pantera despierta',subtitle:'Michi · Pantera Negra',
-   description:'Una pantera negra compacta y musculosa, con orejas redondeadas, una larga cola y reflejos de carbón sobre el pelaje negro.',
+   title:'03 · Una sombra diminuta',subtitle:'Michi · Ratón de Ónice',
+   description:'Un ratón negro diminuto de grandes orejas, ojos de ámbar y una cola inquieta. Se mueve con rapidez entre las raíces.',
    secret:'Aprovecha los cambios de altura y vigila los brillos propios de cada enemigo.',
    gesture:'Pelaje negro · orejas redondas · una cola',tone:'#f6a7ff'
  }),

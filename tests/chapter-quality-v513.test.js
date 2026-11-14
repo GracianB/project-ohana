@@ -27,6 +27,7 @@ test('ten encounter plans replace patrols with finite, complementary chapter gro
  const signatures=new Set();
  for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero],plan=CHAPTER_ENCOUNTERS[hero];
   signatures.add(JSON.stringify(plan.groups));assert.equal(plan.groups.length,3);assert.ok(r.foes.length<=34);assert.ok(new Set(r.foes.map(f=>f[4]?.role).filter(Boolean).map(role=>({pursuer:'native',captain:'native',shield:'carapace',shooter:'spitter',gunner:'spitter',jumper:'leaper',flyer:'winged',burrower:'burrower'})[role])).size>=3,'each room needs several distinct visible anatomies');
+  if(r.michiSanctuary){assert.equal(r.foes.length,14);assert.equal(new Set(r.foes.map(f=>f[2])).size,5);assert.ok(r.foes.every(f=>f[4].michiSanctuary&&f[4].leash));continue;}
   for(let group=0;group<(hero==='kilo'?5:3);group++){
    const foes=r.foes.filter(f=>f[4]?.authoredEncounter===group);
    assert.ok(foes.length>=(hero==='kilo'?2:3)&&foes.length<=(hero==='kilo'?6:6));

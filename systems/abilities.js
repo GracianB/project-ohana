@@ -1,3 +1,4 @@
+import {drawSanctuaryYarn,drawSanctuaryPurr} from './michi-sanctuary-spells.js';
 import {HERO_IDENTITY} from '../characters/identity-v2.js';
 import {showBlockedHit} from './combat-feedback.js';
 import {shieldBlocksHit} from './campaign-enemies.js';
@@ -3478,6 +3479,7 @@ trail(ctx,f,cam,t,g){drawChispaTrail(ctx,f,cam,t,!!g?.reduceMotion);},
 storm(ctx,f,cam,t,g){drawChispaStorm(ctx,f,cam,t,!!g?.reduceMotion);},
 
 yarn(ctx, f, cam, t, g, p) {
+if(g?.roomDef?.michiSanctuary){drawSanctuaryYarn(ctx,f,cam,t,!!g.reduceMotion);return;}
 const x=f.x-cam.x,y=f.y-cam.y,dir=Math.sign(f.vx)||1,reduced=!!g?.reduceMotion;
 const rot=reduced?0:(t*0.12*dir);
 ctx.save();ctx.translate(x,y);ctx.scale(dir,1);
@@ -3537,6 +3539,7 @@ for(const side of [-1,1]){
 ctx.restore();
 },
 purr(ctx, f, cam, t, g, p) {
+if(g?.roomDef?.michiSanctuary){drawSanctuaryPurr(ctx,f,cam,t,p);return;}
 const x = cx(p) - cam.x, y = cy(p) - cam.y;
 const u = 1 - f.life / (f.max || 72);
 const rad = Math.min(f.R, 36 + u * f.R);

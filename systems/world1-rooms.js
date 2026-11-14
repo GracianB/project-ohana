@@ -1,3 +1,4 @@
+import {authorMichiSanctuary} from './michi-sanctuary.js';
 import {openChapterPits} from './open-chapter-pits.js';
 import {authorKiloEncounters} from './kilo-encounters-v606.js';
 import {authorStitchoEncounters} from './stitcho-encounters-v607.js';
@@ -42,7 +43,7 @@ export const WORLD1_THEMES = Object.freeze({
   kilo:    { name: "Claro de Kilo",            short: "Kilo",      world: 6, color: "#ffacc2", tint: "#ff8fb1", relic: "Canción del hogar",     seal: "serenata",   cast: ["cucaracho","cangrejo","planta","rana","avispa"],        sectors: ["Puerta aloha","Campo de hibiscos","Escenario del ukelele","Lago de las guirnaldas","Senda de los cocos","Escenario del Tambor"] },
   stitcho: { name: "Astillero de Stitcho",     short: "Stitcho",   world: 4, color: "#67ddff", tint: "#3f8cff", relic: "Corazón galáctico",     seal: "reparar",    cast: ["ufo","phosquito","cucaracho","arana","murcielago"],          sectors: ["Muelle cosido","Chatarrería azul","Grúas de plasma","Taller del caos","Hangar estrellado","Altar del experimento"] },
   chispin: { name: "Santuario del Trueno",     short: "Chispín",   world: 9, color: "#fff29a", tint: "#ffd84a", relic: "Relámpago dorado",      seal: "cadena",     cast: ["gaviota","murcielago","phosquito","rana","avispa"],      sectors: ["Puerta de nubes","Campo de pararrayos","Puente del chispazo","Pico tormenta","Valle del arcoíris","Altar del trueno"] },
-  cat:     { name: "Bosque Bioluminiscente de Michi",    short: "Michi",     world: 3, color: "#ceb2ff", tint: "#b98cff", relic: "Luna soñadora",         seal: "medusas",    cast: ["medusa","phosquito","ufo","murcielago","arana"],        sectors: ["Umbral del sueño","Estanque de lunas","Bosque de medusas","Observatorio gatuno","Mar de estrellas","Altar del sueño"] },
+  cat:     { name: "El jardín de las nueve vidas",    short: "Michi",     world: 3, color: "#8dd7c6", tint: "#527578", relic: "Luna soñadora",         seal: "medusas",    cast: ["medusa","phosquito","ufo","murcielago","arana"],        sectors: ["Umbral del sueño","Estanque de lunas","Bosque de medusas","Observatorio gatuno","Mar de estrellas","Altar del sueño"] },
   cuerno:  { name: "Bosque Prisma de Cuerno",  short: "Cuerno",    world: 8, color: "#eccbff", tint: "#d6a8ff", relic: "Aurora viva",           seal: "prismas",    cast: ["arana","murcielago","planta","cangrejo","libelula"],      sectors: ["Claro de cristal","Arboleda aurora","Espejos del alba","Cueva del eco","Sendero arcoíris","Altar del prisma"] },
   dragon:  { name: "Caldera del Dragón",       short: "Dragón",    world: 2, color: "#ff905d", tint: "#ff5a3c", relic: "Brasa del hogar",       seal: "braseros",   cast: ["escoria","brasita","planta","rana","murcielago"],            sectors: ["Camino de ceniza","Río de lava","Forja ancestral","Nido de wyverns","Cráter rojo","Altar del fuego"] },
   dino:    { name: "Valle Fósil de Dino",      short: "Dino",      world: 1, color: "#b8ef6b", tint: "#6fd38b", relic: "Fósil de la familia",   seal: "pisotones",  cast: ["rana","abeja","libelula","cangrejo","cucaracho"],              sectors: ["Helechos gigantes","Cascada de jade","Huesos del T-rex","Nidos de saurópodo","Barro dormido","Altar del fósil"] },
@@ -227,7 +228,7 @@ export function buildWorld1HeroRoom(hero) {
   if(hero==='kilo') return authorKiloEncounters(composed);
   if(hero==='stitcho') return authorStitchoEncounters(composed);
   if(hero==='chispin') return authorChispinEncounters(composed);
-  if(hero==='cat') return openChapterPits(authorCatEncounters(composed));
+  if(hero==='cat') return authorMichiSanctuary(authorCatEncounters(composed));
   if(hero==='cuerno') return openChapterPits(authorCuernoEncounters(composed));
   if(hero==='dragon') return openChapterPits(authorDragonEncounters(composed));
   if(hero==='dino') return openChapterPits(authorDinoEncounters(composed));

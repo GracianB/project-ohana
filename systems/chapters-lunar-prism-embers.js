@@ -6,7 +6,7 @@ export const NEXT_CHAPTERS=Object.freeze({
  yomi:{bossId:'w1-yomi-custodian-v1',name:'Custodio del Observatorio',color:'#c5e4df',state:'_spiritGuide',patterns:['ESQUIVA LA DERIVA','APÁRTATE DE LOS ORBES','CAMBIA DE ALTURA','BUSCA EL HUECO ASTRAL']},
  pizza:{bossId:'w1-pizza-chef-v1',name:'Chef Magmático',color:'#f3d3ac',state:'_magmaChef',patterns:['SALTA LA CARRERA DEL CHEF','ESQUIVA EL QUESO','SALTA EL GOLPE DE PALA','BUSCA EL HUECO DEL ABANICO']},
  dino:{bossId:'w1-dino-colossus-v1',name:'Coloso de Piedra Ancestral',color:'#dce9b8',state:'_stoneColossus',patterns:['SALTA LA EMBESTIDA','ESQUIVA LAS ROCAS','SALTA LA ONDA FÓSIL','BUSCA EL HUECO DEL ABANICO']},
- cat:{bossId:'w1-cat-astral-v1',name:'Oráculo Medusaluna',color:'#e6c4f1',state:'_astralCat',patterns:['ESQUIVA EL LATIGAZO ABISAL','SEPARA LOS ORBES','SALTA LA MEDIA LUNA','SAL DE LAS COLUMNAS']},
+ cat:{bossId:'w1-cat-astral-v1',name:'Polilla del Farol',color:'#e6c4f1',state:'_astralCat',patterns:['ESQUIVA EL LATIGAZO ABISAL','SEPARA LOS ORBES','SALTA LA MEDIA LUNA','SAL DE LAS COLUMNAS']},
  cuerno:{bossId:'w1-cuerno-prism-v1',name:'Bestia Prisma',color:'#c8e7bd',state:'_prismBeast',patterns:['ESQUIVA LA CARGA','CAMBIA DE ALTURA','SALTA EL ABANICO','BUSCA EL HUECO ENTRE PRISMAS']},
  dragon:{bossId:'w1-dragon-igneous-v1',name:'Guardián del Núcleo Ígneo',color:'#ffc594',state:'_igneousDragon',patterns:['ESQUIVA LA CARGA','APÁRTATE DE LA LAVA','SALTA LA ONDA','CAMBIA DE ALTURA']}
 });
@@ -90,7 +90,7 @@ export function drawChapterBossHud(ctx,e,cam){
  ctx.save();ctx.textAlign='center';ctx.fillStyle='#18323f';ctx.fillRect(x-145,y-90,290,60);ctx.fillStyle=def.color;ctx.font='bold 12px sans-serif';ctx.fillText(def.name.toUpperCase()+' · '+b.tier+'/3',x,y-70);
  ctx.fillStyle='#526473';ctx.fillRect(x-128,y-60,256,7);ctx.fillStyle=def.color;ctx.fillRect(x-128,y-60,256*Math.max(0,e.hp/e.max),7);
  ctx.fillStyle='#f4f6df';ctx.font='11px sans-serif';ctx.fillText(b.phase==='rest'?'RECUPERACIÓN · ATACA':'PROTEGIDO · ESQUIVA',x,y-39);
- if(b.phase==='warn'){
+ if(b.phase==='warn'&&!e._michiSanctuary){
   ctx.strokeStyle=def.color;ctx.lineWidth=3;ctx.setLineDash([7,6]);
   if(e._growthChapter==='cat'&&b.attack===3)for(const col of b.columns||[]){ctx.beginPath();ctx.moveTo(col-cam.x,NEXT_ARENA.floor-cam.y-300);ctx.lineTo(col-cam.x,NEXT_ARENA.floor-cam.y);ctx.stroke();}
   else if(b.airRays)for(const ray of b.airRays){ctx.beginPath();ctx.moveTo(x,y+35);ctx.lineTo(x+ray.vx*50,y+35+ray.vy*50);ctx.stroke();}

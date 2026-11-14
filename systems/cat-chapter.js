@@ -1,3 +1,5 @@
+import {updateMichiSanctuary} from './michi-sanctuary.js';
+import {drawMichiSanctuary} from '../worlds/michi-sanctuary-art.js';
 import {XP_NEED} from './xp.js';
 import {drawCatMoonJelly,drawCatCrystalBridge,drawCatTrap,drawCatAtmosphere,drawCatStardust,drawCatPitVortex,drawCatPlatformDecor,drawCatBossArena,drawCatPearl,drawCatUpdraft} from './cat-chapter-art-v609.js';
 export const MICHI_CHAPTER_BOSS_ID='w1-cat-astral-v1';
@@ -30,6 +32,7 @@ export function catTrapSilenced(g,id){
 export function updateCatChapter(g,hurt){
  if(!catChapter(g)||!g.world1||!g.player||g.player.dead)return;
  catGrowth(g);
+ if(g.roomDef.michiSanctuary){updateMichiSanctuary(g);return;}
 
  const p=g.player;
 
@@ -95,13 +98,14 @@ export function updateCatChapter(g,hurt){
 export function catObjective(g){
  if(!catChapter(g)||g.world1?.sealed||!g.world1?.stations.every(s=>s.done))return null;
  return {
-  x:8750,y:1134,label:'Oráculo Medusaluna',
-  action:'Las cinco medusas están despiertas · esquiva sus 4 fases de aviso y ataca en recuperación cuando abra el núcleo'
+  x:8750,y:1134,label:g.roomDef.michiSanctuary?'Polilla del Farol':'Oráculo Medusaluna',
+  action:g.roomDef.michiSanctuary?'Los cinco faroles brillan · salta la carga, esquiva el polen y sal de las columnas. Ataca cuando abra el farol.':'Las cinco medusas están despiertas · esquiva sus 4 fases de aviso y ataca en recuperación cuando abra el núcleo'
  };
 }
 
 export function drawCatChapter(ctx,g,cam){
  if(!catChapter(g))return;
+ if(g.roomDef.michiSanctuary)return;
  const t=g.world1?.tick||0,reduced=!!g.reduceMotion;
  const vw=g.viewW||1280;
 

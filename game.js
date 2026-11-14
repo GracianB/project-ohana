@@ -1,3 +1,5 @@
+import {interactMichiSanctuary} from './systems/michi-sanctuary.js';
+import {drawMichiSanctuary,drawMichiSanctuaryBackdrop} from './worlds/michi-sanctuary-art.js';
 import {drawKiloLivingGrove} from './worlds/kilo-living-grove.js';
 import {skillIcon,mountCompactHud} from './systems/compact-hud.js';
 import {updateMichiPresence} from './systems/michi-presence.js';
@@ -441,6 +443,7 @@ function chapterGrowthWaiting(g){return kiloGrowthWaiting(g)||stitchoGrowthWaiti
 function canAct() { return game.running && !world1CineActive(game) && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
+if(interactMichiSanctuary(game))return;
 if(game.finalRitualEnabled&&game.finalGauntlet?.phase==='summoning')return;
 if(interactFinalRitual(game))return;
 if (!interactKiloInstrument(game) && !interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
@@ -762,7 +765,7 @@ game.spawnChispinBoss=()=>{
   game.enemies.push(enemy);
   return true;
 };
-if(r.growthChapter&&!game.world1?.sealed&&!game.clearedEncounters?.[id]?.includes(NEXT_CHAPTERS[r.growthChapter].bossId)){const create={cat:createMichiBoss,cuerno:createCuernoBoss,dragon:createDragonBoss,dino:createDinoBoss,pizza:createPizzaBoss,frita:createFritaBoss,yomi:createYomiBoss}[r.growthChapter];game.enemies.push(create(makeFoe,game.rng,{roomId:id,encounterId:NEXT_CHAPTERS[r.growthChapter].bossId,x:8750,arena:NEXT_ARENA,chapter:r.growthChapter}));}
+if(r.growthChapter&&!game.world1?.sealed&&!game.clearedEncounters?.[id]?.includes(NEXT_CHAPTERS[r.growthChapter].bossId)){const create={cat:createMichiBoss,cuerno:createCuernoBoss,dragon:createDragonBoss,dino:createDinoBoss,pizza:createPizzaBoss,frita:createFritaBoss,yomi:createYomiBoss}[r.growthChapter];game.enemies.push(create(makeFoe,game.rng,{roomId:id,encounterId:NEXT_CHAPTERS[r.growthChapter].bossId,x:8750,sanctuary:!!r.michiSanctuary,arena:r.michiSanctuary?{...NEXT_ARENA,hp:480}:NEXT_ARENA,chapter:r.growthChapter}));}
 game.spawnMichiBoss=()=>{
   if(game.roomId!=='hub'||game.player?.id!=='cat'||!game.personalAdventureSolo)return false;
   if((game.clearedEncounters?.hub||[]).includes(MICHI_BOSS_ID))return true;
@@ -825,6 +828,7 @@ for (const portal of portals.items) {
 }
 if (game.player) placeFrom(fromDir);
 game.cam.x = 0;
+if(r.michiSanctuary&&game.player){const p=game.player,spawn=r.michiSanctuary.spawn;p.x=spawn.x-p.w/2;p.y=spawn.floor-p.h-3;game.cam.x=Math.max(0,p.x-(game.viewW||1280)/2);game.cam.y=Math.max(0,p.y-(game.viewH||720)*.65);game._michiTransitCooldown=0;game._michiBossArrival=false;game._michiExitScene=false;}
 game.fading = 16;
 game.doorHold = reduceMotion ? 4 : 8;
 game.doorWait = null;
@@ -1893,6 +1897,7 @@ const right = axisX > 0;
 const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
 const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
 const drop = !!(keys["s"] || keys["arrowdown"]);
+if(game.roomDef?.michiSanctuary){if(drop&&!p._sanctuaryDown){p._sanctuaryDown=true;if(interactMichiSanctuary(game))return;}if(!drop)p._sanctuaryDown=false;}
 const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
 if (p.dash > 0) p.dash--;
 if (p._dashGo > 0) p._dashGo--;
@@ -3182,6 +3187,7 @@ ctx.restore();
 }
 // V468: cada sala del Mundo 1 usa el decorado de su héroe y su silueta gigante.
 function drawWorld1Backdrop(world,W,H){
+ if(drawMichiSanctuaryBackdrop(ctx,game,game.cam,t,W,H))return;
  const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
  if(h!=="kilo"&&drawLivingRealm(ctx,game.roomDef.fusionBoss?"final":h,game.cam,W,H,t,{reduceMotion:rd})){drawChapterLandmarks(ctx,game,game.cam,t,W,H);drawRealmSignatures(ctx,h,game.cam,W,H,t,rd);return;}
  if(h==="kilo"){if(game.roomDef.kiloExperienceVersion)drawKiloLivingGrove(ctx,game,game.cam,t,W,H);else drawKiloBayBackdrop(ctx,game.cam,t,W,H,rd);}
@@ -3288,10 +3294,11 @@ if(!game.roomDef?.world1)drawIslandLandmarks(ctx,game,game.cam,t);
 drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,game,game.cam,t);
 const realmTerrain={frita:{id:'frita-market',groundTop:'#e5cfa5',ground:'#9c8492',edge:'#f7e8c4'},yomi:{id:'yomi-observatory',groundTop:'#d7e6de',ground:'#8ca7af',edge:'#e8f4eb'},pizza:{id:'pizza-harbor',groundTop:'#eacba5',ground:'#b09179',edge:'#fff0cd'},dino:{id:'fossil-valley',groundTop:'#d9deb9',ground:'#90a48a',edge:'#eff1ce'},cat:{id:'lunar-garden',groundTop:'#e4d5e4',ground:'#a598ab',edge:'#f3e6e5'},cuerno:{id:'prism-grove',groundTop:'#cbdca9',ground:'#93a684',edge:'#edf1cb'},dragon:{id:'ember-forge',groundTop:'#e4c4a4',ground:'#9c8070',edge:'#f5dbb3'}}[game.roomDef?.hero];
 const heroTerrain=realmTerrain?{...world,...realmTerrain}:game.roomDef?.hero==='stitcho'?{...world,id:'dock',groundTop:'#e2c6a0',ground:'#a78f77',edge:'#efe0b9',platOutline:'#466577'}:game.roomDef?.hero==='chispin'?{...world,id:'sanctuary',groundTop:'#f1e5ca',ground:'#a3b8bf',edge:'#fff3d8',platOutline:'#5a788e'}:world;
-game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
+if(!game.roomDef?.michiSanctuary)game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
 if(game.roomDef?.kiloChapter&&!game.roomDef?.composition){ctx.save();ctx.strokeStyle='#273329';ctx.lineWidth=2;for(const pl of game.platforms){if(pl.h>24||!visibleForRender(pl,game.cam,viewportW,viewportH))continue;const px=pl.x-game.cam.x,py=pl.y-game.cam.y;ctx.fillStyle='#e0c67f';ctx.fillRect(px,py,pl.w,5);ctx.strokeRect(px,py,pl.w,pl.h);}ctx.restore();}
 if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
 }
+if(game.roomDef?.michiSanctuary)drawMichiSanctuary(ctx,game,game.cam,t);
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 drawIslandSprings(ctx,game,game.cam,t);
 drawNestArena(ctx,game,game.cam,t);
@@ -3347,7 +3354,7 @@ for (const e of game.enemies) {
   if(e._fusionBoss){}
   else if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
-  else if(e._michiBoss){if(!e._growthChapter)drawMichiBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);}
+  else if(e._michiBoss){if(e._michiSanctuary||!e._growthChapter)drawMichiBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);}
   else if(e._dragonBoss){}
   else if(e._dinoBoss){}
   else if(e._fritaBoss){}
@@ -4235,6 +4242,7 @@ combatTarget(){
  return {x:e.x,y:e.y,hp:e.hp};
 },
 setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
+michiSanctuaryState(){return {guardianDefeated:!!game.clearedEncounters?.['w1-cat']?.includes('w1-cat-astral-v1'),zone:game.roomDef?.michiSanctuary?game.roomDef.michiSanctuary.zones.find(z=>game.player.x>=z.x&&game.player.x<z.x+z.w&&game.player.y+game.player.h>=z.y&&game.player.y+game.player.h<=z.y+z.h)?.id:null,album:game.world1Collect?.rooms?.cat,remaining:(game.world1CollectItems||[]).filter(m=>!game.world1Collect?.rooms?.cat?.found.includes(m.id)).map(m=>({...m}))};},
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  heroItems(){return (game.heroCollection?.items||[]).map(item=>({...item}));},

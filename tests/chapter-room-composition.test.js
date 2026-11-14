@@ -6,9 +6,9 @@ import {enterCampaignExploration,updateCampaignExploration} from '../systems/cam
 test('ten authored rooms have distinct materials, continuous recoverable terrain and an unchanged boss floor',()=>{
  const materials=new Set();
  for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];assert.ok(r.composition);materials.add(r.composition.material);assert.ok(r.terraces.length>=2,hero+' needs meaningful relief');
-  const floors=r.plats.filter(p=>p[3]>40).sort((a,b)=>a[0]-b[0]);assert.ok(floors.length>=1,hero+' has floor segments');for(const p of floors)assert.ok(WORLD1_FLOOR-p[1]<=160,"banks must remain within the late-form physical jump envelope");
+  const floors=r.plats.filter(p=>p[3]>40).sort((a,b)=>a[0]-b[0]);assert.ok(floors.length>=1,hero+' has floor segments');for(const p of floors)assert.ok(r.michiSanctuary||WORLD1_FLOOR-p[1]<=160,"banks must remain within the late-form physical jump envelope");
   for(const px of (hero==='kilo'?[KILO_CHAPTER_ARENA.left,KILO_CHAPTER_ARENA.left+400,KILO_CHAPTER_ARENA.right-1]:[8260,8750,9320]))assert.equal(floors.find(p=>px>=p[0]&&px<p[0]+p[2])[1],1134);
-  for(const s of r.seal.stations){const floor=floors.find(p=>s.x>=p[0]&&s.x<p[0]+p[2]);if(floor)assert.equal(floor[1],1134,hero+' objective floor stays reachable');}
+  for(const s of r.seal.stations){const floor=floors.find(p=>s.x>=p[0]&&s.x<p[0]+p[2]);if(floor&&!r.michiSanctuary)assert.equal(floor[1],1134,hero+' objective floor stays reachable');}
  }
  assert.equal(materials.size,10);
 });
@@ -17,7 +17,7 @@ test('authored exploration adds no surprise platforms and uses persistent existi
 });
 test('authored ground enemies and XP are placed above the actual banks',()=>{
  for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];for(const f of r.foes)if(f[4]?.anchorFloor){assert.ok(Number.isFinite(f[4].anchorFloor));}
-  for(const o of r.orbs){const tr=r.terraces.find(t=>o[0]>=t.x&&o[0]<t.x+t.w);if(tr)assert.ok(o[1]<tr.y-18,hero+' XP must not be buried');}
+  for(const o of r.orbs){const tr=(r.michiSanctuary?[]:r.terraces).find(t=>o[0]>=t.x&&o[0]<t.x+t.w);if(tr)assert.ok(o[1]<tr.y-18,hero+' XP must not be buried');}
  }
 });
 

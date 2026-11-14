@@ -4,7 +4,7 @@ import {michiActing,michiChoreography,michiPawCycle} from './michi-acting.js';
 const TAU=Math.PI*2;
 const number=(v,d=0)=>Number.isFinite(v)?v:d;
 const clamp=v=>Math.max(0,Math.min(1,number(v)));
-export const REBEL_SILHOUETTES=Object.freeze(['kitten-quadruped','winged-glider','black-panther','wizard-lynx','floating-cat-ghost']);
+export const REBEL_SILHOUETTES=Object.freeze(['kitten-quadruped','winged-glider','onyx-mouse','wizard-lynx','floating-cat-ghost']);
 // Art-space envelopes include lifted paws, ear tufts, soul-lights and wings.
 export const REBEL_ART_HEIGHT=Object.freeze([100,135,98,158,150]);
 function tools(c){
@@ -49,7 +49,7 @@ function kitten(a,p){const{c,shape,oval}=a;
  oval(-12,-20,23,16,'#4b5971',-.12);oval(-5,-15,16,8,'#758399',.1);shape('#253244',()=>{c.moveTo(-29,-25);c.quadraticCurveTo(-10,-36,11,-22);c.lineTo(4,-11);c.lineTo(-23,-12);});
  for(const [x,phase]of[[-25,0],[-10,Math.PI],[7,Math.PI],[22,0]]){const gait=michiPawCycle(p,phase,5,4),step=(p.air?(x>0?7:-5):gait.step)+(x===22?p.strike*15:0),lift=p.air?9:(x===22?p.strike*18:0)+gait.lift;if(x===22&&p.groom>.15){shape('#46536d',()=>{c.moveTo(18,-23);c.quadraticCurveTo(31,-17,27,-20-p.groom*8);c.lineTo(22,-23-p.groom*8);c.quadraticCurveTo(23,-16,18,-23);});continue;}c.save();c.translate(0,-lift);shape('#46536d',()=>{c.moveTo(x-4,-20);c.lineTo(x+3,-18);c.lineTo(x+4+step,-3);c.lineTo(x-5+step,-3);});paw(a,p,x+step,0,8,'#8290a3',x===22&&p.strike>.1);oval(x+step+1,1,2.4,1.4,'#e7b9c6');c.restore();}
  drawMichiDetails(a,p,0);
- face(a,p,{x:13+p.strike*4,y:-46,size:1.02});if(p.groom){paw(a,p,24,-20-p.groom*9,6);if(p.groom>.4)oval(20,-26,2,3,'#df94a7');};scarf(a,9,-27,'#e36c82',19,p.run*2);
+ face(a,p,{x:13+p.strike*4,y:-46,size:1.09});if(p.groom){paw(a,p,24,-20-p.groom*9,6);if(p.groom>.4)oval(20,-26,2,3,'#df94a7');};scarf(a,9,-27,'#e36c82',19,p.run*2);
 
 }
 function glider(a,p){const{c,shape,stroke,oval}=a,air=p.state!=='dead',beat=p.still?0:Math.sin(p.t*(p.wing==='ascend'?.25:.09)),fold=(air?(p.wing==='ascend'?.83+beat*.17:p.wing==='descend'?.55:.9+beat*.08):.36)+(p.wingFlare||0);
@@ -60,6 +60,7 @@ function glider(a,p){const{c,shape,stroke,oval}=a,air=p.state!=='dead',beat=p.st
   shape('#604768',()=>{c.moveTo(side*16,-51);c.lineTo(tip-side*10,lift+12);c.quadraticCurveTo(side*38,-58,side*29,-42);},null);
   for(let rib=0;rib<3;rib++)stroke('#b68391',.75,()=>{c.moveTo(side*12,-49);c.quadraticCurveTo(side*(26+rib*7),-57-rib*8,tip-side*(12+rib*9),lift+19+rib*9);});
   stroke('#ec8b78',1.4,()=>{c.moveTo(side*10,-49);c.lineTo(tip,lift);c.moveTo(side*10,-49);c.lineTo(side*40,-41);});
+  for(let i=0;i<4;i++)oval(side*(23+i*7),-56-i*5,1,1.6,i%2?'#e9dfbc':'#8dd7c6');
   shape('#b8b9c7',()=>{c.moveTo(tip,lift);c.lineTo(tip+side*3,lift-7);c.lineTo(tip+side*4,lift+6);});
  }
  tail(a,p,{x:-7,y:-20,tipX:-34,tipY:-5,width:5,color:'#343f5c',accent:'#ff957a'});
@@ -106,7 +107,7 @@ function lynx(a,p){const{c,shape,stroke,oval}=a;
   c.save();c.translate(x,y);c.rotate((p.state==='cast'?p.cast*.6:0)*side+p.strike*side*.45);c.translate(-x,-y);if(side>0){const tx=x+12+p.cast*10,ty=y-39-p.strike*6;stroke('#1b2639',5,()=>{c.moveTo(x-3,y+9);c.lineTo(tx,ty);});stroke('#ba8fce',2.4,()=>{c.moveTo(x-3,y+9);c.lineTo(tx,ty);});shape('#eeefba',()=>{for(let i=0;i<10;i++){const q=-Math.PI/2+i*Math.PI/5,r=i%2?3.5:8;if(i===0)c.moveTo(tx+Math.cos(q)*r,ty+Math.sin(q)*r);else c.lineTo(tx+Math.cos(q)*r,ty+Math.sin(q)*r);}},'#685985');const theta=(p.state==='cast'?p.cast*.6:0)+p.strike*.45;p.castOrigin={x:x+Math.cos(theta)*(tx-x)-Math.sin(theta)*(ty-y),y:y+Math.sin(theta)*(tx-x)+Math.cos(theta)*(ty-y)};}else drawMichiGrimoire(a,p,x,y);paw(a,p,x,y+3,6,'#65969f',true);c.restore();
  }
  face(a,p,{x:0,y:-83,size:.8,fur:'#3c6073',kind:'lynx',accent:'#8ae8dc'});scarf(a,-1,-65,'#b95e74',54,Math.sin(p.t*.05)*5);
- c.save();c.translate(p.look,-96+p.breath);c.rotate(p.still?0:p.ear*.3-p.turn*.08+p.land*.06);c.scale(.72,.72);c.translate(0,112);shape('#302b51',()=>{c.moveTo(-24,-112);c.quadraticCurveTo(-13,-142,-10,-166);c.quadraticCurveTo(0,-177,25,-153);c.lineTo(9,-156);c.quadraticCurveTo(5,-138,24,-112);},'#111e31');shape('#69598c',()=>{c.moveTo(-19,-120);c.lineTo(-15,-130);c.quadraticCurveTo(0,-123,17,-128);c.lineTo(21,-118);},null);shape('#4d3b70',()=>{c.moveTo(-18,-119);c.quadraticCurveTo(-9,-145,-10,-163);c.lineTo(-5,-161);c.quadraticCurveTo(-7,-137,2,-119);},null);oval(0,-112,36,6,'#43365f',-.04);stroke('#b7a2d5',1.4,()=>{c.moveTo(-32,-111);c.quadraticCurveTo(0,-104,32,-113);});oval(-4,-141,5,6,'#ece7b6');oval(-1,-144,4.5,5.5,'#302b51');c.restore();
+ c.save();c.translate(p.look,-120+p.breath);c.rotate(p.still?0:p.ear*.3-p.turn*.08+p.land*.06);c.scale(.6,.6);c.translate(0,112);shape('#302b51',()=>{c.moveTo(-24,-112);c.quadraticCurveTo(-13,-142,-10,-166);c.quadraticCurveTo(0,-177,25,-153);c.lineTo(9,-156);c.quadraticCurveTo(5,-138,24,-112);},'#111e31');shape('#69598c',()=>{c.moveTo(-19,-120);c.lineTo(-15,-130);c.quadraticCurveTo(0,-123,17,-128);c.lineTo(21,-118);},null);shape('#4d3b70',()=>{c.moveTo(-18,-119);c.quadraticCurveTo(-9,-145,-10,-163);c.lineTo(-5,-161);c.quadraticCurveTo(-7,-137,2,-119);},null);oval(0,-112,36,6,'#43365f',-.04);stroke('#b7a2d5',1.4,()=>{c.moveTo(-32,-111);c.quadraticCurveTo(0,-104,32,-113);});oval(-4,-141,5,6,'#ece7b6');oval(-1,-144,4.5,5.5,'#302b51');c.restore();
 }
 function ghost(a,p){const{c,shape,stroke,oval}=a;
  // Compact mischievous spirit: a big expressive head over a tiny curled soul.
@@ -131,7 +132,22 @@ function ghost(a,p){const{c,shape,stroke,oval}=a;
  if(p.friend>.1){c.save();c.globalAlpha=p.friend*.6;stroke('#e3f8db',1.1,()=>{c.moveTo(22,-70);c.quadraticCurveTo(30,-78,35,-71);});c.restore();}
  c.restore();
 }
-const RIGS=[kitten,glider,panther,lynx,ghost];
+function mouse(a,p){
+ const{c,shape,stroke,oval}=a;const run=p.run,hop=p.air?-5:Math.abs(run)*2;
+ c.save();c.translate(0,-hop);c.rotate(p.air?-.08:0);
+ stroke('#34333b',3,()=>{c.moveTo(-20,-13);c.bezierCurveTo(-49,-9,-48,-38,-31,-34);c.bezierCurveTo(-18,-30,-43,-20,-46,-25);});
+ oval(-5,-18,24,16,'#080a0e');oval(-10,-22,16,9,'#15191e');
+ for(let i=0;i<24;i++)stroke(i%3?'#1d2228':'#303238',.7,()=>{const x=-24+(i%6)*5,y=-24+Math.floor(i/6)*5;c.moveTo(x,y);c.quadraticCurveTo(x+2,y-2,x+4,y-1);});
+ for(const side of[-1,1]){const x=side*14+run*(side<0?6:-6);oval(x,-3,6,3,'#24252c');stroke('#090b10',4,()=>{c.moveTo(side*12,-15);c.lineTo(x,-5);});}
+ c.save();c.translate(15+p.look,-25+p.breath);c.rotate(p.ear*.3+p.lean*.25);
+ for(const side of[-1,1]){oval(side*12,-14,12,13,'#0b0d12');oval(side*12,-14,8,9,'#55414a');oval(side*12-2,-17,3,4,'#73606a');}
+ shape('#080a0d',()=>{c.moveTo(-14,-4);c.bezierCurveTo(-21,-25,14,-28,20,-7);c.lineTo(30,5);c.quadraticCurveTo(13,20,-7,10);});
+ for(const side of[-1,1]){oval(side*8+4,-3,5,6,'#ecd48b');oval(side*8+5+p.look,-3,1.5,4,'#07090d');oval(side*8+3,-5,1.2,1.6,'#fff7dc');}
+ oval(28,5,3,2.5,'#b37e87');for(const side of[-1,1])for(let i=0;i<3;i++)stroke('#88908c',.8,()=>{c.moveTo(20,8);c.lineTo(22+side*(15+i*3),5+i*4);});
+ if(p.gesture>.4)oval(22,12,2,3,'#d499a5');c.restore();
+ scarf(a,9,-17,'#a24b52',12,run*3);stroke('#d9b76d',1.2,()=>c.arc(27,-44,2.5,0,TAU));c.restore();
+}
+const RIGS=[kitten,glider,mouse,lynx,ghost];
 export function drawRebelCat(c,pose={}){
  const form=Math.max(0,Math.min(4,Math.round(number(Number(pose.form))))),state=pose.state||'idle',still=!!pose.reduceMotion||state==='dead';
  const p={state,still,t:still?0:number(pose.t),phase:still?0:number(pose.phase),atk:still?.5:clamp(pose.atk),cast:still?.5:clamp(pose.cast),look:Math.max(-1,Math.min(1,number(pose.look?.x))),power:Math.max(0,Math.min(5,Math.trunc(number(pose.michiPowerIndex,number(pose.castSlot)))))};
@@ -141,8 +157,8 @@ export function drawRebelCat(c,pose={}){
  c.save();c.lineCap='round';c.lineJoin='round';
  const bob=state==='jump'?-5:state==='fall'?3:state==='glide'?-4:state==='hurt'?5:state==='victory'?-7:Math.sin(p.t*.07+form)*.8;
  c.translate(p.reach,bob);c.scale(1+p.widen,1-p.compress);c.rotate(p.lean);c.rotate(state==='dead'?.7:state==='hurt'?-.12:state==='wall'?-.17:p.run*.025);c.scale(1,state==='jump'?1.04:state==='fall'?.95:1);
- if(form===2)c.scale(.74,.74);
- if(form===4)c.scale(.62,.62);
+ if(form===2)c.scale(.62,.62);
+ if(form===4)c.scale(.55,.55);
  RIGS[form](a,p);drawMichiNeon(a,p,form);
  if(state==='cast'){const x=p.castOrigin?.x??(form===2?45:form===4?42:28),y=p.castOrigin?.y??(form===0?-26:form===2?-34:-40),color=['#f49a82','#f1b998','#aebfc4','#d5b8ff','#c4ffee'][form];
   if(p.power===0){a.oval(x,y,5,5,color);a.stroke(color,1.3,()=>{c.moveTo(x-3,y);c.bezierCurveTo(x-18,y+15,x+9,y+21,x+14,y+5);});}

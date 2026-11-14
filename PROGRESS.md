@@ -1,3 +1,7 @@
+## ohana-648 · El jardín de las nueve vidas
+
+Sala ramificada de Michi, ratón negro diminuto, faroles y madrigueras, fauna de raíces y polillas, guardián de tres ataques con recuperación y escenas nativas de historia. IDs de evolución, estaciones y cien recuerdos conservados. Validación y publicación registradas en `docs/V648-VALIDATION.json` y `docs/V648-PUBLICATION.json`.
+
 ## ohana-647 · Animación conectada al movimiento real
 
 Contacto H desde el primer fotograma y recuperación, patas con apoyo y elevación de retorno, aterrizaje, frenada, giro y reacciones de cola/alas/sombrero/libro/fantasma. Velocidad de V646 conservada. [Validación](docs/V647-VALIDATION.json) · [publicación](docs/V647-PUBLICATION.json).

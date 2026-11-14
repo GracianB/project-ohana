@@ -110,6 +110,7 @@ function safeMemoryPlacement(room,item,band){
 // 70 en el suelo / repisas bajas (camino), 30 "reto" (repisas, cerca de estaciones o en el aire a un salto).
 export function world1CollectPlacements(room) {
   if (!room?.plats?.length) return [];
+  if(room.michiSanctuary)return room.michiSanctuary.memories.map(m=>({...m}));
   const W = Math.max(1000, num(room.width, 9600)), r = rng(hash("collect:" + room.id));
   const ledges = room.plats.filter((p) => p[3] <= 40 && p[2] >= 90);
   const stations = room.seal?.stations || [];
@@ -215,6 +216,7 @@ export function drawWorld1Collect(ctx, g, cam, t = 0) {
     if (have.has(it.id)) continue;
     const x = it.x - cx, y = it.y - cy + (g.reduceMotion?0:Math.sin(num(t) * 0.06 + it.id) * 3);
     if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
+    if(g.roomDef?.michiSanctuary){ctx.save();ctx.translate(x,y);ctx.rotate(g.reduceMotion?-.25:Math.sin(t*.025+it.id)*.12-.25);ctx.fillStyle=it.challenge?'#e7a394':'#e9dfbc';ctx.strokeStyle='#527578';ctx.beginPath();ctx.moveTo(-5,7);ctx.bezierCurveTo(-12,-2,-1,-13,8,-11);ctx.quadraticCurveTo(12,1,-5,7);ctx.fill();ctx.stroke();ctx.strokeStyle='#8bb3a4';ctx.beginPath();ctx.moveTo(-5,7);ctx.lineTo(5,-7);ctx.stroke();ctx.restore();continue;}
     if(hero==='kilo'&&g.roomDef?.kiloEncounterVersion){
       // A little petal carries the tune; XP keeps its separate gold diamond.
       ctx.save();ctx.translate(x,y);ctx.rotate(g.reduceMotion?-.2:Math.sin(num(t)*.025+it.id)*.14-.2);

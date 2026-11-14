@@ -27,7 +27,8 @@ test('all ten earned seal celebrations explain the next step and can return to p
   const g={world1Seals:[hero]};playWorld1Cine(g,'awaken',hero);
   for(let i=0;i<20;i++)updateWorld1Cine(g);
   for(let i=0;i<2&&g.world1Cine.i===0;i++)skipWorld1Cine(g);
-  assert.match(world1CinePresentation(g).line,/este|Corazón/);
+  if(hero==='cat'){assert.match(world1CinePresentation(g).line,/Cuerno|este/i);}
+  else assert.match(world1CinePresentation(g).line,/este|Corazón/);
   for(let i=0;i<120;i++)updateWorld1Cine(g);
   assert.equal(world1CinePresentation(g).button,'Volver al juego');
   skipWorld1Cine(g);assert.equal(g.world1Cine,null);

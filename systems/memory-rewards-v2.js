@@ -15,6 +15,7 @@ export const MEMORY_REWARDS=Object.freeze({
 export function memoryBenefits(count){return {compass:count>=25,magnet:count>=50,celebration:count===100};}
 export function startMemoryCelebration(g,hero,replay=false){
  const album=g.world1Collect?.rooms?.[hero];if(!album?.relic||album.found.length!==100||!MEMORY_REWARDS[hero]||g.relicScene)return false;
+ if(hero==='cat'&&g.roomDef?.michiSanctuary&&g.playWorld1Cine){g.playWorld1Cine('chapterHundred',hero);g.resetInput?.();g.onWorld1Beat?.('album-ceremony',hero);return true;}
  g.relicScene={kind:'memory-v2',hero,room:g.roomId,age:0,duration:540,replay};
  g.onRelicBegin?.();g.resetInput?.();g.onWorld1Beat?.('album-ceremony',hero);return true;
 }

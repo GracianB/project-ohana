@@ -13,7 +13,7 @@ export const DINO_DRAGON_HEIGHT = STANDARD_HERO_HEIGHT;
 export const DRAGON_WING_ALLOWANCE = 1.30;
 export const HERO_HEIGHT_TARGET = Object.freeze({
   // The final cat intentionally condenses into a small floating ghost.
-  cat: Object.freeze([55,70,64,120,80]),
+  cat: Object.freeze([55,70,42,120,80]),
   dino: DINO_DRAGON_HEIGHT,
   dragon: Object.freeze(DINO_DRAGON_HEIGHT.map(h => Math.round(h * DRAGON_WING_ALLOWANCE))),
   // Pizza & Frita follow the same standard curve: same size per form, told
