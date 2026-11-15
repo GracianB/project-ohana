@@ -73,7 +73,7 @@ function paintSanctuary(c,W,H,id,cleared){
  const muralReady=sanctuaryMural?.complete&&sanctuaryMural.naturalWidth>0;
  if(muralReady){
   const zoom=id==='canopy'?1.19:1,scale=Math.max(W/sanctuaryMural.naturalWidth,H/sanctuaryMural.naturalHeight)*zoom,dw=sanctuaryMural.naturalWidth*scale,dh=sanctuaryMural.naturalHeight*scale;
-  const dx=(W-dw)*.5+(id==='maze'?W*.13:0),dy=(H-dh)*(id==='canopy'?.12:.5);
+  const dx=Math.max(W-dw,Math.min(0,(W-dw)*.5+(id==='maze'?W*.13:0))),dy=(H-dh)*(id==='canopy'?.12:.5);
   c.drawImage(sanctuaryMural,dx,dy,dw,dh);
   c.save();c.globalAlpha=id==='maze'?.3:id==='return'?.2:.09;c.fillStyle=id==='return'?'#e4b788':q.ink;c.fillRect(0,0,W,H);c.restore();
   if(cleared){const dawn=c.createLinearGradient(0,H*.2,W,H);dawn.addColorStop(0,'#f0d3a322');dawn.addColorStop(1,'#99cab011');c.fillStyle=dawn;c.fillRect(0,0,W,H);}
@@ -128,7 +128,7 @@ function sceneryLayer(W,H,id,cleared){
 }
 export function drawMichiSanctuaryBackdrop(c,g,cam,t,W,H){
  if(!g.roomDef?.michiSanctuary)return false;const id=sanctuaryZone(g)?.id||'court';void preloadMichiScenery(id);const cleared=!!g.world1?.sealed,layer=sceneryLayer(W,H,id,cleared),time=g.reduceMotion?0:t;
- c.save();if(layer)c.drawImage(layer,-((cam.x*.035)%256),0);else paintSanctuary(c,W,H,id,cleared);
+ c.save();if(layer)c.drawImage(layer,-Math.max(0,Math.min(256,cam.x*.017)),0);else paintSanctuary(c,W,H,id,cleared);
  if(id!=='crypt'){c.strokeStyle='#c2ded2';c.lineWidth=1;for(let i=0;i<10;i++){const x=W*.12+i*W*.086+Math.sin(time*.017+i)*7,y=H*(.67+i%4*.032);c.globalAlpha=.12+Math.sin(time*.012+i)*.04;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+12,y-2,x+26+i%3*7,y);c.stroke();}}
  // Wind, pollen and reflected light use a bounded set of low-contrast accents.
  const q=THEMES[id]||THEMES.court;for(let i=0;i<12;i++){const x=((i*157-cam.x*.12+Math.sin(time*.009+i)*12)%(W+80)+W+80)%(W+80)-40,y=H*(.31+noise(i+40)*.49)+Math.sin(time*.013+i)*5;c.globalAlpha=.22+noise(i)*.3;oval(c,x,y,i%4?1.2:2,i%4?1.2:2,q.light);}c.restore();return true;

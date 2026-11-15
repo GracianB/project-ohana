@@ -497,7 +497,7 @@ const PRECACHE_REVISIONS = {
   "assets/michi/sanctuary-crypt.webp": "c6858d0be374e18dc8c14851d183531c29925aa5",
   "assets/michi/sanctuary-glass.webp": "3172c3536f0dabccf0edffa067a6d8f92c5070ea",
   "systems/michi-sanctuary.js": "279f159f8e75543dc3100827a26b53d9e7c4802f",
-  "worlds/michi-sanctuary-art.js": "5701b81706ce8f1aa5f2723ce0092c56bf0ffe07",
+  "worlds/michi-sanctuary-art.js": "5c2f7f8d306b1870aa71ce631dd2f331c5d3b954",
   "systems/michi-sanctuary-combat.js": "797b9feb6dc9e7a2596b346812b380c82ddbb01c",
   "systems/michi-sanctuary-spells.js": "482f3aa821df461a3b2f9803065c3f3a07976fdc",
   "systems/chapter-cinema.js": "662494bec8a46595a4bbfbcc33edaacc0cdb6812",
