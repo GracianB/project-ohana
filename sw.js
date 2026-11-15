@@ -496,12 +496,12 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "worlds/michi-painted-background.js": "f3cbe6da1d221af00f9bff5400c775ab2c9d9f7f",
+  "worlds/michi-painted-background.js": "7f2e8b77b4f6a916e40eb549ba20471951c99823",
   "assets/michi/sanctuary-night.webp": "f76938fb860e0fbf7550d68d3e98f35828180680",
   "assets/michi/sanctuary-crypt.webp": "c6858d0be374e18dc8c14851d183531c29925aa5",
   "assets/michi/sanctuary-glass.webp": "3172c3536f0dabccf0edffa067a6d8f92c5070ea",
   "systems/michi-sanctuary.js": "667cc3f85d91e048fb4b552ea5234795fad131d0",
-  "worlds/michi-sanctuary-art.js": "3da177ebfa189696407c35ff0128bf4da58bebc7",
+  "worlds/michi-sanctuary-art.js": "95f9e4ae100636db28ffc30ac36a5d0c0cca17bb",
   "worlds/michi-living-backdrop.js": "77d32a6476ac0db8723fb16adecb3585bafb6e2a",
   "worlds/michi-living-terrain.js": "c96b6c8a96a1072c5f63b45f7a23f4887b8d46e9",
   "systems/michi-sanctuary-combat.js": "797b9feb6dc9e7a2596b346812b380c82ddbb01c",
@@ -573,7 +573,7 @@ const PRECACHE_REVISIONS = {
   "caprichos.css": "7d395b7b53c6b2ca31f553eb5c65d33a4126c916",
   "systems/field-guide.js": "68296f6cb36d874524539397ccb0b2c3f8850053",
   "worlds/living-realms.js": "665bdbf783583d65bf4a0ee4919a051280df4f8e",
-  "versus.html": "ef5c62952f96f0a09c2689c324ead328a370bdc2",
+  "versus.html": "39303a51dfbd9dbdb07c1ee687535e846886a72b",
   "versus.css": "1342f8b77b943437a13eba326cb3d0f0dd948991",
   "multiplayer/versus-client.js": "1bc9f1f41d54ed74ca137e0e15f44b2cd41e1509",
   "multiplayer/match-rules-v604.js": "22e0ec2591bf777b323edbd5b854aae0fa10f6e1",

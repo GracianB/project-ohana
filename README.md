@@ -1,3 +1,7 @@
+## ohana-651 · Santuario pictórico de Michi
+
+Integra el santuario vivo de la PR #484 y añade jardines pintados, cripta de raíces y vidrieras, siete ambientes, luz de faroles ganados y carga diferida. Conserva el terreno, la orientación y la evolución inicial elegida. [Diseño](docs/MICHI-SCENERY-V651.md).
+
 ## ohana-650 · Michi, el santuario vivo (candidato)
 
 Rediseño visual propuesto en [PR #484](https://github.com/GracianB/project-ohana/pull/484): siete ambientes bioluminiscentes, terreno pintado sobre plataformas reales, señales de faroles contextuales, animación reducida y caché offline revisada. La versión 649 continúa siendo la última publicación verificada mientras 650 completa los controles de calidad y despliegue. [Validación 650](docs/V650-VALIDATION.json) · [Publicación 650](docs/V650-PUBLICATION.json).

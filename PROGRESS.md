@@ -1,3 +1,7 @@
+## ohana-651 · Tu santuario, ampliado con escenarios pintados
+
+Integra la base de la PR #484: terreno vivo, señalización contextual, Continuar en el Atlas y muros del laberinto transitables por el ratón. Añade tres panoramas originales optimizados, siete composiciones, agua y polen animados y luz de faroles reales. Carga diferida, cuatro lienzos como máximo y alternativa vectorial. Conserva la elección inicial de evolución de V649.
+
 ## ohana-650 · Un santuario pictórico para Michi
 
 Tres panoramas originales optimizados en WebP: jardín, raíces y vidrieras. Siete ambientes con paletas propias, agua animada, arquitectura, plantas reactivas, mosaico de piedra y emblemas de túneles. Carga diferida por zona, cuatro fondos en caché y alternativa vectorial. Recorridos, colisiones, combates y elección de evolución de V649 conservados.

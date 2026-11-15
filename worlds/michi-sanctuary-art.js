@@ -1,6 +1,5 @@
 import {drawMichiPaintedBackdrop,preloadMichiScenery} from './michi-painted-background.js';
 export {preloadMichiScenery,MICHI_SCENERY_CACHE_LIMIT,MICHI_SCENERY_VERSION} from './michi-painted-background.js';
-import {drawMichiLivingBackdrop,drawMichiLivingAtmosphere} from './michi-living-backdrop.js';
 import {drawMichiSanctuaryTerrain} from './michi-living-terrain.js';
 import {SANCTUARY_PALETTE as P,nearestSanctuaryPassage,passageReady,sanctuaryZone,sanctuaryGuardianDefeated,sanctuaryObjective} from '../systems/michi-sanctuary.js';
 const TAU=Math.PI*2;
@@ -58,7 +57,6 @@ export function drawMichiSanctuaryBackdrop(c,g,cam,t,W,H){
  const id=sanctuaryZone(g)?.id||'court';
  void preloadMichiScenery(id);
  const painted=drawMichiPaintedBackdrop(c,g,cam,t,W,H);
- if(painted)drawMichiLivingAtmosphere(c,g,cam,t,W,H);
  return painted;
 }
 export function drawMichiSanctuary(c,g,cam,t=0){
