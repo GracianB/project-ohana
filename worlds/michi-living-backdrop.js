@@ -1,6 +1,7 @@
 // Michi / Living Lantern Sanctuary. Decorative screen-space painting only.
 // Art never changes collision, route geometry, enemy AI, save data or interaction IDs.
 // Stable world-anchored parallax, local narrative palettes, reduced-motion support.
+import {drawMichiArchitecture,drawMichiWater} from './michi-living-architecture.js';
 import {sanctuaryZone} from '../systems/michi-sanctuary.js';
 
 const TAU=Math.PI*2;
@@ -8,11 +9,11 @@ const light=(x)=>Math.max(0,Math.min(1,x));
 const mod=(n,d)=>((n%d)+d)%d;
 const noise=(n)=>{const s=Math.sin(n*127.1+43.7)*43758.5453;return s-Math.floor(s);};
 const THEMES=Object.freeze({
- court:  {sky:['#061925','#0e3441','#28565a'],mist:'#6ed5c0',stone:'#24444d',foliage:'#234e52',warm:'#ffe0a4'},
+ court:  {sky:['#101d38','#2c425f','#778b91'],mist:'#6ed5c0',stone:'#24444d',foliage:'#234e52',warm:'#ffe0a4'},
  crypt:  {sky:['#050f1d','#0a2030','#142d39'],mist:'#77babb',stone:'#172c37',foliage:'#163b41',warm:'#e2b6cb'},
  gallery:{sky:['#101b35','#263350','#4a4b64'],mist:'#c7afd7',stone:'#343c5c',foliage:'#454d62',warm:'#ffe7b8'},
- maze:   {sky:['#091c2a','#113544','#31575c'],mist:'#90d2ce',stone:'#213d4b',foliage:'#255353',warm:'#f1d39f'},
- canopy: {sky:['#071d35','#194659','#486f70'],mist:'#a1eeeb',stone:'#31515b',foliage:'#306661',warm:'#ffe1b3'},
+ maze:   {sky:['#152c41','#365563','#77918a'],mist:'#90d2ce',stone:'#213d4b',foliage:'#255353',warm:'#f1d39f'},
+ canopy: {sky:['#1d3155','#54798d','#a2b8ac'],mist:'#a1eeeb',stone:'#31515b',foliage:'#306661',warm:'#ffe1b3'},
  arena:  {sky:['#16192c','#342b48','#665061'],mist:'#edb6cb',stone:'#4b4059',foliage:'#494a5a',warm:'#ffd5a5'},
  return: {sky:['#283c58','#8e7985','#e5ae8a'],mist:'#ffe5bb',stone:'#625664',foliage:'#596c6a',warm:'#fff0c5'}
 });
@@ -41,14 +42,40 @@ function moon(c,cam,t,W,H,theme,cleared,reduced){
  glow.addColorStop(.36,'rgba(195,233,221,.12)');
  glow.addColorStop(1,'rgba(0,0,0,0)');
  c.fillStyle=glow;c.fillRect(x-radius*3.2,y-radius*3.2,radius*6.4,radius*6.4);
- ellipse(c,x,y,radius,radius,'#fff1cd');
- if(!cleared)ellipse(c,x+radius*.40,y-radius*.17,radius*.92,radius*.92,theme.sky[0]);
+ c.fillStyle='#fff1cd';c.beginPath();
+ if(cleared)c.arc(x,y,radius,0,TAU);
+ else{c.arc(x,y,radius,-1.1,1.1,true);c.bezierCurveTo(x-radius*.7,y+radius*.55,x-radius*.7,y-radius*.55,x+Math.cos(-1.1)*radius,y+Math.sin(-1.1)*radius);}
+ c.closePath();c.fill();
  line(c,'rgba(255,238,194,.34)',1.5,()=>{
   c.arc(x,y,radius+11+(reduced?0:Math.sin(t*.015)*2),-.10,Math.PI*1.48);
  });
  // One moon, physically behind the forests, with clear air around the player.
 }
 
+// Vector foliage stamps are generated locally; each tree stays an independent object.
+const crownCache=new Map();
+function paintCrown(c,layer,i){
+ const tones=layer===0?['#253d55','#2c455a']:layer===1?['#3a5a67','#456b72']:['#497779','#608b86'];
+ for(let b=0;b<4;b++){
+  const side=b%2?1:-1,reach=52+noise(i*7+b)*61,yy=18+b*21;
+  line(c,tones[0],3+layer,()=>{c.moveTo(0,yy+41);c.bezierCurveTo(side*27,yy+13,side*reach*.7,yy+12,side*reach,yy-17);});
+  for(let k=0;k<5;k++){
+   const xx=side*(22+k*reach/5),ly=yy+8-k*5;
+   c.fillStyle=tones[k%2];c.beginPath();c.moveTo(xx-23,ly+4);
+   c.bezierCurveTo(xx-36,ly-18,xx-8,ly-29,xx+7,ly-17);
+   c.bezierCurveTo(xx+23,ly-37,xx+43,ly-13,xx+25,ly+3);
+   c.quadraticCurveTo(xx,ly+16,xx-23,ly+4);c.fill();
+   if(layer===2&&k%2===0){ellipse(c,xx+5,ly-7,3,3,'#c2a6b4');ellipse(c,xx+10,ly-5,2,2,'#e0bec1');}
+  }
+ }
+}
+function drawCrown(c,x,y,layer,seed){
+ if(typeof OffscreenCanvas==='undefined'){c.save();c.translate(x,y);paintCrown(c,layer,seed);c.restore();return;}
+ const variant=((seed%4)+4)%4,key=layer+':'+variant;
+ let stamp=crownCache.get(key);
+ if(!stamp){stamp=new OffscreenCanvas(340,200);const q=stamp.getContext('2d');q.translate(170,55);paintCrown(q,layer,variant);crownCache.set(key,stamp);}
+ c.drawImage(stamp,x-170,y-55);
+}
 function distantTrees(c,cam,t,W,H,p,reduced){
  const cx=cam.x||0,cy=cam.y||0;
  for(let layer=0;layer<3;layer++){
@@ -58,30 +85,11 @@ function distantTrees(c,cam,t,W,H,p,reduced){
   for(let i=start;i<=end;i++){
    const x=i*step-cx*par+(noise(i+layer*77)-.5)*88;
    if(x < -150 || x > W+150)continue;
-   const h=H*(.42+noise(i*3+layer*29)*.25),root=baseline+36;
-   const trunk=[18,24,33][layer];
-   line(c,[ '#153340','#183a43','#21464b'][layer],trunk,()=>{
-    c.moveTo(x-11,root);
-    c.bezierCurveTo(x-23,root-h*.38,x+24,root-h*.68,x,root-h);
-   });
-   const top=root-h;
-   for(const side of[-1,1]){
-    line(c,[ '#153340','#183a43','#21464b'][layer],5+layer*2,()=>{
-     c.moveTo(x,root-h*.62);
-     c.quadraticCurveTo(x+side*48,top+46,x+side*(72+noise(i+side*11)*42),top+18);
-    });
-   }
-   // Broken silhouettes, never identical square vertical bars.
-   for(let b=0;b<3;b++){
-    const dx=(noise(i*11+b*71+layer)-.5)*128,dy=noise(i*2+b*59)*40;
-    ellipse(c,x+dx,top+dy,55+noise(i+b*8)*18,16+layer*4,
-      [ '#153c44','#1b4749','#27545a'][layer]);
-   }
-   if(layer===2&&i%3===0){
-    const glowX=x+30,glowY=top+30;
-    ellipse(c,glowX,glowY,5,8,reduced?'rgba(147,219,207,.45)':
-      'rgba(150,247,225,'+(.35+Math.sin(t*.025+i)*.12)+')');
-   }
+   const h=H*(.42+noise(i*3+layer*29)*.25),root=baseline+36,top=root-h;
+   line(c,['#25394d','#2e4957','#365c64'][layer],[18,24,33][layer],()=>{c.moveTo(x-11,root);c.bezierCurveTo(x-23,root-h*.38,x+24,root-h*.68,x,top);});
+   for(const side of[-1,1])line(c,['#25394d','#2e4957','#365c64'][layer],5+layer*2,()=>{c.moveTo(x,root-h*.62);c.quadraticCurveTo(x+side*48,top+46,x+side*(72+noise(i+side*11)*42),top+18);});
+   drawCrown(c,x,top,layer,i);
+   if(layer===2&&i%3===0)ellipse(c,x+30,top+30,3,5,'rgba(225,198,177,'+(reduced?.4:.35+Math.sin(t*.025+i)*.12)+')');
   }
  }
 }
@@ -99,83 +107,6 @@ function foregroundMist(c,cam,t,W,H,p,reduced){
   ellipse(c,x,H*(.75+i*.048),160,21,'rgba(151,225,208,.038)');
  }
 }
-
-function gardenArchitecture(c,zone,cam,t,W,H,p,reduced){
- const xScroll=cam.x||0;
- const base=H*.83-(cam.y||0)*.04;
- if(zone==='court'||zone==='maze'){
-  const step=zone==='court'?490:330,par=.34,start=Math.floor((xScroll*par-200)/step);
-  for(let i=start;i<=Math.ceil((xScroll*par+W+200)/step);i++){
-   const x=i*step-xScroll*par,y=base+((i%2+2)%2)*24,high=zone==='maze'?220:310;
-   line(c,p.stone,zone==='maze'?14:22,()=>{
-    c.moveTo(x-110,y);c.bezierCurveTo(x-100,y-high,x+102,y-high,x+106,y);
-   });
-   line(c,'rgba(137,207,190,.25)',2,()=>{
-    c.moveTo(x-99,y-8);c.bezierCurveTo(x-87,y-high+25,x+91,y-high+25,x+97,y-8);
-   });
-   if(zone==='court'){
-    const ly=y-high*.72;
-    line(c,'#638c80',1.5,()=>{c.moveTo(x,ly-40);c.lineTo(x,ly);});
-    ellipse(c,x,ly+6,12,17,p.warm);
-    ellipse(c,x,ly+4,24,26,'rgba(255,219,157,.09)');
-   }else for(const side of[-1,1]){
-    ellipse(c,x+side*124,y-64,68,66,p.foliage);
-    ellipse(c,x+side*124,y-126,44,33,p.foliage);
-   }
-  }
- }
- if(zone==='crypt'){
-  // Ancient roots descend naturally from a broken ceiling, leaving the middle navigable.
-  for(let i=0;i<7;i++){
-   const x=mod(i*273-xScroll*.2,W+220)-100,drop=125+noise(i*7)*140;
-   line(c,'#263f44',14,()=>{c.moveTo(x,-28);c.bezierCurveTo(x-25,drop*.25,x+45,drop*.55,x,drop);});
-   line(c,'#4a7970',2,()=>{c.moveTo(x+5,0);c.quadraticCurveTo(x+22,drop*.5,x,drop-8);});
-   ellipse(c,x,drop-5,5,9,'rgba(157,226,210,.44)');
-  }
-  const a=c.createRadialGradient(W*.52,H*.62,12,W*.52,H*.62,W*.52);
-  a.addColorStop(0,'rgba(76,150,160,.15)');a.addColorStop(1,'rgba(0,0,0,0)');
-  c.fillStyle=a;c.fillRect(0,0,W,H);
- }
- if(zone==='gallery'){
-  const gap=300,par=.25;
-  for(let i=Math.floor((xScroll*par-120)/gap);i<=Math.ceil((xScroll*par+W+120)/gap);i++){
-   const x=i*gap-xScroll*par,y=H*.55;
-   line(c,'#6f6883',15,()=>{c.moveTo(x-70,y+70);c.lineTo(x-70,y-155);c.quadraticCurveTo(x,y-270,x+70,y-155);c.lineTo(x+70,y+70);});
-   for(let k=0;k<3;k++)ellipse(c,x+(k-1)*19,y-130+(k%2)*16,16,48,['#8b9abe','#bda1c4','#efbeac'][k]);
-   line(c,'rgba(255,241,215,.25)',2,()=>{c.moveTo(x-66,y-23);c.lineTo(x+66,y-23);});
-  }
- }
- if(zone==='canopy'){
-  // Hanging sky-islands do not pretend to be solid platforms.
-  for(let i=-1;i<Math.ceil(W/310)+2;i++){
-   const x=i*310-mod(xScroll*.18,310)+100,y=H*(.44+(i%3)*.09);
-   line(c,'rgba(123,197,181,.4)',2,()=>{c.moveTo(x,-20);c.bezierCurveTo(x+17,y*.4,x-24,y*.65,x,y-16);});
-   ellipse(c,x,y,95,17,'#3a6665');ellipse(c,x,y-15,82,14,'#60928a');
-   for(let k=0;k<4;k++)ellipse(c,x+(k-2)*26,y-25,6,4,'rgba(185,239,215,.57)');
-  }
- }
- if(zone==='arena'){
-  for(let i=0;i<5;i++){
-   const x=(i+1)*W/6,top=H*.3+(i%2)*35;
-   line(c,'#57475f',25,()=>{c.moveTo(x,H);c.lineTo(x,top);});
-   line(c,'#a37d92',3,()=>{c.moveTo(x-11,H);c.lineTo(x-11,top+25);});
-   ellipse(c,x,top,25,8,'#a78b93');
-   ellipse(c,x,top-26,9,13,p.warm);
-  }
- }
- if(zone==='return'){
-  // The first sunrise is earned, never shown in earlier chambers.
-  const horizon=c.createLinearGradient(0,H*.36,0,H);
-  horizon.addColorStop(0,'rgba(252,201,166,0)');
-  horizon.addColorStop(1,'rgba(255,218,168,.15)');
-  c.fillStyle=horizon;c.fillRect(0,H*.36,W,H*.64);
-  for(let i=-1;i<6;i++){
-   const x=i*250-mod(xScroll*.2,250),y=H*.73;
-   line(c,'#6a6e70',9,()=>{c.moveTo(x,y);c.lineTo(x+120,y-78);c.lineTo(x+230,y);});
-  }
- }
-}
-
 
 // Each *earned* lantern lights the world at its actual authored coordinates.
 // Small, culled light pools keep the collision silhouettes and player readable.
@@ -221,17 +152,12 @@ export function drawMichiLivingBackdrop(c,g,cam={},t=0,W=1280,H=720){
  c.save();
  sky(c,W,H,p,lit);
  if(zone!=='crypt')moon(c,cam,t,W,H,p,cleared,reduced);
- distantTrees(c,cam,t,W,H,p,reduced);
- gardenArchitecture(c,zone,cam,t,W,H,p,reduced);
+ if(zone!=='crypt')distantTrees(c,cam,t,W,H,p,reduced);
+ drawMichiArchitecture(c,zone,cam,reduced?0:t,W,H,p,lit);
+ drawMichiWater(c,g,cam,reduced?0:t,W,H,zone,lit);
  starlight(c,cam,t,W,H,p,reduced,lit);
  lanternAfterglow(c,g,cam,t,W,H,reduced);
  foregroundMist(c,cam,t,W,H,p,reduced);
  c.restore();return true;
 }
 
-// Local earned light and mist sit above painted scenery without a second sky/moon.
-export function drawMichiLivingAtmosphere(c,g,cam={},t=0,W=1280,H=720){
- if(!g?.roomDef?.michiSanctuary)return false;
- const p=THEMES[sanctuaryZone(g)?.id]||THEMES.court,reduced=!!g.reduceMotion;
- c.save();lanternAfterglow(c,g,cam,t,W,H,reduced);foregroundMist(c,cam,t,W,H,p,reduced);c.restore();return true;
-}

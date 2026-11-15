@@ -1,0 +1,22 @@
+{
+  "release": "ohana-652",
+  "status": "validation in progress",
+  "passed": [
+    "1948/1948 unit tests passed locally; GitHub Node test job passed",
+    "Release gate: 412 runtime modules, 481 offline resources",
+    "Seven distinct production zone renders, restored courtyard and 390px mobile; no Canvas errors",
+    "Reduced-motion rendering is stable across time and normal animation changes",
+    "Player proximity bends real platform flowers without mutating gameplay state",
+    "Scenery module import and draw make zero flat panorama requests",
+    "Native physical journey earned five lanterns and guardian victory with zero deaths",
+    "Native 390px Atlas: selected Michi form 2 retained after simulation and Continue",
+    "Existing earned-100 save: Continue, album replay, ten-actor scene and accessible controls passed at 1280/390/320"
+  ],
+  "pending": [
+    "Public candidate verification and deployment"
+  ],
+  "limits": [
+    "Scenery is independent vector art; physical routes and combat rules are unchanged. Decorative architecture is not a new collision surface.",
+    "No frame rate guarantee: software/headless rendering measurements depend on load. Tree foliage reuses at most twelve small locally generated stamps."
+  ]
+}
