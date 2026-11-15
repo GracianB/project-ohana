@@ -115,10 +115,10 @@ try{
   const notice=await fly.locator('#notification-container').boundingBox();const screenFoot=(a.player.y+a.player.h-a.camera.y)*1.02-(mobile?844:900)*.01;
   if(notice)assert.ok(screenFoot-145>notice.y+notice.height,'flight camera must keep the visible hero below the objective notice');
   await fly.screenshot({path:`test-results/v624/eclipse-flight-${mobile?'touch':'keyboard'}.png`});
-  if(mobile)await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});else await fly.keyboard.up('Space');
+  if(mobile)await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});else await fly.keyboard.up('w');
   a=await ft(20);assert.equal(a.michiFlight.mode,'hover');assert.equal(a.player.vy,0);
   await fly.keyboard.down('s');a=await ft(15);await fly.keyboard.up('s');assert.equal(a.michiFlight.mode,'descend');assert.ok(a.player.vy>=4.5);
-  eclipseFlight.push({input:mobile?'touch hold':'Space hold',from,ascentY,sustainedFrames:100,heroClearOfObjective:true,hover:true,controlledDescent:true,earnedBackup:true});await context.close();
+  eclipseFlight.push({input:mobile?'touch hold':'W hold',from,ascentY,sustainedFrames:100,heroClearOfObjective:true,hover:true,controlledDescent:true,earnedBackup:true});await context.close();
  }
  assert.deepEqual(errors,[]);
  await fs.writeFile('test-results/v624/moon-hare.json',JSON.stringify({selection,artwork:artwork.bounds,eclipseFlight,chapter:{room:'w1-cat',formsEarned:[...earned].sort(),stations:current.world1.done,deaths,physicalControls:true,directChapterAccessFixture:true,fairyFlight},errors},null,2));
