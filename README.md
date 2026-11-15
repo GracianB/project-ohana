@@ -1,3 +1,7 @@
+## ohana-650 · Michi, el santuario vivo (candidato)
+
+Rediseño visual propuesto en [PR #484](https://github.com/GracianB/project-ohana/pull/484): siete ambientes bioluminiscentes, terreno pintado sobre plataformas reales, señales de faroles contextuales, animación reducida y caché offline revisada. La versión 649 continúa siendo la última publicación verificada mientras 650 completa los controles de calidad y despliegue. [Validación 650](docs/V650-VALIDATION.json) · [Publicación 650](docs/V650-PUBLICATION.json).
+
 <div align="center">
 
 <img src="favicon.svg" width="96" alt="Emblema de OHANA" />
@@ -6,7 +10,7 @@
 
 **Diez historias. Una familia.**
 
-[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=650) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=651) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
 

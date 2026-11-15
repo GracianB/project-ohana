@@ -2,6 +2,10 @@
 
 Tres panoramas originales optimizados en WebP: jardín, raíces y vidrieras. Siete ambientes con paletas propias, agua animada, arquitectura, plantas reactivas, mosaico de piedra y emblemas de túneles. Carga diferida por zona, cuatro fondos en caché y alternativa vectorial. Recorridos, colisiones, combates y elección de evolución de V649 conservados.
 
+## ohana-650 · Michi: santuario vivo y navegación despejada
+
+Candidato de mejora visual en PR #484. Siete ambientes con arquitectura, iluminación nocturna, luna y parallax propios; piedra y flora sobre colisionadores reales; señales contextuales y movimiento reducido. Sin alterar progreso, niveles, controles, jefes ni evolución elegida en ohana-649. La publicación requiere CI y comprobación visual; no se considera realizada aún.
+
 ## ohana-649 · Respetar la evolución inicial elegida
 
 Publicado y verificado en GitHub Pages y Netlify: 1.920 pruebas y las 50 combinaciones de personaje/forma inicial con Continue. La elección del Atlas ya no se sustituye por la forma final al restaurar un sello o los objetivos del capítulo. La experiencia histórica no se concede otra vez; la experiencia nueva continúa funcionando. Continue conserva la forma y el contexto de la partida elegida sin borrar evoluciones ni sellos conseguidos.

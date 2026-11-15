@@ -1,0 +1,49 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
+import {michiNextPassage,michiZoneAtArrival,michiShouldDescendToArch,MICHI_FAROL_ZONES} from './browser/michi-campaign-route.mjs';
+
+const room=WORLD1_ROOMS['w1-cat'];
+const next=(from,to,lamps,sealed=false,echoes=0)=>
+ michiNextPassage(room,from,to,lamps,sealed,echoes);
+test('Michi route follows authored lantern gates without skipping locked passages',()=>{
+ assert.deepEqual(MICHI_FAROL_ZONES,['court','crypt','maze','canopy','gallery']);
+ assert.equal(next('court','crypt',0),null);
+ assert.equal(next('court','crypt',1)?.id,'court-crypt');
+ assert.equal(next('crypt','maze',2)?.id,'crypt-court');
+ assert.equal(next('court','maze',2)?.id,'court-maze');
+ assert.equal(next('maze','canopy',3)?.id,'maze-canopy');
+ assert.equal(next('canopy','gallery',4)?.id,'canopy-maze');
+ assert.equal(next('maze','gallery',4)?.id,'maze-court');
+ assert.equal(next('court','gallery',4)?.id,'court-gallery');
+ assert.equal(next('gallery','arena',5)?.id,'gallery-court');
+ assert.equal(next('court','arena',5)?.id,'court-arena');
+ assert.equal(next('arena','court',5)?.id,'arena-court');
+ assert.equal(next('court','return',5,true,2),null);
+ assert.equal(next('court','return',5,true,3)?.id,'court-exit');
+});
+test('Michi maze stone thresholds are passable before the fairy flight unlock',()=>{
+ const roomFloor=room.michiSanctuary.zones.find(z=>z.id==='maze').floor;
+ for(const x of [6420,7480]){
+  const wall=room.plats.find(q=>q[0]===x&&q[2]===28);
+  assert.ok(wall,'missing authored maze landmark '+x);
+  assert.equal(wall[1]+wall[3],roomFloor);
+  assert.ok(wall[3]<=130,'maze threshold must be jumpable as evo 2, not require evo 1/4 flight');
+ }
+});
+test('every legal Michi entrance arrives at a named chapter floor',()=>{
+ for(const arch of room.michiSanctuary.passages){
+  const zone=michiZoneAtArrival(room,arch);
+  assert.ok(zone,arch.id+' destination must be on authored floor');
+  assert.ok(room.michiSanctuary.zones.some(z=>z.id===zone),arch.id);
+ }
+});
+
+test('Michi approaches a lower native arch by dropping only through a real thin ledge',()=>{
+ const arch={x:6180,floor:1134},elevated={x:6153,y:905,w:22,h:34,grounded:true};
+ assert.equal(michiShouldDescendToArch(elevated,arch),true);
+ assert.equal(michiShouldDescendToArch({...elevated,grounded:false},arch),false);
+ assert.equal(michiShouldDescendToArch({...elevated,y:1080},arch),false);
+ assert.equal(michiShouldDescendToArch({...elevated,x:5840},arch),false);
+ assert.equal(michiShouldDescendToArch(elevated,null),false);
+});
