@@ -1,0 +1,24 @@
+{
+  "release": "ohana-650",
+  "status": "local validation passed; publication pending",
+  "passed": [
+    "1936 unit tests passed, zero failures",
+    "Release gate: 409 runtime modules and 481 offline resources",
+    "Seven distinct production scenery zones, restored courtyard and 390px scenery screenshots",
+    "Reduced-motion drawing remains stable across different clocks; active decoration changes normally",
+    "Importing shared art fetches no Michi images; each of the three murals loads at most once",
+    "Three WebP murals fit the 1.4MB total / 500KiB individual image budget",
+    "Native keyboard and production physics earned all five lamps and defeated the guardian; no station/XP/health grants",
+    "Continuation from that earned save physically collected 100 memories, all three echoes, relic and seal; Continue and departure scene passed",
+    "1280/390/320 actual earned Continue, album replay, native story controls and reduced-motion scenes passed",
+    "Simulation, room geometry, combat and starting-evolution source files unchanged from V649"
+  ],
+  "pending": [
+    "Netlify candidate and public deployment verification"
+  ],
+  "limits": [
+    "Scenery screenshots are production-renderer position fixtures, separate from the earned physical journey.",
+    "Warm-frame timings depend on software rendering and competing tests; no fixed device FPS guarantee is claimed.",
+    "There are three painted panoramas, composed into seven zone treatments, not seven independent paintings."
+  ]
+}
