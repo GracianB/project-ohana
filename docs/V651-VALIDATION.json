@@ -1,0 +1,21 @@
+{
+  "release": "ohana-651",
+  "status": "candidate validation in progress",
+  "passed": [
+    "Seven distinct production zone renders, restored courtyard and 390px mobile; no Canvas errors",
+    "Lazy loading: zero image requests on shared-module import; one request per mural family",
+    "Reduced-motion rendering stable across time; normal animation changes",
+    "Native physical route earned all five lanterns and defeated guardian with zero deaths",
+    "Native 390px Atlas: all forms/seals earned, selected Michi form 2 remains selected after simulation and Continue",
+    "Offline release gate: 412 runtime modules and 484 resources"
+  ],
+  "pending": [
+    "Full unit suite after release documentation links",
+    "Native 100 memories/three echoes and scene checks",
+    "Public candidate and production verification"
+  ],
+  "limits": [
+    "Position fixtures verify art, not earned progression.",
+    "No frame rate guarantee; software rendering varies with concurrent browser load."
+  ]
+}

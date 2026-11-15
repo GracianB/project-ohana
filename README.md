@@ -1,6 +1,6 @@
 ## ohana-651 · Santuario pictórico de Michi
 
-Integra el santuario vivo de la PR #484 y añade jardines pintados, cripta de raíces y vidrieras, siete ambientes, luz de faroles ganados y carga diferida. Conserva el terreno, la orientación y la evolución inicial elegida. [Diseño](docs/MICHI-SCENERY-V651.md).
+Integra el santuario vivo de la PR #484 y añade jardines pintados, cripta de raíces y vidrieras, siete ambientes, luz de faroles ganados y carga diferida. Conserva el terreno, la orientación y la evolución inicial elegida. [Diseño](docs/MICHI-SCENERY-V651.md) · [Validación](docs/V651-VALIDATION.json) · [Publicación](docs/V651-PUBLICATION.json).
 
 ## ohana-650 · Michi, el santuario vivo (candidato)
 
