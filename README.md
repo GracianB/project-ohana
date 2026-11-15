@@ -1,3 +1,11 @@
+## ohana-651 · Santuario pictórico de Michi
+
+Integra el santuario vivo de la PR #484 y añade jardines pintados, cripta de raíces y vidrieras, siete ambientes, luz de faroles ganados y carga diferida. Conserva el terreno, la orientación y la evolución inicial elegida. [Diseño](docs/MICHI-SCENERY-V651.md) · [Validación](docs/V651-VALIDATION.json) · [Publicación](docs/V651-PUBLICATION.json).
+
+## ohana-650 · Michi, el santuario vivo (candidato)
+
+Rediseño visual propuesto en [PR #484](https://github.com/GracianB/project-ohana/pull/484): siete ambientes bioluminiscentes, terreno pintado sobre plataformas reales, señales de faroles contextuales, animación reducida y caché offline revisada. La versión 649 continúa siendo la última publicación verificada mientras 650 completa los controles de calidad y despliegue. [Validación 650](docs/V650-VALIDATION.json) · [Publicación 650](docs/V650-PUBLICATION.json).
+
 <div align="center">
 
 <img src="favicon.svg" width="96" alt="Emblema de OHANA" />
@@ -6,7 +14,7 @@
 
 **Diez historias. Una familia.**
 
-[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=649) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=651) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
 
@@ -23,7 +31,7 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; Aventura y Versus comprobados entre dos navegadores con vistas de escritorio y móvil. La prueba con dispositivos físicos sigue pendiente.
 
-Registro de entrega: `ohana-649` / la forma inicial elegida se conserva al entrar en capítulos completados y al continuar. [Validación](docs/V649-VALIDATION.json) · [Publicación](docs/V649-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
+Registro de entrega: `ohana-650` / nuevo escenario pictórico de Michi: jardín nocturno, cripta de raíces, vidrieras, terrazas suspendidas y muelle. [Validación](docs/V650-VALIDATION.json) · [Publicación](docs/V650-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
 
 ## Historial de desarrollo
 

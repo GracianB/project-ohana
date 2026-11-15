@@ -1,0 +1,9 @@
+{
+  "release": "ohana-650",
+  "status": "candidate; not published",
+  "pullRequest": "https://github.com/GracianB/project-ohana/pull/484",
+  "githubPages": "https://gracianb.github.io/project-ohana/",
+  "productionVerified": false,
+  "netlifyVerified": false,
+  "notes": "The verified published version remains ohana-649 until the new CI gates and production checks pass."
+}

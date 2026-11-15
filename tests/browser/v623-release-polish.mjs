@@ -35,7 +35,12 @@ try{
   assert.match(await page.locator('.fg-combat-rules').innerText(),/U no conecta/);
   await page.locator('.fg-combat-rules').screenshot({path:`test-results/v623/powers-guide-${width}.png`});
   await page.locator('#btn-close-help').click();await page.keyboard.press('Escape');await page.locator('#btn-quit').click();
-  await page.locator('#btn-continue').waitFor({state:'visible'});await page.locator('#btn-continue').click();await page.clock.runFor(14000);await films();await tick(3);
+  // After returning to the Atlas, Continue must be visible on the ACTUAL
+  // landing UI, not on the old hidden title-shell menu. Clicks use the real
+  // Atlas control and restore the previously earned Stitcho evolution.
+  await page.locator('#hoku-atlas #atlas-resume').waitFor({state:'visible'});
+  await page.screenshot({path:`test-results/v623/atlas-continue-${width}.png`});
+  await page.locator('#atlas-resume').click();await page.clock.runFor(14000);await films();await tick(3);
   const resumed=await page.evaluate(()=>window.__OHANA_E2E.state());
   assert.equal(resumed.hero,'stitcho');assert.equal(resumed.evo,4);assert.deepEqual(resumed.world1Seals,before.world1Seals);
   if(width===320){

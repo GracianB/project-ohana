@@ -1,0 +1,34 @@
+name: V650 focused sanctuary and combat acceptance
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v650-focused-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused:
+    name: V650 real Michi chapter, relic descent and active combat
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install exact dependencies
+        run: npm ci --no-audit --no-fund
+      - name: "Unit regressions: real arches, earned lights and balcony exit"
+        run: node --test tests/michi-campaign-route.test.js tests/michi-sanctuary-living-art.test.js tests/gauntlet-collection-approach.test.js
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Verify real Kilo pressure dodges on Normal
+        run: node tests/browser/v513-pressure.mjs
+      - name: Verify real Michi gates, five lanterns, guardian and Continue
+        run: OHANA_PILOT_HERO=cat node tests/browser/v507-three-chapters.mjs

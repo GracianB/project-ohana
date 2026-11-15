@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';import fs from 'node:fs/promises';
 import {chromium} from 'playwright';import {startServer} from './server.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 import {advanceKiloEncounterControls} from './kilo-encounter-controls-v606.mjs';
+import {michiNextPassage,michiZoneAtArrival,michiShouldDescendToArch,MICHI_FAROL_ZONES} from './michi-campaign-route.mjs';
 import {playGauntlet} from './gauntlet-controls.mjs';
 const server=await startServer(0);let browser;
 try{
@@ -29,6 +30,12 @@ try{
   const expeditionNodes=await page.evaluate(async hero=>(await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-'+hero].expedition?.nodes||[],hero);
   const allStations=await page.evaluate(async hero=>(await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-'+hero].seal.stations,hero);
   const stations=hero==='pizza'?allStations.filter(q=>q.kind==='guest'):allStations;
+  // Michi has a genuine multi-level sanctuary. Its arches, not a direct X
+  // sprint into a lower floor, are the legal route between earned faroles.
+  const michiRoom=hero==='cat'?await page.evaluate(async()=>{
+   return (await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-cat'];
+  }):null;
+  let michiZone='court';
   const forms=new Set([0]);let deaths=0,iterations=0,minHp=s.hp,railRun=false;
   for(let i=0;i<7000&&!s.world1.sealed;i++){
    iterations=i;
@@ -54,6 +61,12 @@ try{
      await page.screenshot({path:'test-results/v600/death-'+hero+'-'+attempt+'.png'});
     assert.ok(attempt<=12,'natural retries exhausted '+JSON.stringify(evidence));
     await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();s=await step(90);
+    if(hero==='cat'){
+     const p=s.player,foot=p.y+p.h,center=p.x+p.w/2;
+     const restored=michiRoom.michiSanctuary.zones.filter(z=>center>=z.x&&center<z.x+z.w)
+       .sort((a,b)=>Math.abs(a.floor-foot)-Math.abs(b.floor-foot))[0];
+     if(restored&&Math.abs(restored.floor-foot)<105)michiZone=restored.id;
+    }
    }
    await films();s=await state();forms.add(s.evo);minHp=Math.min(minHp,s.hp);
    if(hero==='kilo'){
@@ -67,8 +80,13 @@ try{
    }
    const data=await page.evaluate(()=>({next:window.__OHANA_E2E.nextChapterState(),workshop:window.__OHANA_E2E.stitchoChapterState(),fryer:window.__OHANA_E2E.fryerAstralState(),pizza:window.__OHANA_E2E.pizzaChapterState()}));
    const foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast()),boss=foes.find(e=>e.chapterBoss||e.guardian||e.stitchoBoss||e.chispinBoss),b=boss&&(boss.chapterBoss||boss.guardian||boss.stitchoBoss||boss.chispinBoss);
-   const p=s.player,station=stations[s.world1.done],near=foes.filter(e=>e.hp>0&&Math.hypot(e.x+e.w/2-p.x-p.w/2,e.y+e.h/2-p.y-p.h/2)<430).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
+   const p=s.player,station=stations[s.world1.done];
+   const michiDefeated=hero==='cat'&&!station
+     ?(await page.evaluate(()=>window.__OHANA_E2E.michiSanctuaryState().guardianDefeated)):false;
+   const michiBoss=hero==='cat'?foes.find(e=>e.michiBoss):null;
+   const near=foes.filter(e=>e.hp>0&&Math.hypot(e.x+e.w/2-p.x-p.w/2,e.y+e.h/2-p.y-p.h/2)<430).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
    let target=station?station.x:(boss?.x||8750)-210,jump=false;
+   if(hero==='cat'&&!station&&!michiDefeated)target=(michiBoss?.x||8750)-140;
    if(hero==='stitcho'){
     if(s.world1.done===1&&!data.workshop.railDone){
      if(p.x+p.w/2>3340)railRun=false;
@@ -83,7 +101,8 @@ try{
    if(hero==='yomi'&&station&&data.fryer.stations.find(q=>q.id===station.id)?.state!=='live')target=station.x-145;
    if(!station&&b?.phase==='warn'&&(b.attack===0||b.attack===3))target=p.x<boss.x?Math.max(8290,boss.x-380):Math.min(9240,boss.x+380);
    const expedition=await page.evaluate(()=>window.__OHANA_E2E.expeditionState?.());
-   const inAct2=!station&&(!boss||boss.hp<=0)&&expeditionNodes.length>0;
+   const inAct2=!station&&(!boss||boss.hp<=0)&&expeditionNodes.length>0
+     &&(hero!=='cat'||michiDefeated);
    const node=inAct2?expeditionNodes.find(n=>!expedition?.done.includes(n.id)):null;
    if(node){
     target=node.kind==='supper'&&expedition?.carry!==node.id?node.x-700:node.x;
@@ -101,12 +120,40 @@ try{
      if(node.kind==='plate'&&Math.abs(ndx)<140){if(p.grounded)jump=true;else if(p.vy>0)await press('k');}
     }
    }
+   let michiPassage=null;
+   if(hero==='cat'){
+    const destination=station?MICHI_FAROL_ZONES[s.world1.done]
+      :!michiDefeated?'arena':node?(node.x>6000?'canopy':'court'):'court';
+    michiPassage=michiNextPassage(michiRoom,michiZone,destination,
+      s.world1.done,s.world1.sealed,expedition?.done.length||0);
+    assert.ok(michiZone===destination||michiPassage,
+      'Missing legal Michi passage '+michiZone+' → '+destination);
+    if(michiPassage){
+     target=michiPassage.x;jump=false;
+     const center=p.x+p.w/2,foot=p.y+p.h;
+     if(michiShouldDescendToArch(p,michiPassage)){
+      // Drop from the actual one-way terrace using the real player DOWN key;
+      // running toward a doorway while standing above it cannot activate E.
+      await release('w');await hold('s');s=await step(16);await release('s');
+      continue;
+     }
+     if(Math.abs(center-michiPassage.x)<55&&Math.abs(foot-michiPassage.floor)<80){
+      await release('d');await release('a');await release('w');await release('s');
+      await press('e');const arrived=await step(4),rp=arrived.player;
+      if(Math.abs(rp.x+rp.w/2-michiPassage.toX)<120&&
+         Math.abs(rp.y+rp.h-michiPassage.toFloor)<100){
+       michiZone=michiZoneAtArrival(michiRoom,michiPassage);
+       s=arrived;continue;
+      }
+     }
+    }
+   }
    const dx=target-p.x-p.w/2;
    if(Math.abs(dx)>24)await hold(dx>0?'d':'a');
    if(hero==='stitcho'&&s.world1.done===1&&!data.workshop.railDone&&railRun&&p.grounded&&p.x+p.w/2>=2910&&p.x+p.w/2<3000)await press('k');
    if(hero==='cuerno'&&!data.next.mirror&&Math.abs(dx)<200)await press('j');
    if(hero==='dragon'&&station&&Math.abs(dx)<240)await press('j');
-   if(hero==='cat'&&station&&Math.abs(dx)<300&&(p.grounded||p.vy>=0&&p.jumps<p.maxJumps&&p.y+p.h>station.y+45))jump=true;
+   if(hero==='cat'&&station&&!michiPassage&&Math.abs(dx)<300&&(p.grounded||p.vy>=0&&p.jumps<p.maxJumps&&p.y+p.h>station.y+45))jump=true;
    if(hero==='dino'&&station){
     if(Math.abs(dx)<180&&(p.grounded?station.y-p.y-p.h<station.dropHeight+10:p.vy>=0&&p.jumps<p.maxJumps&&station.y-(data.next.dinoPeak??station.y)<station.dropHeight+20))jump=true;
     if(s.evo>=1&&Math.abs(dx)<55&&!p.grounded&&p.vy>0&&station.y-(data.next.dinoPeak??station.y)>=station.dropHeight+10)await press('k');
