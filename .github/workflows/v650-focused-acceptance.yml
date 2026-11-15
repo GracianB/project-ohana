@@ -24,7 +24,7 @@ jobs:
           node-version: 22
       - name: Install exact dependencies
         run: npm ci --no-audit --no-fund
-      - name: Unit regressions: real arches, earned lights and balcony exit
+      - name: "Unit regressions: real arches, earned lights and balcony exit"
         run: node --test tests/michi-campaign-route.test.js tests/michi-sanctuary-living-art.test.js tests/gauntlet-collection-approach.test.js
       - name: Install Chromium
         run: npx playwright install chromium
