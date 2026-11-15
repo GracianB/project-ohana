@@ -1,0 +1,13 @@
+{
+  "release": "ohana-652",
+  "status": "validation in progress",
+  "passed": [],
+  "pending": [
+    "Unit suite",
+    "Seven-zone presentation and reactive scene checks",
+    "Native journey, mobile Continue and public deployment"
+  ],
+  "limits": [
+    "Scenery is independent vector art; physical routes and combat rules are unchanged. Decorative architecture is not a new collision surface."
+  ]
+}

@@ -1,3 +1,7 @@
+## ohana-652 · Volver al escenario construido
+
+Escenario 100% vectorial de Michi, sin fondos raster ni descargas de panoramas. Invernaderos, bóvedas de raíces, vitrales, jardines colgantes, agua por capas y flora sobre plataformas reales que se inclina al pasar. Los faroles ganados abren los motivos florales de las ventanas. Recorridos, colisiones, progreso y evolución inicial conservados.
+
 ## ohana-651 · Tu santuario, ampliado con escenarios pintados
 
 Publicado en GitHub Pages y Netlify; 1.949 pruebas, recorrido real completo y selección/Continue verificados. Integra la base de la PR #484: terreno vivo, señalización contextual, Continuar en el Atlas y muros del laberinto transitables por el ratón. Añade tres panoramas originales optimizados, siete composiciones, agua y polen animados y luz de faroles reales. Carga diferida, cuatro lienzos como máximo y alternativa vectorial. Conserva la elección inicial de evolución de V649.

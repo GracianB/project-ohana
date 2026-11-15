@@ -1,5 +1,5 @@
-import {drawMichiPaintedBackdrop,preloadMichiScenery} from './michi-painted-background.js';
-export {preloadMichiScenery,MICHI_SCENERY_CACHE_LIMIT,MICHI_SCENERY_VERSION} from './michi-painted-background.js';
+import {drawMichiLivingBackdrop} from './michi-living-backdrop.js';
+import {drawMichiNearGrowth} from './michi-living-architecture.js';
 import {drawMichiSanctuaryTerrain} from './michi-living-terrain.js';
 import {SANCTUARY_PALETTE as P,nearestSanctuaryPassage,passageReady,sanctuaryZone,sanctuaryGuardianDefeated,sanctuaryObjective} from '../systems/michi-sanctuary.js';
 const TAU=Math.PI*2;
@@ -54,16 +54,14 @@ export function drawSanctuaryWayfinding(c,g,cam,t=0,W=1280,H=720){
 // The living scenery is independent from colliders and chapter objectives.
 export function drawMichiSanctuaryBackdrop(c,g,cam,t,W,H){
  if(!g?.roomDef?.michiSanctuary)return false;
- const id=sanctuaryZone(g)?.id||'court';
- void preloadMichiScenery(id);
- const painted=drawMichiPaintedBackdrop(c,g,cam,t,W,H);
- return painted;
+ return drawMichiLivingBackdrop(c,g,cam,t,W,H);
 }
 export function drawMichiSanctuary(c,g,cam,t=0){
  if(!g.roomDef?.michiSanctuary)return;const W=g.viewW||1280,H=g.viewH||720,r=g.roomDef.michiSanctuary,near=nearestSanctuaryPassage(g);c.save();c.lineCap='round';
  // The real collision map owns the stones. A dedicated artist supplies the texture.
  const lit=(g.world1?.stations||[]).filter(s=>s.done).length/5;
  drawMichiSanctuaryTerrain(c,g.platforms||[],cam,W,H,sanctuaryZone(g)?.id,lit);
+ drawMichiNearGrowth(c,g,cam,t,W,H);
  const playerX=(g.player?.x||0)+(g.player?.w||0)*.5-cam.x;
  const playerY=(g.player?.y||0)+(g.player?.h||0)*.5-cam.y;
  for(const a of r.passages){

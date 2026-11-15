@@ -1,3 +1,7 @@
+## ohana-652 · Michi: escenario vivo por capas
+
+Arquitectura, raíces, vidrieras, agua y vegetación dibujadas con Canvas. Sin panoramas planos: profundidad por parallax, cristales que se abren con los faroles ganados y plantas que responden al paso de Michi. [Validación](docs/V652-VALIDATION.json) · [Publicación](docs/V652-PUBLICATION.json).
+
 ## ohana-651 · Santuario pictórico de Michi
 
 Integra el santuario vivo de la PR #484 y añade jardines pintados, cripta de raíces y vidrieras, siete ambientes, luz de faroles ganados y carga diferida. Conserva el terreno, la orientación y la evolución inicial elegida. [Diseño](docs/MICHI-SCENERY-V651.md) · [Validación](docs/V651-VALIDATION.json) · [Publicación](docs/V651-PUBLICATION.json).
@@ -12,7 +16,7 @@ La base del santuario vivo de [PR #484](https://github.com/GracianB/project-ohan
 
 **Diez historias. Una familia.**
 
-[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=651) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
+[Jugar la aventura](https://gracianb.github.io/project-ohana/?release=652) · [Jugar 2 jugadores](https://project-ohana-multiplayer.netlify.app/multiplayer) · [Cierre de V1](docs/V1.0.0-CIERRE.md) · [Estado verificable](docs/v1-solo-status.json)
 
 </div>
 

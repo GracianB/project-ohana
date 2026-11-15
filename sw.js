@@ -1,10 +1,7 @@
-const VERSION = "ohana-651";
+const VERSION = "ohana-652";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
-  "./worlds/michi-painted-background.js?v=" + VERSION,
-  "./assets/michi/sanctuary-night.webp",
-  "./assets/michi/sanctuary-crypt.webp",
-  "./assets/michi/sanctuary-glass.webp",
+  "./worlds/michi-living-architecture.js?v=" + VERSION,
   "./systems/michi-sanctuary.js?v=" + VERSION,
   "./worlds/michi-sanctuary-art.js?v=" + VERSION,
   "./worlds/michi-living-backdrop.js?v=" + VERSION,
@@ -496,13 +493,10 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "worlds/michi-painted-background.js": "7f2e8b77b4f6a916e40eb549ba20471951c99823",
-  "assets/michi/sanctuary-night.webp": "f76938fb860e0fbf7550d68d3e98f35828180680",
-  "assets/michi/sanctuary-crypt.webp": "c6858d0be374e18dc8c14851d183531c29925aa5",
-  "assets/michi/sanctuary-glass.webp": "3172c3536f0dabccf0edffa067a6d8f92c5070ea",
+  "worlds/michi-living-architecture.js": "adc107fb8b38849e06a64ee4d5b3925d628c7bf7",
   "systems/michi-sanctuary.js": "667cc3f85d91e048fb4b552ea5234795fad131d0",
-  "worlds/michi-sanctuary-art.js": "95f9e4ae100636db28ffc30ac36a5d0c0cca17bb",
-  "worlds/michi-living-backdrop.js": "77d32a6476ac0db8723fb16adecb3585bafb6e2a",
+  "worlds/michi-sanctuary-art.js": "ebf7f59cb18db494c383aa26c869ff3877de27a2",
+  "worlds/michi-living-backdrop.js": "8ec9007cba7614a1aa89c8fc6acdea51ec3da52e",
   "worlds/michi-living-terrain.js": "c96b6c8a96a1072c5f63b45f7a23f4887b8d46e9",
   "systems/michi-sanctuary-combat.js": "797b9feb6dc9e7a2596b346812b380c82ddbb01c",
   "systems/michi-sanctuary-spells.js": "482f3aa821df461a3b2f9803065c3f3a07976fdc",
@@ -573,7 +567,7 @@ const PRECACHE_REVISIONS = {
   "caprichos.css": "7d395b7b53c6b2ca31f553eb5c65d33a4126c916",
   "systems/field-guide.js": "68296f6cb36d874524539397ccb0b2c3f8850053",
   "worlds/living-realms.js": "665bdbf783583d65bf4a0ee4919a051280df4f8e",
-  "versus.html": "39303a51dfbd9dbdb07c1ee687535e846886a72b",
+  "versus.html": "30501553be721ac973edc969f13be7f2c93413cf",
   "versus.css": "1342f8b77b943437a13eba326cb3d0f0dd948991",
   "multiplayer/versus-client.js": "1bc9f1f41d54ed74ca137e0e15f44b2cd41e1509",
   "multiplayer/match-rules-v604.js": "22e0ec2591bf777b323edbd5b854aae0fa10f6e1",
@@ -734,7 +728,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "77035c396a4c6f58aec6af1378ea3a1892433ef9",
-  "index.html": "985104d8987910ce7832086ddda65f896f6f0fe6",
+  "index.html": "d2d2ddcd0e8860a82173c059fe3c7ff605cc9155",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
