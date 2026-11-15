@@ -1,7 +1,27 @@
 {
   "release": "ohana-651",
-  "status": "candidate; not published",
+  "status": "published and verified",
   "pullRequest": "https://github.com/GracianB/project-ohana/pull/485",
   "integrates": "https://github.com/GracianB/project-ohana/pull/484",
-  "productionVerified": false
+  "sourceHead": "ae453558413cd9d90700bfc0e640619316dea558",
+  "sourceMerge": "5a408c7ba94d7b4d249c9a00ca59257adb84daab",
+  "netlifyBuildCommit": "7ae6f62c3c6c5458de2c50709cee5f20475156e3",
+  "runtimeNote": "Later source commits changed workflow syntax and release documentation; the 23 checked deployed runtime/art files match the merged source.",
+  "githubPages": {
+    "url": "https://gracianb.github.io/project-ohana/?release=651",
+    "workflow": "https://github.com/GracianB/project-ohana/actions/runs/43731682793",
+    "filesChecked": 23,
+    "nativeMobileVerified": true
+  },
+  "netlify": {
+    "url": "https://project-ohana-multiplayer.netlify.app",
+    "deployId": "6af9d3810f6db362225b687f",
+    "candidateNativeMobileVerified": true,
+    "filesChecked": 23,
+    "adventureApiVerified": true,
+    "versusApiVerified": true,
+    "promotedExactTestedDeploy": true,
+    "productionNativeMobileVerified": true
+  },
+  "previousNetlifyDeploy": "6af860f745246021aebde150"
 }

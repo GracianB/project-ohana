@@ -1,9 +1,9 @@
 {
   "release": "ohana-650",
-  "status": "candidate; not published",
+  "status": "integrated into ohana-651; not published independently",
   "pullRequest": "https://github.com/GracianB/project-ohana/pull/484",
   "githubPages": "https://gracianb.github.io/project-ohana/",
   "productionVerified": false,
   "netlifyVerified": false,
-  "notes": "The verified published version remains ohana-649 until the new CI gates and production checks pass."
+  "notes": "PR #484 merged through PR #485. See V651-PUBLICATION.json for the combined release."
 }

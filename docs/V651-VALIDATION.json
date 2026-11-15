@@ -1,21 +1,29 @@
 {
   "release": "ohana-651",
-  "status": "candidate validation in progress",
+  "status": "published and verified",
   "passed": [
     "Seven distinct production zone renders, restored courtyard and 390px mobile; no Canvas errors",
     "Lazy loading: zero image requests on shared-module import; one request per mural family",
     "Reduced-motion rendering stable across time; normal animation changes",
     "Native physical route earned all five lanterns and defeated guardian with zero deaths",
     "Native 390px Atlas: all forms/seals earned, selected Michi form 2 remains selected after simulation and Continue",
-    "Offline release gate: 412 runtime modules and 484 resources"
+    "Offline release gate: 412 runtime modules and 484 resources",
+    "1949/1949 unit tests passed locally and in GitHub Pages release workflow 43731682793",
+    "Physical hundred memories, three echoes, earned seal, ceremony and Continue passed",
+    "Native 1280/390/320 earned Continue, album replay, ten-actor scene, accessible controls and reduced motion passed",
+    "Independent PR #484 pilot physically completed Michi chapter",
+    "Netlify candidate: all 23 checked runtime/art files match tested source; two-player API passed adventure and versus",
+    "GitHub Pages workflow 43731682793: release checks and deployment passed; 23 checked public files match tested source",
+    "Public candidate and GitHub Pages native mobile Atlas: selected form 2, saved form and Continue retained; painted scenery response observed",
+    "Exact tested Netlify candidate promoted; production 23 runtime/art files and two-player adventure/versus API checks passed",
+    "GitHub focused sanctuary acceptance and two-browser multiplayer workflow passed",
+    "Production Netlify native mobile: painted scenery loaded, selected form 2 and Continue retained; earned seals intact"
   ],
-  "pending": [
-    "Full unit suite after release documentation links",
-    "Native 100 memories/three echoes and scene checks",
-    "Public candidate and production verification"
-  ],
+  "pending": [],
   "limits": [
     "Position fixtures verify art, not earned progression.",
-    "No frame rate guarantee; software rendering varies with concurrent browser load."
+    "No frame rate guarantee; software rendering varies with concurrent browser load.",
+    "Broader multi-hero CI jobs are reported separately; focused scenery acceptance does not claim every unrelated CI job passed.",
+    "Initial public probes required a controller correction: scene buttons may disappear automatically, and the default resource timing buffer can fill before images; final checks observe actual successful image responses."
   ]
 }
