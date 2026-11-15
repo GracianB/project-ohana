@@ -110,8 +110,9 @@ try{
   await fly.locator('#game').focus();let a=await ft(12);assert.equal(a.evo,4);const from=a.player.y;
   let session;
   if(mobile){const box=await fly.locator('.touch-btn.jump').boundingBox();assert.ok(box);session=await context.newCDPSession(fly);await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:box.x+box.width/2,y:box.y+box.height/2}]});}
-  else await fly.keyboard.down('Space');
-  a=await ft(100);assert.equal(a.michiFlight.mode,'ascend');assert.equal(a.michiFlight.unlimited,true);assert.ok(a.player.y<from-200);const ascentY=a.player.y;
+  else await fly.keyboard.down('w');
+  a=await ft(12);assert.equal(a.michiFlight.mode,'ascend',JSON.stringify({input:mobile?'touch':'keyboard',player:a.player,flight:a.michiFlight}));
+  a=await ft(88);assert.equal(a.michiFlight.mode,'ascend',JSON.stringify({input:mobile?'touch':'keyboard',player:a.player,flight:a.michiFlight}));assert.equal(a.michiFlight.unlimited,true);assert.ok(a.player.y<from-200);const ascentY=a.player.y;
   const notice=await fly.locator('#notification-container').boundingBox();const screenFoot=(a.player.y+a.player.h-a.camera.y)*1.02-(mobile?844:900)*.01;
   if(notice)assert.ok(screenFoot-145>notice.y+notice.height,'flight camera must keep the visible hero below the objective notice');
   await fly.screenshot({path:`test-results/v624/eclipse-flight-${mobile?'touch':'keyboard'}.png`});
