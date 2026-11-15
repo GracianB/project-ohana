@@ -1,6 +1,6 @@
 ## ohana-651 · Tu santuario, ampliado con escenarios pintados
 
-Integra la base de la PR #484: terreno vivo, señalización contextual, Continuar en el Atlas y muros del laberinto transitables por el ratón. Añade tres panoramas originales optimizados, siete composiciones, agua y polen animados y luz de faroles reales. Carga diferida, cuatro lienzos como máximo y alternativa vectorial. Conserva la elección inicial de evolución de V649.
+Publicado en GitHub Pages y Netlify; 1.949 pruebas, recorrido real completo y selección/Continue verificados. Integra la base de la PR #484: terreno vivo, señalización contextual, Continuar en el Atlas y muros del laberinto transitables por el ratón. Añade tres panoramas originales optimizados, siete composiciones, agua y polen animados y luz de faroles reales. Carga diferida, cuatro lienzos como máximo y alternativa vectorial. Conserva la elección inicial de evolución de V649.
 
 ## ohana-650 · Un santuario pictórico para Michi
 
@@ -8,7 +8,7 @@ Tres panoramas originales optimizados en WebP: jardín, raíces y vidrieras. Sie
 
 ## ohana-650 · Michi: santuario vivo y navegación despejada
 
-Candidato de mejora visual en PR #484. Siete ambientes con arquitectura, iluminación nocturna, luna y parallax propios; piedra y flora sobre colisionadores reales; señales contextuales y movimiento reducido. Sin alterar progreso, niveles, controles, jefes ni evolución elegida en ohana-649. La publicación requiere CI y comprobación visual; no se considera realizada aún.
+Base de mejora visual de PR #484, integrada en ohana-651. Siete ambientes con arquitectura, iluminación nocturna, luna y parallax propios; piedra y flora sobre colisionadores reales; señales contextuales y movimiento reducido. Sin alterar progreso, niveles, controles, jefes ni evolución elegida en ohana-649. Su publicación se registra junto con el escenario pictórico en V651-PUBLICATION.json.
 
 ## ohana-649 · Respetar la evolución inicial elegida
 
