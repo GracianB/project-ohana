@@ -4,6 +4,10 @@ El objetivo continúa calculándose mediante sanctuaryObjective sobre la ruta re
 
 Los arcos reaccionan con un halo suave solo si passageReady confirma que pueden usarse y Michi está cerca. Los textos de faroles y arcos se recortan al ancho visible. El escenario decorativo no introduce superficies transitables ni nuevas colisiones.
 
+## Estado de despegue
+
+El salto ordinario continúa gobernando el impulso inicial. Mientras la forma alada asciende con ese impulso, el estado de vuelo informa `takeoff`, no `ground`. En cuanto las alas toman el control, el estado pasa a `ascend`. Se exigen ambos hitos durante el control mantenido, y después suspensión y descenso. Sin alterar la velocidad, la gravedad ni los saltos.
+
 ## Aceptación
 
 - Pruebas unitarias: tests/michi-wayfinding-v653.test.js y tests/michi-flight-v653.test.js.

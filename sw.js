@@ -521,7 +521,7 @@ const PRECACHE_REVISIONS = {
   "systems/final-hero-choice.js": "feea8845ef0c866e2d46350bcd54fe795a2ca698",
   "systems/family-actor.js": "782f8cad723e7eea0398c55ffa8fd9e05342b967",
   "characters/michi-eyes.js": "806709c1946861637fa89430483312c6542257ba",
-  "characters/michi-flight.js": "44c6065434bc48b105f929e4f08321b72e22b56f",
+  "characters/michi-flight.js": "6471f30294b31ef07749ef66f240219a676262fb",
   "characters/michi-rebel.js": "2d6369622689027c43f25f63828b2b835c5f6185",
   "characters/michi-kitten.js": "0b28dc3a4d648c476092f7655c65001ed6db40f7",
   "systems/michi-field-manual.js": "99e1ffd8dac834a01f4adae86cd21cbd1c5973ca",

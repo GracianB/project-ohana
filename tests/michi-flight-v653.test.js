@@ -24,6 +24,7 @@ test('ghost transition requires physical airborne state, not a fake ground ascen
  assert.equal(michiFlightState(p).mode,'ground');
  p.grounded=false;p.vy=-9;
  assert.equal(steerMichiFlight(p,{jump:true}),false,'ordinary takeoff impulse owns the first fast ascent');
+ assert.equal(michiFlightState(p).mode,'takeoff','the early airborne jump is never reported as grounded');
  p.vy=-3;
  assert.equal(steerMichiFlight(p,{jump:true}),true);
  assert.equal(michiFlightState(p).mode,'ascend');
