@@ -17,3 +17,7 @@ El salto ordinario continúa gobernando el impulso inicial. Mientras la forma al
 - Obligatorias antes de integrar: quality, aceptación de capítulo, revisión de arte y comprobación de versión publicada.
 
 Las respuestas son visuales y de orientación, no nuevos acertijos, recompensas o poderes. No se afirma rendimiento real de dispositivos físicos sin medirlo.
+
+## Corazón de Ohana: premios del ritual
+
+El ritual individual del final ahora muestra únicamente sus resonancias de suelo ganadas. Los cristales XP ambientales anteriores ya no se generan encima de la ruta del ritual: evita recompensas de experiencia involuntarias al recoger las tres resonancias. Se conservan todos los cristales en el modo de procesión sin ritual y en las otras salas. La prueba V630 se ejecuta justo después de construir la partida real de V600 para detectar este fallo antes de la batería visual lenta.

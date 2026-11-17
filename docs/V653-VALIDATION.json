@@ -7,7 +7,9 @@
     "Mobile-safe lantern and portal labels",
     "V624 airborne held-input test isolated from route collisions",
     "Seven-zone browser acceptance in quality workflow",
-    "Release cache revisions updated to changed source bytes"
+    "Release cache revisions updated to changed source bytes",
+    "Solo final ritual no longer overlaps earned resonances with ambient XP crystals; multiplayer retains original collectibles",
+    "V630 ritual acceptance runs immediately after its genuine V600 save dependency"
   ],
   "pending": [
     "Unit and visual GitHub Actions quality",

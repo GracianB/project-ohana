@@ -6,6 +6,12 @@ export const FINAL_RESONANCE_KEY='ohana-final-resonances-v1';
 const PREFIX='w1-final-ritual-v630-';
 export const FINAL_QUIMERA_PORTAL=Object.freeze({x:6900,y:934,rx:108,ry:132,hero:'quimera'});
 export const FINAL_RITUAL_PORTALS=Object.freeze([...FINAL_PORTALS,FINAL_QUIMERA_PORTAL]);
+// The solo final ritual has its own earned ground resonances. The historic XP
+// crystal procession would overlap them and grant unrelated experience.
+// Other room orbs and the non-ritual multiplayer procession stay unchanged.
+export function ambientOrbsForRoom(room,ritualEnabled=false){
+ return room?.fusionBoss&&ritualEnabled?[]:(room?.orbs||[]);
+}
 const validHero=hero=>KEEPSAKE_ORDER.includes(hero);
 const permitted=g=>g?.roomId==='w1-final'&&g.finalRitualEnabled&&!g.onlineAdventure&&g.player&&!g.player.dead&&g.player.health>0&&KEEPSAKE_ORDER.every(h=>g.world1Seals?.includes(h));
 const storage=g=>g.finalResonanceStorage||g.keepsakeStorage||globalThis.localStorage;

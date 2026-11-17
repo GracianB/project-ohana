@@ -308,6 +308,15 @@ jobs:
           export CHROMIUM_BIN
           node tests/browser/v513-full-campaign.mjs
 
+      # V630 consumes the genuine V600 earned-campaign storage. Run it here
+      # so a ritual reward regression fails before the slower art/replay gates.
+      - name: V630 chapter relics, ritual and ten earned guardian rematches
+        run: |
+          npm run test:browser:ritual-relics
+          npm run test:browser:ritual-native
+          npm run test:browser:guardian-art
+          OHANA_TEST_DIFFICULTY=normal npm run test:browser:gauntlet
+
       - name: V1 release polish from earned campaign · links, pause, save and Continue
         run: npm run test:browser:release-polish
 
@@ -330,13 +339,6 @@ jobs:
           npm run test:browser:public-entry
           node tests/browser/lobby-ux.mjs
           node tests/browser/v634-rejoin-invite.mjs
-
-      - name: V630 chapter relics, ritual and ten earned guardian rematches
-        run: |
-          npm run test:browser:ritual-relics
-          npm run test:browser:ritual-native
-          npm run test:browser:guardian-art
-          OHANA_TEST_DIFFICULTY=normal npm run test:browser:gauntlet
 
       # V629 audited the retired mirror selector; V639 above checks its replacement,
       # including the locked final destination and selection/progress isolation.

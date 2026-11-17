@@ -13,7 +13,7 @@ import {kiloChapterAbility,interactKiloInstrument} from './systems/world1-play.j
 import {createAdventureStorage} from './multiplayer/adventure-progress.js';
 import {drawLivingRealm} from './worlds/living-realms.js';
 import {drawPortalMirrors, FINAL_PORTALS} from './systems/final-portal-mirrors.js';
-import {interactFinalRitual,FINAL_RITUAL_PORTALS} from './systems/final-ritual.js';
+import {interactFinalRitual,FINAL_RITUAL_PORTALS,ambientOrbsForRoom} from './systems/final-ritual.js';
 import {openFinalHeroChoice,closeFinalHeroChoice} from './systems/final-hero-choice.js';
 import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
 import {KEEPSAKES,readKeepsakes,mergeKeepsakes,persistKeepsakes} from './systems/keepsakes.js';
@@ -733,7 +733,9 @@ game.onHeroAbility=(p,index)=>{kiloChapterAbility(game,p,index);expeditionAbilit
 game.onDinoLandingHit=(e,dmg)=>hitArenaEnemy(game,e,dmg,{color:'#deedbc',stun:25,ky:-4,kx:Math.sign(e.x-game.player.x)*4,shake:2,parts:6});
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
-game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
+// A solo final ritual uses earned floor resonances, not the old ambient XP crystals.
+// Keep the original procession crystals for multiplayer and other rooms.
+game.orbs = ambientOrbsForRoom(r,game.finalRitualEnabled).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
 game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
 const e = makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng});
