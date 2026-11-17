@@ -508,7 +508,7 @@ const PRECACHE_REVISIONS = {
   "characters/kilo-virtuoso.js": "dbfce07551531253a792e947c66df4df222de583",
   "worlds/kilo-living-grove.js": "b51daa4bf9533a84f2fc2957715fde4d799b90ac",
   "systems/compact-hud.js": "74ea11549989efe7245e6358771881567801ec06",
-  "compact-play.css": "21865baae8b872ccc7e06b1a77999951dffcb8ce",
+  "compact-play.css": "c926daf38945171ad3e814b39e34abd183a1f4cc",
   "systems/hoku-atlas.js": "aa503e2222cf13e160faf21df61851f3b7d63bfa",
   "systems/hoku-atlas-model.js": "1c8e2952857a6314040322b9a02e99c1100fb09f",
   "hoku-atlas.css": "08abbd1ef019f2fdd4d1b95c573da67bac32e58d",

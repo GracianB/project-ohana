@@ -25,3 +25,7 @@ El ritual individual del final ahora muestra únicamente sus resonancias de suel
 ## Ritual final táctil
 
 El control E de interacción se ha movido fuera de la fila plegable de poderes. En 320 y 390 px sale sobre el grupo principal **solo cuando existe un aviso de interacción contextual**. Al estar listo el ritual, el juego muestra el aviso E junto al portal; los avisos puramente informativos no muestran E. El indicador semántico `data-touch-interact` solo se asigna a textos con una acción E auténtica. Los poderes J/K/L/I/P/U siguen plegados, sin duplicar controles. V630 comprueba el toque real al reabrir el selector, y el E2E móvil comprueba que no se ve sin aviso.
+
+### Posición real del control E
+
+`systems/compact-hud.js` traslada el botón E ya existente directamente a `#touch` al montar el HUD. Por eso la regla de visibilidad debe ser `#touch > .interact`, no `.col.act > .interact`. El E2E móvil comprueba la visibilidad computada y el caso sin marcador accionable.
