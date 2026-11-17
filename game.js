@@ -13,7 +13,7 @@ import {kiloChapterAbility,interactKiloInstrument} from './systems/world1-play.j
 import {createAdventureStorage} from './multiplayer/adventure-progress.js';
 import {drawLivingRealm} from './worlds/living-realms.js';
 import {drawPortalMirrors, FINAL_PORTALS} from './systems/final-portal-mirrors.js';
-import {interactFinalRitual,FINAL_RITUAL_PORTALS,ambientOrbsForRoom} from './systems/final-ritual.js';
+import {interactFinalRitual,FINAL_RITUAL_PORTALS,ambientOrbsForRoom,finalRitualInteractionPrompt} from './systems/final-ritual.js';
 import {openFinalHeroChoice,closeFinalHeroChoice} from './systems/final-hero-choice.js';
 import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
 import {KEEPSAKES,readKeepsakes,mergeKeepsakes,persistKeepsakes} from './systems/keepsakes.js';
@@ -2126,6 +2126,7 @@ else if (michiTrailPrompt(game))setPrompt(michiTrailPrompt(game),true);
 else if (grovePrompt(game))setPrompt(grovePrompt(game),true);
 else if (portals.prompt) setPrompt(portals.prompt, true);
 else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
+else if (finalRitualInteractionPrompt(game)) setPrompt(finalRitualInteractionPrompt(game),true);
 else if (p.x > game.worldW - 90 && r.doors.right) setPrompt(r.world1 && !world1CanLeave(game,"right") ? "SELLO DORMIDO · " + (r.fusionBoss ? "vence a la Quimera" : r.hero===WORLD1_ORDER.at(-1)&&!world1SealsComplete(game.world1Seals)?"reúne los diez sellos":"despierta el sello de la sala") : "ESTE · sigue andando", true);
 else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
 else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);

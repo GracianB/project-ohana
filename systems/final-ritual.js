@@ -49,6 +49,15 @@ export function chooseFinalFighter(g,hero){
  g.onGauntletBeat?.('summon',v.hero);
  return true;
 }
+// Show E only when an earned ritual is actionable and not blocked by cinema.
+export function finalRitualInteractionPrompt(g){
+ const v=g?.finalGauntlet;
+ if(!permitted(g)||!v||v.phase!=='gathering'||g.world1Cine||g._pendingWorld1Cine)return null;
+ const portal=ritualPortal(v.hero),p=g.player;
+ if(!portal||Math.abs(p.x+p.w/2-portal.x)>=190)return null;
+ if(v.hero!=='quimera'&&(v.resonances?.[v.hero]?.length||0)!==3)return null;
+ return 'E · elige tu héroe e invoca al guardián';
+}
 export function interactFinalRitual(g){
  const v=g?.finalGauntlet;if(!permitted(g)||v?.phase!=='gathering')return false;
  const portal=ritualPortal(v.hero),p=g.player;

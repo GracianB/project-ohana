@@ -24,4 +24,4 @@ El ritual individual del final ahora muestra únicamente sus resonancias de suel
 
 ## Ritual final táctil
 
-El control E de interacción se ha movido fuera de la fila plegable de poderes. En 320 y 390 px permanece visible sobre el grupo principal, sin desbloquear J/K/L/I/P/U ni crear otro control duplicado. La prueba V630 usa pulsaciones táctiles reales tanto para cancelar como para reabrir la selección de luchador.
+El control E de interacción se ha movido fuera de la fila plegable de poderes. En 320 y 390 px sale sobre el grupo principal **solo cuando existe un aviso de interacción contextual**. Al estar listo el ritual, el juego muestra el aviso E junto al portal; fuera de esa situación, E permanece oculto. Los poderes J/K/L/I/P/U siguen plegados, sin duplicar controles. V630 comprueba el toque real al reabrir el selector, y el E2E móvil comprueba que no se ve sin aviso.

@@ -10,7 +10,7 @@
     "Release cache revisions updated to changed source bytes",
     "Solo final ritual no longer overlaps earned resonances with ambient XP crystals; multiplayer retains original collectibles",
     "V630 ritual acceptance runs immediately after its genuine V600 save dependency",
-    "Compact portrait touch E now remains visible outside the collapsible power palette, with native ritual reopening acceptance"
+    "Compact portrait touch E is outside the collapsible power palette but visible only with a contextual prompt; earned solo ritual exposes the action and native tap checks reopening"
   ],
   "pending": [
     "Unit and visual GitHub Actions quality",
