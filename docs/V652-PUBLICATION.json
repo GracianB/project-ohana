@@ -1,5 +1,16 @@
 {
   "release": "ohana-652",
-  "status": "candidate; not published",
-  "productionVerified": false
+  "status": "GitHub Pages deployment successful; end-to-end public validation pending",
+  "sourceMerge": "79007a1cbbfc6435a5964253a56c16fbf7368587",
+  "githubPages": {
+    "workflow": "https://github.com/GracianB/project-ohana/actions/runs/43736918286",
+    "conclusion": "success"
+  },
+  "quality": {
+    "workflow": "https://github.com/GracianB/project-ohana/actions/runs/43736889637",
+    "conclusion": "failure",
+    "failedStep": "V624 held flight acceptance"
+  },
+  "productionVerified": false,
+  "notes": "Deployment green alone does not prove native public gameplay or Netlify equivalence."
 }

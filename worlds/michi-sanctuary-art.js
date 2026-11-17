@@ -28,11 +28,32 @@ export function drawSanctuaryLantern(c,x,y,lit=false,t=0,small=false,reduced=fal
 }
 // One compositional focal point, never a screenful of overlapping labels.
 // Reads the same earned objective as gameplay HUD and follows camera movement.
+
+// World-space objectives projected into the playable edges: pure drawing guidance.
+export function sanctuaryEdgeBeacon(goal,cam={},W=1280,H=720){
+ if(!goal||!Number.isFinite(goal.x)||!Number.isFinite(goal.y)||W<160||H<220)return null;
+ const x=goal.x-(Number.isFinite(cam?.x)?cam.x:0),y=goal.y-(Number.isFinite(cam?.y)?cam.y:0)-97;
+ if(x>=28&&x<=W-28&&y>=38&&y<=H-44)return null;
+ const mx=W*.5,my=H*.53,dx=x-mx,dy=y-my;
+ const side=W<480?43:63,top=Math.min(115,H*.24),bottom=H-(W<480?156:130);
+ const sx=dx>0?(W-side-mx)/dx:dx<0?(side-mx)/dx:Infinity;
+ const sy=dy>0?(bottom-my)/dy:dy<0?(top-my)/dy:Infinity;
+ const scale=Math.min(sx,sy);
+ return Number.isFinite(scale)&&scale>=0?{x:mx+dx*scale,y:my+dy*scale,angle:Math.atan2(dy,dx)}:null;
+}
 export function drawSanctuaryWayfinding(c,g,cam,t=0,W=1280,H=720){
  const goal=sanctuaryObjective(g);
  if(!goal||!Number.isFinite(goal.x)||!Number.isFinite(goal.y))return false;
  const x=goal.x-(cam?.x||0),y=goal.y-(cam?.y||0)-97;
- if(x<28||x>W-28||y<38||y>H-44)return false;
+ const beacon=sanctuaryEdgeBeacon(goal,cam,W,H);
+ if(beacon){
+  c.save();c.translate(beacon.x,beacon.y);c.rotate(beacon.angle);
+  const breath=g.reduceMotion?0:Math.sin(t*.035)*1.25;
+  oval(c,0,0,19+breath,19+breath,'rgba(6,29,40,.82)');
+  stroke(c,'rgba(145,220,205,.84)',1.6,()=>{c.arc(0,0,15+breath,0,TAU);});
+  c.fillStyle='#f5dfaf';c.beginPath();c.moveTo(13,0);c.lineTo(-4,-7);c.lineTo(-1,0);c.lineTo(-4,7);c.closePath();c.fill();
+  oval(c,-7,0,2,2,'#90dccb');c.restore();return true;
+ }
  const reduced=!!g.reduceMotion;
  const pulse=reduced?0:Math.sin(t*.035)*2.5;
  const size=13+pulse,glow=c.createRadialGradient(x,y,2,x,y,38+pulse);
@@ -69,7 +90,9 @@ export function drawMichiSanctuary(c,g,cam,t=0){
   if(x<-120||x>W+120||y<-90||y>H+170)continue;
   const ready=passageReady(g,a);
   const nearby=Math.hypot(x-playerX,(y-45)-playerY)<235;
-  // The passage itself stays readable from afar; words appear only when useful.
+  // Real, unlocked arches respond to Michi's proximity without changing gameplay.
+   if(nearby&&ready){const halo=c.createRadialGradient(x,y-63,8,x,y-63,78);halo.addColorStop(0,'rgba(142,233,206,.17)');halo.addColorStop(1,'rgba(142,233,206,0)');c.fillStyle=halo;c.fillRect(x-82,y-152,164,162);}
+   // The passage itself stays readable from afar; words appear only when useful.
   c.fillStyle='#203944';c.beginPath();c.moveTo(x-46,y);c.lineTo(x-46,y-60);
   c.bezierCurveTo(x-46,y-123,x+46,y-123,x+46,y-60);c.lineTo(x+46,y);c.fill();
   c.fillStyle=ready?'#142d35':'#152c38';c.beginPath();c.moveTo(x-29,y);
@@ -83,11 +106,12 @@ export function drawMichiSanctuary(c,g,cam,t=0){
   drawSanctuaryLantern(c,x,y-100,ready,t,true,!!g.reduceMotion);
   if(nearby){
    const text=a.label,tagW=Math.min(W-24,Math.max(118,Math.min(266,text.length*7.1+24)));
-   c.fillStyle='rgba(8,29,39,.91)';c.fillRect(x-tagW/2,y-166,tagW,31);
+   const tagX=Math.max(tagW/2+12,Math.min(W-tagW/2-12,x));
+    c.fillStyle='rgba(8,29,39,.91)';c.fillRect(tagX-tagW/2,y-166,tagW,31);
    c.fillStyle=ready?'#f9e9cc':'#c3cdc7';c.textAlign='center';
-   c.font='600 12px sans-serif';c.fillText(text,x,y-145,tagW-10);
+   c.font='600 12px sans-serif';c.fillText(text,tagX,y-145,tagW-10);
    c.font='11px sans-serif';c.fillStyle=ready?'#b6eedc':'#f4c6ae';
-   c.fillText(ready?'↓ / E para entrar':a.exit?'Necesitas el sello y 3 ecos':a.need+' faroles',x,y-126);
+   c.fillText(ready?'↓ / E para entrar':a.exit?'Necesitas el sello y 3 ecos':a.need+' faroles',tagX,y-126);
   }
  }
  for(const s of g.world1?.stations||[]){
@@ -98,8 +122,8 @@ export function drawMichiSanctuary(c,g,cam,t=0){
   const close=Math.hypot(x-playerX,y-30-playerY)<240;
   if(close&&!s.done){
    const tw=Math.min(235,W-24);
-   c.fillStyle='rgba(8,30,39,.89)';c.fillRect(x-tw/2,y-107,tw,28);
-   c.fillStyle='#fff0cf';c.font='600 12px sans-serif';c.textAlign='center';c.fillText(s.name,x,y-88,tw-16);
+   c.fillStyle='rgba(8,30,39,.89)';c.fillRect(Math.max(12,Math.min(W-tw-12,x-tw/2)),y-107,tw,28);
+   c.fillStyle='#fff0cf';c.font='600 12px sans-serif';c.textAlign='center';c.fillText(s.name,Math.max(tw/2+12,Math.min(W-tw/2-12,x)),y-88,tw-16);
   }
   if(s.done){c.fillStyle='#65998b';c.fillRect(x-45,y+25,90,5);}
  }

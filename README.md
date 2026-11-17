@@ -1,3 +1,9 @@
+## OHANA 653 · Michi, santuario orientativo y reactivo (candidato)
+
+Brújula vectorial cuando el objetivo real sale de cámara, arcos activos con luz de proximidad y rótulos ajustados al móvil. Sin nuevas colisiones ni ventajas artificiales. Pruebas de vuelo, render de siete zonas y caché offline verificable. Todavía sujeto al CI completo y publicación.
+
+[Diseño](docs/MICHI-INTERACTION-V653.md) · [Validación](docs/V653-VALIDATION.json) · [Publicación](docs/V653-PUBLICATION.json).
+
 ## ohana-652 · Michi: escenario vivo por capas
 
 Arquitectura, raíces, vidrieras, agua y vegetación dibujadas con Canvas. Sin panoramas planos: profundidad por parallax, cristales que se abren con los faroles ganados y plantas que responden al paso de Michi. [Validación](docs/V652-VALIDATION.json) · [Publicación](docs/V652-PUBLICATION.json).
@@ -33,7 +39,7 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; Aventura y Versus comprobados entre dos navegadores con vistas de escritorio y móvil. La prueba con dispositivos físicos sigue pendiente.
 
-Registro de entrega: `ohana-650` / nuevo escenario pictórico de Michi: jardín nocturno, cripta de raíces, vidrieras, terrazas suspendidas y muelle. [Validación](docs/V650-VALIDATION.json) · [Publicación](docs/V650-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
+Estado anterior en main: ohana-652 desplegada en GitHub Pages; la suite quality y la comprobación pública definitiva siguen pendientes. Jardín nocturno, cripta de raíces, vidrieras, terrazas suspendidas y muelle. [Validación](docs/V650-VALIDATION.json) · [Publicación](docs/V650-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
 
 ## Historial de desarrollo
 

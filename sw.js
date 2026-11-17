@@ -1,4 +1,4 @@
-const VERSION = "ohana-652";
+const VERSION = "ohana-653";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./worlds/michi-living-architecture.js?v=" + VERSION,
@@ -495,7 +495,7 @@ const PRECACHE = [
 const PRECACHE_REVISIONS = {
   "worlds/michi-living-architecture.js": "adc107fb8b38849e06a64ee4d5b3925d628c7bf7",
   "systems/michi-sanctuary.js": "667cc3f85d91e048fb4b552ea5234795fad131d0",
-  "worlds/michi-sanctuary-art.js": "ebf7f59cb18db494c383aa26c869ff3877de27a2",
+  "worlds/michi-sanctuary-art.js": "5c68d93e35189ad4fb549c1e6c4a38bb7b1608a7",
   "worlds/michi-living-backdrop.js": "8ec9007cba7614a1aa89c8fc6acdea51ec3da52e",
   "worlds/michi-living-terrain.js": "c96b6c8a96a1072c5f63b45f7a23f4887b8d46e9",
   "systems/michi-sanctuary-combat.js": "797b9feb6dc9e7a2596b346812b380c82ddbb01c",
@@ -728,7 +728,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "77035c396a4c6f58aec6af1378ea3a1892433ef9",
-  "index.html": "d2d2ddcd0e8860a82173c059fe3c7ff605cc9155",
+  "index.html": "2aa5f3ad790edfd272345c2ed726f3ed9e5d6da0",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",

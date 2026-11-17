@@ -316,6 +316,9 @@ jobs:
           npm run test:browser:reported-visuals
           npm run test:browser:frita-motion
 
+      - name: V653 scenery · real seven zones, mobile and reduced motion
+        run: npm run test:browser:michi-scenery
+
       - name: V624 Michicornio · anatomy, earned fourth form and winged flight
         run: npm run test:browser:michi-v624
       - name: V625 Michi · five forms, anatomical bounds and responsive presentation

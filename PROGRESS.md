@@ -1,3 +1,7 @@
+## ohana-653 · Santuario vivo con orientación real (candidato)
+
+La dirección del objetivo ahora permanece visible discretamente fuera del encuadre; solo los arcos físicamente disponibles emiten un halo al acercarse. Etiquetas de faroles y pasajes quedan dentro de la pantalla estrecha. El vuelo histórico se prueba en aire sin obstáculos y la suite quality incorpora las siete zonas vectoriales. Nada cambia colisiones, IA, progreso, guardados o poderes. CI y producción pendientes de verificación.
+
 ## ohana-652 · Volver al escenario construido
 
 Escenario 100% vectorial de Michi, sin fondos raster ni descargas de panoramas. Invernaderos, bóvedas de raíces, vitrales, jardines colgantes, agua por capas y flora sobre plataformas reales que se inclina al pasar. Los faroles ganados abren los motivos florales de las ventanas. Recorridos, colisiones, progreso y evolución inicial conservados.
