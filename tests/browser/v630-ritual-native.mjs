@@ -20,7 +20,12 @@ try{
   await page.waitForFunction(()=>document.documentElement.dataset.ohanaBoot==='ready',undefined,{timeout:120000});
   assert.equal(await page.evaluate(()=>!!window.__OHANA_E2E),false);
   await activate(page.locator('#ohana-intro.ready .oi-enter'));
+  // Select Yomi in the native Atlas before entering the final room. The test
+  // must not assume the saved campaign's previously selected hero was Yomi.
+  await activate(page.locator('.char-card[data-id="yomi"]'));
+  assert.equal(await page.locator('#hoku-atlas').getAttribute('data-hero'),'yomi','native Atlas must select Yomi');
   await activate(page.locator('[data-atlas-step="1"]'));await activate(page.locator('[data-atlas-room="w1-final"]'));
+  assert.equal(await page.locator('#hoku-atlas').getAttribute('data-hero'),'yomi','choosing the final room preserves native hero selection');
   // Destination hides hero details by design. Show the native Form step first.
   await activate(page.locator('[data-atlas-step="2"]'));
   assert.equal(await page.locator('#hoku-atlas').getAttribute('data-step'),'2');
