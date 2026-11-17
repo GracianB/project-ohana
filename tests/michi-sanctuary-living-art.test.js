@@ -90,7 +90,8 @@ test('Michi focus marker projects earned offscreen goals and stays still in redu
  assert.equal(drawSanctuaryWayfinding(b.ctx,g,g.cam,400,1280,720),true);
  assert.deepEqual(a.operations,b.operations);
  assert.ok(a.operations.some(op=>op[0]==='radial'),'earned destination has a legible glow');
- assert.equal(drawSanctuaryWayfinding(outside.ctx,g,{x:0,y:0},0,1280,720),false);
- assert.equal(outside.operations.length,0,'no marker or painter work offscreen');
+ assert.equal(drawSanctuaryWayfinding(outside.ctx,g,{x:0,y:0},0,1280,720),true);
+ assert.ok(outside.operations.some(op=>op[0]==='translate'),'offscreen pointer must be projected to a safe edge');
+ assert.equal(outside.depth(),0,'Canvas state remains balanced');
  assert.equal(a.depth(),0);
 });
