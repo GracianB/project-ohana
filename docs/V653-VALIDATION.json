@@ -9,7 +9,8 @@
     "Seven-zone browser acceptance in quality workflow",
     "Release cache revisions updated to changed source bytes",
     "Solo final ritual no longer overlaps earned resonances with ambient XP crystals; multiplayer retains original collectibles",
-    "V630 ritual acceptance runs immediately after its genuine V600 save dependency"
+    "V630 ritual acceptance runs immediately after its genuine V600 save dependency",
+    "Compact portrait touch E now remains visible outside the collapsible power palette, with native ritual reopening acceptance"
   ],
   "pending": [
     "Unit and visual GitHub Actions quality",
@@ -17,7 +18,7 @@
     "Physical mobile frame time"
   ],
   "limits": [
-    "No gameplay route, AI, collision, progression, power or save changes",
+    "No changes to route, AI, collision, powers or saves; final solo ritual no longer grants overlapping ambient XP",
     "Positioned flight fixture is separate from an earned physical traversal"
   ]
 }

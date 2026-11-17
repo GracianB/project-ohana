@@ -21,3 +21,7 @@ Las respuestas son visuales y de orientación, no nuevos acertijos, recompensas 
 ## Corazón de Ohana: premios del ritual
 
 El ritual individual del final ahora muestra únicamente sus resonancias de suelo ganadas. Los cristales XP ambientales anteriores ya no se generan encima de la ruta del ritual: evita recompensas de experiencia involuntarias al recoger las tres resonancias. Se conservan todos los cristales en el modo de procesión sin ritual y en las otras salas. La prueba V630 se ejecuta justo después de construir la partida real de V600 para detectar este fallo antes de la batería visual lenta.
+
+## Ritual final táctil
+
+El control E de interacción se ha movido fuera de la fila plegable de poderes. En 320 y 390 px permanece visible sobre el grupo principal, sin desbloquear J/K/L/I/P/U ni crear otro control duplicado. La prueba V630 usa pulsaciones táctiles reales tanto para cancelar como para reabrir la selección de luchador.
