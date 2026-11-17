@@ -1,3 +1,4 @@
+import {drawMichiMothGuardian} from '../worlds/michi-moth-guardian.js';
 import {drawSanctuaryLantern} from '../worlds/michi-sanctuary-art.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function updateSanctuaryBoss(e,g,hurt){
@@ -27,14 +28,9 @@ export function updateSanctuaryBoss(e,g,hurt){
  e.stun=Math.min(e.stun||0,2);e._campaign={wind:e.wind,active:e.lunge,aim:b.aim};return true;
 }
 export function drawSanctuaryBoss(c,e,cam,t,reduced){
- const b=e._astralCat,x=e.x+e.w/2-cam.x,y=e.y+e.h-cam.y,flap=reduced?0:Math.sin(t*.065)*(b.phase==='attack'?13:5);
- c.save();c.translate(x,y);c.lineWidth=2;c.strokeStyle='#102a34';
- for(const side of[-1,1])for(let wing=0;wing<2;wing++){c.fillStyle=wing?'#537f7c':'#80998b';c.beginPath();c.moveTo(side*12,-65);c.bezierCurveTo(side*(87-wing*10),-184+wing*45+flap,side*102,-37+wing*18,side*12,-35);c.closePath();c.fill();c.stroke();c.strokeStyle='#d8d1ac';c.beginPath();c.moveTo(side*17,-66);c.quadraticCurveTo(side*43,-108+flap,side*75,-116+wing*37);c.stroke();c.strokeStyle='#102a34';}
- c.fillStyle='#344e50';c.beginPath();c.ellipse(0,-71,22,53,0,0,Math.PI*2);c.fill();
- c.fillStyle='#e9dfbc';c.beginPath();c.ellipse(0,-116,23,20,0,0,Math.PI*2);c.fill();
- for(const side of[-1,1]){c.fillStyle='#102a34';c.beginPath();c.ellipse(side*8,-118,4,7,side*.2,0,Math.PI*2);c.fill();c.strokeStyle='#e9dfbc';c.beginPath();c.moveTo(side*10,-130);c.quadraticCurveTo(side*38,-164,side*43,-146);c.stroke();c.moveTo(side*13,-28);c.lineTo(side*29,-3);c.stroke();}
- drawSanctuaryLantern(c,0,-56,b.phase==='rest',t,true);c.restore();
+ return drawMichiMothGuardian(c,e,cam,t,reduced,drawSanctuaryLantern);
 }
+
 export function drawSanctuarySignals(c,e,cam){
  const b=e._astralCat;if(b.phase!=='warn')return;const x=e.x+e.w/2-cam.x,y=e.y+e.h*.5-cam.y,A=e._chapterArena;
  c.save();c.strokeStyle='#e7a394';c.fillStyle='#e7a394';c.lineWidth=2;c.setLineDash([7,5]);

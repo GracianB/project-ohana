@@ -1,0 +1,27 @@
+{
+  "release": "ohana-655",
+  "kind": "single-commit consolidated release manifest",
+  "sourcePullRequest": "https://github.com/GracianB/project-ohana/pull/488",
+  "preservedBaseCommit": "637539b023f2b790da526e12d991c9bd61f149a0",
+  "runtimeManifestSha256": "c7adaa377b146b2adff66e9f94991f0ac7a264150e8f68dd826436bfff46433d",
+  "netlify": {
+    "testedDeployId": "6afcc678f1e23b6a2a813dba",
+    "candidateUrl": "https://6afcc678f1e23b6a2a813dba--project-ohana-multiplayer.netlify.app",
+    "productionUrl": "https://project-ohana-multiplayer.netlify.app",
+    "promotion": "restore exact tested candidate",
+    "filesChecked": 34,
+    "candidateNativeMobileVerified": true
+  },
+  "githubPages": {
+    "url": "https://gracianb.github.io/project-ohana/?release=655",
+    "workflow": "pages.yml",
+    "publicationMethod": "one manual workflow_dispatch after squash integration"
+  },
+  "actionsBudget": {
+    "intermediateRuns": 0,
+    "supersededQualityRunCancelled": 44168096032,
+    "integrationMessage": "[skip ci]",
+    "publicationWorkflowDispatches": 1
+  },
+  "manifestScope": "Runtime/art/style; publication documents are recorded at integration."
+}

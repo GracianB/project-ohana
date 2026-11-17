@@ -77,10 +77,10 @@ test('earned farols illuminate their actual position without adding invisible of
  g.world1.stations[0].done=true;
  drawMichiLivingBackdrop(light.ctx,g,g.cam,20,1280,720);
  const radials=x=>x.operations.filter(op=>op[0]==='radial').length;
- assert.equal(radials(light),radials(dark)+1,'a real farol should cast a localized radial glow');
+ assert.ok(radials(light)>radials(dark),'earned light warms the real farol and family landmark');
  g.world1.stations[0].x=7000;
  drawMichiLivingBackdrop(offscreen.ctx,g,g.cam,20,1280,720);
- assert.equal(radials(offscreen),radials(dark),'offscreen farols are culled');
+ assert.equal(radials(light),radials(offscreen)+1,'offscreen farols are culled while the earned landmark remains warm');
  assert.equal(light.depth(),0);
 });
 

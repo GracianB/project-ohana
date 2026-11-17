@@ -12,111 +12,129 @@ export function quimeraPose(e,t=0,reduce=false){
   organ:ORGANS[b.attack]||'core',color:WORLD1_THEMES[HEROES[b.attack]]?.color||'#ffbe77',open:b.mode==='rest'?1:b.mode==='special'?.7:.18,
   gait:reduce?0:b.mode==='charge'?Math.sin(time*.65):0};
 }
+// Sculpted living creature: soft material boundaries, no outlined armor panels.
 export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
- const p=quimeraPose(e,t,reduce),b=e._fusion||{},formed=b.mode==='intro'?clamp(1-num(b.clock)/Math.max(1,num(b.introMax,260))):1;
- const ink='#101322',bone='#dbd1b4',plate='#343a50',edge='#7b8796',accent=p.color;
- const path=(fill,fn,w=2)=>{c.beginPath();fn();c.closePath();c.fillStyle=fill;c.fill();if(w){c.strokeStyle=ink;c.lineWidth=w;c.stroke();}};
- const line=(col,w,fn)=>{c.beginPath();fn();c.strokeStyle=col;c.lineWidth=w;c.stroke();};
- const oval=(x,y,rx,ry,col,rot=0)=>path(col,()=>c.ellipse(x,y,rx,ry,rot,0,TAU),1.4);
+ const p=quimeraPose(e,t,reduce),b=e._fusion||{},time=p.time;
+ const formed=b.mode==='intro'?clamp(1-num(b.clock)/Math.max(1,num(b.introMax,260))):1;
+ const phase=p.spread,breath=p.breathe,cast=p.warning,hit=p.strike;
+ const palette=[null,['#7c91a0','#35495d','#101d32'],['#9293b5','#4c4d73','#171d39'],['#b29cc7','#555477','#171d37'],['#d3b6d5','#6b5e86','#1d2441']][p.phase];
+ const grad=(x,y,r,colors)=>{const g=c.createRadialGradient(x-r*.25,y-r*.32,1,x,y,r);colors.forEach((v,i)=>g.addColorStop(i/(colors.length-1),v));return g;};
+ const shape=(fill,fn)=>{c.fillStyle=fill;c.beginPath();fn();c.closePath();c.fill();};
+ const oval=(x,y,rx,ry,fill,rot=0)=>shape(fill,()=>c.ellipse(x,y,rx,ry,rot,0,TAU));
+ const curve=(color,width,fn)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();fn();c.stroke();};
+ const skin=(x,y,r,light=0)=>grad(x,y,r,light?['#a9b8bd',palette[0],palette[1]]:palette);
  c.save();c.translate(num(e.x)-num(cam.x)+num(e.w,230)/2,num(e.y)-num(cam.y)+num(e.h,290));c.scale(e.facing===1?-1:1,1);
  c.globalAlpha*=formed;c.lineCap='round';c.lineJoin='round';
- oval(0,3,128,14,'#070c2077');
- c.translate(p.hurt?7:p.strike?-7:p.warning*4,p.dead?31:p.breathe+p.warning*5);c.rotate(p.dead?-.24:p.hurt?.04:b.mode==='charge'?-.08:0);
- // A sinuous armored tail ends in the same broken blade as the crown.
- c.save();c.translate(57,-77);c.rotate((reduce?0:Math.sin(p.time*.035)*.06)+(p.organ==='tail'?p.warning*.4:0));
- path('#222b41',()=>{c.moveTo(-10,-17);c.bezierCurveTo(92,13,122,-25,116,-89);c.bezierCurveTo(141,-28,112,36,0,26);});
- for(let i=0;i<5;i++)line(edge,2,()=>{c.moveTo(22+i*18,-1-i*4);c.lineTo(25+i*18,18-i*6);});
- path(bone,()=>{c.moveTo(106,-73);c.lineTo(111,-114);c.lineTo(134,-94);c.lineTo(119,-61);});c.restore();
- // Two structural wings grow from scapulae, with one elbow and three fingers.
+ oval(4,3,128,14,grad(4,3,130,['#03081799','#03081700']));
+ c.translate(p.hurt?5:hit?-5:0,p.dead?35:breath+cast*3);c.rotate(p.dead?-.23:b.mode==='charge'?-.12:0);
+ // A muscular tail curls in depth; its luminous fin is tissue, not a blade.
+ c.save();c.translate(61,-79);c.rotate(Math.sin(time*.025)*.08+(p.organ==='tail'?cast*.3:0));
+ curve('#111b32',29,()=>{c.moveTo(-2,2);c.bezierCurveTo(99,48,147,-5,114,-100);});
+ curve('#455a72',17,()=>{c.moveTo(0,-3);c.bezierCurveTo(94,28,133,-8,114,-100);});
+ shape(grad(117,-94,35,['#c6dfe0','#7890ac','#293b5d']),()=>{c.moveTo(112,-76);c.bezierCurveTo(79,-95,94,-124,125,-138);c.quadraticCurveTo(116,-107,138,-98);c.quadraticCurveTo(127,-91,112,-76);});
+ c.restore();
+ // Translucent membranes fold from a thick, curved shoulder. No wireframe ribs.
  for(const side of [1,-1]){
-  const spread=40+p.spread*43+(p.organ==='wing'?p.warning*22:0);
-  c.save();c.translate(side*54,-189);c.scale(side,1);c.rotate(-.12-p.spread*.13+(reduce?0:Math.sin(p.time*.04+side)*.025));
-  path('#23283f',()=>{c.moveTo(-9,24);c.lineTo(22,-41);c.lineTo(spread,-102);c.lineTo(spread+43,-134);c.lineTo(spread+34,-63);c.lineTo(spread+76,15);c.quadraticCurveTo(spread+43,-8,spread+28,36);c.quadraticCurveTo(50,9,14,49);});
-  const membrane=c.createLinearGradient(0,-70,110,25);membrane.addColorStop(0,'#45445f');membrane.addColorStop(1,p.phase>=3?'#694b61':'#30364b');
-  path(membrane,()=>{c.moveTo(13,13);c.lineTo(spread+28,-81);c.lineTo(spread+57,8);c.quadraticCurveTo(spread+31,0,spread+22,24);c.quadraticCurveTo(40,9,13,35);},1);
-  for(let i=0;i<3;i++)line(edge,2.5,()=>{c.moveTo(6,21);c.lineTo(spread+24,-76);c.lineTo(spread+54-i*20,10+i*9);});
-  path(bone,()=>{c.moveTo(spread+25,-90);c.lineTo(spread+43,-134);c.lineTo(spread+39,-94);});
-  if(p.organ==='wing'&&(p.warning||p.strike))line(accent,3,()=>{c.moveTo(6,21);c.lineTo(spread+24,-76);c.lineTo(spread+53,11);});
+  c.save();c.translate(side*46,-178);c.scale(side,1);
+  c.rotate(-.1-phase*.08+Math.sin(time*.033+side)*.035-(p.organ==='wing'?cast*.12:0));
+  const span=109+phase*35;
+  const wing=c.createLinearGradient(20,-125,span+40,40);wing.addColorStop(0,'#b0b9d0');wing.addColorStop(.26,'#6c7399');wing.addColorStop(.65,'#323e64');wing.addColorStop(1,'#192b4600');
+  shape(wing,()=>{c.moveTo(-8,34);c.bezierCurveTo(9,-66,span-38,-114,span+13,-156);c.quadraticCurveTo(span-5,-70,span+40,-2);c.quadraticCurveTo(span+9,-23,span+1,25);c.quadraticCurveTo(70,-7,38,54);c.quadraticCurveTo(16,26,-8,34);});
+  const edge=c.createLinearGradient(0,0,span,-150);edge.addColorStop(0,'#526680');edge.addColorStop(.65,'#9bacc0');edge.addColorStop(1,'#e0d7d4');
+  curve(edge,7,()=>{c.moveTo(0,24);c.bezierCurveTo(16,-63,span-29,-114,span+13,-156);});
+  for(let fold=0;fold<3;fold++){
+   const fx=span-12-fold*28;
+   shape('#0c1c3922',()=>{c.moveTo(span+10,-145);c.quadraticCurveTo(fx-27,-42,fx-10,26);c.quadraticCurveTo(fx-19,-45,span+10,-145);});
+  }
+  // Small luminous pores follow the membrane rather than dividing it into cells.
+  c.globalAlpha*=.4+phase*.25;
+  for(let i=0;i<8;i++){const x=35+i*11,y=-26-i*9;oval(x,y,1.4+i*.12,1.4+i*.12,'#d5e6ed');}
   c.restore();
  }
- // Powerful haunches, angular ankle armor and three planted claws per paw.
+ // Rear legs sit in shadow behind a continuous flank.
  for(const side of [1,-1]){
-  c.save();c.translate(side*55,-58);c.rotate(side*p.gait*.13);
-  oval(0,-9,34,46,'#333b50',side*.2);
-  path(plate,()=>{c.moveTo(-22,3);c.lineTo(-32,40);c.lineTo(-41,51);c.quadraticCurveTo(-4,67,31,51);c.lineTo(24,12);});
-  for(let k=0;k<3;k++)path(bone,()=>{const x=-29+k*19;c.moveTo(x,45);c.lineTo(x-8,60);c.lineTo(x+10,57);c.lineTo(x+12,46);},1);
-  line(edge,2,()=>{c.moveTo(-18,-15);c.lineTo(10,-30);c.lineTo(23,-9);});c.restore();
+  c.save();c.translate(side*55,-54);c.rotate(side*p.gait*.12);
+  oval(0,-17,35,50,skin(0,-22,58),side*.3);
+  shape(skin(0,16,42),()=>{c.moveTo(-22,-8);c.quadraticCurveTo(-25,17,-33,35);c.bezierCurveTo(-47,50,-19,58,14,51);c.quadraticCurveTo(32,47,23,31);c.lineTo(24,-10);});
+  for(let i=0;i<3;i++)shape(grad(-23+i*17,45,15,['#f3e9d0','#a8a9a7','#5f7182']),()=>{let x=-26+i*17;c.moveTo(x,39);c.quadraticCurveTo(x-7,46,x-6,56);c.quadraticCurveTo(x+6,53,x+9,41);});
+  c.restore();
  }
- const armor=c.createLinearGradient(-90,-210,90,-55);armor.addColorStop(0,'#647183');armor.addColorStop(.45,'#353e54');armor.addColorStop(1,'#1b2338');
- path(armor,()=>{c.moveTo(-36,-238);c.quadraticCurveTo(-96,-226,-95,-166);c.lineTo(-72,-77);c.quadraticCurveTo(0,-48,73,-84);c.lineTo(95,-170);c.quadraticCurveTo(93,-223,37,-237);});
- // Interlocking ribs open away from the core during a genuine recovery.
- for(const side of [-1,1])for(let i=0;i<4;i++){
-  const x=side*(25+p.open*8+p.spread*10+i*2),y=-199+i*27;
-  path(i%2?'#475267':'#596477',()=>{c.moveTo(x,y-14);c.lineTo(side*(72-i*5),y-23);c.lineTo(side*(78-i*6),y-3);c.lineTo(x,y+11);});
-  line('#a3a9a4',1,()=>{c.moveTo(x,y-10);c.lineTo(side*(67-i*5),y-17);});
+ // Pear-shaped thorax and raised shoulders build an animal silhouette.
+ shape(skin(-5,-165,120),()=>{c.moveTo(-35,-246);c.bezierCurveTo(-102,-253,-110,-184,-88,-118);c.bezierCurveTo(-71,-56,56,-56,84,-116);c.bezierCurveTo(113,-185,81,-240,29,-244);});
+ oval(-39,-191,45,61,skin(-43,-207,77),-.28);
+ oval(50,-174,39,64,skin(39,-197,75),.24);
+ oval(7,-121,54,54,grad(4,-125,66,['#687d8b','#354d63','#19283f']));
+ // A soft pale breast grows around the exposed heart.
+ shape(grad(-4,-167,74,['#cad4cb','#768b9b','#263950']),()=>{c.moveTo(-28,-223);c.quadraticCurveTo(0,-213,32,-224);c.quadraticCurveTo(55,-176,27,-128);c.lineTo(0,-102);c.lineTo(-24,-130);c.quadraticCurveTo(-51,-169,-28,-223);});
+ // Long mane tufts have rounded roots and flowing tapered ends.
+ for(const side of [-1,1])for(let i=4;i>=0;i--){
+  const x=side*(33+i*7),y=-230+i*13,sway=Math.sin(time*.028+i)* (2+phase*5);
+  shape(grad(x,y,45,['#9ca9b8','#4e637e','#253b57']),()=>{c.moveTo(x-side*13,y-17);c.bezierCurveTo(x+side*25,y-27,x+side*(30+phase*11)+sway,y+23,x+side*18+sway,y+49);c.quadraticCurveTo(x+side*13,y+14,x-side*10,y+18);});
  }
- path(ink,()=>{c.moveTo(0,-208);c.lineTo(29+p.open*7,-161);c.lineTo(0,-106);c.lineTo(-29-p.open*7,-161);});
- c.save();c.translate(0,-160);c.scale(.85+p.spread*.35,.85+p.spread*.35);c.translate(0,160);
- const core=c.createRadialGradient(0,-160,2,0,-160,33);core.addColorStop(0,p.dead?'#7e7485':'#fff1cc');core.addColorStop(.4,p.open>.5?'#7ce6d1':accent);core.addColorStop(1,'#6d3d69');
- path(core,()=>{c.moveTo(0,-194);c.lineTo(21,-163);c.lineTo(0,-122);c.lineTo(-21,-163);},1.5);
- line('#fff1cb',1.7,()=>{c.moveTo(0,-185);c.lineTo(-8,-162);c.lineTo(0,-132);});
- c.restore();
- // Ten visible shards; the selected stolen voice alone lights its channels.
- WORLD1_ORDER.forEach((hero,i)=>{
-  const side=i<5?-1:1,j=i%5,x=side*(56+Math.sin(j*.8)*10),y=-218+j*26,col=WORLD1_THEMES[hero].color;
-  const active=HEROES[b.attack]===hero;
-  path(active?col:'#242b40',()=>{c.moveTo(x,y-7);c.lineTo(x+6,y);c.lineTo(x,y+8);c.lineTo(x-6,y);},1);
-  line(active?col:'#81889a',1.2,()=>{c.moveTo(x,y);c.lineTo(side*24,-160);});
+ // Forelegs articulate from the shoulder with weighted, rounded paws.
+ for(const side of [1,-1]){
+  const lift=p.organ==='paw'?cast*.34:cast*.07;
+  c.save();c.translate(side*70,-190);c.rotate(side*(.08+lift-hit*.12)+(side===1?-.12:.05)+Math.sin(time*.03+side)*.018);
+  shape(skin(-6,47,86),()=>{c.moveTo(-20,-14);c.bezierCurveTo(-47,-4,-40,35,-28,63);c.quadraticCurveTo(-23,87,-31,116);c.bezierCurveTo(-47,143,4,149,30,131);c.quadraticCurveTo(33,119,23,105);c.quadraticCurveTo(38,69,29,38);c.quadraticCurveTo(26,-11,-20,-14);});
+  oval(-9,21,14,31,grad(-12,15,40,['#acb9bd88','#778da433','#405b7200']),-.3);
+  for(let k=0;k<3;k++){
+   const x=-24+k*18;
+   oval(x+5,123,12,14,skin(x+3,119,24));
+   shape(grad(x,137,18,['#f2ead7','#b9b6b3','#697f93']),()=>{c.moveTo(x-3,130);c.quadraticCurveTo(x-10,138,x-5,150);c.quadraticCurveTo(x+5,144,x+9,131);});
+  }
+  c.restore();
+ }
+ // The heart is an organic vertical aperture, with a bright recovery iris.
+ const heartY=-165,open=p.open,hr=21+open*6+phase*3;
+ oval(0,heartY,hr+7,48,'#101c35');
+ oval(0,heartY,hr,42,grad(-2,heartY,44,[open>.5?'#f0ffe7':'#fff0db',open>.5?'#85e4ca':p.color,'#4c477c']));
+ oval(-4,heartY-5,5+open*3,28,grad(-4,heartY-7,30,['#ffffff','#d9ffe499','#dcfff000']));
+ // Ten captive lights are nestled in the fur, not connected by drawn lines.
+ WORLD1_ORDER.forEach((hero,i)=>{const side=i<5?-1:1,j=i%5,x=side*(33+j*4),y=-209+j*19,col=WORLD1_THEMES[hero].color;
+  oval(x,y,3.2,4.5,grad(x,y,5,[HEROES[b.attack]===hero?'#ffffff':col,col,'#243751']));
  });
- // Forearms visibly brace, cast or recoil; the low stance sells the weight.
+ // Long feline muzzle, connected neck, and asymmetric brow sell a living face.
+ c.save();c.translate(-14-(p.organ==='horn'?cast*10:0),-236-(p.organ==='crown'?cast*7:0));
+ c.rotate(p.organ==='jaw'?-cast*.1:p.dead?.2:-.025);
+ oval(4,7,43,48,skin(-5,-7,63));
  for(const side of [1,-1]){
-  const raise=p.organ==='paw'?p.warning*.6:p.organ==='core'?p.warning*.2:0;
-  c.save();c.translate(side*78,-190);c.rotate(side*(.08+raise-p.strike*.14));
-  path('#475165',()=>{c.moveTo(-19,-7);c.quadraticCurveTo(-37,29,-25,59);c.lineTo(-22,102);c.quadraticCurveTo(0,119,23,102);c.lineTo(28,46);c.lineTo(19,-6);});
-  path('#727d89',()=>{c.moveTo(-23,34);c.lineTo(0,19);c.lineTo(28,35);c.lineTo(18,60);c.lineTo(-20,63);});
-  path('#2b344b',()=>{c.moveTo(-23,80);c.lineTo(-30,126);c.quadraticCurveTo(0,140,34,121);c.lineTo(21,81);});
-  for(let k=0;k<3;k++)path(bone,()=>{const x=-21+k*18;c.moveTo(x,118);c.lineTo(x-7,142);c.lineTo(x+10,136);c.lineTo(x+11,117);},1);
-  if(p.organ==='paw')line(accent,2.5,()=>{c.moveTo(0,53);c.lineTo(-2,116);});c.restore();
+  // Curved horns emerge behind soft ears; the final phase lengthens their roots.
+  shape(grad(side*33,-67,49,['#e8e2cf','#aab0b2','#546b84']),()=>{c.moveTo(side*20,-31);c.bezierCurveTo(side*42,-52,side*31,-82,side*(57+phase*7),-102-phase*10);c.quadraticCurveTo(side*44,-68,side*48,-47);c.quadraticCurveTo(side*43,-26,side*20,-31);});
+  shape(skin(side*35,-20,34),()=>{c.moveTo(side*21,-24);c.quadraticCurveTo(side*39,-54,side*56,-50);c.quadraticCurveTo(side*56,-21,side*37,-8);});
+  shape('#35455e',()=>{c.moveTo(side*33,-23);c.lineTo(side*48,-42);c.quadraticCurveTo(side*46,-23,side*38,-18);});
  }
- // A single leonine head, heavy jaw and broken crown replace the old prop pile.
- c.save();c.translate(-7-(p.organ==='horn'?p.warning*12:0),-219-(p.organ==='crown'?p.warning*8:0));
- c.rotate(p.organ==='jaw'?-p.warning*.1:p.dead?.22:0);
- for(const side of [1,-1]){
-  path('#454d62',()=>{c.moveTo(side*27,-18);c.lineTo(side*62,-63);c.lineTo(side*69,-23);c.lineTo(side*44,21);});
-  path(bone,()=>{c.moveTo(side*30,-38);c.quadraticCurveTo(side*36,-85,side*64,-104);c.lineTo(side*54,-66);c.lineTo(side*65,-73);c.quadraticCurveTo(side*57,-40,side*40,-27);});
-  line('#8c817c',1.5,()=>{c.moveTo(side*39,-41);c.lineTo(side*54,-82);});
+ if(p.phase>=3)for(const side of [-1,1])for(let i=0;i<4;i++){
+  const x=side*(31+i*4),y=-35+i*15,flow=Math.sin(time*.04+i)*3;
+  shape(grad(x,y,34,['#d7ccdc','#8e91b2','#45557b00']),()=>{c.moveTo(x-side*10,y-7);c.bezierCurveTo(x+side*13,y-14,x+side*29+flow,y+11,x+side*22+flow,y+33);c.quadraticCurveTo(x+side*12,y+9,x-side*8,y+13);});
  }
- path('#515d70',()=>{c.moveTo(-39,-52);c.quadraticCurveTo(2,-77,44,-46);c.lineTo(52,-7);c.lineTo(30,32);c.lineTo(-18,34);c.lineTo(-54,4);});
- // Mane plates overlap the neck, keeping the skull connected to the spine.
- for(const side of [-1,1])for(let i=0;i<3;i++)path(i%2?'#353e54':'#77818b',()=>{const x=side*(36+i*4),y=-21+i*16;c.moveTo(x,y-12);c.lineTo(x+side*24,y+18);c.lineTo(x-side*6,y+12);});
+ shape(skin(-14,-36,64),()=>{c.moveTo(-35,-38);c.bezierCurveTo(-25,-61,23,-62,37,-38);c.quadraticCurveTo(50,-7,29,17);c.quadraticCurveTo(5,31,-30,15);c.quadraticCurveTo(-51,-6,-35,-38);});
+ // Brow ridges cast one broad shadow instead of graphic black outlines.
  for(const side of [-1,1]){
-  const x=side*23,y=-21;
-  path(ink,()=>{c.moveTo(x-14,y-6);c.lineTo(x+15,y-10);c.lineTo(x+11,y+7);c.lineTo(x-11,y+6);},1);
-  if(!p.dead){path('#ffe3a0',()=>{c.moveTo(x-11,y-3);c.lineTo(x+11,y-6);c.lineTo(x+8,y+3);c.lineTo(x-8,y+3);},0);oval(x-2,y-1,2,6,ink);}
-  line('#92979a',3,()=>{c.moveTo(x-14,y-9);c.lineTo(x+13,y-13);});
+  const x=side*22;
+  oval(x,-19,18,11,'#14213a',side*-.15);
+  if(!p.dead){
+   shape(grad(x,-19,20,['#fffad1','#e3bb79','#a77359']),()=>{c.moveTo(x-14,-22-side*2);c.quadraticCurveTo(x,-24,x+14,-22+side*2);c.quadraticCurveTo(x+4,-13,x-10,-15);});
+   oval(x-3,-20,2,6,'#152036');oval(x-6,-22,2,1.3,'#ffffff');
+  }
+  shape(skin(x,-32,31),()=>{c.moveTo(x-18,-38+side*5);c.quadraticCurveTo(x,-36,x+17,-38-side*5);c.lineTo(x+14,-25-side*5);c.quadraticCurveTo(x,-30,x-15,-25+side*5);});
+  shape(skin(side*26,-4,31),()=>{c.moveTo(side*21,-16);c.quadraticCurveTo(side*49,-13,side*45,15);c.lineTo(side*30,33);c.quadraticCurveTo(side*33,10,side*15,6);});
  }
- const jaw=p.organ==='jaw'?(p.warning*6+p.strike*13):p.strike?5:0;
- path('#20283c',()=>{c.moveTo(-43,5);c.lineTo(28,8);c.lineTo(24,30+jaw);c.lineTo(-25,34+jaw);c.lineTo(-52,22);});
- path('#8d969b',()=>{c.moveTo(-41,-2);c.lineTo(-4,-4);c.lineTo(30,6);c.lineTo(16,18);c.lineTo(-30,17);c.lineTo(-55,6);});
- path(ink,()=>{c.moveTo(-38,-2);c.lineTo(-13,-1);c.lineTo(-21,9);c.lineTo(-35,7);},1);
- for(let i=0;i<4;i++)path(bone,()=>{const x=-35+i*16;c.moveTo(x,17);c.lineTo(x+4,25+jaw*.25);c.lineTo(x+8,16);},.8);
- if(p.organ==='jaw'&&(p.warning||p.strike))line(accent,3,()=>{c.moveTo(-38,27+jaw*.4);c.lineTo(15,28+jaw*.4);});
- path(p.phase>=3?'#e2bc8d':'#8f969a',()=>{c.moveTo(-11,-51);c.lineTo(0,-84-p.spread*13);c.lineTo(13,-51);c.lineTo(0,-34);});
- if(p.organ==='crown')line(accent,2.5,()=>{c.moveTo(-39,-41);c.lineTo(-52,-79);c.moveTo(39,-41);c.lineTo(52,-79);});
+ const jaw=p.organ==='jaw'?cast*5+hit*12:hit?4:0;
+ shape(skin(-18,17+jaw,44),()=>{c.moveTo(-42,15+jaw);c.quadraticCurveTo(-15,9,23,15+jaw);c.quadraticCurveTo(22,40+jaw,-13,43+jaw);c.quadraticCurveTo(-38,39+jaw,-42,15+jaw);});
+ if(jaw>2)oval(-16,19+jaw*.5,27,6+jaw*.4,'#131d32');
+ // Two overlapping muzzle pads avoid a flat polygonal snout.
+ shape(grad(-24,0,38,['#b5c3c2','#7e96a1','#415d77']),()=>{c.moveTo(-25,-9);c.quadraticCurveTo(-50,-10,-47,12);c.quadraticCurveTo(-45,25,-20,23);c.quadraticCurveTo(-6,19,-10,7);});
+ shape(grad(3,0,32,['#a8babd','#6e8b9d','#3b5875']),()=>{c.moveTo(-8,-5);c.quadraticCurveTo(21,-7,26,10);c.quadraticCurveTo(26,25,1,25);c.quadraticCurveTo(-13,22,-13,8);});
+ shape(grad(-18,1,15,['#4a5b6d','#17283e','#101a2e']),()=>{c.moveTo(-30,-1);c.quadraticCurveTo(-18,-7,-5,0);c.quadraticCurveTo(-15,12,-21,9);});
+ curve('#3b5069',1.2,()=>{c.moveTo(-19,9);c.lineTo(-20,16);c.quadraticCurveTo(-31,19,-35,14);});
+ for(const side of [-1,1])shape(grad(side*22,22,16,['#fff1d4','#b8c0c1','#6f859b']),()=>{c.moveTo(side*22-4,17);c.quadraticCurveTo(side*22-9,31,side*22-3,36+jaw*.25);c.quadraticCurveTo(side*22+3,29,side*22+5,18);});
+ // One luminous forehead crest; no crown full of intersecting spikes.
+ shape(grad(-2,-49,35,['#ece3d3','#b1a2b6','#52617f']),()=>{c.moveTo(-12,-37);c.quadraticCurveTo(-14,-65,-1,-80-phase*12);c.quadraticCurveTo(3,-57,12,-40);c.quadraticCurveTo(1,-25,-12,-37);});
  c.restore();
- // Phase damage is structural, not a palette swap: plates split around the heart.
- if(p.phase>=2)for(const side of [-1,1])line('#e6b994',1.8,()=>{c.moveTo(side*21,-205);c.lineTo(side*35,-185);c.lineTo(side*28,-169);c.lineTo(side*41,-142);});
- if(p.phase>=3)for(const side of [-1,1]){
-  path('#181e32',()=>{c.moveTo(side*46,-134);c.lineTo(side*60,-110);c.lineTo(side*38,-83);c.lineTo(side*33,-113);});
-  line('#daaa88',1.7,()=>{c.moveTo(side*46,-134);c.lineTo(side*60,-110);c.lineTo(side*38,-83);});
+ // The prison dissolves into soft wisps in the final phase.
+ if(p.phase===4)for(const side of [-1,1])for(let i=0;i<3;i++){
+  const x=side*(99+i*15),y=-152-i*36+Math.sin(time*.024+i)*4;
+  oval(x,y,7-i,18+i*3,grad(x,y,27,['#c8b3e355','#8b9cc322','#899db900']),side*.3);
  }
- if(p.phase>=3)line('#efc18a',2,()=>{c.moveTo(35,-82);c.lineTo(21,-97);c.lineTo(29,-114);});
- if(p.phase===4)for(let i=0;i<4;i++){
-  const side=i%2?-1:1,x=side*(103+(i>>1)*22),y=-125-(i>>1)*53;
-  c.save();c.translate(x,y+(reduce?0:Math.sin(p.time*.04+i)*3));c.rotate(side*.25);
-  path('#566174',()=>{c.moveTo(-8,-14);c.lineTo(10,-6);c.lineTo(5,17);c.lineTo(-9,7);});
-  line('#edc394',1.5,()=>{c.moveTo(-5,-9);c.lineTo(4,-4);c.lineTo(1,10);});c.restore();
- }
- if(p.phase===4)for(const side of [-1,1])path('#e7c798',()=>{c.moveTo(side*18,-191);c.lineTo(side*37,-207);c.lineTo(side*33,-171);},1);
  c.restore();
 }

@@ -1,0 +1,7 @@
+body.michi-story #world1-cine-controls{display:flex;align-items:center;gap:9px;max-width:calc(100vw - 24px)}
+#world1-cine-skip{min-height:44px;min-width:108px;padding:9px 12px;border:1px solid #aeb9b04d;border-radius:12px;background:#13243ae8;color:#c6d2c4;font:500 12px Outfit,sans-serif;touch-action:manipulation;cursor:pointer}
+#world1-cine-skip[hidden]{display:none!important}
+body.michi-story #world1-cine-next{background:#485750;border-color:#dec79a;color:#fff1cf}
+body.michi-story #world1-cine-skip:focus-visible{outline:3px solid #e6ce9d;outline-offset:3px}
+@media(max-width:650px){body.michi-story #world1-cine-next{font-size:13px;min-width:150px;padding:9px 12px}body.michi-story #world1-cine-controls{gap:8px}}
+@media(max-height:500px) and (orientation:landscape){body.michi-story #world1-cine-controls{left:auto;right:16px;transform:none;bottom:12px}}

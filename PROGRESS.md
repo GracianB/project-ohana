@@ -1,3 +1,15 @@
+## ohana-656 · Michi, Kilo y santuario de Quimera
+
+Planos propios y progresión determinista en seis escenas de Michi, reunión de los diez personajes, barca y transiciones diferenciadas de aire, ratón, magia y fantasma. Texto progresivo, controles nativos de continuar/saltar y movimiento reducido. Kilo recibe atención ambiental, rostro y ukelele refinados, pelo por mechones, trenzado y telas recortadas al dobladillo animado. Se reúne con V654 y V655 en una sola integración.
+
+## ohana-655 · Una entrega: jardín, personaje y móvil
+
+Amplía V654 antes de su única integración: dos zonas táctiles para pulgares, ninguna acción superpuesta, contexto Usar separado de avisos, HUD estrecho y bandeja de poderes; cara vectorial nueva y materiales/vestuario refinados en las cinco formas. Sin cambiar hitboxes, velocidades, poderes ni progreso.
+
+## ohana-654 · Michi: el jardín que recuerda
+
+Entrega reunida en un solo commit: base V653 revisada, patio con tres accesos separados y balcón real, canal recuperable y puente persistente, campana de calma, corriente activable y ruta alta, tres recuerdos escuchables, árbol familiar, rostro y pañuelo de Michi refinados, guardián de alas grabadas. Sin fondos raster. Cien IDs de recuerdos y elección de evolución conservados. 1.964 pruebas locales y recorrido físico completo superados, candidato público verificado y una sola ejecución de publicación de Pages prevista.
+
 ## ohana-653 · Santuario vivo con orientación real (candidato)
 
 La dirección del objetivo ahora permanece visible discretamente fuera del encuadre; solo los arcos físicamente disponibles emiten un halo al acercarse. Etiquetas de faroles y pasajes quedan dentro de la pantalla estrecha. El vuelo histórico se prueba en aire sin obstáculos y la suite quality incorpora las siete zonas vectoriales. Nada cambia colisiones, IA, progreso, guardados o poderes. CI y producción pendientes de verificación.

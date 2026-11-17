@@ -1,0 +1,25 @@
+{
+  "release": "ohana-656",
+  "kind": "single-commit consolidated release manifest",
+  "sourcePullRequest": "https://github.com/GracianB/project-ohana/pull/488",
+  "preservedBaseCommit": "637539b023f2b790da526e12d991c9bd61f149a0",
+  "runtimeManifestSha256": "fab6e2b29df61b7164f3b3fda7d67a3e88b703d0e444a37817652ddfe0e43b3b",
+  "netlify": {
+    "testedDeployId": "6afd113bf7596bf92f0204eb",
+    "candidateUrl": "https://6afd113bf7596bf92f0204eb--project-ohana-multiplayer.netlify.app",
+    "productionUrl": "https://project-ohana-multiplayer.netlify.app",
+    "promotion": "restore exact tested candidate",
+    "filesChecked": 49
+  },
+  "githubPages": {
+    "url": "https://gracianb.github.io/project-ohana/?release=656",
+    "workflow": "pages.yml",
+    "publicationMethod": "one manual workflow_dispatch after squash integration"
+  },
+  "actionsBudget": {
+    "pushAndSquashSubject": "[skip ci]",
+    "intermediateActionsRuns": 0,
+    "plannedPagesDispatches": 1
+  },
+  "previousNetlifyDeploy": "6afcc678f1e23b6a2a813dba"
+}

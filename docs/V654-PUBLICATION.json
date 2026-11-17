@@ -1,0 +1,26 @@
+{
+  "release": "ohana-654",
+  "kind": "garden candidate preserved in the consolidated ohana-655 release",
+  "sourcePullRequest": "https://github.com/GracianB/project-ohana/pull/488",
+  "preservedBaseCommit": "637539b023f2b790da526e12d991c9bd61f149a0",
+  "runtimeManifestSha256": "9ef6063b87fb059582d58f7fff8824ff86c9744168d462abadb86496ae6ee8e8",
+  "netlify": {
+    "testedDeployId": "6afcc1d5c13ba5a323219e79",
+    "candidateUrl": "https://6afcc1d5c13ba5a323219e79--project-ohana-multiplayer.netlify.app",
+    "productionUrl": "https://project-ohana-multiplayer.netlify.app",
+    "promotion": "restore the exact tested candidate",
+    "filesChecked": 29,
+    "candidateNativeMobileVerified": true
+  },
+  "githubPages": {
+    "supersededBy": "ohana-655",
+    "note": "The user requested the mobile/character polish before the single main integration."
+  },
+  "actionsBudget": {
+    "intermediateRuns": 0,
+    "supersededQualityRunCancelled": 44168096032,
+    "integrationMessage": "[skip ci]",
+    "publicationWorkflowDispatches": 1
+  },
+  "manifestScope": "Runtime/art files; publication documents are recorded at integration."
+}

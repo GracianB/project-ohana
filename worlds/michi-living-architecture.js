@@ -25,7 +25,7 @@ function vine(c,x,y,length,t,seed,energy){
   if(j%2===0)flower(c,xx+8,yy+5,3.3+energy*1.4,energy>.5?'#e8bfd7':'#9a9bbd');
  }
 }
-function window(c,x,y,w,h,energy,t,seed){
+function paintWindow(c,x,y,w,h,energy,t,seed){
  const glass=c.createLinearGradient(x-w/2,y-h,x+w/2,y);
  glass.addColorStop(0,'#52779455');glass.addColorStop(.55,'#b197b04d');glass.addColorStop(1,'#93c0b626');
  c.fillStyle=glass;c.beginPath();c.moveTo(x-w/2,y);c.lineTo(x-w/2,y-h*.6);c.bezierCurveTo(x-w/2,y-h*1.15,x+w/2,y-h*1.15,x+w/2,y-h*.6);c.lineTo(x+w/2,y);c.fill();
@@ -34,6 +34,15 @@ function window(c,x,y,w,h,energy,t,seed){
  for(let k=0;k<6;k++)leaf(c,x,bloom,w*.30*opening,k*TAU/6+Math.sin(t*.005+seed)*.025,['#b29ab788','#84c3bd88','#d5bc8b77'][k%3]);
  oval(c,x,bloom,5,5,'#e6d5aa');
  line(c,'#78918a',1.2,()=>{c.moveTo(x,y-h*.89);c.lineTo(x,y);for(let j=1;j<4;j++){c.moveTo(x-w*.44,y-j*h*.18);c.lineTo(x+w*.44,y-j*h*.18);}});
+}
+// Each glass panel is an independent generated vector object. Earned-light state
+// changes its key; at most twelve panels are retained, with no image downloads.
+const glassPanels=new Map();
+function window(c,x,y,w,h,energy,t,seed){
+ if(typeof OffscreenCanvas==='undefined'){paintWindow(c,x,y,w,h,energy,t,seed);return;}
+ const key=[w,h,Math.round(energy*5)].join(':');let panel=glassPanels.get(key);
+ if(!panel){panel=new OffscreenCanvas(Math.ceil(w)+24,Math.ceil(h)+24);const q=panel.getContext('2d');q.translate(w/2+12,h+12);paintWindow(q,0,0,w,h,energy,0,0);if(glassPanels.size>=12)glassPanels.delete(glassPanels.keys().next().value);glassPanels.set(key,panel);}
+ c.drawImage(panel,x-w/2-12,y-h-12);
 }
 function conservatory(c,x,y,s,energy,t){
  c.save();c.translate(x,y);c.scale(s,s);
@@ -89,7 +98,7 @@ export function drawMichiArchitecture(c,zone,cam,t,W,H,p,energy=0){
  c.save();c.lineCap='round';
  for(let i=first;i<=last;i++){
   const x=i*gap-cx;if(x< -500||x>W+330)continue;
-  if(zone==='court'){conservatory(c,x,base,scale*(.87+hash(i+31)*.19),energy,t);fountain(c,x+380,base+70,energy,t);arch(c,x+380,base+10,200,194,'#719c96',5);vine(c,x+320,base-156,136,t,i,energy);vine(c,x+439,base-156,102,t,i+3,energy);}
+  if(zone==='court'){conservatory(c,x,base,scale*(.58+hash(i+31)*.10),energy,t);fountain(c,x+380,base+70,energy,t);arch(c,x+380,base+10,200,194,'#719c96',5);vine(c,x+320,base-156,136,t,i,energy);vine(c,x+439,base-156,102,t,i+3,energy);}
   else if(zone==='crypt')rootVault(c,x,base,scale,t,energy);
   else if(zone==='gallery'||zone==='arena'){
    const ww=zone==='arena'?200:143,hh=zone==='arena'?360:285;
@@ -143,10 +152,10 @@ export function drawMichiNearGrowth(c,g,cam,t,W,H){
  c.save();
  for(const platform of g.platforms||[]){
   if(platform.w<80||platform.y-(cam.y||0)<-30||platform.y-(cam.y||0)>H+80)continue;
-  const start=Math.max(0,Math.floor(((cam.x||0)-platform.x-40)/132));
-  const end=Math.min(Math.floor(platform.w/132),Math.ceil(((cam.x||0)+W-platform.x+40)/132));
+  const start=Math.max(0,Math.floor(((cam.x||0)-platform.x-40)/192));
+  const end=Math.min(Math.floor(platform.w/192),Math.ceil(((cam.x||0)+W-platform.x+40)/192));
   for(let i=start;i<end;i++){
-   const wx=platform.x+i*132+47,x=wx-(cam.x||0),y=platform.y-(cam.y||0);
+   const wx=platform.x+i*192+47,x=wx-(cam.x||0),y=platform.y-(cam.y||0);
    const near=Math.max(0,1-Math.hypot(px-wx,py-platform.y)/155);
    const sway=Math.sin(time*.024+i)*3+near*Math.max(-1,Math.min(1,(hero.vx||0)/5))*7;
    line(c,'#578c81',1.5,()=>{c.moveTo(x,y);c.quadraticCurveTo(x-7+sway,y-19,x+sway,y-35-near*6);});

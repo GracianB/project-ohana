@@ -37,10 +37,10 @@ export function drawMichiSanctuaryTerrain(c,platforms=[],cam={},W=1280,H=720,zon
    }
   }
   // Organic silhouettes grow from supports; none are collision bodies.
-  const first=Math.max(0,Math.floor((cx-p.x-60)/68));
-  const last=Math.min(Math.ceil(p.w/68),Math.ceil((cx+W-p.x+60)/68));
+  const first=Math.max(0,Math.floor((cx-p.x-60)/104));
+  const last=Math.min(Math.ceil(p.w/104),Math.ceil((cx+W-p.x+60)/104));
   for(let i=first;i<last;i++){
-   const px=x+i*68+20;
+   const px=x+i*104+20;
    if(px < -60 || px > W+60)continue;
    const seed=Math.abs(Math.floor(p.x/37))+i*7;
    c.strokeStyle=seed%3===0?'#75aaa0':'#58897e';c.lineWidth=1.4;

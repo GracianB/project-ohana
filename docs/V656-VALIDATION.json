@@ -1,0 +1,28 @@
+{
+  "release": "ohana-656",
+  "status": "local acceptance passed",
+  "unitTests": {
+    "passed": 1968,
+    "failed": 0
+  },
+  "releaseGate": {
+    "runtimeModules": 423,
+    "resources": 494
+  },
+  "browserAcceptance": [
+    "V654 native journey: five lamps, mechanisms, guardian, zero deaths",
+    "V654 physical 100 memories, three echoes, relic, seal and saved return",
+    "V655 mobile: 320x568, 320x844, 390x844, 844x390; simultaneous touch movement/jump and native Use",
+    "V656 Michi six staged story events, four transformations, responsive captions and native skip",
+    "V656 Kilo five costumes, musical rotation, physical instrument route and Tambor victory",
+    "Quimera: 20 art states, ten warning/active pairs, all four phases in desktop/mobile production arena"
+  ],
+  "quimeraScope": "Arena access and HP fixtures are synthetic, not an earned full-campaign victory",
+  "includes": [
+    "PR488 original thirteen commits",
+    "V654 garden",
+    "V655 mobile and five forms",
+    "V656 cinematics, Kilo and Quimera"
+  ],
+  "actionsBudget": "One final squash with skip ci; one manual Pages dispatch"
+}

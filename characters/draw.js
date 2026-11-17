@@ -1266,6 +1266,7 @@ q(pose.chispinWelcome?.coil,8),q(pose.chispinWelcome?.gills,8),
 q(pose.chispinWelcome?.breath,12),q(pose.chispinWelcome?.dragon,12),
 q(pose.chispinWelcome?.chase,12),q(pose.chispinWelcome?.yomi,12),
 q(pose.chispinWelcome?.dino,12),
+pose.kiloPresence?.kind||'',q(pose.kiloPresence?.attention,8),q(pose.kiloPresence?.lookX,8),q(pose.kiloPresence?.lookY,8),
 // V353 Michi cat: real form-specific ears/eyes/tail/wings invalidate canvas.
 pose.michiPresence?.kind||'',q(pose.michiPresence?.lookX,8),q(pose.michiPresence?.lookY,8),q(pose.michiPresence?.attention,8),q(pose.michiPresence?.idleTicks,8),pose.michiMotion?.flight||'',q(pose.michiMotion?.vx,4),q(pose.michiMotion?.vy,4),
 pose.michiWelcome?.phase || "",q(pose.michiWelcome?.inspect,12),
@@ -1420,6 +1421,7 @@ const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,i
   reduceMotion: options.reduceMotion===true,theatreHQ:!!p._theatreHQ};
 articulateStride(pose,p.id);
 if(michiRig){pose.michiPresence=p._michiPresence;pose.michiMotion={vx:(p.vx||0)*(p.facing||1),vy:p.vy||0,flight:p._michiWingMode||'ground',fuel:(p._michiWingFuel||0)/(p._michiWingMax||210)};}
+if(p.id==='kilo'){pose.kiloPresence=p._kiloPresence;if(p._kiloPresence?.attention>.1)pose.look={x:p._kiloPresence.lookX,y:p._kiloPresence.lookY};}
 if(p.id==="yomi")pose.yomiKnowledge=p._yomiKnowledge||0;
 if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;
 if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDino;

@@ -3,9 +3,9 @@ export function drawMichiDetails(a,p,form){
  const{c,shape,stroke,oval}=a;
  if(form===0){
   // Worn denim vest: seam, moon patch and a safety pin, readable at baby scale.
-  shape('#3b4960',()=>{c.moveTo(-28,-30);c.lineTo(-14,-34);c.lineTo(3,-27);c.lineTo(0,-16);c.lineTo(-23,-14);});
-  stroke('#a1a9ad',.8,()=>{c.moveTo(-24,-27);c.lineTo(-22,-17);c.moveTo(-8,-29);c.lineTo(-5,-18);});
-  oval(-15,-24,5,5,'#e6c39f');oval(-13,-26,4,4,'#344357');
+  shape('#45556d',()=>{c.moveTo(-28,-30);c.lineTo(-14,-34);c.lineTo(3,-27);c.lineTo(0,-16);c.lineTo(-23,-14);});
+  stroke('#c2c8c7',.8,()=>{c.moveTo(-24,-27);c.lineTo(-22,-17);c.moveTo(-8,-29);c.lineTo(-5,-18);});
+  for(const x of[-25,-7])oval(x,-20,1.2,1.2,'#d9bd8f');oval(-15,-24,5,5,'#e6c39f');oval(-13,-26,4,4,'#344357');
   stroke('#c6ced2',1.2,()=>{c.moveTo(-23,-22);c.lineTo(-19,-19);c.moveTo(-24,-20);c.lineTo(-20,-17);});
  }else if(form===1){
   // Flight harness follows the chest; brass fasteners distinguish it from fur.
@@ -20,7 +20,7 @@ export function drawMichiDetails(a,p,form){
   shape('#252238',()=>{c.moveTo(-13,-47);c.lineTo(-2,-40);c.lineTo(-12,-18);c.lineTo(-26,-25);c.lineTo(-20,-36);});
   shape('#494060',()=>{c.moveTo(4,-43);c.lineTo(14,-48);c.lineTo(21,-27);c.lineTo(10,-20);});
   stroke('#7eb6b5',1,()=>{c.moveTo(-15,-40);c.lineTo(-20,-27);c.moveTo(12,-40);c.lineTo(16,-28);});
-  for(let i=0;i<3;i++)stroke('#c8adcf',.75,()=>{const y=-37+i*5;c.moveTo(-15,y);c.lineTo(-12,y+2);c.lineTo(-16,y+3);});oval(-2,-42,4,4,'#e4d6ac');oval(0,-44,3,3,'#293c50');
+  for(let i=0;i<3;i++)stroke('#c8adcf',.75,()=>{const y=-37+i*5;c.moveTo(-15,y);c.lineTo(-12,y+2);c.lineTo(-16,y+3);});stroke('#cbb68e',1,()=>{c.moveTo(-23,-25);c.quadraticCurveTo(-1,-9,21,-25);});for(let i=0;i<4;i++){const x=-16+i*9;stroke('#ad9bbd',.8,()=>{c.moveTo(x,-27);c.lineTo(x+2,-24);c.lineTo(x+4,-27);});}oval(-2,-42,4,4,'#e4d6ac');oval(0,-44,3,3,'#293c50');
  }else{
   // Three small feline soul-lights follow the nine trailing ribbons.
   for(let i=0;i<3;i++){const phase=p.still?i*2:p.t*.025+i*2,x=Math.cos(phase)*(34+i*3),y=-65+Math.sin(phase)*15;

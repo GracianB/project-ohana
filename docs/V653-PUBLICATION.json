@@ -1,6 +1,6 @@
 {
   "release": "ohana-653",
-  "status": "candidate; not published",
+  "status": "integrated in consolidated ohana-655 via PR #488; no independent release",
   "productionVerified": false,
   "netlifyVerified": false
 }

@@ -1,3 +1,15 @@
+## ohana-656 · Michi, Kilo y Quimera renovados
+
+Incluye el jardín, las cinco formas y el móvil de V655. Nuevos planos y acciones en la llegada, Polilla, diez voces y barca; cuatro transformaciones diferenciadas, texto legible y salto de escena nativo. Kilo recibe pelo, vestuario, rostro, ukelele y atención visual renovados. Quimera estrena cuerpo orgánico, melena espectral, alas translúcidas, corazón luminoso y santuario, con efectos ajustados a la geometría real de daño. [Diseño](docs/MICHI-CINEMA-KILO-V656.md) · [Validación](docs/V656-VALIDATION.json) · [Publicación](docs/V656-PUBLICATION.json).
+
+## ohana-655 · Michi y controles para dos pulgares
+
+Incluye el jardín V654 completo y una revisión de las cinco formas: caras, ojos, pañuelos, alas y vestuario. Controles móviles repartidos en dos zonas, bajar accesible, salto amplio, poderes en su bandeja y Usar contextual. [Diseño](docs/MICHI-TOUCH-DESIGN-V655.md) · [Validación](docs/V655-VALIDATION.json) · [Publicación](docs/V655-PUBLICATION.json).
+
+## ohana-654 · Michi: el jardín que recuerda
+
+Rutas a distintas alturas, pozo de raíces, balcón de espejos, canal con puente cultivable, campana para calmar la fauna y viento para explorar las ramas. Tres recuerdos de la familia, un árbol de diez lazos y la Polilla rediseñada. Conserva la base de orientación, vuelo y móvil de V653. [Diseño](docs/MICHI-GARDEN-V654.md) · [Validación](docs/V654-VALIDATION.json) · [Publicación](docs/V654-PUBLICATION.json).
+
 ## ohana-653 · Michi, santuario orientativo y reactivo (candidato)
 
 Brújula vectorial cuando el objetivo real sale de cámara, arcos activos con luz de proximidad y rótulos ajustados al móvil. Sin nuevas colisiones ni ventajas artificiales. Pruebas de vuelo, render de siete zonas y caché offline verificable. Todavía sujeto al CI completo y publicación.
