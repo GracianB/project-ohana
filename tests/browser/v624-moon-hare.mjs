@@ -108,7 +108,7 @@ try{
   const ft=async n=>{await fly.evaluate(n=>window.__OHANA_E2E.step(n),n);await fly.clock.runFor(16);return fly.evaluate(()=>window.__OHANA_E2E.state());};
   for(let i=0;i<20;i++){if(!(await fly.evaluate(()=>window.__OHANA_E2E.state())).world1Cine)break;await fly.keyboard.press('Enter');await ft(100);}
   // The earned-campaign save is genuine; this isolated held-input flight probe
-   // uses collision-free air in the same real chapter, not a platform lip.
+   // uses a collision-free air gap above the ledge in the real chapter.
    for(let attempt=0;attempt<12;attempt++){
     if(await fly.locator('#evo-stage.show .evo-skip').count()){
      await fly.locator('#evo-stage.show .evo-skip').click();await ft(4);continue;
@@ -116,7 +116,7 @@ try{
     if(!(await fly.evaluate(()=>window.__OHANA_E2E.state().world1Cine)))break;
     await fly.keyboard.press('Enter');await ft(90);
    }
-   await fly.evaluate(()=>window.__OHANA_E2E.setPlayer(4360,700));
+   await fly.evaluate(()=>window.__OHANA_E2E.setPlayer(4360,900));
    await fly.locator('#game').focus();let a=await ft(2);
    assert.equal(a.evo,4);assert.equal(a.paused,false,'the test must not be paused');
    assert.equal(a.world1Cine,null,'entry films must finish before held-input flight');
