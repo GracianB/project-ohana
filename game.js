@@ -484,7 +484,9 @@ help.classList.toggle("open", open);
 function setPrompt(text, on) {
 const el = DOM.prompt;
 if (!el) return;
-if (!on) { el.classList.remove("show"); return; }
+// Expose mobile E only for actionable prompts, never for plain notices.
+ el.toggleAttribute('data-touch-interact',Boolean(on&&/(?:^\s*E\b|\/\s*E\b|\b(?:pulsa|presiona)\s+E\b)/i.test(String(text||''))));
+ if (!on) { el.classList.remove("show"); return; }
 setText(el, text);
 el.classList.add("show");
 }

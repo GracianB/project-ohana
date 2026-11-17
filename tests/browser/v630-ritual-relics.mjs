@@ -52,7 +52,7 @@ try{
   assert.equal(await page.locator('.fr-hero').count(),10);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await page.screenshot({path:`${dir}/hero-choice-${width}.png`});
   await activate(page.locator('.fr-choice-back'));assert.equal((await state()).gauntlet.phase,'gathering');assert.equal(await page.locator('#final-hero-choice').count(),0);
-  await page.locator('#game').focus();if(width<500){await tick(2);assert.equal(await page.locator('.touch-btn.interact').isVisible(),true,'earned ritual exposes contextual touch E');await page.locator('.touch-btn.interact').tap();}else await page.keyboard.press('e');
+  await page.locator('#game').focus();if(width<500){await tick(2);assert.equal(await page.locator('#prompt.show[data-touch-interact]').count(),1,'earned ritual must have a real E interaction prompt');assert.equal(await page.locator('.touch-btn.interact').isVisible(),true,'earned ritual exposes contextual touch E');await page.locator('.touch-btn.interact').tap();}else await page.keyboard.press('e');
   try{await page.locator('#final-hero-choice').waitFor({state:'visible'});}catch(error){
    console.log('RITUAL_REOPEN_FAILURE',JSON.stringify({width,state:await state(),overlays:await page.evaluate(()=>({classes:document.body.className,open:[...document.querySelectorAll('#map-overlay.open,#help.open,#pause-overlay.open,#evo-stage.show')].map(e=>e.id),focus:document.activeElement?.id}))}));
    await page.screenshot({path:`${dir}/reopen-failure-${width}.png`});throw error;

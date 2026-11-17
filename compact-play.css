@@ -11,7 +11,7 @@ body.compact-play.playing #prompt{bottom:105px;font-size:12px;max-width:min(580p
 
 body.compact-play.playing.world1-story #play-options,body.compact-play.playing:has(#final-hero-choice) #play-options{visibility:hidden}
 /* E is a primary action beside the main buttons, never hidden in collapsed powers. */
-body.compact-play.playing #touch .col.act>.interact{display:none}body.compact-play.playing:has(#prompt.show) #touch .col.act>.interact{display:grid;align-self:flex-end;flex:0 0 auto;min-width:48px;min-height:44px;border-radius:12px}
+body.compact-play.playing #touch .col.act>.interact{display:none}body.compact-play.playing:has(#prompt.show[data-touch-interact]) #touch .col.act>.interact{display:grid;align-self:flex-end;flex:0 0 auto;min-width:48px;min-height:44px;border-radius:12px}
 body.compact-play.playing #online-peer-badge{top:92px!important;left:16px!important;transform:none!important;font-size:9px!important;padding:5px 9px!important}
 body.compact-play.playing #ohana-coop-role{right:16px;bottom:108px;font-size:10px;max-width:210px;background:#102b3ccc}
 @media(max-width:640px){body.compact-play.playing #online-peer-badge{top:78px!important;left:10px!important;font-size:8px!important}body.compact-play.playing #ohana-coop-role{top:auto;bottom:166px;right:10px;max-width:175px;font-size:9px}}
