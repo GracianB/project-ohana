@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {michiFlightState,steerMichiFlight,MICHI_FAIRY_FLIGHT_FRAMES} from '../characters/michi-flight.js';
 
 test('earned final ghost sustains ascent, hover and controlled descent',()=>{
- const p={id:'cat',evo:4,health:100,hp:100,dead:false,grounded:false,vy:-8};
+ const p={id:'cat',evo:4,health:100,hp:100,dead:false,grounded:false,vy:-3};
  for(let i=0;i<100;i++)assert.equal(steerMichiFlight(p,{jump:true}),true);
  assert.equal(michiFlightState(p).mode,'ascend');
  assert.equal(michiFlightState(p).unlimited,true);
@@ -23,6 +23,8 @@ test('ghost transition requires physical airborne state, not a fake ground ascen
  assert.equal(steerMichiFlight(p,{jump:true}),false);
  assert.equal(michiFlightState(p).mode,'ground');
  p.grounded=false;p.vy=-9;
+ assert.equal(steerMichiFlight(p,{jump:true}),false,'ordinary takeoff impulse owns the first fast ascent');
+ p.vy=-3;
  assert.equal(steerMichiFlight(p,{jump:true}),true);
  assert.equal(michiFlightState(p).mode,'ascend');
 });

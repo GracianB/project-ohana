@@ -84,7 +84,7 @@ test('earned farols illuminate their actual position without adding invisible of
  assert.equal(light.depth(),0);
 });
 
-test('Michi focus marker tracks the earned objective, culls offscreen and stays still in reduced motion',()=>{
+test('Michi focus marker projects earned offscreen goals and stays still in reduced motion',()=>{
  const g=fakeGame(6,true,0),a=recorder(),b=recorder(),outside=recorder();
  assert.equal(drawSanctuaryWayfinding(a.ctx,g,g.cam,0,1280,720),true);
  assert.equal(drawSanctuaryWayfinding(b.ctx,g,g.cam,400,1280,720),true);

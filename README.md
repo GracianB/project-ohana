@@ -1,4 +1,4 @@
-## OHANA 653 · Michi, santuario orientativo y reactivo (candidato)
+## ohana-653 · Michi, santuario orientativo y reactivo (candidato)
 
 Brújula vectorial cuando el objetivo real sale de cámara, arcos activos con luz de proximidad y rótulos ajustados al móvil. Sin nuevas colisiones ni ventajas artificiales. Pruebas de vuelo, render de siete zonas y caché offline verificable. Todavía sujeto al CI completo y publicación.
 
