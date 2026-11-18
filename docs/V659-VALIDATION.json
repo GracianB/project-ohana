@@ -1,0 +1,57 @@
+{
+  "release": "ohana-659",
+  "status": "local acceptance passed",
+  "unitTests": {
+    "passed": 1978,
+    "failed": 0
+  },
+  "releaseGate": {
+    "runtimeModules": 427,
+    "resources": 498
+  },
+  "energy": {
+    "rows": [
+      {
+        "kind": "bolt",
+        "solidRatio": 0.07739392053117543,
+        "animates": true,
+        "reduced": true,
+        "pure": true,
+        "outside": 0
+      },
+      {
+        "kind": "geyser",
+        "solidRatio": 0.3602941176470588,
+        "animates": true,
+        "reduced": true,
+        "pure": true,
+        "outside": 0
+      },
+      {
+        "kind": "beam",
+        "solidRatio": 0.11223958333333334,
+        "animates": true,
+        "reduced": true,
+        "pure": true,
+        "outside": 0
+      }
+    ],
+    "errors": []
+  },
+  "arenaAcceptance": "All four phases, ten warning/attack pairs, desktop/mobile framing and collision geometry passed. Synthetic final access and boss HP fixtures; not an earned campaign victory.",
+  "changes": [
+    "remove rectangular fills and frames from energy columns and warning lanes",
+    "branched lightning with discharge sparks",
+    "separated fluid geyser tongues and droplets",
+    "interleaving turbulent sweeps with vortex knots",
+    "public studio can play all three phase specials"
+  ],
+  "combat": "Existing damage, timing, velocities and collision bounds retained",
+  "actionsBudget": "single squash with skip ci and one manual Pages dispatch",
+  "publicCandidateAcceptance": {
+    "runtimeFilesMatched": 55,
+    "studioActualLightningGeyserAndSpecialSweep": true,
+    "noRuntimeErrors": true,
+    "twoPlayerAdventureAndVersus": true
+  }
+}
