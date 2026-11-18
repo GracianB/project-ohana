@@ -77,20 +77,21 @@ test('earned farols illuminate their actual position without adding invisible of
  g.world1.stations[0].done=true;
  drawMichiLivingBackdrop(light.ctx,g,g.cam,20,1280,720);
  const radials=x=>x.operations.filter(op=>op[0]==='radial').length;
- assert.equal(radials(light),radials(dark)+1,'a real farol should cast a localized radial glow');
+ assert.ok(radials(light)>radials(dark),'earned light warms the real farol and family landmark');
  g.world1.stations[0].x=7000;
  drawMichiLivingBackdrop(offscreen.ctx,g,g.cam,20,1280,720);
- assert.equal(radials(offscreen),radials(dark),'offscreen farols are culled');
+ assert.equal(radials(light),radials(offscreen)+1,'offscreen farols are culled while the earned landmark remains warm');
  assert.equal(light.depth(),0);
 });
 
-test('Michi focus marker tracks the earned objective, culls offscreen and stays still in reduced motion',()=>{
+test('Michi focus marker projects earned offscreen goals and stays still in reduced motion',()=>{
  const g=fakeGame(6,true,0),a=recorder(),b=recorder(),outside=recorder();
  assert.equal(drawSanctuaryWayfinding(a.ctx,g,g.cam,0,1280,720),true);
  assert.equal(drawSanctuaryWayfinding(b.ctx,g,g.cam,400,1280,720),true);
  assert.deepEqual(a.operations,b.operations);
  assert.ok(a.operations.some(op=>op[0]==='radial'),'earned destination has a legible glow');
- assert.equal(drawSanctuaryWayfinding(outside.ctx,g,{x:0,y:0},0,1280,720),false);
- assert.equal(outside.operations.length,0,'no marker or painter work offscreen');
+ assert.equal(drawSanctuaryWayfinding(outside.ctx,g,{x:0,y:0},0,1280,720),true);
+ assert.ok(outside.operations.some(op=>op[0]==='translate'),'offscreen pointer must be projected to a safe edge');
+ assert.equal(outside.depth(),0,'Canvas state remains balanced');
  assert.equal(a.depth(),0);
 });

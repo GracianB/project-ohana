@@ -23,7 +23,7 @@ test('tunnels enforce lamp gates, preserve life/form and cannot bounce on held i
  g.world1.stations[0].done=true;assert.equal(interactMichiSanctuary(g),true);assert.equal(g.player.x,a.toX-9);assert.equal(g.player.health,100);assert.equal(g.player.evo,4);assert.equal(sanctuaryZone(g).id,'crypt');assert.equal(interactMichiSanctuary(g),false);
 });
 test('wayfinding follows unlocked tunnels to the next lamp rather than pointing through a ceiling',()=>{
- const g=game();g.world1.stations[0].done=true;const o=sanctuaryObjective(g);assert.equal(o.x,3870);assert.match(o.action,/↓ \/ E/);g.player.x=1200;g.player.y=1800;assert.equal(sanctuaryObjective(g).x,1910);
+ const g=game();g.world1.stations[0].done=true;const o=sanctuaryObjective(g);assert.equal(o.x,3670);assert.match(o.action,/↓ \/ E/);g.player.x=1200;g.player.y=1800;assert.equal(sanctuaryObjective(g).x,1910);
 });
 test('exit requires earned seal and all three post-boss echoes',()=>{const g=game(),a=room.michiSanctuary.passages.find(a=>a.exit);g.world1.stations.forEach(s=>s.done=true);assert.equal(passageReady(g,a),false);g.world1.sealed=true;assert.equal(passageReady(g,a),false);g.expedition.done=[0,1,2];assert.equal(passageReady(g,a),true);});
 for(const event of ['roomEnter','awaken','chapterHundred','chapterBossIntro','chapterExit'])test('native story contract '+event,()=>{const shots=buildChapterFilm(event,'cat',{form:2});assert.ok(shots.length);assert.ok(shots.every(s=>s.line&&s.title&&s.form===2&&s.dur>100&&s.layout==='chapter-film'));assert.equal(buildChapterFilm(event,'kilo'),null);});

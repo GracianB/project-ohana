@@ -18,7 +18,12 @@ export function steerMichiFlight(p,input={}){
  else if(input.drop)p._michiTakeoff=0;
  if(p.grounded){p._michiWingFuel=MICHI_FAIRY_FLIGHT_FRAMES;p._michiWingMax=MICHI_FAIRY_FLIGHT_FRAMES;p._michiWingAir=false;p._michiWingMode='ground';p._gliding=false;return false;}
  // Keep the ordinary takeoff impulse before the wings assume control.
- if(!p._michiWingAir&&(!input.jump||p.vy< -3.6))return false;
+ if(!p._michiWingAir&&(!input.jump||p.vy< -3.6)){
+  // The normal jump impulse still owns takeoff. Report it accurately rather
+  // than claiming the ghost is grounded while it is physically ascending.
+  if(input.jump&&p.vy< -3.6)p._michiWingMode='takeoff';
+  return false;
+ }
  p._michiWingAir=true;p._gliding=true;
  const unlimited=p.evo===4;
  if(input.drop){p._michiWingMode='descend';p.vy=Math.max(4.5,p.vy);}

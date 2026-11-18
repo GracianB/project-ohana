@@ -107,11 +107,27 @@ try{
   await fly.evaluate(()=>{localStorage.removeItem('ohana-resume');window.__OHANA_E2E.startWorld1('cat');});
   const ft=async n=>{await fly.evaluate(n=>window.__OHANA_E2E.step(n),n);await fly.clock.runFor(16);return fly.evaluate(()=>window.__OHANA_E2E.state());};
   for(let i=0;i<20;i++){if(!(await fly.evaluate(()=>window.__OHANA_E2E.state())).world1Cine)break;await fly.keyboard.press('Enter');await ft(100);}
-  await fly.locator('#game').focus();let a=await ft(12);assert.equal(a.evo,4);const from=a.player.y;
+  // The earned-campaign save is genuine; this isolated held-input flight probe
+   // uses a collision-free air gap above the ledge in the real chapter.
+   for(let attempt=0;attempt<12;attempt++){
+    if(await fly.locator('#evo-stage.show .evo-skip').count()){
+     await fly.locator('#evo-stage.show .evo-skip').click();await ft(4);continue;
+    }
+    if(!(await fly.evaluate(()=>window.__OHANA_E2E.state().world1Cine)))break;
+    await fly.keyboard.press('Enter');await ft(90);
+   }
+   await fly.evaluate(()=>window.__OHANA_E2E.setPlayer(4360,900));
+   await fly.locator('#game').focus();let a=await ft(2);
+   assert.equal(a.evo,4);assert.equal(a.paused,false,'the test must not be paused');
+   assert.equal(a.world1Cine,null,'entry films must finish before held-input flight');
+   assert.equal(a.player.grounded,false,'flight probe starts free of physical obstacles');
+   const from=a.player.y;
   let session;
   if(mobile){const box=await fly.locator('.touch-btn.jump').boundingBox();assert.ok(box);session=await context.newCDPSession(fly);await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:box.x+box.width/2,y:box.y+box.height/2}]});}
   else await fly.keyboard.down('w');
-  a=await ft(12);assert.equal(a.michiFlight.mode,'ascend',JSON.stringify({input:mobile?'touch':'keyboard',player:a.player,flight:a.michiFlight}));
+  a=await ft(12);
+   assert.ok(a.player.y<from-30&&a.player.vy<0,'real jump must gain altitude before wings take over');
+   assert.ok(['takeoff','ascend'].includes(a.michiFlight.mode),JSON.stringify({input:mobile?'touch':'keyboard',paused:a.paused,cinematic:a.world1Cine,player:a.player,flight:a.michiFlight}));
   a=await ft(88);assert.equal(a.michiFlight.mode,'ascend',JSON.stringify({input:mobile?'touch':'keyboard',player:a.player,flight:a.michiFlight}));assert.equal(a.michiFlight.unlimited,true);assert.ok(a.player.y<from-200);const ascentY=a.player.y;
   const notice=await fly.locator('#notification-container').boundingBox();const screenFoot=(a.player.y+a.player.h-a.camera.y)*1.02-(mobile?844:900)*.01;
   if(notice)assert.ok(screenFoot-145>notice.y+notice.height,'flight camera must keep the visible hero below the objective notice');

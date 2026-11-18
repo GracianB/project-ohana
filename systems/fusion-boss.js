@@ -376,6 +376,13 @@ export function drawFusionProjectiles(ctx,b,cam,t=0,reduce=false){
   ctx.beginPath();ctx.ellipse(x,y,box.w/2,box.h/2,0,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle='#12192b';ctx.lineWidth=2;ctx.stroke();
   ctx.save();ctx.beginPath();ctx.ellipse(x,y,Math.max(1,box.w/2-1),Math.max(1,box.h/2-1),0,0,Math.PI*2);ctx.clip();
+  // Layered facets stay clipped inside the actual collision silhouette.
+  const spin=reduce?0:(s.age||0)*.045;
+  ctx.globalAlpha=.26;ctx.fillStyle='#17233e';
+  ctx.beginPath();ctx.ellipse(x+s.r*.34,y+s.r*.32,s.r*.85,s.r*.78,spin,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=.65;ctx.strokeStyle='#fff7dc';ctx.lineWidth=1;
+  ctx.beginPath();ctx.ellipse(x-s.r*.13,y-s.r*.14,s.r*.75,s.r*.67,0,Math.PI*1.1,Math.PI*1.8);ctx.stroke();
+  ctx.globalAlpha=1;
   ctx.fillStyle='#fff0d4';ctx.strokeStyle='#fff0d4';ctx.lineWidth=2;
   if(s.k==='ring'||s.k==='wave'){
    ctx.beginPath();ctx.arc(x,y,s.r*.65,0,Math.PI*2);ctx.stroke();
@@ -385,9 +392,12 @@ export function drawFusionProjectiles(ctx,b,cam,t=0,reduce=false){
    for(let i=0;i<5;i++){const a=spin+i*Math.PI*2/5;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*s.r,y+Math.sin(a)*s.r);ctx.stroke();}
   }else if(s.k==='jelly'){
    ctx.fillStyle='#27304f';ctx.fillRect(x-s.r,y+2,s.r*2,s.r);
-   for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(x+i*6,y+3);ctx.lineTo(x+i*6,y+s.r);ctx.stroke();}
+   for(let i=-1;i<=1;i++){const sway=reduce?0:Math.sin((s.age||0)*.1+i)*3;ctx.beginPath();ctx.moveTo(x+i*6,y+3);ctx.quadraticCurveTo(x+i*6+sway,y+s.r*.6,x+i*6-sway,y+s.r);ctx.stroke();}
+   ctx.fillStyle='#fff8dc';for(const side of [-1,1]){ctx.beginPath();ctx.ellipse(x+side*6,y-4,2,3,0,0,Math.PI*2);ctx.fill();}
   }else if(s.k==='node'){
-   ctx.strokeRect(x-7,y-7,14,14);
+   ctx.save();ctx.translate(x,y);ctx.rotate(reduce?Math.PI/4:Math.PI/4+Math.sin((s.age||0)*.04)*.16);
+   ctx.strokeRect(-8,-8,16,16);ctx.strokeRect(-3,-3,6,6);ctx.restore();
+   for(let i=0;i<4;i++){const a=i*Math.PI/2;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*11,y+Math.sin(a)*11);ctx.lineTo(x+Math.cos(a)*s.r,y+Math.sin(a)*s.r);ctx.stroke();}
   }else if(s.k==='echo'){
    ctx.beginPath();ctx.moveTo(x-18,y-18);ctx.lineTo(x+18,y);ctx.lineTo(x-18,y+18);ctx.closePath();ctx.stroke();
   }else{

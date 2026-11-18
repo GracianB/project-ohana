@@ -32,23 +32,40 @@ export function drawKiloVirtuoso(c,p,f,d,r){
 
 // Sewn panels follow the same torso/hip transforms as the articulated dress.
 function drawKiloCouture(c,p,f,d,r){
- const sy=-d.ll-d.th,hip=-d.ll,x=(r.hipX||0)*.4-.5,shift=-(p.sway||0)*3+(r.skirt||0)*3,t=p.reduceMotion?0:Number(p.t)||0;
- const palettes=[['#fff4e2','#d77f9e'],['#fff2c9','#ed8b8e'],['#d5f1ae','#3f8c83'],['#ffe3a0','#508d91'],['#fff5c7','#cf9d4e']], [light,trim]=palettes[f];
- const line=(color,w,fn)=>{c.beginPath();fn();c.strokeStyle=color;c.lineWidth=w;c.stroke();};
+ const sy=-d.ll-d.th,hip=-d.ll,x=(r.hipX||0)*.4-.5,shift=-(p.sway||0)*3+(r.hipX||0)*.6+(r.skirt||0)*3;
+ const hem=hip+d.ll*(f===4?.55:f>=3?.45:f===0?.35:.32)-(r.hemLift||0),top=f===0?10:8,w=(f===0?14:13+f*.8)+(r.flare||0)*7;
+ const palettes=[['#f6d6d0','#c88699','#fff1d9'],['#cf736e','#f7dbb9','#fff3d9'],['#5f9a88','#b9d9b0','#f2e2b9'],['#703c56','#d0a976','#e5d9b1'],['#dce8d2','#c7ae75','#fff5d4']], [fabric,trim,light]=palettes[f];
+ const line=(col,weight,fn)=>{c.strokeStyle=col;c.lineWidth=weight;c.beginPath();fn();c.stroke();};
+ const bead=(xx,yy,rx,ry,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(xx,yy,rx,ry,0,0,Math.PI*2);c.fill();};
+ c.save();
+ // Clip woven panels to the moving garment, including the actual raised hem.
+ c.beginPath();c.moveTo(x-top,sy);c.quadraticCurveTo(x-top-2,sy+(hem-sy)*.4,x-w+shift,hem);c.quadraticCurveTo(x+shift,hem+3+(r.flare||0),x+w+shift,hem);c.quadraticCurveTo(x+top+2,sy+(hem-sy)*.4,x+top,sy);c.closePath();c.clip();
  if(f===0){
-  // Tiny stitched pocket and a sleeping seed on the baby's romper.
-  c.fillStyle='#ffe8dc';c.beginPath();c.moveTo(x-9,sy+7);c.lineTo(x-2,sy+7);c.lineTo(x-2,sy+13);c.quadraticCurveTo(x-6,sy+17,x-9,sy+12);c.fill();
-  line(trim,.65,()=>{c.moveTo(x-8,sy+8);c.lineTo(x-8,sy+12);c.lineTo(x-5,sy+14);c.lineTo(x-3,sy+12);});return;
+  c.fillStyle='#ffe5d4';c.beginPath();c.moveTo(x-7,sy+7);c.lineTo(x,sy+7);c.lineTo(x,sy+14);c.quadraticCurveTo(x-4,sy+17,x-7,sy+13);c.fill();
+  line(trim,.65,()=>{c.moveTo(x-6,sy+8);c.lineTo(x-6,sy+13);c.quadraticCurveTo(x-3,sy+15,x-1,sy+12);});
+  for(let j=0;j<3;j++)bead(x+4,sy+5+j*4,.7,.8,light);
+ }else{
+  // Form-specific cuts: bias silk, leaf-weave, ceremonial brocade and pearl petals.
+  const count=f===4?5:f===1?3:4;
+  for(let j=0;j<count;j++){
+   const k=j/(count-1),xx=x+(k-.5)*w*1.65,tip=xx+shift*(.5+k*.5);
+   c.fillStyle=j%2?fabric:trim;c.globalAlpha=f===4?.72:.34;c.beginPath();c.moveTo(x+(k-.5)*top,sy+d.th*.22);c.bezierCurveTo(xx*.65+x*.35,hip-5,tip-3,hem-7,tip,hem+2);c.quadraticCurveTo(tip+4,hem-2,tip+6,hem-9);c.quadraticCurveTo(xx+5,hip-3,x+(k-.5)*top+3,sy+d.th*.22);c.fill();
+   c.globalAlpha=1;line(f===4?light:trim,.65,()=>{c.moveTo(x+(k-.5)*top,sy+d.th*.25);c.quadraticCurveTo(xx+1,hip,tip,hem-3);});
+  }
+  const waist=sy+d.th*.57;c.fillStyle=fabric;c.fillRect(x-w,waist-1,w*2,3.3);
+  line(light,.9,()=>{c.moveTo(x-w,waist);c.quadraticCurveTo(x,waist+2,x+w,waist);});
+  for(let j=0;j<7;j++){
+   const xx=x-w*.72+j*w*.24+shift*.7,yy=hem-4-Math.sin(j*.55)*1.2;
+   line(trim,.8,()=>{c.moveTo(xx-1.6,yy);c.quadraticCurveTo(xx,yy-4,xx+1.6,yy);c.quadraticCurveTo(xx,yy+2,xx-1.6,yy);});
+   if(f>=3)bead(xx,yy-3,.65,1,light);
+  }
+  if(f===2||f===3){
+   for(let j=0;j<4;j++){const yy=sy+d.th*.3+j*3.1;line(light,.6,()=>{c.moveTo(x-3,yy);c.lineTo(x,yy-1.6);c.lineTo(x+3,yy);c.lineTo(x,yy+1.6);c.closePath();});}
+  }
+  if(f===4){for(let j=0;j<5;j++)bead(x+(j-2)*3.2,sy+5+Math.abs(j-2)*.8,1.2,2.2,j%2?trim:light);}
  }
- // Distinct bolero, woven yoke, ceremonial embroidery and solar pleats.
- if(f===1){c.fillStyle='#f5d6b1';for(const side of[-1,1]){c.beginPath();c.moveTo(x+side*7,sy+2);c.quadraticCurveTo(x+side*16,sy-1,x+side*13,sy+11);c.lineTo(x+side*8,sy+7);c.fill();}}
- const hem=hip+d.ll*(f===4?.55:f===3?.45:.32),w=11+f;
- for(let i=0;i<7;i++){const k=i/6,xx=x+(k-.5)*w*2+shift*k,wave=p.reduceMotion?0:Math.sin(t*.075+i*.8)*(f===4?1.6:.8);
-  line(i%2?trim:light,f===4?1.2:.9,()=>{c.moveTo(xx*.7+x*.3,sy+d.th*.62);c.quadraticCurveTo(xx+wave,hip,xx+wave,hem-2);});
-  if(f>=3){c.fillStyle=light;c.beginPath();c.moveTo(xx,hem-6);c.lineTo(xx+1.5,hem-3);c.lineTo(xx,hem);c.lineTo(xx-1.5,hem-3);c.fill();}
- }
- line(light,1.4,()=>{c.moveTo(x-8,sy+5);c.quadraticCurveTo(x,sy+14,x+8,sy+5);});
- // Musical beadwork forms a narrow stitched border, never a body-sized aura.
- for(let i=0;i<5;i++){const xx=x-7+i*3.5,y=sy+d.th*.58+Math.abs(i-2)*.45;c.fillStyle=i%2?trim:light;c.beginPath();c.ellipse(xx,y,1.1,1.8,0,0,Math.PI*2);c.fill();}
- if(f===4){for(const side of[-1,1])line('#fff8e1',1,()=>{c.moveTo(x+side*8,sy+5);c.bezierCurveTo(x+side*19,sy+15,x+side*17,hip+8,x+side*12,hem+3);});}
+ c.restore();
+ // The yoke and clasp sit above the stitched fabric, still on the original torso.
+ line(light,1,()=>{c.moveTo(x-7,sy+3);c.quadraticCurveTo(x,sy+12,x+7,sy+3);});
+ if(f>0){bead(x,sy+9,2,2.7,trim);bead(x,sy+8.4,.7,1,light);}
 }

@@ -1,3 +1,4 @@
+import {drawQuimeraSanctum} from './quimera-regalia.js';
 // OHANA V467 · MUNDO 1 · Dirección del jefe final (Quimera Ohana).
 // El cuerpo, las fases y los diez ataques viven en systems/fusion-boss.js. Este
 // módulo es la CAPA DE DIRECCIÓN encima: hace la pelea cinematográfica, legible
@@ -97,7 +98,8 @@ export function drawWorld1BossBackdrop(ctx, g, cam, t = 0) {
   // Paralaje 0.6: el centro de la arena queda centrado cuando la cámara llega a ella.
   const sx = (WORLD1_ARENA.left + WORLD1_ARENA.right) / 2 * 0.6 + num(g?.viewW, 1600) * 0.2 - num(cam?.x) * 0.6, cy = 520 - num(cam?.y) * 0.4;
   const d = g.world1Boss, phase = num(e?.phase, 1), rot = (g.reduceMotion ? 0 : num(t) * 0.002);
-  ctx.save(); ctx.globalAlpha = 0.14 + phase * 0.03;
+  drawQuimeraSanctum(ctx,{x:sx,y:cy,phase,time:t,freed:!!d?.defeat,reduce:!!g.reduceMotion});
+  ctx.save(); ctx.globalAlpha = 0.08 + phase * 0.02;
   ctx.fillStyle = "#2a0f2e"; ctx.beginPath(); ctx.ellipse(sx, cy, 640, 420, 0, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = "#ff7ad0"; ctx.lineWidth = 6; ctx.setLineDash([18, 14]); ctx.beginPath();
   FRAME.forEach((f, i) => { const a = rot; const x = sx + f.dx * Math.cos(a) - f.dy * Math.sin(a), y = cy + f.dx * Math.sin(a) + f.dy * Math.cos(a); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);

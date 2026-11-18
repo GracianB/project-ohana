@@ -107,6 +107,7 @@ export function world1CinePresentation(g) {
     canAdvance: c.t >= 20&&!(last&&g._coopFinalWaiting),
     button: last&&g._coopFinalWaiting?'Esperando al compañero':reading ? "Mostrar texto" : last && c.id !== "bossDefeat" ? "Volver al juego" : "Continuar"};
 }
+export function skipMichiChapterFilm(g){const c=g?.world1Cine;if(c?.hero!=='cat'||c.shots?.[c.i]?.layout!=='chapter-film'||!world1CinePresentation(g)?.canAdvance)return false;endScene(g);return true;}
 export function skipWorld1Cine(g) {
   const c = g?.world1Cine, view = world1CinePresentation(g);
   if (!view?.canAdvance) return false;
@@ -124,6 +125,8 @@ export function syncWorld1CineControls(g, doc = globalThis.document, visible = t
   const view = g.running ? world1CinePresentation(g) : null;
   const active = !!view;
   if (doc.body.classList.contains("world1-story") !== active) doc.body.classList.toggle("world1-story", active);
+  doc.body.classList.toggle('michi-story',active&&g.world1Cine?.hero==='cat'&&g.world1Cine?.shots[g.world1Cine.i]?.layout==='chapter-film');
+  const skip=root.querySelector('#world1-cine-skip');if(skip){skip.hidden=!doc.body.classList.contains('michi-story');skip.setAttribute('aria-disabled',String(!view?.canAdvance));}
   const show = active && visible, wasHidden = root.hidden, ownedFocus = root.contains(doc.activeElement);
   root.hidden = !show;
   if (!show) {

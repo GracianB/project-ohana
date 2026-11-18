@@ -1350,7 +1350,22 @@ try {
     await mobilePage.locator('.touch-btn[data-k="u"]').tap();
     await mobilePage.waitForFunction(()=>window.__OHANA_E2E.state().lastAbilitySlot===3,null,{timeout:2500});
   }
-  assert.equal(await mobilePage.locator('.touch-btn[data-k="e"]').isVisible(),false,'interaction stays contextual when no prompt is active');
+  // The last baby may be standing beside a real interaction marker; checking
+  // E blindly as 'always hidden' would reject a correctly actionable prompt.
+  // Verify both directions: real E prompts reveal it, and informational
+  // prompts never do. The marker check is synchronous to avoid RAF races.
+  const interaction=await mobilePage.evaluate(()=>{
+    const el=document.querySelector('.touch-btn[data-k="e"]'),prompt=document.querySelector('#prompt');
+    const marker=!!prompt?.hasAttribute('data-touch-interact'),active=!!prompt?.classList.contains('show');
+    const shown=getComputedStyle(el).display!=='none';
+    prompt?.removeAttribute('data-touch-interact');
+    const hiddenWithoutAction=getComputedStyle(el).display==='none';
+    if(marker)prompt.setAttribute('data-touch-interact','');
+    return{marker,active,shown,hiddenWithoutAction,promptText:prompt?.textContent?.trim().slice(0,80),body:document.body.className};
+  });
+  assert.equal(interaction.shown,interaction.active&&interaction.marker,'touch E visibility must follow actionable prompt: '+JSON.stringify(interaction));
+  assert.equal(interaction.hiddenWithoutAction,true,'touch E must remain hidden for non-actionable notices: '+JSON.stringify(interaction));
+  assert.equal(await mobilePage.locator('.touch-btn[data-k="e"]').isVisible(),interaction.shown,'Playwright-visible touch E must match real contextual action');
   await mobilePage.locator('.touch-btn[data-k="j"]').tap();
   await mobile.close();
 

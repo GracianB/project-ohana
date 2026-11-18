@@ -1,3 +1,21 @@
+## ohana-656 · Michi, Kilo y Quimera renovados
+
+Incluye el jardín, las cinco formas y el móvil de V655. Nuevos planos y acciones en la llegada, Polilla, diez voces y barca; cuatro transformaciones diferenciadas, texto legible y salto de escena nativo. Kilo recibe pelo, vestuario, rostro, ukelele y atención visual renovados. Quimera estrena cuerpo orgánico, melena espectral, alas translúcidas, corazón luminoso y santuario, con efectos ajustados a la geometría real de daño. [Diseño](docs/MICHI-CINEMA-KILO-V656.md) · [Validación](docs/V656-VALIDATION.json) · [Publicación](docs/V656-PUBLICATION.json).
+
+## ohana-655 · Michi y controles para dos pulgares
+
+Incluye el jardín V654 completo y una revisión de las cinco formas: caras, ojos, pañuelos, alas y vestuario. Controles móviles repartidos en dos zonas, bajar accesible, salto amplio, poderes en su bandeja y Usar contextual. [Diseño](docs/MICHI-TOUCH-DESIGN-V655.md) · [Validación](docs/V655-VALIDATION.json) · [Publicación](docs/V655-PUBLICATION.json).
+
+## ohana-654 · Michi: el jardín que recuerda
+
+Rutas a distintas alturas, pozo de raíces, balcón de espejos, canal con puente cultivable, campana para calmar la fauna y viento para explorar las ramas. Tres recuerdos de la familia, un árbol de diez lazos y la Polilla rediseñada. Conserva la base de orientación, vuelo y móvil de V653. [Diseño](docs/MICHI-GARDEN-V654.md) · [Validación](docs/V654-VALIDATION.json) · [Publicación](docs/V654-PUBLICATION.json).
+
+## ohana-653 · Michi, santuario orientativo y reactivo (candidato)
+
+Brújula vectorial cuando el objetivo real sale de cámara, arcos activos con luz de proximidad y rótulos ajustados al móvil. Sin nuevas colisiones ni ventajas artificiales. Pruebas de vuelo, render de siete zonas y caché offline verificable. Todavía sujeto al CI completo y publicación.
+
+[Diseño](docs/MICHI-INTERACTION-V653.md) · [Validación](docs/V653-VALIDATION.json) · [Publicación](docs/V653-PUBLICATION.json).
+
 ## ohana-652 · Michi: escenario vivo por capas
 
 Arquitectura, raíces, vidrieras, agua y vegetación dibujadas con Canvas. Sin panoramas planos: profundidad por parallax, cristales que se abren con los faroles ganados y plantas que responden al paso de Michi. [Validación](docs/V652-VALIDATION.json) · [Publicación](docs/V652-PUBLICATION.json).
@@ -33,7 +51,7 @@ Aventura individual de **10 personajes**, **50 formas** y **10 salas** propias, 
 - **Controles:** teclado y botones táctiles, música y movimiento suave configurables. Los datos se guardan en el navegador del jugador.
 - **Multijugador:** Aventura y Versus disponibles desde el [vestíbulo de Netlify](https://project-ohana-multiplayer.netlify.app/multiplayer). Servicio reactivado; Aventura y Versus comprobados entre dos navegadores con vistas de escritorio y móvil. La prueba con dispositivos físicos sigue pendiente.
 
-Registro de entrega: `ohana-650` / nuevo escenario pictórico de Michi: jardín nocturno, cripta de raíces, vidrieras, terrazas suspendidas y muelle. [Validación](docs/V650-VALIDATION.json) · [Publicación](docs/V650-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
+Estado anterior en main: ohana-652 desplegada en GitHub Pages; la suite quality y la comprobación pública definitiva siguen pendientes. Jardín nocturno, cripta de raíces, vidrieras, terrazas suspendidas y muelle. [Validación](docs/V650-VALIDATION.json) · [Publicación](docs/V650-PUBLICATION.json) · [Reanudar mantenimiento](docs/HANDOFF-V1-SOLO.md). Aventura y Versus: [multijugador publicado](https://project-ohana-multiplayer.netlify.app/multiplayer).
 
 ## Historial de desarrollo
 

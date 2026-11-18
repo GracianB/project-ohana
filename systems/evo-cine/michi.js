@@ -1,3 +1,4 @@
+import {drawMichiMetamorphosis} from './michi-stage.js';
 // OHANA V461 · Michicornio's living metamorphosis, four seconds, four acts.
 // All 2D Canvas, deterministic per seed, accessible; no images, gradients or RNG.
 // Phase: listening → horn gathers light → jelly cocoon + bloom → living reveal.
@@ -82,15 +83,6 @@ function drawMotif(ctx,motif,w,h,cx,cy,K,t,k,pal,gentle){
  ctx.restore();
 }
 export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2,opts={}){
- const reduced=!!opts.reducedMotion,beat=michicornioEvoBeat(t,fromForm,toForm,reduced,opts.seed),now=beat.time,k=reduced?.65:clip(now/4),cx=w/2,foot=h*.76,K=h/300;
- ctx.save();ctx.fillStyle='#102c38';ctx.fillRect(0,0,w,h);ctx.fillStyle='#24434b';ctx.fillRect(0,foot,w,h-foot);ctx.fillStyle='#73978b';ctx.fillRect(0,foot,w,3*K);
- for(let i=0;i<5;i++){const x=w*(.16+i*.17);ctx.strokeStyle='#34525a';ctx.lineWidth=3*K;ctx.beginPath();ctx.moveTo(x,foot);ctx.lineTo(x,h*.34);ctx.quadraticCurveTo(x-16*K,h*.23,x+12*K,h*.19);ctx.stroke();ctx.fillStyle=i<toForm?'#e9dfbc':'#45636b';ctx.fillRect(x-6*K,h*.31,12*K,18*K);}
- const morph=now>=1.95,form=morph?toForm:fromForm,state=reduced?'idle':now<.9?'idle':now<1.95?'cast':now<2.9?(toForm===2?'glide':toForm===3?'run':'jump'):'victory';
- const lift=reduced?0:toForm===2&&morph?Math.sin(clip((now-1.95)/2)*Math.PI)*28*K:toForm===5&&morph?12*K:0;
- drawEvolutionActor(ctx,'cat',cx,foot-lift,2.25*K,form,now,{state,reducedMotion:reduced,seed:opts.seed});
- // Transformation is a small trail of released fireflies, rather than another eclipse.
- for(let i=0;i<22;i++){const a=i*2.399,r=(reduced?60:30+beat.charge*70+beat.bloom*45)*K;ctx.globalAlpha=.25+beat.charge*.35;const x=cx+Math.cos(a+(!reduced?now*.5:0))*r,y=foot-50*K+Math.sin(a)*r*.55;diamond(ctx,x,y,(i%3?1.5:2.4)*K,i%3?'#8dd7c6':'#e7a394');}
- ctx.globalAlpha=1;ctx.textAlign='center';ctx.fillStyle='#e9dfbc';ctx.font='700 '+Math.max(12,18*K)+'px sans-serif';ctx.fillText(FORM_NAMES[toForm-1]||'Michi',cx,h*.13,w-24);ctx.fillStyle='#8dd7c6';ctx.font='600 '+Math.max(10,11*K)+'px sans-serif';ctx.fillText(['','Una chispa entre las raíces','El aire también es un camino','Pequeño. Negro. Imparable.','La magia aprende a escuchar','Nada puede encerrar un recuerdo'][toForm]||'',cx,h*.21,w-24);
- ctx.fillStyle='#a8c9bf';ctx.font='600 '+Math.max(10,10*K)+'px sans-serif';ctx.fillText('Forma '+fromForm+' → '+toForm,cx,h*.28,w-24);
- for(let i=0;i<5;i++)diamond(ctx,cx+(i-2)*20*K,h*.91,(i===toForm-1?5:3)*K,i<toForm?'#8dd7c6':'#45636b');ctx.restore();
+ const beat=michicornioEvoBeat(t,fromForm,toForm,!!opts.reducedMotion,opts.seed);
+ return drawMichiMetamorphosis(ctx,w,h,beat,FORM_NAMES);
 }

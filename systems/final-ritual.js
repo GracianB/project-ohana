@@ -6,6 +6,12 @@ export const FINAL_RESONANCE_KEY='ohana-final-resonances-v1';
 const PREFIX='w1-final-ritual-v630-';
 export const FINAL_QUIMERA_PORTAL=Object.freeze({x:6900,y:934,rx:108,ry:132,hero:'quimera'});
 export const FINAL_RITUAL_PORTALS=Object.freeze([...FINAL_PORTALS,FINAL_QUIMERA_PORTAL]);
+// The solo final ritual has its own earned ground resonances. The historic XP
+// crystal procession would overlap them and grant unrelated experience.
+// Other room orbs and the non-ritual multiplayer procession stay unchanged.
+export function ambientOrbsForRoom(room,ritualEnabled=false){
+ return room?.fusionBoss&&ritualEnabled?[]:(room?.orbs||[]);
+}
 const validHero=hero=>KEEPSAKE_ORDER.includes(hero);
 const permitted=g=>g?.roomId==='w1-final'&&g.finalRitualEnabled&&!g.onlineAdventure&&g.player&&!g.player.dead&&g.player.health>0&&KEEPSAKE_ORDER.every(h=>g.world1Seals?.includes(h));
 const storage=g=>g.finalResonanceStorage||g.keepsakeStorage||globalThis.localStorage;
@@ -42,6 +48,15 @@ export function chooseFinalFighter(g,hero){
  v.fighter=hero;v.phase='summoning';v.summonTicks=0;g.finalFighter=hero;
  g.onGauntletBeat?.('summon',v.hero);
  return true;
+}
+// Show E only when an earned ritual is actionable and not blocked by cinema.
+export function finalRitualInteractionPrompt(g){
+ const v=g?.finalGauntlet;
+ if(!permitted(g)||!v||v.phase!=='gathering'||g.world1Cine||g._pendingWorld1Cine)return null;
+ const portal=ritualPortal(v.hero),p=g.player;
+ if(!portal||Math.abs(p.x+p.w/2-portal.x)>=190)return null;
+ if(v.hero!=='quimera'&&(v.resonances?.[v.hero]?.length||0)!==3)return null;
+ return 'E · elige tu héroe e invoca al guardián';
 }
 export function interactFinalRitual(g){
  const v=g?.finalGauntlet;if(!permitted(g)||v?.phase!=='gathering')return false;

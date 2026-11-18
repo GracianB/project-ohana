@@ -1,3 +1,4 @@
+import {drawKiloHairBack,drawKiloHairFront} from '../kilo-hair.js';
 import {kiloVirtuosoRig,drawKiloVirtuoso} from '../kilo-virtuoso.js';
 // KILO · niña hawaiana (diseño original) · characters/art/lilo.js
 // pose.move === "float" (o state "glide"): falda en paracaídas, brazos abiertos.
@@ -101,6 +102,9 @@ function uke(ctx, R, x, y, ang, s, gold) {
   R.blob(ctx, [[s * 0.55, 0], [s * 0.45, -s * 0.33], [s * 0.2, -s * 0.38], [s * 0.04, -s * 0.3], [-s * 0.2, -s * 0.5], [-s * 0.55, -s * 0.42],
     [-s * 0.7, 0], [-s * 0.55, s * 0.42], [-s * 0.2, s * 0.5], [s * 0.04, s * 0.3], [s * 0.2, s * 0.38], [s * 0.45, s * 0.33]], body, { lw: R.LINE * 0.8 });
   R.ellipse(ctx, s * 0.12, 0, s * 0.14, s * 0.14, "#3a2014", { line: false, shade: false });
+  ctx.strokeStyle=gold?'#f5d997':'#f2ce98';ctx.lineWidth=s*.035;ctx.beginPath();ctx.arc(s*.12,0,s*.20,0,Math.PI*2);ctx.stroke();
+  ctx.strokeStyle='#9f6b4a';ctx.lineWidth=s*.018;for(let j=0;j<3;j++){ctx.beginPath();ctx.moveTo(-s*.48,-s*.25+j*s*.18);ctx.quadraticCurveTo(-s*.28,-s*.29+j*s*.18,-s*.1,-s*.19+j*s*.18);ctx.stroke();}
+  for(let j=0;j<5;j++){ctx.strokeStyle='#bc9470';ctx.lineWidth=s*.022;ctx.beginPath();ctx.moveTo(s*(.66+j*.15),-s*.08);ctx.lineTo(s*(.66+j*.15),s*.08);ctx.stroke();}
   ctx.fillStyle = R.darken(body, 0.45);
   ctx.fillRect(-s * 0.46, -s * 0.2, s * 0.08, s * 0.4);
   ctx.strokeStyle = "rgba(255,255,255,0.75)";
@@ -478,25 +482,7 @@ function solve(pose, d, f) {
   return r;
 }
 
-function ponytail(ctx, R, pose, f, hr, r) {
-  const t = pose.t;
-  if (f === 0) {
-    ctx.save();
-    ctx.translate(-hr * 0.05, -hr * 0.92);
-    ctx.rotate(Math.sin(t * 0.08) * 0.15 + pose.sway * 0.3 + (r.hairLag || 0) * 0.6);
-    R.tail(ctx, 0, 0, hr * 0.55, -1.7, (k) => 4.5 + pose.bounce, 5, 2.5, HAIR, { segments: 7 });
-    ctx.restore();
-    return;
-  }
-  const len=hr*[.55,1.9,2.5,3.1,3.7][f],bx=-hr*.63,by=-hr*.42;
-  const wind=pose.reduceMotion?0:Math.sin(t*.055)*3+(r.hairLag||0)*12;
-  ctx.save();ctx.fillStyle=HAIR;ctx.strokeStyle=R.INK;ctx.lineWidth=3;
-  ctx.beginPath();ctx.moveTo(bx+hr*.3,by-hr*.3);ctx.bezierCurveTo(bx-hr*.7,by-hr*.2,bx-hr*.8+wind,by+len*.5,bx-hr*.15+wind,by+len);
-  ctx.bezierCurveTo(bx+hr*.15+wind,by+len*.83,bx+hr*.43,by+len*.3,bx+hr*.3,by-hr*.3);ctx.fill();ctx.stroke();
-  ctx.strokeStyle=HAIR_HI;ctx.globalAlpha=.6;ctx.lineWidth=1.5;
-  for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(bx-2-i*3,by);ctx.bezierCurveTo(bx-hr*.4-i*2,by+len*.35,bx-hr*.3+wind,by+len*.7,bx+wind-i*2,by+len*(.83+i*.04));ctx.stroke();}
-  ctx.restore();
-}
+function ponytail(ctx,R,pose,f,hr,r){drawKiloHairBack(ctx,R,pose,f,hr,r);}
 
 function head(ctx, R, pose, f, hr, r) {
   const t = pose.t;
@@ -518,6 +504,7 @@ function head(ctx, R, pose, f, hr, r) {
   ctx.beginPath(); ctx.arc(-hr * 0.1, -hr * 0.05, hr * 0.78, -1.5, -1.25); ctx.stroke();
   ctx.restore();
 
+  drawKiloHairFront(ctx,R,pose,f,hr,r);
   const ex = hr * 0.12, ey = hr * 0.27;
   if (r.mood === "hurt" || r.mood === "dead") {
     ctx.strokeStyle = R.INK; ctx.lineWidth = hr * 0.08; ctx.lineCap = "round";
@@ -538,6 +525,12 @@ function head(ctx, R, pose, f, hr, r) {
     R.eye(ctx, ex, ey, hr * 0.29 * eb, pose, { iris: IRIS, mood: r.wink ? "happy" : mood, lash: true });
     R.eye(ctx, hr * 0.66, ey - hr * 0.02, hr * 0.24 * eb, pose, { iris: IRIS, mood });
   }
+  if(r.mood!=='hurt'&&r.mood!=='dead'){
+    ctx.save();ctx.strokeStyle='#654252';ctx.lineWidth=hr*.035;ctx.lineCap='round';
+    for(const xx of[ex,hr*.66]){ctx.beginPath();ctx.moveTo(xx-hr*.16,ey-hr*.35);ctx.quadraticCurveTo(xx,ey-hr*.44,xx+hr*.16,ey-hr*.35);ctx.stroke();}
+    ctx.fillStyle='#a46651';for(const side of[-1,1])for(let j=0;j<3;j++){ctx.beginPath();ctx.ellipse(hr*(side<0?-.02+j*.065:.72+j*.045),hr*(.48+(j%2)*.04),hr*.018,hr*.016,0,0,Math.PI*2);ctx.fill();}ctx.restore();
+  }
+  if(f>0){R.ellipse(ctx,-hr*.34,hr*.44,hr*.05,hr*.07,'#e6c494',{line:false,shade:false});}
   R.blush(ctx, -hr * 0.08, hr * 0.52, hr * 0.14);
   R.blush(ctx, hr * 0.84, hr * 0.5, hr * 0.09);
   ctx.strokeStyle = R.darken(SKIN, 0.35); ctx.lineWidth = 1.5;
@@ -963,8 +956,13 @@ function draw(ctx, pose, R) {
       r.flare += beat * .5; r.hairUp += beat * .25;
     }
   }
+  if(st==='idle'&&!pose.kiloPerformance&&!pose.kiloWelcome&&pose.kiloPresence?.attention>.2){
+    const attention=pose.kiloPresence.attention;r.headRot+=(pose.kiloPresence.lookY||0)*.04*attention;r.lean+=(pose.kiloPresence.lookX||0)*.025*attention;
+    if(pose.kiloPresence.kind==='friend'){r.mood='happy';r.mouth='smile';}
+    else if(pose.kiloPresence.kind==='listen'){r.mood='normal';r.mouth='o';r.hairLag+=attention*.035;}
+  }
   const virtuoso=kiloVirtuosoRig(pose,f);
-  if(virtuoso.active&&!dead){r.lean+=virtuoso.lean;r.footF[0]+=virtuoso.plant;r.footB[0]-=virtuoso.plant*.4;if(virtuoso.focus)r.mood='angry';}
+  if(virtuoso.active&&!dead){r.lean+=virtuoso.lean;r.footF[0]+=virtuoso.plant;r.footB[0]-=virtuoso.plant*.4;if(virtuoso.focus)r.mood=st==='attack'?'angry':pose.castSlot===1?'happy':'normal';}
   const hipY = -d.ll, sy = hipY - d.th, al = d.al;
   const hx = 1 + r.hipX * 0.3, hy = sy - d.hr * 0.9;
   if (dead) {

@@ -1,3 +1,4 @@
+import {drawMichiMemoryTree} from './michi-memory-tree.js';
 // Michi / Living Lantern Sanctuary. Decorative screen-space painting only.
 // Art never changes collision, route geometry, enemy AI, save data or interaction IDs.
 // Stable world-anchored parallax, local narrative palettes, reduced-motion support.
@@ -9,12 +10,12 @@ const light=(x)=>Math.max(0,Math.min(1,x));
 const mod=(n,d)=>((n%d)+d)%d;
 const noise=(n)=>{const s=Math.sin(n*127.1+43.7)*43758.5453;return s-Math.floor(s);};
 const THEMES=Object.freeze({
- court:  {sky:['#101d38','#2c425f','#778b91'],mist:'#6ed5c0',stone:'#24444d',foliage:'#234e52',warm:'#ffe0a4'},
- crypt:  {sky:['#050f1d','#0a2030','#142d39'],mist:'#77babb',stone:'#172c37',foliage:'#163b41',warm:'#e2b6cb'},
+ court:  {sky:['#171a34','#474361','#a18c9f'],mist:'#6ed5c0',stone:'#24444d',foliage:'#234e52',warm:'#ffe0a4'},
+ crypt:  {sky:['#080e22','#242e4a','#4c576c'],mist:'#77babb',stone:'#172c37',foliage:'#163b41',warm:'#e2b6cb'},
  gallery:{sky:['#101b35','#263350','#4a4b64'],mist:'#c7afd7',stone:'#343c5c',foliage:'#454d62',warm:'#ffe7b8'},
  maze:   {sky:['#152c41','#365563','#77918a'],mist:'#90d2ce',stone:'#213d4b',foliage:'#255353',warm:'#f1d39f'},
  canopy: {sky:['#1d3155','#54798d','#a2b8ac'],mist:'#a1eeeb',stone:'#31515b',foliage:'#306661',warm:'#ffe1b3'},
- arena:  {sky:['#16192c','#342b48','#665061'],mist:'#edb6cb',stone:'#4b4059',foliage:'#494a5a',warm:'#ffd5a5'},
+ arena:  {sky:['#211a33','#57425e','#a67e90'],mist:'#edb6cb',stone:'#4b4059',foliage:'#494a5a',warm:'#ffd5a5'},
  return: {sky:['#283c58','#8e7985','#e5ae8a'],mist:'#ffe5bb',stone:'#625664',foliage:'#596c6a',warm:'#fff0c5'}
 });
 const ellipse=(c,x,y,rx,ry,fill)=>{c.fillStyle=fill;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();};
@@ -59,7 +60,7 @@ function paintCrown(c,layer,i){
  for(let b=0;b<4;b++){
   const side=b%2?1:-1,reach=52+noise(i*7+b)*61,yy=18+b*21;
   line(c,tones[0],3+layer,()=>{c.moveTo(0,yy+41);c.bezierCurveTo(side*27,yy+13,side*reach*.7,yy+12,side*reach,yy-17);});
-  for(let k=0;k<5;k++){
+  for(let k=0;k<4;k++){
    const xx=side*(22+k*reach/5),ly=yy+8-k*5;
    c.fillStyle=tones[k%2];c.beginPath();c.moveTo(xx-23,ly+4);
    c.bezierCurveTo(xx-36,ly-18,xx-8,ly-29,xx+7,ly-17);
@@ -79,6 +80,7 @@ function drawCrown(c,x,y,layer,seed){
 function distantTrees(c,cam,t,W,H,p,reduced){
  const cx=cam.x||0,cy=cam.y||0;
  for(let layer=0;layer<3;layer++){
+  c.save();c.globalAlpha=[.28,.34,.43][layer];
   const par=[.07,.15,.27][layer],step=[290,255,225][layer];
   const start=Math.floor((cx*par-180)/step),end=Math.ceil((cx*par+W+180)/step);
   const baseline=H*(.85+layer*.05)-cy*par*.32;
@@ -91,6 +93,7 @@ function distantTrees(c,cam,t,W,H,p,reduced){
    drawCrown(c,x,top,layer,i);
    if(layer===2&&i%3===0)ellipse(c,x+30,top+30,3,5,'rgba(225,198,177,'+(reduced?.4:.35+Math.sin(t*.025+i)*.12)+')');
   }
+  c.restore();
  }
 }
 
@@ -153,6 +156,7 @@ export function drawMichiLivingBackdrop(c,g,cam={},t=0,W=1280,H=720){
  sky(c,W,H,p,lit);
  if(zone!=='crypt')moon(c,cam,t,W,H,p,cleared,reduced);
  if(zone!=='crypt')distantTrees(c,cam,t,W,H,p,reduced);
+ drawMichiMemoryTree(c,g,cam,t,W,H,zone);
  drawMichiArchitecture(c,zone,cam,reduced?0:t,W,H,p,lit);
  drawMichiWater(c,g,cam,reduced?0:t,W,H,zone,lit);
  starlight(c,cam,t,W,H,p,reduced,lit);

@@ -1,4 +1,6 @@
-import {interactMichiSanctuary} from './systems/michi-sanctuary.js';
+import {updateKiloPresence} from './systems/kilo-presence.js';
+import {gardenInteractionPrompt} from './systems/michi-garden-life.js';
+import {interactMichiSanctuary,sanctuaryInteractionPrompt} from './systems/michi-sanctuary.js';
 import {drawMichiSanctuary,drawMichiSanctuaryBackdrop} from './worlds/michi-sanctuary-art.js';
 import {drawKiloLivingGrove} from './worlds/kilo-living-grove.js';
 import {skillIcon,mountCompactHud} from './systems/compact-hud.js';
@@ -13,7 +15,7 @@ import {kiloChapterAbility,interactKiloInstrument} from './systems/world1-play.j
 import {createAdventureStorage} from './multiplayer/adventure-progress.js';
 import {drawLivingRealm} from './worlds/living-realms.js';
 import {drawPortalMirrors, FINAL_PORTALS} from './systems/final-portal-mirrors.js';
-import {interactFinalRitual,FINAL_RITUAL_PORTALS} from './systems/final-ritual.js';
+import {interactFinalRitual,FINAL_RITUAL_PORTALS,ambientOrbsForRoom,finalRitualInteractionPrompt} from './systems/final-ritual.js';
 import {openFinalHeroChoice,closeFinalHeroChoice} from './systems/final-hero-choice.js';
 import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
 import {KEEPSAKES,readKeepsakes,mergeKeepsakes,persistKeepsakes} from './systems/keepsakes.js';
@@ -133,7 +135,7 @@ import { FUSION_STORY } from "./systems/world1-story.js";
 import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, syncWorld1Album, toggleWorld1Album, world1AlbumKey, world1AlbumFor } from "./systems/world1-collect.js";
 import { readWorld1Seals, storeWorld1Seals, world1StartRoom, world1ChapterEntry } from "./systems/world1-progress.js";
 import { createWorld1BossDirector, world1BossFilterDamage, updateWorld1BossDirector, drawWorld1BossBackdrop, drawWorld1BossTelegraphs, drawWorld1BossOverlay, world1BossAccessibleText, quimeraCameraZoom } from "./systems/world1-boss.js";
-import { playWorld1Cine, flushWorld1CineQueue, updateWorld1Cine, skipWorld1Cine, drawWorld1Cine, world1CineActive, syncWorld1CineControls } from "./systems/world1-cine.js";
+import { playWorld1Cine, flushWorld1CineQueue, updateWorld1Cine, skipWorld1Cine, skipMichiChapterFilm, drawWorld1Cine, world1CineActive, syncWorld1CineControls } from "./systems/world1-cine.js";
 import { makeDummy as w1MakeDummy, drawDummy as w1DrawDummy, baseHeight as w1BaseHeight } from "./systems/cinema-kit.js";
 // V468: Mundo 1 (diez salas de héroe + Corazón de Ohana) convive con el Mundo 2 (salas clásicas).
 const ROOMS = Object.freeze({ ...WORLD2_ROOMS, ...WORLD1_ROOMS });
@@ -484,7 +486,9 @@ help.classList.toggle("open", open);
 function setPrompt(text, on) {
 const el = DOM.prompt;
 if (!el) return;
-if (!on) { el.classList.remove("show"); return; }
+// Expose mobile E only for actionable prompts, never for plain notices.
+ el.toggleAttribute('data-touch-interact',Boolean(on&&/(?:^\s*E\b|\/\s*E\b|\b(?:pulsa|presiona)\s+E\b)/i.test(String(text||''))));
+ if (!on) { el.classList.remove("show"); return; }
 setText(el, text);
 el.classList.add("show");
 }
@@ -733,7 +737,9 @@ game.onHeroAbility=(p,index)=>{kiloChapterAbility(game,p,index);expeditionAbilit
 game.onDinoLandingHit=(e,dmg)=>hitArenaEnemy(game,e,dmg,{color:'#deedbc',stun:25,ky:-4,kx:Math.sign(e.x-game.player.x)*4,shake:2,parts:6});
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
-game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
+// A solo final ritual uses earned floor resonances, not the old ambient XP crystals.
+// Keep the original procession crystals for multiplayer and other rooms.
+game.orbs = ambientOrbsForRoom(r,game.finalRitualEnabled).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
 game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
 const e = makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng});
@@ -1997,6 +2003,7 @@ if(p.id==='kilo'&&kiloStep&&!(p._dashGo>0)){inputState.kiloBurst=kiloStep.face*(
 const kiloFlight=steerKiloFlight(p,inputState);
 const michiFlight=steerMichiFlight(p,inputState);
 updateMichiPresence(game,inputState);
+updateKiloPresence(game);
 const wasGrounded = !!p.grounded;
 const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
 const incoming = p.vy;
@@ -2120,10 +2127,12 @@ if (ok) {
 const r = room();
 if (stitchoTrailPrompt(game))setPrompt(stitchoTrailPrompt(game),true);
 else if (chispinTrailPrompt(game))setPrompt(chispinTrailPrompt(game),true);
+else if(gardenInteractionPrompt(game)||sanctuaryInteractionPrompt(game))setPrompt(gardenInteractionPrompt(game)||sanctuaryInteractionPrompt(game),true);
 else if (michiTrailPrompt(game))setPrompt(michiTrailPrompt(game),true);
 else if (grovePrompt(game))setPrompt(grovePrompt(game),true);
 else if (portals.prompt) setPrompt(portals.prompt, true);
 else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
+else if (finalRitualInteractionPrompt(game)) setPrompt(finalRitualInteractionPrompt(game),true);
 else if (p.x > game.worldW - 90 && r.doors.right) setPrompt(r.world1 && !world1CanLeave(game,"right") ? "SELLO DORMIDO · " + (r.fusionBoss ? "vence a la Quimera" : r.hero===WORLD1_ORDER.at(-1)&&!world1SealsComplete(game.world1Seals)?"reúne los diez sellos":"despierta el sello de la sala") : "ESTE · sigue andando", true);
 else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
 else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
@@ -3588,7 +3597,7 @@ const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
 const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
 const bond=slot.supreme?uBondProgress(game.player):null;
 const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante "+(game.player.id==="kilo"?"2 s":"6 s")) : d.name + (d.desc ? " · " + d.desc : "");
-return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="skill-icon">'+skillIcon(d.key)+'</span><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
+return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="skill-icon">'+skillIcon(d.key,game.player?.id)+'</span><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
 slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
@@ -3805,7 +3814,8 @@ for(const btn of touchPowers){
  const index=PWIDX[btn.dataset.k],status=powerStatus(game,index,index===3?supremeOf(p.id):null);
  if(!status)continue;
  const key=btn.dataset.k.toUpperCase(),caption=status.kind==='flight'?'K ↓':status.kind==='cooldown'?status.short:status.kind==='charge'?'P '+Math.floor(status.pct)+'%':status.kind==='locked'?key+'·'+(POWER_LEVELS[index]+1):key+(index===4&&status.available?'✓':'');
- if(btn.textContent!==caption)btn.textContent=caption;
+ if(!btn.querySelector('.touch-skill-icon'))btn.innerHTML='<span class="touch-skill-icon"></span><span class="touch-skill-name"></span><small class="touch-skill-status"></small>';
+ const glyph=skillIcon(key,p.id),icon=btn.querySelector('.touch-skill-icon');if(icon.innerHTML!==glyph)icon.innerHTML=glyph;setText(btn.querySelector('.touch-skill-name'),status.def.name);setText(btn.querySelector('.touch-skill-status'),status.available?'':status.kind==='locked'?'◇':status.kind==='cooldown'?status.short:status.kind==='charge'?Math.floor(status.pct)+'%':caption);
  btn.classList.toggle("off",status.kind==='locked');btn.classList.toggle("cooling",!status.available&&status.kind!=='locked');
  btn.dataset.powerState=status.kind;btn.style.setProperty("--cd",status.pct+"%");
  btn.title=status.def.name+" · "+status.label;
@@ -4160,6 +4170,7 @@ updateHUD();
 document.getElementById("world1-cine-next")?.addEventListener("click", () => {
   if (!paused && !overlayOpen()) skipWorld1Cine(game);
 });
+document.getElementById("world1-cine-skip")?.addEventListener("click",()=>{if(!paused&&!overlayOpen())skipMichiChapterFilm(game);});
 document.getElementById("world1-album-close")?.addEventListener("click",()=>toggleWorld1Album(game,false));
 for(const [id,key] of [["world1-album-prev","ArrowLeft"],["world1-album-next","ArrowRight"]]) {
   document.getElementById(id)?.addEventListener("click",()=>world1AlbumKey(game,key));

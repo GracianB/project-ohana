@@ -10,6 +10,7 @@ export function updateMichiPresence(g,input={}){
   for(const e of g.enemies||[])if(e.hp>0&&!e.dead&&!e.hidden)consider(e,'threat',190,-45);
   for(const e of g.orbs||[])if(!e.taken)consider(e,'curious',145,15);
   for(const e of g.world1?.stations||[])if(!e.done)consider(e,'curious',125,25);
+  const story=g.roomDef?.michiSanctuary?.garden;if(story){for(const q of story.mechanisms)consider({x:q.x,y:q.floor-48},'curious',130,20);if(g._michiGardenMoment){const q=story.moments.find(q=>q.id===g._michiGardenMoment.id);if(q)consider({x:q.x,y:q.floor-35},'friend',180,-20);}}
   const guest=g._evolutionAttacks?.guest;if(guest?.life>0)consider(guest,'friend',180,0);
  }
  const previous=p._michiPresence||{},weight=target?1:0;

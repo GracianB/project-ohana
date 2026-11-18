@@ -1,0 +1,22 @@
+{
+  "release": "ohana-655",
+  "status": "local and public candidate acceptance passed",
+  "includesGardenAcceptance": "V654-VALIDATION.json",
+  "unitTests": 1964,
+  "passed": [
+    "Complete unit suite: 1964 passed, zero failures",
+    "General production Chromium browser audit passed, including mobile controls",
+    "Four touch layouts: 320x568, 320x844, 390x844 and 844x390; all visible targets at least 44px, in viewport and non-overlapping",
+    "Native simultaneous right/jump contacts, native J cast from power tray and native Usar listening/persistence passed at every size",
+    "Five production actor forms: distinct monochrome silhouettes, finite vector art across states, reduced-motion stability and flat amber eyes",
+    "390px native Atlas: explicitly selected form retained at launch, after simulation and Continue",
+    "Full V654 physical garden route: five lanterns, guardian with zero deaths, bridge/bell/wind/listening, 100 memories including high route, three echoes, seal, ceremony, boat and Continue",
+    "Public candidate: 34 checked runtime/art/style files match final source byte-for-byte",
+    "Public native mobile: actual walking to the bench, touch interaction, saved memory and selected form survive Continue",
+    "Two-player public candidate API passed adventure and versus"
+  ],
+  "limits": [
+    "Entry and earned-seal fixtures exercise actual native UI; they do not claim complete two-player or mobile campaign progression.",
+    "No frame-rate guarantee for physical devices. Actor faces stay flat vectors; independent scenery objects use bounded generated caches."
+  ]
+}

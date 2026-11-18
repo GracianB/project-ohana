@@ -2,7 +2,7 @@
 // The caller must walk to the selected arch and press the REAL E key.
 // Never writes to a game object, grants a farol or teleports the actor.
 export const MICHI_FAROL_ZONES=Object.freeze(['court','crypt','maze','canopy','gallery']);
-const zoneAt=(zones,x,floor)=>zones.find(z=>x>=z.x&&x<z.x+z.w&&Math.abs(z.floor-floor)<6)?.id||null;
+const zoneAt=(zones,x,floor)=>zones.find(z=>x>=z.x&&x<z.x+z.w&&(Number.isFinite(z.y)?floor>=z.y&&floor<=z.y+z.h:Math.abs(z.floor-floor)<6))?.id||null;
 export function michiNextPassage(room,source,target,lit=0,sealed=false,echoes=0){
  const r=room?.michiSanctuary;
  if(!r||!source||!target||source===target)return null;

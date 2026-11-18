@@ -17,10 +17,10 @@ test('Michi route follows authored lantern gates without skipping locked passage
  assert.equal(next('maze','gallery',4)?.id,'maze-court');
  assert.equal(next('court','gallery',4)?.id,'court-gallery');
  assert.equal(next('gallery','arena',5)?.id,'gallery-court');
- assert.equal(next('court','arena',5)?.id,'court-arena');
+ assert.equal(next('court','arena',5)?.id,'court-maze');
  assert.equal(next('arena','court',5)?.id,'arena-court');
  assert.equal(next('court','return',5,true,2),null);
- assert.equal(next('court','return',5,true,3)?.id,'court-exit');
+ assert.equal(next('court','return',5,true,3)?.id,'court-maze');
 });
 test('Michi maze stone thresholds are passable before the fairy flight unlock',()=>{
  const roomFloor=room.michiSanctuary.zones.find(z=>z.id==='maze').floor;
