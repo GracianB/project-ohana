@@ -1,0 +1,12 @@
+{
+  "release": "ohana-663",
+  "sourceBranch": "codex/quimera-663",
+  "preservedBaseCommit": "8330b7a3d04d05cafb1069cb263aa009663676cd",
+  "runtimeManifestSha256": "6349c115f0c9d0b76419e82c933367169aee7e70beae858927db6a38f0a4a43f",
+  "pagesUrl": "https://gracianb.github.io/project-ohana/?release=663",
+  "previewUrl": "https://gracianb.github.io/project-ohana/previews/quimera-design.html?release=663&attack=rayos",
+  "netlifyUrl": "https://project-ohana-multiplayer.netlify.app",
+  "method": "one skip-ci commit, exact tested Netlify candidate promotion, one manual Pages dispatch",
+  "rollbackDeploy": "6afd8eb1999ae0be58270ee9",
+  "status": "local acceptance passed; final public checks reported in delivery"
+}

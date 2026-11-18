@@ -1,4 +1,4 @@
-const VERSION = "ohana-662";
+const VERSION = "ohana-663";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/quimera-pressure.js?v=" + VERSION,
@@ -689,7 +689,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-collect.js": "b56318e191160e87287daa96daaa8fad97a5b74d",
   "systems/world1-boss.js": "b6d0a24f422ee87b1591d22229e290a1fe02d75e",
   "systems/fusion-boss.js": "636494df323ab217cea20e55f2d53082f87d5d80",
-  "systems/quimera-art.js": "ed31f301e7ff847b5711f3e509c8490d023fe3bf",
+  "systems/quimera-art.js": "163034904727f5e0872e132446c940b811e280aa",
   "systems/quimera-regalia.js": "546ff962d7cb2a7af402235117e541f6a1442705",
   "systems/world1-story.js": "e1324becee767e794b86580bc3b5534c7a647e87",
   "systems/world1-rooms.js": "e651a4cde4ebad3fee06c9118edc4f4ad856488e",
@@ -767,7 +767,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "77035c396a4c6f58aec6af1378ea3a1892433ef9",
-  "index.html": "a892fc07fcf5514fa7542229c72c677d6158b432",
+  "index.html": "c3a9f567d0619d5ac5add6b6594aa20a9af6d273",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",

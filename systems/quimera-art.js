@@ -16,130 +16,109 @@ export function quimeraArticulation(e,t=0,reduce=false){
  const p=quimeraPose(e,t,reduce),b=e._fusion||{},w=p.warning*p.warning*(3-2*p.warning),release=b.mode==='attack'?Math.sin(Math.PI*(1-clamp(num(b.clock)/30))):0;
  return{coil:w,recoil:release*11,lean:b.mode==='charge'?.2:b.mode==='leap'?-.14:p.organ==='core'?w*.1:w*.045,arm:p.organ==='paw'?w*.62:p.organ==='core'?w*.4:p.organ==='tail'?w*.18:w*.09,head:p.organ==='jaw'?-w*.17:p.organ==='crown'?w*.08:-.05,mantle:w*(p.organ==='wing'?.24:.08),idle:reduce?0:Math.sin(p.time*.033)*.018};
 }
-// Hand-shaped silhouettes and broad light planes; the hollow chest is the focal point.
+// Smooth anatomical masses, lit cavities and independent joints. No wire outlines.
 export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  const p=quimeraPose(e,t,reduce),a=quimeraArticulation(e,t,reduce),b=e._fusion||{},T=p.time,S=p.spread,W=p.warning;
  const formed=b.mode==='intro'?clamp(1-num(b.clock)/Math.max(1,num(b.introMax,260))):1;
- const recoil=a.recoil;
- const bend=a.lean;
- const breath=p.breathe,flow=Math.sin(T*.025),dark='#0b1428',rim=p.phase>=3?'#a1abbc':'#738398';
  const path=(fill,fn)=>{c.fillStyle=fill;c.beginPath();fn();c.closePath();c.fill();};
- const oval=(x,y,rx,ry,col,rot=0)=>path(col,()=>c.ellipse(x,y,rx,ry,rot,0,TAU));
+ const oval=(x,y,rx,ry,col,rot=0)=>path(col,()=>c.ellipse(x,y,Math.max(.01,rx),Math.max(.01,ry),rot,0,TAU));
  const linear=(x,y,xx,yy,stops)=>{const g=c.createLinearGradient(x,y,xx,yy);stops.forEach(([at,col])=>g.addColorStop(at,col));return g;};
- const glow=(x,y,r,col)=>{const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,col);g.addColorStop(1,'#76e8e000');return g;};
- const line=(col,width,fn)=>{c.strokeStyle=col;c.lineWidth=width;c.beginPath();fn();c.stroke();};
- const flesh=linear(-100,-230,100,-60,[[0,'#48516b'],[.28,'#2a2d46'],[.65,'#171c32'],[1,'#090e1e']]);
- c.save();c.translate(num(e.x)-num(cam.x)+num(e.w,230)/2,num(e.y)-num(cam.y)+num(e.h,290));c.scale(e.facing===1?-1:1,1);c.globalAlpha*=formed;c.lineJoin='round';c.lineCap='round';
- oval(2,4,119,11,'#050c1b80');
- c.translate(recoil+(p.hurt?7:0),p.dead?37:breath);c.rotate(p.dead?.26:bend);
- // A low, long tail dissolves into three independent currents.
- for(let i=2;i>=0;i--){
-  const k=i*13;
-  path(linear(30,-85,181,-150,[[0,'#233b54'],[.7,'#304d67'],[1,'#688f9b00']]),()=>{c.moveTo(38,-89+k*.3);c.bezierCurveTo(136,-27,184,-58,172-k,-155+flow*(5+i));c.bezierCurveTo(198-k,-69,146,3,39,-62+k*.3);});
- }
- // The mantle is a torn, flowing mass, not a symmetrical pair of bat wings.
- for(const side of [1,-1]){
-  c.save();c.translate(side*35,-202);c.scale(side,1);c.rotate(flow*.025-side*.06-a.mantle);
-  const sweep=13+S*22;
-  path(linear(0,-95,154,83,[[0,'#8994a9'],[.14,'#465270'],[.42,'#292d49'],[.82,'#141a30'],[1,'#0d203900']]),()=>{
-   c.moveTo(-18,14);c.bezierCurveTo(6,-67,79,-98,161+sweep,-120);c.bezierCurveTo(111,-75,118,-31,183,-8);c.quadraticCurveTo(144,-12,127,3);c.quadraticCurveTo(151,35,162,50);c.quadraticCurveTo(109,14,100,26);c.quadraticCurveTo(125,65,113+flow*6,93);c.bezierCurveTo(102,60,63,60,52,32);c.quadraticCurveTo(32,55,19,75);c.quadraticCurveTo(24,30,-18,14);
-  });
-  // Two broad tissue highlights describe a fold without outlining every edge.
-  path('#8bb8bd24',()=>{c.moveTo(8,-13);c.quadraticCurveTo(58,-70,139,-99);c.quadraticCurveTo(65,-50,81,-4);c.quadraticCurveTo(47,-30,8,-13);});
-  path('#07142d77',()=>{c.moveTo(24,-8);c.quadraticCurveTo(89,-44,128,9);c.quadraticCurveTo(98,-4,92,25);c.quadraticCurveTo(72,4,24,-8);});
-  if(p.phase>=3)for(let i=0;i<3;i++){
-   const x=83+i*23,y=14+i*12;
-   path(linear(x,y,x+8,y+63,[[0,'#9bdad666'],[1,'#6dc8d000']]),()=>{c.moveTo(x,y);c.quadraticCurveTo(x+22,y+26,x+flow*9,y+67);c.quadraticCurveTo(x+8,y+26,x-5,y+4);});
+ const radial=(x,y,r,stops)=>{const g=c.createRadialGradient(x-r*.25,y-r*.3,0,x,y,r);stops.forEach(([at,col])=>g.addColorStop(at,col));return g;};
+ const skin=linear(-90,-220,85,-45,[[0,'#71838c'],[.2,'#3b5967'],[.52,'#243546'],[1,'#10192d']]);
+ const bone=linear(-40,-65,39,40,[[0,'#dfdfc5'],[.25,'#b5c8bf'],[.6,'#748e97'],[1,'#344b65']]);
+ const active=organ=>p.organ===organ&&(W>0||p.strike);
+ const glow=(x,y,r,color)=>oval(x,y,r,r,radial(x,y,r,[[0,color],[1,'#819fba00']]));
+ c.save();c.translate(num(e.x)-num(cam.x)+num(e.w,230)/2,num(e.y)-num(cam.y)+num(e.h,290));c.scale(e.facing===1?-1:1,1);c.globalAlpha*=formed;
+ // Contact stays anchored while the torso breathes, recoils and coils.
+ oval(0,4,111,10,'#03091588');
+ c.translate(a.recoil+(p.hurt?5:0),p.dead?35:p.breathe);c.rotate(p.dead?.24:a.lean);
+ // Long muscular tail, with a travelling fold rather than stacked outlines.
+ path(linear(25,-68,187,-129,[[0,'#24364c'],[.55,'#4c6978'],[1,'#92a9a300']]),()=>{c.moveTo(28,-89);c.bezierCurveTo(100,-48,181,-42,164,-122);c.quadraticCurveTo(158,-153,181,-168+Math.sin(T*.027)*8);c.bezierCurveTo(158,-129,218,-36,126,-29);c.quadraticCurveTo(71,-24,28,-62);});
+ // A mantle of staggered membrane fingers unfurls through the four phases.
+ for(const side of[1,-1]){
+  c.save();c.translate(side*44,-211);c.scale(side,1);c.rotate(-.035+Math.sin(T*.022+side)*.025-a.mantle);
+  for(let i=3;i>=0;i--){const span=92+i*21+S*36,lag=Math.sin(T*.026-i*.65)*7,tipY=-119+i*45;
+   path(linear(0,-45,span,tipY+45,[[0,'#385169'],[.4,i%2?'#464c6b':'#555c78'],[.75,'#24253f'],[1,'#111b3000']]),()=>{c.moveTo(-16,8);c.bezierCurveTo(29,-53,span-56,tipY-18,span,tipY+lag);c.quadraticCurveTo(span-40,tipY+19,span-25,tipY+55);c.bezierCurveTo(span-53,tipY+33,59,65,8,54);});
+   path('#a0b8b921',()=>{c.moveTo(5,0);c.quadraticCurveTo(span*.55,tipY*.8,span-9,tipY+lag+3);c.quadraticCurveTo(span*.58,tipY*.62,32,22);});
   }
+  if(p.phase>=2)for(let i=0;i<p.phase;i++){const xx=104+i*17,yy=-85+i*43;path(linear(xx,yy,xx+4,yy+64,[[0,'#87bab65c'],[1,'#6587ad00']]),()=>{c.moveTo(xx,yy);c.bezierCurveTo(xx+28,yy+25,xx+8+Math.sin(T*.035+i)*10,yy+45,xx+18,yy+69);c.quadraticCurveTo(xx-15,yy+33,xx,yy);});}
   c.restore();
  }
- // An offset haunch and grounded toes anchor the otherwise spectral silhouette.
- for(const side of [1,-1]){
-  c.save();c.translate(side*(side===1?59:44),-49);c.rotate(side*p.gait*.15);
-  path(flesh,()=>{c.moveTo(-26,-44);c.quadraticCurveTo(31,-72,35,-12);c.quadraticCurveTo(24,9,29,30);c.quadraticCurveTo(43,47,9,50);c.lineTo(-33,50);c.quadraticCurveTo(-39,36,-19,27);c.quadraticCurveTo(-43,-9,-26,-44);});
-  for(let i=0;i<3;i++)path('#c4d2c5',()=>{let x=-29+i*18;c.moveTo(x,42);c.quadraticCurveTo(x-9,48,x-12,57);c.quadraticCurveTo(x+4,56,x+9,42);});
+ // Digitigrade haunches: the knee, hock and toes carry separate curved volumes.
+ for(const side of[1,-1]){
+  c.save();c.translate(side*(side<0?46:57),-60);c.rotate(side*p.gait*.12);
+  oval(0,-1,32,46,skin,side*.2);
+  path(linear(-18,-3,24,65,[[0,'#344858'],[.5,'#1c293e'],[1,'#455b69']]),()=>{c.moveTo(-21,-6);c.quadraticCurveTo(35,-12,25,26);c.quadraticCurveTo(6,40,18,48);c.quadraticCurveTo(31,62,4,64);c.lineTo(-29,64);c.quadraticCurveTo(-42,54,-16,44);c.quadraticCurveTo(-6,25,-21,-6);});
+  for(let i=0;i<3;i++){const xx=-25+i*15;oval(xx,58,11,7,'#405969');path('#b7c7bd',()=>{c.moveTo(xx-6,58);c.quadraticCurveTo(xx-13,65,xx-14,69);c.quadraticCurveTo(xx-2,68,xx+3,59);});}
   c.restore();
  }
- // Broad chest, narrow waist; shoulders remain continuous with the long forelimbs.
- path(flesh,()=>{c.moveTo(-29,-246);c.bezierCurveTo(-89,-237,-99,-170,-75,-114);c.quadraticCurveTo(-57,-50,4,-58);c.quadraticCurveTo(66,-52,81,-119);c.bezierCurveTo(99,-176,73,-232,32,-244);});
- path(linear(-61,-202,44,-83,[[0,'#7a9aab'],[.3,'#3c6079'],[1,'#11203c']]),()=>{c.moveTo(-37,-231);c.quadraticCurveTo(-83,-219,-69,-153);c.quadraticCurveTo(-40,-114,-33,-87);c.quadraticCurveTo(-16,-111,-22,-155);c.quadraticCurveTo(-13,-194,-37,-231);});
- // A dark aperture eats the chest; thin light gathers only when it can be hit.
- oval(0,-161,36+p.open*5,56,'#071223',-.1);
- const heart=p.open>.5?'#bff7d9':p.color;
- oval(-2,-161,30,47,glow(-2,-161,51,p.open>.5?'#5dc8b866':'#bd73b044'));
- c.save();c.translate(-2,-161);c.rotate(-.12);c.scale(1,.96);
- for(let i=0;i<2;i++){
-  const flip=i?1:-1;c.save();c.scale(flip,1);
-  path(linear(-8,-45,20,42,[[0,rim],[.5,'#406b82'],[1,'#1b3656']]),()=>{c.moveTo(2,-51);c.bezierCurveTo(44,-43,43,21,4,51);c.quadraticCurveTo(25,4,2,-51);});
-  c.restore();
+ // Pear-shaped ribcage, narrow belly, and a cool reflected rim.
+ path(skin,()=>{c.moveTo(-30,-246);c.bezierCurveTo(-101,-240,-105,-167,-72,-112);c.quadraticCurveTo(-44,-55,2,-56);c.quadraticCurveTo(66,-49,82,-121);c.bezierCurveTo(103,-188,75,-244,27,-248);});
+ path('#a8c9bf24',()=>{c.moveTo(-35,-238);c.bezierCurveTo(-82,-218,-91,-177,-64,-136);c.quadraticCurveTo(-76,-200,-35,-238);});
+ // The open chest is a spherical abyss with light visibly recessed inside it.
+ const opening=p.open,heart=opening>.5?'#c0ead2':p.color;
+ oval(-3,-164,43,61,'#101c30',-.1);oval(-4,-164,34+opening*3,51,'#040c1b',-.1);
+ c.save();c.beginPath();c.ellipse(-4,-164,33,50,-.1,0,TAU);c.clip();
+ glow(-7,-167,43,opening>.5?'#7bd8bb99':'#a88fc177');
+ for(let i=0;i<5;i++){const phase=T*.017+i*TAU/5,x=-5+Math.sin(phase)*17,y=-166+Math.cos(phase)*24;oval(x,y,3,8,'#a4d9ce55',phase);}
+ oval(-7,-165,13+W*3,23,radial(-7,-165,26,[[0,'#f0edcc'],[.25,heart],[.62,'#678fa1'],[1,'#314760']]),-.14);
+ oval(-11,-175,4,7,'#ecf6d69c',-.25);c.restore();
+ // Protective ribs peel away during recovery, leaving the vulnerability clear.
+ for(const side of[-1,1])for(let i=0;i<3;i++){
+  const y=-209+i*35,xx=side*(29+opening*7);path(linear(xx,y,side*48,y+24,[[0,'#a3b7b7'],[.4,'#516f80'],[1,'#263b52']]),()=>{c.moveTo(xx,y-7);c.quadraticCurveTo(side*61,y+10,side*38,y+36);c.quadraticCurveTo(side*(45-opening*10),y+14,xx,y-7);});
  }
- path(linear(-8,-27,12,27,[[0,'#f2f1d2'],[.32,heart],[1,'#499fa2']]),()=>{c.moveTo(-4,-31);c.quadraticCurveTo(17,-5,8,12);c.lineTo(-2,33);c.quadraticCurveTo(-16,3,-4,-31);});
+ // Shoulder fur follows through at a different rhythm from the membrane.
+ for(const side of[1,-1])for(let i=3;i>=0;i--){const xx=side*(37+i*11),yy=-242+i*19,lag=Math.sin(T*.032-i*.6)*3;
+  path(linear(xx,yy,xx+side*23,yy+58,[[0,side<0?'#839da3':'#526780'],[.42,'#344d63'],[1,'#14243b']]),()=>{c.moveTo(xx-side*14,yy-11);c.bezierCurveTo(xx+side*25,yy-14,xx+side*29+lag,yy+14,xx+side*20+lag,yy+54);c.quadraticCurveTo(xx+side*4,yy+18,xx-side*17,yy+17);});
+ }
+ // Upper arm, forearm and broad curled hand articulate as one continuous limb.
+ for(const side of[1,-1]){
+  c.save();c.translate(side*(70+S*6),-196);c.rotate(side*((side<0?a.arm:a.arm*.48)-p.strike*.13)+(side<0?.18:-.16)+Math.sin(T*.031+side)*.025);
+  path(linear(-28,0,24,138,[[0,side<0?'#668693':'#3f5b73'],[.35,'#30485d'],[.7,'#1a2c43'],[1,'#4b6474']]),()=>{c.moveTo(-15,-17);c.bezierCurveTo(-47,-10,-41,30,-25,53);c.quadraticCurveTo(-17,76,-30,100);c.bezierCurveTo(-51,128,-32,149,-9,145);c.quadraticCurveTo(27,147,29,122);c.quadraticCurveTo(18,101,26,80);c.bezierCurveTo(45,33,31,-15,9,-19);c.quadraticCurveTo(-4,-22,-15,-17);});
+  oval(-15,29,11,26,'#b2c5bf14',-.2);oval(-6,120,24,19,'#263e54');
+  for(let i=0;i<3;i++){const xx=-23+i*17;oval(xx,127,8,11,'#4a6372',-.25);path(linear(xx,129,xx-6,159,[[0,'#d8dbc4'],[1,'#718d99']]),()=>{c.moveTo(xx-5,129);c.bezierCurveTo(xx-14,138,xx-14,153,xx-7,159);c.quadraticCurveTo(xx-5,146,xx+5,133);});}
+  if(active('paw'))glow(-6,115,26,p.color+'55');c.restore();
+ }
+ // Captive voices are sunk into shoulder tissue, with only the speaking one bright.
+ WORLD1_ORDER.forEach((hero,i)=>{const side=i<5?-1:1,j=i%5,xx=side*(39+j*5),yy=-218+j*21,lit=HEROES[b.attack]===hero;c.save();c.globalAlpha*=lit?.85:.22;oval(xx,yy,2.6,5,WORLD1_THEMES[hero].color,-side*.2);c.restore();});
+ // A feline-draconic skull: round brow and muzzle emerge from a deep mane.
+ c.save();c.translate(-16-(p.organ==='horn'?W*11:0),-230-(p.organ==='crown'?W*8:0));c.rotate(p.dead?.3:a.head+a.idle);
+ const jaw=p.organ==='jaw'?W*9+p.strike*14:p.strike?3:0;
+ for(const side of[1,-1]){
+  // Swept antlers grow organically from a thick root, never a straight triangle.
+  path(linear(side*20,-18,side*62,-111,[[0,'#354f62'],[.34,'#8ea8ac'],[.7,'#c4d0be'],[1,'#e3dfc2']]),()=>{c.moveTo(side*18,-22);c.bezierCurveTo(side*45,-39,side*31,-78,side*(64+S*13),-112-S*10);c.bezierCurveTo(side*46,-78,side*64,-49,side*35,-13);c.quadraticCurveTo(side*23,-9,side*18,-22);});
+  for(let i=2;i>=0;i--)path(linear(side*25,-24,side*66,40,[[0,'#53677c'],[1,'#17263d']]),()=>{const yy=-29+i*17;c.moveTo(side*25,yy);c.quadraticCurveTo(side*(57+i*6),yy-20,side*(67+i*5),yy-12);c.quadraticCurveTo(side*47,yy+9,side*(51+i*2),yy+34);c.quadraticCurveTo(side*30,yy+22,side*25,yy);});
+ }
+ // Splintered crown unfurls into an asymmetric rack in later movements.
+ if(p.phase>=2)for(let i=0;i<p.phase-1;i++){
+  const xx=26+i*10,top=-79-i*13;
+  path(linear(xx,-32,xx+20,top,[[0,'#3b536b'],[.5,'#889fa5'],[1,'#cbd2bb']]),()=>{c.moveTo(xx,-30);c.bezierCurveTo(xx+33,-44,xx+6,top+14,xx+25,top);c.quadraticCurveTo(xx+14,top+20,xx+31,-47);c.quadraticCurveTo(xx+37,-27,xx,-19);});
+ }
+ // Shadow behind the jaw separates it from the upper muzzle when breathing fire.
+ oval(-12,18+jaw*.6,25,27+jaw*.2,'#071124',-.17);
+ path(linear(-30,10,17,63,[[0,'#758f99'],[.55,'#3a556d'],[1,'#1b314e']]),()=>{c.moveTo(-34,7);c.quadraticCurveTo(-12,25,18,12);c.quadraticCurveTo(24,34+jaw,-13,49+jaw*.6);c.quadraticCurveTo(-31,40+jaw*.4,-34,7);});
+ path(bone,()=>{c.moveTo(-25,-55);c.bezierCurveTo(0,-68,27,-55,32,-33);c.quadraticCurveTo(37,-6,19,9);c.quadraticCurveTo(8,25,-15,24);c.quadraticCurveTo(-43,18,-44,-6);c.bezierCurveTo(-51,-29,-44,-48,-25,-55);});
+ // Curved cheek volumes wrap under the brow; the left muzzle leads the silhouette.
+ oval(-26,-1,17,18,linear(-40,-10,-14,20,[[0,'#c4d1c3'],[.5,'#829fa3'],[1,'#3f5f75']]),-.3);
+ path('#273c55',()=>{c.moveTo(-39,-27);c.quadraticCurveTo(-26,-36,-10,-21);c.quadraticCurveTo(7,-32,30,-25);c.quadraticCurveTo(23,-11,5,-11);c.quadraticCurveTo(-6,-6,-17,-14);c.quadraticCurveTo(-34,-10,-39,-27);});
+ const blink=reduce?0:Math.max(0,1-Math.abs((T%410)-390)/8);
+ if(!p.dead)for(const side of[-1,1]){const xx=side<0?-27:13;c.save();c.translate(xx,-20);c.scale(1,Math.max(.1,1-blink));oval(0,0,8,2.7,active('crown')?'#f6e0b1':'#c2eed7',side*.12);oval(-1,0,1.5,4,'#13253a');oval(-3,-1.5,1.5,1,'#faf5d3');c.restore();}
+ // Heavy eyelids cast a soft overhang; no engraved network over the face.
+ path('#819e9f',()=>{c.moveTo(-41,-29);c.quadraticCurveTo(-24,-42,-9,-25);c.quadraticCurveTo(-25,-23,-38,-20);});
+ path('#9eb5ad',()=>{c.moveTo(-7,-25);c.quadraticCurveTo(15,-40,32,-27);c.quadraticCurveTo(14,-23,-4,-17);});
+ oval(-17,-41,9,13,'#e4e4c421',-.3);
+ for(const side of[-1,1])path('#233c55',()=>{const xx=side*26;c.moveTo(xx,-12);c.quadraticCurveTo(xx+side*16,-9,xx+side*11,9);c.quadraticCurveTo(xx+side*4,0,xx,-12);});
+ // A short broad muzzle, nostrils and long curved fangs make the face predatory.
+ oval(-26,12,15,9,linear(-43,5,-10,25,[[0,'#bac9ba'],[.5,'#7c9a9d'],[1,'#3a596e']]),-.08);
+ path('#26374a',()=>{c.moveTo(-39,6);c.quadraticCurveTo(-32,3,-25,8);c.quadraticCurveTo(-33,14,-39,6);});
+ for(const [xx,len]of[[-35,19],[-12,14]])path(linear(xx,14,xx,37,[[0,'#ebe5cb'],[1,'#8a9fa7']]),()=>{c.moveTo(xx-3,15);c.quadraticCurveTo(xx-4,25+jaw*.25,xx+3,15+len+jaw*.2);c.quadraticCurveTo(xx+5,22,xx+5,13);});
+ if(active('jaw'))glow(-17,27+jaw*.4,17,p.color+'77');
+ if(active('crown'))glow(-3,-60,26,p.color+'55');
+ path(linear(-10,-68,12,-30,[[0,'#bacbbd'],[1,'#4f7886']]),()=>{c.moveTo(-17,-46);c.quadraticCurveTo(-7,-64,-4,-79-S*10);c.quadraticCurveTo(5,-67,10,-47);c.quadraticCurveTo(1,-34,-17,-46);});
+ // Beard and throat frills trail behind the head's smaller idle movement.
+ for(let i=0;i<3;i++)path(linear(-18+i*8,31,-7+i*12,78,[[0,'#506e82'],[1,'#34597800']]),()=>{const xx=-23+i*12;c.moveTo(xx,31);c.quadraticCurveTo(xx+14,49,xx+8,76+Math.sin(T*.03+i)*4);c.quadraticCurveTo(xx-7,59,xx,31);});
  c.restore();
- // Fur separates into long, deliberate clumps with a quiet rim on the lit side.
- for(const side of [1,-1])for(let i=3;i>=0;i--){
-  const x=side*(31+i*10),y=-234+i*19,lag=Math.sin(T*.035+i)*3;
-  path(linear(x-13,y-13,x+side*22,y+52,[[0,side<0?'#73829d':'#494d6b'],[.38,'#253f59'],[1,'#0d2038']]),()=>{c.moveTo(x-side*13,y-18);c.bezierCurveTo(x+side*26,y-20,x+side*30+lag,y+11,x+side*19+lag,y+50);c.quadraticCurveTo(x+side*7,y+20,x-side*15,y+19);});
- }
- // Unequal forearms: the near arm reaches forward, the other braces its weight.
- for(const side of [1,-1]){
-  const raise=a.arm;
-  c.save();c.translate(side*66,-194);c.rotate(side*(raise-p.strike*.13)+(side<0?.17:-.16)+Math.sin(T*.035+side)*.025);
-  path(linear(-24,0,28,136,[[0,side<0?'#648799':'#344f6c'],[.42,'#27435d'],[1,'#111f36']]),()=>{c.moveTo(-16,-14);c.bezierCurveTo(-43,-6,-39,38,-24,59);c.quadraticCurveTo(-17,82,-32,115);c.quadraticCurveTo(-45,140,-20,143);c.quadraticCurveTo(8,150,29,129);c.quadraticCurveTo(24,106,27,86);c.quadraticCurveTo(40,39,21,1);c.quadraticCurveTo(8,-19,-16,-14);});
-  path('#8db5bf30',()=>{c.moveTo(-16,0);c.quadraticCurveTo(-33,21,-14,58);c.quadraticCurveTo(-19,23,-6,11);});
-  for(let i=0;i<3;i++){
-   const x=-25+i*18;
-   path('#c4d2c5',()=>{c.moveTo(x,125);c.bezierCurveTo(x-12,139,x-16,154,x-9,160);c.quadraticCurveTo(x+2,148,x+10,130);});
-  }
-  c.restore();
- }
- // Small openings in the shoulder mass expose the imprisoned light as phases split.
- if(p.phase>=2)for(const side of[-1,1])for(let i=0;i<3;i++){
-  const x=side*(64+i*4),y=-176+i*17;c.save();c.globalAlpha*=.18+p.open*.12;
-  path(p.color,()=>{c.moveTo(x,y-8);c.quadraticCurveTo(x+side*10,y-3,x+side*3,y+11);c.quadraticCurveTo(x-side*3,y+1,x,y-8);});c.restore();
- }
- // Ten embedded teardrops, subtly lit. They never become a string of buttons.
- WORLD1_ORDER.forEach((hero,i)=>{
-  const side=i<5?-1:1,j=i%5,x=side*(39+j*5),y=-218+j*21;
-  const active=HEROES[b.attack]===hero,col=WORLD1_THEMES[hero].color;
-  c.globalAlpha*=active?.95:.35;
-  path(col,()=>{c.moveTo(x,y-4);c.quadraticCurveTo(x+4,y+2,x,y+6);c.quadraticCurveTo(x-4,y+2,x,y-4);});
-  c.globalAlpha/=active?.95:.35;
- });
- // A swept-back crown and long hollow mask replace the smiling animal muzzle.
- c.save();c.translate(-16-(p.organ==='horn'?W*11:0),-228-(p.organ==='crown'?W*8:0));c.rotate(p.dead?.3:a.head+a.idle);
- for(const side of [1,-1]){
-  path(linear(side*20,-20,side*62,-111,[[0,'#3b596c'],[.45,'#b5c7c5'],[1,'#e6e8d5']]),()=>{c.moveTo(side*18,-24);c.bezierCurveTo(side*46,-50,side*26,-85,side*(66+S*14),-113-S*12);c.bezierCurveTo(side*48,-85,side*65,-50,side*37,-16);});
-  // Sweeping cheek fins taper backwards; no separate spherical cheeks.
-  path(flesh,()=>{c.moveTo(side*25,-21);c.quadraticCurveTo(side*61,-54,side*73,-43);c.quadraticCurveTo(side*50,-15,side*49,22);c.quadraticCurveTo(side*34,10,side*25,-21);});
- }
- const mask=linear(-42,-60,33,38,[[0,'#e2e5cf'],[.28,'#c4d0c5'],[.56,'#88a6ab'],[1,'#3c617a']]);
- path(mask,()=>{c.moveTo(-24,-54);c.quadraticCurveTo(8,-70,31,-45);c.quadraticCurveTo(43,-24,26,1);c.lineTo(15,17);c.quadraticCurveTo(4,39,-15,47);c.quadraticCurveTo(-36,29,-39,5);c.quadraticCurveTo(-54,-30,-24,-54);});
- // One continuous dark eye socket lies under the pronounced mask brow.
- path('#0a1930',()=>{c.moveTo(-38,-26);c.quadraticCurveTo(-19,-25,-11,-15);c.quadraticCurveTo(7,-24,31,-24);c.lineTo(23,-8);c.quadraticCurveTo(2,-10,-9,-4);c.quadraticCurveTo(-25,-13,-35,-9);});
- if(!p.dead)for(const side of [-1,1]){
-  const x=side<0?-26:13,blink=reduce?0:Math.max(0,1-Math.abs((T%410)-390)/8);
-  c.save();c.translate(x,-16);c.scale(1,Math.max(.12,1-blink));c.translate(-x,16);
-  path('#d3f7dd',()=>{c.moveTo(x-8,-19);c.lineTo(x+9,-16);c.lineTo(x+2,-11);c.lineTo(x-7,-14);});
-  oval(x,-16,1.8,3.5,'#253046');oval(x-3,-17,1.2,.8,'#faf0d5');c.restore();
- }
- // Broken porcelain recesses give the mask depth without wire engravings.
- for(const side of[-1,1])path('#37425a',()=>{const x=side*27;c.moveTo(x,-40);c.quadraticCurveTo(x+side*10,-33,x+side*5,-24);c.quadraticCurveTo(x-side*2,-31,x,-40);});
- // Long, solid cheek planes and a narrow split, rather than a cartoon mouth.
- path('#24425b',()=>{c.moveTo(-29,-3);c.quadraticCurveTo(-25,18,-13,34);c.lineTo(-10,9);c.lineTo(-20,-6);});
- const jaw=p.organ==='jaw'?W*8+p.strike*15:p.strike?4:0;
- path('#08172c',()=>{c.moveTo(-12,6);c.quadraticCurveTo(-1,1,17,4);c.lineTo(7,22+jaw);c.lineTo(-13,40+jaw*.3);c.quadraticCurveTo(-6,24,-12,6);});
- path('#c4d2c5',()=>{c.moveTo(-1,7);c.lineTo(7,4);c.quadraticCurveTo(7,19,0,24);});
- path('#9cb9bb',()=>{c.moveTo(-21,-50);c.quadraticCurveTo(-12,-72,-4,-88-S*14);c.quadraticCurveTo(8,-58,12,-47);c.lineTo(-4,-31);});
- if(jaw>3)for(let i=0;i<2;i++)path('#c6c9be',()=>{const x=4+i*8;c.moveTo(x,12);c.lineTo(x+4,8);c.quadraticCurveTo(x+4,24+jaw*.25,x-2,28+jaw*.25);});
- // A short chestward beard dissolves with follow-through, not a fixed jaw plate.
- path(linear(-10,27,6,82,[[0,'#608699'],[1,'#31557600']]),()=>{c.moveTo(-23,29);c.quadraticCurveTo(-8,49,11,32);c.quadraticCurveTo(10,64,21+flow*5,80);c.quadraticCurveTo(-9,69,-23,29);});
- c.restore();
- // The last phase unbinds a crescent behind the shoulders, never across the face.
- if(p.phase>=3)for(let i=0;i<(p.phase===4?5:2);i++){
-  const side=i%2?1:-1,x=side*(106+(i>>1)*22),y=-160-(i>>1)*47;
-  c.save();c.translate(x,y+Math.sin(T*.025+i)*4);c.rotate(side*.3);
-  path(linear(-7,-19,10,21,[[0,'#c8d7cd'],[.4,'#688b9f'],[1,'#203e5d']]),()=>{c.moveTo(-3,-20);c.quadraticCurveTo(14,-3,2,21);c.lineTo(-8,8);c.quadraticCurveTo(1,-2,-3,-20);});
-  c.restore();
- }
+ // Later phases release asymmetric fragments, drifting behind the shoulders.
+ if(p.phase>=3)for(let i=0;i<(p.phase===4?7:3);i++){const side=i%2?1:-1,xx=side*(107+(i>>1)*19),yy=-150-(i>>1)*40;c.save();c.translate(xx,yy+Math.sin(T*.023+i)*5);c.rotate(side*.3+Math.sin(T*.016+i)*.1);path(linear(-9,-22,9,22,[[0,'#c2cdbd'],[.45,'#65889b'],[1,'#203d5c']]),()=>{c.moveTo(-3,-22);c.bezierCurveTo(17,-8,13,9,1,23);c.quadraticCurveTo(-11,13,-7,6);c.quadraticCurveTo(0,-8,-3,-22);});c.restore();}
  c.restore();
 }

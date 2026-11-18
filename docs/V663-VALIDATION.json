@@ -1,0 +1,32 @@
+{
+  "release": "ohana-663",
+  "status": "local acceptance passed",
+  "unitTests": {
+    "passed": 1998,
+    "failed": 0
+  },
+  "browserAcceptance": {
+    "anatomy": {
+      "distinctWarningPoses": 7,
+      "renderPure": true,
+      "reducedMotionStable": true,
+      "inheritedAlphaPreserved": true
+    },
+    "arena": {
+      "phases": 4,
+      "ordinaryAttacks": 10,
+      "widths": [
+        1280,
+        390,
+        320
+      ],
+      "runtimeFaults": 0,
+      "collisionClipping": "passed"
+    }
+  },
+  "releaseGate": {
+    "runtimeModules": 429,
+    "resources": 500
+  },
+  "scope": "Synthetic access, starting placement and phase/HP fixtures; native movement and attacks. Not an earned full-campaign victory."
+}
