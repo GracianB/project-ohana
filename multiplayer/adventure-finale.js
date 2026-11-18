@@ -18,7 +18,7 @@ export function finaleEnemy(enemy){
  if(enemy._fusionBoss){
   out._fusion={...enemy._fusion};const q=enemy._fusion?.pressure;
   if(q){
-   const actorKeys=['id','kind','_quimeraMinion','roomId','x','y','w','h','hp','max','vx','vy','facing','age','mode','clock','cooldown','serial','contactDmg','attackDamage','color','_coopSyncId','_coopVisit','flash','stun','invuln','hitDash','leapFrom','leapTo'];
+   const actorKeys=['id','kind','_quimeraMinion','roomId','x','y','w','h','hp','max','vx','vy','facing','age','mode','clock','cooldown','serial','contactDmg','attackDamage','color','_coopSyncId','_coopVisit','flash','stun','invuln','hitDash','leapFrom','leapTo','leapWarn'];
    out._fusion.pressure=Object.fromEntries(['phase','t','spawned','next','serial','starSerial','giftPending','notice'].filter(k=>q[k]!==undefined).map(k=>[k,q[k]]));
    out._fusion.pressure.minions=(q.minions||[]).map(m=>({...Object.fromEntries(actorKeys.filter(k=>m[k]!==undefined).map(k=>[k,m[k]])),...(m.target?{target:{x:m.target.x,y:m.target.y}}:{})}));
    out._fusion.pressure.stars=(q.stars||[]).map(s=>Object.fromEntries(['id','x','y','vy','life','age'].filter(k=>s[k]!==undefined).map(k=>[k,s[k]])));

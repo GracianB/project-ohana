@@ -1,4 +1,4 @@
-import {absorbQuimeraArenaHit} from './quimera-arena.js';
+import {absorbQuimeraArenaHit,quimeraArenaNavigation} from './quimera-arena.js';
 import {drawQuimeraSanctum} from './quimera-regalia.js';
 // OHANA V467 · MUNDO 1 · Dirección del jefe final (Quimera Ohana).
 // El cuerpo, las fases y los diez ataques viven en systems/fusion-boss.js. Este
@@ -74,7 +74,7 @@ export function updateWorld1BossDirector(g) {
     const A = FUSION_ATTACKS[b.attack] || { hero: "kilo", name: b.attack };
     d.card = { t: 0, max: 80, hero: A.hero, name: A.name, tip: ATTACK_CARDS[b.attack] || "", color: WORLD1_THEMES[A.hero]?.color || "#fff" };
     const hurt = p && num(p.health) / Math.max(1, num(p.maxHealth, 100)) < BOSS_FAIRNESS.mercyHp;
-    if (hurt && d.mercy < BOSS_FAIRNESS.maxMercy) { b.clock = num(b.clock) + BOSS_FAIRNESS.mercyWarn; d.mercy++; }
+    if (hurt && d.mercy < BOSS_FAIRNESS.maxMercy) { b.clock = num(b.clock) + BOSS_FAIRNESS.mercyWarn;b.warnMax=b.clock; d.mercy++; }
     g.onWorld1Beat?.("boss-attack", A.hero, b.attack);
   }
   d.prevMode = b.mode;
@@ -131,13 +131,19 @@ function bars(ctx, W, H, k) { const h = H * 0.11 * clamp(k, 0, 1); ctx.fillStyle
 // minimap on normal desktop viewports. Fight prompts remain at screen top.
 // Canvas text is invisible to assistive technology. Announce coarse HP bands
 // (10% increments) rather than every hit, so screen readers are not flooded.
-export function world1BossAccessibleText(e) {
+export function quimeraSupportText(g){
+ if(!g?.boss?._fusionBoss)return '';
+ const guard=g.quimeraArena?.shield>0,chain=g._quimeraStarPocket?.chain||0;
+ return (guard?' Escudo de un golpe activo.':'')+(chain?' Constelación: '+chain+' de 3 estrellas.':'');
+}
+
+export function world1BossAccessibleText(e,g={}) {
   if(!e?._fusionBoss) return "";
   const phase = Math.max(1, Math.min(4, Math.floor(num(e.phase,1))));
   const health = Math.max(0, Math.min(100,
     Math.ceil(clamp(num(e.hp) / Math.max(1, num(e.max,1)),0,1)*10)*10));
   const b=e._fusion||{},hint=b.mode==='warn'?`${FUSION_ATTACKS[b.attack]?.name||''}. ${ATTACK_CARDS[b.attack]||''}.`:b.mode==='special'?`${b.special?.name||''}. Lee las zonas marcadas.`:b.mode==='rest'?'Núcleo abierto. Contraataca.':'';
-  return `Quimera Ohana. Fase ${phase} de 4. Vida aproximada: ${health} por ciento.`+(hint?' '+hint:'');
+  return `Quimera Ohana. Fase ${phase} de 4. Vida aproximada: ${health} por ciento.`+(hint?' '+hint:'')+quimeraSupportText(g);
 }
 
 // Only the final encounter may widen a compact viewport. The player and the
@@ -155,7 +161,7 @@ export function world1BossHealthLayout(W, H) {
   return {
     bw,
     bx: (W - bw) / 2,
-    by: H - Math.max(120, Math.min(170, H * 0.165))
+    by: W<640?140:H - Math.max(120, Math.min(170, H * 0.165))
   };
 }
 
@@ -172,14 +178,16 @@ export function drawWorld1BossOverlay(ctx, g, W, H, t = 0) {
     WORLD1_ORDER.forEach((h, i) => { const x0 = bx + bw * i / 10, x1 = Math.min(bx + bw * k, bx + bw * (i + 1) / 10); if (x1 > x0) { ctx.fillStyle = WORLD1_THEMES[h].color; ctx.fillRect(x0, by, x1 - x0, 14); } });
     ctx.fillStyle = "#fff"; for (const c of [0.7, 0.45, 0.2]) ctx.fillRect(bx + bw * c - 1, by - 4, 2, 22);
     ctx.font = "bold 15px sans-serif"; ctx.fillText(`QUIMERA OHANA · FASE ${num(e.phase, 1)}/4`, W / 2, by - 16);
-    if(b.mode==='rest'){ctx.fillStyle='#b5f2db';ctx.font='700 11px sans-serif';ctx.fillText('NÚCLEO ABIERTO · CONTRAATACA',W/2,by+30);}
+    if(b.mode==='rest'){ctx.fillStyle='#b5f2db';ctx.font='700 11px sans-serif';ctx.fillText('NÚCLEO ABIERTO · CONTRAATACA',W/2,by+30);ctx.fillStyle='#28444c';ctx.fillRect(bx,by+41,bw,3);ctx.fillStyle='#b5ddc6';ctx.fillRect(bx,by+41,bw*clamp((b.rest||0)/(b.restMax||110),0,1),3);
+     const nav=quimeraArenaNavigation(g);if(nav&&!d.card){ctx.font='10px sans-serif';ctx.fillStyle='#bacac7';ctx.fillText((nav.direction==='left'?'‹ ':nav.direction==='right'?'› ':'')+nav.label+(nav.ready?' · listo':' · '+nav.cooldown+' s'),W/2,by+59,bw+90);}}
+    if(b.mode!=='special'&&quimeraSupportText(g)){ctx.fillStyle='#d8d6af';ctx.font='10px sans-serif';ctx.fillText(quimeraSupportText(g).trim(),W/2,by-35,Math.min(W-24,600));}
 
   }
   // Rótulo de ataque (cinemático, breve): emblema del héroe imitado + consejo.
   if (d.card) {
-    const c=d.card,a=Math.min(1,c.t/8,(c.max-c.t)/12),y=W<640?218:H*.16,cw=Math.min(560,W-24),left=(W-cw)/2;
+    const c=d.card,a=Math.min(1,c.t/8,(c.max-c.t)/12),y=W<640?234:H*.16,cw=Math.min(560,W-24),left=(W-cw)/2;
     ctx.globalAlpha=a;ctx.fillStyle='rgba(10,6,20,.88)';ctx.fillRect(left,y-34,cw,68);
-    ctx.fillStyle=c.color;ctx.fillRect(left,y+30,cw*(1-c.t/c.max),3);
+    ctx.fillStyle=c.color;ctx.fillRect(left,y+30,cw*(b.mode==='warn'?clamp((b.clock||0)/(b.warnMax||72),0,1):0),3);
     drawHeroEmblem(ctx,c.hero,left+28,y,36,c.color,t);
     ctx.font='700 '+(W<500?14:18)+'px sans-serif';ctx.fillText(c.name.toUpperCase(),W/2+14,y-10,cw-76);
     ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.fillText(c.tip,W/2+14,y+13,cw-76);
@@ -188,11 +196,11 @@ export function drawWorld1BossOverlay(ctx, g, W, H, t = 0) {
   // Especial: bandas + coro de los diez ecos girando + nombre de fase.
   if (d.special) {
     const s = d.special, k = Math.min(1, s.t / 20);
-    ctx.globalAlpha=k;ctx.fillStyle='rgba(10,6,20,.86)';ctx.fillRect(16,W<640?184:H*.10,Math.max(0,W-32),54);
+    ctx.globalAlpha=k;ctx.fillStyle='rgba(10,6,20,.86)';ctx.fillRect(16,W<640?184:H*.10,Math.max(0,W-32),80);
     ctx.fillStyle='#ffd79c';ctx.font='700 '+Math.min(20,Math.round(W/22))+'px sans-serif';ctx.fillText(s.name||'',W/2,(W<640?184:H*.10)+17);
     ctx.fillStyle='#fff1dc';ctx.font='12px sans-serif';
     const tip=s.id==='eco'?'Sal de las columnas antes del impacto':s.id==='erupcion'?'Haz caso a las bandas: salta la baja, evita la alta':'Salta los ecos bajos; pasa bajo los altos';
-    ctx.fillText(tip,W/2,(W<640?184:H*.10)+39,Math.max(1,W-48));
+    ctx.fillText(s.line||'',W/2,(W<640?184:H*.10)+39,Math.max(1,W-48));ctx.fillStyle='#bad7d1';ctx.fillText(tip,W/2,(W<640?184:H*.10)+63,Math.max(1,W-48));
   }
   // Derrota: destellos que vuelan a cada héroe.
   if (d.defeat) {

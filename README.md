@@ -1,3 +1,5 @@
+**ohana-700** · [37 iteraciones del eclipse](docs/QUIMERA-V700-STAGES.md) · [validación](docs/V700-VALIDATION.json) · [publicación](docs/V700-PUBLICATION.json).
+
 **ohana-663**: [anatomía de Quimera](docs/QUIMERA-V663.md) · [validación](docs/V663-VALIDATION.json) · [publicación](docs/V663-PUBLICATION.json).
 
 Actualización **ohana-662**: [refuerzos del eclipse](docs/QUIMERA-V662.md), [validación](docs/V662-VALIDATION.json) y [publicación](docs/V662-PUBLICATION.json), con siluetas y señales diferenciadas.

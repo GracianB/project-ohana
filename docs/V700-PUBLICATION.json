@@ -1,0 +1,20 @@
+{
+  "release": "ohana-700",
+  "sourceBranch": "codex/quimera-700",
+  "preservedBaseCommit": "c37f1065d4dd0cd1b68c61c9a6f8951815e12fba",
+  "iterations": 37,
+  "runtimeManifestSha256": "eb8f4085bace484f3200e459e201930f28fcc14cf7dd3c466b0811223d4fcc5f",
+  "githubPages": "https://gracianb.github.io/project-ohana/?release=700",
+  "preview": "https://gracianb.github.io/project-ohana/previews/quimera-design.html?release=700&phase=4&attack=rayos",
+  "netlify": "https://project-ohana-multiplayer.netlify.app",
+  "method": "one skip-ci commit; one manual Pages dispatch; promote the exact tested Netlify candidate",
+  "rollbackDeploy": "6afd9baaad287170dcfefd8f",
+  "status": "local acceptance passed; final public checks reported in delivery",
+  "publicCandidate": {
+    "deployId": "6afdd447411e6985bb47a3bb",
+    "url": "https://6afdd447411e6985bb47a3bb--project-ohana-multiplayer.netlify.app",
+    "runtimeFilesMatched": 59,
+    "browserStudioVerified": true,
+    "twoPlayerAdventureAndVersus": true
+  }
+}

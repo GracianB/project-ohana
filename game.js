@@ -3784,7 +3784,7 @@ if (!bossA11y && boss?._fusionBoss) {
   document.body.appendChild(bossA11y);
 }
 if (bossA11y) {
-  const accessibleBoss = world1BossAccessibleText(boss);
+  const accessibleBoss = world1BossAccessibleText(boss,game);
   if (bossA11y.textContent !== accessibleBoss) bossA11y.textContent = accessibleBoss;
   lastAnnouncedQuimeraPhase = boss?._fusionBoss ? Number(boss.phase) : null;
 }
@@ -3797,6 +3797,7 @@ if(guardianView&&game.running){ctx.save();const layout=gauntletHudLayout(ctx,gua
 if(!guardianA11y&&guardianText){guardianA11y=document.createElement("span");guardianA11y.id="world1-guardian-a11y";guardianA11y.setAttribute("role","status");guardianA11y.setAttribute("aria-live","polite");guardianA11y.setAttribute("aria-atomic","true");guardianA11y.style.cssText="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0";document.body.appendChild(guardianA11y);}
 if(guardianA11y&&guardianA11y.textContent!==guardianText)guardianA11y.textContent=guardianText;
 document.body.classList.toggle("boss-fight", !!boss);
+document.body.classList.toggle("quimera-fight",!!boss?._fusionBoss&&game.running&&!world1CineActive(game));
 if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
 if (boss) {
 const phase = bossPhaseProfile(boss.phase);

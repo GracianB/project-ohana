@@ -126,7 +126,7 @@ export function updateFusionBoss(e, g, helpers = {}) {
   e.x = clamp(e.x, A.left, A.right - e.w);
   e.y = WORLD1_FLOOR - e.h + (b.mode === "leap" ? -Math.sin(Math.PI * clamp(b.clock / 50, 0, 1)) * 260 : 0);
   if (b.mode === "intro") {
-    if (--b.clock <= 0) { b.mode = "rest"; b.rest = 40; e.telegraph = false; helpers.showBossMessage?.("QUIMERA OHANA", "Diez voces en un solo cuerpo. Golpéala entre ataques: cada fase libera un movimiento especial."); }
+    if (--b.clock <= 0) { b.mode = "rest"; b.rest = 40;b.restMax=40; e.telegraph = false; helpers.showBossMessage?.("QUIMERA OHANA", "Diez voces en un solo cuerpo. Golpéala entre ataques: cada fase libera un movimiento especial."); }
     return true;
   }
   if (b.mode === "special") { updateSpecial(e, b, g, hurt, helpers); return true; }
@@ -148,7 +148,7 @@ function finishAttack(e, b) {
   b.mode = "rest"; b.attack = null;
   // En fase 4 encadena dos ataques de cada tres.
   b.combo = (b.combo + 1) % 3;
-  b.rest = [0, 100, 92, 84, 78][e.phase];
+  b.rest = [0, 100, 92, 84, 78][e.phase];b.restMax=b.rest;
   e.vulnerable=true;
 }
 
@@ -272,7 +272,7 @@ function updateSpecial(e, b, g, hurt, helpers) {
     const i = Math.floor((T - 80) / 30), hero = Object.keys(WORLD1_THEMES)[i % 10], dir = i % 2 ? 1 : -1;
     pushShot(b, { k: "echo", hero, x: clamp(pcx(p)-dir*680,A.left+40,A.right-40), y: i % 3 === 2 ? WORLD1_FLOOR - 170 : WORLD1_FLOOR - 38, vx: dir * 10, vy: 0, r: 30, delay:42, life:Math.min(120,s.length-T-42), dmg: 15, col: WORLD1_THEMES[hero].color });
   }
-  if (T >= s.length) { b.mode = "rest"; b.rest = 110; b.special = null; e.telegraph = false; g.storyLine = ""; }
+  if (T >= s.length) { b.mode = "rest"; b.rest = 110;b.restMax=110; b.special = null; e.telegraph = false; g.storyLine = ""; }
 }
 
 export function fusionBossSnapshot(e) {

@@ -12,11 +12,15 @@ function dropStar(q,x,y){
 }
 export function collectQuimeraStars(g){
  const e=g?.boss,q=e?._fusion?.pressure,p=g?.player;if(!q||!p||p.dead||e.hp<=0)return 0;
- if(g._quimeraStarPocket?.boss!==e)g._quimeraStarPocket={boss:e,taken:new Set(),burst:0,chain:0};
- const pocket=g._quimeraStarPocket;if(pocket.burst>0)pocket.burst--;let n=0;
+ if(g._quimeraStarPocket?.boss!==e)g._quimeraStarPocket={boss:e,taken:new Set(),burst:0,chain:0,lures:new Map()};
+ const pocket=g._quimeraStarPocket;pocket.lures||=new Map();if(pocket.burst>0)pocket.burst--;let n=0;
  for(const s of q.stars){
-  if(s.life<=0||pocket.taken.has(s.id)||Math.hypot(clamp(s.x,p.x,p.x+p.w)-s.x,clamp(s.y,p.y,p.y+p.h)-s.y)>24)continue;
-  pocket.taken.add(s.id);pocket.burst=28;pocket.chain=((pocket.chain||0)+1)%3;n++;
+  if(s.life<=0||pocket.taken.has(s.id)){pocket.lures.delete(s.id);continue;}
+  let local=pocket.lures.get(s.id)||s;const tx=clamp(local.x,p.x,p.x+p.w),ty=clamp(local.y,p.y,p.y+p.h),distance=Math.hypot(tx-local.x,ty-local.y);
+  const obstructed=(g.platforms||[]).some(v=>!v.oneWay&&v.x<Math.max(tx,local.x)&&v.x+v.w>Math.min(tx,local.x)&&v.y<Math.max(ty,local.y)&&v.y+(v.h||18)>Math.min(ty,local.y));
+  if(s.age>=30&&distance>24&&distance<72&&!obstructed){const step=Math.min(1.8,distance);local={x:local.x+(tx-local.x)/distance*step,y:local.y+(ty-local.y)/distance*step};pocket.lures.set(s.id,local);}
+  if(Math.hypot(clamp(local.x,p.x,p.x+p.w)-local.x,clamp(local.y,p.y,p.y+p.h)-local.y)>24)continue;
+  pocket.lures.delete(s.id);pocket.taken.add(s.id);pocket.burst=28;pocket.chain=((pocket.chain||0)+1)%3;n++;
   if(Number.isFinite(p.health)&&Number.isFinite(p.maxHealth))p.health=Math.min(p.maxHealth,p.health+QUIMERA_PRESSURE.starHeal);
   p.invuln=Math.max(p.invuln||0,18);
   // Only nearby ordinary projectiles disperse. Columns and phase specials remain.
@@ -25,6 +29,7 @@ export function collectQuimeraStars(g){
   if(g.quimeraArena&&pocket.chain===0){if((g.quimeraArena.shield||0)<90)g.quimeraArena.shieldSource='constellation';g.quimeraArena.shield=Math.max(g.quimeraArena.shield||0,90);g.quimeraArena.shieldBurst=28;}
   if(g.quimeraArena)g.quimeraArena.message={text:pocket.chain===0?'CONSTELACIÓN · Tres estrellas te protegen de un golpe':'ESTRELLA ALIADA · Hasta 8 de vida · Constelación '+pocket.chain+'/3',life:150};
  }
+ for(const id of pocket.lures.keys())if(!q.stars.some(s=>s.id===id&&s.life>0))pocket.lures.delete(id);
  return n;
 }
 export function updateQuimeraPressure(e,g,helpers={}){
@@ -46,7 +51,7 @@ export function updateQuimeraPressure(e,g,helpers={}){
  const quota=QUIMERA_PRESSURE.phaseQuota[e.phase]||0;
  if(q.spawned<quota&&q.minions.length<QUIMERA_PRESSURE.aliveCap&&q.t>=q.next){
   const serial=++q.serial,flying=serial%2===0,side=serial%2?1:-1,h=flying?36:42;let x=clamp(p.x+side*460,A.left+60,A.right-100);if(Math.abs(x-p.x)<280)x=clamp(p.x-side*460,A.left+60,A.right-100);
-  const m={id:'quimera-echo-'+serial,kind:flying?'eclipse-watcher':'eclipse-hunter',_quimeraMinion:true,roomId:'w1-final',x,y:F-h-(flying?170:0),w:38,h,hp:flying?38+e.phase*5:44+e.phase*7,max:flying?38+e.phase*5:44+e.phase*7,vx:0,vy:0,facing:-side,age:0,mode:'spawn',clock:QUIMERA_PRESSURE.spawnWarning,cooldown:70,serial,attackDamage:9+Math.floor(e.phase/2),contactDmg:0,color:flying?'#b59acc':'#8aa6b2',_coopSyncId:100000+serial,_coopVisit:Math.floor(g.coopRoomVisit||0)};
+  const m={id:'quimera-echo-'+serial,kind:flying?'eclipse-watcher':'eclipse-hunter',_quimeraMinion:true,roomId:'w1-final',x,y:F-h-(flying?170:0),w:38,h,hp:flying?38+e.phase*5:44+e.phase*7,max:flying?38+e.phase*5:44+e.phase*7,vx:0,vy:0,facing:-side,age:0,mode:'spawn',clock:QUIMERA_PRESSURE.spawnWarning,cooldown:70,serial,attackDamage:9+Math.floor(e.phase/2),contactDmg:0,leapWarn:e.phase>=3,color:flying?'#b59acc':'#8aa6b2',_coopSyncId:100000+serial,_coopVisit:Math.floor(g.coopRoomVisit||0)};
   q.minions.push(m);g.enemies.push(m);q.spawned++;q.next=q.t+180;
  }
  for(const m of q.minions){
@@ -76,7 +81,7 @@ export function updateQuimeraPressure(e,g,helpers={}){
    if(--m.clock<=0){m.mode='wait';m.cooldown=110;m.vx=0;}continue;
   }
   m.cooldown=Math.max(0,m.cooldown-1);
-  if(flying){m.y=F-205+Math.sin(m.age*.025+m.serial)*14;m.vx=Math.sign(px-m.x)*.65;}else{m.y=F-m.h;m.vx=Math.abs(px-m.x)>120?Math.sign(px-m.x)*1.4:0;}
+  if(flying){m.y=F-205+Math.sin(m.age*.025+m.serial)*14;const range=Math.abs(px-m.x);m.vx=range>320?Math.sign(px-m.x)*.65:range<190?-Math.sign(px-m.x)*.65:0;}else{m.y=F-m.h;m.vx=Math.abs(px-m.x)>120?Math.sign(px-m.x)*1.4:0;}
   m.x=clamp(m.x+m.vx,A.left,A.right-m.w);
   const occupied=q.minions.some(other=>other!==m&&['wind','dash','leap'].includes(other.mode));
   if(m.cooldown<=0&&b.mode==='rest'&&!occupied){m.mode='wind';m.clock=flying?48:42;m.target={x:px,y:py};m.vx=0;}
@@ -90,7 +95,7 @@ export function drawQuimeraMinion(c,m,cam,t=0,reduce=false){
  const oval=(x,y,rx,ry,color,angle=0)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,TA);c.fill();};
  c.save();
  if(warn&&m.target){
-  const tx=x,floor=F-(cam.y||0),k=1-clamp(m.clock/(watcher?48:42),0,1);
+  const tx=!watcher&&m.leapWarn?clamp(clamp(m.target.x-m.w/2,m.x-330,m.x+330),A.left,A.right-m.w)+m.w/2-(cam.x||0):x,floor=F-(cam.y||0),k=1-clamp(m.clock/(watcher?48:42),0,1);
   if(!watcher){oval(tx,floor-2,27+9*k,6,'#d3af8640');for(const side of[-1,1])oval(tx+side*17,floor-3,4,2,'#e8c79588',side*.3);}
   else{const tx=m.target.x-(cam.x||0),ty=m.target.y-(cam.y||0);for(let i=0;i<4;i++){const a=i*TA/4;oval(tx+Math.cos(a)*19,ty+Math.sin(a)*19,2,4,'#d6b6c588',a);}}
  }
@@ -122,9 +127,10 @@ export function drawQuimeraMinion(c,m,cam,t=0,reduce=false){
  c.restore();
 }
 export function drawQuimeraStars(c,g,cam,t=0,reduce=false){
+ const baseAlpha=c.globalAlpha;
  const q=g?.boss?._fusion?.pressure;if(!q||g.boss.hp<=0)return;const taken=g._quimeraStarPocket?.taken;
- c.save();for(const s of q.stars){if(s.life<=0||taken?.has(s.id))continue;const x=s.x-(cam.x||0),y=s.y-(cam.y||0)+(reduce?0:Math.sin(t*.06+s.id)*3);const halo=c.createRadialGradient(x,y,1,x,y,26);halo.addColorStop(0,'#f8d99455');halo.addColorStop(1,'#f8d99400');c.fillStyle=halo;c.beginPath();c.ellipse(x,y,26,26,0,0,TAU);c.fill();c.fillStyle='#f1dfad';c.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*TAU/10,r=i%2?5:12;i?c.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r):c.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}c.closePath();c.fill();c.fillStyle='#664869';c.beginPath();c.ellipse(x-3,y-1,1,1.6,0,0,TAU);c.ellipse(x+3,y-1,1,1.6,0,0,TAU);c.fill();}
- const pocket=g._quimeraStarPocket;if(pocket?.chain>0&&g.player){const p=g.player,x=p.x+p.w/2-(cam.x||0),y=p.y-12-(cam.y||0);for(let i=0;i<3;i++){c.fillStyle=i<pocket.chain?'#dfce9c':'#555367';c.beginPath();c.moveTo(x-12+i*12,y-3);c.lineTo(x-9+i*12,y);c.lineTo(x-12+i*12,y+3);c.lineTo(x-15+i*12,y);c.closePath();c.fill();}}
- if(pocket?.burst>0){const p=g.player,x=p.x+p.w/2-(cam.x||0),y=p.y+p.h/2-(cam.y||0),k=1-pocket.burst/28;c.globalAlpha=1-k;c.fillStyle='#efdaa5';for(let i=0;i<7;i++){const a=i*TAU/7,rr=reduce?28:15+k*45;c.beginPath();c.ellipse(x+Math.cos(a)*rr,y+Math.sin(a)*rr,2,4,a,0,TAU);c.fill();}}
+ c.save();for(const s of q.stars){if(s.life<=0||taken?.has(s.id))continue;const local=g._quimeraStarPocket?.lures?.get(s.id)||s,x=local.x-(cam.x||0),y=local.y-(cam.y||0)+(reduce?0:Math.sin(t*.06+s.id)*3);const lifeScale=.55+.45*Math.min(1,s.life/180),halo=c.createRadialGradient(x,y,1,x,y,26*lifeScale);halo.addColorStop(0,'#f8d99455');halo.addColorStop(1,'#f8d99400');c.fillStyle=halo;c.beginPath();c.ellipse(x,y,26*lifeScale,26*lifeScale,0,0,TAU);c.fill();c.fillStyle='#f1dfad';c.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*TAU/10,r=i%2?5:12;i?c.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r):c.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}c.closePath();c.fill();c.fillStyle='#664869';c.beginPath();c.ellipse(x-3,y-1,1,1.6,0,0,TAU);c.ellipse(x+3,y-1,1,1.6,0,0,TAU);c.fill();}
+ const pocket=g._quimeraStarPocket;if((pocket?.chain>0||g.quimeraArena?.shieldSource==='constellation'&&g.quimeraArena?.shield>0)&&g.player){const p=g.player,x=p.x+p.w/2-(cam.x||0),y=p.y-12-(cam.y||0);for(let i=0;i<3;i++){c.fillStyle=i<(g.quimeraArena?.shieldSource==='constellation'&&g.quimeraArena?.shield>0?3:pocket.chain)?'#dfce9c':'#555367';c.beginPath();c.moveTo(x-12+i*12,y-3);c.lineTo(x-9+i*12,y);c.lineTo(x-12+i*12,y+3);c.lineTo(x-15+i*12,y);c.closePath();c.fill();}}
+ if(pocket?.burst>0){const p=g.player,x=p.x+p.w/2-(cam.x||0),y=p.y+p.h/2-(cam.y||0),k=1-pocket.burst/28;c.globalAlpha=baseAlpha*(1-k);c.fillStyle='#efdaa5';for(let i=0;i<7;i++){const a=i*TAU/7,rr=reduce?28:15+k*45;c.beginPath();c.ellipse(x+Math.cos(a)*rr,y+Math.sin(a)*rr,2,4,a,0,TAU);c.fill();}}
  c.restore();
 }
