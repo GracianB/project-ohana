@@ -1,3 +1,4 @@
+import {drawQuimeraProjectiles,drawQuimeraCast} from './quimera-effects.js';
 import {drawQuimeraCreature} from './quimera-art.js';
 // Four-phase Echo encounter. Locked targets, shared visible danger geometry
 // and explicit recovery windows keep every stolen power readable.
@@ -10,16 +11,16 @@ export const FUSION_BOSS = Object.freeze({ hp: 2800, w: 230, h: 290, maxShots: 9
 export const FUSION_PHASES = Object.freeze([0.70, 0.45, 0.20]);
 // Ataques por fase (cada uno pertenece a un héroe).
 export const FUSION_ATTACKS = Object.freeze({
-  ola:       { hero: "kilo",    name: "Ola del ukelele",     warn: 72 },
-  plasma:    { hero: "stitcho", name: "Plasma cosido",       warn: 66 },
-  rayos:     { hero: "chispin", name: "Rayos en cadena",     warn: 78 },
-  medusas:   { hero: "cat",     name: "Lluvia de medusas",   warn: 72 },
-  embestida: { hero: "cuerno",  name: "Embestida prisma",    warn: 78 },
-  aliento:   { hero: "dragon",  name: "Aliento del hogar",   warn: 78 },
-  terremoto: { hero: "dino",    name: "Terremoto fósil",     warn: 78 },
-  geiseres:  { hero: "frita",   name: "Géiseres de aceite",  warn: 78 },
-  ruedas:    { hero: "pizza",   name: "Ruedas de pizza",     warn: 66 },
-  red:       { hero: "yomi",    name: "Red neuronal",        warn: 84 }
+  ola:       { hero: "kilo",    name: "Marea del silencio",     warn: 72 },
+  plasma:    { hero: "stitcho", name: "Lanzas del vacío",       warn: 66 },
+  rayos:     { hero: "chispin", name: "Cicatrices del trueno",     warn: 78 },
+  medusas:   { hero: "cat",     name: "Lluvia de espectros",   warn: 72 },
+  embestida: { hero: "cuerno",  name: "Carga del eclipse",    warn: 78 },
+  aliento:   { hero: "dragon",  name: "Aliento de ceniza",   warn: 78 },
+  terremoto: { hero: "dino",    name: "Ruptura ancestral",     warn: 78 },
+  geiseres:  { hero: "frita",   name: "Columnas del umbral",  warn: 78 },
+  ruedas:    { hero: "pizza",   name: "Coronas errantes",     warn: 66 },
+  red:       { hero: "yomi",    name: "Cerco de voces",        warn: 84 }
 });
 export const FUSION_PHASE_ATTACKS = Object.freeze({
   1: ["ola", "plasma", "rayos"],
@@ -56,6 +57,9 @@ export function fusionPhaseFor(hp, max) {
   return k > FUSION_PHASES[0] ? 1 : k > FUSION_PHASES[1] ? 2 : k > FUSION_PHASES[2] ? 3 : 4;
 }
 
+function burst(b,x,y,col,kind='spark',r=20){
+ b.fx??=[];if(b.fx.length>=32)b.fx.shift();b.fx.push({x,y,col,kind,r,age:0,id:b.shotSerial||0});
+}
 function pushShot(b, s) {
   if (b.shots.length >= FUSION_BOSS.maxShots) return;
   // A projectile keeps its source after the boss returns to rest or starts
@@ -104,7 +108,7 @@ export function updateFusionBoss(e, g, helpers = {}) {
   e.vx = 0; e.vy = 0;
   // Do not inflict one last projectile hit after the killing blow.
   // The boss director handles its defeat animation in the following tick.
-  if (e.hp <= 0) { b.shots.length = 0; return true; }
+  if (e.hp <= 0) { b.shots.length = 0;b.fx=[]; return true; }
   if (!p || p.dead) return true;
   // Cambio de fase → movimiento especial cinemático (invulnerable mientras dura).
   const phase = fusionPhaseFor(e.hp, e.max);
@@ -129,10 +133,10 @@ export function updateFusionBoss(e, g, helpers = {}) {
     const dx = pcx(p) - (e.x + e.w / 2);
     if (Math.abs(dx) > 360) e.x = clamp(e.x+Math.sign(dx)*3.4,A.left,A.right-e.w);
     e.facing = Math.sign(dx) || e.facing;
-    if (--b.rest <= 0) startAttack(e, b, p);
+    if (--b.rest <= 0) {startAttack(e, b, p);helpers.beep?.('whoosh');}
     return true;
   }
-  if (b.mode === "warn") { if (--b.clock <= 0) { b.mode = "attack"; b.clock = 0; e.telegraph = false; fireAttack(e, b, g, p); } return true; }
+  if (b.mode === "warn") { if (--b.clock <= 0) { b.mode = "attack"; b.clock = 0; e.telegraph = false; fireAttack(e, b, g, p);helpers.beep?.({ola:'ukulele',plasma:'plasma',rayos:'storm',medusas:'blink',embestida:'charge',aliento:'bite',terremoto:'quake',geiseres:'fryer',ruedas:'rollo',red:'caos'}[b.attack]);g.shake=Math.max(g.shake||0,g.reduceMotion?0:3); } return true; }
   if (b.mode === "attack" || b.mode === "leap" || b.mode === "charge") { tickAttack(e, b, g, p, hurt); return true; }
   return true;
 }
@@ -147,6 +151,7 @@ function finishAttack(e, b) {
 
 function fireAttack(e, b, g, p) {
   const ex = e.x + e.w / 2, ey = WORLD1_FLOOR-160, A = WORLD1_ARENA, target=b.target||{x:pcx(p),y:pcy(p)}, col = WORLD1_THEMES[FUSION_ATTACKS[b.attack].hero].color;
+  burst(b,ex,ey,col,'spark',24);
   switch (b.attack) {
     case "ola": for (let i = 0; i < 3; i++) for (const d of [-1, 1]) pushShot(b, { k: "ring", x: ex, y: WORLD1_FLOOR - 22, vx: d * (4 + i * 1.2), vy: 0, r: 22, life: 165 + i * 12, delay: i * 18, dmg: 12, col }); break;
     case "plasma": for (let i = -1; i <= 1; i++) { const dx = target.x - ex, dy = target.y - ey, a = Math.atan2(dy, dx) + i * .22; pushShot(b, { k: "orb", x: ex, y: ey, vx: Math.cos(a) * 6.5, vy: Math.sin(a) * 6.5, r: 14, life: 160, dmg: 13, col }); } break;
@@ -168,13 +173,14 @@ function tickAttack(e, b, g, p, hurt) {
     const next=e.x+b.chargeDir*(e.phase>=4?15:12),end=b.chargeTarget??(b.chargeDir>0?A.right-e.w:A.left);
     e.x=clamp(b.chargeDir>0?Math.min(next,end):Math.max(next,end),A.left,A.right-e.w);
     if(rectHits(fusionChargeBounds(e),p))hurt(20,FUSION_ATTACKS.embestida.name);
-    if (e.x===end||e.x<=A.left||e.x>=A.right-e.w) { g.shake = Math.max(g.shake || 0, g.reduceMotion ? 2 : 14); finishAttack(e, b); }
+    if (e.x===end||e.x<=A.left||e.x>=A.right-e.w) { burst(b,e.x+e.w/2,WORLD1_FLOOR-3,WORLD1_THEMES.cuerno.color,'ground',42); g.shake = Math.max(g.shake || 0, g.reduceMotion ? 2 : 14); finishAttack(e, b); }
     return;
   }
   if (b.mode === "leap") {
     b.clock--; const k = 1 - b.clock / 50;
     e.x = b.leapFrom + (b.leapTarget - b.leapFrom) * k;
     if (b.clock <= 0) {
+      burst(b,e.x+e.w/2,WORLD1_FLOOR-3,WORLD1_THEMES.dino.color,'ground',65);
       g.shake = Math.max(g.shake || 0, g.reduceMotion ? 3 : 20);
       for (const d of [-1, 1]) pushShot(b, { k: "wave", x: e.x + e.w / 2, y: WORLD1_FLOOR - 18, vx: d * 7, vy: 0, r: 26, life: 140, dmg: 16, col: WORLD1_THEMES.dino.color });
       if (rectHits({x:e.x-e.w*.1,y:WORLD1_FLOOR-30,w:e.w*1.2,h:30},p)) hurt(18, FUSION_ATTACKS.terremoto.name);
@@ -211,6 +217,7 @@ export function fusionShotHitsPlayer(s,p,A=WORLD1_ARENA){
 }
 export function updateFusionProjectilesOnly(e,g,hurt){if(e?._fusion)updateShots(e,e._fusion,g,hurt);}
 function updateShots(e, b, g, hurt) {
+  if(b.fx)b.fx=b.fx.filter(fx=>++fx.age<28);
   const p = g.player, A = WORLD1_ARENA;
   for (const s of b.shots) {
     if (s.delay > 0) { s.delay--; continue; }
@@ -222,7 +229,7 @@ function updateShots(e, b, g, hurt) {
     if (s.x < A.left - 120 || s.x > A.right + 120 || s.y>WORLD1_FLOOR+s.r+30) s.life = 0;
     if (!p || p.dead || s.hit) continue;
     const hit = fusionShotHitsPlayer(s,p,A);
-    if (hit) { s.hit = s.k !== "bolt" && s.k !== "geyser" && s.k !== "beam"; hurt(s.dmg, s.source || FUSION_ATTACKS[b.attack]?.name || "QUIMERA"); if (s.k === "bolt" || s.k === "geyser" || s.k === "beam") s.life = Math.min(s.life, 1); }
+    if (hit) { burst(b,s.x,Math.min(s.y,WORLD1_FLOOR-4),s.col,'spark',s.r||20);s.hit = s.k !== "bolt" && s.k !== "geyser" && s.k !== "beam"; hurt(s.dmg, s.source || FUSION_ATTACKS[b.attack]?.name || "QUIMERA"); if (s.k === "bolt" || s.k === "geyser" || s.k === "beam") s.life = Math.min(s.life, 1); }
   }
   b.shots = b.shots.filter((s) => s.life > 0 && !s.hit);
 }
@@ -231,7 +238,7 @@ function updateShots(e, b, g, hurt) {
 function startSpecial(e, b, g, phase, helpers) {
   const sp = FUSION_SPECIALS[phase];
   b.mode = "special"; b.special = { id: sp.id, name: sp.name, line: sp.line, t: 0, length: sp.length, phase };
-  b.shots = []; b.attack=null; b.target=null; b.marks=[];
+  b.shots = [];b.fx=[]; b.attack=null; b.target=null; b.marks=[];
   e.telegraph = true;
   g.flash = Math.max(g.flash || 0, g.reduceMotion ? 3 : 14); g.flashColor = "#fff0f8";
   g.shake = Math.max(g.shake || 0, g.reduceMotion ? 0 : 10);
@@ -280,6 +287,7 @@ export function drawFusionBoss(ctx, e, cam, t, reduce = false) {
   ctx.save(); ctx.lineJoin = "round"; ctx.lineCap = "round";
   if (formed < 1) drawIntroThreads(ctx, x, foot - 150, formed, tt);
   drawQuimeraCreature(ctx,e,cam,t,reduce);
+  drawQuimeraCast(ctx,e,cam,t,reduce);
   ctx.restore();
   drawFusionProjectiles(ctx, b, cam, t, reduce);
 }
@@ -342,71 +350,7 @@ export function drawFusionAttackTelegraphs(c,e,cam={x:0,y:0},t=0,reduce=false){
 }
 
 export function drawFusionProjectiles(ctx,b,cam,t=0,reduce=false){
- ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
- for(const s of b.shots||[]){
-  const x=s.x-cam.x,y=s.y-cam.y,box=fusionShotBounds(s),active=fusionShotActive(s),col=s.col||'#f7c17c';
-  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=2;
-  if(s.delay>0){
-   // A locked landing lane for meteors and a travel lane for arriving echoes.
-   ctx.globalAlpha=.22;
-   if(s.k==='meteor')ctx.fillRect(x-s.r,WORLD1_FLOOR-460-cam.y,s.r*2,460);
-   else if(s.k==='echo'){
-    const end=s.x+(s.vx||0)*Math.min(s.life,130),left=Math.min(s.x,end);
-    ctx.fillRect(left-cam.x,y-38,Math.abs(end-s.x)+30,76);
-   }
-   if(s.k==='meteor'){ctx.globalAlpha=.85;ctx.beginPath();ctx.ellipse(x,WORLD1_FLOOR-cam.y-4,s.r,6,0,0,Math.PI*2);ctx.stroke();}
-   continue;
-  }
-  if(['bolt','geyser','beam'].includes(s.k)){
-   const xx=box.x-cam.x,yy=box.y-cam.y;
-   ctx.globalAlpha=active?.8:.16;ctx.fillRect(xx,yy,box.w,box.h);
-   ctx.globalAlpha=active?1:.75;ctx.strokeRect(xx+1,yy+1,box.w-2,box.h-2);
-   if(active){
-    ctx.fillStyle='#fff0cf';
-    if(s.k==='beam')ctx.fillRect(xx,yy+box.h*.43,box.w,box.h*.14);
-    else if(s.k==='bolt'){
-     ctx.lineWidth=3;ctx.strokeStyle='#fff5d8';ctx.beginPath();
-     for(let k=0;k<=12;k++){const py=yy+box.h*k/12,px=x+(k===0||k===12?0:((k%2?1:-1)*s.r*.45));k?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.stroke();
-    }else for(let i=0;i<3;i++)ctx.fillRect(xx+box.w*(.15+i*.27),yy+7,4,box.h-10);
-   }
-   continue;
-  }
-  ctx.globalAlpha=1;
-  // Solid silhouette is exactly the circle/ellipse used for contact damage.
-  ctx.beginPath();ctx.ellipse(x,y,box.w/2,box.h/2,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#12192b';ctx.lineWidth=2;ctx.stroke();
-  ctx.save();ctx.beginPath();ctx.ellipse(x,y,Math.max(1,box.w/2-1),Math.max(1,box.h/2-1),0,0,Math.PI*2);ctx.clip();
-  // Layered facets stay clipped inside the actual collision silhouette.
-  const spin=reduce?0:(s.age||0)*.045;
-  ctx.globalAlpha=.26;ctx.fillStyle='#17233e';
-  ctx.beginPath();ctx.ellipse(x+s.r*.34,y+s.r*.32,s.r*.85,s.r*.78,spin,0,Math.PI*2);ctx.fill();
-  ctx.globalAlpha=.65;ctx.strokeStyle='#fff7dc';ctx.lineWidth=1;
-  ctx.beginPath();ctx.ellipse(x-s.r*.13,y-s.r*.14,s.r*.75,s.r*.67,0,Math.PI*1.1,Math.PI*1.8);ctx.stroke();
-  ctx.globalAlpha=1;
-  ctx.fillStyle='#fff0d4';ctx.strokeStyle='#fff0d4';ctx.lineWidth=2;
-  if(s.k==='ring'||s.k==='wave'){
-   ctx.beginPath();ctx.arc(x,y,s.r*.65,0,Math.PI*2);ctx.stroke();
-   ctx.beginPath();ctx.moveTo(x-s.r,y);ctx.quadraticCurveTo(x,y-s.r*.5,x+s.r,y);ctx.stroke();
-  }else if(s.k==='wheel'){
-   const spin=reduce?0:(s.age||0)*.13;
-   for(let i=0;i<5;i++){const a=spin+i*Math.PI*2/5;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*s.r,y+Math.sin(a)*s.r);ctx.stroke();}
-  }else if(s.k==='jelly'){
-   ctx.fillStyle='#27304f';ctx.fillRect(x-s.r,y+2,s.r*2,s.r);
-   for(let i=-1;i<=1;i++){const sway=reduce?0:Math.sin((s.age||0)*.1+i)*3;ctx.beginPath();ctx.moveTo(x+i*6,y+3);ctx.quadraticCurveTo(x+i*6+sway,y+s.r*.6,x+i*6-sway,y+s.r);ctx.stroke();}
-   ctx.fillStyle='#fff8dc';for(const side of [-1,1]){ctx.beginPath();ctx.ellipse(x+side*6,y-4,2,3,0,0,Math.PI*2);ctx.fill();}
-  }else if(s.k==='node'){
-   ctx.save();ctx.translate(x,y);ctx.rotate(reduce?Math.PI/4:Math.PI/4+Math.sin((s.age||0)*.04)*.16);
-   ctx.strokeRect(-8,-8,16,16);ctx.strokeRect(-3,-3,6,6);ctx.restore();
-   for(let i=0;i<4;i++){const a=i*Math.PI/2;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*11,y+Math.sin(a)*11);ctx.lineTo(x+Math.cos(a)*s.r,y+Math.sin(a)*s.r);ctx.stroke();}
-  }else if(s.k==='echo'){
-   ctx.beginPath();ctx.moveTo(x-18,y-18);ctx.lineTo(x+18,y);ctx.lineTo(x-18,y+18);ctx.closePath();ctx.stroke();
-  }else{
-   ctx.beginPath();ctx.arc(x-s.r*.22,y-s.r*.22,s.r*.4,0,Math.PI*2);ctx.fill();
-   ctx.beginPath();ctx.moveTo(x-s.r*.6,y+s.r*.4);ctx.lineTo(x+s.r*.4,y-s.r*.55);ctx.stroke();
-  }
-  ctx.restore();
- }
- ctx.restore();
+ drawQuimeraProjectiles(ctx,b,cam,t,reduce,fusionShotBounds,fusionShotActive);
 }
 
 // Capa de pantalla: bandas negras y rótulo durante la aparición y los especiales.

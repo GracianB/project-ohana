@@ -1,16 +1,18 @@
 // Cooperative engine progress is separate from the solo profile. The host
 // remains combat authority; either authenticated teammate can solve a puzzle.
 import {WORLD1_ROOMS,WORLD1_ORDER} from '../systems/world1-rooms.js';
+const finalKeys=new Set(['west','heart','east'].map(id=>'w1-final-eclipse-'+id));
 const empty=()=>({stations:{},secrets:{},encounters:{},seals:[]});
 const ids=(values,allowed)=>Array.isArray(values)?[...new Set(values.filter(id=>allowed(id)))]:[];
 const union=(a=[],b=[])=>[...new Set([...a,...b])];
 export function adventureRoomProgress(game){
- const roomId=game?.roomId,r=WORLD1_ROOMS[roomId];if(!r?.hero)return null;
+ const roomId=game?.roomId,r=WORLD1_ROOMS[roomId];if(r?.fusionBoss)return{roomId,stations:[],secrets:(game.secrets?.[roomId]||[]).filter(id=>finalKeys.has(id)),encounters:[],sealed:false};if(!r?.hero)return null;
  return {roomId,stations:(game.world1?.stations||[]).filter(s=>s.done&&s.kind!=='oven').map(s=>s.id),
  secrets:game.secrets?.[roomId]||[],encounters:game.clearedEncounters?.[roomId]||[],sealed:!!game.world1?.sealed};
 }
 export function mergeAdventureProgress(previous,payload,{roomId,host=false}={}){
  const r=WORLD1_ROOMS[roomId];
+ if(r?.fusionBoss&&payload?.roomId===roomId){const next=structuredClone(previous||empty());next.secrets[roomId]=union(next.secrets[roomId],ids(payload.secrets,id=>finalKeys.has(id)));return next;}
  if(!r?.hero||payload?.roomId!==roomId)return previous||empty();
  const next=structuredClone(previous||empty()),stations=new Set(r.seal.stations.filter(s=>s.kind!=='oven').map(s=>s.id));
  const stationIds=ids(payload.stations,id=>stations.has(id));
@@ -39,6 +41,7 @@ export function applyAdventureProgress(game,progress){
   game.secrets[room]=union(game.secrets[room],progress.secrets?.[room]);
   game.clearedEncounters[room]=union(game.clearedEncounters[room],progress.encounters?.[room]);
  }
+ game.secrets['w1-final']=union(game.secrets['w1-final'],(progress.secrets?.['w1-final']||[]).filter(id=>finalKeys.has(id)));
  game.world1Seals=WORLD1_ORDER.filter(h=>(game.world1Seals||[]).includes(h)||(progress.seals||[]).includes(h));
  if(!r?.hero||w?.room!==game.roomId){if(w?.statuesLit)w.statuesLit=(r.statues||[]).map(s=>game.world1Seals.includes(s.hero));return game.roomId==='w1-final';}
  const completed=new Set(game.world1Stations[game.roomId]);

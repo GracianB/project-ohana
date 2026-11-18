@@ -1,0 +1,51 @@
+{
+  "release": "ohana-658",
+  "status": "local acceptance passed",
+  "unitTests": {
+    "passed": 1978,
+    "failed": 0
+  },
+  "bossTests": 29,
+  "releaseGate": {
+    "runtimeModules": 426,
+    "resources": 497
+  },
+  "browserAcceptance": [
+    "20 art states, responsive framing and reduced-motion stability",
+    "four phases in desktop and 390/320px production arenas",
+    "ten warning and attack pairs",
+    "nine distinct projectile materials; read-only rendering and reduced-motion equality",
+    "bounded 90-projectile render batch",
+    "public preview uses the actual attack AI and never writes campaign progress",
+    "living eclipse: player tracking, fifty presences and reduced-motion stability",
+    "native keyboard E and mobile Use activate a real prism",
+    "real jump lands on the unlocked step at desktop and 390px mobile",
+    "prism path appears in actual serialized save"
+  ],
+  "effects": {
+    "maxImpactBursts": 32,
+    "expiryFrames": 28,
+    "clearedAtTransitionAndDefeat": true
+  },
+  "scope": "Boss damage, speed and schedules retained. New optional prism shields, physical routes and airborne currents. Arena access/starting placement use fixtures, followed by native interaction and physical jump. Not an earned full-campaign victory.",
+  "arenaTests": {
+    "passed": 7,
+    "physicalSteps": 9,
+    "prisms": 3,
+    "echoes": 50,
+    "shieldFrames": 180,
+    "cooldownFrames": 600,
+    "saveRoundTrip": true,
+    "coopWhitelist": true
+  },
+  "eclipseRendererMedianMs": 1.1000000014901161,
+  "eclipseMotionAndPurity": {
+    "medianMs": 1.1000000014901161,
+    "reduced": true,
+    "tracks": true,
+    "animates": true,
+    "echoes": 50,
+    "pure": true
+  },
+  "directPreviewCacheUpgrade": "verified old 657 worker -> 658, automatic document reload and new studio controls"
+}

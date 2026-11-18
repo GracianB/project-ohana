@@ -1,0 +1,28 @@
+{
+  "release": "ohana-658",
+  "kind": "single-commit final boss and interactive arena release",
+  "sourceBranch": "codex/quimera-eclipse-658",
+  "preservedBaseCommit": "de7fb991e9a16db2a33472a5eca4ac28b767667c",
+  "runtimeManifestSha256": "16b1636fdcc798d8a308c1fd521ba4a25191b281e56f139a43e6ab2e764f4a6b",
+  "netlify": {
+    "testedDeployId": "6afd1b8aad8acf4e374ca4f6",
+    "candidateUrl": "https://6afd1b8aad8acf4e374ca4f6--project-ohana-multiplayer.netlify.app",
+    "productionUrl": "https://project-ohana-multiplayer.netlify.app",
+    "promotion": "exact tested candidate restored",
+    "filesChecked": 54,
+    "nativeMobileStartAndContinue": true,
+    "twoPlayerAdventureAndVersus": true
+  },
+  "githubPages": {
+    "url": "https://gracianb.github.io/project-ohana/?release=658",
+    "workflow": "pages.yml",
+    "publicationMethod": "one manual workflow_dispatch after single squash integration"
+  },
+  "actionsBudget": {
+    "pushAndSquashSubject": "[skip ci]",
+    "intermediateActionsRuns": 0,
+    "plannedPagesDispatches": 1
+  },
+  "rollbackDeploy": "6afd113bf7596bf92f0204eb",
+  "directPreviewCacheUpgrade": "verified old 657 worker -> 658, automatic document reload and new studio controls"
+}
