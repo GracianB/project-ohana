@@ -1,3 +1,5 @@
+import {drawQuimeraIntent} from './quimera-telegraphs.js';
+import {updateQuimeraPressure} from './quimera-pressure.js';
 import {drawQuimeraProjectiles,drawQuimeraCast} from './quimera-effects.js';
 import {drawQuimeraCreature} from './quimera-art.js';
 // Four-phase Echo encounter. Locked targets, shared visible danger geometry
@@ -108,14 +110,15 @@ export function updateFusionBoss(e, g, helpers = {}) {
   e.vx = 0; e.vy = 0;
   // Do not inflict one last projectile hit after the killing blow.
   // The boss director handles its defeat animation in the following tick.
-  if (e.hp <= 0) { b.shots.length = 0;b.fx=[]; return true; }
-  if (!p || p.dead) return true;
+  if (e.hp <= 0) { updateQuimeraPressure(e,g,helpers);b.shots.length = 0;b.fx=[]; return true; }
+  if (!p || p.dead) {updateQuimeraPressure(e,g,helpers);return true;}
   // Cambio de fase → movimiento especial cinemático (invulnerable mientras dura).
   const phase = fusionPhaseFor(e.hp, e.max);
   if (phase > e.phase && b.mode !== "special") {
     e.phase = phase;
     if (!b.announced[phase]) { b.announced[phase] = true; startSpecial(e, b, g, phase, helpers); }
   }
+  updateQuimeraPressure(e,g,helpers);
   updateShots(e,b,g,hurt);
   if (b.mode === "intro" || b.mode === "special") e.invuln = Math.max(e.invuln || 0, 2);
   e.vulnerable = b.mode === "rest";
@@ -304,54 +307,8 @@ function drawIntroThreads(ctx, x, y, k, t) {
 }
 
 export function drawFusionAttackTelegraphs(c,e,cam={x:0,y:0},t=0,reduce=false){
- const b=e._fusion;if(!b||b.mode!=='warn'||!b.attack)return;
- const A=WORLD1_ARENA,col=WORLD1_THEMES[FUSION_ATTACKS[b.attack].hero].color,ox=cam.x||0,oy=cam.y||0;
- const ex=e.x+e.w/2,floor=WORLD1_FLOOR-oy,aim=b.aim||-1;
- c.save();c.lineCap='round';c.lineJoin='round';
- const zone=(x,y,w,h)=>{
-  c.save();c.strokeStyle=col;c.lineWidth=1.5;c.globalAlpha=.45;
-  if(h>w){for(let i=0;i<8;i++){const yy=y-oy+h*(i+.5)/8;c.beginPath();c.moveTo(x-ox+2,yy);c.lineTo(x-ox+5,yy+4);c.moveTo(x-ox+w-2,yy);c.lineTo(x-ox+w-5,yy+4);c.stroke();}}
-  else{for(let i=0;i<Math.min(18,Math.ceil(w/65));i++){const xx=x-ox+(i+.5)*w/Math.min(18,Math.ceil(w/65));c.beginPath();c.moveTo(xx-5,y-oy+h-3);c.lineTo(xx,y-oy+h-8);c.lineTo(xx+5,y-oy+h-3);c.stroke();}}
-  c.restore();c.globalAlpha=.85;c.strokeStyle=col;
- };
- const arrow=(x,y,dir)=>{c.beginPath();c.moveTo(x-dir*10,y-6);c.lineTo(x,y);c.lineTo(x-dir*10,y+6);c.stroke();};
- if(b.attack==='rayos'||b.attack==='geiseres')for(const x of b.marks||[]){
-  const height=b.attack==='rayos'?WORLD1_FLOOR:340;
-  zone(x-34,WORLD1_FLOOR-height,68,height);
-  c.beginPath();c.ellipse(x-ox,floor-3,34,7,0,0,Math.PI*2);c.stroke();
- }
- if(b.attack==='medusas')for(const x of b.marks||[]){zone(x-20,WORLD1_FLOOR-440,40,440);c.beginPath();c.moveTo(x-ox,floor-432);c.lineTo(x-ox,floor-404);c.stroke();arrow(x-ox,floor-401,1);}
- if(b.attack==='terremoto'){
-  const x=(b.leapTarget??e.x)+e.w/2;
-  zone(x-e.w*.6,WORLD1_FLOOR-18,e.w*1.2,18);
-  c.globalAlpha=.8;c.beginPath();c.ellipse(x-ox,floor-5,e.w*.6,13,0,0,Math.PI*2);c.stroke();
- }
- if(b.attack==='embestida'){
-  const box=fusionChargeBounds(e),end=b.chargeTarget??e.x+aim*900;
-  zone(Math.min(e.x,end)+e.w*.06,box.y,Math.abs(end-e.x)+box.w,box.h);
-  for(let i=1;i<=3;i++)arrow(ex-ox+aim*i*75,floor-70,aim);
- }
- if(b.attack==='ola'||b.attack==='ruedas'){
-  const dirs=b.attack==='ola'?[-1,1]:[aim];
-  for(const dir of dirs){zone(dir>0?ex:Math.max(A.left,ex-1100),WORLD1_FLOOR-(b.attack==='ola'?44:130),Math.min(1100,dir>0?A.right-ex:ex-A.left),b.attack==='ola'?44:130);arrow(ex-ox+dir*110,floor-24,dir);}
- }
- if(b.attack==='red'){
-  c.globalAlpha=.8;c.strokeStyle=col;c.lineWidth=2;c.setLineDash([7,7]);
-  for(const m of b.marks||[]){c.beginPath();c.arc(m.x-ox,m.y-oy,16,0,Math.PI*2);c.stroke();c.beginPath();c.moveTo(m.x-ox,m.y-oy);c.lineTo((b.target?.x??ex)-ox,(b.target?.y??WORLD1_FLOOR-30)-oy);c.stroke();}
- }
- if(b.attack==='plasma'||b.attack==='aliento'){
-  c.globalAlpha=.7;c.strokeStyle=col;c.lineWidth=2;c.setLineDash([9,8]);
-  if(b.attack==='plasma')for(let i=-1;i<=1;i++){
-   const target=b.target||{x:ex+aim*800,y:WORLD1_FLOOR-30};
-   const angle=Math.atan2(target.y-(WORLD1_FLOOR-160),target.x-ex)+i*.22;
-   c.beginPath();c.moveTo(ex-ox,WORLD1_FLOOR-160-oy);c.lineTo(ex-ox+Math.cos(angle)*1040,WORLD1_FLOOR-160-oy+Math.sin(angle)*1040);c.stroke();
-  }
-  else for(const i of[0,3,7]){
-   const angle=(aim>0?0:Math.PI)+(i-3.5)*.11*aim,vx=Math.cos(angle)*(6+i*.2),vy=Math.sin(angle)*2.2+.6;
-   c.beginPath();for(let age=0;age<=100;age+=5){const x=ex+aim*90+vx*age-ox,y=WORLD1_FLOOR-200+vy*age+.025*age*(age-1)-oy;age?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();
-  }
- }
- c.setLineDash([]);c.restore();
+ const attack=e?._fusion?.attack,def=FUSION_ATTACKS[attack];if(!def)return;
+ drawQuimeraIntent(c,e,cam,t,WORLD1_THEMES[def.hero].color,reduce);
 }
 
 export function drawFusionProjectiles(ctx,b,cam,t=0,reduce=false){

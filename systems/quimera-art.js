@@ -18,13 +18,13 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  const formed=b.mode==='intro'?clamp(1-num(b.clock)/Math.max(1,num(b.introMax,260))):1;
  const recoil=b.mode==='attack'?Math.sin(clamp(num(b.clock)/30)*Math.PI)*9:0;
  const bend=b.mode==='charge'?.18:b.mode==='leap'?-.12:W*.07;
- const breath=p.breathe,flow=Math.sin(T*.025),dark='#0b1428',rim=p.phase>=3?'#9bc4d3':'#688b9d';
+ const breath=p.breathe,flow=Math.sin(T*.025),dark='#0b1428',rim=p.phase>=3?'#a1abbc':'#738398';
  const path=(fill,fn)=>{c.fillStyle=fill;c.beginPath();fn();c.closePath();c.fill();};
  const oval=(x,y,rx,ry,col,rot=0)=>path(col,()=>c.ellipse(x,y,rx,ry,rot,0,TAU));
  const linear=(x,y,xx,yy,stops)=>{const g=c.createLinearGradient(x,y,xx,yy);stops.forEach(([at,col])=>g.addColorStop(at,col));return g;};
  const glow=(x,y,r,col)=>{const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,col);g.addColorStop(1,'#76e8e000');return g;};
  const line=(col,width,fn)=>{c.strokeStyle=col;c.lineWidth=width;c.beginPath();fn();c.stroke();};
- const flesh=linear(-100,-230,100,-60,[[0,'#526d80'],[.28,'#233d56'],[.65,'#14253f'],[1,'#09142a']]);
+ const flesh=linear(-100,-230,100,-60,[[0,'#48516b'],[.28,'#2a2d46'],[.65,'#171c32'],[1,'#090e1e']]);
  c.save();c.translate(num(e.x)-num(cam.x)+num(e.w,230)/2,num(e.y)-num(cam.y)+num(e.h,290));c.scale(e.facing===1?-1:1,1);c.globalAlpha*=formed;c.lineJoin='round';c.lineCap='round';
  oval(2,4,119,11,'#050c1b80');
  c.translate(recoil+(p.hurt?7:0),p.dead?37:breath);c.rotate(p.dead?.26:bend);
@@ -37,7 +37,7 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  for(const side of [1,-1]){
   c.save();c.translate(side*35,-202);c.scale(side,1);c.rotate(flow*.025-side*.06-(p.organ==='wing'?W*.18:0));
   const sweep=13+S*22;
-  path(linear(0,-95,154,83,[[0,'#9ab5bd'],[.14,'#4c7187'],[.42,'#253e59'],[.82,'#10233e'],[1,'#0d203900']]),()=>{
+  path(linear(0,-95,154,83,[[0,'#8994a9'],[.14,'#465270'],[.42,'#292d49'],[.82,'#141a30'],[1,'#0d203900']]),()=>{
    c.moveTo(-18,14);c.bezierCurveTo(6,-67,79,-98,161+sweep,-120);c.bezierCurveTo(111,-75,118,-31,183,-8);c.quadraticCurveTo(144,-12,127,3);c.quadraticCurveTo(151,35,162,50);c.quadraticCurveTo(109,14,100,26);c.quadraticCurveTo(125,65,113+flow*6,93);c.bezierCurveTo(102,60,63,60,52,32);c.quadraticCurveTo(32,55,19,75);c.quadraticCurveTo(24,30,-18,14);
   });
   // Two broad tissue highlights describe a fold without outlining every edge.
@@ -74,7 +74,7 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  // Fur separates into long, deliberate clumps with a quiet rim on the lit side.
  for(const side of [1,-1])for(let i=3;i>=0;i--){
   const x=side*(31+i*10),y=-234+i*19,lag=Math.sin(T*.035+i)*3;
-  path(linear(x-13,y-13,x+side*22,y+52,[[0,side<0?'#6f91a2':'#3c5c77'],[.38,'#253f59'],[1,'#0d2038']]),()=>{c.moveTo(x-side*13,y-18);c.bezierCurveTo(x+side*26,y-20,x+side*30+lag,y+11,x+side*19+lag,y+50);c.quadraticCurveTo(x+side*7,y+20,x-side*15,y+19);});
+  path(linear(x-13,y-13,x+side*22,y+52,[[0,side<0?'#73829d':'#494d6b'],[.38,'#253f59'],[1,'#0d2038']]),()=>{c.moveTo(x-side*13,y-18);c.bezierCurveTo(x+side*26,y-20,x+side*30+lag,y+11,x+side*19+lag,y+50);c.quadraticCurveTo(x+side*7,y+20,x-side*15,y+19);});
  }
  // Unequal forearms: the near arm reaches forward, the other braces its weight.
  for(const side of [1,-1]){
@@ -108,16 +108,20 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  // One continuous dark eye socket lies under the pronounced mask brow.
  path('#0a1930',()=>{c.moveTo(-38,-26);c.quadraticCurveTo(-19,-25,-11,-15);c.quadraticCurveTo(7,-24,31,-24);c.lineTo(23,-8);c.quadraticCurveTo(2,-10,-9,-4);c.quadraticCurveTo(-25,-13,-35,-9);});
  if(!p.dead)for(const side of [-1,1]){
-  const x=side<0?-26:13;
+  const x=side<0?-26:13,blink=reduce?0:Math.max(0,1-Math.abs((T%410)-390)/8);
+  c.save();c.translate(x,-16);c.scale(1,Math.max(.12,1-blink));c.translate(-x,16);
   path('#d3f7dd',()=>{c.moveTo(x-8,-19);c.lineTo(x+9,-16);c.lineTo(x+2,-11);c.lineTo(x-7,-14);});
-  line('#f0ffe8',1,()=>{c.moveTo(x-8,-19);c.lineTo(x+9,-16);});
+  oval(x,-16,1.8,3.5,'#253046');oval(x-3,-17,1.2,.8,'#faf0d5');c.restore();
  }
+ // Broken porcelain recesses give the mask depth without wire engravings.
+ for(const side of[-1,1])path('#37425a',()=>{const x=side*27;c.moveTo(x,-40);c.quadraticCurveTo(x+side*10,-33,x+side*5,-24);c.quadraticCurveTo(x-side*2,-31,x,-40);});
  // Long, solid cheek planes and a narrow split, rather than a cartoon mouth.
  path('#24425b',()=>{c.moveTo(-29,-3);c.quadraticCurveTo(-25,18,-13,34);c.lineTo(-10,9);c.lineTo(-20,-6);});
  const jaw=p.organ==='jaw'?W*8+p.strike*15:p.strike?4:0;
  path('#08172c',()=>{c.moveTo(-12,6);c.quadraticCurveTo(-1,1,17,4);c.lineTo(7,22+jaw);c.lineTo(-13,40+jaw*.3);c.quadraticCurveTo(-6,24,-12,6);});
  path('#c4d2c5',()=>{c.moveTo(-1,7);c.lineTo(7,4);c.quadraticCurveTo(7,19,0,24);});
  path('#9cb9bb',()=>{c.moveTo(-21,-50);c.quadraticCurveTo(-12,-72,-4,-88-S*14);c.quadraticCurveTo(8,-58,12,-47);c.lineTo(-4,-31);});
+ if(jaw>3)for(let i=0;i<2;i++)path('#c6c9be',()=>{const x=4+i*8;c.moveTo(x,12);c.lineTo(x+4,8);c.quadraticCurveTo(x+4,24+jaw*.25,x-2,28+jaw*.25);});
  // A short chestward beard dissolves with follow-through, not a fixed jaw plate.
  path(linear(-10,27,6,82,[[0,'#608699'],[1,'#31557600']]),()=>{c.moveTo(-23,29);c.quadraticCurveTo(-8,49,11,32);c.quadraticCurveTo(10,64,21+flow*5,80);c.quadraticCurveTo(-9,69,-23,29);});
  c.restore();

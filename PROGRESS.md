@@ -1,3 +1,7 @@
+## ohana-660 · Combate del eclipse
+
+Refuerzos finitos: cupos 1/2/2/3, máximo dos vivos; aparición de 72 cuadros, ataques anticipados y objetivos fijados. Estrellas recogibles con curación limitada y limpieza de proyectiles ordinarios. Nuevas formas de energía y huellas espectrales sin guías lineales; paleta oscura, máscara y ojo renovados. Estado de refuerzos compartido con autoridad del anfitrión.
+
 ## ohana-659 · Rayos, géiseres y barridos
 
 Retirados los paneles de color y sus contornos en ataques y avisos. Energía recortada a la misma geometría real de daño, con preparación, activación y movimiento reducido. Los tres especiales se pueden probar desde el estudio.

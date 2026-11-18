@@ -1,0 +1,22 @@
+// Final access and fighter placement are fixtures; attacks, defeat and pickups are native.
+import assert from'node:assert/strict';import fs from'node:fs/promises';import{chromium}from'playwright';import{startServer}from'./server.mjs';import{selectFinalFighter}from'./final-ritual-controls.mjs';
+const server=await startServer(0),browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'}),dir='test-results/v660',base=`http://127.0.0.1:${server.address().port}`;
+try{await fs.mkdir(dir,{recursive:true});const width=Number(process.env.PRESSURE_WIDTH||1280),p=await browser.newPage({viewport:{width,height:width<500?844:900},hasTouch:width<500,isMobile:width<500}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/?e2e=1');await p.locator('.oi-enter').click();
+ await p.evaluate(async()=>{localStorage.clear();const{WORLD1_ORDER}=await import('/systems/world1-rooms.js');localStorage.setItem('ohana-w1-seals-v1',JSON.stringify(WORLD1_ORDER));localStorage.setItem('ohana-keepsakes-v1',JSON.stringify(WORLD1_ORDER));const e=window.__OHANA_E2E;e.startWorld1('kilo');e.manualClock(true);e.loadRoom('w1-final');e.setPlayer(7300,1000);e.step(5);});
+ for(let i=0;i<25;i++){await selectFinalFighter(p,'kilo');await p.keyboard.press('Enter');const s=await p.evaluate(()=>{const e=window.__OHANA_E2E;e.setInvulnerable(600);return e.step(100);});if(s.boss&&!s.world1Cine&&!s.pendingWorld1Cine)break;}
+ await p.evaluate(()=>{const e=window.__OHANA_E2E,s=e.state();e.setInvulnerable(600);e.setPlayer(7800,1134-s.player.h);});
+ let pressure;for(let i=0;i<80;i++){pressure=await p.evaluate(()=>{window.__OHANA_E2E.step(10);return window.__OHANA_E2E.quimeraPressureState();});if(pressure?.minions.some(m=>m.mode!=='spawn'))break;}
+ assert.ok(pressure.minions.length);assert.ok(pressure.minions.length<=2);const serial=pressure.minions[0].serial,starBefore=Math.max(...pressure.stars.map(s=>s.id),0);await p.screenshot({path:`${dir}/reinforcement-${width}.png`});
+ const initial=await p.evaluate(()=>window.__OHANA_E2E.state());await p.keyboard.down('d');await p.evaluate(()=>window.__OHANA_E2E.step(1));await p.keyboard.up('d');let defeated=false;
+ for(let i=0;i<14;i++){
+  const target=(await p.evaluate(()=>window.__OHANA_E2E.quimeraPressureState())).minions.find(m=>m.serial===serial);if(!target){defeated=true;break;}
+  await p.evaluate(target=>{const e=window.__OHANA_E2E,s=e.state();e.setPlayer(target.x-s.player.w-18,1134-s.player.h);e.setInvulnerable(600);},target);
+  if(width<500)await p.locator('#touch [data-k="h"]').tap();else await p.keyboard.press('h');await p.evaluate(()=>window.__OHANA_E2E.step(28));
+ }
+ pressure=await p.evaluate(()=>window.__OHANA_E2E.quimeraPressureState());assert.ok(defeated||!pressure.minions.some(m=>m.serial===serial),'native H must defeat the spawned summon');
+ const dropped=pressure.stars.find(s=>s.id>starBefore);assert.ok(dropped,'defeating the summon leaves a real support star');const star=pressure.stars.find(s=>!pressure.taken.includes(s.id));assert.ok(star,'a phase support star remains available for the walking check');
+ const pocketBefore=pressure.taken.length;const state=await p.evaluate(()=>window.__OHANA_E2E.state()),direction=star.x>(state.player.x+state.player.w/2)?'d':'a';await p.keyboard.down(direction);
+ try{for(let i=0;i<260;i++){pressure=await p.evaluate(()=>{window.__OHANA_E2E.step(2);return window.__OHANA_E2E.quimeraPressureState();});if(pressure.taken.includes(star.id))break;}}finally{await p.keyboard.up(direction);}
+ assert.ok(pressure.taken.includes(star.id),'native walking collects the support star');assert.ok(pressure.taken.length>pocketBefore);const final=await p.evaluate(()=>window.__OHANA_E2E.state());assert.equal(final.evo,initial.evo);assert.equal(final.xp,state.xp);assert.equal(final.runtimeFaults,0);assert.deepEqual(errors,[]);await p.screenshot({path:`${dir}/star-collected-${width}.png`});
+ await fs.writeFile(`${dir}/native-pressure-${width}.json`,JSON.stringify({summon:serial,star:star.id,taken:pressure.taken,initialGrowth:{evo:initial.evo,xp:initial.xp},afterCombatGrowth:{evo:state.evo,xp:state.xp},finalGrowth:{evo:final.evo,xp:final.xp},runtimeFaults:final.runtimeFaults,errors,scope:'Synthetic final access/placement, native H defeat and native walking pickup, not a full campaign victory'},null,2));console.log('PASS V660: real summon, native H defeat, physical star pickup, no star XP grants and no runtime faults');
+}finally{await browser.close();server.closeAllConnections();server.close();}

@@ -1,0 +1,51 @@
+{
+  "release": "ohana-660",
+  "status": "local acceptance passed",
+  "unitTests": {
+    "passed": 1990,
+    "failed": 0
+  },
+  "pressureTests": 12,
+  "releaseGate": {
+    "runtimeModules": 429,
+    "resources": 500
+  },
+  "pressure": {
+    "phaseQuota": [
+      1,
+      2,
+      2,
+      3
+    ],
+    "aliveCap": 2,
+    "spawnWarningFrames": 72,
+    "starHealMaximum": 8,
+    "starLifeFrames": 900,
+    "starPoolMaximum": 6,
+    "ordinaryProjectilesDispersedMaximum": 2
+  },
+  "browserAcceptance": [
+    "20 Quimera art states and reduced-motion stability",
+    "four phases and ten warning/attack pairs in desktop/mobile production arena",
+    "native H defeats a real reinforcement; walking collects its support star",
+    "native touch attack defeats a reinforcement at 390px; walking collects a star",
+    "star pickup preserves growth earned by normal combat",
+    "eclipse player tracking, fifty echoes, immutable rendering and reduced-motion stability",
+    "physical prism route remains usable on desktop/mobile",
+    "energy clipping, open silhouettes and zero stroked guide calls"
+  ],
+  "coopAcceptance": [
+    "authenticated boss snapshot carries targetable summons and stars",
+    "guest render and hit targets reference the same summon objects",
+    "host applies cooperative summon impacts and reflects health in next snapshot",
+    "snapshots exclude transient and circular ability attachments",
+    "guests never advance spawn decisions and collect each personal star only once"
+  ],
+  "scope": "Synthetic final access, starting placement and phase/HP fixtures. Native attacks and walking pickups; not an earned full-campaign victory.",
+  "publicCandidate": {
+    "runtimeFilesMatched": 58,
+    "starPickupAndSummonAppearance": true,
+    "noRuntimeErrors": true,
+    "twoPlayerAdventureAndVersus": true
+  }
+}

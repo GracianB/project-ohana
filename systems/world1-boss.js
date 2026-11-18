@@ -104,11 +104,7 @@ export function drawWorld1BossTelegraphs(ctx, g, cam, t = 0) {
   const e = fusion(g); if (!e) return; const b = e._fusion || {};
   if (b.mode !== "warn") return;
   drawFusionAttackTelegraphs(ctx,e,cam,t,!!g.reduceMotion);
-  // A safe marker is shown only for stationary, locked ground columns.
-  const safe=safeLaneX(e,b);if(safe==null)return;
-  ctx.save();ctx.fillStyle='#b5f2db';ctx.textAlign='center';ctx.font='700 12px sans-serif';
-  ctx.fillRect(safe-num(cam?.x)-40,WORLD1_FLOOR-num(cam?.y)-4,80,4);
-  ctx.fillText('SIN COLUMNA',safe-num(cam?.x),WORLD1_FLOOR-num(cam?.y)-17);ctx.restore();
+
 }
 
 export function safeLaneX(e, b) {

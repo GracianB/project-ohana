@@ -6,25 +6,13 @@ const TAU=Math.PI*2;
 export function drawQuimeraProjectiles(c,b,cam,t,reduce,bounds,isActive){
  c.save();c.lineCap='round';c.lineJoin='round';
  const path=(fill,fn)=>{c.fillStyle=fill;c.beginPath();fn();c.closePath();c.fill();};
- const stroke=(color,width,fn)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();fn();c.stroke();};
  const ellipse=(x,y,rx,ry,fill)=>path(fill,()=>c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,TAU));
- // Velocity ribbons fade completely at the tail; they carry no collision.
- for(const s of b.shots||[]){
-  if(reduce||s.delay>0||s.hit||!['orb','fire','meteor','wheel','echo'].includes(s.k))continue;
-  const x=s.x-(cam.x||0),y=s.y-(cam.y||0),vx=s.vx||0,vy=s.vy||0;
-  for(let i=3;i>0;i--){c.globalAlpha=.025*i;c.strokeStyle=s.col||'#8cddd8';c.lineWidth=(s.r||20)*(.17+i*.09);c.beginPath();c.moveTo(x-vx*i*3,y-vy*i*3);c.quadraticCurveTo(x-vx*i,y-vy*i,x,y);c.stroke();}
- }
  c.globalAlpha=1;
  for(const s of b.shots||[]){
   const box=bounds(s),x=s.x-(cam.x||0),y=s.y-(cam.y||0),xx=box.x-(cam.x||0),yy=box.y-(cam.y||0),col=s.col||'#8cddd8',active=isActive(s),age=reduce?19:(s.age||0),r=s.r||20;
   if(s.hit||s.life<=0)continue;
   if(s.delay>0){
-   c.globalAlpha=.18;c.fillStyle=col;
-   if(s.k==='meteor'){stroke(col,1.5,()=>{c.moveTo(x,FLOOR-460-(cam.y||0));c.lineTo(x,FLOOR-420-(cam.y||0));});}
-   else if(s.k==='echo'){const end=s.x+(s.vx||0)*Math.min(s.life,130);stroke(col,1.5,()=>{c.moveTo(Math.min(s.x,end)-(cam.x||0),y);c.lineTo(Math.max(s.x,end)-(cam.x||0),y);});}
-   c.globalAlpha=.8;
-   if(s.k==='meteor')stroke(col,2,()=>c.ellipse(x,FLOOR-(cam.y||0)-4,r,6,0,0,TAU));
-   continue;
+   const yy=(s.k==='meteor'?FLOOR-4:s.y)-(cam.y||0),g=c.createRadialGradient(x,yy,0,x,yy,s.r||30);g.addColorStop(0,col);g.addColorStop(1,'#adbbd200');{c.globalAlpha=.45;c.fillStyle=g;c.beginPath();c.ellipse(x,yy,s.r||30,s.k==='meteor'?7:15,0,0,Math.PI*2);c.fill();}continue;
   }
   c.save();c.beginPath();
   const column=['bolt','geyser','beam'].includes(s.k);
@@ -40,12 +28,11 @@ export function drawQuimeraProjectiles(c,b,cam,t,reduce,bounds,isActive){
    // A pointed plasma lance, with a braided electrical interior.
    c.save();c.rotate(Math.atan2(s.vy||0,s.vx||1));
    path(g,()=>{c.moveTo(r,0);c.quadraticCurveTo(-r*.2,-r*.8,-r,-r*.65);c.lineTo(-r*.6,0);c.lineTo(-r,r*.65);c.quadraticCurveTo(-r*.2,r*.8,r,0);});
-   stroke('#ecfff3',1.8,()=>{c.moveTo(-r,0);c.lineTo(-r*.25,-r*.2);c.lineTo(0,r*.2);c.lineTo(r*.8,0);});c.restore();
+   path('#dfead6',()=>{c.moveTo(r*.7,0);c.quadraticCurveTo(0,-r*.35,-r*.45,0);c.quadraticCurveTo(0,r*.3,r*.7,0);});c.restore();
   }else if(s.k==='ring'||s.k==='wave'){
    // A travelling crest rolls over a foam lip, rather than a disc.
    c.save();c.scale(direction,1);
    path(g,()=>{c.moveTo(-r,r);c.bezierCurveTo(-r,-r*.2,-r*.2,-r, r*.6,-r*.8);c.quadraticCurveTo(r*.2,-r*.65,r*.1,-r*.2);c.quadraticCurveTo(r*.8,-r*.4,r,r);});
-   stroke('#f0fff0',2,()=>{c.moveTo(-r*.7,r*.15);c.bezierCurveTo(-r*.45,-r*.55,r*.2,-r*.75,r*.6,-r*.8);});
    for(let i=0;i<4;i++)ellipse(-r*.5+i*r*.35,r*.6+Math.sin(age*.2+i)*2,2.3,1.4,'#fffce4');c.restore();
   }else if(s.k==='fire'||s.k==='meteor'){
    c.save();c.rotate(Math.atan2(s.vy||0,s.vx||1));
@@ -55,13 +42,13 @@ export function drawQuimeraProjectiles(c,b,cam,t,reduce,bounds,isActive){
   }else if(s.k==='jelly'){
    c.save();
    path(g,()=>{c.moveTo(-r,1);c.quadraticCurveTo(-r*.8,-r,r*.1,-r);c.quadraticCurveTo(r,-r*.7,r,1);c.quadraticCurveTo(0,-r*.15,-r,1);});
-   for(let i=-2;i<=2;i++){const k=reduce?0:Math.sin(age*.13+i)*3;stroke(col,2,()=>{c.moveTo(i*r*.32,0);c.bezierCurveTo(i*r*.32+k,r*.3,i*r*.32-k,r*.65,i*r*.3,r);});}
+   for(let i=-2;i<=2;i++){const k=reduce?0:Math.sin(age*.13+i)*3;path(col,()=>{const xx=i*r*.32;c.moveTo(xx-1.5,0);c.bezierCurveTo(xx+k-2,r*.3,xx-k-1,r*.65,xx,r);c.bezierCurveTo(xx-k+2,r*.65,xx+k+2,r*.3,xx+1.5,0);});}
    for(const side of[-1,1])ellipse(side*5,-5,1.8,2.5,'#ecffeb');c.restore();
   }else if(s.k==='wheel'){
    // An incandescent saw-like corona with a dark negative-space centre.
    c.save();c.rotate(reduce?0:age*.15);
    path(g,()=>{for(let i=0;i<24;i++){const a=i*TAU/24,rr=i%2?r*.73:r;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}});
-   ellipse(0,0,r*.5,r*.5,'#192a45');stroke('#fff0c8',2,()=>c.arc(0,0,r*.58,0,TAU));c.restore();
+   ellipse(0,0,r*.5,r*.5,'#171b30');for(let i=0;i<6;i++){const a=i*TAU/6;ellipse(Math.cos(a)*r*.62,Math.sin(a)*r*.62,2.5,2.5,'#e6d6b2');}c.restore();
   }else if(s.k==='node'){
    c.save();c.rotate(reduce?0:age*.025);
    path(g,()=>{c.moveTo(0,-r);c.quadraticCurveTo(3,-4,r,0);c.quadraticCurveTo(3,4,0,r);c.quadraticCurveTo(-3,4,-r,0);c.quadraticCurveTo(-3,-4,0,-r);});
@@ -69,7 +56,7 @@ export function drawQuimeraProjectiles(c,b,cam,t,reduce,bounds,isActive){
   }else if(s.k==='echo'){
    c.save();c.scale(direction,1);
    path(g,()=>{c.moveTo(22,-7);c.quadraticCurveTo(18,-27,3,-24);c.lineTo(-6,-34);c.lineTo(-11,-21);c.quadraticCurveTo(-23,-16,-20,4);c.quadraticCurveTo(-29,19,-26,35);c.quadraticCurveTo(-4,23,12,24);c.quadraticCurveTo(1,9,22,-7);});
-   stroke('#ebffe8',1.5,()=>{c.moveTo(4,-10);c.lineTo(13,-12);});c.restore();
+   ellipse(5,-10,1.8,2.5,'#dce9d1');ellipse(13,-11,1.5,2,'#dce9d1');c.restore();
   }else ellipse(0,0,r*.75,r*.75,g);
   c.restore();c.restore();
  }
@@ -90,11 +77,6 @@ export function drawQuimeraCast(c,e,cam,t=0,reduce=false){
   const angle=i*TAU/5+time*.014,rad=14+(1-k)*35;
   c.beginPath();c.ellipse(organ.x+Math.cos(angle)*rad,organ.y+Math.sin(angle)*rad*.65,1.5,3,angle,0,TAU);c.fill();
  }
- if(b.mode==='warn'){
-  c.lineWidth=1.5;c.beginPath();c.arc(organ.x,organ.y,12+k*8,-Math.PI/2,-Math.PI/2+TAU*k);c.stroke();
- }else if(k>0){
-  c.globalAlpha=k*.5;c.lineWidth=2;c.beginPath();c.ellipse(organ.x,organ.y,16+(1-k)*45,10+(1-k)*24,0,0,TAU);c.stroke();
- }
  c.restore();
 }
 
@@ -104,7 +86,7 @@ function drawQuimeraImpacts(c,b,cam,reduce){
   const p=Math.max(0,Math.min(1,fx.age/28)),x=fx.x-(cam.x||0),y=fx.y-(cam.y||0),r=fx.r||22;
   c.save();c.translate(x,y);c.globalAlpha=(1-p)*.7;c.fillStyle=fx.col||'#a5e1d8';c.strokeStyle=fx.col||'#a5e1d8';
   if(fx.kind==='ground'){
-   c.lineWidth=2;c.beginPath();c.ellipse(0,0,r*(.5+p*2),5+p*6,0,0,TAU);c.stroke();
+   c.globalAlpha=(1-p)*.12;c.beginPath();c.ellipse(0,0,r*(.5+p*2),5+p*6,0,0,TAU);c.fill();c.globalAlpha=(1-p)*.7;
   }
   for(let i=0;i<7;i++){
    const a=i*TAU/7+(fx.id||0)*.7,d=reduce?r*.5:r*(.2+p*1.7),size=(1-p)*3;

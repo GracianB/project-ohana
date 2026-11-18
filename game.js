@@ -1,3 +1,4 @@
+import {drawQuimeraMinion,drawQuimeraStars,collectQuimeraStars} from './systems/quimera-pressure.js';
 import {updateQuimeraArena,interactQuimeraArena,quimeraArenaPrompt,drawQuimeraArena} from './systems/quimera-arena.js';
 import {updateKiloPresence} from './systems/kilo-presence.js';
 import {gardenInteractionPrompt} from './systems/michi-garden-life.js';
@@ -2321,9 +2322,11 @@ function updateEnemies() {
 if (!game.player) return;
 if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final'){
  const p=game.player,consumed=game._coopFinalConsumed||=new Set();
+ collectQuimeraStars(game);
  if(performance.now()-(game._coopFinalPacketAt||0)<750){
   for(const shot of game.coopFinalShots||[]){if(shot.life<=0)continue;shot.x+=shot.vx;shot.y+=shot.vy;shot.life--;if(p.invuln<=0&&aabb(p,shot)){hurtPlayer(shot.dmg,'GUARDIÁN');if(!['prism','lightning','geysers','ember'].includes(shot.gauntlet)){shot.life=0;consumed.add('g:'+shot.id);}}}
   const shots=[...(game.boss?._fusion?.shots||[])];updateFusionProjectilesOnly(game.boss,game,damage=>hurtPlayer(damage,'ECO'));for(const shot of shots)if(shot.hit||shot.life<=1)consumed.add('q:'+(game.boss?._coopSyncId||0)+':'+shot.id);
+  for(const m of game.boss?._fusion?.pressure?.minions||[]){if(m.hp>0&&m.mode==='dash'&&p.invuln<=0&&aabb(p,m))hurtPlayer(m.attackDamage||10,'Acechador del eclipse');}
   const e=game.finalGauntlet?.guardian;if(e?.hp>0&&e.contactDmg>0&&p.invuln<=0&&aabb(p,e))hurtPlayer(e.contactDmg,'GUARDIÁN');
  }
  while(consumed.size>2048)consumed.delete(consumed.values().next().value);
@@ -2352,7 +2355,7 @@ if (onlineCoop.advanceGuestCombat(game)) {
 game.bossFx?.update();
 game.viewW=camW();game.viewH=camH();
 game.combatDifficulty=readCombatDifficulty(game.roomId);
-game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t, {x:game.cam.x,y:game.cam.y,w:camW(),h:camH()});
+game.enemyDirector = game.boss?._fusionBoss?null:directEnemyEncounter(game.enemies, game.player, game.roomId, t, {x:game.cam.x,y:game.cam.y,w:camW(),h:camH()});
 updateChampions(game);
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
 if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
@@ -2386,6 +2389,7 @@ if (e.stun > 0) {
   }
 }
 
+if(e._quimeraMinion)continue;
 if (e.boss) {
   if (e.fell) {
     // Hold the defeated Queen on screen. The finale owns her fragmentation.
@@ -2986,6 +2990,7 @@ resolveEnemyContact(e);
 updateStitchoWebs(game);
 updateDinoHazards(game, (n) => hurtPlayer(n, "-" + n));
 game.enemies = game.enemies.filter((e) => {
+if(e._quimeraMinion)return e.hp>0;
 if (e.hp <= 0) onDinoFoeDeath(e);
 if (e.boss && e.hp <= 0) {
   if (!e.fell) {
@@ -3310,7 +3315,7 @@ drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChi
 if(!game.roomDef?.world1)drawIslandLandmarks(ctx,game,game.cam,t);
 drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,game,game.cam,t);
 const realmTerrain={frita:{id:'frita-market',groundTop:'#e5cfa5',ground:'#9c8492',edge:'#f7e8c4'},yomi:{id:'yomi-observatory',groundTop:'#d7e6de',ground:'#8ca7af',edge:'#e8f4eb'},pizza:{id:'pizza-harbor',groundTop:'#eacba5',ground:'#b09179',edge:'#fff0cd'},dino:{id:'fossil-valley',groundTop:'#d9deb9',ground:'#90a48a',edge:'#eff1ce'},cat:{id:'lunar-garden',groundTop:'#e4d5e4',ground:'#a598ab',edge:'#f3e6e5'},cuerno:{id:'prism-grove',groundTop:'#cbdca9',ground:'#93a684',edge:'#edf1cb'},dragon:{id:'ember-forge',groundTop:'#e4c4a4',ground:'#9c8070',edge:'#f5dbb3'}}[game.roomDef?.hero];
-const heroTerrain=game.roomDef?.fusionBoss?{...world,id:'quimera-sanctum',groundTop:'#567988',ground:'#182b42',edge:'#a3c4be',platOutline:'#14263e'}:realmTerrain?{...world,...realmTerrain}:game.roomDef?.hero==='stitcho'?{...world,id:'dock',groundTop:'#e2c6a0',ground:'#a78f77',edge:'#efe0b9',platOutline:'#466577'}:game.roomDef?.hero==='chispin'?{...world,id:'sanctuary',groundTop:'#f1e5ca',ground:'#a3b8bf',edge:'#fff3d8',platOutline:'#5a788e'}:world;
+const heroTerrain=game.roomDef?.fusionBoss?{...world,id:'quimera-sanctum',groundTop:'#465568',ground:'#10172a',edge:'#9aadb4',platOutline:'#14263e'}:realmTerrain?{...world,...realmTerrain}:game.roomDef?.hero==='stitcho'?{...world,id:'dock',groundTop:'#e2c6a0',ground:'#a78f77',edge:'#efe0b9',platOutline:'#466577'}:game.roomDef?.hero==='chispin'?{...world,id:'sanctuary',groundTop:'#f1e5ca',ground:'#a3b8bf',edge:'#fff3d8',platOutline:'#5a788e'}:world;
 if(!game.roomDef?.michiSanctuary)game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
 if(game.roomDef?.kiloChapter&&!game.roomDef?.composition){ctx.save();ctx.strokeStyle='#273329';ctx.lineWidth=2;for(const pl of game.platforms){if(pl.h>24||!visibleForRender(pl,game.cam,viewportW,viewportH))continue;const px=pl.x-game.cam.x,py=pl.y-game.cam.y;ctx.fillStyle='#e0c67f';ctx.fillRect(px,py,pl.w,5);ctx.strokeRect(px,py,pl.w,pl.h);}ctx.restore();}
 if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
@@ -3320,6 +3325,7 @@ drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 drawIslandSprings(ctx,game,game.cam,t);
 drawNestArena(ctx,game,game.cam,t);
 drawQuimeraArena(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
+drawQuimeraStars(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
 portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
@@ -3352,6 +3358,7 @@ for (const e of game.enemies) {
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
   if(drawChapterBossV2(ctx,e,game.cam,t,game.reduceMotion||reduceMotion)){}
+  else if(e._quimeraMinion)drawQuimeraMinion(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._fusionBoss)drawFusionBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._drummer)drawGroveGuardianBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
@@ -3392,7 +3399,7 @@ if (!game.finale) {
   ctx.restore();
 }
 if(game.world1Boss)drawWorld1BossTelegraphs(ctx,game,game.cam,t);
-if (!game.finale){drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);drawChampionSignals(ctx,game,game.cam);}
+if (!game.finale){if(!game.boss?._fusionBoss)drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);drawChampionSignals(ctx,game,game.cam);}
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
 // Network freshness is stable for this paint; asking it for each bolt also
@@ -4262,6 +4269,7 @@ combatTarget(){
  return {x:e.x,y:e.y,hp:e.hp};
 },
 setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
+quimeraPressureState(){const q=game.boss?._fusion?.pressure;return q?{phase:q.phase,t:q.t,spawned:q.spawned,minions:q.minions.map(m=>({...m})),stars:q.stars.map(s=>({...s})),taken:[...(game._quimeraStarPocket?.taken||[])],health:game.player.health,maxHealth:game.player.maxHealth}:null;},
 quimeraArenaState(){const s=game.quimeraArena;return{shield:s?.shield||0,cooldowns:{...s?.cooldowns},awakened:[...(s?.awakened||[])],platforms:game.platforms.filter(p=>p.quimeraStep).map(p=>({...p})),secrets:[...(game.secrets?.['w1-final']||[])]};},
 michiSanctuaryState(){return {guardianDefeated:!!game.clearedEncounters?.['w1-cat']?.includes('w1-cat-astral-v1'),zone:game.roomDef?.michiSanctuary?game.roomDef.michiSanctuary.zones.find(z=>game.player.x>=z.x&&game.player.x<z.x+z.w&&game.player.y+game.player.h>=z.y&&game.player.y+game.player.h<=z.y+z.h)?.id:null,album:game.world1Collect?.rooms?.cat,remaining:(game.world1CollectItems||[]).filter(m=>!game.world1Collect?.rooms?.cat?.found.includes(m.id)).map(m=>({...m}))};},
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},

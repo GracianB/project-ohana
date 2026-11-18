@@ -19,23 +19,28 @@ export function drawLivingEclipse(c,o){
   const a=i*TAU/100,flow=Math.sin(a*7+T*.009)*7+Math.sin(a*13-T*.013)*4,rr=r+12+p.breath+flow+p.warning*(8+Math.sin(a*5)*5);
   const xx=Math.cos(a)*rr,yy=Math.sin(a)*rr;i?c.lineTo(xx,yy):c.moveTo(xx,yy);
  }c.closePath();c.fill();
- c.strokeStyle=color;c.lineWidth=1.5;c.globalAlpha=.14+p.awake*.035;
+ c.globalAlpha=.65;
  // Short flame-shaped coronal streamers have independent follow-through.
  for(let i=0;i<64;i++){
   const a=i*TAU/64,rr=r+5+p.breath,length=8+Math.sin(i*17.1)*5+p.warning*13,lean=Math.sin(T*.011+i)*.045;
   c.save();c.rotate(a);c.fillStyle=i%3?'#8acbc91b':'#d4d7b32a';c.beginPath();c.moveTo(rr,-2.5);c.bezierCurveTo(rr+length*.7,-6,rr+length+5,lean*r,rr+length,4);c.quadraticCurveTo(rr+length*.3,2,rr,3);c.closePath();c.fill();c.restore();
  }
- // Three nested arcs rotate independently, never into a wireframe cage.
- for(let i=0;i<3;i++){const a=T*(i%2?-.001:.0013)+i*1.8;c.beginPath();c.ellipse(0,0,r+25+i*14,(r+25+i*14)*(.94+i*.02),0,a,a+1.2+p.warning*.6);c.stroke();}
  c.globalAlpha=1;
  // Eyelids are cut from the eclipse's shadow; the pupil follows the actual hero.
  const eyeY=r*.08,open=p.alive?(1-p.blink)*(.42+p.phase*.08+p.warning*.18)*p.intro:p.freed?.5:.13;
  c.save();c.beginPath();c.ellipse(0,eyeY,r*.62,Math.max(1,r*.30*open),-.04,0,TAU);c.clip();
- const iris=c.createRadialGradient(p.lookX,eyeY+p.lookY,4,p.lookX,eyeY+p.lookY,r*.44);iris.addColorStop(0,p.freed?'#b3d7c8':'#7bbfb8');iris.addColorStop(.45,'#2e606f');iris.addColorStop(1,'#0b2438');c.fillStyle=iris;c.fillRect(-r, -r,r*2,r*2);
- c.fillStyle='#0a1c30';c.beginPath();c.ellipse(p.lookX,eyeY+p.lookY,r*(p.special?.12:.08-p.warning*.035),r*.29,0,0,TAU);c.fill();
- c.fillStyle='#d3efd466';c.beginPath();c.ellipse(p.lookX-r*.06,eyeY+p.lookY-r*.14,r*.045,r*.06,-.3,0,TAU);c.fill();c.restore();
- // Eyelid margins breathe softly. Their quiet colors sit behind attack warnings.
- c.globalAlpha=.3;c.strokeStyle=color;c.lineWidth=2;c.beginPath();c.moveTo(-r*.63,eyeY);c.quadraticCurveTo(0,eyeY-r*.5*open,r*.63,eyeY-r*.04);c.stroke();c.globalAlpha=1;
+ // Deep sclera and a spherical, textured iris. Every fiber is a filled petal.
+ c.fillStyle='#080f20';c.fillRect(-r,-r,r*2,r*2);
+ const ix=p.lookX,iy=eyeY+p.lookY,ir=r*.30;
+ const iris=c.createRadialGradient(ix-ir*.2,iy-ir*.22,1,ix,iy,ir);iris.addColorStop(0,p.freed?'#c7d6b4':'#c0a07b');iris.addColorStop(.35,'#8c7c81');iris.addColorStop(.72,'#484e72');iris.addColorStop(1,'#152239');c.fillStyle=iris;c.beginPath();c.ellipse(ix,iy,ir,ir*1.05,0,0,TAU);c.fill();
+ for(let i=0;i<48;i++){
+  const a=i*TAU/48,inner=ir*.39,outer=ir*(.76+.18*Math.sin(i*31));
+  c.globalAlpha=.13;c.fillStyle=i%3?'#d4b88c':'#8e96b9';c.beginPath();c.moveTo(ix+Math.cos(a)*inner,iy+Math.sin(a)*inner);c.quadraticCurveTo(ix+Math.cos(a+.07)*ir*.7,iy+Math.sin(a+.07)*ir*.7,ix+Math.cos(a)*outer,iy+Math.sin(a)*outer);c.lineTo(ix+Math.cos(a+.035)*outer,iy+Math.sin(a+.035)*outer);c.closePath();c.fill();
+ }
+ c.globalAlpha=1;c.fillStyle='#060b18';c.beginPath();c.ellipse(ix,iy,r*(p.special?.09:.045-p.warning*.018),r*.29,0,0,TAU);c.fill();
+ // Two soft reflections and a translucent tear film follow the eye surface.
+ c.fillStyle='#e5dfc477';c.beginPath();c.ellipse(ix-ir*.32,iy-ir*.41,ir*.13,ir*.2,-.3,0,TAU);c.fill();c.fillStyle='#c8cedc44';c.beginPath();c.ellipse(ix+ir*.38,iy+ir*.33,ir*.08,ir*.07,0,0,TAU);c.fill();c.restore();
+ c.fillStyle='#66718c22';c.beginPath();c.moveTo(-r*.63,eyeY);c.quadraticCurveTo(0,eyeY-r*.5*open,r*.63,eyeY-r*.04);c.quadraticCurveTo(0,eyeY-r*.42*open,-r*.63,eyeY);c.closePath();c.fill();
  // Fifty independent presences, five for every character in the story.
  for(const q of ECLIPSE_ECHOES){
   const a=q.seed+T*(.0005+q.ring*.00008)*(q.id%2?1:-1),ring=r+45+q.ring*19;
