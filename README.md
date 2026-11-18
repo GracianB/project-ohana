@@ -1,3 +1,7 @@
+## ohana-658 · Quimera, el devorador de ecos
+
+Nueva silueta de máscara hueca, manto rasgado y extremidades asimétricas. Diez poderes con materiales propios, preparación y liberación sonoras, eclipse vivo con 50 ecos, tres prismas, nueve escalones, corrientes ascendentes y escudos; previsualización del ataque completo. [Diseño](docs/QUIMERA-V658.md) · [Validación](docs/V658-VALIDATION.json) · [Publicación](docs/V658-PUBLICATION.json).
+
 ## ohana-656 · Michi, Kilo y Quimera renovados
 
 Incluye el jardín, las cinco formas y el móvil de V655. Nuevos planos y acciones en la llegada, Polilla, diez voces y barca; cuatro transformaciones diferenciadas, texto legible y salto de escena nativo. Kilo recibe pelo, vestuario, rostro, ukelele y atención visual renovados. Quimera estrena cuerpo orgánico, melena espectral, alas translúcidas, corazón luminoso y santuario, con efectos ajustados a la geometría real de daño. [Diseño](docs/MICHI-CINEMA-KILO-V656.md) · [Validación](docs/V656-VALIDATION.json) · [Publicación](docs/V656-PUBLICATION.json).

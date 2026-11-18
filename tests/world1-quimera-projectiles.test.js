@@ -40,7 +40,7 @@ test("Quimera: projectiles preserve their author's name after the next attack st
   s.player.x = first.x + first.vx - s.player.w / 2;
   s.player.y = first.y + first.vy - s.player.h / 2;
   s.step();
-  assert.ok(s.hits.some(([, label]) => label === "Plasma cosido"),
+  assert.ok(s.hits.some(([, label]) => label === FUSION_ATTACKS.plasma.name),
     "damage label must remain the firing attack, not generic QUIMERA");
 });
 

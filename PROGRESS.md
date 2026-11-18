@@ -1,3 +1,7 @@
+## ohana-658 · Quimera y lenguaje de ataques
+
+Silueta, máscara, manto y animación sustituidos. Renderer propio para nueve materiales de proyectil y tres tipos de columna/barrido; señales de sonido y emisión. Corregida la salida anticipada que omitía el escenario final. El estudio público ejecuta preparación, liberación y recuperación con la IA real. El eclipse sigue al jugador con la mirada y reúne 50 ecos. Tres prismas activan nueve escalones persistentes, corrientes ascendentes y escudos temporales; sus rutas se comparten en cooperativo. Una entrega conjunta y una publicación de Pages.
+
 ## ohana-656 · Michi, Kilo y santuario de Quimera
 
 Planos propios y progresión determinista en seis escenas de Michi, reunión de los diez personajes, barca y transiciones diferenciadas de aire, ratón, magia y fantasma. Texto progresivo, controles nativos de continuar/saltar y movimiento reducido. Kilo recibe atención ambiental, rostro y ukelele refinados, pelo por mechones, trenzado y telas recortadas al dobladillo animado. Se reúne con V654 y V655 en una sola integración.

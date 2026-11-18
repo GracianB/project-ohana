@@ -1,3 +1,4 @@
+import {absorbQuimeraArenaHit} from './quimera-arena.js';
 import {drawQuimeraSanctum} from './quimera-regalia.js';
 // OHANA V467 · MUNDO 1 · Dirección del jefe final (Quimera Ohana).
 // El cuerpo, las fases y los diez ataques viven en systems/fusion-boss.js. Este
@@ -33,12 +34,12 @@ export const ATTACK_CARDS = Object.freeze({
   ola:       "Salta la ola cuando cruce el suelo",
   plasma:    "Cambia de altura: apunta a tu última posición",
   rayos:     "Sal de las columnas marcadas",
-  medusas:   "Busca los huecos entre medusas",
+  medusas:   "Busca los huecos entre espectros",
   embestida: "Salta por encima o sube al balcón",
   aliento:   "Ponte detrás de la Quimera",
   terremoto: "Sal de la marca y salta la onda al caer",
   geiseres:  "Evita los círculos del suelo",
-  ruedas:    "Salta las ruedas una a una",
+  ruedas:    "Salta las coronas una a una",
   red:       "Sal del anillo antes de que se cierre"
 });
 
@@ -53,6 +54,7 @@ export function world1BossFilterDamage(g, dmg) {
   const d = g?.world1Boss, e = fusion(g); dmg = Math.max(0, num(dmg));
   if (!d || !e) return dmg;
   if (d.grace > 0 || d.defeat || e._fusion?.mode === "intro") return 0;
+  if(absorbQuimeraArenaHit(g,dmg))return 0;
   const room = Math.max(0, BOSS_FAIRNESS.capPerAttack - d.attackDmg);
   const out = Math.min(dmg, room);
   d.attackDmg += out; if (out > 0) { d.grace = BOSS_FAIRNESS.grace; d.hitFlash = 12; }
@@ -92,19 +94,9 @@ export function updateWorld1BossDirector(g) {
 }
 
 // Fondo de la sala enorme: la silueta gigante "cosida" con los diez emblemas.
-const FRAME = Object.freeze(WORLD1_ORDER.map((hero, i) => { const a = -Math.PI / 2 + i / 10 * Math.PI * 2; return { hero, dx: Math.cos(a) * 520, dy: Math.sin(a) * 330 }; }));
-export function drawWorld1BossBackdrop(ctx, g, cam, t = 0) {
-  const e = fusion(g); if (!e && !g?.world1Boss) return;
-  // Paralaje 0.6: el centro de la arena queda centrado cuando la cámara llega a ella.
-  const sx = (WORLD1_ARENA.left + WORLD1_ARENA.right) / 2 * 0.6 + num(g?.viewW, 1600) * 0.2 - num(cam?.x) * 0.6, cy = 520 - num(cam?.y) * 0.4;
-  const d = g.world1Boss, phase = num(e?.phase, 1), rot = (g.reduceMotion ? 0 : num(t) * 0.002);
-  drawQuimeraSanctum(ctx,{x:sx,y:cy,phase,time:t,freed:!!d?.defeat,reduce:!!g.reduceMotion});
-  ctx.save(); ctx.globalAlpha = 0.08 + phase * 0.02;
-  ctx.fillStyle = "#2a0f2e"; ctx.beginPath(); ctx.ellipse(sx, cy, 640, 420, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = "#ff7ad0"; ctx.lineWidth = 6; ctx.setLineDash([18, 14]); ctx.beginPath();
-  FRAME.forEach((f, i) => { const a = rot; const x = sx + f.dx * Math.cos(a) - f.dy * Math.sin(a), y = cy + f.dx * Math.sin(a) + f.dy * Math.cos(a); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
-  FRAME.forEach((f) => { const x = sx + f.dx * Math.cos(rot) - f.dy * Math.sin(rot), y = cy + f.dx * Math.sin(rot) + f.dy * Math.cos(rot); const freed = d?.defeat; drawHeroEmblem(ctx, f.hero, x, y, 170, freed ? WORLD1_THEMES[f.hero].color : "#6b2a5e", t); });
-  ctx.restore();
+export function drawWorld1BossBackdrop(ctx, g, cam, t = 0, W = g?.viewW||1600, H = g?.viewH||1000) {
+ const e=fusion(g),phase=num(e?.phase,1);
+ drawQuimeraSanctum(ctx,{x:W*.54-(num(cam?.x)-(WORLD1_ARENA.left+WORLD1_ARENA.right)/2)*.12,y:H*.43,phase,time:t,freed:!!g.world1Boss?.defeat,reduce:!!g.reduceMotion,width:W,height:H,player:g.player,cam,boss:e,arena:g.quimeraArena});
 }
 
 // Telegrafías en coordenadas de mundo (se dibujan sobre el suelo de la arena).
