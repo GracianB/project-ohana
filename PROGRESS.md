@@ -1,3 +1,7 @@
+# ohana-663 · Anatomía de Quimera
+
+Revisión integral del cuerpo, mandíbula, manto, corona por fases, costillas móviles y luz del núcleo. Ver docs/QUIMERA-V663.md.
+
 # ohana-662 · Refuerzos del eclipse
 
 Acechador con silueta de bestia, vigía de ojo flotante, señales locales de preparación y objetivo fijado del vigía. Comprobaciones en docs/QUIMERA-V662.md.
