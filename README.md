@@ -1,3 +1,7 @@
+## ohana-661 · El encuentro del eclipse
+
+Prismas con funciones diferentes, constelaciones defensivas al recoger tres estrellas, ataques avanzados de los refuerzos y una Quimera más articulada. El ojo anticipa el objetivo del ataque y el estudio muestra a Kilo real y permite probar todas las interacciones. [Diseño](docs/QUIMERA-V661.md) · [Validación](docs/V661-VALIDATION.json) · [Publicación](docs/V661-PUBLICATION.json).
+
 ## ohana-660 · Quimera, estrellas y refuerzos del eclipse
 
 Paleta más oscura, máscara expresiva e iris del eclipse con volumen. Ataques y avisos sin guías dibujadas. Acechadores y vigías añaden presión; sus estrellas recuperan vida y dispersan proyectiles cercanos. [Diseño](docs/QUIMERA-V660.md) · [Validación](docs/V660-VALIDATION.json) · [Publicación](docs/V660-PUBLICATION.json).

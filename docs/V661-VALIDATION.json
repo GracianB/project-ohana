@@ -1,0 +1,36 @@
+{
+  "release": "ohana-661",
+  "status": "local acceptance passed",
+  "unitTests": {
+    "passed": 1998,
+    "failed": 0
+  },
+  "releaseGate": {
+    "runtimeModules": 429,
+    "resources": 500
+  },
+  "browserAcceptance": [
+    "four anatomical phases and ten warning/attack pairs; 1280/390/320px; zero runtime faults",
+    "native keyboard and touch activation of all three prism roles; real wind launch and nine saved steps",
+    "native H/touch defeat of reinforcement and walking star pickup at 1280/390px; no star XP",
+    "three-star constellation, real Kilo studio actor and safe replay coordinates",
+    "energy clipping, reduced-motion stability and no stroked projectile guides"
+  ],
+  "newUnitCoverage": [
+    "distinct prism effects",
+    "short/tall star pickup",
+    "bounded constellation guard",
+    "locked advanced hunter leap",
+    "advanced watcher spread",
+    "locked eclipse gaze",
+    "pure finite articulation",
+    "guest consumed-projectile persistence"
+  ],
+  "publicCandidate": {
+    "deployId": "6afd85faa078de1e984b1c38",
+    "url": "https://6afd85faa078de1e984b1c38--project-ohana-multiplayer.netlify.app",
+    "runtimeFilesMatched": 58,
+    "twoPlayerAdventureAndVersus": true
+  },
+  "scope": "Synthetic final access, starting placement and phase/HP fixtures; native inputs afterward. Not an earned full-campaign victory."
+}
