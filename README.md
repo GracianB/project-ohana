@@ -1,3 +1,7 @@
+## ohana-660 · Quimera, estrellas y refuerzos del eclipse
+
+Paleta más oscura, máscara expresiva e iris del eclipse con volumen. Ataques y avisos sin guías dibujadas. Acechadores y vigías añaden presión; sus estrellas recuperan vida y dispersan proyectiles cercanos. [Diseño](docs/QUIMERA-V660.md) · [Validación](docs/V660-VALIDATION.json) · [Publicación](docs/V660-PUBLICATION.json).
+
 ## ohana-659 · Energía de Quimera sin barras
 
 Rayos ramificados, géiseres líquidos y barridos turbulentos sustituyen los rellenos rectangulares. Avisos con marcas separadas, sin marcos de caja. La previsualización permite también los tres ataques especiales. [Validación](docs/V659-VALIDATION.json) · [Publicación](docs/V659-PUBLICATION.json).

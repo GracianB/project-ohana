@@ -15,7 +15,15 @@ export function finaleEnemy(enemy){
  if(!enemy)return null;const keys=['x','y','w','h','hp','max','vx','vy','kind','boss','miniBoss','gauntletBoss','evolved','_fusionBoss','phase','contactDmg','damageWindowRemaining','damageTakenScale','_guardianOpening','_coopSyncId','_coopVisit','telegraph','teleKind','invuln','flash','dying','dyingMax','facing'];
  const out=Object.fromEntries(keys.filter(k=>enemy[k]!==undefined).map(k=>[k,enemy[k]]));
  if(enemy.gauntletBoss)out[KEEPSAKES[enemy.gauntletBoss]?.key]=enemy[KEEPSAKES[enemy.gauntletBoss]?.key];
- if(enemy._fusionBoss)out._fusion=enemy._fusion;
+ if(enemy._fusionBoss){
+  out._fusion={...enemy._fusion};const q=enemy._fusion?.pressure;
+  if(q){
+   const actorKeys=['id','kind','_quimeraMinion','roomId','x','y','w','h','hp','max','vx','vy','facing','age','mode','clock','cooldown','serial','contactDmg','attackDamage','color','_coopSyncId','_coopVisit','flash','stun','invuln','hitDash'];
+   out._fusion.pressure=Object.fromEntries(['phase','t','spawned','next','serial','starSerial','giftPending','notice'].filter(k=>q[k]!==undefined).map(k=>[k,q[k]]));
+   out._fusion.pressure.minions=(q.minions||[]).map(m=>({...Object.fromEntries(actorKeys.filter(k=>m[k]!==undefined).map(k=>[k,m[k]])),...(m.target?{target:{x:m.target.x,y:m.target.y}}:{})}));
+   out._fusion.pressure.stars=(q.stars||[]).map(s=>Object.fromEntries(['id','x','y','vy','life','age'].filter(k=>s[k]!==undefined).map(k=>[k,s[k]])));
+  }
+ }
  return clean(out);
 }
 export function validFinaleEnemy(e){
@@ -86,7 +94,7 @@ export function applyAdventureFinale(g,state,{host=false,players=[]}={}){
  Object.assign(v,{found:[...state.found],phase:state.phase,hero:state.hero,guardian:null,object:state.hero?{x:9360,y:1119}:null});
  if(fresh){g.coopFinalShots=(state.shots||[]).filter(s=>!g._coopFinalConsumed?.has('g:'+s.id)).map(s=>({...s}));g._coopFinalPacketAt=globalThis.performance?.now?.()||0;}
  const spec=state.boss||state.guardian;
- if(spec){let enemy=g.enemies?.find(e=>spec._fusionBoss?e._fusionBoss:e.gauntletBoss===spec.gauntletBoss);if(!enemy)enemy={};if(fresh||!enemy.kind)Object.assign(enemy,structuredClone(spec),{roomId:'w1-final'});if(enemy._fusion)enemy._fusion.shots=(enemy._fusion.shots||[]).filter(s=>!g._coopFinalConsumed?.has('q:'+(enemy._coopSyncId||0)+':'+s.id));g.enemies=[enemy];if(spec._fusionBoss){g.boss=enemy;g.world1Boss||=g.createCoopBossDirector?.(enemy);if(g.world1Boss&&state.director)Object.assign(g.world1Boss,structuredClone(state.director));}else{v.guardian=enemy;g.boss=null;}}
+ if(spec){let enemy=g.enemies?.find(e=>spec._fusionBoss?e._fusionBoss:e.gauntletBoss===spec.gauntletBoss);if(!enemy)enemy={};if(fresh||!enemy.kind)Object.assign(enemy,structuredClone(spec),{roomId:'w1-final'});if(enemy._fusion)enemy._fusion.shots=(enemy._fusion.shots||[]).filter(s=>!g._coopFinalConsumed?.has('q:'+(enemy._coopSyncId||0)+':'+s.id));g.enemies=[enemy,...(enemy._fusion?.pressure?.minions||[]).filter(m=>m?._quimeraMinion&&m.hp>0)];if(spec._fusionBoss){g.boss=enemy;g.world1Boss||=g.createCoopBossDirector?.(enemy);if(g.world1Boss&&state.director)Object.assign(g.world1Boss,structuredClone(state.director));}else{v.guardian=enemy;g.boss=null;}}
  const cue=state.cue;
  if(cue&&g._coopFinalCue?.id!==cue.id){
   // The engine's existing queue owns overlapping evolution/entry films.
