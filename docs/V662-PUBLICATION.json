@@ -1,0 +1,13 @@
+{
+  "release": "ohana-662",
+  "sourceBranch": "codex/quimera-662",
+  "preservedBaseCommit": "35cb52e9fff38ec51ca6769661b4a1c51d418316",
+  "githubPages": "https://gracianb.github.io/project-ohana/?release=662",
+  "netlify": "https://project-ohana-multiplayer.netlify.app",
+  "method": "one skip-ci commit, tested Netlify candidate promotion, one manual Pages dispatch",
+  "status": "publication prepared; final public checks reported in delivery",
+  "netlifyCandidate": {
+    "id": "6afd8eb1999ae0be58270ee9",
+    "url": "https://6afd8eb1999ae0be58270ee9--project-ohana-multiplayer.netlify.app"
+  }
+}

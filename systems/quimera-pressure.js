@@ -83,18 +83,42 @@ export function updateQuimeraPressure(e,g,helpers={}){
  }
  if(collectQuimeraStars(g)>0)helpers.beep?.(g._quimeraStarPocket.chain===0?'pickup':'orb');
 }
+// Watcher warnings use the locked target; filled footprints
+// stay quiet and never imply a damaging beam across the arena.
 export function drawQuimeraMinion(c,m,cam,t=0,reduce=false){
- if(!m||m.hp<=0)return;const x=m.x+m.w/2-(cam.x||0),y=m.y+m.h/2-(cam.y||0),T=reduce?0:t,spawn=m.mode==='spawn',warn=m.mode==='wind';
- c.save();c.translate(x,y);c.scale(m.facing===1?-1:1,1);if(warn&&m.kind==='eclipse-hunter')c.scale(1.08,.84);if(m.mode==='dash')c.rotate(-.2);if(m.mode==='leap')c.rotate(-.12);c.globalAlpha=spawn?.2+Math.max(0,1-m.clock/72)*.6:1;
- const coat=c.createLinearGradient(-20,-20,20,23);coat.addColorStop(0,m.flash>0?'#97869f':'#42516d');coat.addColorStop(.5,'#1b203a');coat.addColorStop(1,'#0a1023');
- c.fillStyle=coat;c.beginPath();c.moveTo(-17,8);c.bezierCurveTo(-29,-8,-10,-29,11,-19);c.quadraticCurveTo(26,-13,20,9);c.lineTo(26,25);c.quadraticCurveTo(4,15,-15,25);c.quadraticCurveTo(-10,14,-17,8);c.fill();
- c.fillStyle=warn?'#e1c4c8':'#b8bbc4';c.beginPath();c.moveTo(-12,-11);c.quadraticCurveTo(2,-20,15,-9);c.lineTo(7,9);c.lineTo(0,14);c.lineTo(-11,4);c.closePath();c.fill();
- c.fillStyle='#14243c';c.beginPath();c.moveTo(-10,-7);c.lineTo(-1,-3);c.lineTo(10,-8);c.lineTo(6,0);c.lineTo(-7,1);c.closePath();c.fill();
- c.fillStyle=warn?'#ffcda3':'#bce6dc';c.beginPath();c.ellipse(-5,-4,2,1,0,0,TAU);c.ellipse(5,-4,2,1,0,0,TAU);c.fill();
- if(m.kind==='eclipse-watcher')for(const side of[-1,1]){c.fillStyle='#71618888';c.beginPath();c.moveTo(side*14,-6);c.quadraticCurveTo(side*31,-24+Math.sin(T*.06)*3,side*32,4);c.quadraticCurveTo(side*22,-1,side*23,15);c.lineTo(side*13,6);c.closePath();c.fill();}
- if(spawn){c.globalAlpha=.5;c.fillStyle='#ad8aba';for(let i=0;i<5;i++){const a=i*TAU/5+T*.025;c.beginPath();c.ellipse(Math.cos(a)*26,Math.sin(a)*20,2,4,a,0,TAU);c.fill();}}
- if(warn){c.globalAlpha=.7;c.fillStyle='#edcfa0';for(let i=0;i<3;i++){c.beginPath();c.ellipse(-15+i*15,-28-Math.sin(T*.08+i)*2,2,3,0,0,TAU);c.fill();}}
- for(let i=0;i<4;i++){c.fillStyle=m.hp/m.max>(i/4)?'#a8b6bd':'#26334a';c.beginPath();c.ellipse(-10+i*7,31,2,2.5,0,0,TAU);c.fill();}
+ if(!m||m.hp<=0)return;const T=reduce?0:t,watcher=m.kind==='eclipse-watcher',spawn=m.mode==='spawn',warn=m.mode==='wind',x=m.x+m.w/2-(cam.x||0),y=m.y+m.h/2-(cam.y||0),TA=Math.PI*2;
+ const oval=(x,y,rx,ry,color,angle=0)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,TA);c.fill();};
+ c.save();
+ if(warn&&m.target){
+  const tx=x,floor=F-(cam.y||0),k=1-clamp(m.clock/(watcher?48:42),0,1);
+  if(!watcher){oval(tx,floor-2,27+9*k,6,'#d3af8640');for(const side of[-1,1])oval(tx+side*17,floor-3,4,2,'#e8c79588',side*.3);}
+  else{const tx=m.target.x-(cam.x||0),ty=m.target.y-(cam.y||0);for(let i=0;i<4;i++){const a=i*TA/4;oval(tx+Math.cos(a)*19,ty+Math.sin(a)*19,2,4,'#d6b6c588',a);}}
+ }
+ // The floor shadow stays at the actual landing plane, separate from the body.
+ oval(x,F-(cam.y||0)-2,watcher?18:23,4,spawn?'#080e2022':'#080e2066');
+ c.translate(x,y);c.scale(m.facing===1?-1:1,1);c.globalAlpha*=spawn?.18+Math.max(0,1-m.clock/72)*.65:1;
+ const coat=c.createLinearGradient(-23,-20,22,24);coat.addColorStop(0,m.flash>0?'#b8a4b9':'#57617a');coat.addColorStop(.4,'#242c46');coat.addColorStop(1,'#0a1022');
+ const path=(fill,fn)=>{c.fillStyle=fill;c.beginPath();fn();c.closePath();c.fill();};
+ if(watcher){
+  // Detached feather shells surround a spherical iris; no shared humanoid mask.
+  for(const side of[-1,1])for(let i=2;i>=0;i--){const flutter=Math.sin(T*.045+i)*3;path(i===0?'#827193aa':'#45415f99',()=>{c.moveTo(side*(13+i*2),-10+i*6);c.bezierCurveTo(side*(24+i*5),-24+flutter,side*(38+i*3),-15+i*8,side*(29+i*3),6+i*5);c.quadraticCurveTo(side*24,1+i*5,side*15,15);});}
+  oval(0,0,18,21,coat);oval(-1,-2,14,12,'#bbb7bf');oval(-2,-2,warn?8:7,10,warn?'#c392a7':'#727b9c');oval(-3,-2,warn?2:3,8,'#11172b');oval(-5,-6,2,2,'#e1e4d7');
+  for(let i=0;i<3;i++)path('#6c638799',()=>{const xx=-9+i*9;c.moveTo(xx,17);c.quadraticCurveTo(xx+Math.sin(T*.035+i)*7,27,xx-4,33);c.quadraticCurveTo(xx+8,26,xx+5,15);});
+  path('#404764',()=>{c.moveTo(-19,-9);c.quadraticCurveTo(0,-33,19,-9);c.lineTo(12,-14);c.quadraticCurveTo(0,-25,-12,-14);});
+ }else{
+  // Low shoulder, forward muzzle, ears and four paws read as a stalking beast.
+  if(warn)c.scale(1.12,.83);if(m.mode==='dash'||m.mode==='leap')c.rotate(-.12);
+  path('#3b455f',()=>{c.moveTo(13,6);c.bezierCurveTo(31,10,34,-2,26,-12);c.bezierCurveTo(41,3,35,20,13,14);});
+  oval(2,6,22,13,coat,-.1);oval(-10,0,14,15,coat,-.3);
+  path('#414b65',()=>{c.moveTo(-21,-4);c.lineTo(-24,-21);c.lineTo(-13,-12);c.lineTo(-3,-20);c.lineTo(-1,-2);});
+  path(warn?'#c3b9bd':'#a1aab4',()=>{c.moveTo(-23,-8);c.quadraticCurveTo(-10,-15,-3,-6);c.lineTo(-10,6);c.lineTo(-26,8);c.lineTo(-30,2);});
+  path('#11192e',()=>{c.moveTo(-25,-5);c.lineTo(-17,-2);c.lineTo(-8,-6);c.lineTo(-13,1);c.lineTo(-24,1);});oval(-21,-3,2.5,1.3,warn?'#f1c8a1':'#bfd8cb');oval(-29,2,2,1.5,'#0c152a');
+  for(let i=0;i<4;i++){const xx=-16+i*11,gait=reduce||warn?0:Math.sin(T*(m.mode==='dash'?.4:.1)+i*Math.PI)*3;oval(xx+gait,18,5,4,i%2?'#7e8c9d':'#59677e',-.15);}
+  for(let i=0;i<3;i++)path('#718199',()=>{c.moveTo(-2+i*6,-5);c.lineTo(0+i*6,-13+i*2);c.lineTo(5+i*6,-3);});
+ }
+ if(spawn){c.globalAlpha*=.7;for(let i=0;i<6;i++){const a=i*TA/6+(reduce?0:T*.025);oval(Math.cos(a)*28,Math.sin(a)*24,2,4,'#ad8aba',a);}}
+ if(warn){for(let i=0;i<3;i++)oval(-10+i*10,-32,2,3,'#edcfa0');}
+ for(let i=0;i<4;i++)oval(-10+i*7,watcher?39:27,2,2.5,m.hp/m.max>i/4?'#a8b6bd':'#26334a');
  c.restore();
 }
 export function drawQuimeraStars(c,g,cam,t=0,reduce=false){

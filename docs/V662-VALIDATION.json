@@ -1,0 +1,17 @@
+{
+  "release": "ohana-662",
+  "unitTests": {
+    "passed": 1998,
+    "failed": 0,
+    "note": "Full suite found missing current-release README ledger link; repaired and reran README contract."
+  },
+  "browserTests": [
+    "ten minion art states, distinct silhouettes, render purity, stable reduced motion",
+    "three native prism activations with keyboard/touch, physical wind launch, nine saved steps and constellation"
+  ],
+  "releaseGate": {
+    "runtimeModules": 429,
+    "resources": 500
+  },
+  "scope": "Final access/placement fixtures; native interactions afterward. No full campaign victory claim."
+}

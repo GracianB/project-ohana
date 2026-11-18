@@ -1,3 +1,7 @@
+# ohana-662 · Refuerzos del eclipse
+
+Acechador con silueta de bestia, vigía de ojo flotante, señales locales de preparación y objetivo fijado del vigía. Comprobaciones en docs/QUIMERA-V662.md.
+
 ## ohana-661 · Encuentro completo
 
 Marea protege; Corazón dispersa cuatro ecos ordinarios; Regreso impulsa al jugador y refuerza la corriente. Tres estrellas forman una defensa breve. Acechadores saltan y vigías abren su abanico en fases avanzadas, con destino fijado y cupos conservados. Quimera articula cada órgano emisor; el ojo sigue la mira fijada y reacciona a la ayuda. El estudio incorpora al actor de Kilo y pruebas de los tres prismas y constelaciones.
