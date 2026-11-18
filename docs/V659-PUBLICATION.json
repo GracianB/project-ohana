@@ -1,0 +1,31 @@
+{
+  "release": "ohana-659",
+  "kind": "single-commit Quimera energy revision",
+  "sourceBranch": "codex/quimera-energy-659",
+  "preservedBaseCommit": "c964b26b9bf9a2aa9125fb0b812302e5ebcaec03",
+  "runtimeManifestSha256": "b79a87bf0d69fce9137bb0a50a954c4f3cf1d025d8f2663818d51c62c5d7ed69",
+  "netlify": {
+    "testedDeployId": "6afd247942583dc237dd4808",
+    "candidateUrl": "https://6afd247942583dc237dd4808--project-ohana-multiplayer.netlify.app",
+    "productionUrl": "https://project-ohana-multiplayer.netlify.app",
+    "filesChecked": 55,
+    "promotion": "restore exact tested candidate"
+  },
+  "githubPages": {
+    "url": "https://gracianb.github.io/project-ohana/?release=659",
+    "previewUrl": "https://gracianb.github.io/project-ohana/previews/quimera-design.html?release=659&attack=rayos",
+    "workflow": "pages.yml",
+    "publicationMethod": "one manual dispatch after single squash"
+  },
+  "actionsBudget": {
+    "commitSubject": "[skip ci]",
+    "plannedPagesDispatches": 1
+  },
+  "rollbackDeploy": "6afd1b8aad8acf4e374ca4f6",
+  "publicCandidateAcceptance": {
+    "runtimeFilesMatched": 55,
+    "studioActualLightningGeyserAndSpecialSweep": true,
+    "noRuntimeErrors": true,
+    "twoPlayerAdventureAndVersus": true
+  }
+}

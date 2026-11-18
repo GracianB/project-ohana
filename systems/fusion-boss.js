@@ -308,7 +308,12 @@ export function drawFusionAttackTelegraphs(c,e,cam={x:0,y:0},t=0,reduce=false){
  const A=WORLD1_ARENA,col=WORLD1_THEMES[FUSION_ATTACKS[b.attack].hero].color,ox=cam.x||0,oy=cam.y||0;
  const ex=e.x+e.w/2,floor=WORLD1_FLOOR-oy,aim=b.aim||-1;
  c.save();c.lineCap='round';c.lineJoin='round';
- const zone=(x,y,w,h)=>{c.fillStyle=col;c.globalAlpha=.13;c.fillRect(x-ox,y-oy,w,h);c.globalAlpha=.85;c.strokeStyle=col;c.lineWidth=2;c.strokeRect(x-ox,y-oy,w,h);};
+ const zone=(x,y,w,h)=>{
+  c.save();c.strokeStyle=col;c.lineWidth=1.5;c.globalAlpha=.45;
+  if(h>w){for(let i=0;i<8;i++){const yy=y-oy+h*(i+.5)/8;c.beginPath();c.moveTo(x-ox+2,yy);c.lineTo(x-ox+5,yy+4);c.moveTo(x-ox+w-2,yy);c.lineTo(x-ox+w-5,yy+4);c.stroke();}}
+  else{for(let i=0;i<Math.min(18,Math.ceil(w/65));i++){const xx=x-ox+(i+.5)*w/Math.min(18,Math.ceil(w/65));c.beginPath();c.moveTo(xx-5,y-oy+h-3);c.lineTo(xx,y-oy+h-8);c.lineTo(xx+5,y-oy+h-3);c.stroke();}}
+  c.restore();c.globalAlpha=.85;c.strokeStyle=col;
+ };
  const arrow=(x,y,dir)=>{c.beginPath();c.moveTo(x-dir*10,y-6);c.lineTo(x,y);c.lineTo(x-dir*10,y+6);c.stroke();};
  if(b.attack==='rayos'||b.attack==='geiseres')for(const x of b.marks||[]){
   const height=b.attack==='rayos'?WORLD1_FLOOR:340;

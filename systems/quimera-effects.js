@@ -1,3 +1,4 @@
+import {drawQuimeraEnergy} from './quimera-energy.js';
 // All luminous material is clipped to the collision footprint supplied by combat.
 // Decorative particles never enlarge the painted damage area.
 import {WORLD1_FLOOR as FLOOR} from './world1-rooms.js';
@@ -19,8 +20,8 @@ export function drawQuimeraProjectiles(c,b,cam,t,reduce,bounds,isActive){
   if(s.hit||s.life<=0)continue;
   if(s.delay>0){
    c.globalAlpha=.18;c.fillStyle=col;
-   if(s.k==='meteor')c.fillRect(x-r,FLOOR-460-(cam.y||0),r*2,460);
-   else if(s.k==='echo'){const end=s.x+(s.vx||0)*Math.min(s.life,130);c.fillRect(Math.min(s.x,end)-(cam.x||0),y-38,Math.abs(end-s.x)+30,76);}
+   if(s.k==='meteor'){stroke(col,1.5,()=>{c.moveTo(x,FLOOR-460-(cam.y||0));c.lineTo(x,FLOOR-420-(cam.y||0));});}
+   else if(s.k==='echo'){const end=s.x+(s.vx||0)*Math.min(s.life,130);stroke(col,1.5,()=>{c.moveTo(Math.min(s.x,end)-(cam.x||0),y);c.lineTo(Math.max(s.x,end)-(cam.x||0),y);});}
    c.globalAlpha=.8;
    if(s.k==='meteor')stroke(col,2,()=>c.ellipse(x,FLOOR-(cam.y||0)-4,r,6,0,0,TAU));
    continue;
@@ -29,29 +30,9 @@ export function drawQuimeraProjectiles(c,b,cam,t,reduce,bounds,isActive){
   const column=['bolt','geyser','beam'].includes(s.k);
   if(column)c.rect(xx,yy,box.w,box.h);else c.ellipse(x,y,box.w/2,box.h/2,0,0,TAU);
   c.clip();
-  // Quiet solid coverage identifies the complete contact boundary.
-  c.globalAlpha=active?(column?.28:.12):.12;c.fillStyle=col;c.fillRect(xx,yy,box.w,box.h);c.globalAlpha=1;
-  if(column){
-   if(!active){
-    c.globalAlpha=.7;stroke(col,2,()=>{c.rect(xx+1,yy+1,box.w-2,box.h-2);});
-    if(s.k!=='beam')for(let i=0;i<3;i++){const y=yy+box.h-18-i*25;stroke(col,1.5,()=>{c.moveTo(x-9,y);c.lineTo(x,y-8);c.lineTo(x+9,y);});}
-   }else if(s.k==='bolt'){
-    const g=c.createLinearGradient(xx,0,xx+box.w,0);g.addColorStop(0,'#b2f6ff00');g.addColorStop(.5,'#c9faffaa');g.addColorStop(1,'#b2f6ff00');c.fillStyle=g;c.fillRect(xx,yy,box.w,box.h);
-    for(let branch=0;branch<3;branch++){
-     const points=[];for(let i=0;i<=16;i++)points.push([x+Math.sin(i*127.1+branch*17+Math.floor(age/3)*13.7)*r*.56,yy+box.h*i/16]);
-     stroke(branch===0?'#f1ffff':col,branch===0?4:1.5,()=>points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y)));
-    }
-    for(let i=0;i<7;i++){const k=(age*13+i*53)%box.h;ellipse(x+Math.sin(i*7)*r*.7,yy+k,1.5,5,'#eafff8');}
-   }else if(s.k==='geyser'){
-    const g=c.createLinearGradient(0,yy+box.h,0,yy);g.addColorStop(0,col);g.addColorStop(.5,'#fff2bba0');g.addColorStop(1,'#ffefc900');
-    path(g,()=>{c.moveTo(xx,yy+box.h);for(let i=0;i<=10;i++){const py=yy+box.h*(1-i/10),width=r*(.4+.35*Math.sin(i*.7+age*.09));c.lineTo(x-width,py);}c.quadraticCurveTo(x,yy-20,x+r*.5,yy+10);for(let i=10;i>=0;i--){const py=yy+box.h*(1-i/10),width=r*(.45+.3*Math.sin(i*.7+age*.09+1));c.lineTo(x+width,py);}c.lineTo(xx+box.w,yy+box.h);});
-    for(let i=0;i<9;i++){const py=yy+box.h-((age*9+i*41)%box.h);ellipse(x+Math.sin(i*17+age*.03)*r*.75,py,2+i%3,5+i%4,'#fff5cd');}
-   }else{
-    const center=yy+box.h/2,g=c.createLinearGradient(0,yy,0,yy+box.h);g.addColorStop(0,col);g.addColorStop(.35,'#fff9dc');g.addColorStop(.5,'#ffffff');g.addColorStop(.7,'#fff9dc');g.addColorStop(1,col);c.globalAlpha=.85;c.fillStyle=g;c.fillRect(xx,yy,box.w,box.h);
-    c.globalAlpha=.6;for(let i=0;i<16;i++){const px=xx+((age*25+i*151)%box.w);stroke('#ffffff',2,()=>{c.moveTo(px-45,center+Math.sin(i)*13);c.lineTo(px,center+Math.sin(i)*13);});}
-   }
-   c.restore();continue;
-  }
+  if(column){drawQuimeraEnergy(c,s,box,cam,active,reduce);c.restore();continue;}
+  // Round shots retain a quiet contact field; energy lanes have no filled slabs.
+  c.globalAlpha=active?.12:.08;c.fillStyle=col;c.fillRect(xx,yy,box.w,box.h);c.globalAlpha=1;
   c.save();c.translate(x,y);
   const g=c.createLinearGradient(-r,-r,r,r);g.addColorStop(0,'#ffffff');g.addColorStop(.25,col);g.addColorStop(1,'#142b4a');
   const direction=Math.sign(s.vx)||1;

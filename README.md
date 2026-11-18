@@ -1,3 +1,7 @@
+## ohana-659 · Energía de Quimera sin barras
+
+Rayos ramificados, géiseres líquidos y barridos turbulentos sustituyen los rellenos rectangulares. Avisos con marcas separadas, sin marcos de caja. La previsualización permite también los tres ataques especiales. [Validación](docs/V659-VALIDATION.json) · [Publicación](docs/V659-PUBLICATION.json).
+
 ## ohana-658 · Quimera, el devorador de ecos
 
 Nueva silueta de máscara hueca, manto rasgado y extremidades asimétricas. Diez poderes con materiales propios, preparación y liberación sonoras, eclipse vivo con 50 ecos, tres prismas, nueve escalones, corrientes ascendentes y escudos; previsualización del ataque completo. [Diseño](docs/QUIMERA-V658.md) · [Validación](docs/V658-VALIDATION.json) · [Publicación](docs/V658-PUBLICATION.json).

@@ -1,3 +1,7 @@
+## ohana-659 · Rayos, géiseres y barridos
+
+Retirados los paneles de color y sus contornos en ataques y avisos. Energía recortada a la misma geometría real de daño, con preparación, activación y movimiento reducido. Los tres especiales se pueden probar desde el estudio.
+
 ## ohana-658 · Quimera y lenguaje de ataques
 
 Silueta, máscara, manto y animación sustituidos. Renderer propio para nueve materiales de proyectil y tres tipos de columna/barrido; señales de sonido y emisión. Corregida la salida anticipada que omitía el escenario final. El estudio público ejecuta preparación, liberación y recuperación con la IA real. El eclipse sigue al jugador con la mirada y reúne 50 ecos. Tres prismas activan nueve escalones persistentes, corrientes ascendentes y escudos temporales; sus rutas se comparten en cooperativo. Una entrega conjunta y una publicación de Pages.

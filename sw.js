@@ -1,6 +1,7 @@
-const VERSION = "ohana-658";
+const VERSION = "ohana-659";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/quimera-energy.js?v=" + VERSION,
   "./systems/quimera-arena.js?v=" + VERSION,
   "./systems/quimera-eclipse.js?v=" + VERSION,
   "./systems/quimera-effects.js?v=" + VERSION,
@@ -510,9 +511,10 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/quimera-energy.js": "be0f9cdafb6941cd9ddc278626d4ac295e12006d",
   "systems/quimera-arena.js": "b3cb25a3c60505503f1687c908ada50d7abb8792",
   "systems/quimera-eclipse.js": "65a524af8ca522d88d8bc2bcade0914dad6f96f3",
-  "systems/quimera-effects.js": "4401dd4b0b6bf563bf8953ae1aaa5ed55a074aba",
+  "systems/quimera-effects.js": "b8e7041a7be1fec977f4cf3f6e10885881ef7746",
   "systems/kilo-presence.js": "f72c935f85a782bba721afb64efee0bb2ffd8809",
   "characters/kilo-hair.js": "b881e022c1572018a9856c258220d9e872924a77",
   "michi-film.css": "795ac2875cc0da7c8cfb3351582cb7e11efc01ac",
@@ -682,7 +684,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-progress.js": "5d6d7a21ee772f57f6491be4471f1c1f6f0ddd70",
   "systems/world1-collect.js": "b56318e191160e87287daa96daaa8fad97a5b74d",
   "systems/world1-boss.js": "f408c8f0b3449942477077c58cfc3ff4cf6faa52",
-  "systems/fusion-boss.js": "9ad3c1ae6701d5171f20ab55d8172de24c33dc8c",
+  "systems/fusion-boss.js": "71a853660045887f13bd0a2c7386b58d8da7cf0e",
   "systems/quimera-art.js": "ca2f835aeb5fff68b562a59a9099366b9f05a73c",
   "systems/quimera-regalia.js": "debc4cd85290d6072eaf7e61a736e2f9761c6fec",
   "systems/world1-story.js": "e1324becee767e794b86580bc3b5534c7a647e87",
@@ -761,7 +763,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "77035c396a4c6f58aec6af1378ea3a1892433ef9",
-  "index.html": "178d994493260395667062de8162aa4ccf91a852",
+  "index.html": "ceea371adc8e2d12aecc921f2b301fec0dbeb9c3",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
