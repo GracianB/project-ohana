@@ -447,7 +447,7 @@ function chapterGrowthWaiting(g){return kiloGrowthWaiting(g)||stitchoGrowthWaiti
 function canAct() { return game.running && !world1CineActive(game) && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
-if(interactQuimeraArena(game))return;
+if(interactQuimeraArena(game)){if(game.quimeraArena?.cue){beep(game.quimeraArena.cue);game.quimeraArena.cue=null;}return;}
 if(interactMichiSanctuary(game))return;
 if(game.finalRitualEnabled&&game.finalGauntlet?.phase==='summoning')return;
 if(interactFinalRitual(game))return;
@@ -2322,11 +2322,11 @@ function updateEnemies() {
 if (!game.player) return;
 if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final'){
  const p=game.player,consumed=game._coopFinalConsumed||=new Set();
- collectQuimeraStars(game);
+ if(collectQuimeraStars(game)>0)beep(game._quimeraStarPocket.chain===0?'pickup':'orb');
  if(performance.now()-(game._coopFinalPacketAt||0)<750){
   for(const shot of game.coopFinalShots||[]){if(shot.life<=0)continue;shot.x+=shot.vx;shot.y+=shot.vy;shot.life--;if(p.invuln<=0&&aabb(p,shot)){hurtPlayer(shot.dmg,'GUARDIÁN');if(!['prism','lightning','geysers','ember'].includes(shot.gauntlet)){shot.life=0;consumed.add('g:'+shot.id);}}}
   const shots=[...(game.boss?._fusion?.shots||[])];updateFusionProjectilesOnly(game.boss,game,damage=>hurtPlayer(damage,'ECO'));for(const shot of shots)if(shot.hit||shot.life<=1)consumed.add('q:'+(game.boss?._coopSyncId||0)+':'+shot.id);
-  for(const m of game.boss?._fusion?.pressure?.minions||[]){if(m.hp>0&&m.mode==='dash'&&p.invuln<=0&&aabb(p,m))hurtPlayer(m.attackDamage||10,'Acechador del eclipse');}
+  for(const m of game.boss?._fusion?.pressure?.minions||[]){if(m.hp>0&&['dash','leap'].includes(m.mode)&&p.invuln<=0&&aabb(p,m))hurtPlayer(m.attackDamage||10,'Acechador del eclipse');}
   const e=game.finalGauntlet?.guardian;if(e?.hp>0&&e.contactDmg>0&&p.invuln<=0&&aabb(p,e))hurtPlayer(e.contactDmg,'GUARDIÁN');
  }
  while(consumed.size>2048)consumed.delete(consumed.values().next().value);
@@ -4270,7 +4270,7 @@ combatTarget(){
 },
 setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
 quimeraPressureState(){const q=game.boss?._fusion?.pressure;return q?{phase:q.phase,t:q.t,spawned:q.spawned,minions:q.minions.map(m=>({...m})),stars:q.stars.map(s=>({...s})),taken:[...(game._quimeraStarPocket?.taken||[])],health:game.player.health,maxHealth:game.player.maxHealth}:null;},
-quimeraArenaState(){const s=game.quimeraArena;return{shield:s?.shield||0,cooldowns:{...s?.cooldowns},awakened:[...(s?.awakened||[])],platforms:game.platforms.filter(p=>p.quimeraStep).map(p=>({...p})),secrets:[...(game.secrets?.['w1-final']||[])]};},
+quimeraArenaState(){const s=game.quimeraArena;return{shield:s?.shield||0,shieldSource:s?.shieldSource||null,pulse:s?.pulse||0,wind:s?.wind||0,cooldowns:{...s?.cooldowns},awakened:[...(s?.awakened||[])],platforms:game.platforms.filter(p=>p.quimeraStep).map(p=>({...p})),secrets:[...(game.secrets?.['w1-final']||[])]};},
 michiSanctuaryState(){return {guardianDefeated:!!game.clearedEncounters?.['w1-cat']?.includes('w1-cat-astral-v1'),zone:game.roomDef?.michiSanctuary?game.roomDef.michiSanctuary.zones.find(z=>game.player.x>=z.x&&game.player.x<z.x+z.w&&game.player.y+game.player.h>=z.y&&game.player.y+game.player.h<=z.y+z.h)?.id:null,album:game.world1Collect?.rooms?.cat,remaining:(game.world1CollectItems||[]).filter(m=>!game.world1Collect?.rooms?.cat?.found.includes(m.id)).map(m=>({...m}))};},
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},

@@ -65,7 +65,7 @@ try{
   }
   for(const [index,hp]of[2800,1800,1000,400].entries()){
    let state=await game.evaluate(hp=>{const e=window.__OHANA_E2E;e.setInvulnerable(600);e.setBossHp(hp);e.step(540);const s=e.state();if(s.boss)e.setPlayer(s.boss.x-300,1000);return e.step(5);},hp);
-   assert.ok(state.boss,'final boss must be active in the production arena');assert.equal(state.boss.phase,index+1);assert.equal(state.runtimeFaults,0);
+   assert.ok(state.boss,'final boss must be active in the production arena');assert.equal(state.boss.phase,index+1);assert.equal(state.runtimeFaults,0,JSON.stringify({width,phase:index+1,last:state.lastRuntimeFault}));
    await game.keyboard.down('d');await game.keyboard.down('w');await game.evaluate(()=>window.__OHANA_E2E.step(12));await game.keyboard.up('w');await game.keyboard.up('d');
    if(width<500){
     const framing=await game.evaluate(async()=>{

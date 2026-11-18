@@ -1,3 +1,7 @@
+## ohana-661 · Encuentro completo
+
+Marea protege; Corazón dispersa cuatro ecos ordinarios; Regreso impulsa al jugador y refuerza la corriente. Tres estrellas forman una defensa breve. Acechadores saltan y vigías abren su abanico en fases avanzadas, con destino fijado y cupos conservados. Quimera articula cada órgano emisor; el ojo sigue la mira fijada y reacciona a la ayuda. El estudio incorpora al actor de Kilo y pruebas de los tres prismas y constelaciones.
+
 ## ohana-660 · Combate del eclipse
 
 Refuerzos finitos: cupos 1/2/2/3, máximo dos vivos; aparición de 72 cuadros, ataques anticipados y objetivos fijados. Estrellas recogibles con curación limitada y limpieza de proyectiles ordinarios. Nuevas formas de energía y huellas espectrales sin guías lineales; paleta oscura, máscara y ojo renovados. Estado de refuerzos compartido con autoridad del anfitrión.

@@ -1,4 +1,4 @@
-const VERSION = "ohana-660";
+const VERSION = "ohana-661";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/quimera-pressure.js?v=" + VERSION,
@@ -513,11 +513,11 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/quimera-pressure.js": "dfb572e16a2d450b112f9099a758971ee0021e65",
+  "systems/quimera-pressure.js": "3d673e04c74db31343fa9fc3def86b71ed00a73a",
   "systems/quimera-telegraphs.js": "f40c92a5afad16400dca3db19a7837f54b183b19",
   "systems/quimera-energy.js": "c9cf7b72687e85bad2864ce52e315c5e8af48198",
-  "systems/quimera-arena.js": "b3cb25a3c60505503f1687c908ada50d7abb8792",
-  "systems/quimera-eclipse.js": "b2fae66d7d59637e76dc9c855681e584df6f851d",
+  "systems/quimera-arena.js": "c58ff9b6d9fd98e596e62a9caedec99bd92c983c",
+  "systems/quimera-eclipse.js": "0241c4a413981cde326e503543f52ec21c9e9e62",
   "systems/quimera-effects.js": "81e3341238fa0316a6f86eb45f8993ac85fb6df2",
   "systems/kilo-presence.js": "f72c935f85a782bba721afb64efee0bb2ffd8809",
   "characters/kilo-hair.js": "b881e022c1572018a9856c258220d9e872924a77",
@@ -610,7 +610,7 @@ const PRECACHE_REVISIONS = {
   "multiplayer/versus-client.js": "1bc9f1f41d54ed74ca137e0e15f44b2cd41e1509",
   "multiplayer/match-rules-v604.js": "22e0ec2591bf777b323edbd5b854aae0fa10f6e1",
   "multiplayer/adventure-progress.js": "be9cfcf03feb9f4b3ad279f711a9c8c6d0807bc6",
-  "multiplayer/adventure-finale.js": "92f664f9b6bfec7a829306f12f1a86a6411f3c78",
+  "multiplayer/adventure-finale.js": "a200db6c45c2acaa33da8f47af0d898b31ebd1c0",
   "multiplayer/adventure-retry.js": "867f1fed30539d1ff3d8561e96fb9aec77996885",
   "multiplayer/adventure-roles.js": "784bfcf5831fab7489a3119bc8295891858af873",
   "systems/coop-role-v604.js": "9760a8385f5e9012542cd572a29bd12d002302cf",
@@ -689,7 +689,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-collect.js": "b56318e191160e87287daa96daaa8fad97a5b74d",
   "systems/world1-boss.js": "b6d0a24f422ee87b1591d22229e290a1fe02d75e",
   "systems/fusion-boss.js": "636494df323ab217cea20e55f2d53082f87d5d80",
-  "systems/quimera-art.js": "62d4c80af4b95d102e4713ddfdfc4127c120d339",
+  "systems/quimera-art.js": "ed31f301e7ff847b5711f3e509c8490d023fe3bf",
   "systems/quimera-regalia.js": "546ff962d7cb2a7af402235117e541f6a1442705",
   "systems/world1-story.js": "e1324becee767e794b86580bc3b5534c7a647e87",
   "systems/world1-rooms.js": "e651a4cde4ebad3fee06c9118edc4f4ad856488e",
@@ -767,7 +767,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "77035c396a4c6f58aec6af1378ea3a1892433ef9",
-  "index.html": "d17198b36445ea076441161853cb015183ab198c",
+  "index.html": "5b8fdb15d1c39393dc8b73b4948a1a5b97e2c53e",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
@@ -793,7 +793,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "31b0dfba1cf43438ebc88f41675de433eeeb28d7",
+  "game.js": "4dc9972521f484000e80ee903fdf1c35e23b80da",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "71a63ad4f6842602f56a8edd3d373f622065710d",
   "characters/ten-action-acting.js": "8c56db05f0625ebce31e10abbba5305be881d0ff",

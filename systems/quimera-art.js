@@ -12,12 +12,16 @@ export function quimeraPose(e,t=0,reduce=false){
   organ:ORGANS[b.attack]||'core',color:WORLD1_THEMES[HEROES[b.attack]]?.color||'#ffbe77',open:b.mode==='rest'?1:b.mode==='special'?.7:.18,
   gait:reduce?0:b.mode==='charge'?Math.sin(time*.65):0};
 }
+export function quimeraArticulation(e,t=0,reduce=false){
+ const p=quimeraPose(e,t,reduce),b=e._fusion||{},w=p.warning*p.warning*(3-2*p.warning),release=b.mode==='attack'?Math.sin(Math.PI*(1-clamp(num(b.clock)/30))):0;
+ return{coil:w,recoil:release*11,lean:b.mode==='charge'?.2:b.mode==='leap'?-.14:p.organ==='core'?w*.1:w*.045,arm:p.organ==='paw'?w*.62:p.organ==='core'?w*.4:p.organ==='tail'?w*.18:w*.09,head:p.organ==='jaw'?-w*.17:p.organ==='crown'?w*.08:-.05,mantle:w*(p.organ==='wing'?.24:.08),idle:reduce?0:Math.sin(p.time*.033)*.018};
+}
 // Hand-shaped silhouettes and broad light planes; the hollow chest is the focal point.
 export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
- const p=quimeraPose(e,t,reduce),b=e._fusion||{},T=p.time,S=p.spread,W=p.warning;
+ const p=quimeraPose(e,t,reduce),a=quimeraArticulation(e,t,reduce),b=e._fusion||{},T=p.time,S=p.spread,W=p.warning;
  const formed=b.mode==='intro'?clamp(1-num(b.clock)/Math.max(1,num(b.introMax,260))):1;
- const recoil=b.mode==='attack'?Math.sin(clamp(num(b.clock)/30)*Math.PI)*9:0;
- const bend=b.mode==='charge'?.18:b.mode==='leap'?-.12:W*.07;
+ const recoil=a.recoil;
+ const bend=a.lean;
  const breath=p.breathe,flow=Math.sin(T*.025),dark='#0b1428',rim=p.phase>=3?'#a1abbc':'#738398';
  const path=(fill,fn)=>{c.fillStyle=fill;c.beginPath();fn();c.closePath();c.fill();};
  const oval=(x,y,rx,ry,col,rot=0)=>path(col,()=>c.ellipse(x,y,rx,ry,rot,0,TAU));
@@ -35,7 +39,7 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  }
  // The mantle is a torn, flowing mass, not a symmetrical pair of bat wings.
  for(const side of [1,-1]){
-  c.save();c.translate(side*35,-202);c.scale(side,1);c.rotate(flow*.025-side*.06-(p.organ==='wing'?W*.18:0));
+  c.save();c.translate(side*35,-202);c.scale(side,1);c.rotate(flow*.025-side*.06-a.mantle);
   const sweep=13+S*22;
   path(linear(0,-95,154,83,[[0,'#8994a9'],[.14,'#465270'],[.42,'#292d49'],[.82,'#141a30'],[1,'#0d203900']]),()=>{
    c.moveTo(-18,14);c.bezierCurveTo(6,-67,79,-98,161+sweep,-120);c.bezierCurveTo(111,-75,118,-31,183,-8);c.quadraticCurveTo(144,-12,127,3);c.quadraticCurveTo(151,35,162,50);c.quadraticCurveTo(109,14,100,26);c.quadraticCurveTo(125,65,113+flow*6,93);c.bezierCurveTo(102,60,63,60,52,32);c.quadraticCurveTo(32,55,19,75);c.quadraticCurveTo(24,30,-18,14);
@@ -78,7 +82,7 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  }
  // Unequal forearms: the near arm reaches forward, the other braces its weight.
  for(const side of [1,-1]){
-  const raise=p.organ==='paw'?W*.55:p.organ==='core'?W*.25:W*.06;
+  const raise=a.arm;
   c.save();c.translate(side*66,-194);c.rotate(side*(raise-p.strike*.13)+(side<0?.17:-.16)+Math.sin(T*.035+side)*.025);
   path(linear(-24,0,28,136,[[0,side<0?'#648799':'#344f6c'],[.42,'#27435d'],[1,'#111f36']]),()=>{c.moveTo(-16,-14);c.bezierCurveTo(-43,-6,-39,38,-24,59);c.quadraticCurveTo(-17,82,-32,115);c.quadraticCurveTo(-45,140,-20,143);c.quadraticCurveTo(8,150,29,129);c.quadraticCurveTo(24,106,27,86);c.quadraticCurveTo(40,39,21,1);c.quadraticCurveTo(8,-19,-16,-14);});
   path('#8db5bf30',()=>{c.moveTo(-16,0);c.quadraticCurveTo(-33,21,-14,58);c.quadraticCurveTo(-19,23,-6,11);});
@@ -87,6 +91,11 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
    path('#c4d2c5',()=>{c.moveTo(x,125);c.bezierCurveTo(x-12,139,x-16,154,x-9,160);c.quadraticCurveTo(x+2,148,x+10,130);});
   }
   c.restore();
+ }
+ // Small openings in the shoulder mass expose the imprisoned light as phases split.
+ if(p.phase>=2)for(const side of[-1,1])for(let i=0;i<3;i++){
+  const x=side*(64+i*4),y=-176+i*17;c.save();c.globalAlpha*=.18+p.open*.12;
+  path(p.color,()=>{c.moveTo(x,y-8);c.quadraticCurveTo(x+side*10,y-3,x+side*3,y+11);c.quadraticCurveTo(x-side*3,y+1,x,y-8);});c.restore();
  }
  // Ten embedded teardrops, subtly lit. They never become a string of buttons.
  WORLD1_ORDER.forEach((hero,i)=>{
@@ -97,7 +106,7 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
   c.globalAlpha/=active?.95:.35;
  });
  // A swept-back crown and long hollow mask replace the smiling animal muzzle.
- c.save();c.translate(-16-(p.organ==='horn'?W*11:0),-228-(p.organ==='crown'?W*8:0));c.rotate(p.organ==='jaw'?-W*.12:p.dead?.3:-.1);
+ c.save();c.translate(-16-(p.organ==='horn'?W*11:0),-228-(p.organ==='crown'?W*8:0));c.rotate(p.dead?.3:a.head+a.idle);
  for(const side of [1,-1]){
   path(linear(side*20,-20,side*62,-111,[[0,'#3b596c'],[.45,'#b5c7c5'],[1,'#e6e8d5']]),()=>{c.moveTo(side*18,-24);c.bezierCurveTo(side*46,-50,side*26,-85,side*(66+S*14),-113-S*12);c.bezierCurveTo(side*48,-85,side*65,-50,side*37,-16);});
   // Sweeping cheek fins taper backwards; no separate spherical cheeks.
