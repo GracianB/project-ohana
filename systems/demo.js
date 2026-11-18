@@ -2,6 +2,7 @@ import { showTutorialMessage, setPersistentObjective } from "./notify.js";
 import { formatObjective, objectiveForRoom } from "./objectives.js";
 
 const HINTS = {
+  finale:{title:'PRISMAS DEL ECLIPSE',text:'Usa los prismas para protegerte, dispersar ecos o ganar altura. El núcleo se abre entre ataques.'},
   move: {
     title: "MOVERSE",
     text: "A/D para avanzar y retroceder. W salta y S baja por las rutas.",
@@ -63,7 +64,7 @@ function boot() {
   const seen = new Set();
 
   const showPowerHint = (key) => {
-    if (!playing || overlaysBlockHints()) return;
+    if (!playing || overlaysBlockHints() || lastRoom?.id==='w1-final') return;
     const slot = [...document.querySelectorAll(".ability-slot")].find(
       el => el.querySelector(".key")?.textContent?.trim().toLowerCase() === key
     );
@@ -80,6 +81,7 @@ function boot() {
   };
 
   const showHint = (id) => {
+    if(lastRoom?.id==='w1-final'){if(id!=='interact')return;id='finale';}
     if (!playing || seen.has(id) || overlaysBlockHints()) return;
     const hint = HINTS[id];
     if (!hint) return;

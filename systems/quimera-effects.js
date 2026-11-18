@@ -4,15 +4,16 @@ import {drawQuimeraEnergy} from './quimera-energy.js';
 import {WORLD1_FLOOR as FLOOR} from './world1-rooms.js';
 const TAU=Math.PI*2;
 export function drawQuimeraProjectiles(c,b,cam,t,reduce,bounds,isActive){
+ const baseAlpha=c.globalAlpha;
  c.save();c.lineCap='round';c.lineJoin='round';
  const path=(fill,fn)=>{c.fillStyle=fill;c.beginPath();fn();c.closePath();c.fill();};
  const ellipse=(x,y,rx,ry,fill)=>path(fill,()=>c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,TAU));
- c.globalAlpha=1;
+ c.globalAlpha=baseAlpha*(1);
  for(const s of b.shots||[]){
   const box=bounds(s),x=s.x-(cam.x||0),y=s.y-(cam.y||0),xx=box.x-(cam.x||0),yy=box.y-(cam.y||0),col=s.col||'#8cddd8',active=isActive(s),age=reduce?19:(s.age||0),r=s.r||20;
-  if(s.hit||s.life<=0)continue;
+  if(s.hit||s.life<=0)continue;c.globalAlpha=baseAlpha;
   if(s.delay>0){
-   const yy=(s.k==='meteor'?FLOOR-4:s.y)-(cam.y||0),g=c.createRadialGradient(x,yy,0,x,yy,s.r||30);g.addColorStop(0,col);g.addColorStop(1,'#adbbd200');{c.globalAlpha=.45;c.fillStyle=g;c.beginPath();c.ellipse(x,yy,s.r||30,s.k==='meteor'?7:15,0,0,Math.PI*2);c.fill();}continue;
+   const yy=(s.k==='meteor'?FLOOR-4:s.y)-(cam.y||0),g=c.createRadialGradient(x,yy,0,x,yy,s.r||30);g.addColorStop(0,col);g.addColorStop(1,'#adbbd200');{c.globalAlpha=baseAlpha*(.45);c.fillStyle=g;c.beginPath();c.ellipse(x,yy,s.r||30,s.k==='meteor'?7:15,0,0,Math.PI*2);c.fill();}continue;
   }
   c.save();c.beginPath();
   const column=['bolt','geyser','beam'].includes(s.k);
@@ -20,7 +21,7 @@ export function drawQuimeraProjectiles(c,b,cam,t,reduce,bounds,isActive){
   c.clip();
   if(column){drawQuimeraEnergy(c,s,box,cam,active,reduce);c.restore();continue;}
   // Round shots retain a quiet contact field; energy lanes have no filled slabs.
-  c.globalAlpha=active?.12:.08;c.fillStyle=col;c.fillRect(xx,yy,box.w,box.h);c.globalAlpha=1;
+  c.globalAlpha=baseAlpha*(active?.12:.08);c.fillStyle=col;c.fillRect(xx,yy,box.w,box.h);c.globalAlpha=baseAlpha*(1);
   c.save();c.translate(x,y);
   const g=c.createLinearGradient(-r,-r,r,r);g.addColorStop(0,'#ffffff');g.addColorStop(.25,col);g.addColorStop(1,'#142b4a');
   const direction=Math.sign(s.vx)||1;
@@ -65,14 +66,16 @@ export function drawQuimeraProjectiles(c,b,cam,t,reduce,bounds,isActive){
 }
 
 export function drawQuimeraCast(c,e,cam,t=0,reduce=false){
+ const baseAlpha=c.globalAlpha;
  const b=e._fusion;if(!b||!['warn','attack','charge','leap'].includes(b.mode)||!b.attack)return;
  const col={ola:'#f3cd99',plasma:'#8adfe8',rayos:'#f4e9a5',medusas:'#bcb1ee',embestida:'#cce5c3',aliento:'#ffad72',terremoto:'#b4d390',geiseres:'#f1d58e',ruedas:'#f2ba8b',red:'#a5bafa'}[b.attack];
- const k=b.mode==='warn'?Math.max(0,Math.min(1,1-b.clock/(b.warnMax||72))):Math.max(0,(b.clock||0)/30),time=reduce?0:t;
+ const k=b.mode==='warn'?Math.max(0,Math.min(1,1-b.clock/(b.warnMax||72))):b.mode==='charge'?1:b.mode==='leap'?Math.max(0,Math.min(1,1-b.clock/50)):Math.max(0,Math.min(1,(b.clock||0)/30)),time=reduce?0:t;
  const dir=e.facing||-1,x=e.x+e.w/2-(cam.x||0),foot=e.y+e.h-(cam.y||0);
  c.save();c.lineCap='round';c.strokeStyle=col;c.fillStyle=col;
  // Intent gathers into the emitting organ, then recoils outward on release.
  const organ=b.attack==='aliento'?{x:x+dir*42,y:foot-218}:['ola','terremoto','geiseres'].includes(b.attack)?{x:x+dir*70,y:foot-55}:b.attack==='rayos'?{x,y:foot-310}:{x,y:foot-163};
- c.globalAlpha=.15+k*.5;
+ const mist=c.createRadialGradient(organ.x,organ.y,1,organ.x,organ.y,12+k*14);mist.addColorStop(0,col+'66');mist.addColorStop(1,col+'00');c.fillStyle=mist;c.beginPath();c.ellipse(organ.x,organ.y,12+k*14,10+k*10,0,0,TAU);c.fill();c.fillStyle=col;
+ c.globalAlpha=baseAlpha*(.15+k*.5);
  for(let i=0;i<5;i++){
   const angle=i*TAU/5+time*.014,rad=14+(1-k)*35;
   c.beginPath();c.ellipse(organ.x+Math.cos(angle)*rad,organ.y+Math.sin(angle)*rad*.65,1.5,3,angle,0,TAU);c.fill();
@@ -82,11 +85,12 @@ export function drawQuimeraCast(c,e,cam,t=0,reduce=false){
 
 
 function drawQuimeraImpacts(c,b,cam,reduce){
+ const baseAlpha=c.globalAlpha;
  for(const fx of b.fx||[]){
   const p=Math.max(0,Math.min(1,fx.age/28)),x=fx.x-(cam.x||0),y=fx.y-(cam.y||0),r=fx.r||22;
-  c.save();c.translate(x,y);c.globalAlpha=(1-p)*.7;c.fillStyle=fx.col||'#a5e1d8';c.strokeStyle=fx.col||'#a5e1d8';
+  c.save();c.translate(x,y);c.globalAlpha=baseAlpha*((1-p)*.7);c.fillStyle=fx.col||'#a5e1d8';c.strokeStyle=fx.col||'#a5e1d8';
   if(fx.kind==='ground'){
-   c.globalAlpha=(1-p)*.12;c.beginPath();c.ellipse(0,0,r*(.5+p*2),5+p*6,0,0,TAU);c.fill();c.globalAlpha=(1-p)*.7;
+   c.globalAlpha=baseAlpha*((1-p)*.12);c.beginPath();c.ellipse(0,0,r*(.5+p*2),5+p*6,0,0,TAU);c.fill();c.globalAlpha=baseAlpha*((1-p)*.7);
   }
   for(let i=0;i<7;i++){
    const a=i*TAU/7+(fx.id||0)*.7,d=reduce?r*.5:r*(.2+p*1.7),size=(1-p)*3;

@@ -1,3 +1,7 @@
+# ohana-700 · El encuentro del eclipse
+
+37 iteraciones internas desde la 663, con una entrega consolidada. Registro: docs/QUIMERA-V700-STAGES.md.
+
 # ohana-663 · Anatomía de Quimera
 
 Revisión integral del cuerpo, mandíbula, manto, corona por fases, costillas móviles y luz del núcleo. Ver docs/QUIMERA-V663.md.

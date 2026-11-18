@@ -1,0 +1,97 @@
+{
+  "release": "ohana-700",
+  "baseRelease": "ohana-663",
+  "status": "local acceptance passed",
+  "iterations": 37,
+  "unitTests": {
+    "passed": 2007,
+    "failed": 0
+  },
+  "releaseGate": {
+    "runtimeModules": 429,
+    "resources": 500
+  },
+  "arena": {
+    "phases": 4,
+    "ordinaryAttacks": 10,
+    "viewports": [
+      1280,
+      390,
+      320
+    ],
+    "nativeKeyboardAndTouchPrisms": true,
+    "nativeDesktopAndTouchReinforcementDefeat": true,
+    "physicalStarCollection": true,
+    "routes": 12,
+    "persistentSteps": 9
+  },
+  "visual": {
+    "alphaChecks": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "purity": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "stable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scenes": 60,
+    "attacks": [
+      "ola",
+      "plasma",
+      "rayos",
+      "medusas",
+      "embestida",
+      "aliento",
+      "terremoto",
+      "geiseres",
+      "ruedas",
+      "red"
+    ],
+    "errors": []
+  },
+  "nativeRouteAndEnding": {
+    "landed": [
+      "sky-0-0",
+      "sky-0-1",
+      "sky-0-2",
+      "sky-0-3",
+      "sky-0-4"
+    ],
+    "nativeKillingBlow": true,
+    "scenes": [
+      "bossDefeat",
+      "ending"
+    ],
+    "runtimeFaults": 0,
+    "errors": [],
+    "scope": "Access, initial balcony position and phase/HP fixtures; native movement, platform landings, H killing blow and Enter film controls. Not a full earned campaign."
+  },
+  "scope": "Synthetic final access, initial positions and phase/HP fixtures followed by production input/physics. Not an earned full campaign.",
+  "publicCandidate": {
+    "deployId": "6afdd447411e6985bb47a3bb",
+    "url": "https://6afdd447411e6985bb47a3bb--project-ohana-multiplayer.netlify.app",
+    "runtimeFilesMatched": 59,
+    "browserStudioVerified": true,
+    "twoPlayerAdventureAndVersus": true
+  }
+}

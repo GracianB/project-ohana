@@ -16,27 +16,31 @@ export function quimeraArticulation(e,t=0,reduce=false){
  const p=quimeraPose(e,t,reduce),b=e._fusion||{},w=p.warning*p.warning*(3-2*p.warning),release=b.mode==='attack'?Math.sin(Math.PI*(1-clamp(num(b.clock)/30))):0;
  return{coil:w,recoil:release*11,lean:b.mode==='charge'?.2:b.mode==='leap'?-.14:p.organ==='core'?w*.1:w*.045,arm:p.organ==='paw'?w*.62:p.organ==='core'?w*.4:p.organ==='tail'?w*.18:w*.09,head:p.organ==='jaw'?-w*.17:p.organ==='crown'?w*.08:-.05,mantle:w*(p.organ==='wing'?.24:.08),idle:reduce?0:Math.sin(p.time*.033)*.018};
 }
+export const QUIMERA_MATERIALS=Object.freeze([null,{rim:'#71838c',mid:'#3b5967',shade:'#243546',horn:'#e3dfc2'},{rim:'#85859c',mid:'#4c526f',shade:'#28283f',horn:'#d8d5d0'},{rim:'#758e9a',mid:'#3d596b',shade:'#20283f',horn:'#d5e1d1'},{rim:'#9b8da2',mid:'#514761',shade:'#211f36',horn:'#eee1c1'}].map(v=>v&&Object.freeze(v)));
 // Smooth anatomical masses, lit cavities and independent joints. No wire outlines.
 export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
- const p=quimeraPose(e,t,reduce),a=quimeraArticulation(e,t,reduce),b=e._fusion||{},T=p.time,S=p.spread,W=p.warning;
+ const p=quimeraPose(e,t,reduce),a=quimeraArticulation(e,t,reduce),b=e._fusion||{},T=p.time,S=p.spread,W=p.warning,M=QUIMERA_MATERIALS[p.phase];
  const formed=b.mode==='intro'?clamp(1-num(b.clock)/Math.max(1,num(b.introMax,260))):1;
  const path=(fill,fn)=>{c.fillStyle=fill;c.beginPath();fn();c.closePath();c.fill();};
  const oval=(x,y,rx,ry,col,rot=0)=>path(col,()=>c.ellipse(x,y,Math.max(.01,rx),Math.max(.01,ry),rot,0,TAU));
  const linear=(x,y,xx,yy,stops)=>{const g=c.createLinearGradient(x,y,xx,yy);stops.forEach(([at,col])=>g.addColorStop(at,col));return g;};
  const radial=(x,y,r,stops)=>{const g=c.createRadialGradient(x-r*.25,y-r*.3,0,x,y,r);stops.forEach(([at,col])=>g.addColorStop(at,col));return g;};
- const skin=linear(-90,-220,85,-45,[[0,'#71838c'],[.2,'#3b5967'],[.52,'#243546'],[1,'#10192d']]);
+ const skin=linear(-90,-220,85,-45,[[0,M.rim],[.2,M.mid],[.52,M.shade],[1,'#10192d']]);
  const bone=linear(-40,-65,39,40,[[0,'#dfdfc5'],[.25,'#b5c8bf'],[.6,'#748e97'],[1,'#344b65']]);
  const active=organ=>p.organ===organ&&(W>0||p.strike);
  const glow=(x,y,r,color)=>oval(x,y,r,r,radial(x,y,r,[[0,color],[1,'#819fba00']]));
  c.save();c.translate(num(e.x)-num(cam.x)+num(e.w,230)/2,num(e.y)-num(cam.y)+num(e.h,290));c.scale(e.facing===1?-1:1,1);c.globalAlpha*=formed;
+ if(b.mode==='intro'){c.beginPath();c.rect(-300,-420*formed,600,435*formed+2);c.clip();}
+ const unravel=p.dead?clamp(num(e.dying)/Math.max(1,num(e.dyingMax,150))):0;
+ if(p.dead){for(let i=0;i<10;i++){const angle=i*TAU/10,rr=60+unravel*120;oval(Math.cos(angle)*rr,-155+Math.sin(angle)*rr*.6-unravel*70,3,7,WORLD1_THEMES[WORLD1_ORDER[i]].color,angle);}c.globalAlpha*=1-unravel*.85;}
  // Contact stays anchored while the torso breathes, recoils and coils.
  oval(0,4,111,10,'#03091588');
  c.translate(a.recoil+(p.hurt?5:0),p.dead?35:p.breathe);c.rotate(p.dead?.24:a.lean);
  // Long muscular tail, with a travelling fold rather than stacked outlines.
- path(linear(25,-68,187,-129,[[0,'#24364c'],[.55,'#4c6978'],[1,'#92a9a300']]),()=>{c.moveTo(28,-89);c.bezierCurveTo(100,-48,181,-42,164,-122);c.quadraticCurveTo(158,-153,181,-168+Math.sin(T*.027)*8);c.bezierCurveTo(158,-129,218,-36,126,-29);c.quadraticCurveTo(71,-24,28,-62);});
+ path(linear(25,-68,187,-129,[[0,'#24364c'],[.55,'#4c6978'],[1,'#92a9a300']]),()=>{c.moveTo(28,-89);c.bezierCurveTo(100,-48,181,-42,164,-122);c.quadraticCurveTo(158,-153,181,-168+Math.sin(T*.027)*8-(p.organ==='tail'?W*42:0));c.bezierCurveTo(158,-129,218,-36,126,-29);c.quadraticCurveTo(71,-24,28,-62);});
  // A mantle of staggered membrane fingers unfurls through the four phases.
  for(const side of[1,-1]){
-  c.save();c.translate(side*44,-211);c.scale(side,1);c.rotate(-.035+Math.sin(T*.022+side)*.025-a.mantle);
+  c.save();c.translate(side*44,-211);c.scale(side,1);c.rotate(-.035+Math.sin(T*.022+side)*.025-a.mantle-(p.organ==='wing'?W*.13:0));
   for(let i=3;i>=0;i--){const span=92+i*21+S*36,lag=Math.sin(T*.026-i*.65)*7,tipY=-119+i*45;
    path(linear(0,-45,span,tipY+45,[[0,'#385169'],[.4,i%2?'#464c6b':'#555c78'],[.75,'#24253f'],[1,'#111b3000']]),()=>{c.moveTo(-16,8);c.bezierCurveTo(29,-53,span-56,tipY-18,span,tipY+lag);c.quadraticCurveTo(span-40,tipY+19,span-25,tipY+55);c.bezierCurveTo(span-53,tipY+33,59,65,8,54);});
    path('#a0b8b921',()=>{c.moveTo(5,0);c.quadraticCurveTo(span*.55,tipY*.8,span-9,tipY+lag+3);c.quadraticCurveTo(span*.58,tipY*.62,32,22);});
@@ -76,7 +80,7 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
   c.save();c.translate(side*(70+S*6),-196);c.rotate(side*((side<0?a.arm:a.arm*.48)-p.strike*.13)+(side<0?.18:-.16)+Math.sin(T*.031+side)*.025);
   path(linear(-28,0,24,138,[[0,side<0?'#668693':'#3f5b73'],[.35,'#30485d'],[.7,'#1a2c43'],[1,'#4b6474']]),()=>{c.moveTo(-15,-17);c.bezierCurveTo(-47,-10,-41,30,-25,53);c.quadraticCurveTo(-17,76,-30,100);c.bezierCurveTo(-51,128,-32,149,-9,145);c.quadraticCurveTo(27,147,29,122);c.quadraticCurveTo(18,101,26,80);c.bezierCurveTo(45,33,31,-15,9,-19);c.quadraticCurveTo(-4,-22,-15,-17);});
   oval(-15,29,11,26,'#b2c5bf14',-.2);oval(-6,120,24,19,'#263e54');
-  for(let i=0;i<3;i++){const xx=-23+i*17;oval(xx,127,8,11,'#4a6372',-.25);path(linear(xx,129,xx-6,159,[[0,'#d8dbc4'],[1,'#718d99']]),()=>{c.moveTo(xx-5,129);c.bezierCurveTo(xx-14,138,xx-14,153,xx-7,159);c.quadraticCurveTo(xx-5,146,xx+5,133);});}
+  for(let i=0;i<3;i++){const grip=p.organ==='paw'?W*7:W*2,xx=-23+i*17+grip*(1-i);oval(xx,127,8,11,'#4a6372',-.25);path(linear(xx,129,xx-6,159,[[0,'#d8dbc4'],[1,'#718d99']]),()=>{c.moveTo(xx-5,129);c.bezierCurveTo(xx-14,138,xx-14,153,xx-7,159-grip);c.quadraticCurveTo(xx-5,146,xx+5,133);});}
   if(active('paw'))glow(-6,115,26,p.color+'55');c.restore();
  }
  // Captive voices are sunk into shoulder tissue, with only the speaking one bright.
@@ -86,7 +90,7 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  const jaw=p.organ==='jaw'?W*9+p.strike*14:p.strike?3:0;
  for(const side of[1,-1]){
   // Swept antlers grow organically from a thick root, never a straight triangle.
-  path(linear(side*20,-18,side*62,-111,[[0,'#354f62'],[.34,'#8ea8ac'],[.7,'#c4d0be'],[1,'#e3dfc2']]),()=>{c.moveTo(side*18,-22);c.bezierCurveTo(side*45,-39,side*31,-78,side*(64+S*13),-112-S*10);c.bezierCurveTo(side*46,-78,side*64,-49,side*35,-13);c.quadraticCurveTo(side*23,-9,side*18,-22);});
+  path(linear(side*20,-18,side*62,-111,[[0,'#354f62'],[.34,'#8ea8ac'],[.7,'#c4d0be'],[1,M.horn]]),()=>{c.moveTo(side*18,-22);c.bezierCurveTo(side*45,-39,side*31,-78,side*(64+S*13),-112-S*10);c.bezierCurveTo(side*46,-78,side*64,-49,side*35,-13);c.quadraticCurveTo(side*23,-9,side*18,-22);});
   for(let i=2;i>=0;i--)path(linear(side*25,-24,side*66,40,[[0,'#53677c'],[1,'#17263d']]),()=>{const yy=-29+i*17;c.moveTo(side*25,yy);c.quadraticCurveTo(side*(57+i*6),yy-20,side*(67+i*5),yy-12);c.quadraticCurveTo(side*47,yy+9,side*(51+i*2),yy+34);c.quadraticCurveTo(side*30,yy+22,side*25,yy);});
  }
  // Splintered crown unfurls into an asymmetric rack in later movements.
@@ -101,8 +105,9 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  // Curved cheek volumes wrap under the brow; the left muzzle leads the silhouette.
  oval(-26,-1,17,18,linear(-40,-10,-14,20,[[0,'#c4d1c3'],[.5,'#829fa3'],[1,'#3f5f75']]),-.3);
  path('#273c55',()=>{c.moveTo(-39,-27);c.quadraticCurveTo(-26,-36,-10,-21);c.quadraticCurveTo(7,-32,30,-25);c.quadraticCurveTo(23,-11,5,-11);c.quadraticCurveTo(-6,-6,-17,-14);c.quadraticCurveTo(-34,-10,-39,-27);});
+ const gaze=b.target?clamp((b.target.x-(e.x+e.w/2))*(e.facing===1?-1:1)/160,-2.5,2.5):0;
  const blink=reduce?0:Math.max(0,1-Math.abs((T%410)-390)/8);
- if(!p.dead)for(const side of[-1,1]){const xx=side<0?-27:13;c.save();c.translate(xx,-20);c.scale(1,Math.max(.1,1-blink));oval(0,0,8,2.7,active('crown')?'#f6e0b1':'#c2eed7',side*.12);oval(-1,0,1.5,4,'#13253a');oval(-3,-1.5,1.5,1,'#faf5d3');c.restore();}
+ if(!p.dead)for(const side of[-1,1]){const xx=side<0?-27:13;c.save();c.translate(xx,-20);c.scale(1,Math.max(.1,1-blink));oval(0,0,8,2.7,active('crown')?'#f6e0b1':'#c2eed7',side*.12);oval(-1+gaze,0,1.5,4,'#13253a');oval(-3,-1.5,1.5,1,'#faf5d3');c.restore();}
  // Heavy eyelids cast a soft overhang; no engraved network over the face.
  path('#819e9f',()=>{c.moveTo(-41,-29);c.quadraticCurveTo(-24,-42,-9,-25);c.quadraticCurveTo(-25,-23,-38,-20);});
  path('#9eb5ad',()=>{c.moveTo(-7,-25);c.quadraticCurveTo(15,-40,32,-27);c.quadraticCurveTo(14,-23,-4,-17);});
@@ -115,6 +120,7 @@ export function drawQuimeraCreature(c,e,cam={x:0,y:0},t=0,reduce=false){
  if(active('jaw'))glow(-17,27+jaw*.4,17,p.color+'77');
  if(active('crown'))glow(-3,-60,26,p.color+'55');
  path(linear(-10,-68,12,-30,[[0,'#bacbbd'],[1,'#4f7886']]),()=>{c.moveTo(-17,-46);c.quadraticCurveTo(-7,-64,-4,-79-S*10);c.quadraticCurveTo(5,-67,10,-47);c.quadraticCurveTo(1,-34,-17,-46);});
+ if(active('crown'))for(const side of[-1,1]){oval(side*26,-33,3+W*2,8+W*6,p.color,side*.3);}
  // Beard and throat frills trail behind the head's smaller idle movement.
  for(let i=0;i<3;i++)path(linear(-18+i*8,31,-7+i*12,78,[[0,'#506e82'],[1,'#34597800']]),()=>{const xx=-23+i*12;c.moveTo(xx,31);c.quadraticCurveTo(xx+14,49,xx+8,76+Math.sin(T*.03+i)*4);c.quadraticCurveTo(xx-7,59,xx,31);});
  c.restore();

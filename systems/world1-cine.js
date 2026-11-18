@@ -219,17 +219,18 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
     const size = Math.min(W, H) * 0.12 * num(sc, 1);
     ctx.globalAlpha = fadeIn * fadeOut * (s.layout === "fused" ? 0.85 : 1);
     const hop = s.dance && !reduce ? Math.abs(Math.sin(t * 0.09 + i)) * 14 : 0;
+    if(c.id==='bossDefeat')ctx.globalAlpha*=clamp(k*1.7-i*.055,0,1);
     if(!on)ctx.globalAlpha*=.45;
     actor(ctx,h,x,y+size*.5-hop,size/60,
       s.layout==='arrival'
         ? {pose:reduce?'idle':k<.45?'run':k<.7?'cast':'victory',form:0}
-        : {pose:on?(s.dance?'victory':'idle'):'idle',form:0});
+        : {pose:on?(s.dance||c.id==='bossDefeat'?'victory':'idle'):'idle',form:0});
     ctx.globalAlpha=fadeIn*fadeOut;
     if (s.dim && s.layout === "one") { ctx.globalAlpha = 0.5 * fadeIn; ctx.fillStyle = s.bg; ctx.fillRect(x - size, y - size * 0.8 + size * 1.6 * k * 0.6, size * 2, size * 1.6 * (1 - k * 0.6)); }
   });
   if(s.layout==='fused'){
     ctx.save();ctx.globalAlpha=fadeIn;ctx.translate(W/2,H*.74);const scale=Math.min(W/680,H/660);ctx.scale(scale,scale);
-    drawQuimeraCreature(ctx,{x:-115,y:-290,w:230,h:290,phase:c.id==='bossDefeat'?4:1,hp:c.id==='bossDefeat'?0:1,_fusion:{mode:'rest'}},{x:0,y:0},t,reduce);ctx.restore();
+    drawQuimeraCreature(ctx,{x:-115,y:-290,w:230,h:290,phase:c.id==='bossDefeat'?4:1,hp:c.id==='bossDefeat'?0:1,dying:c.id==='bossDefeat'?k*150:0,dyingMax:150,_fusion:c.id==='bossIntro'?{mode:'intro',clock:(1-k)*260,introMax:260}:{mode:'rest'}},{x:0,y:0},t,reduce);ctx.restore();
   }
   if(['keeper','keepsake'].includes(s.layout)){
    // Star/halo alpha must never leak into the two foreground actors.
