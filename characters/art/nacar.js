@@ -89,6 +89,11 @@ function bellPath(c,f,w,h){
  c.closePath();
 }
 
+function filamentPoint(u,x0,y0,x1,y1,x2,y2,x3,y3){
+ const v=1-u,a=v*v*v,b=3*v*v*u,c=3*v*u*u,d=u*u*u;
+ return [a*x0+b*x1+c*x2+d*x3,a*y0+b*y1+c*y2+d*y3];
+}
+
 function ribbons(c,d,s,f,t,hem,drag,squeeze){
  const neon=NEON[f];
  const spread=[.62,.90,1.28,1.13,.94][f];
@@ -110,16 +115,23 @@ function ribbons(c,d,s,f,t,hem,drag,squeeze){
    c.strokeStyle=neon[i%2];c.lineWidth=1.65;c.stroke();
    const wave=.53+.47*Math.sin(t*.093-i*.63);
    glow(c,tip,hem+length,8+f,neon[i%2],.54+.38*wave);
-   if(t>0){
-    const u=(t*.033+i*.09)%1, v=1-u;
-    const sparkX=v*v*v*start+3*v*v*u*controlA+3*v*u*u*controlB+u*u*u*tip;
-    const sparkY=v*v*v*(hem-3)+3*v*v*u*(hem+length*.37)+3*v*u*u*(hem+length*.78)+u*u*u*(hem+length);
-    oval(c,sparkX,sparkY,1.25+f*.11,1.9,'#efffff');
-   }
+   const strand=[start,hem-3,controlA,hem+length*.37,controlB,hem+length*.78,tip,hem+length];
+   const u=t>0?(t*.033+i*.09)%1:.54;
+   const [sparkX,sparkY]=filamentPoint(u,...strand);
+   oval(c,sparkX,sparkY,1.25+f*.11,1.9,'#efffff');
    if(f===2){
     c.fillStyle=neon[i%2];c.beginPath();c.moveTo(tip-2.5,hem+length-2);
     c.lineTo(tip+2.5,hem+length-2);c.lineTo(tip,hem+length+4);c.closePath();c.fill();
-   }else oval(c,tip,hem+length,f===0?2.25:1.55+f*.14,f===0?2.15:2.65,wave>.55?'#fffbe9':neon[i%2]);
+   }else if(f===4){
+    const py=hem+length;
+    for(let j=0;j<3;j++)oval(c,tip,py+j*3.2,2.25-j*.48,2.1-j*.37,j===1?neon[i%2]:'#effcff');
+   }else{
+    oval(c,tip,hem+length,f===0?2.25:1.55+f*.14,f===0?2.15:2.65,wave>.55?'#fffbe9':neon[i%2]);
+    if(f===1){
+     const [x,y]=filamentPoint(.82,...strand);
+     oval(c,x,y,1.7,1.8,'#e9fffa');
+    }
+   }
   }
  }
  for(const side of [-1,1]){
@@ -133,6 +145,17 @@ function ribbons(c,d,s,f,t,hem,drag,squeeze){
   c.closePath();c.fill();
   c.strokeStyle=s.rim;c.lineWidth=1.15;c.beginPath();c.moveTo(x,hem+2);
   c.quadraticCurveTo(x+side*8,hem+length*.36,tail,hem+length*.94);c.stroke();
+  if(f===3){
+   c.strokeStyle=neon[(1-side)/2];c.lineWidth=1.4;c.beginPath();
+   c.bezierCurveTo(x-side*12,hem+length*.28,tail+side*16,hem+length*.62,tail,hem+length);
+   c.stroke();
+  }else if(f===4){
+   for(let i=0;i<4;i++){
+    const u=(i+1)*.18;
+    const [px,py]=filamentPoint(u,x,hem+2,x+side*8,hem+length*.31,tail-side*7,hem+length*.66,tail,hem+length*.94);
+    oval(c,px,py,1.9,1.7,i%2===0?s.light2:s.rim);
+   }
+  }
  }
 }
 

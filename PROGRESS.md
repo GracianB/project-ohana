@@ -1,3 +1,5 @@
+ohana-810 · Seda y joyería de Yomi, filamentos de Nácar y circuitos de IA que muestran los datos capturados.
+
 ohana-809 · Faroles y vestuario de Yomi, tentáculos de Nácar y cinco lecturas claras para IA.
 
 ohana-808 · El farol, los tentáculos y la órbita reaccionan a los poderes de cada personaje.

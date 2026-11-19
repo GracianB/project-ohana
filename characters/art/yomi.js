@@ -386,7 +386,7 @@ function drawCore(ctx,x,y,r,glow,accent,pulse){
  ellipse(ctx,x-r*.2,y-r*.3,r*.22,r*.3,"#eafffa");
 }
 
-function drawWing(ctx,side,F,t,spread,sweep,reduced){
+function drawWing(ctx,side,F,t,spread,sweep,reduced,known){
  // Red's connected circuit folds behind the chassis as it moves.
  const nodes=[[3,1],[13,-16],[29,-22],[44,-10],[35,8],[17,11]];
  const edges=[[0,1],[0,5],[1,2],[1,5],[2,3],[2,5],[3,4],[3,5],[4,5]];
@@ -398,9 +398,10 @@ function drawWing(ctx,side,F,t,spread,sweep,reduced){
  for(const [a,b] of edges){
   const [x,y]=points[a],[xx,yy]=points[b];
   line(ctx,'#192750',4);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(xx,yy);ctx.stroke();
-  line(ctx,'#77daf2',1.25);ctx.stroke();
-  const k=reduced?.5:(t*.035+a*.14+b*.08)%1;
-  ellipse(ctx,x+(xx-x)*k,y+(yy-y)*k,1.42,1.42,'#f2fff4');
+  const active=a<known;
+  line(ctx,active?'#a2fff0':'#77daf2',active?1.85:1.25);ctx.stroke();
+  const k=reduced?.5:(t*(.035+known*.006)+a*.14+b*.08)%1;
+  ellipse(ctx,x+(xx-x)*k,y+(yy-y)*k,active?1.8:1.35,active?1.8:1.35,'#f2fff4');
  }
  for(const [x,y] of points){
   ellipse(ctx,x,y,3.7,3.7,'#172042');ellipse(ctx,x,y,2.4,2.4,'#c2f7ff');
@@ -423,8 +424,8 @@ function drawEcho(ctx,F,t,reduced,acting){
  }
 }
 
-function drawOracle(ctx,F,t,reduced,acting){
- const x=31+(acting?.front||0)*10,y=F.hy+22;
+function drawOracle(ctx,hand,t,reduced,acting,known){
+ const x=hand[0]+3, y=hand[1]-19+(reduced?0:Math.sin(t*.061)*2);
  const r=13+3*(acting?.release||0),spin=reduced?0:t*.039;
  ellipse(ctx,x,y,r+3,r+3,'#28204b');
  ellipse(ctx,x,y,r,r,'#6955a2');
@@ -436,7 +437,12 @@ function drawOracle(ctx,F,t,reduced,acting){
   ctx.lineTo(x+Math.cos(a)*r*.62,y+Math.sin(a)*r*.62);
  }
  ctx.closePath();ctx.stroke();
- star4(ctx,x,y,r*.53,'#faffed');
+ const omen=known===0?'#faffed':YOMI_FAMILY_STARS[Math.min(9,known-1)];
+ star4(ctx,x,y,r*.53,omen);
+ for(let i=0;i<Math.min(known,4);i++){
+  const a=spin*2+i*TAU/4;
+  ellipse(ctx,x+Math.cos(a)*r*.77,y+Math.sin(a)*r*.77,1.55,1.55,'#fff6e5');
+ }
  ellipse(ctx,x-r*.36,y-r*.43,2,1.35,'#fff9fb');
 }
 
@@ -641,8 +647,8 @@ export function drawArtificialIntelligence(ctx,pose,R){
   else if(st==="victory"&&!reduced){const hop=Math.abs(Math.sin(t*.16));ctx.translate(0,-hop*3);ctx.scale(1-hop*.03,1+hop*.03);}
   // ── BACK LAYER ─────────────────────────────────────────────
   if(f===1)drawEcho(ctx,F,T,reduced,acting);
-  if(f===2)drawWing(ctx,-1,F,T,spread,sweep,reduced);
-  if(f===2)drawWing(ctx,1,F,T,spread*.92,sweep,reduced);
+  if(f===2)drawWing(ctx,-1,F,T,spread,sweep,reduced,known);
+  if(f===2)drawWing(ctx,1,F,T,spread*.92,sweep,reduced,known);
   if(f===3)drawCape(ctx,F,T,glow,swing,run,reduced);
   if(f===3)drawSatellites(ctx,F,T,false,reduced,glow,accent,cast,acting);
   if(f===4)drawRingHalf(ctx,F,false,T,reduced,acting,known);
@@ -657,12 +663,12 @@ export function drawArtificialIntelligence(ctx,pose,R){
    for(let i=0;i<6;i++){ctx.fillStyle=i<known?glow:'#527985';ctx.beginPath();ctx.moveTo((i-2.5)*4,yy-1.7);ctx.lineTo((i-2.5)*4+1.7,yy);ctx.lineTo((i-2.5)*4,yy+1.7);ctx.lineTo((i-2.5)*4-1.7,yy);ctx.fill();}
   }
   // ── FRONT LAYER ────────────────────────────────────────────
-  if(f===3&&!dead)drawOracle(ctx,F,T,reduced,acting);
   if(f===4)drawRingHalf(ctx,F,true,T,reduced,acting,known);
   if(f===3)drawSatellites(ctx,F,T,true,reduced,glow,accent,cast,acting);
   const front=handPose(1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run,p.hurt||.5);
   drawCastBody(ctx,p,F,f,cast,acting,front,back,glow,accent,T);
   drawHand(ctx,front[0],front[1],F.hr,front[2],col,glow,front[3]);
+  if(f===3&&!dead)drawOracle(ctx,front,T,reduced,acting,known);
   if(st==="attack"){
    // Basic attack: a "byte" burst at the punching hand.
    const hit=clamp((atk-.38)/.25,0,1)*(1-clamp((atk-.7)/.3,0,1));

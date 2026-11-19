@@ -28,6 +28,7 @@ function lanternShell(ctx,w,h){
 }
 
 function shrineRobe(c,f,w,faceY,trim,glow,shadow,swing){
+ const silk=['','#f79991','#91d9d0','#cba1ea','#ffda94'][f];
  const colors=['','#a53951','#374c74','#382556','#731d42'];
  const shoulders=faceY+10, waist=faceY+29, hem=-5;
  c.fillStyle=colors[f];c.beginPath();c.moveTo(-w*.52,shoulders);
@@ -51,6 +52,23 @@ function shrineRobe(c,f,w,faceY,trim,glow,shadow,swing){
  if(f>1){
   ellipse(c,0,waist+4,3.4,3.4,shadow);
   ellipse(c,0,waist+3,2,2,glow);
+ }
+ // Split panels follow the sway of the legs and are edged with silk thread.
+ if(f>=2){
+  for(const side of [-1,1]){
+   const x=side*w*.26,fall=side*w*.46-swing*.19,top=waist+6,bottom=hem+1;
+   c.fillStyle=f===4?'#94355a':f===3?'#69458b':'#567c9d';
+   c.beginPath();c.moveTo(x,top);c.quadraticCurveTo(x+side*2,(top+bottom)*.5,fall,bottom);
+   c.lineTo(fall+side*6,bottom-4);c.quadraticCurveTo(x+side*6,(top+bottom)*.5,x+side*5,top);c.closePath();c.fill();
+   line(c,silk,1.25);c.stroke();
+  }
+ }
+ if(f>=3){
+  const bx=w*.28,by=waist+6;
+  line(c,'#ffd590',1.2);
+  c.beginPath();c.moveTo(-bx,by);c.bezierCurveTo(-bx-6,by-8,bx+6,by+10,bx,by);
+  c.bezierCurveTo(bx+7,by-9,-bx-6,by+11,-bx,by);c.stroke();
+  for(const side of [-1,1])ellipse(c,side*bx,by,1.8,1.8,'#fff3c3');
  }
  for(let i=0;i<f;i++){
   const x=(i-(f-1)/2)*w*.33-swing*.14,y=hem-7+(i%2)*2;
@@ -319,6 +337,11 @@ function shrineHair(c,f,w,h,faceY,swing,glow){
  const pinX=w*.65;
  for(let i=0;i<f;i++){
   ellipse(c,pinX-i*2.8,y+3-i*2,1.8,1.6,glow);
+ }
+ if(f===4){
+  line(c,'#c7a579',1.15);
+  c.beginPath();c.moveTo(pinX+2,y+8);c.quadraticCurveTo(pinX+8,y+18,pinX+3,y+23);c.stroke();
+  for(let j=0;j<3;j++)ellipse(c,pinX+5-j*.6,y+15+j*4,1.35,1.55,'#fff2c7');
  }
  if(f>=3){
   c.fillStyle='#ffd297';c.beginPath();c.moveTo(pinX+4,y+3);c.lineTo(pinX+10,y+8);

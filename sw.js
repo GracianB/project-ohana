@@ -1,4 +1,4 @@
-const VERSION = "ohana-809";
+const VERSION = "ohana-810";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./engine/foes/nacar-fauna.js?v=" + VERSION,
@@ -530,7 +530,7 @@ const PRECACHE = [
 const PRECACHE_REVISIONS = {
   "engine/foes/nacar-fauna.js": "c48d95ae255ee3a5ffa4c2419a0769b692296ec7",
   "systems/intro-nacar-stage.js": "1cb520e61ba13b8fe8edc48e92b6df54d24d4872",
-  "assets/photobooth/nacar.webp": "24140463751b05cedcf5c7396d6cf13e6bc02adc",
+  "assets/photobooth/nacar.webp": "36cdadf361b861c4773aa002aabcf8db6c849275",
   "assets/photobooth/ia.webp": "05b6c8a7506907a3c0e92645727da9205b24382a",
   "characters/art/ia.js": "8bb3eca84e2336edbdc7d4e14cf077fb119bdf9c",
   "systems/nacar-chapter.js": "82977e38f3f9fb051cffb2e253613262ccfc848a",
@@ -539,8 +539,8 @@ const PRECACHE_REVISIONS = {
   "systems/michi-adventure.js": "1a78a910a2336e49990192260d48c149caf9159a",
   "worlds/michi-adventure-art.js": "1636aabb4493316763af546204ad067449d27e2f",
   "engine/foes/michi-sanctuary-fauna.js": "29f7d4f1e736410ca703e9198a242e1b46a86812",
-  "characters/art/nacar.js": "1e9037feaac5beadc04d5f4c37ab8e40f10b789c",
-  "characters/art/yomi-lantern.js": "b3fceccd1f919dd300d8d9da0a0742c0c0e9e756",
+  "characters/art/nacar.js": "ed23b0de76ab2a3d2290b823c1aa0442ab54fde9",
+  "characters/art/yomi-lantern.js": "53825a04020579f454ed41e9f27fd7bc8d785506",
   "systems/quimera-pressure.js": "d2f92470f86f55dedb289b76d6130128894b6cdc",
   "systems/quimera-telegraphs.js": "977db755af2b14f971068228d5ba800d0ed5f90d",
   "systems/quimera-energy.js": "c157cfc1379196e4d221809ba64c5974c41e7536",
@@ -795,7 +795,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "56644a3576d80c1d2662d9940cff462e8256858d",
-  "index.html": "8f416ec51503dd9a964b94c6f10adbabdd32d7f9",
+  "index.html": "f5bfb8d7139c50aa6d42e006f7cfa95f3da89590",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
@@ -840,7 +840,7 @@ const PRECACHE_REVISIONS = {
   "characters/art/pizza.js": "983af39f1c86fe5155650f4aa0925ce0ddb8ebad",
   "characters/art/stitch.js": "691b89d590591229f957c1e678a083c601dab006",
   "characters/art/stitcho.js": "cdc8f5ec3158c79ca9600bcd5b40dbd8b3e94cdc",
-  "characters/art/yomi.js": "e5e865f5c016f3614e1e41faec174418ff138462",
+  "characters/art/yomi.js": "c3f0ede6a9f00d267ad0184833061c6cc8c23ce1",
   "characters/draw.js": "ac4c6c837d7cc50b6c3d93f40859b7c7efd71d7a",
   "characters/kinetic-stagecraft.js": "8c57247462c7ed4c1129196887e75369167bd764",
   "characters/evolution.js": "55274a90c17961806e8ace271b32854a32e0f759",
