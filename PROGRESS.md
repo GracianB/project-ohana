@@ -1,3 +1,5 @@
+ohana-802 · Paso entre el acuario de Michi y el fondo marino.
+
 ohana-801 · **12 personajes · 5 formas · 10 salas de campaña y un capítulo submarino adicional.**
 
 V800: **11 personajes · 5 formas por personaje · 10 salas del Mundo 1**. Nácar comparte el jardín de Michi; no añade un sello obligatorio.

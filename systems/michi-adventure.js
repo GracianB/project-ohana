@@ -17,13 +17,14 @@ export function authorMichiAdventure(room){
  // Small destinations with genuine interactions, independent of the seal path.
  r.garden.mechanisms.push(...[0,1,2].map(note=>({id:'hollow-'+note,kind:'chime',note,x:1360+note*220,floor:1134,label:['Cascabel de luna','Cascabel de hoja','Cascabel de estrella'][note],action:'E · tocar este cascabel'})),{id:'tide',kind:'rescue',x:1740,floor:300,label:'Nácar · Una voz del mar',action:'E · escuchar a Nácar'},{id:'race',kind:'race',x:5900,floor:1134,label:'Carrera de luciérnagas',action:'E · empezar la carrera opcional'});
  r.garden.moments.push({id:'home',x:2370,floor:1134,title:'EL OVILLO NO ERA UN TESORO',text:'Era un juego que Michi dejó a medias. Alguien lo guardó para poder terminarlo juntos.'},{id:'nacar',x:2300,floor:300,title:'EL MAR TAMBIÉN TIENE CASA',text:'Nácar llegó siguiendo una estrella de mar. Las estrellas de mar le enseñaron a defender el arrecife.'});
+ r.garden.mechanisms.push({id:'ocean',kind:'ocean',x:2580,floor:300,label:'Paso de Nácar',action:'E · entrar como Nácar'});
  r.adventure={race:{start:5900,end:7680,floor:1134,limit:900},chimes:[2,0,1],pages:MICHI_PAGES,bossSign:{x:7940,floor:1134,label:'POLILLA DEL FAROL →',tip:'Cinco faroles despiertan a la guardiana. Su luz se abre entre ataques.'}};
  // Six memories reward each optional room; all original collection identities survive.
  for(let i=0;i<6;i++){Object.assign(r.memories.find(m=>m.id===10+i),{x:930+i*235,y:1107,challenge:true});Object.assign(r.memories.find(m=>m.id===70+i),{x:910+i*235,y:273,challenge:true});}
  for(const m of r.memories){m.title=MICHI_PAGES[m.page];m.fragment=(m.id%10)+1;m.caption=MICHI_FRAGMENTS[m.page][m.id%10];m.story=m.caption+' · '+m.title+' · '+m.fragment+'/10';}
  const names=['Hiladora del ovillo','Polilla del polen','Vigía de semillas','Caracola centinela','Lucerna de marea'];
  for(const f of room.foes){const meta=f[4];meta.michiSpecies=['weaver','moth','seed','snail','tide'][['arana','murcielago','phosquito','ufo','medusa'].indexOf(f[2])]||'moth';meta.name=names[['arana','murcielago','phosquito','ufo','medusa'].indexOf(f[2])]||meta.name;}
- r.garden.mechanisms.push(...[0,1].map(i=>({id:'guardian-'+i,kind:'guard',x:8380+i*770,floor:1010,label:'Farol de refugio',action:'E · preparar escudo de un golpe'})));
+ r.garden.mechanisms.push(...[0,1].map(i=>({id:'guardian-'+i,kind:'guard',x:8410+i*740,floor:1010,label:'Farol de refugio',action:'E · preparar escudo de un golpe'})));
  room.hint='Camina del patio al laberinto y al santuario. Solo el pozo, el balcón y la semilla cambian de altura. Calma las raíces y despierta el viento para descubrir dos escondites.';
  return room;
 }
