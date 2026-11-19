@@ -939,6 +939,7 @@ if(game._stitchoDuet&&!activeGuest)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,d
 drawMoments(ctx,game,t);
 if(game._kiloDuet&&!activeGuest)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if (p.id === "cuerno") drawCuerno(ctx, p, cam, t);
+if (p?.id==='yomi'||p?.id==='ia') drawYomiMarks(ctx,cam,t,game);
 for (const f of FX) {
 const d = DRW[f.kind];
 if (!d) continue;
@@ -1577,7 +1578,7 @@ const h = hand(p), face = p.facing || 1;
 add({
   kind: "ofuda", x: h.x, y: h.y, vx: (10 + evo) * face, vy: 0,
   life: 70, max: 70, hops: YOMI_PING_HOPS[clamp(evo, 0, 4) | 0], hit: new Set(), trail: [],
-  target: null, dmg: (18 + evo * 3) * pw(p),
+  lantern:p.id==='yomi', target: null, dmg: (18 + evo * 3) * pw(p),
 });
 boom(g, h.x, h.y, "#4ff0c8", 6);
 },
@@ -1586,18 +1587,18 @@ boom(g, h.x, h.y, "#4ff0c8", 6);
 sleeve(g, p, evo) {
 const R = YOMI_SCAN_RADIUS[clamp(evo, 0, 4) | 0];
 const f = add({ kind:"sleeve", life:30, max:30, evo, face:p.facing||1, x:cx(p), y:cy(p), R, r:0,
-  hit:new Set(), erased:0, targets:0, dmg:(16 + evo * 4) * pw(p) });
+  lantern:p.id==='yomi', hit:new Set(), erased:0, targets:0, dmg:(16 + evo * 4) * pw(p) });
 if (f) yomiScanStep(g, f, p);
 boom(g,cx(p),cy(p),"#4ff0c8",10,{star:true});
-g.nums?.add(cx(p),p.y-48,"ESCANEO","#bff9ea",true);
+g.nums?.add(cx(p),p.y-48,p.id==='yomi'?"CAMPANADA":"ESCANEO",p.id==='yomi'?"#ffdda1":"#bff9ea",true);
 },
 // L · Síntesis: Yomi junta lo aprendido en un prisma y responde con un haz.
 // Cada enemigo analizado recibe daño crítico, pierde la marca y cura a Yomi.
 maw(g, p, evo) {
 add({ kind: "maw", life: 22, max: 22, evo, face: p.facing || 1, hit: new Set(),
-  len: 300 + evo * 35, half: 20 + evo * 3, dmg: (30 + evo * 6) * pw(p), learned: 0 });
+  lantern:p.id==='yomi', len: 300 + evo * 35, half: 20 + evo * 3, dmg: (30 + evo * 6) * pw(p), learned: 0 });
 g.flash = Math.max(g.flash || 0, 6);
-g.flashColor = "#4ff0c8";
+g.flashColor = p.id==='yomi'?"#ffcc89":"#4ff0c8";
 g.shake = Math.min(18, (g.shake || 0) + 4);
 },
 
@@ -2109,6 +2110,19 @@ purr(g, f, p) {
 f.life--;
 const u = 1 - f.life / (f.max || 72);
 const rad = Math.min(f.R, 36 + u * f.R);
+if(f.marine&&g.roomDef?.nacarChapter&&!g.onlineAdventure){
+ const limit=3+Math.floor((f.evo||0)/2);
+ f.foamBlocked||=0;
+ for(const shot of g.projectiles||[]){
+  if(f.foamBlocked>=limit)break;
+  if(shot.owner!=='enemy'||shot.life<=0)continue;
+  const x=shot.x+shot.w/2,y=shot.y+shot.h/2;
+  if(!Number.isFinite(x+y)||Math.hypot(x-cx(p),y-cy(p))>rad)continue;
+  shot.life=0;shot.intercepted=true;
+  f.foamBlocked++;
+  g.fx?.emit?.(x,y,{color:'#b8f6e0',count:4,size:2,up:.4,life:14});
+ }
+}
 for (const e of g.enemies) {
   if (f.hit.has(e) || !canHit(e)) continue;
   if (Math.hypot(cx(e) - cx(p), cy(e) - cy(p)) > rad) continue;
@@ -2420,6 +2434,7 @@ return f.life > 0 && f.y < (g.worldH || 900) + 40;
 ofuda(g, f) {
 // J · Ping curioso: vuela recto; tras analizar a un enemigo busca al siguiente.
 f.life--;
+const light=f.lantern?"#ffd18e":"#4ff0c8";
 if (f.target && !canHit(f.target)) f.target = nearestEnemy(g, f.x, f.y, YOMI_PING_RANGE, f.hit) || null;
 if (f.target) {
   const dx = cx(f.target) - f.x, dy = cy(f.target) - f.y, d = Math.hypot(dx, dy) || 1;
@@ -2430,19 +2445,19 @@ f.x += f.vx; f.y += f.vy;
 for (const e of g.enemies) {
   if (!canHit(e) || f.hit.has(e) || !circleHit(f.x, f.y, 13, e)) continue;
   f.hit.add(e);
-  hitEnemy(g, e, f.dmg, { kx: (Math.sign(f.vx) || 1) * 2, ky: -1.5, stun: 12, color: "#4ff0c8" });
+  hitEnemy(g, e, f.dmg, { kx: (Math.sign(f.vx) || 1) * 2, ky: -1.5, stun: 12, color: light });
   e._yomiMarkUntil = Math.max(Number(e._yomiMarkUntil) || 0, (Number(g.t) || 0) + YOMI_MARK_FRAMES);
-  michiYomiImpact(cx(e), cy(e) - 6, "¿?", "#4ff0c8");
+  michiYomiImpact(cx(e), cy(e) - 6, f.lantern?"SELLO":"¿?", light);
   if (f.hops > 0) {
     f.target = nearestEnemy(g, cx(e), cy(e), YOMI_PING_RANGE, f.hit);
     if (f.target) { f.hops--; f.life = Math.max(f.life, 36); boom(g, f.x, f.y, "#ff7f6e", 4); break; }
   }
-  boom(g, f.x, f.y, "#4ff0c8", 8, { star: true });
+  boom(g, f.x, f.y, light, 8, { star: true });
   return false;
 }
 if (!f.target) {
   const outside = f.x < 0 || f.x > (g.worldW || 1600) || f.y > (g.worldH || 900) || f.y < -200;
-  if (solidAt(g, f.x, f.y) || outside) { boom(g, f.x, f.y, "#4ff0c8", 4); return false; }
+  if (solidAt(g, f.x, f.y) || outside) { boom(g, f.x, f.y, light, 4); return false; }
 }
 return f.life > 0;
 },
@@ -2458,20 +2473,32 @@ if (!p) return false;
 const strikeFrame = Math.ceil(f.max * .55);
 if (f.life === strikeFrame) {
   f.x0 = cx(p); f.y0 = p.y + p.h * .42;
+  const embers=f.lantern&&!g.onlineAdventure?[]:null;
+  const light=f.lantern?'#ffd18e':'#4ff0c8';
   for (const e of g.enemies) {
     if (!canHit(e) || f.hit.has(e)) continue;
     const dx = (cx(e) - f.x0) * f.face, dy = cy(e) - f.y0;
     if (dx < -16 || dx > f.len || Math.abs(dy) > f.half + e.h * .5) continue;
     f.hit.add(e);
     const marked=(Number(e._yomiMarkUntil)||0)>(Number(g.t)||0);
-    const landed=hitEnemy(g, e, f.dmg * (marked ? 1.7 : 1), { kx: f.face * 7, ky: -2, stun: marked ? 36 : 18, color: "#4ff0c8", crit:marked });
-    if (marked && landed) { e._yomiMarkUntil = 0; f.learned++; }
+    const landed=hitEnemy(g, e, f.dmg * (marked ? 1.7 : 1), { kx: f.face * 7, ky: -2, stun: marked ? 36 : 18, color: light, crit:marked });
+    if (marked && landed) {
+      e._yomiMarkUntil = 0; f.learned++;
+      embers?.push(e);
+    }
+  }
+  for(const source of embers||[]){
+    const next=nearestEnemy(g,cx(source),cy(source),76+f.evo*7,f.hit);
+    if(!next||(next._yomiMarkUntil||0)>(Number(g.t)||0)) continue;
+    next._yomiMarkUntil=(Number(g.t)||0)+YOMI_MARK_FRAMES;
+    f.hit.add(next);
+    boom(g,cx(next),cy(next),light,6,{star:true});
   }
   if (f.learned) {
     healPlayer(p, (2 + f.evo) * f.learned);
     g.nums?.add(cx(p), p.y - 40, "APRENDIDO +" + f.learned, "#bff9ea", true);
   }
-  boom(g, f.x0 + f.face * 30, f.y0, "#4ff0c8", 10, { star: true });
+  boom(g, f.x0 + f.face * 30, f.y0, light, 10, { star: true });
 }
 return f.life > 0;
 },
@@ -2484,15 +2511,16 @@ export const YOMI_PING_RANGE = 260;
 export const YOMI_MARK_FRAMES = 240;
 function yomiScanStep(g, f, p) {
   if (p) { f.x = cx(p); f.y = cy(p); }
+  const light=f.lantern?"#ffd18e":"#4ff0c8";
   const k = 1 - f.life / f.max;
   f.r = 40 + (f.R - 40) * Math.min(1, Math.sqrt(Math.max(0, k) / .7));
   for (const e of g.enemies || []) {
     if (!canHit(e) || f.hit.has(e) || !circleHit(f.x, f.y, f.r, e)) continue;
     f.hit.add(e); f.targets++;
     const dir = Math.sign(cx(e) - f.x) || 1;
-    hitEnemy(g, e, f.dmg * (e.boss ? .75 : 1), { kx: dir * 3, ky: -2, stun: 24, color: "#4ff0c8", parts: 6, hitstop: 0 });
+    hitEnemy(g, e, f.dmg * (e.boss ? .75 : 1), { kx: dir * 3, ky: -2, stun: 24, color: light, parts: 6, hitstop: 0 });
     e._yomiMarkUntil = Math.max(Number(e._yomiMarkUntil) || 0, (Number(g.t) || 0) + YOMI_MARK_FRAMES);
-    michiYomiImpact(cx(e), cy(e) - 8, "ANALIZADO", "#4ff0c8");
+    michiYomiImpact(cx(e), cy(e) - 8, f.lantern?"SELLADO":"ANALIZADO", light);
   }
   // Cortafuegos: hostile shots touched by the ring are deleted.
   for (const pr of g.projectiles || []) {
@@ -2503,8 +2531,8 @@ function yomiScanStep(g, f, p) {
     const volume = ['prism','lightning','geysers','ember'].includes(pr.gauntlet);
     if (volume ? !circleHit(f.x, f.y, f.r, pr)
       : Math.hypot((pr.x || 0) - f.x, (pr.y || 0) - f.y) > f.r) continue;
-    pr.life = 0; f.erased++;
-    boom(g, pr.x, pr.y, "#4ff0c8", 4);
+    pr.life = 0; pr.intercepted=true; f.erased++;
+    boom(g, pr.x, pr.y, light, 4);
   }
 }
 function drawYomiMarks(ctx, cam, t, g) {
@@ -2513,6 +2541,9 @@ function drawYomiMarks(ctx, cam, t, g) {
   for (const e of (g?.enemies || [])) {
     if (visible >= 18 || !canHit(e) || (Number(e._yomiMarkUntil) || 0) <= (Number(g?.t) || 0)) continue;
     const x = e.x - cam.x - 4, y = e.y - cam.y - 4, w = e.w + 8, h = e.h + 8, c = Math.min(9, w * .3);
+    if(g.player?.id==='yomi'){
+      drawLanternSeal(ctx,x+w/2,y-9,-.16,.54);visible++;continue;
+    }
     ctx.save(); ctx.globalAlpha = .7 + .2 * Math.sin((t || 0) * .14);
     ctx.strokeStyle = "#4ff0c8"; ctx.lineWidth = 2; ctx.beginPath();
     for (const [px, py, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]]) {
@@ -2865,6 +2896,16 @@ ctx.arc(x,y,Math.max(1,d.radius-i*10+sway),0,TAU);ctx.stroke();
 ctx.globalAlpha=.20*d.fade;ctx.lineWidth=1.4;ctx.strokeStyle="#fff9ea";
 ctx.beginPath();ctx.arc(x,y,Math.max(1,d.radius+3),0,TAU);ctx.stroke();
 ctx.restore();
+}
+
+function drawLanternSeal(ctx,x,y,angle,s){
+ ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.scale(s,s);
+ ctx.fillStyle='#fff2c9';ctx.strokeStyle='#c46755';ctx.lineWidth=1.2;
+ ctx.beginPath();ctx.moveTo(-12,-6);ctx.lineTo(8,-7);ctx.lineTo(12,0);
+ ctx.lineTo(9,6);ctx.lineTo(-11,7);ctx.lineTo(-8,0);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.strokeStyle='#9e3659';ctx.beginPath();ctx.moveTo(-4,-3);ctx.lineTo(4,-3);
+ ctx.lineTo(1,3);ctx.lineTo(5,3);ctx.moveTo(-5,0);ctx.lineTo(5,0);ctx.stroke();
+ ctx.restore();
 }
 
 const DRW = {
@@ -4018,6 +4059,15 @@ drawSlice(ctx, 1);
 ofuda(ctx, f, cam, t) {
 // J · Ping: a dark data bubble with a coral "?" and a mint pixel trail.
 const x=f.x-cam.x,y=f.y-cam.y;
+if(f.lantern){
+ const angle=Math.atan2(f.vy,f.vx);
+ for(let i=0;i<f.trail.length;i+=4){
+  const alpha=(i+2)/f.trail.length;
+  ctx.save();ctx.globalAlpha=alpha*.4;
+  drawLanternSeal(ctx,f.trail[i]-cam.x,f.trail[i+1]-cam.y,angle,.72);ctx.restore();
+ }
+ drawLanternSeal(ctx,x,y,angle,1);return;
+}
 ctx.save();
 for(let i=0;i<f.trail.length;i+=2){
   const k=i/f.trail.length;ctx.globalAlpha=.15+.45*k;ctx.fillStyle=(i/2)%2?"#ff7f6e":"#4ff0c8";
@@ -4038,6 +4088,18 @@ ctx.restore();
 sleeve(ctx, f, cam, t, g, p) {
 // K · Escáner: one readable radar ring + sweeping beam. The ring IS the hit front.
 const x=f.x-cam.x,y=f.y-cam.y,k=Math.max(0,Math.min(1,1-f.life/f.max)),r=f.r||0;
+if(f.lantern){
+ ctx.save();
+ ctx.strokeStyle='#ffd89d';ctx.lineWidth=3-1.4*k;ctx.globalAlpha=.82*(1-k*.74);
+ ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
+ ctx.globalAlpha=.4*(1-k);ctx.strokeStyle='#e8909f';ctx.lineWidth=1.4;
+ ctx.beginPath();ctx.arc(x,y,Math.max(0,r-11),0,TAU);ctx.stroke();
+ for(let i=0;i<8;i++){
+  const a=i*TAU/8,xx=x+Math.cos(a)*r,yy=y+Math.sin(a)*r;
+  drawLanternSeal(ctx,xx,yy,a+Math.PI*.5,.52);
+ }
+ ctx.restore();return;
+}
 ctx.save();
 ctx.globalAlpha=.07*(1-k);ctx.fillStyle="#4ff0c8";ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();
 ctx.globalAlpha=.8*(1-k*.7);ctx.strokeStyle="#4ff0c8";ctx.lineWidth=3-1.5*k;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
@@ -4046,7 +4108,6 @@ const a=k*TAU*1.25-Math.PI/2;ctx.globalAlpha=.55*(1-k);ctx.lineWidth=2;ctx.begin
 // magic: 8 code runes ride the hit front
 for(let i=0;i<8;i++){const b=i*TAU/8+k*.8;ctx.globalAlpha=.7*(1-k);yomiRune(ctx,x+Math.cos(b)*r,y+Math.sin(b)*r,.8,i,i%2?"#ff7f6e":"#4ff0c8");}
 ctx.restore();
-drawYomiMarks(ctx,cam,t,g);
 },
 maw(ctx, f, cam, t, g, p) {
 // L · Síntesis: the exact beam rectangle is outlined while charging, then fires.
@@ -4055,6 +4116,26 @@ const face=f.face||1,strike=Math.ceil(f.max*.55),charging=f.life>strike;
 const x0=(charging?cx(p):f.x0)-cam.x,y0=(charging?p.y+p.h*.42:f.y0)-cam.y;
 const k=charging?1-(f.life-strike)/(f.max-strike):f.life/strike;
 ctx.save();ctx.translate(x0,y0);ctx.scale(face,1);
+if(f.lantern){
+ const breadth=f.half;
+ ctx.strokeStyle='#ffd18e';
+ if(charging){
+  ctx.globalAlpha=.28+.22*k;ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(0,-breadth);ctx.lineTo(f.len,-breadth);ctx.lineTo(f.len,breadth);ctx.lineTo(0,breadth);ctx.stroke();
+  for(let i=0;i<5;i++)drawLanternSeal(ctx,i*f.len/4,0,i%2?.15:-.15,.6+k*.3);
+ }else{
+  ctx.globalAlpha=.54*k;ctx.fillStyle='#c64e71';
+  ctx.beginPath();ctx.moveTo(0,-breadth);ctx.lineTo(f.len,-breadth);ctx.lineTo(f.len,breadth);ctx.lineTo(0,breadth);ctx.fill();
+  ctx.globalAlpha=k;ctx.fillStyle='#ffbf80';ctx.beginPath();ctx.moveTo(0,breadth*.38);
+  for(let i=1;i<=6;i++){
+   const x=f.len*i/6;
+   ctx.quadraticCurveTo(x-f.len*.09,-breadth*(i%2?.98:.62),x,breadth*.15);
+  }
+  ctx.lineTo(f.len,breadth*.48);ctx.lineTo(0,breadth*.54);ctx.fill();
+  for(let i=0;i<6;i++)drawLanternSeal(ctx,f.len*(i+.5)/6,i%2?breadth*.37:-breadth*.31,i%2?.25:-.23,.65);
+ }
+ ctx.restore();return;
+}
 if(charging){
   ctx.globalAlpha=.18+.3*k;ctx.strokeStyle="#4ff0c8";ctx.lineWidth=1.5;ctx.setLineDash?.([6,6]);
   ctx.strokeRect(0,-f.half,f.len,f.half*2);ctx.setLineDash?.([]);
@@ -4072,7 +4153,6 @@ if(charging){
   ctx.globalAlpha=.7*k;for(let i=0;i<4;i++)yomiRune(ctx,(i*79+(t||0)*6)%f.len,0,.7,i,"#0d1430");
 }
 ctx.restore();
-drawYomiMarks(ctx,cam,t,g);
 },
 jaws(ctx, f, cam, t, g, p) {
 if (!p) return;

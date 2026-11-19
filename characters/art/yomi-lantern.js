@@ -9,6 +9,48 @@ const PAL=[
 const TAU=Math.PI*2,clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 function line(ctx,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap="round";ctx.lineJoin="round";}
 function ellipse(ctx,x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,TAU);ctx.fill();}
+function paperShade(ctx,x,y,rim,light,trim,shadow){
+ if(!ctx.createRadialGradient)return light;
+ const shade=ctx.createRadialGradient(x,y,2,0,-34,rim);
+ shade.addColorStop(0,'#fff9df');
+ shade.addColorStop(.48,light);
+ shade.addColorStop(.84,trim);
+ shade.addColorStop(1,shadow);
+ return shade;
+}
+
+function lanternShell(ctx,f,w,h){
+ ctx.beginPath();
+ switch(f){
+  case 0:
+   ctx.moveTo(0,-h);
+   ctx.bezierCurveTo(w*1.4,-h*.94,w*1.23,-9,0,-9);
+   ctx.bezierCurveTo(-w*1.23,-9,-w*1.4,-h*.94,0,-h);
+   break;
+  case 1:
+   ctx.moveTo(-w*.67,-h+2);ctx.lineTo(w*.67,-h+2);
+   ctx.quadraticCurveTo(w*1.32,-h*.61,w*.58,-14);
+   ctx.quadraticCurveTo(0,-5,-w*.58,-14);
+   ctx.quadraticCurveTo(-w*1.32,-h*.61,-w*.67,-h+2);
+   break;
+  case 2:
+   ctx.moveTo(0,-h-4);ctx.lineTo(w,-h*.69);
+   ctx.quadraticCurveTo(w*1.21,-h*.37,0,-9);
+   ctx.quadraticCurveTo(-w*1.21,-h*.37,-w,-h*.69);
+   break;
+  case 3:
+   ctx.moveTo(-w*.62,-h);ctx.lineTo(w*.62,-h);ctx.lineTo(w*1.04,-h*.69);
+   ctx.lineTo(w*.7,-h*.31);ctx.lineTo(0,-7);ctx.lineTo(-w*.7,-h*.31);ctx.lineTo(-w*1.04,-h*.69);
+   break;
+  case 4:
+   ctx.moveTo(0,-h-1);
+   ctx.bezierCurveTo(w*1.49,-h*1.01,w*1.31,-h*.24,0,-7);
+   ctx.bezierCurveTo(-w*1.31,-h*.24,-w*1.49,-h*1.01,0,-h-1);
+   break;
+ }
+ ctx.closePath();
+}
+
 function crescent(ctx,x,y,r,color){
   line(ctx,color,1.6);ctx.beginPath();ctx.arc(x,y,r,-2.66,-.47);ctx.stroke();
 }
@@ -226,10 +268,12 @@ function draw(ctx,pose,R){
   if(jumpS)ctx.scale(.9,1.1);else if(fallS)ctx.scale(1.06,.95);
   yomiAmbient(ctx,p,f,glow,shadow,t,h,w);
   // Ribbon tail follows the lantern, not a detached sprite or a duplicated hero.
-  ctx.fillStyle=shadow;ctx.globalAlpha=.78;ctx.beginPath();ctx.moveTo(-11,-18);
+  ctx.fillStyle=trim;ctx.globalAlpha=.88;ctx.beginPath();ctx.moveTo(-11,-19);
   ctx.quadraticCurveTo(-29-swing-gather*3,-9,-22-swing,-1);
   ctx.quadraticCurveTo(-14-swing,7,-8,2);ctx.quadraticCurveTo(-6,-11,-11,-18);ctx.fill();
   ctx.globalAlpha=1;
+  line(ctx,glow,1.4);
+  ctx.beginPath();ctx.moveTo(-12,-16);ctx.quadraticCurveTo(-24-swing,-6,-14-swing,1);ctx.stroke();
   if(f===4){
     ctx.save();ctx.globalAlpha=.32+.15*pulse;
     crescent(ctx,0,faceY-4,36+2*pulse,"#ffd988");ctx.restore();
@@ -268,13 +312,22 @@ function draw(ctx,pose,R){
       ctx.closePath();ctx.fill();line(ctx,"#f4a0a4",2.5);ctx.stroke();
     }
   }else{
-    ctx.fillStyle="#563450";
     for(const side of [-1,1]){
+      ctx.fillStyle='#563450';
+      if(ctx.createLinearGradient){
+        const pleat=ctx.createLinearGradient(side*22,-35,side*65,-66);
+        pleat.addColorStop(0,'#563450');pleat.addColorStop(.58,'#803d6e');pleat.addColorStop(1,'#d28489');
+        ctx.fillStyle=pleat;
+      }
       ctx.beginPath();ctx.moveTo(side*16,-65);
       ctx.quadraticCurveTo(side*54,-96,side*70,-82);
       ctx.lineTo(side*51,-44);ctx.quadraticCurveTo(side*75,-18,side*61,1);
       ctx.lineTo(side*23,-21);ctx.closePath();ctx.fill();
-      line(ctx,"#ffdaa4",3);ctx.stroke();
+      line(ctx,"#ffdaa4",2);ctx.stroke();
+      line(ctx,'#e7a58a',1.2);
+      ctx.beginPath();ctx.moveTo(side*27,-48);
+      ctx.quadraticCurveTo(side*46,-72,side*63,-77);
+      ctx.moveTo(side*31,-28);ctx.quadraticCurveTo(side*49,-23,side*61,-6);ctx.stroke();
     }
   }
   // The growing cape makes five recognizable stages, from baby to moon guardian.
@@ -310,23 +363,22 @@ function draw(ctx,pose,R){
     line(ctx,glow,1.7);ctx.beginPath();ctx.moveTo(-9,sleeveLen-3);ctx.quadraticCurveTo(0,sleeveLen,10,sleeveLen-3);ctx.stroke();
     ctx.restore();
   }
-  // Lantern-shaped body: hand-painted gold rim, paper ribs and inner flame.
-  ctx.fillStyle=paper;ctx.beginPath();
-  ctx.moveTo(-w*.77,-h+8);ctx.quadraticCurveTo(-w-2,-h*.52,-w*.82,-19);
-  ctx.quadraticCurveTo(-w*.55,-9,0,-8);
-  ctx.quadraticCurveTo(w*.55,-9,w*.82,-19);
-  ctx.quadraticCurveTo(w+2,-h*.52,w*.77,-h+8);
-  ctx.quadraticCurveTo(0,-h-6,-w*.77,-h+8);ctx.closePath();ctx.fill();
-  line(ctx,"#35233c",3.2);ctx.stroke();
-  ctx.save();ctx.globalAlpha=.13+.07*pulse;
-  ellipse(ctx,0,-h*.41,w*.69,h*.30,glow);ctx.restore();
-  line(ctx,trim,1.45);
-  for(const i of [-1,1]){
-    ctx.beginPath();ctx.moveTo(i*w*.57,-h+11);
-    ctx.quadraticCurveTo(i*w*.82,-h*.5,i*w*.52,-17);ctx.stroke();
+  lanternShell(ctx,f,w,h);
+  ctx.fillStyle=paperShade(ctx,4+(acting?.release||0)*10,-h*.49,h*.73,paper,trim,shadow);
+  ctx.fill();line(ctx,shadow,2);ctx.stroke();
+  ctx.save();ctx.clip();
+  for(const i of [-2,-1,1,2]){
+    const x=i*w*.28;
+    line(ctx,i%2===0?trim:'#fff3cf',i%2===0?1.25:.75);
+    ctx.globalAlpha=i%2===0?.55:.52;
+    ctx.beginPath();ctx.moveTo(x*.71,-h+3);
+    ctx.bezierCurveTo(x*1.66,-h*.72,x*1.5,-h*.32,x*.48,-10);
+    ctx.stroke();
   }
-  line(ctx,trim,3);ctx.beginPath();ctx.moveTo(-w*.67,-h+5);
-  ctx.quadraticCurveTo(0,-h+1,w*.67,-h+5);ctx.stroke();
+  ctx.globalAlpha=.34;
+  line(ctx,'#fff4d5',2);
+  ctx.beginPath();ctx.ellipse(-w*.16,-h*.42,w*.77,h*.3,0,.28,2.72);ctx.stroke();
+  ctx.restore();
   // Evolutions get different head architecture and proportions.
   if(f===0){
     ellipse(ctx,-9,-h+4,10,9,"#ffe2b2");
@@ -416,8 +468,9 @@ function draw(ctx,pose,R){
   // Warm lantern heart stays visible on every stage.
   ellipse(ctx,0,-25,7+f*.5+reveal*2.2+life.flame*1.5,9+f*.3+reveal*2.7+life.flame*1.8,glow);
   ctx.fillStyle=f>=3?"#fff4d0":"#ffedaa";ctx.beginPath();
-  ctx.moveTo(0,-34);ctx.quadraticCurveTo(-7,-23,0,-18);
-  ctx.quadraticCurveTo(9,-24,0,-34);ctx.fill();
+  const flameLean=swing*.39+(acting?.release||0)*6, flameHeight=8+f+(acting?.load||0)*7+(acting?.release||0)*5;
+  ctx.moveTo(flameLean,-25-flameHeight);ctx.quadraticCurveTo(-9,-24,0,-18);
+  ctx.quadraticCurveTo(9,-24,flameLean,-25-flameHeight);ctx.fill();
   // J throws a horizontal paper seal; the hand no longer points skyward.
   if(cast===0) {
     const k=clamp(Number(p.cast)||0,0,1);

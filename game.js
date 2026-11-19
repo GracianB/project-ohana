@@ -3091,6 +3091,7 @@ return false;
 }
 function updateProjectiles() {
 for (const pr of game.projectiles) {
+if (pr.intercepted) continue;
 if (pr.homing && game.enemies[0]) { pr.vx += Math.sign(game.enemies[0].x - pr.x) * 0.35; pr.vy += Math.sign(game.enemies[0].y - pr.y) * 0.35; }
 const previous = { x: pr.x, y: pr.y };
 pr.x += pr.vx; pr.y += pr.vy; pr.life--;

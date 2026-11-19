@@ -35,7 +35,18 @@ export function extraAbility(id,index){
  return {id:`${id}_${index===4?'ascend':'finale'}`,key:index===4?'I':'P',name:HERO_POWERS[id][index===4?0:1],color:d[0],cd:index===4?3600:7200,
   desc:HERO_POWERS[id][index===4?2:3]};
 }
-export function powerAbility(p,index,defs,supreme){return index===3?supreme:index>3?extraAbility(p.id,index):defs[p.abilities?.[index]];}
+const LANTERN_POWERS={
+ ofuda:{name:'Sello viajero',color:'#ffd18e',desc:'El sello rebota de un enemigo a otro y los prepara para L.'},
+ sleeve:{name:'Campanada',color:'#ffdda1',desc:'La onda sella enemigos y desvanece los disparos que toca.'},
+ maw:{name:'Fuego del umbral',color:'#ffb575',desc:'El fuego consume los sellos al acertar y cura a Yomi. En solitario puede pasar un sello a un enemigo cercano.'}
+};
+
+export function powerAbility(p,index,defs,supreme){
+ if(index===3)return supreme;
+ if(index>3)return extraAbility(p.id,index);
+ const id=p.abilities?.[index],base=defs[id],lantern=LANTERN_POWERS[id];
+ return base&&p.id==='yomi'&&lantern?{...base,...lantern}:base;
+}
 function state(g){
  if(!g._evolutionAttacks||g._evolutionAttacks.owner!==g.player||g._evolutionAttacks.room!==g.roomId)
   g._evolutionAttacks={owner:g.player,room:g.roomId,age:0,shots:[],fields:[],drones:[],beams:[],guest:null};

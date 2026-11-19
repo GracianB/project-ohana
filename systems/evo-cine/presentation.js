@@ -23,7 +23,7 @@ export const OWN_EVOLUTION_CINE=Object.freeze({dino:dinoCine,dragon:dragonCine,p
 const clamp=x=>Math.max(0,Math.min(1,x));
 const ease=x=>{const k=clamp(x);return k*k*(3-2*k);};
 const TAU=Math.PI*2;
-const POSES={kilo:'victory',stitcho:'attack',chispin:'attack',cat:'victory',dragon:'glide',dino:'attack',frita:'jump',pizza:'jump',yomi:'attack',cuerno:'victory'};
+const POSES={kilo:'victory',stitcho:'attack',chispin:'attack',cat:'victory',dragon:'glide',dino:'attack',frita:'jump',pizza:'jump',yomi:'attack',cuerno:'victory',nacar:'glide',ia:'victory'};
 
 export function evolutionPresentation(id,evo,width,height,time,reduced=false){
  const def=ROSTER.find(r=>r.id===id)||ROSTER[0];
@@ -100,6 +100,53 @@ function drawUnlockCard(ctx,def,s,width,height,alpha){
  ctx.restore();
 }
 
+const NACAR_REVEAL_WATER=[
+ ['#113c55','#176f74'],
+ ['#122d47','#177187'],
+ ['#143c47','#426e63'],
+ ['#2e285e','#74538d'],
+ ['#151d40','#344b77'],
+];
+
+function drawNacarRevealWater(c,w,h,s,reduced){
+ const t=reduced?0:s.t;
+ c.save();
+ for(let i=0;i<6;i++){
+  const x=w*(.1+i*.159)+Math.sin(t*.95+i)*w*.035;
+  c.fillStyle=i%2?'#baf5e813':'#f4d4ed0e';
+  c.beginPath();c.moveTo(x-12,0);c.lineTo(x+22,0);
+  c.lineTo(x+w*.27,h);c.lineTo(x+w*.13,h);c.fill();
+ }
+ for(let i=0;i<16;i++){
+  const phase=((i*.17+(reduced?0:t*.22))%1);
+  const x=w*(.1+(i*137%83)/100)+Math.sin(phase*TAU)*w*.017;
+  c.strokeStyle=i%3?'#c0f2df50':'#ffe2b87a';c.lineWidth=1.2;
+  c.beginPath();c.arc(x,h*(.79-phase*.51),2+i%5,0,TAU);c.stroke();
+ }
+ c.restore();
+}
+
+function drawIAReveal(c,w,h,s,reduced){
+ const phase=reduced?1:Math.min(1,s.t/2.5);
+ const y=h*.56, radius=Math.min(w,h)*.39;
+ c.save();c.translate(w*.5,y);
+ for(let i=0;i<6;i++){
+  const live=Math.max(0,Math.min(1,phase*1.9-i*.16));
+  const a=i*TAU/6+Math.PI/6;
+  const x=Math.cos(a)*radius,z=Math.sin(a)*radius*.54;
+  c.globalAlpha=live*.46;
+  c.strokeStyle=i%2?'#98f5e0':'#e8aeeb';
+  c.lineWidth=1.2;
+  c.beginPath();c.moveTo(x*1.5,z*1.55);c.lineTo(x*.94,z);
+  c.lineTo(x*.77,z*.62);c.lineTo(x*.57,z*.62);c.stroke();
+  c.translate(x,z);c.rotate(a);
+  c.fillStyle=i%2?'#8debd8':'#d6abee';
+  c.fillRect(-2.5,-2.5,5,5);
+  c.rotate(-a);c.translate(-x,-z);
+ }
+ c.restore();
+}
+
 export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=false){
  const s=evolutionPresentation(id,evo,width,height,reduced?3.5:time,reduced),def=ROSTER.find(r=>r.id===s.id);
  const profile=EVOLUTION_CINEMA_PROFILES[s.id];
@@ -121,9 +168,12 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
  }
  ctx.save();
  try{
-  const bg=cachedGradient(ctx,`evolution-stage:${s.id}:${height}`,()=>{
-   const g=ctx.createLinearGradient(0,0,0,height);g.addColorStop(0,profile.bg);g.addColorStop(.65,'#16373d');g.addColorStop(1,'#091d28');return g;
+  const ocean=s.id==='nacar'?NACAR_REVEAL_WATER[s.form]:null;
+  const bg=cachedGradient(ctx,`evolution-stage:${s.id}:${ocean?s.form:0}:${height}`,()=>{
+   const g=ctx.createLinearGradient(0,0,0,height);g.addColorStop(0,ocean?.[0]||profile.bg);g.addColorStop(.65,ocean?.[1]||(s.id==='ia'?'#26264f':'#16373d'));g.addColorStop(1,'#091d28');return g;
   });ctx.fillStyle=bg;ctx.fillRect(0,0,width,height);
+  if(ocean)drawNacarRevealWater(ctx,width,height,s,reduced);
+  if(s.id==='ia')drawIAReveal(ctx,width,height,s,reduced);
   // Three quiet scenic planes leave the silhouette and text unobstructed.
   for(let layer=0;layer<3;layer++){
    ctx.fillStyle=['#7dbaab0b','#a7d8bd0b','#071d2944'][layer];ctx.beginPath();ctx.moveTo(0,height);

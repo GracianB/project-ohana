@@ -12,7 +12,7 @@ storm: { name: "Tormenta dirigida", key: "L", cd: 6000, color: "#9cf", desc: "To
 yarn: { name: "Zarpa lunar", key: "J", cd: 600, color: "#ff8ad4", desc: "Proyecta una zarpa de sueño a distancia: atraviesa enemigos una vez, sin regresar." },
 purr: { name: "Ronroneo", key: "K", cd: 2400, color: "#ffb6e4", desc: "Ronroneo que duerme enemigos y cura: su alcance crece de 320 a 600 con las evoluciones." },
 bubble:{name:"Perla de espuma",key:"J",cd:750,color:"#a5e6ed",desc:"Perlas de marea a distancia."},
-tideguard:{name:"Abrazo de marea",key:"K",cd:3000,color:"#b8f0dc",desc:"Calma a los enemigos próximos y recupera vida."},
+tideguard:{name:"Abrazo de marea",key:"K",cd:3000,color:"#b8f0dc",desc:"Calma a los enemigos próximos y recupera vida. Bajo el mar en solitario, la espuma intercepta varios disparos."},
 tidestars:{name:"Estrellas de marea",key:"L",cd:6500,color:"#d6c2ee",desc:"Las estrellas de mar buscan blancos con una salida escalonada."},
 ninetails: { name: "Huellas de gatito", key: "L", cd: 6000, color: "#b78bff", desc: "Huellas luminosas que salen escalonadas y persiguen enemigos." },
 breath: { name: "Llamarada", key: "J", cd: 750, color: "#ff6a2a", desc: "Cono de fuego continuo a corta distancia." },
