@@ -1,5 +1,5 @@
 import {nacarPrompt,interactNacar,swimNacar,createNacarBoss,updateNacarBoss} from './systems/nacar-chapter.js';
-import {drawNacarSeabed,drawNacarBoss} from './worlds/nacar-seabed.js';
+import {drawNacarSeabed,drawNacarBoss,drawNacarTerrain} from './worlds/nacar-seabed.js';
 import {absorbMichiGardenHit} from './systems/michi-garden-life.js';
 import {drawQuimeraMinion,drawQuimeraStars,collectQuimeraStars} from './systems/quimera-pressure.js';
 import {updateQuimeraArena,interactQuimeraArena,quimeraArenaPrompt,drawQuimeraArena} from './systems/quimera-arena.js';
@@ -1021,7 +1021,7 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
-game._chosenStartForm=null;game._startFormChoice=null;game._aquariumMichi=null;
+game._chosenStartForm=null;game._startFormChoice=null;game._aquariumMichi=null;game.nacarTimes={};
 if (!resume&&!onlineMode&&typeof globalThis.__ohanaStartForm === "number") {
   const chosenForm = Math.max(0, Math.min(4, globalThis.__ohanaStartForm));
   game.player.evo = chosenForm;
@@ -1130,6 +1130,7 @@ try {
   if (u) {
     game._startFormChoice=u.startFormChoice||null;
     game._aquariumMichi=u.aquariumReturn||null;
+    game.nacarTimes=u.nacarTimes||{};
     game.player.evo = u.evo;
     game.player.xp = u.xp;
     // V313 saves contained one U EXP value. Migrate it to the equipped
@@ -1928,6 +1929,7 @@ const right = axisX > 0;
 const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
 const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
 const drop = !!(keys["s"] || keys["arrowdown"]);
+const swimming=!!game.roomDef?.nacarChapter;
 // Sanctuary travel is deliberate: E / Use. Down only descends or drops.
 const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
 if (p.dash > 0) p.dash--;
@@ -1981,7 +1983,7 @@ for (const plat of game.platforms) {
 }
 }
 const canJump = p.jumps < p.maxJumps || p.coyote > 0 || p.wall;
-if (p.buffer > 0 && canJump) {
+if (!swimming && p.buffer > 0 && canJump) {
 const cuernoAirJump = !(p.coyote > 0 || p.wall);
 p.vy = -p.jumpPower; p.jumps = p.coyote > 0 || p.wall ? 1 : p.jumps + 1;
 if (p.id === "cuerno" && cuernoAirJump && p.jumps === 2 && cuernoFormMods((Number(p.evo) || 0) + 1)?.unlock?.rainbowJump) cuernoDoubleJump(game.cuernoFx, p);
@@ -1989,13 +1991,13 @@ if (p.wall) p.vx = 8 * p.wall;
 p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; beep("jump");
 game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: p.color || "#fff", count: 10, size: 2.6, up: 1.4, speed: 2.2, life: 14 });
 }
-if (!jump) {
+if (!swimming && !jump) {
 if (p._jumpHeld && p.vy < -4) p.vy *= 0.55;
 p._jumpHeld = false;
 }
-if(game.roomDef?.nacarChapter)swimNacar(game,p,jump,!!(keys['s']||keys['arrowdown']));
-if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
-if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
+if(swimming)swimNacar(game,p,jump,drop);
+if (!swimming && p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
+if (p.gliding > 0) { p.gliding--; if(!swimming)p.vy = Math.min(p.vy, 1.3); }
 {
 const holdGlide = !!(p.glide && !p.grounded && p.vy > 1 && jump);
 const glideActive = holdGlide || (p.gliding > 0);
@@ -2015,7 +2017,7 @@ if (glideActive && (p.evo >= 4 || p.glide) && (t % 5 === 0)) {
   });
 }
 }
-if (p.wall) p.vy = Math.min(p.vy, 2.2);
+if (!swimming && p.wall) p.vy = Math.min(p.vy, 2.2);
 stepChispinCloud(p,{jump,left,right});
 const inputState = { axisX, left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jumpPressed, t };
 p._jumpPrev = !!jump;
@@ -2029,7 +2031,7 @@ updateKiloPresence(game);
 const wasGrounded = !!p.grounded;
 const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
 const incoming = p.vy;
-p.vy = Math.min(14, p.vy + (kiloFlight||michiFlight||game.roomDef?.nacarChapter?0:p._dashGo > 0 ? 0.14 : 0.5));
+p.vy = Math.min(14, p.vy + (kiloFlight||michiFlight||swimming?0:p._dashGo > 0 ? 0.14 : 0.5));
 p.grounded = false;
 const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 8));
 let wall = 0;
@@ -3338,7 +3340,8 @@ if(!game.roomDef?.world1)drawIslandLandmarks(ctx,game,game.cam,t);
 drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,game,game.cam,t);
 const realmTerrain={frita:{id:'frita-market',groundTop:'#e5cfa5',ground:'#9c8492',edge:'#f7e8c4'},yomi:{id:'yomi-observatory',groundTop:'#d7e6de',ground:'#8ca7af',edge:'#e8f4eb'},pizza:{id:'pizza-harbor',groundTop:'#eacba5',ground:'#b09179',edge:'#fff0cd'},dino:{id:'fossil-valley',groundTop:'#d9deb9',ground:'#90a48a',edge:'#eff1ce'},cat:{id:'lunar-garden',groundTop:'#e4d5e4',ground:'#a598ab',edge:'#f3e6e5'},cuerno:{id:'prism-grove',groundTop:'#cbdca9',ground:'#93a684',edge:'#edf1cb'},dragon:{id:'ember-forge',groundTop:'#e4c4a4',ground:'#9c8070',edge:'#f5dbb3'}}[game.roomDef?.hero];
 const heroTerrain=game.roomDef?.fusionBoss?{...world,id:'quimera-sanctum',groundTop:'#465568',ground:'#10172a',edge:'#9aadb4',platOutline:'#14263e'}:realmTerrain?{...world,...realmTerrain}:game.roomDef?.hero==='stitcho'?{...world,id:'dock',groundTop:'#e2c6a0',ground:'#a78f77',edge:'#efe0b9',platOutline:'#466577'}:game.roomDef?.hero==='chispin'?{...world,id:'sanctuary',groundTop:'#f1e5ca',ground:'#a3b8bf',edge:'#fff3d8',platOutline:'#5a788e'}:world;
-if(!game.roomDef?.michiSanctuary)game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
+if(game.roomDef?.nacarChapter)game.terrainStats=drawNacarTerrain(ctx,game.platforms,game.cam,camW(),camH());
+else if(!game.roomDef?.michiSanctuary)game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
 if(game.roomDef?.kiloChapter&&!game.roomDef?.composition){ctx.save();ctx.strokeStyle='#273329';ctx.lineWidth=2;for(const pl of game.platforms){if(pl.h>24||!visibleForRender(pl,game.cam,viewportW,viewportH))continue;const px=pl.x-game.cam.x,py=pl.y-game.cam.y;ctx.fillStyle='#e0c67f';ctx.fillRect(px,py,pl.w,5);ctx.strokeRect(px,py,pl.w,pl.h);}ctx.restore();}
 if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
 }
@@ -3656,10 +3659,16 @@ drawHudPortrait(cv,p,t,{reduceMotion:game.reduceMotion||reduceMotion});
 
 function updateHUD() {
 const p = game.player; if (!p) return;
-const jumpHint=p.id==='cat'&&p.evo===1?'saltar · mantener: aletear':p.id==='cat'&&p.evo===4?'mantener: volar':'saltar';
+const ocean=!!game.roomDef?.nacarChapter;
+const jumpHint=ocean?'mantener: ascender':p.id==='cat'&&p.evo===1?'saltar · mantener: aletear':p.id==='cat'&&p.evo===4?'mantener: volar':'saltar';
 if(game._jumpHint!==jumpHint){
  game._jumpHint=jumpHint;const caption=document.getElementById('jump-control-caption');if(caption)caption.textContent=jumpHint;
- const touchJump=document.querySelector('.touch-btn.jump');if(touchJump){const label=jumpHint==='saltar'?'Saltar':p.evo===1?'Saltar; mantener para aletear':'Mantener para volar; soltar para planear';touchJump.setAttribute('aria-label',label);touchJump.title=label;}
+ const touchJump=document.querySelector('.touch-btn.jump');if(touchJump){const label=ocean?'Mantener para ascender':jumpHint==='saltar'?'Saltar':p.evo===1?'Saltar; mantener para aletear':'Mantener para volar; soltar para planear';touchJump.setAttribute('aria-label',label);touchJump.title=label;}
+ const touchDown=document.querySelector('#touch [data-k=s]');
+ if(touchDown){
+  const label=ocean?'Mantener para sumergirse':'Bajar';
+  touchDown.setAttribute('aria-label',label);touchDown.title=label;
+ }
 }
 
 const goal = world1NextObjective(game);

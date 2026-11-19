@@ -42,7 +42,7 @@ import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./muta
 import { MAX_RUNTIME_GHOSTS, MAX_RUNTIME_PROJECTILES, pushRuntime } from "./runtime.js";
 
 import { ABILITY_DEFS } from "./ability-catalog.js";
-import { MICHI_L_SHOTS, michiLaunchFrame, michiShotAnchors, michiShotPalette, drawMichiTailShot } from "./michi-tail-shots.js";
+import { michiLaunchFrame, michiShotAnchors, michiShotPalette, nacarStarVolley, drawMichiTailShot } from "./michi-tail-shots.js";
 export { ABILITY_DEFS };
 
 
@@ -1227,7 +1227,10 @@ ctx.strokeStyle = "#fff"; ctx.lineWidth = Math.max(1, width * 0.4); ctx.stroke()
 }
 
 const CASTERS = {
-bubble(g,p,evo){CASTERS.plasma(g,p,evo);},
+bubble(g,p,evo){
+ add({kind:'burst',n:evo>=3?4:3,i:0,gap:6,next:0,marine:true,form:evo});
+ momentCast(g,p,0,evo);
+},
 tideguard(g,p,evo){CASTERS.purr(g,p,evo);},
 tidestars(g,p,evo){CASTERS.ninetails(g,p,evo);},
 ukulele(g, p, evo) {
@@ -1364,16 +1367,20 @@ const stun = 200 + evo * 30;
 p.health = Math.min(p.maxHealth, p.health + heal);
 g.nums.add(cx(p), p.y - 10, "+" + heal, "#6f6");
 const slept = [];
-add({ kind: "purr", life: 72, max: 72, R, hit: new Set(), slept, dmg: 6 * pw(p), stun, evo });
-boom(g, cx(p), cy(p), "#ffb6e4", 16, { star: true });
+add({ kind: "purr", life: 72, max: 72, R, hit: new Set(), slept, dmg: 6 * pw(p), stun, evo, marine:p.id==='nacar' });
+boom(g, cx(p), cy(p), p.id==='nacar'?'#a4eadc':"#ffb6e4", 16, { star: true });
 },
 ninetails(g, p, evo) {
 // V462: one projectile per real tentacle/appendage of the current form (3/4/7/5/9),
 // each born on its tentacle tip and launched by that tentacle in a ripple. Total
 // damage is kept equal to the old nine-shot volley.
 const targets = g.enemies.filter(canHit).sort((a, b) => Math.hypot(cx(a) - cx(p), cy(a) - cy(p)) - Math.hypot(cx(b) - cx(p), cy(b) - cy(p)));
-const form = Math.max(0, Math.min(4, evo | 0)), n = MICHI_L_SHOTS[form];
-const anchors = michiShotAnchors(p, form), cols = michiShotPalette(p.michiSeed);
+const form = Math.max(0, Math.min(4, evo | 0));
+const marine=p.id==='nacar';
+const volley=marine?nacarStarVolley(p,form):null;
+const anchors=volley?.anchors||michiShotAnchors(p,form);
+const cols=volley?.colors||michiShotPalette(p.michiSeed);
+const n=anchors.length;
 const dmg = (13 + evo * 2) * pw(p) * 9 / n;
 for (let i = 0; i < n; i++) {
   const an = anchors[i], sp = 9.5 + (i % 3) * 1.2 + evo * 0.35, delay = michiLaunchFrame(i, n);
@@ -1381,7 +1388,7 @@ for (let i = 0; i < n; i++) {
     kind: "wisp", x: an.x, y: an.y, vx: Math.cos(an.ang) * sp, vy: Math.sin(an.ang) * sp,
     ax: an.x - cx(p), ay: an.y - (p.y + p.h),
     life: 230, target: targets.length ? targets[i % targets.length] : null, dmg,
-    color: cols[i % 3], accent: cols[3], trail: [], delay, delay0: delay, idx: i, tail: true, marine:p.id==='nacar', form, n,
+    color: cols[i % 3], accent: cols[3], trail: [], delay, delay0: delay, idx: i, tail: true, marine, form, n,
   });
 }
 g.shake = Math.min(18, (g.shake || 0) + 4);
@@ -2015,11 +2022,14 @@ if (f.next-- > 0) return true;
 const h = hand(p);
 const k = f.i - (f.n - 1) / 2;
 pushRuntime(g.projectiles, {
-  x: h.x - 9, y: h.y - 5 + k * 3, vx: 14 * p.facing, vy: k * 0.35,
-  w: 20, h: 10, life: 42, dmg: 9, color: f.i % 2 ? "#9ef0ff" : "#5ad1ff", shape: "bolt", owner: "player", trail: true,
+  x:h.x-9,y:h.y-5+k*3,vx:(f.marine?12+(f.form||0)*.5:14)*p.facing,
+  vy:f.marine?k*.42-.48:k*.35,
+  w:f.marine?17:20,h:f.marine?17:10,life:f.marine?46:42,dmg:9,
+  color:f.marine?(f.i%2?'#f7ddbf':'#a3f1da'):(f.i%2?"#9ef0ff":"#5ad1ff"),
+  shape:f.marine?'tideBubble':"bolt",owner:"player",trail:!f.marine,
 }, MAX_RUNTIME_PROJECTILES);
 g.fx.emit(h.x, h.y, { color: "#9ef0ff", count: 4, size: 2.5, angle: p.facing > 0 ? 0 : Math.PI, spread: 0.8, speed: 3, star: true });
-p.vx -= p.facing * 0.8;
+p.vx -= p.facing * (f.marine?.22:.8);
 f.i++;
 f.next = f.gap;
 return f.i < f.n;
@@ -3544,6 +3554,22 @@ for(const side of [-1,1]){
 ctx.restore();
 },
 purr(ctx, f, cam, t, g, p) {
+if(f.marine||p?.id==='nacar'){
+ const x=cx(p)-cam.x,y=cy(p)-cam.y;
+ const progress=1-f.life/(f.max||72);
+ const radius=Math.min(f.R,36+progress*f.R);
+ ctx.save();
+ ctx.strokeStyle='#b1f1dd';ctx.lineWidth=2.5;
+ ctx.globalAlpha=.76*(1-progress*.62);
+ ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.stroke();
+ const phase=g?.reduceMotion?0:(f.age||0)*.016;
+ for(let i=0;i<10;i++){
+  const angle=phase+i*TAU/10,rr=radius*(i%2?.82:.96);
+  const bx=x+Math.cos(angle)*rr,by=y+Math.sin(angle)*rr;
+  ctx.beginPath();ctx.ellipse(bx,by,3+i%3,5+i%4,angle,0,TAU);ctx.stroke();
+ }
+ ctx.restore();return;
+}
 if(g?.roomDef?.michiSanctuary){drawSanctuaryPurr(ctx,f,cam,t,p);return;}
 const x = cx(p) - cam.x, y = cy(p) - cam.y;
 const u = 1 - f.life / (f.max || 72);
@@ -4133,7 +4159,7 @@ export function drawProjectile(ctx, pr, cam, t) {
 const x = pr.x - cam.x + pr.w / 2;
 const y = pr.y - cam.y + pr.h / 2;
 ctx.save();
-if ((pr.vx || pr.vy) && pr.shape !== "salt") {
+if ((pr.vx || pr.vy) && pr.shape !== "salt" && pr.shape !== "tideBubble") {
 ctx.globalAlpha = 0.45;
 ctx.strokeStyle = pr.color || "#fff";
 ctx.lineWidth = 3;
@@ -4153,6 +4179,15 @@ ctx.lineWidth = 1.4;
 const shape = pr.shape || "orb";
 const w = pr.w;
 const h = pr.h;
+if(shape==='tideBubble'){
+ const radius=Math.min(w,h)*.51;
+ ctx.globalAlpha=.28;ctx.fillStyle=pr.color;
+ ctx.beginPath();ctx.arc(0,0,radius,0,TAU);ctx.fill();
+ ctx.globalAlpha=.95;ctx.strokeStyle=pr.color;ctx.lineWidth=1.8;ctx.stroke();
+ ctx.strokeStyle='#faffee';ctx.lineWidth=1.4;
+ ctx.beginPath();ctx.arc(0,0,radius*.65,Math.PI,Math.PI*1.55);ctx.stroke();
+ ctx.restore();return;
+}
 if (shape === "salt") {
 ctx.globalAlpha = 0.35;
 ctx.fillStyle = "#fff";

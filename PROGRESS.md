@@ -1,3 +1,5 @@
+ohana-804 · Tres rutas de natación, gruta bioluminiscente y combate submarino.
+
 ohana-803 · Pecio de las Promesas y regreso guardado de Michi.
 
 ohana-802 · Paso entre el acuario de Michi y el fondo marino.

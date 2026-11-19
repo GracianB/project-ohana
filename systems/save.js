@@ -3,7 +3,7 @@ import {cleanKeepsakes,mergeKeepsakes} from './keepsakes.js';
 import {cleanRoomAlbums} from './room-album.js';
 // Save v3 (reads v2). Ids viejos se canonizan para no romper partidas.
 import {sanitizeUBonds} from "./u-partners.js";
-import {WORLD1_IDS,cleanWorld1Seals,cleanWorld1Stations} from "./world1-rooms.js";
+import {WORLD1_ROOMS,WORLD1_IDS,cleanWorld1Seals,cleanWorld1Stations} from "./world1-rooms.js";
 const SAVE_ROOMS=['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss','w1-nacar',...WORLD1_IDS];
 export const ID_LEGACY = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin" };
 
@@ -59,6 +59,15 @@ function cleanAquariumReturn(value,room,hero){
  return {evo,xp,hp};
 }
 
+function cleanNacarTimes(raw){
+ const times={};
+ for(const {id,limit} of WORLD1_ROOMS['w1-nacar'].swimRoutes||[]){
+  const ticks=raw?.[id];
+  if(Number.isInteger(ticks)&&ticks>0&&ticks<limit)times[id]=ticks;
+ }
+ return times;
+}
+
 export function packSave(game, MagicMod) {
   const p = game && game.player;
   let magic = null;
@@ -75,6 +84,7 @@ export function packSave(game, MagicMod) {
     secrets: cleanSecrets(game.secrets),
     roomId: game.roomId,
     aquariumReturn: cleanAquariumReturn(game._aquariumMichi,game.roomId,p?.id),
+    nacarTimes: cleanNacarTimes(game.nacarTimes),
     visited: game.visited || { hub: true },
     score: game.score || 0,
     kills: game.kills || 0,
@@ -151,6 +161,7 @@ export function unpackSave(raw, defId) {
     secrets: cleanSecrets(raw.secrets),
     roomId: typeof raw.roomId === "string" && raw.roomId ? raw.roomId : "hub",
     aquariumReturn: cleanAquariumReturn(raw.aquariumReturn,raw.roomId,id),
+    nacarTimes: cleanNacarTimes(raw.nacarTimes),
     visited: vis,
     score: Math.max(0, finiteNumber(raw.score)),
     kills: Math.max(0, finiteNumber(raw.kills)),

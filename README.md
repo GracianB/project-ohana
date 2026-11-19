@@ -1,3 +1,5 @@
+[Validación de ohana-804](docs/V804-VALIDATION.json) · [Publicación](docs/V804-PUBLICATION.json)
+
 [Validación de ohana-803](docs/V803-VALIDATION.json) · [Publicación](docs/V803-PUBLICATION.json)
 
 [Validación de ohana-802](docs/V802-VALIDATION.json) · [Publicación](docs/V802-PUBLICATION.json)

@@ -11,13 +11,58 @@ const oval=(c,x,y,rx,ry,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,Math.
 export function drawSeaStar(c,x,y,size=10,t=0,col='#f6cfaa'){
  c.save();c.translate(x,y);c.rotate(t);c.fillStyle=col;c.strokeStyle='#593d65';c.lineWidth=1.2;c.lineJoin='round';c.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=size*(i%2?.48:1);c.lineTo(Math.cos(a)*r,Math.sin(a)*r);}c.closePath();c.fill();c.stroke();oval(c,-size*.2,-size*.04,1.2,1.8,'#323b58');oval(c,size*.2,-size*.04,1.2,1.8,'#323b58');c.restore();
 }
+const SWIM_BEATS=[.095,.071,.105,.052,.064];
+const BELL_LIGHTS=['#e8f9d8','#adfff2','#c8ffe0','#f9dcff','#ffe5b3'];
+
+function drawBellMarkings(c,form,d,t,lit){
+ c.save();
+ c.lineCap='round';
+ c.lineWidth=form===4?1.9:1.2;
+ c.strokeStyle=BELL_LIGHTS[form];
+ c.globalAlpha=lit;
+ const width=d.rx,height=d.ry;
+ if(form===0){
+  // One curved sheen, like light on the lip of a droplet.
+  c.beginPath();c.moveTo(-width*.6,-height*.24);c.quadraticCurveTo(-width*.37,-height*.79,width*.12,-height*.77);c.stroke();
+  oval(c,width*.49,-height*.42,1.4,1.9,BELL_LIGHTS[form]);
+ }else if(form===1){
+  // The broad bell spreads light along the rim as it contracts.
+  for(let i=-3;i<=3;i++)oval(c,i*width*.245,height*.38,1.3,1.7,BELL_LIGHTS[form]);
+  c.beginPath();c.moveTo(-width*.79,-height*.19);c.quadraticCurveTo(0,-height*.88,width*.78,-height*.22);c.stroke();
+ }else if(form===2){
+  // The compass medusa has a thin radial marking, not an extra limb.
+  for(const side of [-1,1]){
+   c.beginPath();c.moveTo(0,-height*.86);c.quadraticCurveTo(side*width*.19,-height*.54,side*width*.62,-height*.35);
+   c.lineTo(side*width*.42,-height*.51);c.stroke();
+  }
+  oval(c,0,-height*.73,1.8,2.9,'#efffc8');
+ }else{
+  const bands=form===3?3:4;
+  for(let i=0;i<bands;i++){
+   const extent=width*(.45+i*.11),y=-height*(.73-i*.15);
+   c.globalAlpha=lit*(1-i*.13);
+   c.beginPath();c.moveTo(-extent,y+3);
+   c.bezierCurveTo(-extent*.42,y-7,extent*.45,y+5,extent,y-1);c.stroke();
+  }
+  if(form===4){
+   for(let i=-3;i<=3;i++)oval(c,i*width*.24,height*.39,1.6,1.8+(Math.sin(t*.05+i)+1)*.52,'#ffeab2');
+  }
+ }
+ c.restore();
+}
+
 function draw(c,p={}){
  const f=Math.max(0,Math.min(4,Math.round(Number(p.form)||0))),d=NACAR_FORMS[f],reduced=!!p.reduceMotion,t=reduced?0:Number(p.t)||0,run=p.state==='run',hurt=p.state==='hurt',attack=p.state==='attack',victory=p.state==='victory';
- const pulse=reduced?0:Math.sin(t*.055+f)*.035,drift=reduced?0:Math.sin(t*.025)*2,cy=d.top+d.ry+2,hem=cy+d.ry*.55,spread=1+(attack?.1:0);
- c.save();c.translate(0,drift);c.rotate(reduced?0:Math.sin(t*.02)*.025+(run?.055:0));
+ const vertical=Math.max(-1,Math.min(1,Number(p.vy)||0));
+ const swim=Math.max(Math.abs(vertical),Number(p.speed)||0);
+ const pulse=reduced?0:Math.sin(t*SWIM_BEATS[f]+f)*(.036+swim*.048);
+ const drift=reduced?0:Math.sin(t*.025)*2;
+ const cy=d.top+d.ry+2,hem=cy+d.ry*.55,spread=1+(attack?.1:0);
+ c.save();c.translate(0,drift);
+ c.rotate(reduced?0:Math.sin(t*.02)*.025+(run?.055:0)+vertical*(f===2?.17:.095));
  // Long trailing threads lie behind the bell and the expressive face.
  for(let i=0;i<d.tendrils;i++){
-  const k=d.tendrils===1?0:i/(d.tendrils-1)*2-1,x=k*d.rx*.8,tip=hem+d.length*(.68+.32*Math.cos(k*1.7)),sway=reduced?0:Math.sin(t*.035+i*.8)*(4+f*1.4);
+  const k=d.tendrils===1?0:i/(d.tendrils-1)*2-1,x=k*d.rx*.8,tip=hem+d.length*(.68+.32*Math.cos(k*1.7)),sway=reduced?0:Math.sin(t*.035+i*.8)*(4+f*1.4)+vertical*(4+f*1.5);
   c.strokeStyle=i%3?'#9edcd0aa':'#e9cced';c.lineWidth=(i%3?1.4:3.6)+(f===4?.5:0);c.lineCap='round';c.beginPath();c.moveTo(x,hem-3);c.bezierCurveTo(x-sway,hem+d.length*.3,x+sway*1.5,tip-10,x+sway,tip);c.stroke();
   if(i%3===0){oval(c,x+sway,tip,2,3,'#f5dfb5');if(!reduced&&i%2===0)oval(c,x+sway+Math.sin(t*.04+i)*3,tip+7,1,1,'#c4f4eb88');}
  }
@@ -31,6 +76,7 @@ function draw(c,p={}){
  oval(c,-d.rx*.24,-d.ry*.35,d.rx*.45,d.ry*.48,'#f1fff555');
  for(let i=0;i<(f===0?3:5);i++){const a=Math.PI+(i+1)*Math.PI/6;c.strokeStyle='#648d9c44';c.lineWidth=1;c.beginPath();c.moveTo(0,d.ry*.35);c.quadraticCurveTo(Math.cos(a)*d.rx*.4,-d.ry*.1,Math.cos(a)*d.rx*.87,Math.sin(a)*d.ry*.8);c.stroke();}
  if(f===2){for(const side of[-1,1]){c.fillStyle='#a0c8bb';c.beginPath();c.moveTo(side*13,-22);c.quadraticCurveTo(side*36,-12,side*34,5);c.quadraticCurveTo(side*25,0,side*19,13);c.fill();}}
+ drawBellMarkings(c,f,d,t,reduced?.6:.57+swim*.28);
  // Four soft horseshoe organs distinguish a jellyfish from a floating cat.
  for(let i=0;i<4;i++){const a=i*Math.PI/2;c.strokeStyle='#c68ba177';c.lineWidth=2;c.beginPath();c.arc(Math.cos(a)*d.rx*.2,Math.sin(a)*d.ry*.18-2,3+f*.5,.5,Math.PI*1.9);c.stroke();}
  const eyeX=d.rx*.3,eyeY=d.ry*.1,blink=hurt||!reduced&&Math.sin(t*.023)> .993;
