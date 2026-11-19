@@ -21,7 +21,8 @@ export function world1RoomUnlocked(room, seals = []) {
 // abierta sin sello. La carta elegida en la selección manda si está abierta.
 export function world1StartRoom(heroId, seals = [], requested = null) {
   if (requested) return requested;
-  if(heroId==='nacar')return 'w1-cat';
+  if(heroId==='nacar')return 'w1-nacar';
+  if(heroId==='ia')return 'w1-yomi';
   const own = "w1-" + heroId;
   if (WORLD1_ORDER.includes(heroId)) return own;
   const s = new Set(cleanWorld1Seals(seals));
@@ -32,7 +33,8 @@ export function world1StartRoom(heroId, seals = [], requested = null) {
 // Chapter entry owns its protagonist. Retry/Continue in the same chapter keeps
 // earned evolution; crossing into another chapter creates a fresh baby.
 export function world1ChapterEntry(room, {hero, previousRoom, resume=false}={}) {
- if(room==='w1-cat'&&hero==='nacar')return {hero:'nacar',reset:!resume&&previousRoom!==room};
+ if(room==='w1-nacar')return {hero:'nacar',reset:hero!=='nacar'||!resume&&previousRoom!==room};
+ if(room==='w1-yomi'&&hero==='ia')return {hero:'ia',reset:!resume&&previousRoom!==room};
  const owner=String(room).startsWith('w1-')?String(room).slice(3):null;
  if(!WORLD1_ORDER.includes(owner))return null;
  return {hero:owner,reset:hero!==owner||(!resume&&previousRoom!==room)};

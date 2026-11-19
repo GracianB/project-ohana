@@ -19,7 +19,7 @@ test("V86 OHANA welcome and no Atrium wires",()=>{
  assert.ok(css.includes("intro-playing #atrium-fx"));
 });
 test("V86 each U has a genuinely readable multi-beat duration",()=>{
- assert.equal(Object.keys(SUPREME_STORYBOARDS).length,11);
+ assert.equal(Object.keys(SUPREME_STORYBOARDS).length, 12);
  for(const [id,s] of Object.entries(SUPREME_STORYBOARDS)){
   assert.ok(s.duration>=4.8&&s.duration<=6.4,id);
   assert.ok(s.beat.includes("→"),id);

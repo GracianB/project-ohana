@@ -10,7 +10,7 @@ export const FAMILY_ROSTER_V100=Object.freeze({
  dino:Object.freeze({pose:"attack",offset:3.5,tempo:1.55,amp:5}),
  frita:Object.freeze({pose:"jump",offset:4.1,tempo:3.1,amp:6}),
  pizza:Object.freeze({pose:"run",offset:4.8,tempo:2.5,amp:3}),
- yomi:Object.freeze({pose:"victory",offset:5.4,tempo:1.15,amp:1}),
+ yomi:Object.freeze({pose:"victory",offset:5.4,tempo:1.15,amp:1}), ia:Object.freeze({pose:"victory",offset:5.4,tempo:1.15,amp:1}),
  cuerno:Object.freeze({pose:"victory",offset:6.1,tempo:2.2,amp:3}),
 });
 const REST=Object.freeze({pose:"idle",lift:0,grounded:true,melee:0,vx:0});

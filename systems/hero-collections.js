@@ -12,7 +12,7 @@ export const HERO_COLLECTIONS=Object.freeze({
  dino:{room:'hub',title:'Los cien fósiles de Dino',color:'#c5f5a2',bonus:'GUARDIÁN ANTIGUO'},
  frita:{room:'hub',title:'Las cien recetas del mar',color:'#fff3ac',bonus:'BANQUETE DORADO'},
  pizza:{room:'hub',title:'Las cien perlas del horno',color:'#ffcca2',bonus:'HORNO ESTELAR'},
- yomi:{room:'hub',title:'Las cien estrellas perdidas',color:'#f5bedc',bonus:'CONSTELACIÓN ETERNA'},
+ yomi:{room:'hub',title:'Las cien estrellas perdidas',color:'#f5bedc',bonus:'CONSTELACIÓN ETERNA'}, ia:{room:'hub',title:'Las cien estrellas perdidas',color:'#f5bedc',bonus:'CONSTELACIÓN ETERNA'},
  cuerno:{room:'hub',title:'Los cien prismas del bosque',color:'#d5c8ff',bonus:'AURORA VIVA'}
 });
 const personalKey=hero=>'ohana-hero-100-v1:'+hero;

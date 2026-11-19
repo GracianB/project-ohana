@@ -12,7 +12,7 @@ export const ACTION_PROFILES=Object.freeze({
  dino:{tempo:.7,weight:1.45,elastic:.75,tilt:.68,accent:'#c4e899'},
  frita:{tempo:1.31,weight:.64,elastic:1.35,tilt:1.2,accent:'#ffe7aa'},
  pizza:{tempo:1.08,weight:.84,elastic:1.5,tilt:.98,accent:'#f8d099'},
- yomi:{tempo:.98,weight:.67,elastic:1.08,tilt:.95,accent:'#f4c4e3'},
+ yomi:{tempo:.98,weight:.67,elastic:1.08,tilt:.95,accent:'#f4c4e3'}, ia:{tempo:.98,weight:.67,elastic:1.08,tilt:.95,accent:'#f4c4e3'},
  cuerno:{tempo:1,weight:1.05,elastic:.91,tilt:.91,accent:'#dfd3fc'}
 });
 const clamp=(x,min,max)=>Math.max(min,Math.min(max,Number(x)||0));

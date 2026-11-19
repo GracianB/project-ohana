@@ -15,7 +15,7 @@ export const GUEST_ACTING=Object.freeze({
  dino:Object.freeze({style:"fossil-charge",gesture:"stomp",height:1,travel:.89}),
  frita:Object.freeze({style:"crispy-slide",gesture:"slide",height:4,travel:1.24}),
  pizza:Object.freeze({style:"elastic-bounce",gesture:"bounce",height:20,travel:.97}),
- yomi:Object.freeze({style:"shadow-portal",gesture:"hover",height:48,travel:.94}),
+ yomi:Object.freeze({style:"shadow-portal",gesture:"hover",height:48,travel:.94}), ia:Object.freeze({style:"signal-orbit",gesture:"scan",height:42,travel:1.02}),
  cuerno:Object.freeze({style:"prismatic-glide",gesture:"float",height:44,travel:1.05})
 });
 const L_BEATS=Object.freeze([42,66,90]);
@@ -116,6 +116,9 @@ export function guestPerformance(s,ally,reduced=false){
   case "pizza":
    altitude+=reduced?0:Math.abs(Math.sin(age*.16))*19;
    drift=6*impulse;gesture="bounce";pose=attack?"attack":"jump";vy=-1;break;
+  case "ia":
+   altitude+=reduced?0:Math.sin(age*.15)*6;
+   drift=8*impulse;gesture="scan";pose=attack?"attack":"glide";break;
   case "yomi":
    altitude+=reduced?0:Math.sin(age*.11)*8;
    drift=4*impulse;gesture="hover";pose=attack?"attack":"glide";break;

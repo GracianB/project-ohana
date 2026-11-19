@@ -8,7 +8,7 @@ test("V100 Especial: roster íntegro, accesible, sin carrusel activo",()=>{
   const html=fs.readFileSync(new URL("../index.html",import.meta.url),"utf8");
   const css=fs.readFileSync(new URL("../v100-special.css",import.meta.url),"utf8");
   const code=fs.readFileSync(new URL("../systems/title.js",import.meta.url),"utf8");
-  assert.equal(ROSTER.length, 11);
+  assert.equal(ROSTER.length, 12);
   assert.match(html,/data-selector-mode="family-grid"/);
   assert.match(css,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
   assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);

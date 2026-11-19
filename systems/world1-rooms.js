@@ -1,3 +1,4 @@
+import {buildNacarRoom} from './nacar-room.js';
 import {authorMichiSanctuary} from './michi-sanctuary.js';
 import {openChapterPits} from './open-chapter-pits.js';
 import {authorKiloEncounters} from './kilo-encounters-v606.js';
@@ -36,10 +37,12 @@ export const WORLD1_ARENA = Object.freeze({ left: 7000, right: 11800, start: 680
 // Orden de la ruta: cada sala abre la siguiente al despertar su sello.
 export const WORLD1_ORDER = Object.freeze(["kilo","stitcho","chispin","cat","cuerno","dragon","dino","frita","pizza","yomi"]);
 export const WORLD1_IDS = Object.freeze([...WORLD1_ORDER.map((h) => "w1-" + h), "w1-final"]);
-export const WORLD1_HERO_ROOMS = Object.freeze(WORLD1_ORDER.map((h) => "w1-" + h));
+export const WORLD1_ROOM_HEROES=Object.freeze([...WORLD1_ORDER,'nacar']);
+export const WORLD1_HERO_ROOMS = Object.freeze(WORLD1_ROOM_HEROES.map((h) => "w1-" + h));
 
 // world = índice de WORLDS (cielo base) · seal = interacción única de la sala.
 export const WORLD1_THEMES = Object.freeze({
+ nacar:{name:'El jardín del fondo marino',short:'Nácar',world:5,color:'#9de8e2',tint:'#367c8d',relic:'La perla del hogar',seal:'marea',cast:['pez','medusa','anguila','cangrejo','planta'],sectors:['Pradera de luz','Jardín de anémonas','Naufragio dormido','Catedral del coral','Puerta abisal','El hogar del océano']},
   kilo:    { name: "Claro de Kilo",            short: "Kilo",      world: 6, color: "#ffacc2", tint: "#ff8fb1", relic: "Canción del hogar",     seal: "serenata",   cast: ["cucaracho","cangrejo","planta","rana","avispa"],        sectors: ["Puerta aloha","Campo de hibiscos","Escenario del ukelele","Lago de las guirnaldas","Senda de los cocos","Escenario del Tambor"] },
   stitcho: { name: "Astillero de Stitcho",     short: "Stitcho",   world: 4, color: "#67ddff", tint: "#3f8cff", relic: "Corazón galáctico",     seal: "reparar",    cast: ["ufo","phosquito","cucaracho","arana","murcielago"],          sectors: ["Muelle cosido","Chatarrería azul","Grúas de plasma","Taller del caos","Hangar estrellado","Altar del experimento"] },
   chispin: { name: "Santuario del Trueno",     short: "Chispín",   world: 9, color: "#fff29a", tint: "#ffd84a", relic: "Relámpago dorado",      seal: "cadena",     cast: ["gaviota","murcielago","phosquito","rana","avispa"],      sectors: ["Puerta de nubes","Campo de pararrayos","Puente del chispazo","Pico tormenta","Valle del arcoíris","Altar del trueno"] },
@@ -54,6 +57,7 @@ export const WORLD1_THEMES = Object.freeze({
 
 // Explicación jugable de cada sello (se muestra al entrar y en el HUD de sala).
 export const WORLD1_SEALS = Object.freeze({
+ marea:{title:'Las cinco voces del océano',verb:'escucha las perlas cuando brillan',count:5},
   serenata:  { title: "Serenata de las flores",  verb: "Quédate quieto sobre cada hibisco para rasguear su nota", count: 4 },
   reparar:   { title: "Reparar la nave",         verb: "Lleva cada pieza (tócala) hasta su taller marcado",       count: 3 },
   cadena:    { title: "Red de truenos",          verb: "Conecta las cuatro antenas: acércate o golpéalas; cada conexión se conserva", count: 4 },
@@ -284,12 +288,13 @@ export function buildWorld1FinalRoom() {
 
 export const WORLD1_ROOMS = Object.freeze(Object.fromEntries([
   ...WORLD1_ORDER.map((h) => ["w1-" + h, buildWorld1HeroRoom(h)]),
+  ["w1-nacar",buildNacarRoom()],
   ["w1-final", buildWorld1FinalRoom()]
 ]));
 
 export function isWorld1Room(id) { return typeof id === "string" && Object.hasOwn(WORLD1_ROOMS, id); }
 export function heroForWorld1Room(id) { return WORLD1_ROOMS[id]?.hero || null; }
-export function world1RoomForHero(hero) { return WORLD1_ORDER.includes(hero) ? "w1-" + hero : null; }
+export function world1RoomForHero(hero) { return WORLD1_ROOM_HEROES.includes(hero) ? "w1-" + hero : null; }
 
 // Grafo explícito: una ruta principal y dos puentes con el Mundo 2.
 export function world1Graph() {
@@ -306,6 +311,7 @@ export function world1Graph() {
 export function world1DoorOpen(fromId, dir, state = {}) {
   const room = WORLD1_ROOMS[fromId]; if (!room) return true;
   const seals = new Set(state.seals || []);
+  if(room.optionalChapter)return true;
   if (dir === "left") return !(room.fusionBoss && state.bossActive);
   if (dir !== "right") return true;
   if (room.fusionBoss) return !!state.won;

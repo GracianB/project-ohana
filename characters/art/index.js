@@ -3,6 +3,7 @@
 // Registro único y estable de renderers vectoriales.
 // ============================================================================
 
+import ia from './ia.js';
 import nacar from './nacar.js';
 import kilo from "./kilo.js";
 import stitch from "./stitch.js";
@@ -16,6 +17,7 @@ import yomi from "./yomi.js";
 import cuerno from "./cuerno-v373.js";
 
 const ART = Object.freeze({
+  ia,
   nacar,
   kilo,
   lilo: kilo,

@@ -11,6 +11,7 @@ const W1=new Set(['w1-kilo','w1-stitcho','w1-chispin','w1-cat','w1-cuerno','w1-d
 export function worldBounds(id){
  if(typeof id!=='string')return null;
  if(Object.hasOwn(WORLD_BOUNDS,id))return WORLD_BOUNDS[id];
+ if(id==='w1-nacar')return {width:11000,height:2100};
  if(id==='w1-cat')return MICHI_BOUNDS;
  if(W1.has(id))return WORLD1_BOUNDS;
  if(id==='w1-final')return WORLD1_FINALE_BOUNDS;

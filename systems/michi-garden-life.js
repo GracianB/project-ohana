@@ -31,7 +31,7 @@ export function interactMichiGarden(g){
  else if(q.kind==='chime'){const pattern=g.roomDef.michiSanctuary.adventure.chimes,step=g._michiChime||0,correct=q.note===pattern[step];g._michiChime=correct?step+1:0;const complete=g._michiChime>=3;if(complete){remember(g,'hollow');g._michiChime=0;}g._michiGardenMoment={title:complete?'EL ESCONDITE RESPONDE':correct?'CASCABEL '+g._michiChime+'/3':'ESCUCHA EL ORDEN',text:complete?'El espejo de las raíces reconoce la canción.':correct?'Una nota encaja. Busca la siguiente.':'Estrella, luna, hoja. Si te equivocas, puedes empezar sin perder nada.',age:0};}
  else if(q.kind==='guard'){if(!(g._michiLampCooldown>0)){g._michiLampGuard=180;g._michiLampCooldown=360;g._michiGardenMoment={title:'FAROL DE REFUGIO',text:'Un golpe queda protegido durante tres segundos. La luz necesita seis segundos para volver.',age:0};}}
 
- else if(q.kind==='rescue'){remember(g,'tide');g._michiGardenMoment={title:'NÁCAR · LA AMIGA DE LA MAREA',text:'Medusa al flotar, estrella al abrazar el suelo. Nácar se queda con la familia.',age:0};}
+ else if(q.kind==='rescue'){remember(g,'tide');g._michiGardenMoment={title:'NÁCAR · LA AMIGA DE LA MAREA',text:'Una medusa que lleva estrellas de mar a la batalla. Nácar se queda con la familia.',age:0};}
  else if(q.kind==='race'){g._michiRace={active:true,t:0};g._michiGardenMoment={title:'SIGUE A LAS LUCIÉRNAGAS',text:'Cruza el laberinto hasta el farol del este. Es un juego opcional: puedes repetirlo sin perder nada.',age:0};}
  g.fx?.emit?.(q.x,q.floor-38,{color:'#f3d39c',count:g.reduceMotion?3:10,size:2,life:26});
  return true;

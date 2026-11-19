@@ -28,10 +28,10 @@ function game(id, extra={}) {
 }
 
 test("V39: los diez héroes tienen una maestría única", () => {
-  const ids=["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
+  const ids=["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar","ia"];
   const defs=ids.map((id)=>masteryOf(id));
-  assert.equal(Object.keys(HERO_MASTERY).length,11);
-  assert.equal(new Set(defs.map((d)=>d.id)).size,11);
+  assert.equal(Object.keys(HERO_MASTERY).length, 12);
+  assert.equal(new Set(defs.map((d)=>d.id)).size,12);
   assert.ok(defs.every((d)=>d.name && d.desc));
 });
 

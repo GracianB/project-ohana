@@ -7,7 +7,7 @@ const evoOf = (p={}) => Math.max(0, Math.min(4, Number(p.evo)||0));
 const heroId = (p={}) => p.id === "michi" ? "cat" : p.id;
 
 export const HERO_MASTERY = Object.freeze({
-  nacar:Object.freeze({id:'tidefloat',name:'Corriente amable',desc:'Medusa y estrella comparten la marea. Mantén salto al caer para planear en sus formas flotantes.'}),
+  nacar:Object.freeze({id:'tidefloat',name:'Corriente amable',desc:'Nácar se mueve con las corrientes. Mantén salto al caer para planear en sus formas flotantes.'}),
   kilo: Object.freeze({
     id:"bloomdraft", name:"Corriente de Polen",
     desc:"Las flores de Hoku recargan su vuelo y crean corrientes ascendentes.",
@@ -42,6 +42,9 @@ export const HERO_MASTERY = Object.freeze({
   }),
   yomi: Object.freeze({
     id:"hollowphase", name:"Fase Hueca",
+    desc:"Durante el Paso Hueco atraviesa el peligro sin recibir daño de contacto.",
+  }), ia:Object.freeze({
+    id:"signalphase", name:"Fase Hueca",
     desc:"Durante el Paso Hueco atraviesa el peligro sin recibir daño de contacto.",
   }),
   cuerno: Object.freeze({

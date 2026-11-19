@@ -5,8 +5,8 @@ import { ROSTER } from "../characters/roster.js";
 import { rosterIndex } from "../systems/roster-navigation.js";
 
 test("character select: mantiene las 10 entradas del roster", () => {
-  assert.equal(ROSTER.length, 11);
-  assert.equal(new Set(ROSTER.map((character) => character.id)).size, 11);
+  assert.equal(ROSTER.length, 12);
+  assert.equal(new Set(ROSTER.map((character) => character.id)).size, 12);
 });
 
 test("character select: la selección expone estado accesible y navegación circular", () => {

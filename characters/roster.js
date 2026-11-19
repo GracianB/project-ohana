@@ -6,7 +6,7 @@ import {applyHeroIdentity} from './identity-v2.js';
 // w/h son la hitbox. No se han tocado.
 // ============================================================================
 
-const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi", "cuerno", "nacar"];
+const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi", "cuerno", "nacar", "ia"];
 
 const ALIAS = {
   pikachu: "chispin",
@@ -175,12 +175,15 @@ export const ALL_ROSTER = [
   },
 ];
 
-ALL_ROSTER.push({id:'nacar',name:'Nácar',role:'marea',tag:'Medusa · estrella de mar · refugio lunar',color:'#9de8e2',speed:4.3,jumpPower:12.4,maxJumps:2,health:86,w:24,h:28,abilities:['bubble','tideguard','tidestars'],passive:{id:'tidefloat',name:'Corriente amable',desc:'Dos saltos y planeo. Comparte el jardín de Michi sin añadir un sello obligatorio.'},evoNames:['Nácar · Gota de Luna','Nácar · Medusa de Nácar','Nácar · Estrella de Marea','Nácar · Medusa Aurora','Nácar · Corona del Océano'],forms:[
+ALL_ROSTER.push({id:'nacar',name:'Nácar',role:'marea',tag:'Medusa bioluminiscente · corrientes y estrellas',color:'#9de8e2',speed:4.3,jumpPower:12.4,maxJumps:2,health:86,w:24,h:28,abilities:['bubble','tideguard','tidestars'],passive:{id:'tidefloat',name:'Corriente amable',desc:'Dos saltos y planeo. Nada entre los jardines del fondo marino.'},evoNames:['Nácar · Gota de Luna','Nácar · Medusa de Nácar','Nácar · Medusa Brújula','Nácar · Medusa Aurora','Nácar · Reina Abisal'],forms:[
  {name:'Nácar · Gota de Luna',color:'#bdeee8',speed:4.3,jump:12.4,jumps:2,hp:86,w:24,h:28,glide:true},
  {name:'Nácar · Medusa de Nácar',color:'#a5e6ed',speed:4.8,jump:13,jumps:2,hp:105,w:28,h:32,glide:true},
- {name:'Nácar · Estrella de Marea',color:'#9ce9d3',speed:5.4,jump:13.8,jumps:3,hp:130,w:32,h:32},
+ {name:'Nácar · Medusa Brújula',color:'#9ce9d3',speed:5.4,jump:13.8,jumps:3,hp:130,w:32,h:32},
  {name:'Nácar · Medusa Aurora',color:'#d6c2ee',speed:6,jump:14.5,jumps:3,hp:160,w:36,h:40,glide:true},
- {name:'Nácar · Corona del Océano',color:'#b8f0dc',speed:6.8,jump:15.2,jumps:3,hp:200,w:40,h:40,glide:true,aura:true} ]});
+ {name:'Nácar · Reina Abisal',color:'#b8f0dc',speed:6.8,jump:15.2,jumps:3,hp:200,w:40,h:40,glide:true,aura:true} ]});
+
+const guardian=ALL_ROSTER.find(h=>h.id==='yomi');
+ALL_ROSTER.push({...guardian,id:'ia',name:'IA',role:'inteligencia',tag:'La inteligencia de la familia · curiosidad y memoria',evoNames:['IA · Bit','IA · Eco','IA · Red','IA · Oráculo','IA · Constelación'],forms:guardian.forms.map((f,i)=>({...f,name:['IA · Bit','IA · Eco','IA · Red','IA · Oráculo','IA · Constelación'][i]}))});
 
 applyHeroIdentity(ALL_ROSTER);
 

@@ -1,3 +1,5 @@
+import {nacarPrompt,interactNacar,swimNacar,createNacarBoss,updateNacarBoss} from './systems/nacar-chapter.js';
+import {drawNacarSeabed,drawNacarBoss} from './worlds/nacar-seabed.js';
 import {absorbMichiGardenHit} from './systems/michi-garden-life.js';
 import {drawQuimeraMinion,drawQuimeraStars,collectQuimeraStars} from './systems/quimera-pressure.js';
 import {updateQuimeraArena,interactQuimeraArena,quimeraArenaPrompt,drawQuimeraArena} from './systems/quimera-arena.js';
@@ -452,7 +454,7 @@ if(interactQuimeraArena(game)){if(game.quimeraArena?.cue){beep(game.quimeraArena
 if(interactMichiSanctuary(game))return;
 if(game.finalRitualEnabled&&game.finalGauntlet?.phase==='summoning')return;
 if(interactFinalRitual(game))return;
-if (!interactKiloInstrument(game) && !interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
+if (!interactNacar(game) && !interactKiloInstrument(game) && !interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
 if(game.finalHeroChoiceOpen){closeFinalHeroChoice(game);return;}
@@ -752,11 +754,12 @@ if(r.world1&&f[4]?.role){const foot=e.y+e.h;e.w=Math.max(46,e.w);e.h=Math.max(58
 if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=Number.isFinite(f[4].anchorFloor)?f[4].anchorFloor-e.h:f[4].anchorY;}}
 if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
-if((r.kiloChapter||r.stitchoChapter||r.chispinChapter||r.growthChapter)&&e.roomPersona?.chapterHP)e.hp=e.max=e.roomPersona.chapterHP;
+if((r.kiloChapter||r.stitchoChapter||r.chispinChapter||r.growthChapter||r.nacarChapter)&&e.roomPersona?.chapterHP)e.hp=e.max=e.roomPersona.chapterHP;
 initGroveGuardian(e);
 if (f[3]) applyElite(e);
 return scaleFoe(e);
 });
+if(r.nacarChapter&&!game.clearedEncounters?.[id]?.includes('w1-nacar-anemone-v1'))game.enemies.push(createNacarBoss(makeFoe,game.rng));
 game.enemies=game.enemies.filter(e=>!(r.world1&&game.world1?.sealed&&e.miniBoss)&&!(id==='hub'&&game.personalAdventureSolo&&(game.player?.id==='stitcho'||game.player?.id==='chispin'||game.player?.id==='cat'||game.player?.id==='dragon'||game.player?.id==='dino'||game.player?.id==='frita'||game.player?.id==='pizza'||game.player?.id==='yomi'||game.player?.id==='cuerno')&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
 if(r.stitchoChapter&&!game.world1?.sealed&&!game.clearedEncounters?.[id]?.includes(STITCHO_CHAPTER_BOSS_ID)){game.enemies.push(createStitchoBoss(makeFoe,game.rng,{roomId:id,encounterId:STITCHO_CHAPTER_BOSS_ID,x:Math.round(((r.stitchoArena||STITCHO_CHAPTER_ARENA).left+(r.stitchoArena||STITCHO_CHAPTER_ARENA).right)/2),arena:r.stitchoArena||STITCHO_CHAPTER_ARENA}));}
 game.spawnStitchoBoss=()=>{
@@ -1014,7 +1017,7 @@ if (!resume&&!onlineMode&&typeof globalThis.__ohanaStartForm === "number") {
   applyForm(game.player, { silent: true });
   paintFit(game.player);
   game._chosenStartForm = chosenForm;
-  game._startFormChoice={hero:def.id,room:def.id==='nacar'?'w1-cat':"w1-"+def.id,baselineFloor:null,lastFloor:null};
+  game._startFormChoice={hero:def.id,room:def.id==='ia'?'w1-yomi':"w1-"+def.id,baselineFloor:null,lastFloor:null};
 }
 if(def.id==='kilo')game.player._kiloEntranceAt=t;
 else game.player._ohanaEntranceAt=t;
@@ -1142,7 +1145,7 @@ try {
     game.clearedEncounters=u.clearedEncounters||{};game.checkpoints=u.checkpoints||{};game.explored=u.explored||{};game.secrets=u.secrets||{};game._resumeCheckpoint=true;game.roomAlbums=mergeRoomAlbums(game.roomAlbums,u.roomAlbums);
     game._magicSnap = u.magic;
     game.dragonTrial = u.dragonTrial || null;
-    roomId = ROOMS[u.roomId] ? u.roomId : "hub";
+    roomId = def.id==="nacar"&&u.roomId==="w1-cat" ? "w1-nacar" : ROOMS[u.roomId] ? u.roomId : "hub";
   }
 } catch (e) {}
 }
@@ -1977,6 +1980,7 @@ if (!jump) {
 if (p._jumpHeld && p.vy < -4) p.vy *= 0.55;
 p._jumpHeld = false;
 }
+if(game.roomDef?.nacarChapter)swimNacar(game,p,jump,!!(keys['s']||keys['arrowdown']));
 if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
 if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
 {
@@ -2012,7 +2016,7 @@ updateKiloPresence(game);
 const wasGrounded = !!p.grounded;
 const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
 const incoming = p.vy;
-p.vy = Math.min(14, p.vy + (kiloFlight||michiFlight?0:p._dashGo > 0 ? 0.14 : 0.5));
+p.vy = Math.min(14, p.vy + (kiloFlight||michiFlight||game.roomDef?.nacarChapter?0:p._dashGo > 0 ? 0.14 : 0.5));
 p.grounded = false;
 const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 8));
 let wall = 0;
@@ -2130,7 +2134,8 @@ if (ok) {
 }
 }
 const r = room();
-if(quimeraArenaPrompt(game))setPrompt(quimeraArenaPrompt(game),true);
+if(nacarPrompt(game))setPrompt(nacarPrompt(game),true);
+else if(quimeraArenaPrompt(game))setPrompt(quimeraArenaPrompt(game),true);
 else if (stitchoTrailPrompt(game))setPrompt(stitchoTrailPrompt(game),true);
 else if (chispinTrailPrompt(game))setPrompt(chispinTrailPrompt(game),true);
 else if(sanctuaryInteractionPrompt(game))setPrompt(sanctuaryInteractionPrompt(game),true);
@@ -2430,6 +2435,7 @@ if (e.boss) {
   continue;
 }
 
+if(updateNacarBoss(e,game))continue;
 if(updateGauntletGuardian(e,game,hurtPlayer))continue;
 if(updateStitchoBoss(e,game,hurtPlayer))continue;
 if(updateChispinBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
@@ -3060,7 +3066,7 @@ if (e.kind === "cucaracho") {
 }
 if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); if(!game.roomDef?.kiloEncounterVersion)healPlayer(game.player, 4);
-if(e.miniBoss&&!e.gauntletBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":e._chispinBoss?"¡TITÁN DE TRUENO VENCIDO!":e._growthChapter?NEXT_CHAPTERS[e._growthChapter].name.toUpperCase()+" VENCIDO":"¡EL CLARO VUELVE A CANTAR!",e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
+if(e.miniBoss&&!e.gauntletBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":e._chispinBoss?"¡TITÁN DE TRUENO VENCIDO!":e._nacarBoss?"¡ANÉMONA DEL SILENCIO VENCIDA!":e._growthChapter?NEXT_CHAPTERS[e._growthChapter].name.toUpperCase()+" VENCIDO":"¡EL CLARO VUELVE A CANTAR!",e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
   game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
@@ -3210,6 +3216,7 @@ ctx.restore();
 }
 // V468: cada sala del Mundo 1 usa el decorado de su héroe y su silueta gigante.
 function drawWorld1Backdrop(world,W,H){
+ if(drawNacarSeabed(ctx,game,game.cam,t,W,H))return;
  if(game.roomDef.fusionBoss){drawWorld1BossBackdrop(ctx,game,game.cam,t,W,H);return;}
  if(drawMichiSanctuaryBackdrop(ctx,game,game.cam,t,W,H))return;
  const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
@@ -3365,6 +3372,7 @@ for (const e of game.enemies) {
   else if(e._drummer)drawGroveGuardianBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._nacarBoss)drawNacarBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._dinoBoss)drawDinoBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
@@ -4291,7 +4299,7 @@ companionActorState(){const a=game._evolutionAttacks?.guest;return a?{x:a.x,y:a.
 chispinChapterState(){return {gates:[0,1,2].map(i=>({state:chispinGateState(game,i),until:game.world1?.chispinSilenced?.[i]||0})),tick:game.world1?.tick,lastAbility:game._lastAbilityId};},
 stitchoChapterState(){return {move:game.player?._abilMove,carry:game.world1?.carry,railDone:!!game.secrets?.['w1-stitcho']?.includes('w1-stitcho-main-rail-v1'),stations:(game.world1?.stations||[]).map(s=>({id:s.id,done:s.done}))};},
 kiloAirState(){return {skyRings:(game.world1?.skyRings||[]).map(r=>({...r})),chimes:(game.world1?.airChimes||[]).map(c=>({...c})),effects:(game.kiloAbilityFx||[]).map(f=>({...f}))};},
-roomCast(){return game.enemies.map(e=>({kind:e.kind,x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,blockedNoticeTick:e._blockNoticeAt,damageWindowRemaining:e.damageWindowRemaining,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,chapterBoss:NEXT_CHAPTERS[e._growthChapter]?{...e[NEXT_CHAPTERS[e._growthChapter].state],hero:e._growthChapter}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
+roomCast(){return game.enemies.map(e=>({kind:e.kind,x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,blockedNoticeTick:e._blockNoticeAt,damageWindowRemaining:e.damageWindowRemaining,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,chapterBoss:NEXT_CHAPTERS[e._growthChapter]?{...e[NEXT_CHAPTERS[e._growthChapter].state],hero:e._growthChapter}:null,nacarBoss:e._nacarBoss?{...e._nacarBoss}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {

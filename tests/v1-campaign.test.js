@@ -34,7 +34,7 @@ test('V1 finisher needs real hits, caps multihits, consumes exactly once',()=>{
  g.player._finisherActive=true;assert.equal(chargeFinisher(g,200),0);g.player._finisherActive=false;g.player.dead=true;assert.equal(chargeFinisher(g,200),0);
 });
 test('V1 five bespoke islands give every hero one acting partner',()=>{
- assert.equal(FAMILY_ISLANDS.length,5);assert.equal(new Set(FAMILY_ISLANDS.flatMap(z=>z.heroes)).size,11);
+ assert.equal(FAMILY_ISLANDS.length,5);assert.equal(new Set(FAMILY_ISLANDS.flatMap(z=>z.heroes)).size, 12);
  for(const hero of ROSTER){const z=islandForHero(hero.id);assert.ok(z);for(const partner of z.heroes)assert.ok(pairedScene(partner,hero.id,5));assert.equal(pairedScene(ROSTER.find(r=>!z.heroes.includes(r.id)).id,hero.id,5),null);}
 });
 test('V1 eight enemy roles warn before attacking and never begin offscreen',()=>{

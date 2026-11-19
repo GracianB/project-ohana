@@ -23,7 +23,7 @@ export function applyChapterXpFloor(game,floor) {
  p.xp=Math.max(Number(p.xp)||0,floor);return floor;
 }
 export function cleanStartingFormChoice(raw,hero,room) {
- if(!raw||raw.hero!==hero||raw.room!==room||room!=='w1-'+hero||
+ if(!raw||raw.hero!==hero||raw.room!==room||(room!=='w1-'+hero&&!(hero==='ia'&&room==='w1-yomi'))||
   !XP_NEED.includes(raw.baselineFloor)||!XP_NEED.includes(raw.lastFloor)||raw.lastFloor<raw.baselineFloor)return null;
  return {hero,room,baselineFloor:raw.baselineFloor,lastFloor:raw.lastFloor};
 }

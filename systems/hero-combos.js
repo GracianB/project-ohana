@@ -11,20 +11,20 @@ export const HERO_POWERS=Object.freeze({
  dino:['Carga fósil','Estampida ancestral','Arrastra enemigos ligeros durante la carga.','Encadena tres saltos y golpes de suelo.'],
  frita:['Derrape de aceite','Freidora exprés','Deslízate dejando aceite en el recorrido.','Enciende tus pistas de aceite y acaba con una explosión.'],
  pizza:['Porción de regreso','Rueda de pizza','La porción regresa hacia tu posición actual.','Conduce la rueda y lanza porciones al terminar.'],
- yomi:['Salto de datos','Tres respuestas','Se teletransporta entre enemigos analizados y recuerda el recorrido.','Tres pensamientos repiten tus tres últimos golpes como runas de código.'],
+ yomi:['Salto de datos','Tres respuestas','Se teletransporta entre enemigos analizados y recuerda el recorrido.','Tres pensamientos repiten tus tres últimos golpes como runas de código.'], ia:['Salto de datos','Tres respuestas','Se teletransporta entre enemigos analizados y recuerda el recorrido.','Tres pensamientos repiten tus tres últimos golpes como runas de código.'],
  cuerno:['Lanza de aurora','Arco de constelaciones','Carga atravesando una fila de enemigos.','Salta sobre un arco y deja caer lanzas tras de ti.'],
 });
 export function beginHeroPower(g,index,s){
  const p=g.player,id=p.id,c=mid(p),face=p.facing||1,final=index===5;
  const move={id,index,age:0,life:final?120:24,face,start:c,hit:new Set(),beats:new Set(),bonus:0,phase:0};
  if(id==='kilo'&&!final){move.speed=10+(Number(p.evo)||0)*.5;p.invuln=Math.max(p.invuln||0,10);p.vx=face*3;}
- if(final){p._finisherActive=true;move.life=id==='stitcho'?100:id==='yomi'?96:120;}
+ if(final){p._finisherActive=true;move.life=id==='stitcho'?100:['yomi','ia'].includes(id)?96:120;}
  else if(id==='pizza'){
   s.shots.push({id,x:c.x,y:c.y,vx:face*12,vy:0,damage:35,kind:'return',age:0,life:100,r:12,hit:new Set(),origin:p});move.life=1;
  }else if(id==='cat'||id==='dragon'){p.vy=id==='cat'?-9:9;p.grounded=false;move.life=32;}
- if(id==='yomi'&&!final){p._spectralCuts||=[];p._spectralCuts.push({x:c.x,y:c.y,face});p._spectralCuts=p._spectralCuts.slice(-3);}
+ if(['yomi','ia'].includes(id)&&!final){p._spectralCuts||=[];p._spectralCuts.push({x:c.x,y:c.y,face});p._spectralCuts=p._spectralCuts.slice(-3);}
  if(id==='cat'&&final)move.prey=close(g,c.x,c.y,800).filter(e=>e._lunarMarkUntil>(g.t||0));
- if(id==='yomi'&&final)move.cuts=(p._spectralCuts||[]).map(v=>({...v}));
+ if(['yomi','ia'].includes(id)&&final)move.cuts=(p._spectralCuts||[]).map(v=>({...v}));
  s.moves||=[];s.moves.push(move);return move;
 }
 export function rhythmPress(g){
@@ -48,7 +48,7 @@ export function updateHeroPowers(g,s,hit,color){
   if(!final){
    if(m.id!=='pizza'){
     p.vx=m.face*(m.id==='cuerno'?13:m.id==='frita'?12:m.id==='kilo'?(a<6?3:m.speed):10);
-    if(m.id==='yomi')p.invuln=Math.max(p.invuln||0,2);
+    if(['yomi','ia'].includes(m.id))p.invuln=Math.max(p.invuln||0,2);
     if(m.id==='kilo'){if(a>=7&&a<=20)pulse(m,c.x+m.face*25,c.y,70,48+(Number(p.evo)||0)*8);}
     else pulse(m,c.x+m.face*20,c.y,Math.max(p.w*.65,48),m.id==='cuerno'?42:32);
     if(m.id==='chispin')for(const e of close(g,c.x,c.y,260))if(e._chispaMarkUntil>(g.t||0)&&!m.hit.has(e)){pulse(m,mid(e).x,mid(e).y,45,38);}
@@ -77,7 +77,7 @@ export function updateHeroPowers(g,s,hit,color){
   }else if(m.id==='pizza'){
    p.vx=(p.facing||m.face)*11;pulse(m,c.x,c.y,Math.max(65,p.w),45);
    if(a===119)for(let i=-2;i<=2;i++)s.shots.push({id:m.id,x:c.x,y:c.y,vx:Math.cos(i*.3)*m.face*12,vy:Math.sin(i*.3)*10,damage:40,noCharge:true,kind:'return',age:0,life:75,r:12,hit:new Set(),origin:p});
-  }else if(m.id==='yomi'){
+  }else if(['yomi','ia'].includes(m.id)){
    if([12,40,68].includes(a)){const cut=m.cuts[Math.floor(a/28)]||{...m.start,face:m.face};field(m,cut.x+cut.face*80,cut.y,130,72,'pounce',12);s.beams.push({id:m.id,x:cut.x,y:cut.y,tx:cut.x+cut.face*190,ty:cut.y,life:18});}
   }else if(m.id==='cuerno'){
    if(a===1){p.vy=-12;p.grounded=false;}p.vx=m.face*6;
@@ -302,7 +302,7 @@ export function drawHeroPowers(ctx,g,cam){
     }
    }
   }
-  else if(m.id==='yomi'){
+  else if(['yomi','ia'].includes(m.id)){
    const isFinal=m.index===5;
    if(isFinal){
     ctx.strokeStyle='#ba68c8';ctx.lineWidth=3;ctx.globalAlpha=.85;

@@ -104,14 +104,14 @@ test("smoke test: cada personaje activo ejecuta sus 5 renderers vectoriales", as
   }
 
   assert.deepEqual(failures, []);
-  assert.equal(ROSTER.length, 11);
+  assert.equal(ROSTER.length, 12);
   assert.ok(ROSTER.every((character) => character.forms.length === 5));
 });
 
 
 test("hero presence: los 10 personajes tienen perfil de movimiento completo", () => {
   const ids = Object.keys(MOTION_PROFILES);
-  assert.equal(ids.length, 11);
+  assert.equal(ids.length, 12);
 
   for (const [id, profile] of Object.entries(MOTION_PROFILES)) {
     assert.ok(profile.pace > 0, id);

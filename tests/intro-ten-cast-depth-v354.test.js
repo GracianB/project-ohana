@@ -16,6 +16,7 @@ import {chispinWelcomeBeat} from "../systems/intro-chispin-stage.js";
 import {michiWelcomeBeat} from "../systems/intro-michi-stage.js";
 
 const CAST=[
+ ["ia",yomiWelcomeBeat,"yomi","IA","ia.js",5],
  ["nacar",nacarWelcomeBeat,"nacar","Nacar","nacar.js",5],
  ["dragon",dragonWelcomeBeat,"dragon","dragon","dragon.js",4],
  ["dino",dinoWelcomeBeat,"dino","dino","dino.js",5],
@@ -32,10 +33,10 @@ const read=path=>readFileSync(new URL("../"+path,import.meta.url),"utf8");
 
 test("V354 audit: all ten actors still get original independent stage direction",()=>{
  const intro=read("systems/intro.js"),draw=read("characters/draw.js");
- assert.equal(CAST.length,11);
- assert.equal(new Set(CAST.map(x=>x[0])).size,11);
+ assert.equal(CAST.length,12);
+ assert.equal(new Set(CAST.map(x=>x[0])).size,12);
  assert.deepEqual(new Set(WELCOME_CAST_ORDER),new Set(CAST.map(x=>x[0])));
- assert.equal(ROSTER.length, 11);
+ assert.equal(ROSTER.length, 12);
  for(const [id,,stage,artist] of CAST){
   assert.match(intro,new RegExp('actor\\("'+id+'"'),"original intro actor "+id);
   assert.ok(intro.includes(stage+"Welcome:")||intro.includes("michiWelcome:"),"isolated intro direction "+id);
@@ -76,7 +77,7 @@ test("V354 audit: five canonical evolutionary forms are represented without runt
  assert.ok(source.includes("forms"),"canonical evolutionary data must remain");
  for(const [id,,stage,,file] of CAST){
   const art=read("characters/art/"+file);
-  assert.ok(id==='nacar'?art.includes('drawRecoveredMarine')&&read('characters/art/cat.js').length>11000:art.length>11000,id+' must use full production artwork');
+  assert.ok(id==='nacar'?art.includes('NACAR_FORMS')&&art.includes('d.tendrils'):id==='ia'?art.includes('drawArtificialIntelligence')&&read('characters/art/yomi.js').length>11000:art.length>11000,id+' must use full production artwork');
   assert.doesNotMatch(art,/FULL_CONTENT_PLACEHOLDER|PLACEHOLDER_WILL_BE_REPLACED/);
   const definition=ROSTER.find(x=>x.id===id);
   assert.ok(definition,id+" missing from real playable roster");

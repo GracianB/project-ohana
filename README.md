@@ -1,3 +1,9 @@
+[Validación de ohana-801](docs/V801-VALIDATION.json) · [Publicación](docs/V801-PUBLICATION.json)
+
+[Galería de IA](gallery.html?id=ia)
+
+ohana-801 · **12 personajes · 5 formas · 10 salas de campaña y un capítulo submarino adicional.**
+
 V800: **11 personajes · 5 formas por personaje · 10 salas del Mundo 1**. Nácar comparte el jardín de Michi; no añade un sello obligatorio.
 
 **ohana-800** · [Michi y el elenco final](docs/MICHI-V800.md) · [validación](docs/V800-VALIDATION.json) · [publicación](docs/V800-PUBLICATION.json).

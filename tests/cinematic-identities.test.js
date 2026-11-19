@@ -15,10 +15,10 @@ const { SUPREME_IDENTITY, supremeOf, useAbility, clearAbilityFx, updateAbilityFx
 const windup=(g)=>{for(let i=0;i<OHANA_U_WINDUP;i++){g.t++;updateAbilityFx(g);}};
 const { SUPREME_STORYBOARDS } = await import('../systems/supreme-storyboards.js');
 
-const CHARACTERS = ['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno','nacar'];
+const CHARACTERS = ['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno','nacar','ia'];
 
 test('PR151.1: existen exactamente 10 perfiles cinematográficos', () => {
-  assert.equal(Object.keys(EVOLUTION_CINEMA_PROFILES).length, 11);
+  assert.equal(Object.keys(EVOLUTION_CINEMA_PROFILES).length, 12);
   assert.deepEqual(Object.keys(EVOLUTION_CINEMA_PROFILES).sort(), [...CHARACTERS].sort());
 });
 
@@ -31,7 +31,7 @@ test('PR151.2: cada perfil tiene cámara, paleta, motivo y lenguaje de revelado'
 });
 
 test('PR151.3: los perfiles cinematográficos no comparten todos los motivos', () => {
-  assert.equal(new Set(CHARACTERS.map((id) => EVOLUTION_CINEMA_PROFILES[id].motif)).size, 11);
+  assert.equal(new Set(CHARACTERS.map((id) => EVOLUTION_CINEMA_PROFILES[id].motif)).size, 12);
 });
 
 test('V45: la forma final tiene una ascensión propia y sustancialmente más larga', () => {
@@ -51,11 +51,11 @@ test('V45: reduced motion mantiene la ascensión completa pero abreviada', () =>
 });
 
 test('V48: las diez U tienen storyboard cinematográfico propio', () => {
-  assert.equal(Object.keys(SUPREME_STORYBOARDS).length, 11);
+  assert.equal(Object.keys(SUPREME_STORYBOARDS).length, 12);
   assert.deepEqual(Object.keys(SUPREME_STORYBOARDS).sort(), [...CHARACTERS].sort());
-  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].gag)).size, 11);
-  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].camera)).size, 11);
-  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].beat)).size, 11);
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].gag)).size, 12);
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].camera)).size, 12);
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].beat)).size, 12);
   for (const id of CHARACTERS) {
     const story = SUPREME_STORYBOARDS[id];
     assert.ok(story.duration >= 4.8 && story.duration <= 6.4, id + '/duration');
@@ -64,9 +64,9 @@ test('V48: las diez U tienen storyboard cinematográfico propio', () => {
 });
 
 test('PR151.6: existen 10 identidades supreme y todas son únicas', () => {
-  assert.equal(Object.keys(SUPREME_IDENTITY).length, 11);
+  assert.equal(Object.keys(SUPREME_IDENTITY).length, 12);
   assert.deepEqual(Object.keys(SUPREME_IDENTITY).sort(), [...CHARACTERS].sort());
-  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_IDENTITY[id].kind)).size, 11);
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_IDENTITY[id].kind)).size, 12);
 });
 
 test('PR151.7: cada personaje resuelve su supreme correcto', () => {
@@ -120,9 +120,9 @@ test('PR151.10: los contratos de estado de Kilo/Frita/Cuerno se aplican en la su
 test('V37: las diez U tienen nombre y pareja de asistencia propios', () => {
   const names = CHARACTERS.map((id) => supremeOf(id).name);
   const allies = CHARACTERS.map((id) => supremeOf(id).ally);
-  assert.equal(new Set(names).size, 11);
+  assert.equal(new Set(names).size, 12);
   // Original ten-hero assistance cycle stays compatible; Nácar joins Michi.
-  assert.equal(new Set(CHARACTERS.filter(id=>id!=='nacar').map(id=>supremeOf(id).ally)).size, 10);
+  assert.equal(new Set(CHARACTERS.filter(id=>id!=='nacar'&&id!=='ia').map(id=>supremeOf(id).ally)).size, 10);
   assert.equal(supremeOf('nacar').ally, 'cat');
   for (const id of CHARACTERS) {
     assert.match(supremeOf(id).name, /[A-ZÁÉÍÓÚÑ]/);
@@ -131,6 +131,6 @@ test('V37: las diez U tienen nombre y pareja de asistencia propios', () => {
 });
 
 test('V37: las diez identidades supreme conservan una frase cinematográfica propia', () => {
-  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_IDENTITY[id].line)).size, 11);
-  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_IDENTITY[id].text)).size, 11);
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_IDENTITY[id].line)).size, 12);
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_IDENTITY[id].text)).size, 12);
 });
