@@ -664,6 +664,7 @@ beep("locked");
 bounceLocked(fromDir);
 return false;
 }
+if(fromDir==='ocean-link'&&game.player?.id==='cat')game._aquariumMichi={evo:game.player.evo,xp:game.player.xp,hp:game.player.health};
 if(game._startFormChoice&&game._startFormChoice.room!==id)game._startFormChoice=null;
 if(game.personalAdventureSolo&&!game._e2eLegacyStart){
  const finalEntry=id==="w1-final"&&world1SealsComplete(game.world1Seals);
@@ -731,6 +732,14 @@ enterCampaignExploration(game);
 enterKiloGrove(game);enterStitchoTrail(game);enterChispinTrail(game);enterMichiTrail(game);enterDragonTrail(game);enterDinoTrail(game);enterFritaTrail(game);enterPizzaTrail(game);enterYomiTrail(game);enterCuernoTrail(game);enterRoomAlbum(game);enterHeroCollection(game);
 // V468: en el Mundo 1 hay UN solo coleccionable (álbum de 100 cromos por sala).
 if(r.world1){if(game.roomAlbums)delete game.roomAlbums[id];game.roomAlbumItems=[];game.heroCollection=null;}
+if(fromDir==='ocean-return'&&game._aquariumMichi&&game.player?.id==='cat'){
+ const {evo,xp,hp}=game._aquariumMichi;
+ game._aquariumMichi=null;
+ Object.assign(game.player,{evo,xp});
+ applyForm(game.player,{silent:true});
+ paintFit(game.player);
+ game.player.health=Math.min(hp,game.player.maxHealth);
+}
 enterWorld1Collect(game);enterWorld1(game);
 // A genuinely earned seal restores exploration tools quietly. First visits
 // still start as babies; revisits do not replay four evolution cinematics.
@@ -841,8 +850,10 @@ for (const portal of portals.items) {
 }
 }
 if (game.player) placeFrom(fromDir);
+if(fromDir==='ocean-link'&&r.nacarChapter){game.player.x=r.start.x;game.player.y=r.start.y;game.resetInput?.();}
+if(fromDir==='ocean-return')game.resetInput?.();
 game.cam.x = 0;
-if(r.michiSanctuary&&game.player){const p=game.player,spawn=r.michiSanctuary.spawn;p.x=spawn.x-p.w/2;p.y=spawn.floor-p.h-3;game.cam.x=Math.max(0,p.x-(game.viewW||1280)/2);game.cam.y=Math.max(0,p.y-(game.viewH||720)*.65);game._michiTransitCooldown=0;game._michiBossArrival=false;game._michiExitScene=false;}
+if(r.michiSanctuary&&game.player){const p=game.player,spawn=fromDir==='ocean-return'&&game.secrets?.['w1-cat']?.includes('w1-cat-garden-tide')?{x:2480,floor:300}:r.michiSanctuary.spawn;p.x=spawn.x-p.w/2;p.y=spawn.floor-p.h-3;game.cam.x=Math.max(0,p.x-(game.viewW||1280)/2);game.cam.y=Math.max(0,p.y-(game.viewH||720)*.65);game._michiTransitCooldown=0;game._michiBossArrival=false;game._michiExitScene=false;}
 game.fading = 16;
 game.doorHold = reduceMotion ? 4 : 8;
 game.doorWait = null;
@@ -1009,7 +1020,7 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
-game._chosenStartForm=null;game._startFormChoice=null;
+game._chosenStartForm=null;game._startFormChoice=null;game._aquariumMichi=null;
 if (!resume&&!onlineMode&&typeof globalThis.__ohanaStartForm === "number") {
   const chosenForm = Math.max(0, Math.min(4, globalThis.__ohanaStartForm));
   game.player.evo = chosenForm;

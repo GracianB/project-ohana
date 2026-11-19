@@ -1,3 +1,4 @@
+import {drawOceanPassage} from './michi-adventure-art.js';
 import {pearlOpen} from '../systems/nacar-chapter.js';
 import {drawSeaStar} from '../characters/art/nacar.js';
 const TAU=Math.PI*2,oval=(c,x,y,rx,ry,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();};
@@ -18,6 +19,10 @@ export function drawNacarSeabed(c,g,cam,t,W,H){
 export function drawNacarChapter(c,g,cam,t){if(!g.roomDef?.nacarChapter)return false;t=g.reduceMotion?0:t;c.save();
  for(const s of g.world1?.stations||[]){const x=s.x-cam.x,y=s.y-cam.y;if(x< -120||x>(g.viewW||1600)+120)continue;const open=pearlOpen(g.world1.tick,s);oval(c,x,y+12,30,15,'#376d7c');c.fillStyle=s.done?'#bceade':open?'#ead6bc':'#5d8097';c.beginPath();c.arc(x,y,18,Math.PI,0);c.quadraticCurveTo(x+13,y+15,x,y+12);c.quadraticCurveTo(x-13,y+15,x-18,y);c.fill();oval(c,x,y-2,7,8,s.done?'#fff5d0':open?'#edf9e4':'#7296a4');c.textAlign='center';c.font='600 12px sans-serif';c.fillStyle='#cbe7de';c.fillText(s.done?'ESCUCHADA':open?'E · ESCUCHAR':'RESPIRA…',x,y-35);}
  for(const v of g.roomDef.tides){const x=v.x-cam.x,y=v.y-cam.y,up=g._nacarCurrents?.[v.id];c.strokeStyle='#8bbdb4';c.lineWidth=4;c.beginPath();c.arc(x,y,19,0,TAU);c.stroke();for(let i=0;i<4;i++){const a=i*Math.PI/2+(up?-.5:.5);c.beginPath();c.moveTo(x,y);c.lineTo(x+Math.cos(a)*16,y+Math.sin(a)*16);c.stroke();}c.textAlign='center';c.font='12px sans-serif';c.fillStyle='#deead7';c.fillText('E · CORRIENTE '+(up?'↑':'↓'),x,y-34);const a=v.area;for(let i=0;i<12;i++){const xx=a.x+a.w*((i*37%100)/100)-cam.x,yy=a.y+((i*113+(up?-t:t)*1.7)%(a.h)+a.h)%a.h-cam.y;oval(c,xx,yy,2,4,'#b6efdc66');}}
+ if(!g.onlineAdventure)for(const exit of g.roomDef.oceanExits||[]){
+  const x=exit.x-cam.x;
+  if(x>=-120&&x<=(g.viewW||1600)+120)drawOceanPassage(c,x,exit.y-cam.y+35,t,'REGRESO A MICHI');
+ }
  for(let i=0;i<10;i++)drawSeaStar(c,700+i*960-cam.x,1838-cam.y,10,0,i%2?'#d9b6bf':'#bddfc6');
  c.restore();return true;}
 export function drawNacarBoss(c,e,cam,t,reduced){const b=e._nacarBoss;if(!b)return;const x=e.x+e.w/2-cam.x,y=e.y+e.h/2-cam.y,T=reduced?0:t;c.save();

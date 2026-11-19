@@ -7,6 +7,7 @@ function remember(g,id){g.secrets||={};const list=g.secrets['w1-cat']||=[];if(!l
 export function nearestGardenInteraction(g){
  const r=garden(g),p=g.player;if(!r||!p||p.dead)return null;
  return [...r.mechanisms,...r.moments.map(q=>({...q,kind:'moment',label:q.title,action:'E · escuchar este recuerdo'}))]
+  .filter(q=>q.kind!=='ocean'||(!g.onlineAdventure&&gardenHas(g,'tide')))
   .filter(q=>Math.abs(p.x+p.w/2-q.x)<77&&Math.abs(p.y+p.h-q.floor)<85)
   .sort((a,b)=>Math.abs(p.x+p.w/2-a.x)-Math.abs(p.x+p.w/2-b.x))[0]||null;
 }
@@ -17,6 +18,7 @@ function syncBridge(g){
 }
 export function interactMichiGarden(g){
  const q=nearestGardenInteraction(g);if(!q)return false;
+ if(q.kind==='ocean')return g.loadRoom?.('w1-nacar','ocean-link')===true;
  if(g._michiGardenUse>0||q.kind==='bell'&&g._michiGardenHush>0)return true;
  g._michiGardenUse=35;
  if(q.kind==='moment'){
@@ -31,7 +33,7 @@ export function interactMichiGarden(g){
  else if(q.kind==='chime'){const pattern=g.roomDef.michiSanctuary.adventure.chimes,step=g._michiChime||0,correct=q.note===pattern[step];g._michiChime=correct?step+1:0;const complete=g._michiChime>=3;if(complete){remember(g,'hollow');g._michiChime=0;}g._michiGardenMoment={title:complete?'EL ESCONDITE RESPONDE':correct?'CASCABEL '+g._michiChime+'/3':'ESCUCHA EL ORDEN',text:complete?'El espejo de las raíces reconoce la canción.':correct?'Una nota encaja. Busca la siguiente.':'Estrella, luna, hoja. Si te equivocas, puedes empezar sin perder nada.',age:0};}
  else if(q.kind==='guard'){if(!(g._michiLampCooldown>0)){g._michiLampGuard=180;g._michiLampCooldown=360;g._michiGardenMoment={title:'FAROL DE REFUGIO',text:'Un golpe queda protegido durante tres segundos. La luz necesita seis segundos para volver.',age:0};}}
 
- else if(q.kind==='rescue'){remember(g,'tide');g._michiGardenMoment={title:'NÁCAR · LA AMIGA DE LA MAREA',text:'Una medusa que lleva estrellas de mar a la batalla. Nácar se queda con la familia.',age:0};}
+ else if(q.kind==='rescue'){remember(g,'tide');g._michiGardenMoment={title:'NÁCAR · LA AMIGA DE LA MAREA',text:'Una medusa que lleva estrellas de mar a la batalla. Si quieres acompañarme, la corriente te espera a la derecha.',age:0};}
  else if(q.kind==='race'){g._michiRace={active:true,t:0};g._michiGardenMoment={title:'SIGUE A LAS LUCIÉRNAGAS',text:'Cruza el laberinto hasta el farol del este. Es un juego opcional: puedes repetirlo sin perder nada.',age:0};}
  g.fx?.emit?.(q.x,q.floor-38,{color:'#f3d39c',count:g.reduceMotion?3:10,size:2,life:26});
  return true;

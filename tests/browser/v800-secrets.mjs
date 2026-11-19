@@ -12,5 +12,9 @@ try{await fs.mkdir(out,{recursive:true});const ctx=await browser.newContext({vie
  await place(2630,1860);await use();assert.equal((await w()).zone,'hollow');
  await place(6790,620);await use();assert.ok((await w()).gardenSecrets.includes('w1-cat-garden-wind'));
  await place(7580,620);await use();assert.equal((await w()).zone,'tide');await place(1740,300);await use();assert.ok((await w()).gardenSecrets.includes('w1-cat-garden-tide'));await p.screenshot({path:out+'/secret-tide-mobile.png'});
- await place(8380,1010);await use();assert.ok((await w()).guard>0);assert.equal((await state()).world1.done,0,'optional discoveries never grant a farol');assert.equal((await state()).runtimeFaults,0);assert.deepEqual(errors,[]);await fs.writeFile(out+'/secret-interactions.json',JSON.stringify({input:'native touch Use',placementFixture:true,world:await w(),errors},null,2));console.log('PASS touch chime order, root secret, wind secret, Nácar encounter, guardian refuge; no progression grants');
+ await p.evaluate(()=>window.__OHANA_E2E.setEvo(2));
+ await place(2580,300);await use();assert.equal((await state()).hero,'nacar');assert.equal((await state()).roomId,'w1-nacar');
+ for(let i=0;i<10&&(await state()).world1Cine;i++)await p.evaluate(()=>window.__OHANA_E2E.step(600));
+ await place(220,1775+(await state()).player.h/2);await use();assert.equal((await state()).hero,'cat');assert.equal((await state()).evo,2);assert.equal((await w()).zone,'tide');
+ await place(8410,1010);await use();assert.ok((await w()).guard>0);assert.equal((await state()).world1.done,0,'optional discoveries never grant a farol');assert.equal((await state()).runtimeFaults,0);assert.deepEqual(errors,[]);await fs.writeFile(out+'/secret-interactions.json',JSON.stringify({input:'native touch Use',placementFixture:true,world:await w(),errors},null,2));console.log('PASS touch chime order, root secret, wind secret, Nácar encounter, guardian refuge; no progression grants');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
