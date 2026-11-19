@@ -8,7 +8,7 @@ import lanternGuardian from './yomi-lantern.js';
 // F1 Yomi: cabeza-pantalla, cuerpo flotante y manos sin brazos.
 // F2 Yomi Red: alas neuronales que se iluminan al pensar, auriculares de escucha.
 // F3 Yomi Oráculo: placas flotantes, capa de código y tres pensamientos en órbita.
-// F4 Yomi Constelación: cuerpo de cielo nocturno, anillo planetario y alas con
+// F4 Yomi Constelación: cuerpo de cielo nocturno y anillo planetario con
 //    diez estrellas, una por cada miembro de la familia.
 // Todo es Canvas 2D vectorial, determinista (ruido hash, sin azar) y sin gradientes.
 // Paleta por forma: [carcasa, sombra, brillo, acento].
@@ -20,7 +20,7 @@ const PAL=[
   ["#ede3bf","#967658","#b6fff2","#ffd56b"]
 ];
 const INK="#121a36",LINE="#2a3160",SCREEN="#0d1430",INDIGO="#2a2468",GOLD="#ffd56b";
-// Diez estrellas en las alas de Constelación: la familia completa.
+// Diez estrellas en la órbita de Constelación: la familia completa.
 export const YOMI_FAMILY_STARS=Object.freeze([
   "#eb554a","#5ad1ff","#ffe14a","#c9a8ff","#ff6a2a",
   "#4cbf56","#f0b43a","#e0402a","#f2c1ff","#4ff0c8"
@@ -374,25 +374,25 @@ function drawCore(ctx,x,y,r,glow,accent,pulse){
  ellipse(ctx,x-r*.2,y-r*.3,r*.22,r*.3,"#eafffa");
 }
 
-function wingNodes(side,f,spread,sweep){
- // Neural (F2) or constellation (F4) wing: root at the shoulder.
- const big=f===4,sx=(big?1.16:1)*spread,sy=big?1.25:1;
- const base=big?[[20,-24],[42,-38],[64,-28],[58,-6],[36,4]]:[[14,-14],[30,-24],[42,-12],[36,4],[22,8]];
+function wingNodes(side,spread,sweep){
+ // The radiators of Red hinge at the shoulder.
+ const sx=.83*spread,sy=.89;
+ const base=[[14,-14],[30,-24],[42,-12],[36,4],[22,8]];
  return base.map(([x,y],i)=>[side*(x*sx-sweep*i*1.2),y*sy+sweep*i*.8]);
 }
-function drawWing(ctx,side,F,f,glow,accent,t,spread,sweep,front,reduced){
- const rootX=side*8,rootY=F.hy+F.hh/2+(f===4?10:6),nodes=wingNodes(side,f,spread,sweep);
- ctx.save();ctx.translate(rootX,rootY);ctx.globalAlpha=front?1:.94;
+function drawRadiators(ctx,side,F,t,spread,sweep,reduced){
+ const rootX=side*8,rootY=F.hy+F.hh/2+6,nodes=wingNodes(side,spread,sweep);
+ ctx.save();ctx.translate(rootX,rootY);ctx.globalAlpha=.94;
  // A network becomes a set of articulated solar panels, with family lights along the hinges.
  for(let i=nodes.length-1;i>=0;i--){
   const [nx,ny]=nodes[i],flap=reduced?0:Math.sin(t*.08+i*.65)*3,
-   x=nx+side*(f===4?8:4),y=ny+flap,rootY=i*2-3;
-  const color=f===4?YOMI_FAMILY_STARS[(side>0?5:0)+i]:i%2?'#c4eee0':'#edf3db';
-  ctx.fillStyle=f===4?(i%2?'#b79f81':'#b0c0dd'):(i%2?'#798cc1':'#9daae1');
+   x=nx+side*4,y=ny+flap,rootY=i*2-3;
+  const color=i%2?'#c4eee0':'#edf3db';
+  ctx.fillStyle=i%2?'#798cc1':'#9daae1';
   ctx.strokeStyle=LINE;ctx.lineWidth=1.2;
   ctx.beginPath();ctx.moveTo(side*3,rootY);ctx.lineTo(x*.54,y-6);ctx.lineTo(x+side*10,y-6);
   ctx.lineTo(x+side*13,y+2);ctx.lineTo(x,y+7);ctx.lineTo(side*7,rootY+6);ctx.closePath();ctx.fill();ctx.stroke();
-  ctx.fillStyle=f===4?'#52659b':'#8abfc2';ctx.globalAlpha*=.65;ctx.beginPath();ctx.moveTo(side*3,rootY);ctx.lineTo(x+side*10,y-6);ctx.lineTo(x,y+7);ctx.closePath();ctx.fill();ctx.globalAlpha=front?1:.94;
+  ctx.fillStyle='#8abfc2';ctx.globalAlpha=.61;ctx.beginPath();ctx.moveTo(side*3,rootY);ctx.lineTo(x+side*10,y-6);ctx.lineTo(x,y+7);ctx.closePath();ctx.fill();ctx.globalAlpha=.94;
   line(ctx,color,1.5);ctx.beginPath();ctx.moveTo(side*6,rootY+1);ctx.lineTo(x+side*9,y-4);ctx.stroke();
   const lit=reduced?.7:.55+Math.sin(t*.035+i*.8)*.25;
   star4(ctx,x,y,3.2+lit,color);ellipse(ctx,x,y,1,1,'#fff9df');
@@ -434,21 +434,20 @@ function drawSatellites(ctx,F,t,front,reduced,glow,accent,cast,acting){
  }
 }
 
-function drawRingHalf(ctx,F,front,t,glow,reduced){
- // Ten folded memory birds, one family colour each. They circle behind
- // and in front of the gown, with wing hinges rather than particle dots.
- const y=F.hy+F.hh/2+30;
- ctx.save();
+function drawRingHalf(ctx,F,front,t,reduced,acting){
+ const y=F.hy+F.hh/2+28;
+ const r=34+(acting?.release||0)*5, ry=14;
+ const phase=reduced?0:t*.018;
+ ctx.save();ctx.translate(0,y);
+ ctx.strokeStyle=front?'#e7c48d':'#637baf';ctx.lineWidth=front?1.45:2;
+ ctx.beginPath();ctx.ellipse(0,0,r,ry,0,front?0:Math.PI,front?Math.PI:TAU);ctx.stroke();
  for(let i=0;i<10;i++){
-  const a=(reduced?0:t*.008)+i*TAU/10,depth=Math.sin(a);
+  const a=phase+i*TAU/10,depth=Math.sin(a);
   if((depth>=0)!==front)continue;
-  const x=Math.cos(a)*52,yy=y+depth*12,flap=reduced?.4:Math.sin(t*.09+i*.9)*.6;
-  ctx.save();ctx.translate(x,yy);ctx.scale(.85+depth*.1,.85+depth*.1);
-  ctx.fillStyle=YOMI_FAMILY_STARS[i];ctx.strokeStyle=LINE;ctx.lineWidth=.9;
-  for(const side of [-1,1]){
-   ctx.beginPath();ctx.moveTo(0,1);ctx.lineTo(side*10,-6-flap*5);ctx.lineTo(side*6,3);ctx.lineTo(0,4);ctx.closePath();ctx.fill();ctx.stroke();
-  }
-  ctx.fillStyle='#fff8df';ctx.beginPath();ctx.moveTo(0,-2);ctx.lineTo(3,2);ctx.lineTo(0,7);ctx.lineTo(-2,2);ctx.closePath();ctx.fill();ctx.restore();
+  const x=Math.cos(a)*r,yy=depth*ry;
+  ellipse(ctx,x,yy,3.9,3.6,'#17243a');
+  star4(ctx,x,yy,3.3+(front?.9:0),YOMI_FAMILY_STARS[i]);
+  if(front)ellipse(ctx,x,yy,1.15,1.15,'#fff9dc');
  }
  ctx.restore();
 }
@@ -478,8 +477,17 @@ function drawThruster(ctx,F,f,glow,t,st,reduced,jumpS,run){
  const fl=reduced?1:.85+.15*Math.sin(t*.9);
  ctx.save();ctx.globalAlpha=.55;ctx.fillStyle=glow;ctx.beginPath();
  const w=f>=3?7:5,len=(bottom<-12?6:4)*k*fl+2;
- ctx.moveTo(-w,bottom+1);ctx.quadraticCurveTo(0,bottom+len*1.8,w,bottom+1);ctx.closePath();ctx.fill();
- ctx.globalAlpha=.9;ctx.fillStyle="#eafffa";ctx.beginPath();ctx.moveTo(-w*.45,bottom+1);ctx.quadraticCurveTo(0,bottom+len,w*.45,bottom+1);ctx.closePath();ctx.fill();
+ const skew=run?-len*.95:jumpS?-len*.3:0;
+ if(!reduced&&(run||jumpS)){
+  for(let i=0;i<3;i++){
+   const drift=(t*.14+i*.33)%1;
+   ctx.globalAlpha=(1-drift)*.58;
+   ctx.fillRect(skew*(1+drift)+i*2-2,bottom+len*(.9+drift*1.1),2.4,2.4);
+  }
+  ctx.globalAlpha=.55;
+ }
+ ctx.moveTo(-w,bottom+1);ctx.quadraticCurveTo(skew,bottom+len*1.8,w,bottom+1);ctx.closePath();ctx.fill();
+ ctx.globalAlpha=.9;ctx.fillStyle="#eafffa";ctx.beginPath();ctx.moveTo(-w*.45,bottom+1);ctx.quadraticCurveTo(skew*.66,bottom+len,w*.45,bottom+1);ctx.closePath();ctx.fill();
  ctx.restore();
 }
 
@@ -586,11 +594,11 @@ export function drawArtificialIntelligence(ctx,pose,R){
   else if(st==="idle"&&!reduced){const br=Math.sin(t*.05)*.014;ctx.scale(1+br,1-br);} // soft shell breathing
   else if(st==="victory"&&!reduced){const hop=Math.abs(Math.sin(t*.16));ctx.translate(0,-hop*3);ctx.scale(1-hop*.03,1+hop*.03);}
   // ── BACK LAYER ─────────────────────────────────────────────
-  if(f===2||f===4)drawWing(ctx,-1,F,f,glow,accent,T,spread,sweep,false,reduced);
-  if(f===2||f===4)drawWing(ctx,1,F,f,glow,accent,T,spread*.92,sweep,false,reduced);
+  if(f===2)drawRadiators(ctx,-1,F,T,spread,sweep,reduced);
+  if(f===2)drawRadiators(ctx,1,F,T,spread*.92,sweep,reduced);
   if(f===3)drawCape(ctx,F,T,glow,swing,run,reduced);
   if(f===3)drawSatellites(ctx,F,T,false,reduced,glow,accent,cast,acting);
-  if(f===4)drawRingHalf(ctx,F,false,T,glow,reduced);
+  if(f===4)drawRingHalf(ctx,F,false,T,reduced,acting);
   const back=handPose(-1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run,p.hurt||.5);
   ctx.save();ctx.globalAlpha=.92;drawHand(ctx,back[0],back[1],F.hr*.94,back[2],[col[1]],glow,back[3]);ctx.restore();
   drawThruster(ctx,F,f,glow,T,st,reduced,jumpS,run);
@@ -602,7 +610,7 @@ export function drawArtificialIntelligence(ctx,pose,R){
    for(let i=0;i<6;i++){ctx.fillStyle=i<known?glow:'#527985';ctx.beginPath();ctx.moveTo((i-2.5)*4,yy-1.7);ctx.lineTo((i-2.5)*4+1.7,yy);ctx.lineTo((i-2.5)*4,yy+1.7);ctx.lineTo((i-2.5)*4-1.7,yy);ctx.fill();}
   }
   // ── FRONT LAYER ────────────────────────────────────────────
-  if(f===4)drawRingHalf(ctx,F,true,T,glow,reduced);
+  if(f===4)drawRingHalf(ctx,F,true,T,reduced,acting);
   if(f===3)drawSatellites(ctx,F,T,true,reduced,glow,accent,cast,acting);
   const front=handPose(1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run,p.hurt||.5);
   drawCastBody(ctx,p,F,f,cast,acting,front,back,glow,accent,T);

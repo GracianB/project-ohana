@@ -148,7 +148,7 @@ export const ALL_ROSTER = [
     speed: 4.4, jumpPower: 12.0, maxJumps: 2, health: 84, w: 26, h: 36,
     // Internal ids kept for saves, net and duets: ofuda=J Ping, sleeve=K Escáner, maw=L Síntesis.
     abilities: ["ofuda", "sleeve", "maw"],
-    passive: { id: "hollow", name: "Salto recalculado", desc: "Cae más rápido para recolocarse. En el aire, pulsa salto para un microteletransporte de datos con un instante de invulnerabilidad." },
+    passive: { id: "hollow", name: "Paso de brasas", desc: "En el aire, pulsa salto para cruzar un tramo corto envuelta en brasas, con un instante de invulnerabilidad." },
     evoNames: ["Yomi · Lumbre", "Yomi", "Yomi · Guardiana", "Yomi · Custodia Lunar", "Yomi · Farol del Hogar"],
     forms: [
       { name: "Yomi · Lumbre", color: "#9ff7e0", speed: 4.4, jump: 12.0, jumps: 2, hp: 84, w: 26, h: 36 },
@@ -183,7 +183,7 @@ ALL_ROSTER.push({id:'nacar',name:'Nácar',role:'marea',tag:'Medusa bioluminiscen
  {name:'Nácar · Reina Abisal',color:'#b8f0dc',speed:6.8,jump:15.2,jumps:3,hp:200,w:40,h:40,glide:true,aura:true} ]});
 
 const guardian=ALL_ROSTER.find(h=>h.id==='yomi');
-ALL_ROSTER.push({...guardian,id:'ia',name:'IA',role:'inteligencia',tag:'La inteligencia de la familia · curiosidad y memoria',evoNames:['IA · Bit','IA · Eco','IA · Red','IA · Oráculo','IA · Constelación'],forms:guardian.forms.map((f,i)=>({...f,name:['IA · Bit','IA · Eco','IA · Red','IA · Oráculo','IA · Constelación'][i]}))});
+ALL_ROSTER.push({...guardian,id:'ia',name:'IA',role:'inteligencia',passive:{id:'hollow',name:'Salto vectorial',desc:'Pulsa salto en el aire para hacer un salto de datos breve. Puedes invertir el rumbo en pleno vuelo.'},tag:'La inteligencia de la familia · curiosidad y memoria',evoNames:['IA · Bit','IA · Eco','IA · Red','IA · Oráculo','IA · Constelación'],forms:guardian.forms.map((f,i)=>({...f,name:['IA · Bit','IA · Eco','IA · Red','IA · Oráculo','IA · Constelación'][i]}))});
 
 applyHeroIdentity(ALL_ROSTER);
 

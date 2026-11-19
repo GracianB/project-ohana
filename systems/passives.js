@@ -116,8 +116,9 @@ export const Passives = {
         p.vy = Math.min(p.vy, 1.2);
         p.invuln = Math.max(p.invuln || 0, 8);
         p._pmove = "hollow";
-        game.fx.emit(cx(p), cy(p), { color: "#4ff0c8", count: 8, size: 3, up: 0.4, life: 14 });
-        game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#123a44" });
+        const lantern=p.id==='yomi';
+        game.fx.emit(cx(p), cy(p), { color: lantern?"#ffc784":"#4ff0c8", count: 8, size: 3, up: 0.4, life: 14, star:lantern });
+        game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: lantern?"#a44d64":"#123a44" });
       }
       if (p._specter > 0) p._specter--;
     } else if (id === "climb") {

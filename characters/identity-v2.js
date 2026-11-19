@@ -2,7 +2,7 @@
 // Collision boxes, number of jumps, ability IDs and persisted evolution IDs
 // are deliberately unchanged. Kilo retains its approved V1 curves.
 export const HERO_IDENTITY = Object.freeze({
- nacar:{title:'Amiga de la marea',strength:'Control a distancia, planeo y refugio',weakness:'Necesita espacio para preparar su oleada',melee:.85,cooldown:1.05,speed:[4.3,4.8,5.4,6,6.8],hp:[86,105,130,160,200],jump:[12.4,13,13.8,14.5,15.2]},
+ nacar:{title:'Amiga de la marea',strength:'Planeo veloz y control de las corrientes',weakness:'Conserva inercia en el aire',melee:.85,cooldown:1.05,speed:[6.1,6.8,7.5,8.2,9.2],hp:[86,105,130,160,200],jump:[12.4,13,13.8,14.5,15.2]},
   kilo:    { title:'Directora del compás', strength:'Control, apoyo y vuelo musical', weakness:'Necesita ritmo y preparación', melee:1, cooldown:1 },
   stitcho: { title:'Acróbata del plasma', strength:'Movilidad, paredes y cuatro saltos', weakness:'Resiste poco los choques', melee:1.05, cooldown:.92, speed:[4.6,5.2,6,6.8,8], hp:[86,104,126,154,195], jump:[12,12.8,13.6,14.5,16] },
   chispin: { title:'Asalto eléctrico', strength:'La mayor cadencia de ataques', weakness:'La vida más baja; esquiva o cae', melee:.78, cooldown:.76, speed:[5.5,6.2,7,8,9.2], hp:[56,70,88,110,138], jump:[12.2,12.9,13.6,14.4,15.8] },
@@ -12,7 +12,8 @@ export const HERO_IDENTITY = Object.freeze({
   dino:    { title:'Coloso rompeguardias', strength:'El mayor aguante y golpe H', weakness:'El más lento; compromete cada ataque', melee:1.48, cooldown:1.24, speed:[4,4.3,4.8,5.1,6], hp:[140,180,225,285,360], jump:[11,11.6,12.2,12.6,14] },
   frita:   { title:'Especialista del aire', strength:'Impulso, derrape y corrección aérea', weakness:'Poca vida; depende del movimiento', melee:.9, cooldown:.85, speed:[5,5.7,6.5,7.4,8.5], hp:[70,88,108,136,172], jump:[11.4,12.1,12.8,13.6,15] },
   pizza:   { title:'Defensa elástica', strength:'Aguanta golpes, rebota y controla el suelo', weakness:'Carrera lenta, necesita anticipar', melee:1.2, cooldown:1.08, speed:[3.7,4.2,4.8,5.4,6.2], hp:[110,138,174,218,275], jump:[11.8,12.4,13.1,13.6,15.2] },
-  yomi:    { title:'Estratega de datos', strength:'Analiza, contiene y sintetiza', weakness:'Menos velocidad; exige leer ventanas', melee:.75, cooldown:.88, speed:[3.4,3.8,4.2,4.7,5.3], hp:[74,92,114,143,180], jump:[12,12.6,13.2,13.8,14.8] }, ia:{ title:'Estratega de datos', strength:'Analiza, contiene y sintetiza', weakness:'Menos velocidad; exige leer ventanas', melee:.75, cooldown:.88, speed:[3.4,3.8,4.2,4.7,5.3], hp:[74,92,114,143,180], jump:[12,12.6,13.2,13.8,14.8] },
+  yomi:    { title:'Guardiana errante', strength:'Arranque rápido en tierra y sellos en cadena', weakness:'Cambiar de rumbo en el aire exige anticipar', melee:.75, cooldown:.88, speed:[6.3,7,7.8,8.6,9.6], hp:[74,92,114,143,180], jump:[12,12.6,13.2,13.8,14.8] },
+  ia:      { title:'Piloto de constelación', strength:'Invierte el rumbo en el aire y frena con precisión', weakness:'Su prisma exige preparar una línea de tiro', melee:.75, cooldown:.88, speed:[6,6.8,7.6,8.5,9.5], hp:[74,92,114,143,180], jump:[12,12.6,13.2,13.8,14.8] },
 });
 export function applyHeroIdentity(roster) {
   for (const hero of roster) {

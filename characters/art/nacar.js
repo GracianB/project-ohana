@@ -20,6 +20,35 @@ const SKINS=[
  {dark:'#2d456b',body:'#697ab2',light:'#c6d4fc',rim:'#b4f5e4',light2:'#ffe1a2',beat:.061},
 ];
 
+const NEON=[
+ ['#2dffe0','#91ffff'],['#30cbff','#6afff7'],['#a5ff49','#36ffe2'],
+ ['#ff51db','#aa78ff'],['#3affe4','#a579ff'],
+];
+
+function glow(c,x,y,r,color,alpha){
+ if(!c.createRadialGradient)return;
+ c.save();c.globalAlpha=alpha;
+ const light=c.createRadialGradient(x,y,0,x,y,r);
+ light.addColorStop(0,color+'7f');light.addColorStop(.38,color+'32');light.addColorStop(1,color+'00');
+ c.fillStyle=light;c.fillRect(x-r,y-r,r*2,r*2);c.restore();
+}
+
+function wake(c,f,d,cy,t,vertical,speed){
+ const power=Math.min(1,Math.abs(vertical)+speed);
+ if(power<.21)return;
+ const dy=-vertical*17,dx=-speed*17;
+ c.save();
+ for(let i=0;i<6;i++){
+  const k=(t*.038+i/6)%1;
+  const x=dx*(1+k*2.4)+(i%2?1:-1)*(.39+k*.33)*d.rx;
+  const y=cy+d.ry*(.56+k*.86)+dy*(.25+k*1.7);
+  c.globalAlpha=(1-k)*power*.78;
+  c.strokeStyle=NEON[f][i%2];c.lineWidth=1.25;
+  c.beginPath();c.ellipse(x,y,2.1+k*2.5,2+k*3.6,-.35,0,TAU);c.stroke();
+ }
+ c.restore();
+}
+
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
 function glass(c,d,s,hurt){
  if(!c.createLinearGradient)return hurt?'#dec4cc':s.body;
@@ -61,6 +90,7 @@ function bellPath(c,f,w,h){
 }
 
 function ribbons(c,d,s,f,t,hem,drag,squeeze){
+ const neon=NEON[f];
  const spread=[.65,.85,.62,1.0,1.03][f];
  c.lineCap='round';
  for(let i=0;i<d.tendrils;i++){
@@ -69,11 +99,15 @@ function ribbons(c,d,s,f,t,hem,drag,squeeze){
   const length=d.length*(.69+.29*Math.cos(k*1.6))*(1-squeeze*.18);
   const sway=Math.sin(t*.049+i*.95)*(2.2+f*.75)+drag;
   const tip=start*spread+sway;
-  c.strokeStyle=i%3===0?s.rim:s.body+'98';c.lineWidth=i%3===0?2.6:1.15;
   c.beginPath();c.moveTo(start,hem-3);
   c.bezierCurveTo(start+sway*.12,hem+length*.37,tip-sway*.44,hem+length*.78,tip,hem+length);
-  c.stroke();
-  if(i%3===0)oval(c,tip,hem+length,1.35+f*.12,2.6,s.light2);
+  c.strokeStyle=i%3===0?neon[i%2]+'4b':s.body+'a0';c.lineWidth=i%3===0?6:1.2;c.stroke();
+  if(i%3===0){
+   c.strokeStyle=neon[i%2];c.lineWidth=1.65;c.stroke();
+   const wave=.53+.47*Math.sin(t*.093-i*.63);
+   glow(c,tip,hem+length,7+f,neon[i%2],.44+.36*wave);
+   oval(c,tip,hem+length,1.55+f*.14,2.65,wave>.55?'#efffff':neon[i%2]);
+  }
  }
  for(const side of [-1,1]){
   const x=side*d.rx*[.25,.3,.42,.56,.49][f];
@@ -187,6 +221,7 @@ function draw(c,p={}){
  const vertical=clamp(p.vy,-1,1),speed=clamp(p.speed,0,1.4);
  const stroke=Math.max(Math.abs(vertical),speed);
  const cast=p.state==='attack'||p.state==='cast'||p.castSlot>=0&&p.cast>0.2;
+ const neon=NEON[f];
  const hurt=p.state==='hurt',cheer=p.state==='victory';
  const contraction=reduced?0:Math.sin(t*s.beat+f)*(.052+stroke*.07);
  const welcome=reduced?0:clamp(p.nacarWelcome?.float,0,1);
@@ -194,6 +229,9 @@ function draw(c,p={}){
  c.save();
  c.translate(0,reduced?0:Math.sin(t*.027+f)*2.1-welcome*4);
  c.rotate(reduced?0:vertical*(f===2?.2:.13)+speed*.075+Math.sin(t*.024)*.028);
+ if(!reduced)wake(c,f,d,cy,t,vertical,speed);
+ glow(c,0,cy+d.ry*.34,d.rx*1.5+10,neon[0],cast?.85:.52);
+ if(f>=3)glow(c,0,cy+d.ry*.94,d.rx*1.2,neon[1],.63);
  ribbons(c,d,s,f,t,hem,reduced?0:vertical*(4+f*1.6)-speed*4,contraction);
  crest(c,f,d,s,t);
  castLights(c,p,d,s,cy,t);
@@ -201,12 +239,15 @@ function draw(c,p={}){
  c.translate(0,cy);c.scale(1+contraction+(cast?.08:0),1-contraction);
  bellPath(c,f,d.rx,d.ry);
  c.fillStyle=glass(c,d,s,hurt);c.fill();
- c.strokeStyle=s.dark;c.lineWidth=2.5;c.stroke();
- oval(c,0,d.ry*.35,d.rx*.85,d.ry*.24,s.dark+'74');
+ c.strokeStyle=neon[1]+'45';c.lineWidth=7;c.stroke();
+ c.strokeStyle=neon[0];c.lineWidth=1.7;c.stroke();
+ oval(c,0,d.ry*.35,d.rx*.85,d.ry*.24,s.dark+'b8');
+ c.strokeStyle=neon[1];c.lineWidth=1.55;
+ c.beginPath();c.ellipse(0,d.ry*.34,d.rx*.79,d.ry*.27,0,.1,Math.PI-.1);c.stroke();
  oval(c,-d.rx*.23,-d.ry*.38,d.rx*.39,d.ry*.30,s.light+'39',-.2);
  for(let i=0;i<4;i++){
   const a=i*TAU/4;
-  c.strokeStyle=s.light2+'92';c.lineWidth=1.5;
+  c.strokeStyle=neon[i%2];c.lineWidth=1.8;
   c.beginPath();c.arc(Math.cos(a)*d.rx*.18,Math.sin(a)*d.ry*.18-4,2.6+f*.5,.35,5.7);c.stroke();
  }
  trim(c,d,s,f,t,cast||cheer);

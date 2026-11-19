@@ -1,3 +1,5 @@
+ohana-807 · Yomi guardiana del santuario, Nácar bioluminiscente y Constelación compacta. Los tres ganan velocidad y control propio.
+
 ohana-806 · Quince formas de Nácar, Yomi e IA, escenas de evolución y defensa con la ola de Nácar.
 
 ohana-805 · Doble presión, corrientes de la arena y avisos de la Anémona.

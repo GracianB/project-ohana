@@ -47,7 +47,7 @@ import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianBody,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight,stopKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
-import {updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
+import {HERO_STEERING,updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
@@ -1931,6 +1931,7 @@ const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !
 const drop = !!(keys["s"] || keys["arrowdown"]);
 const swimming=!!game.roomDef?.nacarChapter;
 // Sanctuary travel is deliberate: E / Use. Down only descends or drops.
+const steering=HERO_STEERING[p.id];
 const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
 if (p.dash > 0) p.dash--;
 if (p._dashGo > 0) p._dashGo--;
@@ -1958,14 +1959,16 @@ if (oppose) {
 } else if (axisX !== 0) {
 const target = axisX * moveSpeed;
 const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
-const accel = p.grounded
-  ? (reversing ? CONTROL_FEEL.reverseGroundAccel : CONTROL_FEEL.groundAccel)
-  : (reversing ? CONTROL_FEEL.reverseAirAccel : CONTROL_FEEL.airAccel);
+const accelKey = p.grounded
+  ? (reversing ? 'reverseGroundAccel' : 'groundAccel')
+  : (reversing ? 'reverseAirAccel' : 'airAccel');
+const accel = steering?.[accelKey] ?? CONTROL_FEEL[accelKey];
 p.vx += (target - p.vx) * accel;
 if (Math.abs(target - p.vx) < 0.06) p.vx = target;
 p.facing = axisX;
 } else {
-p.vx *= p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake;
+const brakeKey = p.grounded ? 'groundBrake' : 'airBrake';
+p.vx *= steering?.[brakeKey] ?? CONTROL_FEEL[brakeKey];
 if (Math.abs(p.vx) < 0.04) p.vx = 0;
 }
 if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;

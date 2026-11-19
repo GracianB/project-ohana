@@ -19,36 +19,37 @@ function paperShade(ctx,x,y,rim,light,trim,shadow){
  return shade;
 }
 
-function lanternShell(ctx,f,w,h){
- ctx.beginPath();
- switch(f){
-  case 0:
-   ctx.moveTo(0,-h);
-   ctx.bezierCurveTo(w*1.4,-h*.94,w*1.23,-9,0,-9);
-   ctx.bezierCurveTo(-w*1.23,-9,-w*1.4,-h*.94,0,-h);
-   break;
-  case 1:
-   ctx.moveTo(-w*.67,-h+2);ctx.lineTo(w*.67,-h+2);
-   ctx.quadraticCurveTo(w*1.32,-h*.61,w*.58,-14);
-   ctx.quadraticCurveTo(0,-5,-w*.58,-14);
-   ctx.quadraticCurveTo(-w*1.32,-h*.61,-w*.67,-h+2);
-   break;
-  case 2:
-   ctx.moveTo(0,-h-4);ctx.lineTo(w,-h*.69);
-   ctx.quadraticCurveTo(w*1.21,-h*.37,0,-9);
-   ctx.quadraticCurveTo(-w*1.21,-h*.37,-w,-h*.69);
-   break;
-  case 3:
-   ctx.moveTo(-w*.62,-h);ctx.lineTo(w*.62,-h);ctx.lineTo(w*1.04,-h*.69);
-   ctx.lineTo(w*.7,-h*.31);ctx.lineTo(0,-7);ctx.lineTo(-w*.7,-h*.31);ctx.lineTo(-w*1.04,-h*.69);
-   break;
-  case 4:
-   ctx.moveTo(0,-h-1);
-   ctx.bezierCurveTo(w*1.49,-h*1.01,w*1.31,-h*.24,0,-7);
-   ctx.bezierCurveTo(-w*1.31,-h*.24,-w*1.49,-h*1.01,0,-h-1);
-   break;
- }
+function lanternShell(ctx,w,h){
+ ctx.beginPath();ctx.moveTo(0,-h);
+ ctx.bezierCurveTo(w*1.4,-h*.94,w*1.23,-9,0,-9);
+ ctx.bezierCurveTo(-w*1.23,-9,-w*1.4,-h*.94,0,-h);
  ctx.closePath();
+}
+
+function shrineRobe(c,f,w,faceY,trim,glow,shadow,swing){
+ const colors=['','#88405d','#a13b69','#442653','#9a365c'];
+ const shoulders=faceY+10, waist=faceY+29, hem=-5;
+ c.fillStyle=colors[f];c.beginPath();c.moveTo(-w*.52,shoulders);
+ c.quadraticCurveTo(-w*.64,waist,-w*(.75+f*.065)-swing*.18,hem-3);
+ c.quadraticCurveTo(-w*.46,-1,0,hem);
+ c.quadraticCurveTo(w*.46,-1,w*(.76+f*.065)-swing*.12,hem-3);
+ c.quadraticCurveTo(w*.61,waist,w*.52,shoulders);
+ c.closePath();c.fill();line(c,shadow,1.8);c.stroke();
+ line(c,f===3?'#dfacd1':'#ffead1',f===4?4:3);
+ c.beginPath();c.moveTo(-w*.47,shoulders+2);c.lineTo(w*.22,waist-2);
+ c.moveTo(w*.46,shoulders+2);c.lineTo(-w*.27,waist+1);c.stroke();
+ c.fillStyle=f===3?'#bd7bb3':'#d4a36d';c.beginPath();c.moveTo(-w*.59,waist);
+ c.quadraticCurveTo(0,waist+3,w*.59,waist);c.lineTo(w*.65,waist+7);
+ c.quadraticCurveTo(0,waist+10,-w*.64,waist+7);c.closePath();c.fill();
+ if(f>1){
+  ellipse(c,0,waist+4,3.4,3.4,shadow);
+  ellipse(c,0,waist+3,2,2,glow);
+ }
+ for(let i=0;i<f;i++){
+  const x=(i-(f-1)/2)*w*.33-swing*.14,y=hem-7+(i%2)*2;
+  line(c,trim,1.5);c.beginPath();c.moveTo(x-2,y+2);
+  c.quadraticCurveTo(x-4,y-3,x,y-5);c.quadraticCurveTo(x+4,y-3,x+2,y+2);c.stroke();
+ }
 }
 
 function crescent(ctx,x,y,r,color){
@@ -229,6 +230,54 @@ export function yomiWelcomeAnatomy(pose={},form=0){
  });
 }
 
+// A shrine keeper's clothing sits on the body. Only the lantern and charms swing free.
+function shrineAccessory(c,f,w,h,swing,glow,shadow,acting){
+ const y=-h*.48, cord='#f3bf80', tassel=f===4?'#f49a90':'#bf5478';
+ c.save();
+ c.translate(w*.79,y);
+ c.rotate(swing*.016+(acting?.front||0)*.6);
+ line(c,cord,1.7);c.beginPath();c.moveTo(-4,0);c.quadraticCurveTo(9,2,11,14);c.stroke();
+ if(f>=1){
+  c.fillStyle=shadow;c.beginPath();c.moveTo(5,14);c.lineTo(17,14);c.lineTo(19,23);c.lineTo(15,29);c.lineTo(7,29);c.lineTo(3,23);c.closePath();c.fill();
+  const flame=acting?.release||0;
+  ellipse(c,11,22,4.5+f*.36+flame*2,5+flame*2,glow);
+  ellipse(c,11+flame*1.5,21,1.9,3+flame*2,'#fff7cf');
+ }
+ const knot=f>=1?30:14;
+ line(c,cord,2);c.beginPath();c.moveTo(11,knot-2);c.lineTo(11,knot+4);c.stroke();
+ for(let i=-1;i<=1;i++){
+  line(c,tassel,1.4);c.beginPath();c.moveTo(11+i*1.1,knot+2);
+  c.quadraticCurveTo(11+i*1.5-swing*.1,knot+6,11+i*2.6-swing*.28,knot+10+f);c.stroke();
+ }
+ c.restore();
+}
+
+function shrineHair(c,f,w,h,faceY,swing,glow){
+ if(f===0)return;
+ const y=-h+4, shade=['','#392542','#27233c','#2b1837','#231b3e'][f];
+ const extension=[0,8,14,20,24][f];
+ c.fillStyle=shade;c.beginPath();c.moveTo(-w*.92,faceY+8);
+ c.quadraticCurveTo(-w*1.14,y-11,-w*.37,y-12);
+ c.quadraticCurveTo(w*.39,y-25,w*.96,y+6);
+ c.quadraticCurveTo(w*1.13,faceY+3,w*.79,faceY+extension);
+ c.quadraticCurveTo(w*.64+swing*.1,faceY+7,w*.65,y+8);
+ c.quadraticCurveTo(w*.47,y+11,w*.31,faceY-6);
+ c.quadraticCurveTo(w*.18,y+13,w*.06,y+10);
+ c.quadraticCurveTo(-w*.18,faceY-3,-w*.51,y+8);
+ c.quadraticCurveTo(-w*.66,faceY+12,-w*.89+swing*.12,faceY+extension);
+ c.closePath();c.fill();
+ line(c,f>=3?'#95678d':'#79536f',1.7);
+ c.beginPath();c.moveTo(-w*.66,y+1);c.quadraticCurveTo(-w*.28,y-13,w*.48,y-7);c.stroke();
+ const pinX=w*.65;
+ for(let i=0;i<f;i++){
+  ellipse(c,pinX-i*2.8,y+3-i*2,1.8,1.6,glow);
+ }
+ if(f>=3){
+  c.fillStyle='#ffd297';c.beginPath();c.moveTo(pinX+4,y+3);c.lineTo(pinX+10,y+8);
+  c.lineTo(pinX+4,y+15);c.lineTo(pinX,y+8);c.closePath();c.fill();
+ }
+}
+
 function draw(ctx,pose,R){
   const p=pose||{},f=clamp(p.form|0,0,4),t=Number(p.t)||0,st=p.state||"idle";
   const col=PAL[f],paper=col[0],trim=col[1],glow=col[2],shadow=col[3];
@@ -278,56 +327,18 @@ function draw(ctx,pose,R){
     ctx.save();ctx.globalAlpha=.32+.15*pulse;
     crescent(ctx,0,faceY-4,36+2*pulse,"#ffd988");ctx.restore();
   }
-  // Each form changes its silhouette, not just a scale factor or decoration.
-  // F0: squat glowing seed. F1: tall wanderer. F2: winged ward.
-  // F3: angular night knight. F4: double-crescent moon guardian.
-  if(f===0){
-    ctx.fillStyle="#e8b17f";
+  // The silhouette drops down into a split shrine coat as the forms mature.
+  if(f>=1){
+    const flare=w*(.79+f*.095);
+    ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-w*.55,shoulder);
+    ctx.quadraticCurveTo(-flare,-26,-flare-swing*.42,-4);
+    ctx.quadraticCurveTo(-w*.52,4,-4,-4);ctx.lineTo(0,-14);
+    ctx.lineTo(6,-3);ctx.quadraticCurveTo(w*.58,2,flare-swing*.27,-8);
+    ctx.quadraticCurveTo(flare,-32,w*.62,shoulder);ctx.closePath();ctx.fill();
+    line(ctx,trim,2);ctx.stroke();
     for(const side of [-1,1]){
-      ctx.beginPath();ctx.ellipse(side*19,-31,10,17,side*.32,0,TAU);ctx.fill();
-      line(ctx,"#533b56",2.4);ctx.stroke();
-    }
-  }else if(f===1){
-    ctx.fillStyle=trim;
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*15,-44);
-      ctx.quadraticCurveTo(side*33,-34,side*33,-5);
-      ctx.quadraticCurveTo(side*21,-11,side*14,-15);ctx.closePath();ctx.fill();
-      line(ctx,"#52344e",2);ctx.stroke();
-    }
-  }else if(f===2){
-    ctx.fillStyle="#c9808a";
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*14,-58);
-      ctx.quadraticCurveTo(side*43,-65,side*51,-45);
-      ctx.lineTo(side*34,-32);ctx.lineTo(side*21,-40);
-      ctx.closePath();ctx.fill();line(ctx,"#563851",3);ctx.stroke();
-    }
-  }else if(f===3){
-    ctx.fillStyle="#753656";
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*14,-58);
-      ctx.lineTo(side*55,-75);ctx.lineTo(side*41,-40);
-      ctx.lineTo(side*56,-5);ctx.quadraticCurveTo(side*31,-16,side*19,-31);
-      ctx.closePath();ctx.fill();line(ctx,"#f4a0a4",2.5);ctx.stroke();
-    }
-  }else{
-    for(const side of [-1,1]){
-      ctx.fillStyle='#563450';
-      if(ctx.createLinearGradient){
-        const pleat=ctx.createLinearGradient(side*22,-35,side*65,-66);
-        pleat.addColorStop(0,'#563450');pleat.addColorStop(.58,'#803d6e');pleat.addColorStop(1,'#d28489');
-        ctx.fillStyle=pleat;
-      }
-      ctx.beginPath();ctx.moveTo(side*16,-65);
-      ctx.quadraticCurveTo(side*54,-96,side*70,-82);
-      ctx.lineTo(side*51,-44);ctx.quadraticCurveTo(side*75,-18,side*61,1);
-      ctx.lineTo(side*23,-21);ctx.closePath();ctx.fill();
-      line(ctx,"#ffdaa4",2);ctx.stroke();
-      line(ctx,'#e7a58a',1.2);
-      ctx.beginPath();ctx.moveTo(side*27,-48);
-      ctx.quadraticCurveTo(side*46,-72,side*63,-77);
-      ctx.moveTo(side*31,-28);ctx.quadraticCurveTo(side*49,-23,side*61,-6);ctx.stroke();
+      line(ctx,glow,1.35);ctx.beginPath();ctx.moveTo(side*w*.69,-24);
+      ctx.quadraticCurveTo(side*w*.79,-16,side*flare*.83-swing*.23,-7);ctx.stroke();
     }
   }
   // The growing cape makes five recognizable stages, from baby to moon guardian.
@@ -363,79 +374,40 @@ function draw(ctx,pose,R){
     line(ctx,glow,1.7);ctx.beginPath();ctx.moveTo(-9,sleeveLen-3);ctx.quadraticCurveTo(0,sleeveLen,10,sleeveLen-3);ctx.stroke();
     ctx.restore();
   }
-  lanternShell(ctx,f,w,h);
-  ctx.fillStyle=paperShade(ctx,4+(acting?.release||0)*10,-h*.49,h*.73,paper,trim,shadow);
-  ctx.fill();line(ctx,shadow,2);ctx.stroke();
-  ctx.save();ctx.clip();
-  for(const i of [-2,-1,1,2]){
-    const x=i*w*.28;
-    line(ctx,i%2===0?trim:'#fff3cf',i%2===0?1.25:.75);
-    ctx.globalAlpha=i%2===0?.55:.52;
-    ctx.beginPath();ctx.moveTo(x*.71,-h+3);
-    ctx.bezierCurveTo(x*1.66,-h*.72,x*1.5,-h*.32,x*.48,-10);
-    ctx.stroke();
-  }
-  ctx.globalAlpha=.34;
-  line(ctx,'#fff4d5',2);
-  ctx.beginPath();ctx.ellipse(-w*.16,-h*.42,w*.77,h*.3,0,.28,2.72);ctx.stroke();
-  ctx.restore();
-  // Evolutions get different head architecture and proportions.
   if(f===0){
-    ellipse(ctx,-9,-h+4,10,9,"#ffe2b2");
-    ellipse(ctx,10,-h+4,10,9,"#ffe2b2");
-  }
-  if(f===2){
-    ctx.fillStyle="#ad637e";
-    ctx.beginPath();ctx.moveTo(-w*.86,-h+9);
-    ctx.lineTo(-w*.45,-h-13);ctx.lineTo(0,-h-7);
-    ctx.lineTo(w*.45,-h-13);ctx.lineTo(w*.86,-h+9);
-    ctx.closePath();ctx.fill();line(ctx,"#5d3b59",2.5);ctx.stroke();
-  }
-  if(f===3){
-    ctx.fillStyle="#552f53";
-    ctx.beginPath();ctx.moveTo(-w-7,-h+17);
-    ctx.quadraticCurveTo(-w-9,-h-15,0,-h-22);
-    ctx.quadraticCurveTo(w+9,-h-15,w+7,-h+17);
-    ctx.lineTo(w*.58,-h+7);ctx.quadraticCurveTo(0,-h-7,-w*.58,-h+7);
-    ctx.closePath();ctx.fill();line(ctx,"#d98291",2.5);ctx.stroke();
-  }
-  if(f===4){
+    lanternShell(ctx,w,h);
+    ctx.fillStyle=paperShade(ctx,4,-h*.49,h*.73,paper,trim,shadow);
+    ctx.fill();line(ctx,shadow,2);ctx.stroke();
     for(const side of [-1,1]){
-      ctx.save();ctx.translate(side*w*.54,-h-9);
-      ctx.scale(side,1);ctx.fillStyle="#ffd19a";ctx.beginPath();
-      ctx.moveTo(-5,8);ctx.quadraticCurveTo(-23,-9,-15,-31);
-      ctx.quadraticCurveTo(1,-25,8,-5);ctx.closePath();ctx.fill();
-      line(ctx,"#703754",2.5);ctx.stroke();ctx.restore();
+      line(ctx,trim,1.1);ctx.beginPath();ctx.moveTo(side*10,-h+11);
+      ctx.quadraticCurveTo(side*17,-h*.49,side*10,-13);ctx.stroke();
     }
-  }
-  // Cap and top-knot: each evolution gets a clearer signature silhouette.
-  ellipse(ctx,0,-h-2,w*.71,4.8,shadow);
-  ellipse(ctx,0,-h-5,w*.42,3.3,glow);
-  if(f>=1){
-    line(ctx,trim,2.1);ctx.beginPath();ctx.moveTo(0,-h-7);
-    ctx.quadraticCurveTo(swing*.2,-h-15,0,-h-19);ctx.stroke();
-    ellipse(ctx,0,-h-20,3.3+f*.3,3.3+f*.3,glow);
-  }
-  if(f>=2){
-    for(const side of [-1,1]){
-      ctx.save();ctx.translate(side*(w*.53),-h-5);
-      ctx.rotate(side*.22);ctx.fillStyle=trim;ctx.beginPath();
-      ctx.moveTo(-5,0);ctx.quadraticCurveTo(-9,-11,-2,-17-f*2);
-      ctx.quadraticCurveTo(7,-12,6,0);ctx.closePath();ctx.fill();ctx.restore();
-    }
+    ellipse(ctx,0,-h-1,10,4,shadow);
+    ellipse(ctx,1,-h-6,4,5,glow);
+  }else{
+    shrineRobe(ctx,f,w,faceY,trim,glow,shadow,swing);
+    const skin=f>=3?'#ffe1c9':'#ffe6cb';
+    ellipse(ctx,1,faceY+2,w*.79,17,shadow);
+    ellipse(ctx,1,faceY+1,w*.75,15.4,skin);
+    shrineHair(ctx,f,w,h,faceY,swing,glow);
   }
   // Expressive OHANA face, never permanent horror teeth.
   const mood=hurt?"closed":angry?"angry":(welcome?.spark||0)>.47?"closed":startle>.23?"closed":
     reveal>.25||bow>.20||(welcome?.melody||0)>.45||(welcome?.dino||0)>.45?"happy":st==="victory"||cast===3?"happy":"normal";
-  const eyeSize=f===0?7.3:6+f*.15; // V370: Farol baby reads cuter
+  const eyeSize=f===0?8:7.1+f*.18;
   R.eye(ctx,-8,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
   R.eye(ctx,9,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
+  if(!hurt&&mood==='normal'&&f>0){
+    line(ctx,shadow,1.45);ctx.beginPath();
+    ctx.moveTo(-16,faceY-3);ctx.lineTo(-18,faceY-5);
+    ctx.moveTo(15,faceY-3);ctx.lineTo(18,faceY-5);ctx.stroke();
+  }
   if(!angry){
     ellipse(ctx,-w*.49,faceY+9,3.5,2.1,"#ef9fa0");
     ellipse(ctx,w*.49,faceY+9,3.5,2.1,"#ef9fa0");
   }
   ctx.fillStyle=angry?"#592943":"#94536b";ctx.beginPath();
-  ctx.ellipse(1,faceY+13,angry?6+open*8:4.8+open*2.8,angry?4+open*7:2.4+open*3.9,0,0,TAU);ctx.fill();
+  ctx.ellipse(1,faceY+(f===0?13:10),angry?4+open*5:2.5+open*2.8,angry?2+open*4:1.2+open*3,0,0,TAU);ctx.fill();
   // The L bite grows from Yomi's expression, not an unrelated monster sprite.
   if(cast===2){
     const snap=acting?.release||0;
@@ -446,16 +418,6 @@ function draw(ctx,pose,R){
     }
     ctx.restore();
   }
-  if(angry&&f>=3){
-    ctx.fillStyle="#fff4d8";for(let i=-1;i<=1;i++){
-      ctx.beginPath();ctx.moveTo(i*6,faceY+8);ctx.lineTo(i*6+2,faceY+12+open*5);
-      ctx.lineTo(i*6+4,faceY+8);ctx.fill();
-    }
-  }
-  if(f>=3){
-    line(ctx,trim,1.8);ctx.beginPath();ctx.moveTo(w*.26,faceY-18);
-    ctx.lineTo(w*.08,faceY-11);ctx.lineTo(w*.31,faceY-5);ctx.stroke();
-  }
   // Four different emotions make the guardian readable at first glance.
   if(st==="idle"&&f<=1){
     ctx.save();ctx.globalAlpha=.4+.2*pulse;line(ctx,glow,1);
@@ -465,12 +427,14 @@ function draw(ctx,pose,R){
     ctx.save();ctx.globalAlpha=.60;line(ctx,"#ffe0ac",2);
     ctx.beginPath();ctx.arc(0,faceY-17,18,-2.8,-.3);ctx.stroke();ctx.restore();
   }
-  // Warm lantern heart stays visible on every stage.
+  // Lumbre carries its own flame. Yomi carries it in the hand lantern.
+  if(f===0){
   ellipse(ctx,0,-25,7+f*.5+reveal*2.2+life.flame*1.5,9+f*.3+reveal*2.7+life.flame*1.8,glow);
   ctx.fillStyle=f>=3?"#fff4d0":"#ffedaa";ctx.beginPath();
   const flameLean=swing*.39+(acting?.release||0)*6, flameHeight=8+f+(acting?.load||0)*7+(acting?.release||0)*5;
   ctx.moveTo(flameLean,-25-flameHeight);ctx.quadraticCurveTo(-9,-24,0,-18);
   ctx.quadraticCurveTo(9,-24,flameLean,-25-flameHeight);ctx.fill();
+  }
   // J throws a horizontal paper seal; the hand no longer points skyward.
   if(cast===0) {
     const k=clamp(Number(p.cast)||0,0,1);
@@ -501,6 +465,7 @@ function draw(ctx,pose,R){
     const v=st==="victory"?pulse:Math.sin(Math.PI*clamp(p.flourish,0,1));
     ctx.save();ctx.globalAlpha=.4*v;crescent(ctx,w+5,faceY-19,9+f,glow);ctx.restore();
   }
+  shrineAccessory(ctx,f,w,h,swing,glow,shadow,acting);
   drawYomiRitual(ctx,p,f,trim,glow,faceY,w,t);
   ctx.restore();
 }
