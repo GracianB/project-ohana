@@ -1,4 +1,4 @@
-const VERSION = "ohana-801";
+const VERSION = "ohana-802";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/intro-nacar-stage.js?v=" + VERSION,
@@ -793,7 +793,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "56644a3576d80c1d2662d9940cff462e8256858d",
-  "index.html": "b41989b8325e25c99e8be5ae30721b70c38729b9",
+  "index.html": "c0f4110d0f4b1c591a452a385f482671d5b11136",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
