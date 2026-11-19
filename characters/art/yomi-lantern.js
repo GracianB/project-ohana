@@ -20,14 +20,15 @@ function paperShade(ctx,x,y,rim,light,trim,shadow){
 }
 
 function lanternShell(ctx,w,h){
- ctx.beginPath();ctx.moveTo(0,-h);
- ctx.bezierCurveTo(w*1.4,-h*.94,w*1.23,-9,0,-9);
- ctx.bezierCurveTo(-w*1.23,-9,-w*1.4,-h*.94,0,-h);
+ ctx.beginPath();ctx.moveTo(-w*.53,-h+4);ctx.lineTo(w*.53,-h+4);
+ ctx.bezierCurveTo(w*1.23,-h*.83,w*1.23,-h*.42,w*.54,-15);
+ ctx.quadraticCurveTo(0,-11,-w*.54,-15);
+ ctx.bezierCurveTo(-w*1.23,-h*.42,-w*1.23,-h*.83,-w*.53,-h+4);
  ctx.closePath();
 }
 
 function shrineRobe(c,f,w,faceY,trim,glow,shadow,swing){
- const colors=['','#88405d','#a13b69','#442653','#9a365c'];
+ const colors=['','#a53951','#374c74','#382556','#731d42'];
  const shoulders=faceY+10, waist=faceY+29, hem=-5;
  c.fillStyle=colors[f];c.beginPath();c.moveTo(-w*.52,shoulders);
  c.quadraticCurveTo(-w*.64,waist,-w*(.75+f*.065)-swing*.18,hem-3);
@@ -35,6 +36,12 @@ function shrineRobe(c,f,w,faceY,trim,glow,shadow,swing){
  c.quadraticCurveTo(w*.46,-1,w*(.76+f*.065)-swing*.12,hem-3);
  c.quadraticCurveTo(w*.61,waist,w*.52,shoulders);
  c.closePath();c.fill();line(c,shadow,1.8);c.stroke();
+ // Each fabric has a separate lining, embroidered hem and layered collar.
+ c.fillStyle=['','#e27c80','#6ebebc','#9877cb','#d77287'][f];
+ c.beginPath();c.moveTo(-w*.39,waist+4);c.lineTo(-w*.66-swing*.11,hem-3);
+ c.quadraticCurveTo(-w*.29,hem+2,0,hem);c.lineTo(w*.25,waist+8);c.closePath();c.fill();
+ line(c,'#fff0c2',1.2);c.beginPath();c.moveTo(-w*.73,hem-8);
+ c.quadraticCurveTo(0,hem-3,w*.74,hem-8);c.stroke();
  line(c,f===3?'#dfacd1':'#ffead1',f===4?4:3);
  c.beginPath();c.moveTo(-w*.47,shoulders+2);c.lineTo(w*.22,waist-2);
  c.moveTo(w*.46,shoulders+2);c.lineTo(-w*.27,waist+1);c.stroke();
@@ -47,8 +54,10 @@ function shrineRobe(c,f,w,faceY,trim,glow,shadow,swing){
  }
  for(let i=0;i<f;i++){
   const x=(i-(f-1)/2)*w*.33-swing*.14,y=hem-7+(i%2)*2;
-  line(c,trim,1.5);c.beginPath();c.moveTo(x-2,y+2);
-  c.quadraticCurveTo(x-4,y-3,x,y-5);c.quadraticCurveTo(x+4,y-3,x+2,y+2);c.stroke();
+  line(c,f>=3?'#ffcf8f':glow,1.25);c.beginPath();
+  if(f===2){c.moveTo(x-4,y);c.quadraticCurveTo(x,y-6,x+4,y);c.moveTo(x-4,y+3);c.quadraticCurveTo(x,y-3,x+4,y+3);}
+  else{c.moveTo(x-3,y+2);c.quadraticCurveTo(x-4,y-4,x,y-4);c.quadraticCurveTo(x+5,y-4,x+3,y+2);c.lineTo(x-3,y+2);}
+  c.stroke();if(f===4)ellipse(c,x,y-1,1.2,1.2,'#fff4c8');
  }
 }
 
@@ -245,11 +254,26 @@ function shrineAccessory(c,f,w,h,swing,glow,shadow,acting){
  }
  line(c,cord,1.7);c.beginPath();c.moveTo(-4,0);c.quadraticCurveTo(9,2,11,14);c.stroke();
  if(f>=1){
+  c.save();c.translate(11,14);
+  const scale=[1,1,1.13,1.27,1.45][f];
+  c.scale(scale,scale);c.translate(-11,-14);
   c.fillStyle=shadow;c.beginPath();c.moveTo(5,14);c.lineTo(17,14);c.lineTo(19,23);c.lineTo(15,29);c.lineTo(7,29);c.lineTo(3,23);c.closePath();c.fill();
   ellipse(c,11,22,4.5+f*.36+release*2,5+release*2,glow);
   ellipse(c,11+release*1.5,21,1.9,3+release*2,'#fff7cf');
+  line(c,'#fac48a',1.05);c.beginPath();c.moveTo(6,16);c.lineTo(16,16);
+  c.moveTo(4,23);c.lineTo(18,23);c.moveTo(7,28);c.lineTo(15,28);c.stroke();
+  if(f>=3){
+   line(c,'#fff2b7',1.3);c.beginPath();c.moveTo(7,16);c.lineTo(11,13);c.lineTo(16,16);
+   c.moveTo(7,27);c.lineTo(6,19);c.moveTo(15,27);c.lineTo(16,19);c.stroke();
+  }
+  if(f===4){
+   c.fillStyle='#ffc67c';c.beginPath();c.moveTo(3,20);c.lineTo(0,23);c.lineTo(5,25);
+   c.moveTo(19,20);c.lineTo(22,23);c.lineTo(17,25);c.fill();
+   ellipse(c,11,26,2.8,1.7,'#fff5cf');
+  }
+  c.restore();
  }
- const knot=f>=1?30:14;
+ const knot=[14,30,32,34,37][f];
  line(c,cord,2);c.beginPath();c.moveTo(11,knot-2);c.lineTo(11,knot+4);c.stroke();
  for(let i=-1;i<=1;i++){
   line(c,tassel,1.4);c.beginPath();c.moveTo(11+i*1.1,knot+2);
@@ -271,20 +295,27 @@ function shrineAccessory(c,f,w,h,swing,glow,shadow,acting){
 
 function shrineHair(c,f,w,h,faceY,swing,glow){
  if(f===0)return;
- const y=-h+4, shade=['','#392542','#27233c','#2b1837','#231b3e'][f];
+ const y=-h+4, shade=['','#ece7f9','#e5f4fc','#dcd9f9','#fff3eb'][f];
  const extension=[0,8,14,20,24][f];
  c.fillStyle=shade;c.beginPath();c.moveTo(-w*.92,faceY+8);
  c.quadraticCurveTo(-w*1.14,y-11,-w*.37,y-12);
- c.quadraticCurveTo(w*.39,y-25,w*.96,y+6);
+ c.quadraticCurveTo(w*.42,y-17,w*.96,y+6);
  c.quadraticCurveTo(w*1.13,faceY+3,w*.79,faceY+extension);
  c.quadraticCurveTo(w*.64+swing*.1,faceY+7,w*.65,y+8);
  c.quadraticCurveTo(w*.47,y+11,w*.31,faceY-6);
  c.quadraticCurveTo(w*.18,y+13,w*.06,y+10);
  c.quadraticCurveTo(-w*.18,faceY-3,-w*.51,y+8);
  c.quadraticCurveTo(-w*.66,faceY+12,-w*.89+swing*.12,faceY+extension);
- c.closePath();c.fill();
- line(c,f>=3?'#95678d':'#79536f',1.7);
+ c.closePath();c.fill();line(c,'#554b75',1.7);c.stroke();
+ c.fillStyle=f===3?'#a59bce':'#b5bfdb';c.beginPath();
+ c.moveTo(-w*.79,y+9);c.quadraticCurveTo(-w*.65,y+16,-w*.82+swing*.12,faceY+extension-3);
+ c.quadraticCurveTo(-w*1.0,faceY+2,-w*.79,y+9);c.fill();
+ line(c,'#fffdf6',2.55);
  c.beginPath();c.moveTo(-w*.66,y+1);c.quadraticCurveTo(-w*.28,y-13,w*.48,y-7);c.stroke();
+ line(c,f===3?'#ab9ec9':'#b3b9d2',1.1);
+ c.beginPath();c.moveTo(w*.18,y-7);c.quadraticCurveTo(w*.12,y+4,-w*.29,faceY-7);
+ c.moveTo(w*.38,y-5);c.quadraticCurveTo(w*.46,y+8,w*.36,faceY-9);
+ c.moveTo(-w*.69,y+8);c.quadraticCurveTo(-w*.73,faceY-5,-w*.63+swing*.1,faceY+extension-5);c.stroke();
  const pinX=w*.65;
  for(let i=0;i<f;i++){
   ellipse(c,pinX-i*2.8,y+3-i*2,1.8,1.6,glow);
@@ -370,12 +401,14 @@ function draw(ctx,pose,R){
     ctx.beginPath();ctx.moveTo(-w*.78,-17);ctx.quadraticCurveTo(0,-7,w*.78,-17);ctx.stroke();ctx.restore();
   }
   // Actual foot silhouette: Yomi hovers but retains a clear readable ground anchor.
-  if(!run&&!jumpS&&!fallS){ellipse(ctx,-7,0,7,3,shadow);ellipse(ctx,8,0,7,3,shadow);}
+  if(f===0){ellipse(ctx,0,0,8,1.7,shadow);}
+  else if(!run&&!jumpS&&!fallS){ellipse(ctx,-7,0,7,3,shadow);ellipse(ctx,8,0,7,3,shadow);}
   else{const ls=run&&!reduced?Math.sin(runPh)*5:0,ly=jumpS?-5:fallS?3:0;
    ellipse(ctx,-7-ls,ly-(run?Math.max(0,Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);
    ellipse(ctx,8+ls,(jumpS?-3:ly)-(run?Math.max(0,-Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);}
   // Two animated open sleeves. K's suction visibly pulls them forward.
   for(const side of [-1,1]){
+    if(f===0)break;
     ctx.save();ctx.translate(side*(w*.77),shoulder+6);
     // K rings a bell from both sleeves; L winds the leading sleeve back for the bite.
     const leading=side===1,windup=acting?(leading?acting.front:acting.back):0;
@@ -389,6 +422,11 @@ function draw(ctx,pose,R){
     ctx.quadraticCurveTo(13,sleeveLen*.48,7,0);ctx.closePath();ctx.fill();
     line(ctx,trim,2);ctx.stroke();
     line(ctx,glow,1.7);ctx.beginPath();ctx.moveTo(-9,sleeveLen-3);ctx.quadraticCurveTo(0,sleeveLen,10,sleeveLen-3);ctx.stroke();
+    if(f>=2){
+      line(ctx,f===4?'#ffdc96':trim,1.1);
+      ctx.beginPath();ctx.moveTo(-8,sleeveLen-8);ctx.quadraticCurveTo(0,sleeveLen-5,8,sleeveLen-8);ctx.stroke();
+      for(let i=-1;i<=1;i++)ellipse(ctx,i*4,sleeveLen-9-i*i,1,1,glow);
+    }
     ctx.restore();
   }
   if(f===0){
@@ -399,8 +437,13 @@ function draw(ctx,pose,R){
       line(ctx,trim,1.1);ctx.beginPath();ctx.moveTo(side*10,-h+11);
       ctx.quadraticCurveTo(side*17,-h*.49,side*10,-13);ctx.stroke();
     }
-    ellipse(ctx,0,-h-1,10,4,shadow);
-    ellipse(ctx,1,-h-6,4,5,glow);
+    line(ctx,shadow,3.2);ctx.beginPath();ctx.arc(0,-h-1,7,-Math.PI,0);ctx.stroke();
+    ellipse(ctx,0,-h+2,w*.72,4.4,shadow);
+    ellipse(ctx,0,-h+1,w*.59,1.8,'#ffd891');
+    ellipse(ctx,0,-15,w*.65,3.9,shadow);
+    ellipse(ctx,0,-16,w*.54,1.6,'#ffcb7c');
+    line(ctx,trim,1.6);ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(0,-6);ctx.stroke();
+    ellipse(ctx,0,-5,2.2,3.4,glow);
   }else{
     shrineRobe(ctx,f,w,faceY,trim,glow,shadow,swing);
     const skin=f>=3?'#ffe1c9':'#ffe6cb';
@@ -494,7 +537,7 @@ function draw(ctx,pose,R){
     ctx.lineTo(tail+4,y+8);ctx.quadraticCurveTo(-w-9,y+13,-w*.56,y+4);ctx.closePath();ctx.fill();
     line(ctx,glow,1.2);ctx.beginPath();ctx.moveTo(-w*.58,y+2);ctx.quadraticCurveTo(-w-9,y+11,tail+2,y+5);ctx.stroke();
   }
-  shrineAccessory(ctx,f,w,h,swing,glow,shadow,acting);
+  if(f>0)shrineAccessory(ctx,f,w,h,swing,glow,shadow,acting);
   drawYomiRitual(ctx,p,f,trim,glow,faceY,w,t);
   ctx.restore();
 }

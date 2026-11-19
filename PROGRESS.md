@@ -1,3 +1,5 @@
+ohana-809 · Faroles y vestuario de Yomi, tentáculos de Nácar y cinco lecturas claras para IA.
+
 ohana-808 · El farol, los tentáculos y la órbita reaccionan a los poderes de cada personaje.
 
 ohana-807 · Yomi guardiana del santuario, Nácar bioluminiscente y Constelación compacta. Los tres ganan velocidad y control propio.

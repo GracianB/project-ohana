@@ -313,8 +313,11 @@ function drawHead(ctx,F,f,col,glow,accent,mood,blink,look,t,pulse,faceY,sway,dro
  ctx.moveTo(vx+3,vy+vh*.62);ctx.lineTo(vx+vw*.38,vy+1.5);ctx.lineTo(vx+vw*.52,vy+1.5);ctx.lineTo(vx+vw*.18,vy+vh*.75);ctx.closePath();ctx.fill();ctx.restore();
  // scanline cursor drifting down the screen (stops in reduced motion; t=0)
  ctx.save();ctx.globalAlpha=.16;ctx.fillStyle=glow;ctx.fillRect(vx+2,vy+((t*.35)%vh),vw-4,1.2);ctx.restore();
- const s=f===0?1.08:f===4?1.05:1;
+ const s=f===0?1.17:f===4?1.05:1;
  drawEyes(ctx,mood,0,F.hy+faceY-1,s,glow,accent,blink,look.x,look.y,t);
+ if(f===0&&mood!=='off'&&mood!=='glitch'){
+  for(const side of [-1,1])ellipse(ctx,side*11.2,F.hy+faceY+4,2.6,1.3,'#ff9d976e');
+ }
  ctx.restore();
  drawAntenna(ctx,F,f,y,sway,col,glow,accent,pulse,droop);
 }
@@ -383,30 +386,58 @@ function drawCore(ctx,x,y,r,glow,accent,pulse){
  ellipse(ctx,x-r*.2,y-r*.3,r*.22,r*.3,"#eafffa");
 }
 
-function wingNodes(side,spread,sweep){
- // The radiators of Red hinge at the shoulder.
- const sx=.83*spread,sy=.89;
- const base=[[14,-14],[30,-24],[42,-12],[36,4],[22,8]];
- return base.map(([x,y],i)=>[side*(x*sx-sweep*i*1.2),y*sy+sweep*i*.8]);
-}
 function drawWing(ctx,side,F,t,spread,sweep,reduced){
- const rootX=side*8,rootY=F.hy+F.hh/2+6,nodes=wingNodes(side,spread,sweep);
- ctx.save();ctx.translate(rootX,rootY);ctx.globalAlpha=.94;
- // A network becomes a set of articulated solar panels, with family lights along the hinges.
- for(let i=nodes.length-1;i>=0;i--){
-  const [nx,ny]=nodes[i],flap=reduced?0:Math.sin(t*.08+i*.65)*3,
-   x=nx+side*4,y=ny+flap,rootY=i*2-3;
-  const color=i%2?'#c4eee0':'#edf3db';
-  ctx.fillStyle=i%2?'#798cc1':'#9daae1';
-  ctx.strokeStyle=LINE;ctx.lineWidth=1.2;
-  ctx.beginPath();ctx.moveTo(side*3,rootY);ctx.lineTo(x*.54,y-6);ctx.lineTo(x+side*10,y-6);
-  ctx.lineTo(x+side*13,y+2);ctx.lineTo(x,y+7);ctx.lineTo(side*7,rootY+6);ctx.closePath();ctx.fill();ctx.stroke();
-  ctx.fillStyle='#8abfc2';ctx.globalAlpha=.61;ctx.beginPath();ctx.moveTo(side*3,rootY);ctx.lineTo(x+side*10,y-6);ctx.lineTo(x,y+7);ctx.closePath();ctx.fill();ctx.globalAlpha=.94;
-  line(ctx,color,1.5);ctx.beginPath();ctx.moveTo(side*6,rootY+1);ctx.lineTo(x+side*9,y-4);ctx.stroke();
-  const lit=reduced?.7:.55+Math.sin(t*.035+i*.8)*.25;
-  star4(ctx,x,y,3.2+lit,color);ellipse(ctx,x,y,1,1,'#fff9df');
+ // Red's connected circuit folds behind the chassis as it moves.
+ const nodes=[[3,1],[13,-16],[29,-22],[44,-10],[35,8],[17,11]];
+ const edges=[[0,1],[0,5],[1,2],[1,5],[2,3],[2,5],[3,4],[3,5],[4,5]];
+ const points=nodes.map(([x,y],i)=>[side*(x*spread-i*sweep*.55),y+(reduced?0:Math.sin(t*.065-i*.77)*2)]);
+ ctx.save();ctx.translate(side*7,F.hy+F.hh/2+12);
+ ctx.fillStyle='#344a7685';ctx.beginPath();
+ for(const [x,y] of points)ctx.lineTo(x,y);
+ ctx.closePath();ctx.fill();
+ for(const [a,b] of edges){
+  const [x,y]=points[a],[xx,yy]=points[b];
+  line(ctx,'#192750',4);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(xx,yy);ctx.stroke();
+  line(ctx,'#77daf2',1.25);ctx.stroke();
+  const k=reduced?.5:(t*.035+a*.14+b*.08)%1;
+  ellipse(ctx,x+(xx-x)*k,y+(yy-y)*k,1.42,1.42,'#f2fff4');
+ }
+ for(const [x,y] of points){
+  ellipse(ctx,x,y,3.7,3.7,'#172042');ellipse(ctx,x,y,2.4,2.4,'#c2f7ff');
  }
  ctx.restore();
+}
+
+function drawEcho(ctx,F,t,reduced,acting){
+ const gain=acting?.release||0;
+ for(const side of [-1,1]){
+  const origin=side*F.hw*.48, y=F.hy+1;
+  ellipse(ctx,origin,y,5,7,'#58445e');ellipse(ctx,origin,y,3.3,4.8,'#ffe7a9');
+  for(let i=0;i<3;i++){
+   const phase=reduced?.65:(t*.027+i*.22)%1;
+   ctx.save();ctx.globalAlpha=.25+phase*.48;
+   line(ctx,i===0?'#fff1af':'#eca185',1.8);
+   const a=side===1?0:Math.PI;
+   ctx.beginPath();ctx.arc(origin,y,8+i*5+gain*4,a-.65,a+.65);ctx.stroke();ctx.restore();
+  }
+ }
+}
+
+function drawOracle(ctx,F,t,reduced,acting){
+ const x=31+(acting?.front||0)*10,y=F.hy+22;
+ const r=13+3*(acting?.release||0),spin=reduced?0:t*.039;
+ ellipse(ctx,x,y,r+3,r+3,'#28204b');
+ ellipse(ctx,x,y,r,r,'#6955a2');
+ ellipse(ctx,x-2,y-3,r*.7,r*.67,'#927cda');
+ line(ctx,'#f4c9ff',1.2);ctx.beginPath();ctx.ellipse(x,y,r,r*.43,-.33,0,TAU);ctx.stroke();
+ line(ctx,'#baeefa',1.15);ctx.beginPath();
+ for(let i=0;i<5;i++){
+  const a=spin+i*TAU/5;
+  ctx.lineTo(x+Math.cos(a)*r*.62,y+Math.sin(a)*r*.62);
+ }
+ ctx.closePath();ctx.stroke();
+ star4(ctx,x,y,r*.53,'#faffed');
+ ellipse(ctx,x-r*.36,y-r*.43,2,1.35,'#fff9fb');
 }
 
 function drawCape(ctx,F,t,glow,swing,run,reduced){
@@ -445,7 +476,7 @@ function drawSatellites(ctx,F,t,front,reduced,glow,accent,cast,acting){
 
 function drawRingHalf(ctx,F,front,t,reduced,acting,known){
  const y=F.hy+F.hh/2+28;
- const r=36+(acting?.release||0)*7, ry=14+2*(acting?.release||0);
+ const r=31+(acting?.release||0)*6, ry=13+2*(acting?.release||0);
  const phase=reduced?0:t*.018;
  ctx.save();ctx.translate(0,y);
  ctx.strokeStyle=front?'#e7c48d':'#637baf';ctx.lineWidth=front?1.45:2;
@@ -602,12 +633,14 @@ export function drawArtificialIntelligence(ctx,pose,R){
   ctx.save();ctx.globalAlpha=dead?.2:.26;ellipse(ctx,0,0,F.hw*.42,3.2,glow);ctx.restore();
   if(!dead)drawYomiMagic(ctx,p,f,F,glow,accent,T,cast,acting,reduced,st);
   ctx.translate(0,hover);
+  if(f===4)ctx.scale(.79,.81);
   ctx.rotate((run?(reduced?.1:.1+.03*Math.sin(runPh*2)):flight?-.04:0)+(acting?.tilt||0)+stageTilt+life.tilt+(dead?.34:0));
   if(life.active)ctx.scale(life.expandX,life.expandY);
   if(jumpS)ctx.scale(.93,1.07);else if(fallS)ctx.scale(1.05,.96);
   else if(st==="idle"&&!reduced){const br=Math.sin(t*.05)*.014;ctx.scale(1+br,1-br);} // soft shell breathing
   else if(st==="victory"&&!reduced){const hop=Math.abs(Math.sin(t*.16));ctx.translate(0,-hop*3);ctx.scale(1-hop*.03,1+hop*.03);}
   // ── BACK LAYER ─────────────────────────────────────────────
+  if(f===1)drawEcho(ctx,F,T,reduced,acting);
   if(f===2)drawWing(ctx,-1,F,T,spread,sweep,reduced);
   if(f===2)drawWing(ctx,1,F,T,spread*.92,sweep,reduced);
   if(f===3)drawCape(ctx,F,T,glow,swing,run,reduced);
@@ -624,6 +657,7 @@ export function drawArtificialIntelligence(ctx,pose,R){
    for(let i=0;i<6;i++){ctx.fillStyle=i<known?glow:'#527985';ctx.beginPath();ctx.moveTo((i-2.5)*4,yy-1.7);ctx.lineTo((i-2.5)*4+1.7,yy);ctx.lineTo((i-2.5)*4,yy+1.7);ctx.lineTo((i-2.5)*4-1.7,yy);ctx.fill();}
   }
   // ── FRONT LAYER ────────────────────────────────────────────
+  if(f===3&&!dead)drawOracle(ctx,F,T,reduced,acting);
   if(f===4)drawRingHalf(ctx,F,true,T,reduced,acting,known);
   if(f===3)drawSatellites(ctx,F,T,true,reduced,glow,accent,cast,acting);
   const front=handPose(1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run,p.hurt||.5);

@@ -1,7 +1,7 @@
 // Five jellyfish anatomies. Sea stars belong to her attacks, never her body.
 const TAU=Math.PI*2;
 export const NACAR_FORMS=Object.freeze([
- {name:'Gota de Luna',rx:17,ry:18,top:-57,tendrils:4,length:20,frills:0,hue:'#bdeee8'},
+ {name:'Gota de Luna',rx:19,ry:17,top:-54,tendrils:4,length:16,frills:0,hue:'#ffe18d'},
  {name:'Medusa de Nácar',rx:31,ry:16,top:-70,tendrils:8,length:39,frills:7,hue:'#9de3ef'},
  {name:'Medusa Brújula',rx:24,ry:32,top:-100,tendrils:6,length:49,frills:4,hue:'#a0edcc'},
  {name:'Medusa Aurora',rx:41,ry:25,top:-111,tendrils:14,length:55,frills:11,hue:'#d9bcf0'},
@@ -13,7 +13,7 @@ export function drawSeaStar(c,x,y,size=10,t=0,col='#f6cfaa'){
 }
 
 const SKINS=[
- {dark:'#23566a',body:'#64c4ca',light:'#defcf1',rim:'#a4f5db',light2:'#ffd58d',beat:.103},
+ {dark:'#8e4c32',body:'#f4a33c',light:'#fff4ad',rim:'#ffe25c',light2:'#fffae0',beat:.103},
  {dark:'#1c587e',body:'#65cbd8',light:'#ddfff9',rim:'#97f3fe',light2:'#fff0b8',beat:.074},
  {dark:'#245464',body:'#76cdb1',light:'#def8be',rim:'#a5f4cc',light2:'#f5d792',beat:.113},
  {dark:'#423e77',body:'#ba86cf',light:'#ffd7ef',rim:'#c3b9ff',light2:'#92ffe3',beat:.053},
@@ -21,7 +21,7 @@ const SKINS=[
 ];
 
 const NEON=[
- ['#2dffe0','#91ffff'],['#30cbff','#6afff7'],['#a5ff49','#36ffe2'],
+ ['#ffdc45','#fff69c'],['#30cbff','#6afff7'],['#a5ff49','#36ffe2'],
  ['#ff51db','#aa78ff'],['#3affe4','#a579ff'],
 ];
 
@@ -91,16 +91,20 @@ function bellPath(c,f,w,h){
 
 function ribbons(c,d,s,f,t,hem,drag,squeeze){
  const neon=NEON[f];
- const spread=[.65,.85,.62,1.0,1.03][f];
+ const spread=[.62,.90,1.28,1.13,.94][f];
+ const tempo=[.081,.063,.051,.046,.037][f];
+ const undulation=[3,6,4,10,8][f];
  c.lineCap='round';
  for(let i=0;i<d.tendrils;i++){
   const k=2*i/(d.tendrils-1)-1;
   const start=k*d.rx*.8;
-  const length=d.length*(.69+.29*Math.cos(k*1.6))*(1-squeeze*.18);
-  const sway=Math.sin(t*.049+i*.95)*(2.2+f*.75)+drag;
+  const taper=f===2?.72+Math.abs(k)*.28:f===4?.73+.29*Math.pow(Math.cos(k*1.25),2):.69+.29*Math.cos(k*1.6);
+  const length=d.length*taper*(1-squeeze*.18);
+  const sway=Math.sin(t*tempo+i*.82)*undulation+drag;
   const tip=start*spread+sway;
+  const controlA=start+sway*.12+(f===3?k*11:0), controlB=tip-sway*.44+(f>=3?-k*13:0);
   c.beginPath();c.moveTo(start,hem-3);
-  c.bezierCurveTo(start+sway*.12,hem+length*.37,tip-sway*.44,hem+length*.78,tip,hem+length);
+  c.bezierCurveTo(controlA,hem+length*.37,controlB,hem+length*.78,tip,hem+length);
   c.strokeStyle=i%3===0?neon[i%2]+'4b':s.body+'a0';c.lineWidth=i%3===0?6:1.2;c.stroke();
   if(i%3===0){
    c.strokeStyle=neon[i%2];c.lineWidth=1.65;c.stroke();
@@ -108,19 +112,22 @@ function ribbons(c,d,s,f,t,hem,drag,squeeze){
    glow(c,tip,hem+length,8+f,neon[i%2],.54+.38*wave);
    if(t>0){
     const u=(t*.033+i*.09)%1, v=1-u;
-    const sparkX=v*v*v*start+3*v*v*u*(start+sway*.12)+3*v*u*u*(tip-sway*.44)+u*u*u*tip;
+    const sparkX=v*v*v*start+3*v*v*u*controlA+3*v*u*u*controlB+u*u*u*tip;
     const sparkY=v*v*v*(hem-3)+3*v*v*u*(hem+length*.37)+3*v*u*u*(hem+length*.78)+u*u*u*(hem+length);
     oval(c,sparkX,sparkY,1.25+f*.11,1.9,'#efffff');
    }
-   oval(c,tip,hem+length,1.55+f*.14,2.65,wave>.55?'#efffff':neon[i%2]);
+   if(f===2){
+    c.fillStyle=neon[i%2];c.beginPath();c.moveTo(tip-2.5,hem+length-2);
+    c.lineTo(tip+2.5,hem+length-2);c.lineTo(tip,hem+length+4);c.closePath();c.fill();
+   }else oval(c,tip,hem+length,f===0?2.25:1.55+f*.14,f===0?2.15:2.65,wave>.55?'#fffbe9':neon[i%2]);
   }
  }
  for(const side of [-1,1]){
   const x=side*d.rx*[.25,.3,.42,.56,.49][f];
   const length=d.length*(f===3?.92:.8);
-  const width=[4,8,6,13,14][f];
+  const width=[4,6,5,17,12][f];
   const tail=x+side*(f===2?16:8)+drag*.65;
-  c.fillStyle=s.body+'ad';c.beginPath();c.moveTo(x-width,hem-2);
+  c.fillStyle=(f>=3?neon[(side+1)/2]:s.body)+'86';c.beginPath();c.moveTo(x-width,hem-2);
   c.bezierCurveTo(x+side*12,hem+length*.25,tail-side*15,hem+length*.64,tail,hem+length);
   c.bezierCurveTo(tail+side*8,hem+length*.64,x+width*.5,hem+length*.22,x+width,hem-2);
   c.closePath();c.fill();
@@ -192,11 +199,12 @@ function face(c,p,d,s,f,t){
    c.beginPath();c.moveTo(ex-3,y);
    c.quadraticCurveTo(ex,y+(glad?-4:3),ex+3,y);c.stroke();
   }else{
-   oval(c,ex,y,4+f*.39,5.8+f*.4,'#fff8e9');
-   oval(c,ex+gaze,y+.35,2.7+f*.23,4+f*.3,'#192f49');
-   oval(c,ex+gaze-.9,y-1.6,1.14,1.3,s.light);
+   oval(c,ex,y,f===0?5:4+f*.39,f===0?6.9:5.8+f*.4,'#fff8e9');
+   oval(c,ex+gaze,y+.35,f===0?3.5:2.7+f*.23,f===0?5:4+f*.3,f===0?'#673b3d':'#192f49');
+   oval(c,ex+gaze-.9,y-1.6,f===0?1.5:1.14,1.3,s.light);
+   if(f===0)oval(c,ex+gaze+1.4,y+2.2,.65,.74,'#fff4b9');
   }
-  oval(c,side*d.rx*.51,y+5.7,3.1+f*.28,1.6,'#eea5b78c');
+  oval(c,side*d.rx*.51,y+5.7,3.1+f*.28,1.6,f===0?'#ff8968aa':'#eea5b78c');
  }
  c.strokeStyle=s.dark;c.lineWidth=1.35;
  c.beginPath();c.arc(0,y+4,attack?3.7:2.7,hurt?3.22:.18,hurt?6.15:Math.PI-.18);c.stroke();
