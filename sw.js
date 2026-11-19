@@ -1,4 +1,4 @@
-const VERSION = "ohana-804";
+const VERSION = "ohana-805";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./engine/foes/nacar-fauna.js?v=" + VERSION,
@@ -533,9 +533,9 @@ const PRECACHE_REVISIONS = {
   "assets/photobooth/nacar.webp": "65987fb92f5e8f73e648bcd220c10d90e297a422",
   "assets/photobooth/ia.webp": "6b70c310b42925cbf0a135a5bfff3e64a9000bf9",
   "characters/art/ia.js": "8bb3eca84e2336edbdc7d4e14cf077fb119bdf9c",
-  "systems/nacar-chapter.js": "d449174c52aac8d2f97848a64a1682c10c62cee3",
-  "systems/nacar-room.js": "d3497497ea3c12be438da03b9074950a8b5cd1cb",
-  "worlds/nacar-seabed.js": "84e27b2d509b6ed28ead1e9fc5502eeb92f9ade8",
+  "systems/nacar-chapter.js": "4adfef8a001f6d02cb2d7aad8aa7912b0de4d930",
+  "systems/nacar-room.js": "8324409a7576e1fe98df59ee03678f89a4bf8086",
+  "worlds/nacar-seabed.js": "e43fe020bff4df55a948cdd8ef5ee85afb7894c7",
   "systems/michi-adventure.js": "1a78a910a2336e49990192260d48c149caf9159a",
   "worlds/michi-adventure-art.js": "1636aabb4493316763af546204ad067449d27e2f",
   "engine/foes/michi-sanctuary-fauna.js": "29f7d4f1e736410ca703e9198a242e1b46a86812",
@@ -795,7 +795,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "56644a3576d80c1d2662d9940cff462e8256858d",
-  "index.html": "6eb417b3bfe6a1485b1e8ae90d0a67f3f5d9cb81",
+  "index.html": "4a3afd6381a2604b89a5192cb58dca9dafb5db7a",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
@@ -821,7 +821,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "8ced745bd4a2c464bb14328dc3eda7ba605ab314",
+  "game.js": "86e69464746a066f19d78951ab7ae6b43041042e",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "799e042fb74a31b80089c2a1b25764d6f882fd12",
   "characters/ten-action-acting.js": "fc777bd24389c06a4b0ee68d64ad6f1b8415e10f",

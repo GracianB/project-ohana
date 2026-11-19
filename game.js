@@ -1,5 +1,5 @@
 import {nacarPrompt,interactNacar,swimNacar,createNacarBoss,updateNacarBoss} from './systems/nacar-chapter.js';
-import {drawNacarSeabed,drawNacarBoss,drawNacarTerrain} from './worlds/nacar-seabed.js';
+import {drawNacarSeabed,drawNacarBoss,drawNacarTerrain,drawAnemoneStatus} from './worlds/nacar-seabed.js';
 import {absorbMichiGardenHit} from './systems/michi-garden-life.js';
 import {drawQuimeraMinion,drawQuimeraStars,collectQuimeraStars} from './systems/quimera-pressure.js';
 import {updateQuimeraArena,interactQuimeraArena,quimeraArenaPrompt,drawQuimeraArena} from './systems/quimera-arena.js';
@@ -2450,7 +2450,7 @@ if (e.boss) {
   continue;
 }
 
-if(updateNacarBoss(e,game))continue;
+if(updateNacarBoss(e,game,hurtPlayer))continue;
 if(updateGauntletGuardian(e,game,hurtPlayer))continue;
 if(updateStitchoBoss(e,game,hurtPlayer))continue;
 if(updateChispinBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
@@ -3586,6 +3586,7 @@ if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
 }
 drawMinimap();
 drawWorld1Overlay(ctx,game,viewW,viewH);
+drawAnemoneStatus(ctx,game,viewW);
 drawAdventureGuide(ctx,game,viewW,viewH,Magic.status());
 if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH,{badge:false});}
 if(game.boss?._fusionBoss&&!game.world1Boss&&!world1CineActive(game))drawFusionBossOverlay(ctx,game.boss,viewW,viewH);

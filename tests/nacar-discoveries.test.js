@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {buildNacarRoom} from '../systems/nacar-room.js';
-import {interactNacar,nacarPrompt,nacarDiscovered,updateNacarChapter,activeNacarRoute,swimNacar,nacarBossPattern} from '../systems/nacar-chapter.js';
+import {interactNacar,nacarPrompt,nacarDiscovered,updateNacarChapter,activeNacarRoute,swimNacar,nacarBossPattern,anemonePressure,createNacarBoss,updateNacarBoss} from '../systems/nacar-chapter.js';
 import {packSave,unpackSave} from '../systems/save.js';
 
 function setup(){
@@ -91,4 +91,50 @@ test('the late-stage sweep leaves two adjacent lanes clear',()=>{
  assert.ok(shots.every(s=>s.y!==1405&&s.y!==1510));
  e._nacarBoss.tx=9800;
  assert.ok(nacarBossPattern(e).every(s=>s.x===10480&&s.angle===Math.PI));
+});
+
+test('Anemone locks its attack on entering the arena and cancels from a retreat',()=>{
+ const {g}=setup();
+ g.world1.stations.forEach(s=>{s.done=true;});
+ g.projectiles=[];
+ const boss=createNacarBoss(()=>({}),()=>.5);
+ const p=g.player;
+ Object.assign(p,{x:900,y:1200});
+ for(let i=0;i<140;i++)updateNacarBoss(boss,g);
+ assert.equal(boss._nacarBoss.active,false);
+ assert.equal(g.projectiles.length,0);
+ Object.assign(p,{x:9300,y:1300});
+ for(let i=0;i<34;i++)updateNacarBoss(boss,g);
+ const locked=boss._nacarBoss.tx;
+ p.x=9700;
+ for(let i=0;i<65;i++)updateNacarBoss(boss,g);
+ assert.equal(boss._nacarBoss.tx,locked);
+ assert.ok(g.projectiles.every(s=>s.anemone&&s.life>0));
+ assert.ok(g.projectiles.length);
+ p.x=8200;updateNacarBoss(boss,g);
+ assert.ok(g.projectiles.every(s=>s.life===0&&s.dmg===0));
+ assert.equal(boss._nacarBoss.active,false);
+});
+
+test('double pressure uses both announced safe lanes and hits only once per wave',()=>{
+ const {g}=setup();
+ g.world1.stations.forEach(s=>{s.done=true;});
+ g.projectiles=[];
+ const e=createNacarBoss(()=>({}),()=>.5);
+ const p=g.player,b=e._nacarBoss;
+ Object.assign(p,{x:9520,y:1126}); // centre within upper lane
+ Object.assign(b,{active:true,phase:'attack',attack:4,ty:1520,clock:105,tier:3});
+ const hits=[];
+ const hurt=amount=>hits.push(amount);
+ assert.equal(anemonePressure(e).safeY,1140);
+ updateNacarBoss(e,g,hurt);
+ assert.deepEqual(hits,[]);
+ while(b.clock>19)updateNacarBoss(e,g,hurt);
+ assert.equal(anemonePressure(e).safeY,1530);
+ updateNacarBoss(e,g,hurt);
+ assert.deepEqual(hits,[19]);
+ for(let i=0;i<18;i++)updateNacarBoss(e,g,hurt);
+ assert.deepEqual(hits,[19]);
+ assert.equal(b.phase,'rest');
+ assert.equal(e.damageWindowRemaining,b.openDamage);
 });

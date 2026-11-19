@@ -5,7 +5,7 @@ export const pearlOpen=(tick,s)=>((tick+(s.phase||0))%180)<100;
 export const nacarChapter=g=>!!g?.roomDef?.nacarChapter;
 const saved=g=>g.secrets?.['w1-nacar']||[];
 function remember(g,id){g.secrets||={};const a=g.secrets['w1-nacar']||=[];if(!a.includes(id))a.push(id);g.save?.();}
-export function enterNacarChapter(g){if(!nacarChapter(g))return;g._nacarCurrents={west:!saved(g).includes('w1-nacar-valve-west'),east:saved(g).includes('w1-nacar-valve-east')};g.world1.sealed=saved(g).includes('w1-nacar-home');applyChapterXpFloor(g,XP_NEED[Math.min(4,g.world1.stations.filter(s=>s.done).length)]);}
+export function enterNacarChapter(g){if(!nacarChapter(g))return;g._nacarCurrents=Object.fromEntries(g.roomDef.tides.map(v=>[v.id,v.up!==saved(g).includes('w1-nacar-valve-'+v.id)]));g.world1.sealed=saved(g).includes('w1-nacar-home');applyChapterXpFloor(g,XP_NEED[Math.min(4,g.world1.stations.filter(s=>s.done).length)]);}
 export const nacarDiscovered=(g,id)=>saved(g).includes('w1-nacar-discovery-'+id);
 
 export function nacarDiscoveryAvailable(g,discovery){
@@ -160,9 +160,34 @@ export function interactNacar(g){
  g.save?.();
  return true;
 }
-export function nacarObjective(g){if(!nacarChapter(g))return null;const active=activeNacarRoute(g);if(active){const [x,y]=active.route.rings[active.run.ring];return{x,y,label:active.route.name,action:'Cruza el aro '+(active.run.ring+1)+' de '+active.route.rings.length};}const s=g.world1?.stations.find(s=>!s.done);if(s)return{x:s.x,y:s.y,label:s.name,action:'Nada hasta la perla y pulsa E / Usar cuando brille'};if(!g.world1.sealed)return{x:9550,y:1440,label:'Anémona del silencio',action:'Esquiva el aviso y ataca durante su apertura'};return{x:10800,y:1775,label:'Volver con Michi',action:'La marea está a salvo. Pulsa E / Usar en la corriente del este'};}
-export function updateNacarChapter(g){if(!nacarChapter(g))return false;const w=g.world1;updateSwimRoute(g);for(const v of g.roomDef.tides){const a=v.area,up=g._nacarCurrents?.[v.id];for(const shot of g.projectiles||[])if(shot.owner==='enemy'&&shot.x>a.x&&shot.x<a.x+a.w&&shot.y>a.y&&shot.y<a.y+a.h)shot.vy=up?-4:4;}
- if(!w.sealed&&w.stations.every(s=>s.done)&&g.clearedEncounters?.['w1-nacar']?.includes(NACAR_BOSS_ID)){w.sealed=true;remember(g,'w1-nacar-home');g.playWorld1Cine?.('nacarVictory','nacar');}return true;}
+export function nacarObjective(g){if(!nacarChapter(g))return null;const active=activeNacarRoute(g);if(active){const [x,y]=active.route.rings[active.run.ring];return{x,y,label:active.route.name,action:'Cruza el aro '+(active.run.ring+1)+' de '+active.route.rings.length};}const s=g.world1?.stations.find(s=>!s.done);if(s)return{x:s.x,y:s.y,label:s.name,action:'Nada hasta la perla y pulsa E / Usar cuando brille'};if(!g.world1.sealed)return{x:9550,y:1440,label:'Anémona del silencio',action:'Busca el pasillo iluminado y ataca mientras el núcleo esté abierto'};return{x:10800,y:1775,label:'Volver con Michi',action:'La marea está a salvo. Pulsa E / Usar en la corriente del este'};}
+function dissipateAnemoneVolley(g){
+ for(const projectile of g.projectiles||[]){
+  if(!projectile.anemone)continue;
+  projectile.life=0;
+  projectile.dmg=0;
+ }
+}
+
+export function updateNacarChapter(g){
+ if(!nacarChapter(g))return false;
+ const w=g.world1;
+ updateSwimRoute(g);
+ for(const valve of g.roomDef.tides){
+  const a=valve.area,up=g._nacarCurrents?.[valve.id];
+  for(const shot of g.projectiles||[]){
+   if(shot.owner!=='enemy'||shot.anemone)continue;
+   if(shot.x>a.x&&shot.x<a.x+a.w&&shot.y>a.y&&shot.y<a.y+a.h)shot.vy=up?-4:4;
+  }
+ }
+ if(!w.sealed&&w.stations.every(s=>s.done)&&g.clearedEncounters?.['w1-nacar']?.includes(NACAR_BOSS_ID)){
+  w.sealed=true;
+  dissipateAnemoneVolley(g);
+  remember(g,'w1-nacar-home');
+  g.playWorld1Cine?.('nacarVictory','nacar');
+ }
+ return true;
+}
 // Profiles are local to the ocean. Main campaign movement and other heroes use their normal physics.
 export const NACAR_SWIM_PROFILES=Object.freeze([
  {up:5.2,down:5.0,steer:.43,tide:1.0},    // Gota: easy to place in a ring.
@@ -190,13 +215,14 @@ export function swimNacar(g,p,up,down){
  p.coyote=0;
  if(p.y<100){p.y=100;p.vy=Math.max(0,p.vy);}
 }
-export function createNacarBoss(makeFoe,rng){const e=makeFoe(9500,1430,'medusa','w1-nacar',998,{rng});Object.assign(e,{x:9500,y:1430,w:130,h:135,hp:520,max:520,miniBoss:true,_encounterSaveId:NACAR_BOSS_ID,_nacarBoss:{phase:'rest',clock:90,attack:0,tier:1},damageTakenScale:0});return e;}
+export function createNacarBoss(makeFoe,rng){const e=makeFoe(9500,1430,'medusa','w1-nacar',998,{rng});Object.assign(e,{x:9500,y:1430,w:130,h:135,hp:520,max:520,miniBoss:true,_encounterSaveId:NACAR_BOSS_ID,_nacarBoss:{phase:'rest',clock:90,attack:0,tier:1,active:false},damageTakenScale:0});return e;}
 const bossSweepDirection=enemy=>enemy._nacarBoss.tx<enemy.x?1:-1;
-export const NACAR_ATTACK_NAMES=Object.freeze(['Abanico de esporas','Lluvia de pólipos','Corona de aguijones','Marea cruzada']);
+export const NACAR_ATTACK_NAMES=Object.freeze(['Abanico de esporas','Lluvia de pólipos','Corona de aguijones','Marea cruzada','Doble presión']);
 
 export function nacarBossPattern(enemy){
  const {attack,tier,tx,ty}=enemy._nacarBoss;
  const x=enemy.x+enemy.w/2,y=enemy.y+enemy.h/2;
+ if(attack===4)return [];
  if(attack===3){
   const direction=bossSweepDirection(enemy);
   const source=direction>0?8840:10480;
@@ -210,16 +236,96 @@ export function nacarBossPattern(enemy){
  return Array.from({length:count},(_,i)=>({x,y,angle:attack===0?aim+(i-(count-1)/2)*.18:i*Math.PI*2/count}));
 }
 
-export function updateNacarBoss(e,g){const b=e._nacarBoss;if(!b)return false;e.vx=0;e.vy=0;e.stun=0;if(e.hp<=0)return true;const p=g.player;if(!p||p.dead||!g.world1?.stations.every(s=>s.done)){e.damageTakenScale=0;return true;}b.tier=e.hp<e.max*.3?3:e.hp<e.max*.65?2:1;if(Math.abs(p.x-e.x)>1500)return true;
- if(--b.clock>0){if(b.phase==='rest')e.damageTakenScale=e.damageWindowRemaining>0?1:0;return true;}
- if(b.phase==='rest'){b.phase='warn';b.clock=65;b.tx=p.x+p.w/2;b.ty=p.y+p.h/2;e.damageTakenScale=0;}
- else if(b.phase==='warn'){
-  b.phase='attack';
-  b.clock=32;
-  for(const shot of nacarBossPattern(e)){
-   if(g.projectiles.length>=120)break;
-   g.projectiles.push({x:shot.x,y:shot.y,vx:Math.cos(shot.angle)*5.2,vy:Math.sin(shot.angle)*5.2,w:16,h:16,life:b.attack===3?340:150,dmg:12+b.tier*2,owner:'enemy',color:'#d7a7d1'});
-  }
+export const ANEMONE_ARENA=Object.freeze({left:8790,right:10650,top:810,floor:1850});
+const PRESSURE_TIME=105;
+const ATTACK_ORDERS=[[0,1,2],[3,1,0,2],[4,3,2,0,1]];
+const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+
+export function anemonePressure(enemy){
+ const {attack,ty,phase,clock}=enemy._nacarBoss;
+ if(attack!==4||(phase!=='warn'&&phase!=='attack'))return null;
+ const second=phase==='attack'&&clock<=99;
+ const upper=(ty>1300)!==second;
+ const safeY=upper?1140:1530;
+ return {safeY,halfHeight:112,ticks:phase==='warn'?clock:clock>99?0:Math.max(0,clock-19),
+  impact:phase==='attack'&&(clock===PRESSURE_TIME||clock===19),
+  flash:phase==='attack'&&(clock>99||clock<=19)};
+}
+
+function opening(enemy){
+ const b=enemy._nacarBoss;
+ b.phase='rest';
+ b.clock=[108,100,94][b.tier-1];
+ b.openTime=b.clock;
+ b.openDamage=[180,152,142][b.tier-1];
+ enemy.damageWindowRemaining=b.openDamage;
+ enemy.damageTakenScale=1;
+}
+
+function emitAnemoneVolley(enemy,g){
+ const b=enemy._nacarBoss;
+ for(const shot of nacarBossPattern(enemy)){
+  if(g.projectiles.length>=120)break;
+  g.projectiles.push({
+   x:shot.x-8,y:shot.y-8,vx:Math.cos(shot.angle)*5.2,vy:Math.sin(shot.angle)*5.2,
+   w:16,h:16,life:b.attack===3?340:150,dmg:12+b.tier*2,owner:'enemy',
+   color:'#d7a7d1',anemone:true,
+  });
  }
- else{b.phase='rest';b.clock=105;b.attack=(b.attack+1)%(b.tier>=2?4:3);e.damageWindowRemaining=180;e.damageTakenScale=1;}return true;
+}
+
+function applyAnemonePressure(e,p,hurt){
+ const field=anemonePressure(e);
+ if(!field?.impact)return;
+ const x=p.x+p.w/2,y=p.y+p.h/2;
+ const a=ANEMONE_ARENA;
+ if(x>a.left&&x<a.right&&y>a.top&&y<a.floor&&Math.abs(y-field.safeY)>field.halfHeight)
+  hurt?.(19,'PRESIÓN ABISAL');
+}
+
+export function updateNacarBoss(e,g,hurt){
+ const b=e._nacarBoss;
+ if(!b)return false;
+ e.vx=0;e.vy=0;e.stun=0;
+ if(e.hp<=0)return true;
+ const p=g.player,a=ANEMONE_ARENA;
+ if(!p||p.dead||!g.world1?.stations.every(s=>s.done)){
+  e.damageTakenScale=0;
+  return true;
+ }
+ const x=p.x+p.w/2,y=p.y+p.h/2;
+ if(!b.active){
+  if(x<a.left||x>a.right||y<a.top||y>a.floor)return true;
+  b.active=true;
+  b.phase='approach';
+  b.clock=34;
+ }
+ if(x<a.left-480||x>a.right+240){
+  b.active=false;
+  e.damageTakenScale=0;
+  dissipateAnemoneVolley(g);
+  return true;
+ }
+ if(b.phase==='attack'&&b.attack===4)applyAnemonePressure(e,p,hurt);
+ if(--b.clock>0){
+  if(b.phase==='rest')e.damageTakenScale=e.damageWindowRemaining>0?1:0;
+  return true;
+ }
+ if(b.phase==='rest'||b.phase==='approach'){
+  const tier=e.hp<e.max*.3?3:e.hp<e.max*.65?2:1;
+  const order=ATTACK_ORDERS[tier-1];
+  b.turn=b.tier===tier?(b.turn??-1)+1:0;
+  b.tier=tier;
+  b.attack=order[b.turn%order.length];
+  b.phase='warn';
+  b.clock=65;
+  b.tx=clamp(x,a.left+40,a.right-40);
+  b.ty=clamp(y,a.top+35,a.floor-35);
+  e.damageTakenScale=0;
+ }else if(b.phase==='warn'){
+  b.phase='attack';
+  b.clock=b.attack===4?PRESSURE_TIME:32;
+  if(b.attack!==4)emitAnemoneVolley(e,g);
+ }else opening(e);
+ return true;
 }

@@ -67,6 +67,8 @@ export function buildNacarRoom(){
   tides:[
    {id:'west',x:3550,y:1740,area:{x:3500,y:700,w:350,h:1150},up:true},
    {id:'east',x:6200,y:1180,area:{x:6150,y:450,w:350,h:1350},up:false},
+   {id:'arena-west',x:8940,y:1620,area:{x:8820,y:985,w:225,h:765},up:true},
+   {id:'arena-east',x:10220,y:1010,area:{x:10110,y:900,w:245,h:735},up:false},
   ],
   hint:'Mantén salto para ascender y bajar para sumergirte. Suelta ambas teclas para flotar. Escucha las cinco perlas y prueba los aros de la pradera.',
  };

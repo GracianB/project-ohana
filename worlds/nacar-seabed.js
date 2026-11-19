@@ -1,5 +1,5 @@
 import {drawOceanPassage} from './michi-adventure-art.js';
-import {pearlOpen,nacarDiscovered,nacarDiscoveryAvailable,nacarBossPattern,activeNacarRoute,nacarRouteAvailable,NACAR_ATTACK_NAMES} from '../systems/nacar-chapter.js';
+import {pearlOpen,nacarDiscovered,nacarDiscoveryAvailable,nacarBossPattern,activeNacarRoute,nacarRouteAvailable,NACAR_ATTACK_NAMES,ANEMONE_ARENA,anemonePressure} from '../systems/nacar-chapter.js';
 import {drawSeaStar} from '../characters/art/nacar.js';
 const TAU=Math.PI*2,oval=(c,x,y,rx,ry,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();};
 function drawGrotto(c,g,cam,t,W,H){
@@ -237,6 +237,11 @@ function drawSwimRoutes(c,g,cam,t){
 }
 
 export function drawNacarChapter(c,g,cam,t){if(!g.roomDef?.nacarChapter)return false;t=g.reduceMotion?0:t;c.save();
+ const guardian=g.enemies?.find(e=>e._nacarBoss?.active&&e.hp>0);
+ if(guardian){
+  if(guardian._nacarBoss.attack===4)drawPressureWater(c,guardian,cam);
+  else if(guardian._nacarBoss.phase==='warn')drawAnemoneTrajectories(c,guardian,cam);
+ }
  for(const s of g.world1?.stations||[]){const x=s.x-cam.x,y=s.y-cam.y;if(x< -120||x>(g.viewW||1600)+120)continue;const open=pearlOpen(g.world1.tick,s);oval(c,x,y+12,30,15,'#376d7c');c.fillStyle=s.done?'#bceade':open?'#ead6bc':'#5d8097';c.beginPath();c.arc(x,y,18,Math.PI,0);c.quadraticCurveTo(x+13,y+15,x,y+12);c.quadraticCurveTo(x-13,y+15,x-18,y);c.fill();oval(c,x,y-2,7,8,s.done?'#fff5d0':open?'#edf9e4':'#7296a4');c.textAlign='center';c.font='600 12px sans-serif';c.fillStyle='#cbe7de';c.fillText(s.done?'ESCUCHADA':open?'E · ESCUCHAR':'RESPIRA…',x,y-35);}
  for(const valve of g.roomDef.tides){
   const x=valve.x-cam.x,y=valve.y-cam.y;
@@ -273,6 +278,49 @@ export function drawNacarChapter(c,g,cam,t){if(!g.roomDef?.nacarChapter)return f
  }
  for(let i=0;i<10;i++)drawSeaStar(c,700+i*960-cam.x,1838-cam.y,10,0,i%2?'#d9b6bf':'#bddfc6');
  c.restore();return true;}
+function drawPressureWater(c,e,cam){
+ const field=anemonePressure(e);
+ if(!field)return;
+ const a=ANEMONE_ARENA;
+ const left=a.left-cam.x,top=a.top-cam.y,width=a.right-a.left;
+ const safeTop=field.safeY-field.halfHeight-cam.y;
+ const safeBottom=field.safeY+field.halfHeight-cam.y;
+ c.save();
+ c.fillStyle=field.flash?'#ce718667':'#9f587132';
+ c.fillRect(left,top,width,safeTop-top);
+ c.fillRect(left,safeBottom,width,a.floor-cam.y-safeBottom);
+ c.strokeStyle='#c1eed9';c.lineWidth=2;
+ for(const edge of [safeTop,safeBottom]){
+  c.beginPath();c.moveTo(left,edge);c.lineTo(left+width,edge);c.stroke();
+ }
+ c.restore();
+}
+
+export function drawAnemoneStatus(c,g,width){
+ if(!g.roomDef?.nacarChapter||g.world1Cine)return;
+ const enemy=g.enemies.find(e=>e._nacarBoss?.active&&e.hp>0);
+ if(!enemy)return;
+ const b=enemy._nacarBoss,pressure=anemonePressure(enemy);
+ const open=b.phase==='rest'&&enemy.damageWindowRemaining>0;
+ if(!open&&!pressure&&b.phase!=='warn')return;
+ const w=Math.min(254,width-28),x=(width-w)/2,y=105;
+ const title=open?'NÚCLEO ABIERTO':pressure?'NADA POR EL PASILLO VERDE':NACAR_ATTACK_NAMES[b.attack].toUpperCase();
+ const color=open?'#dff6ba':pressure?'#bee8d4':'#ffd0c0';
+ const duration=open?b.openTime:pressure?(b.phase==='warn'?65:81):65;
+ const ticks=open?b.clock:pressure?pressure.ticks:b.clock;
+ c.save();
+ c.fillStyle='#142b40ef';c.fillRect(x,y,w,32);
+ c.textAlign='center';c.font='600 11px sans-serif';c.fillStyle=color;
+ c.fillText(title,width/2,y+14,w-14);
+ c.globalAlpha=.9;
+ c.fillRect(x+8,y+21,(w-16)*Math.max(0,Math.min(1,ticks/duration)),3);
+ if(open){
+  c.globalAlpha=.55;
+  c.fillRect(x+8,y+27,(w-16)*Math.min(1,enemy.damageWindowRemaining/b.openDamage),2);
+ }
+ c.restore();
+}
+
 function drawAnemoneTrajectories(c,e,cam){
  const {attack,clock}=e._nacarBoss;
  const urgency=1-Math.max(0,Math.min(1,clock/65));
@@ -303,7 +351,6 @@ export function drawNacarBoss(c,e,cam,t,reduced){
  const x=e.x+e.w/2-cam.x,y=e.y+e.h/2-cam.y,clock=reduced?0:t;
  const vulnerable=b.phase==='rest'&&e.damageWindowRemaining>0;
  const [root,rim,tip,inner]=BOSS_PALETTES[Math.max(0,Math.min(2,(b.tier||1)-1))];
- if(b.phase==='warn')drawAnemoneTrajectories(c,e,cam);
  c.save();
  c.translate(x,y);
  oval(c,0,8,78,78,inner+'66');
@@ -347,7 +394,7 @@ export function drawNacarBoss(c,e,cam,t,reduced){
  c.textAlign='center';c.fillStyle='#faead5';c.font='600 12px sans-serif';
  c.fillText('ANÉMONA DEL SILENCIO',0,-135);
  c.font='600 11px sans-serif';
- const instruction=vulnerable?'AHORA · NÚCLEO ABIERTO':b.phase==='rest'?'EL NÚCLEO SE CIERRA':b.phase==='warn'?NACAR_ATTACK_NAMES[b.attack].toUpperCase():'CORRIENTE HOSTIL';
+ const instruction=!b.active?'ESCUCHA LAS CINCO PERLAS Y ACÉRCATE':b.phase==='approach'?'LA ANÉMONA DESPIERTA':vulnerable?'AHORA · NÚCLEO ABIERTO':b.phase==='rest'?'EL NÚCLEO SE CIERRA':b.phase==='warn'?NACAR_ATTACK_NAMES[b.attack].toUpperCase():'CORRIENTE HOSTIL';
  c.fillText(instruction,0,128);
  c.restore();
 }
