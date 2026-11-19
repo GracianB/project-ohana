@@ -5,6 +5,7 @@ import { CAMPAIGN, START_EVOLUTION, START_XP } from "../../multiplayer/mission.j
 const ARENA = { left: 48, right: 1232, top: 450, floor: 572, exit: 1125 };
 const MAX_EVENTS = 32;
 const ABILITY_RULES = Object.freeze({
+  bubble:[48,750,240],tideguard:[34,3000,240,16],tidestars:[120,6500,300],
   ukulele: [42, 750, 230], hula: [68, 2200, 260], ohana: [132, 5200, 300],
   plasma: [48, 700, 240], rollo: [74, 1900, 250], caos: [118, 4800, 300],
   chain: [46, 650, 250], blink: [72, 1800, 260], storm: [126, 5000, 310],

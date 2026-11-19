@@ -13,8 +13,8 @@ const evo=fs.readFileSync("systems/evo-cinema.js","utf8");
 
 test("Yomi IA: roster, nombres y habilidades con identidad de IA",()=>{
  const y=ROSTER.find(r=>r.id==="yomi");
- assert.deepEqual(y.forms.map(f=>f.name),["Yomi Bit","Yomi","Yomi Red","Yomi Oráculo","Yomi Constelación"]);
- assert.equal(y.role,"IA");
+ assert.deepEqual(y.forms.map(f=>f.name),["Yomi · Lumbre","Yomi","Yomi · Guardiana","Yomi · Custodia Lunar","Yomi · Farol del Hogar"]);
+ assert.equal(y.role,"guardiana");
  assert.deepEqual(y.abilities,["ofuda","sleeve","maw"]);
  assert.equal(ABILITY_DEFS.ofuda.name,"Ping curioso");
  assert.equal(ABILITY_DEFS.sleeve.name,"Escáner");

@@ -1,6 +1,6 @@
 import{steerMichiFlight}from'../../characters/michi-flight.js';
 // Server-owned arena simulation. Clients submit controls, never hits, XP or winners.
-import{findRoster}from'../../characters/roster.js';
+import{findRoster,ROSTER}from'../../characters/roster.js';
 import{WORLD1_THEMES,WORLD1_ARENA,WORLD1_FLOOR}from'../../systems/world1-rooms.js';
 import{createDuel,awardDuelEvent,validDuelArena}from'../../multiplayer/match-rules-v604.js';
 import{KEEPSAKES}from'../../systems/keepsakes.js';
@@ -54,6 +54,7 @@ export function versusAction(room,player,kind,slot){
  else if(key==='K'){
   if(['stitcho','chispin','cuerno','dino','frita'].includes(id)){a.dash=id==='chispin'?9:18;a.dashSpeed=a.facing*(id==='cuerno'?15:id==='chispin'?18:11);a.invuln=Math.max(a.invuln,id==='chispin'?12:5);}
   else if(id==='kilo'){a.flight=a.flight?0:240+level*30;a.vy=-2;}
+  else if(id==='nacar'){a.hp=Math.min(a.maxHp,a.hp+8);a.invuln=Math.max(a.invuln,18);strike(v,a,220,10+level*3,{all:true,stun:24});}
   else if(id==='cat'){strike(v,a,220,12+level*3,{all:true,stun:24});}
   else if(id==='yomi'){for(const p of v.shots)if(p.owner!==a.id&&distance(a,p)<300+45*level)p.life=0;for(const t of targets(v,a))if(distance(a,t)<300+45*level)t.markUntil=v.tick+240;}
   else if(id==='pizza'){for(const t of targets(v,a))if(distance(a,t)<300){t.slow=90;damage(v,t,14+level*3,a);}}
@@ -63,7 +64,7 @@ export function versusAction(room,player,kind,slot){
   for(const t of targets(v,a))if(distance(a,t)<370){const n=38+level*9;const landed=damage(v,t,id==='yomi'&&t.markUntil>v.tick?n*1.5:n,a);if(id==='yomi'&&landed&&t.markUntil>v.tick){t.markUntil=0;a.hp=Math.min(a.maxHp,a.hp+6);}}
  }else if(key==='I'){a.dash=20;a.dashSpeed=a.facing*12;a.invuln=Math.max(a.invuln,10);fire(v,a,3,28+level*5,10);}
  else if(key==='P'){a.charge=0;fire(v,a,7,50+level*5,12);strike(v,a,300,65,{all:true});}
- else if(key==='U'){const ids=['kilo','stitcho','chispin','cat','cuerno','dragon','dino','frita','pizza','yomi'];a.companion={id:ids[(ids.indexOf(id)+1+v.tick%8)%10],life:480,next:1};}
+ else if(key==='U'){const ids=ROSTER.map(h=>h.id).filter(h=>h!==id);a.companion={id:ids[v.tick%ids.length],life:480,next:1};}
  event(v,'action',findRoster(id).name+' · '+key,{actor:a.id,key});if(v.phase==='complete')room.phase='complete';sync(room);return{accepted:true,key};
 }
 export function setVersusInput(room,player,input,now){

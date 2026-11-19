@@ -3,7 +3,7 @@ export const FAMILY_ISLANDS=Object.freeze([
  {id:'aloha',name:'Bahía del compás',heroes:['kilo','stitcho'],x:250,y:260,rx:220,ry:128,color:'#83bfa0',sand:'#efd49e'},
  {id:'kitchen',name:'Puerto del banquete',heroes:['pizza','frita'],x:690,y:230,rx:200,ry:125,color:'#b7c18a',sand:'#f2c78c'},
  {id:'fossil',name:'Cráter de los gigantes',heroes:['dragon','dino'],x:1130,y:270,rx:210,ry:140,color:'#ae9b88',sand:'#b9a384'},
- {id:'moon',name:'Jardín de la luna',heroes:['cat','cuerno'],x:480,y:510,rx:220,ry:100,color:'#99b0bb',sand:'#d9d2bb'},
+ {id:'moon',name:'Jardín de la luna',heroes:['cat','cuerno','nacar'],x:480,y:510,rx:220,ry:100,color:'#99b0bb',sand:'#d9d2bb'},
  {id:'storm',name:'Santuario del trueno',heroes:['chispin','yomi'],x:990,y:510,rx:230,ry:100,color:'#9b9eba',sand:'#d4bfd0'},
 ]);
 

@@ -1,0 +1,4 @@
+// One tide-born performance, independent of gameplay and the other heroes.
+const ease=v=>{const x=Math.max(0,Math.min(1,v));return x*x*(3-2*x);};
+export function nacarWelcomeBeat(seconds,reduced=false){const t=Number.isFinite(seconds)?((seconds%14+14)%14):0,pulse=(a,b,c,d)=>ease((t-a)/(b-a))*(1-ease((t-c)/(d-c)));if(reduced)return{phase:'idle',float:0,pearl:0,greet:0,reduced:true};return{phase:t<3.5?'listen':t<4.4?'pearl':t<5.4?'greet':'rest',float:pulse(3.1,3.4,4.9,5.4),pearl:pulse(3.4,3.7,4.1,4.4),greet:pulse(4.4,4.7,5.1,5.4),reduced:false};}
+export function drawNacarWelcomeFX(c,x,y,height,time,beat,layer='back'){if(beat.reduced)return;c.save();c.fillStyle=layer==='back'?'#9de8e244':'#e8e7c7';for(let i=0;i<5;i++){const a=i*Math.PI*2/5+time*.7,r=height*(.25+beat.pearl*.13);c.beginPath();c.ellipse(x+Math.cos(a)*r,y-height*.5+Math.sin(a)*r*.5,1.5+beat.pearl*2,3,0,0,Math.PI*2);c.fill();}c.restore();}

@@ -15,7 +15,7 @@ const pose=(state,time,form=2,reduceMotion=false)=>({
 });
 const vec=v=>[v.dx,v.dy,v.rotation,v.sx,v.sy,v.ear,v.tail,v.paw,v.wing,v.glow].map(x=>Math.round(x*1000)/1000).join(',');
 test('V459: all 10 active heroes have all ten individually choreographed action channels',()=>{
- assert.equal(ROSTER.length,10);
+ assert.equal(ROSTER.length, 11);
  assert.equal(ACTION_CHANNELS.length,10);
  assert.equal(new Set(ACTION_CHANNELS).size,10);
  assert.deepEqual([...MICHICORNIO_ACTIONS], [...ACTION_CHANNELS]);

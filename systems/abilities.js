@@ -242,6 +242,7 @@ cuerno:  { aurora: true,  name: "Manto aurora", text: "Escudo luminoso y salto m
 });
 
 const SUPREME = Object.freeze({
+ nacar:{id:'tide_guest',name:'Marea compartida',key:'U',cd:18000,color:'#9de8e2',special:'Ayuda de la familia',ally:'cat'},
 kilo:    { id: "solar", name: "OHANA: ¡A COMPÁS!", key: "U", cd: 18000, color: "#ffd36a", special: "Dúo musical", ally: "stitcho" },
 stitcho: { id: "bang", name: "CAOS BAJO LA NUBE", key: "U", cd: 18000, color: "#8f7bff", special: "Dúo de tormenta", ally: "chispin" },
 chispin: { id: "boltgod", name: "JUICIO DEL TRUENO", key: "U", cd: 18000, color: "#ffe14a", special: "Dúo del trueno", ally: "cat" },
@@ -263,6 +264,7 @@ return SPECIALS[id] || SPECIALS.kilo;
 }
 
 export const SUPREME_IDENTITY = Object.freeze({
+ nacar:{kind:'tide',line:'EL MAR TAMBIÉN ABRAZA.',text:'Una corriente reúne a la familia.'},
 kilo:    { kind: "bloom",   line: "NADIE SE QUEDA ATRÁS", text: "El sol llama a toda la familia." },
 stitcho: { kind: "rift",    line: "TODO CAOS TIENE COSTURA", text: "Cose el espacio y arrastra el combate al centro." },
 chispin: { kind: "chain",   line: "NO HAY DONDE ESCONDERSE", text: "La tormenta marca y persigue cada blanco." },
@@ -910,7 +912,7 @@ if(p.id==="cuerno"&&FX.some(f=>f.kind==="cuernoFantasyTrail"))
 tickCuernoFantasyStatus(game,p,canHit,damageEnemy);
 trimAbilityProjectiles(game);
 game.dinoAbilityFx=captureDinoNativeFx(p);
-game.michiAbilityFx=p.id==='cat'?(readMichiEffects(FX.filter(f=>['yarn','purr','wisp'].includes(f.kind)).slice(-12))||[]):[];
+game.michiAbilityFx=['cat','nacar'].includes(p.id)?(readMichiEffects(FX.filter(f=>['yarn','purr','wisp'].includes(f.kind)).slice(-12))||[]):[];
 game.chispinAbilityFx=p.id==='chispin'?(readChispinEffects(FX.filter(f=>['chain','trail','storm'].includes(f.kind)).slice(0,8))||[]):[];
 game.kiloAbilityFx=p.id==='kilo'?FX.filter(f=>['note','hula','ohana'].includes(f.kind)).slice(0,12).map(f=>({
  kind:f.kind,x:Number.isFinite(f.x)?f.x:cx(p),y:Number.isFinite(f.y)?f.y:cy(p),
@@ -1225,6 +1227,9 @@ ctx.strokeStyle = "#fff"; ctx.lineWidth = Math.max(1, width * 0.4); ctx.stroke()
 }
 
 const CASTERS = {
+bubble(g,p,evo){CASTERS.plasma(g,p,evo);},
+tideguard(g,p,evo){CASTERS.purr(g,p,evo);},
+tidestars(g,p,evo){CASTERS.ninetails(g,p,evo);},
 ukulele(g, p, evo) {
 const h = hand(p);
 const n = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
@@ -1376,7 +1381,7 @@ for (let i = 0; i < n; i++) {
     kind: "wisp", x: an.x, y: an.y, vx: Math.cos(an.ang) * sp, vy: Math.sin(an.ang) * sp,
     ax: an.x - cx(p), ay: an.y - (p.y + p.h),
     life: 230, target: targets.length ? targets[i % targets.length] : null, dmg,
-    color: cols[i % 3], accent: cols[3], trail: [], delay, delay0: delay, idx: i, tail: true, form, n,
+    color: cols[i % 3], accent: cols[3], trail: [], delay, delay0: delay, idx: i, tail: true, marine:p.id==='nacar', form, n,
   });
 }
 g.shake = Math.min(18, (g.shake || 0) + 4);

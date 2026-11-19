@@ -3,6 +3,7 @@
 // intact and available outside the personal single-player route.
 import {roomAlbumPlacements} from './room-album.js';
 export const HERO_COLLECTIONS=Object.freeze({
+ nacar:{room:'hub',title:'Las cien perlas de Nácar',color:'#9de8e2',bonus:'ABRAZO DE LA MAREA'},
  kilo:{room:'hub',title:'La melodía de las cien flores',color:'#ffe2ac',bonus:'CANCIÓN DEL HOGAR'},
  stitcho:{room:'hub',title:'Las cien chispas del caos',color:'#8cecff',bonus:'CORAZÓN GALÁCTICO'},
  chispin:{room:'hub',title:'Los cien rayos del trueno',color:'#fff2a3',bonus:'RELÁMPAGO DORADO'},

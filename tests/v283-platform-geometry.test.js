@@ -4,8 +4,8 @@ import {ROSTER} from "../characters/roster.js";
 import {supportBelow,formPlatformAudit} from "../systems/platform-geometry.js";
 test("V283: all ten heroes expose five measurable hitboxes",()=>{
  const a=formPlatformAudit(ROSTER,[]);
- assert.equal(ROSTER.length,10);
- assert.equal(a.forms.length,50);
+ assert.equal(ROSTER.length, 11);
+ assert.equal(a.forms.length, 55);
  assert.ok(a.tallest>0&&a.widest>0);
  assert.ok(a.forms.every(f=>f.height>0&&f.width>0&&f.jump>0));
 });

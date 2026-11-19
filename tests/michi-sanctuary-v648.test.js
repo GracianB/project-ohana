@@ -10,7 +10,7 @@ import {captureCombatFrame,validCombatFrame} from '../systems/coop-combat-mirror
 const room=WORLD1_ROOMS['w1-cat'];
 const game=()=>({roomDef:room,roomId:room.id,worldW:14400,worldH:2100,viewW:1280,viewH:720,cam:{x:0,y:0},player:{id:'cat',x:4360,y:1116,w:18,h:18,evo:4,health:100},world1:{stations:room.seal.stations.map(s=>({...s,done:false})),sealed:false},expedition:{done:[]},projectiles:[]});
 test('Michi sanctuary preserves identities and gives each branch a real destination floor',()=>{
- assert.equal(room.width,14400);assert.equal(room.height,2100);assert.deepEqual(room.seal.stations.map(s=>s.id),[0,1,2,3,4]);assert.equal(room.michiSanctuary.zones.length,7);
+ assert.equal(room.width,14400);assert.equal(room.height,2100);assert.deepEqual(room.seal.stations.map(s=>s.id),[0,1,2,3,4]);assert.equal(room.michiSanctuary.zones.length,9);
  for(const a of room.michiSanctuary.passages){assert.ok(room.plats.some(p=>a.toX>p[0]&&a.toX<p[0]+p[2]&&a.toFloor===p[1]),a.id);assert.ok(a.need<=5);}
  assert.deepEqual(worldBounds('w1-cat'),{width:14400,height:2100});assert.equal(worldBounds('w1-kilo').height,1260);
 });
@@ -23,7 +23,7 @@ test('tunnels enforce lamp gates, preserve life/form and cannot bounce on held i
  g.world1.stations[0].done=true;assert.equal(interactMichiSanctuary(g),true);assert.equal(g.player.x,a.toX-9);assert.equal(g.player.health,100);assert.equal(g.player.evo,4);assert.equal(sanctuaryZone(g).id,'crypt');assert.equal(interactMichiSanctuary(g),false);
 });
 test('wayfinding follows unlocked tunnels to the next lamp rather than pointing through a ceiling',()=>{
- const g=game();g.world1.stations[0].done=true;const o=sanctuaryObjective(g);assert.equal(o.x,3670);assert.match(o.action,/↓ \/ E/);g.player.x=1200;g.player.y=1800;assert.equal(sanctuaryObjective(g).x,1910);
+ const g=game();g.world1.stations[0].done=true;const o=sanctuaryObjective(g);assert.equal(o.x,3670);assert.match(o.action,/E \/ Usar/);g.player.x=1200;g.player.y=1800;assert.equal(sanctuaryObjective(g).x,1910);
 });
 test('exit requires earned seal and all three post-boss echoes',()=>{const g=game(),a=room.michiSanctuary.passages.find(a=>a.exit);g.world1.stations.forEach(s=>s.done=true);assert.equal(passageReady(g,a),false);g.world1.sealed=true;assert.equal(passageReady(g,a),false);g.expedition.done=[0,1,2];assert.equal(passageReady(g,a),true);});
 for(const event of ['roomEnter','awaken','chapterHundred','chapterBossIntro','chapterExit'])test('native story contract '+event,()=>{const shots=buildChapterFilm(event,'cat',{form:2});assert.ok(shots.length);assert.ok(shots.every(s=>s.line&&s.title&&s.form===2&&s.dur>100&&s.layout==='chapter-film'));assert.equal(buildChapterFilm(event,'kilo'),null);});

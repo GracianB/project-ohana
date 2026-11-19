@@ -6,6 +6,7 @@ const alive=e=>e&&e.hp>0&&!e.dying&&!e.fell;
 const tier=p=>Math.max(0,Math.min(4,Number(p.evo)||0));
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const THEMES={
+ nacar:['#9de8e2','moon','Salto de espuma','Marea de estrellas','pounce','orbit'],
  kilo:['#ffd994','petal','Semillas del aloha','Jardín del sol','fan','garden'],
  stitcho:['#83eaff','ship','Costura de plasma','Flota 626','cross','fleet'],
  chispin:['#fff07b','bolt','Muelle relámpago','Cielo de tormenta','chain','thunder'],

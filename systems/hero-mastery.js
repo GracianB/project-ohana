@@ -7,6 +7,7 @@ const evoOf = (p={}) => Math.max(0, Math.min(4, Number(p.evo)||0));
 const heroId = (p={}) => p.id === "michi" ? "cat" : p.id;
 
 export const HERO_MASTERY = Object.freeze({
+  nacar:Object.freeze({id:'tidefloat',name:'Corriente amable',desc:'Medusa y estrella comparten la marea. Mantén salto al caer para planear en sus formas flotantes.'}),
   kilo: Object.freeze({
     id:"bloomdraft", name:"Corriente de Polen",
     desc:"Las flores de Hoku recargan su vuelo y crean corrientes ascendentes.",

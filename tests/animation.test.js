@@ -16,8 +16,8 @@ const basePlayer = {
 };
 
 test("los 10 personajes tienen perfiles cinéticos propios", () => {
-  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
-  assert.equal(Object.keys(MOTION_PROFILES).length, 10);
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
+  assert.equal(Object.keys(MOTION_PROFILES).length, 11);
   for (const id of ids) {
     const profile = motionProfile({ id });
     assert.equal(profile, MOTION_PROFILES[id]);
@@ -98,7 +98,7 @@ test("cambio de dirección produce un pulso visual de giro y frenada", () => {
 });
 
 test("las 40 transiciones de evolución tienen mensaje y escalera narrativa", () => {
-  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
   assert.equal(EVOLUTION_STAGE_COPY.length, 5);
   assert.equal(Object.keys(EVOLUTION_MESSAGES).length, 10);
 
@@ -118,8 +118,8 @@ test("las 40 transiciones de evolución tienen mensaje y escalera narrativa", ()
 });
  
 test("las 50 formas tienen transformación corporal progresiva por personaje", () => {
-  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
-  assert.equal(Object.keys(EVOLUTION_FORM_PROFILES).length, 10);
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
+  assert.equal(Object.keys(EVOLUTION_FORM_PROFILES).length, 11);
 
   for (const id of ids) {
     const profile = EVOLUTION_FORM_PROFILES[id];
@@ -153,10 +153,10 @@ test("los 10 golpes básicos y las 30 habilidades tienen firmas visuales estable
 
 
 test("las 5 formas tienen identidad visual y cinética propia para los 10 personajes", () => {
-  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
   assert.equal(EVOLUTION_STAGES.length, 5);
-  assert.equal(EVOLUTION_SIGNATURES.length, 50);
-  assert.equal(new Set(EVOLUTION_SIGNATURES).size, 50);
+  assert.equal(EVOLUTION_SIGNATURES.length, 55);
+  assert.equal(new Set(EVOLUTION_SIGNATURES).size, 55);
 
   for (const id of ids) {
     const keys = [];
@@ -197,7 +197,7 @@ test("las 5 formas tienen identidad visual y cinética propia para los 10 person
 });
 
 test("los estilos de evolución conservan una separación fuerte entre bebé, alta y forma final", () => {
-  for (const id of ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"]) {
+  for (const id of ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"]) {
     const baby = applyEvolutionPose({ state:"idle", form:0, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:0 });
     const high = applyEvolutionPose({ state:"idle", form:3, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:3 });
     const final = applyEvolutionPose({ state:"idle", form:4, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:4 });
@@ -211,7 +211,7 @@ test("los estilos de evolución conservan una separación fuerte entre bebé, al
 
 test("la progresión de evolución también escala la lectura del combate sin tocar la lógica", () => {
   assert.equal(EVOLUTION_COMBAT_STAGES.length, 5);
-  for (const id of ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"]) {
+  for (const id of ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"]) {
     const profiles = EVOLUTION_COMBAT_STAGES.map((stage, evo) => evolutionProfile({ id, evo }));
     for (const p of profiles) {
       for (const key of ["attack","cast","impact","trail","glow","density","snap"]) {
@@ -230,7 +230,7 @@ test("la progresión de evolución también escala la lectura del combate sin to
 
 test("la etapa final usa diseño por personaje y se nombra como forma final", () => {
   assert.equal(EVOLUTION_STAGES[4].name, "final");
-  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
   const motifs = ids.map((id) => evolutionProfile({ id, evo: 4 }).finalDesign.motif);
   assert.equal(new Set(motifs).size, ids.length);
   for (const id of ids) {
@@ -238,7 +238,7 @@ test("la etapa final usa diseño por personaje y se nombra como forma final", ()
   }
 });
 test("la identidad de personaje modula combate sin colapsar las cinco etapas", () => {
-  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
   const e2 = ids.map((id) => evolutionProfile({ id, evo: 2 }).combat.attack);
   assert.equal(new Set(e2).size, ids.length);
   const e4 = ids.map((id) => evolutionProfile({ id, evo: 4 }).combat.cast);
@@ -293,9 +293,9 @@ test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etap
   assert.equal(typeof drawEvolutionDesignFX, "function");
   assert.equal(typeof drawEvolutionSilhouetteFX, "function");
   assert.equal(typeof drawEvolutionCombatFX, "function");
-  assert.equal(Object.keys(EVOLUTION_FINAL_DESIGNS).length, 10);
+  assert.equal(Object.keys(EVOLUTION_FINAL_DESIGNS).length, 11);
   const ctx = makeEvolutionCinemaContext();
-  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
 
   for (const id of ids) {
     for (let evo = 0; evo < 5; evo++) {
@@ -311,7 +311,7 @@ test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etap
 
 
 test("las formas 2-4 tienen siluetas finales distintas y FX de combate dibujables", () => {
-  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
   const ctx = makeEvolutionCinemaContext();
   const silhouettes = ids.map((id) => evolutionProfile({ id, evo: 4 }).finalDesign.silhouette);
   assert.equal(new Set(silhouettes).size, 10);

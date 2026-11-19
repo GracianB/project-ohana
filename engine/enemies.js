@@ -1,3 +1,4 @@
+import {drawSanctuaryFauna} from './foes/michi-sanctuary-fauna.js';
 import {drawCreatureFinish} from './foes/creature-finish.js';
 import { drawBossQueen } from "./boss-art.js";
 import { drawQueenV94Warning } from "../systems/boss-v94-readability.js";
@@ -76,6 +77,7 @@ export function drawEnemy(ctx, e, cam, t, {reduceMotion=false}={}) {
 
   if (e.kind === "boss") drawBoss(ctx, e, t);
   else if (e.roomPersona?.special&&e.kind==='cangrejo') drawGroveDrummer(ctx,e,t,reduceMotion);
+  else if (drawSanctuaryFauna(ctx,e,t,reduceMotion)) { /* authored Michi fauna */ }
   else if (drawKiloFoe(ctx, e, t)) { /* V372 Kilo */ }
   else if (drawStitchoFoe(ctx, e, t)) { /* V372 Stitcho */ }
   else if (drawMichiFoe(ctx, e, t)) { /* V372 Michi */ }

@@ -1,6 +1,7 @@
 // PROJECT OHANA V48 · SUPREME STORYBOARDS
 // Pure data: safe to import in Node tests and browser runtime.
 export const SUPREME_STORYBOARDS = Object.freeze({
+  nacar:{duration:5.2,camera:'tide',gag:'pearl-surprise',scene:'tide',beat:'PERLA → OLA → ABRAZO'},
   kilo:    { duration:4.80, camera:"rise",    gag:"pollen-bonk",    scene:"bloom",   beat:"MOTA → GOLPE → SOL" },
   stitcho: { duration:5.05, camera:"zip",     gag:"rift-zipper",    scene:"rift",    beat:"GRIETA → MIRADA → COSTURA" },
   chispin: { duration:4.90, camera:"snap",    gag:"overcharge",     scene:"storm",   beat:"CARGA → CALAMBRE → RAYO" },

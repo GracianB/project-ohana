@@ -1,0 +1,104 @@
+{
+  "release": "ohana-800",
+  "baseRelease": "ohana-700",
+  "status": "local acceptance passed",
+  "unitTests": {
+    "passed": 2019,
+    "failed": 0
+  },
+  "releaseGate": {
+    "runtimeModules": 435,
+    "resources": 507,
+    "heroes": 11,
+    "forms": 55,
+    "campaignRooms": 10
+  },
+  "nativeMichiJourney": {
+    "entry": "baby",
+    "earnedLanterns": 5,
+    "bossDeaths": 0,
+    "bossPatterns": [
+      "silk_charge",
+      "pollen_fan",
+      "lantern_rain"
+    ],
+    "memoryCount": 100,
+    "familyEchoes": 3,
+    "seal": true,
+    "hundredScene": true,
+    "exitScene": true,
+    "reloadPreservesProgress": true,
+    "repeatedHundredSceneAfterReload": false,
+    "scope": "Keyboard and production physics. Collection continued from actual earned boss/canopy save checkpoints; no item, station, evolution or boss grants."
+  },
+  "touch": {
+    "viewports": [
+      [
+        320,
+        568
+      ],
+      [
+        320,
+        844
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ]
+    ],
+    "multitouchMovement": true,
+    "powerJ": true,
+    "nonoverlapping44pxTargets": true,
+    "secretInteractionFixture": {
+      "viewport": [
+        390,
+        844
+      ],
+      "nativeUse": true,
+      "chimeOrder": true,
+      "rootEntrance": true,
+      "aquariumEntrance": true,
+      "nacarEncounter": true,
+      "guardianRefuge": true,
+      "scope": "Explicit placement fixtures; interactions use the real touch Use button, with no progression grants."
+    }
+  },
+  "cast": {
+    "productionForms": 15,
+    "stateRenders": 90,
+    "marineChapterEntry": true,
+    "marineEvolutionMovies": 4,
+    "errors": [],
+    "nativeAtlasSelectionAndStart": true,
+    "rosterCounter": "11 / 11"
+  },
+  "sourceTests": [
+    "tests/michi-v800.test.js",
+    "tests/browser/v800-michi-journey.mjs",
+    "tests/browser/v800-michi-collection.mjs",
+    "tests/browser/v800-cast.mjs",
+    "tests/browser/v800-secrets.mjs",
+    "tests/browser/v655-touch-layout.mjs"
+  ],
+  "limits": [
+    "Other World 1 rooms retain their existing designs.",
+    "Nácar shares the Michi chapter; ten campaign seals remain.",
+    "Yomi artwork/identity restored; existing ability/save identifiers retained."
+  ],
+  "multiplayer": {
+    "heroes": [
+      "nacar",
+      "yomi"
+    ],
+    "twoAuthenticatedPlayers": true,
+    "modes": [
+      "adventure",
+      "versus"
+    ],
+    "candidateVerified": true
+  }
+}

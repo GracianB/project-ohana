@@ -471,6 +471,7 @@ ellipse, blob, poly, limb, swingLimb, eye, mouth, blush, shine, star, sparkle, t
 };
 
 export const MOTION_PROFILES = {
+ nacar:{pace:.9,sway:1.4,bounce:.5,weight:.55,attack:1.05,impact:.95,jump:1.15,cast:1.2,dash:.95},
 kilo:    { pace: 0.96, sway: 1.18, bounce: 1.08, weight: 0.82, attack: 1.10, impact: 1.05, jump: 1.08, cast: 1.00, dash: 0.90 },
 stitcho: { pace: 1.12, sway: 1.20, bounce: 0.92, weight: 0.68, attack: 1.18, impact: 1.05, jump: 1.18, cast: 1.08, dash: 1.32 },
 chispin: { pace: 1.38, sway: 1.42, bounce: 0.74, weight: 0.54, attack: 1.28, impact: 1.18, jump: 1.28, cast: 1.22, dash: 1.48 },

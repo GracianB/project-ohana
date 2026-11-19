@@ -19,7 +19,7 @@ test("V86 OHANA welcome and no Atrium wires",()=>{
  assert.ok(css.includes("intro-playing #atrium-fx"));
 });
 test("V86 each U has a genuinely readable multi-beat duration",()=>{
- assert.equal(Object.keys(SUPREME_STORYBOARDS).length,10);
+ assert.equal(Object.keys(SUPREME_STORYBOARDS).length,11);
  for(const [id,s] of Object.entries(SUPREME_STORYBOARDS)){
   assert.ok(s.duration>=4.8&&s.duration<=6.4,id);
   assert.ok(s.beat.includes("→"),id);
@@ -27,7 +27,7 @@ test("V86 each U has a genuinely readable multi-beat duration",()=>{
 });
 test("V86 power metadata is shared with battle engine and HUD",()=>{
  assert.equal(ABILITY_DEFS,CATALOG);
- assert.equal(Object.keys(ABILITY_DEFS).length,30);
+ assert.equal(Object.keys(ABILITY_DEFS).length, 33);
  assert.equal(CATALOG.gallop.key,"K");
 });
 test("V86 boss finale opens wings, never placeholder concentric circles",()=>{

@@ -5,7 +5,7 @@ import {HERO_IDENTITY,applyHeroIdentity,heroMeleeMultiplier} from '../characters
 import {markAt} from '../characters/signature.js';
 
 test('V2: ten heroes have honest strengths and weaknesses with unchanged form identities',()=>{
-  assert.equal(ROSTER.length,10);
+  assert.equal(ROSTER.length, 11);
   for(const hero of ROSTER){
     assert.equal(hero.forms.length,5);
     assert.ok(hero.identity?.strength&&hero.identity?.weakness);

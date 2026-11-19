@@ -80,7 +80,7 @@ test("V322 · each rank-3 duet has four chapters, no extra impacts or range chan
 test("V322 · ranks 1-2 stay unchanged; all other 9 partners remain selectable",()=>{
   for(const hero of heroes){
     const choices=optionsForUPartner(hero);
-    assert.equal(choices.length,9);
+    assert.equal(choices.length, 10);
     for(const rank of [1,2]){
       const s=frame(hero,27,2,rank);
       assert.equal(legendaryDuetMoment(s),null);

@@ -8,8 +8,8 @@ import {roomAlbumPlacements} from '../systems/room-album.js';
 
 test('every character owns a distinct 100-item personal album with specific trophy',()=>{
  assert.deepEqual(new Set(Object.keys(HERO_COLLECTIONS)),new Set(ROSTER.map(hero=>hero.id)));
- assert.equal(new Set(Object.values(HERO_COLLECTIONS).map(info=>info.title)).size,10);
- assert.equal(new Set(Object.values(HERO_COLLECTIONS).map(info=>info.bonus)).size,10);
+ assert.equal(new Set(Object.values(HERO_COLLECTIONS).map(info=>info.title)).size,11);
+ assert.equal(new Set(Object.values(HERO_COLLECTIONS).map(info=>info.bonus)).size,11);
  for(const hero of ROSTER){
   const info=HERO_COLLECTIONS[hero.id],room=hero.id==='stitcho'?createStitchoRoom(ROOMS.hub):ROOMS[info.room];
   assert.ok(room);

@@ -10,6 +10,8 @@ const light=(x)=>Math.max(0,Math.min(1,x));
 const mod=(n,d)=>((n%d)+d)%d;
 const noise=(n)=>{const s=Math.sin(n*127.1+43.7)*43758.5453;return s-Math.floor(s);};
 const THEMES=Object.freeze({
+ hollow:{sky:['#1d2330','#3d3948','#74635d'],mist:'#d3b790',stone:'#4c515c',foliage:'#5a6262',warm:'#f0d2a1'},
+ tide:{sky:['#092c3d','#1f5c6a','#4c9c9f'],mist:'#9de8e2',stone:'#335568',foliage:'#407c7e',warm:'#eee3c0'},
  court:  {sky:['#171a34','#474361','#a18c9f'],mist:'#6ed5c0',stone:'#24444d',foliage:'#234e52',warm:'#ffe0a4'},
  crypt:  {sky:['#080e22','#242e4a','#4c576c'],mist:'#77babb',stone:'#172c37',foliage:'#163b41',warm:'#e2b6cb'},
  gallery:{sky:['#101b35','#263350','#4a4b64'],mist:'#c7afd7',stone:'#343c5c',foliage:'#454d62',warm:'#ffe7b8'},
@@ -147,6 +149,38 @@ function starlight(c,cam,t,W,H,p,reduced,lit){
  }
 }
 
+// Secret rooms have their own architecture, anchored to their real floors.
+// These painted silhouettes never stand in for collision or interactions.
+function secretRoom(c,zone,cam,t,W,H){
+ if(zone!=='tide'&&zone!=='hollow')return;
+ c.save();c.translate(-cam.x,-cam.y);
+ if(zone==='tide'){
+  for(let i=0;i<7;i++){
+   const x=600+i*370;
+   c.fillStyle='#163b50';c.beginPath();c.roundRect(x-135,-110,270,400,125);c.fill();
+   const glow=c.createLinearGradient(x,0,x,290);glow.addColorStop(0,'#285b70');glow.addColorStop(.65,'#429d9d');glow.addColorStop(1,'#1d626e');
+   c.fillStyle=glow;c.beginPath();c.roundRect(x-115,-90,230,370,110);c.fill();
+   for(let j=0;j<5;j++){const yy=30+j*48,xx=x+Math.sin(i*2+j+t*.007)*65;ellipse(c,xx,yy,2+j%2,4,'#cfede35c');}
+   for(let j=0;j<4;j++){const xx=x-85+j*53;c.strokeStyle=j%2?'#386d6b':'#285b67';c.lineWidth=8;c.beginPath();c.moveTo(xx,289);c.bezierCurveTo(xx-18,240,xx+25,220,xx+Math.sin(t*.012+j)*12,185+j*14);c.stroke();}
+   c.fillStyle='#b9d9ce55';c.beginPath();c.moveTo(x-80,-70);c.lineTo(x-30,-70);c.lineTo(x+115,270);c.lineTo(x+70,270);c.closePath();c.fill();
+  }
+  // A sea-star mosaic and a waiting pearl mark Nácar's home.
+  c.fillStyle='#1c4b5d';c.fillRect(450,286,2700,14);
+  for(let i=0;i<36;i++)ellipse(c,480+i*75,294,9,3,i%2?'#85b8b0':'#497c84');
+ }else{
+  for(let i=0;i<9;i++){
+   const x=470+i*330;c.strokeStyle=i%2?'#544752':'#403d4b';c.lineWidth=44;c.beginPath();c.moveTo(x-90,1134);c.bezierCurveTo(x+90,1050,x-60,900,x+70,835);c.stroke();
+   c.strokeStyle='#8a716155';c.lineWidth=3;c.stroke();
+   ellipse(c,x+40,1020,10,15,'#f0cf9e');ellipse(c,x+40,1020,4,9,'#fff0c5');
+  }
+  c.fillStyle='#473f4d';c.beginPath();c.roundRect(1160,920,840,150,65);c.fill();
+  c.fillStyle='#ead6b2';c.textAlign='center';c.font='600 15px sans-serif';c.fillText('ESTRELLA  ·  LUNA  ·  HOJA',1580,953);
+  c.font='12px sans-serif';c.fillStyle='#c5b7a8';c.fillText('Una canción abre el espejo de las raíces',1580,978);
+  for(let i=0;i<5;i++){ellipse(c,2180+i*35,1117,24,11,['#ae7e8f','#b69a83','#788c91'][i%3]);}
+ }
+ c.restore();
+}
+
 export function drawMichiLivingBackdrop(c,g,cam={},t=0,W=1280,H=720){
  if(!g?.roomDef?.michiSanctuary)return false;
  const zone=sanctuaryZone(g)?.id||'court',p=THEMES[zone]||THEMES.court;
@@ -154,10 +188,11 @@ export function drawMichiLivingBackdrop(c,g,cam={},t=0,W=1280,H=720){
  const lit=(g.world1?.stations||[]).filter(s=>s.done).length/5;
  c.save();
  sky(c,W,H,p,lit);
- if(zone!=='crypt')moon(c,cam,t,W,H,p,cleared,reduced);
- if(zone!=='crypt')distantTrees(c,cam,t,W,H,p,reduced);
+ if(!['crypt','hollow'].includes(zone))moon(c,cam,t,W,H,p,cleared,reduced);
+ if(!['crypt','hollow'].includes(zone))distantTrees(c,cam,t,W,H,p,reduced);
  drawMichiMemoryTree(c,g,cam,t,W,H,zone);
  drawMichiArchitecture(c,zone,cam,reduced?0:t,W,H,p,lit);
+ secretRoom(c,zone,cam,reduced?0:t,W,H);
  drawMichiWater(c,g,cam,reduced?0:t,W,H,zone,lit);
  starlight(c,cam,t,W,H,p,reduced,lit);
  lanternAfterglow(c,g,cam,t,W,H,reduced);

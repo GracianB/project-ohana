@@ -1,0 +1,22 @@
+{
+  "release": "ohana-800",
+  "sourceBranch": "codex/michi-800",
+  "preservedBaseCommit": "859c9f7db8dbce0c0026e83f04ff37146eaa9a07",
+  "githubPages": "https://gracianb.github.io/project-ohana/?release=800",
+  "netlify": "https://project-ohana-multiplayer.netlify.app",
+  "method": "one skip-ci source commit, one squash main commit, one manual Pages dispatch; promote the tested Netlify candidate",
+  "rollbackDeploy": "6afdd447411e6985bb47a3bb",
+  "status": "accepted release source; final Pages run and production verification recorded in the delivery pull request",
+  "publicCandidate": {
+    "deployId": "6afef023461269ab143ddc2b",
+    "url": "https://6afef023461269ab143ddc2b--project-ohana-multiplayer.netlify.app",
+    "runtimeFilesVerified": 108,
+    "netlifyHtmlNormalization": "versus.html: two automatic Netlify pretty-URL anchor rewrites; every other checked runtime file matches byte-for-byte",
+    "nativeSelectionAndStart": [
+      "nacar desktop",
+      "yomi mobile"
+    ],
+    "twoPlayerAdventureAndVersus": true
+  },
+  "serviceWorkerSha256": "c9452676e035ded625d2257abc83446a0c7b5479bd702a55cf8e818320104b1c"
+}

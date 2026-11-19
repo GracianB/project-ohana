@@ -28,6 +28,11 @@ export function interactMichiGarden(g){
   for(const e of g.enemies||[])if(e.hp>0&&!e._astralCat&&e.roomPersona?.michiSanctuary&&Math.hypot(e.x-q.x,e.y-q.floor)<600)e.stun=Math.max(e.stun||0,180);
   g._michiGardenHush=180;remember(g,'hush');
  }else if(q.kind==='wind'){remember(g,'wind');}
+ else if(q.kind==='chime'){const pattern=g.roomDef.michiSanctuary.adventure.chimes,step=g._michiChime||0,correct=q.note===pattern[step];g._michiChime=correct?step+1:0;const complete=g._michiChime>=3;if(complete){remember(g,'hollow');g._michiChime=0;}g._michiGardenMoment={title:complete?'EL ESCONDITE RESPONDE':correct?'CASCABEL '+g._michiChime+'/3':'ESCUCHA EL ORDEN',text:complete?'El espejo de las raíces reconoce la canción.':correct?'Una nota encaja. Busca la siguiente.':'Estrella, luna, hoja. Si te equivocas, puedes empezar sin perder nada.',age:0};}
+ else if(q.kind==='guard'){if(!(g._michiLampCooldown>0)){g._michiLampGuard=180;g._michiLampCooldown=360;g._michiGardenMoment={title:'FAROL DE REFUGIO',text:'Un golpe queda protegido durante tres segundos. La luz necesita seis segundos para volver.',age:0};}}
+
+ else if(q.kind==='rescue'){remember(g,'tide');g._michiGardenMoment={title:'NÁCAR · LA AMIGA DE LA MAREA',text:'Medusa al flotar, estrella al abrazar el suelo. Nácar se queda con la familia.',age:0};}
+ else if(q.kind==='race'){g._michiRace={active:true,t:0};g._michiGardenMoment={title:'SIGUE A LAS LUCIÉRNAGAS',text:'Cruza el laberinto hasta el farol del este. Es un juego opcional: puedes repetirlo sin perder nada.',age:0};}
  g.fx?.emit?.(q.x,q.floor-38,{color:'#f3d39c',count:g.reduceMotion?3:10,size:2,life:26});
  return true;
 }
@@ -36,8 +41,11 @@ export function updateMichiGarden(g){
  g._michiGardenUse=Math.max(0,(g._michiGardenUse||0)-1);
  g._michiGardenHush=Math.max(0,(g._michiGardenHush||0)-1);
  if(g._michiGardenMoment&&++g._michiGardenMoment.age>420)g._michiGardenMoment=null;
+ g._michiLampGuard=Math.max(0,(g._michiLampGuard||0)-1);g._michiLampCooldown=Math.max(0,(g._michiLampCooldown||0)-1);
  syncBridge(g);
  const p=g.player,w=garden(g).wind;
  // Deliberate airborne entry: the current assists a jump, never steals ground control.
  if(gardenHas(g,'wind')&&!p.dead&&!p.grounded&&p.x+p.w>w.x&&p.x<w.x+w.w&&p.y+p.h>w.y&&p.y<w.y+w.h)p.vy=Math.min(p.vy,-4.8);
 }
+
+export function absorbMichiGardenHit(g,damage){if(!(damage>0)||!garden(g)||!(g._michiLampGuard>0))return false;g._michiLampGuard=0;g._michiGardenMoment={title:'EL FAROL TE PROTEGE',text:'Escudo consumido. Busca la siguiente apertura de la Polilla.',age:0};return true;}

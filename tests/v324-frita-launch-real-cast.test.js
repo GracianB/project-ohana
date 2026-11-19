@@ -27,7 +27,7 @@ function gameFor(form,ally,enemies) {
 
 test('V324: Frita cast U damages local targets only, all 5 evolutions and 9 partners',()=>{
   const partners=optionsForUPartner('frita');
-  assert.equal(partners.length,9);
+  assert.equal(partners.length, 10);
   for(let form=0;form<5;form++)for(const partner of partners){
     clearAbilityFx();
     const near=enemyAt(114,277,'near');

@@ -1,3 +1,5 @@
+import {drawMichiAdventure} from './michi-adventure-art.js';
+import {passageVisible} from '../systems/michi-adventure.js';
 import {drawGardenPassage,drawMichiGarden} from './michi-garden-props.js';
 import {drawMichiLivingBackdrop} from './michi-living-backdrop.js';
 import {drawMichiNearGrowth} from './michi-living-architecture.js';
@@ -83,10 +85,11 @@ export function drawMichiSanctuary(c,g,cam,t=0){
  // The real collision map owns the stones. A dedicated artist supplies the texture.
  const lit=(g.world1?.stations||[]).filter(s=>s.done).length/5;
  drawMichiSanctuaryTerrain(c,g.platforms||[],cam,W,H,sanctuaryZone(g)?.id,lit);
- drawMichiNearGrowth(c,g,cam,t,W,H);
+ drawMichiNearGrowth(c,g,cam,t,W,H);drawMichiAdventure(c,g,cam,t,W,H);
  const playerX=(g.player?.x||0)+(g.player?.w||0)*.5-cam.x;
  const playerY=(g.player?.y||0)+(g.player?.h||0)*.5-cam.y;
  for(const a of r.passages){
+  if(a.walkThrough||!passageVisible(g,a))continue;
   const x=a.x-cam.x,y=a.floor-cam.y;
   if(x<-120||x>W+120||y<-90||y>H+170)continue;
   const ready=passageReady(g,a);
@@ -102,7 +105,7 @@ export function drawMichiSanctuary(c,g,cam,t=0){
    c.fillStyle=ready?'#f9e9cc':'#c3cdc7';c.textAlign='center';
    c.font='600 12px sans-serif';c.fillText(text,tagX,y-145,tagW-10);
    c.font='11px sans-serif';c.fillStyle=ready?'#b6eedc':'#f4c6ae';
-   c.fillText(ready?'↓ / E para entrar':a.exit?'Necesitas el sello y 3 ecos':a.need+' faroles',tagX,y-126);
+   c.fillText(ready?'E / Usar para entrar':a.exit?'Necesitas el sello y 3 ecos':a.need+' faroles',tagX,y-126);
   }
  }
  for(const s of g.world1?.stations||[]){
@@ -134,7 +137,7 @@ export function drawMichiSanctuary(c,g,cam,t=0){
   c.fillStyle='rgba(6,28,37,.9)';c.fillRect((W-w)/2,y,w,40);
   c.fillStyle=passageReady(g,near)?'#dbf5df':'#f7c7ad';
   c.textAlign='center';c.font='600 13px sans-serif';
-  c.fillText(passageReady(g,near)?'↓ / E  ·  '+near.label:
+  c.fillText(passageReady(g,near)?'E / Usar  ·  '+near.label:
     near.exit?'Consigue el sello y tres ecos':'Faroles pendientes · '+near.need,W/2,y+25,w-22);
  }
  c.restore();

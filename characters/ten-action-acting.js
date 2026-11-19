@@ -3,6 +3,7 @@
 // Channel choreography has individual weight/tempo/elasticity, not just recoloured FX.
 export const ACTION_CHANNELS=Object.freeze(['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);
 export const ACTION_PROFILES=Object.freeze({
+ nacar:{tempo:.87,weight:.58,elastic:1.4,tilt:.84,accent:'#9de8e2'},
  kilo:{tempo:.82,weight:.72,elastic:1.20,tilt:.78,accent:'#ffe0a6'},
  stitcho:{tempo:1.34,weight:.74,elastic:1.24,tilt:1.35,accent:'#88e9ff'},
  chispin:{tempo:1.55,weight:.62,elastic:1.31,tilt:1.28,accent:'#fff6a5'},

@@ -1432,6 +1432,7 @@ if(p.id==="cuerno"&&p._introForceCanvas&&p._introCuerno)pose.cuernoWelcome=p._in
 if(p.id==="kilo"&&p._introForceCanvas&&p._introKilo)pose.kiloWelcome=p._introKilo;
 if(p.id==="stitcho"&&p._introForceCanvas&&p._introStitcho)pose.stitchoWelcome=p._introStitcho;
 if(p.id==="chispin"&&p._introForceCanvas&&p._introChispin)pose.chispinWelcome=p._introChispin;
+if(p.id==="nacar"&&p._introForceCanvas&&p._introNacar)pose.nacarWelcome=p._introNacar;
 if(p.id==="cat"&&p._introForceCanvas&&p._introMichi)pose.michiWelcome=p._introMichi;
 if(p.id==='cat'&&!pose.reduceMotion)pose.michicornioFrame=Math.floor(t/2);
 if(p.id==='cat')pose.michiSeed=Number.isFinite(p.michiSeed)?p.michiSeed:0;
@@ -1556,7 +1557,7 @@ if (burstK > 0.35) {
   if(p.id==="kilo"||michiRig)flashA=Math.min(.12,flashA);
 }
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; if (p.id === "frita") flashA = hurtFresh ? 0.3 : 0.18; if(michiRig)flashA=hurtFresh?.22:.12; }
-const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat","dragon","dino"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
+const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat","dragon","dino","nacar"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
 drawKiloFlightTrail(ctx,p,H,t,options.reduceMotion===true);
 ctx.save();
 ctx.rotate(tilt * 0.5);

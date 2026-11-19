@@ -641,3 +641,6 @@ function draw(ctx, pose, R) {
 }
 
 export default { id: "cat", draw };
+
+// Recovered marine anatomy, independent from Michi's current feline renderer.
+export function drawRecoveredMarine(ctx,pose={}){const f=Math.max(0,Math.min(4,Math.round(Number(pose.form)||0))),marine=[2,2,4,2,4][f],scale=[.48,.68,.72,.94,1.08][f],safe={...pose,t:pose.reduceMotion?0:Number(pose.t)||0,michiSeed:pose.michiSeed||0};ctx.save();ctx.scale(scale,scale);drawMichiMythic(ctx,safe,solve(safe),marine);ctx.restore();}

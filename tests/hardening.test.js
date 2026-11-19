@@ -925,8 +925,8 @@ test("V39 hero mastery gives all ten heroes unique traversal without contaminati
   const sw = fs.readFileSync("./sw.js", "utf8");
   const module = await import("../systems/hero-mastery.js");
 
-  assert.equal(Object.keys(module.HERO_MASTERY).length, 10);
-  assert.equal(new Set(Object.values(module.HERO_MASTERY).map((entry) => entry.id)).size, 10);
+  assert.equal(Object.keys(module.HERO_MASTERY).length, 11);
+  assert.equal(new Set(Object.values(module.HERO_MASTERY).map((entry) => entry.id)).size, 11);
   assert.doesNotMatch(mastery, /Math\.random\(/);
   assert.doesNotMatch(mastery, /\.hp\s*[-+]=/);
   assert.doesNotMatch(mastery, /\.health\s*[-+]=/);

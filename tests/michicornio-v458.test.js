@@ -20,7 +20,7 @@ test('Michicornio visible name and evolved forms preserve canonical cat ID and o
  for(const id of ['michi','michicornio','cat'])assert.equal(aliasId(id),'cat');
  assert.equal(ART.cat,ART.michi);assert.equal(ART.michi,ART.michicornio);
  assert.match(HERO_COLLECTIONS.cat.title,/Michicornio/);
- assert.equal(ROSTER.length,10);
+ assert.equal(ROSTER.length, 11);
  assert.ok(ROSTER.every(x=>x.forms.length===5));
 });
 

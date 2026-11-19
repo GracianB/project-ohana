@@ -2,6 +2,7 @@ const mid=e=>({x:e.x+e.w/2,y:e.y+e.h/2});
 const living=e=>e&&e.hp>0&&!e.dying&&!e.fell;
 const close=(g,x,y,r)=>g.enemies.filter(living).filter(e=>Math.hypot(mid(e).x-x,mid(e).y-y)<r);
 export const HERO_POWERS=Object.freeze({
+ nacar:['Salto de espuma','Marea de estrellas','Impulso corto para abrir espacio y golpear.','Una marea protege el entorno con impactos repetidos.'],
  kilo:['Remate aloha','A compás del sol','Acierta tres ataques H o J en cualquier orden; cuando ponga I LISTO, pulsa I: paso evasivo y golpe ascendente.','Carga 100 causando daño real; pulsa P para lanzar y al ritmo de sus tres señales para ampliar ondas y daño.'],
  stitcho:['Rebote 626','Flota cruzada','Rebota hacia el siguiente enemigo al acertar con paso acrobático de plasma.','La flota 626 bombardea la zona señalada con rayos orbitales de plasma.'],
  chispin:['Carrera relámpago','Tormenta enlazada','Cruza enemigos y conecta las marcas de J.','Detona las marcas y encadena descargas.'],
@@ -65,6 +66,8 @@ export function updateHeroPowers(g,s,hit,color){
   }else if(m.id==='dragon'){
    p.vy=-2+Math.sin(a*.12)*2;p.grounded=false;p.vx=(p.facing||m.face)*8;
    if(a%10===0)field(m,c.x,p.y+p.h,70,25,'eruption',8);
+  }else if(m.id==='nacar'){
+   p.vx*=.92;if([12,40,68,96].includes(a)){m.hit.clear();field(m,c.x,c.y,220,36,'constellation',14);}
   }else if(m.id==='dino'){
    p.vx=(p.facing||m.face)*8;if([1,40,80].includes(a)){p.vy=-10;p.grounded=false;m.phase++;}
    if(a%40===32){m.hit.clear();pulse(m,c.x,p.y+p.h,180,56);field(m,c.x,p.y+p.h,180,18,'quake',1);}

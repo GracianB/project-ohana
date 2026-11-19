@@ -1,3 +1,9 @@
+V800: **11 personajes · 5 formas por personaje · 10 salas del Mundo 1**. Nácar comparte el jardín de Michi; no añade un sello obligatorio.
+
+# ohana-800 · Michi, Nácar y la guardiana de faroles
+
+Entrega validada: rutas físicas, dos salas secretas, juegos, fauna propia, huellas L, cien recuerdos narrativos y elenco de once personajes. 2.019 pruebas, recorrido nativo de cinco faroles y jefe sin muertes; colección completa, tres ecos, sello, recarga y salida comprobados. Registro: docs/V800-VALIDATION.json.
+
 # ohana-700 · El encuentro del eclipse
 
 37 iteraciones internas desde la 663, con una entrega consolidada. Registro: docs/QUIMERA-V700-STAGES.md.

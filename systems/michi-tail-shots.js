@@ -1,3 +1,4 @@
+import {drawMichiPaw} from '../worlds/michi-adventure-art.js';
 // OHANA V462 · Michicornio L projectiles: one luminous shot per tentacle, launched
 // from the tentacle tips, with a TRANSPARENT wake instead of the old additive white
 // ribbons. Pure Canvas 2D: layered alpha fills/strokes only, never gradients; no RNG.
@@ -8,7 +9,7 @@ export {MICHI_L_SHOTS,michiLaunchFrame};
 const TAU=Math.PI*2;
 // Shot variant per form: kitten tail stars, fairy pixie stars, medusa moon-jellies,
 // astral comet flames, eclipse jellies.
-export const MICHI_SHOT_KIND=Object.freeze(['star','pixie','jelly','comet','jelly']);
+export const MICHI_SHOT_KIND=Object.freeze(['paw','paw','paw','paw','paw']);
 
 // Tentacle-tip anchors in world space (relative to the hitbox foot), mirrored by facing.
 export function michiShotAnchors(p,form){
@@ -62,7 +63,7 @@ function rings(ctx,x,y,r,color){ // flat halo: three concentric low-alpha discs
 function star(ctx,r,inner,points=5){ctx.beginPath();for(let k=0;k<points*2;k++){const a=k*Math.PI/points-Math.PI/2,rr=k%2?r*inner:r;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}ctx.closePath();}
 
 export function drawMichiTailShot(ctx,f,cam,t){
- const x=f.x-cam.x,y=f.y-cam.y,kind=MICHI_SHOT_KIND[f.form|0]||'jelly',col=f.color||'#ffb6e4';
+ const x=f.x-cam.x,y=f.y-cam.y,kind=f.marine?([2,4].includes(f.form)?'pixie':'jelly'):MICHI_SHOT_KIND[f.form|0]||'paw',col=f.color||'#ffb6e4';
  const pts=(f.trail||[]).map(q=>({x:q.x-cam.x,y:q.y-cam.y}));
  ctx.save();ctx.lineJoin='round';
  if(f.delay>0){ // charging on the tentacle tip, before launch
@@ -74,7 +75,9 @@ export function drawMichiTailShot(ctx,f,cam,t){
  const ang=Math.atan2(f.vy||0,f.vx||1),age=f.age||0,pulse=.5+.5*Math.sin(age*.45+(f.idx||0));
  rings(ctx,x,y,kind==='jelly'?20:17,col);
  ctx.translate(x,y);ctx.rotate(ang);
- if(kind==='jelly'){
+ if(kind==='paw'){
+  ctx.rotate(-ang);ctx.globalAlpha=1;drawMichiPaw(ctx,0,0,10,col,Math.sin(age*.08)*.12);ctx.globalAlpha=.7;drawMichiPaw(ctx,-4,2,6,'#f8efd6');
+ }else if(kind==='jelly'){
   // A tiny moon-jelly swimming head-first: translucent bell, rim light, four gonads,
   // trailing filaments that lag behind with the swim pulse.
   const bw=8+pulse*1.8,bl=10-pulse*1.8; // swim pulse: bell widens as it shortens

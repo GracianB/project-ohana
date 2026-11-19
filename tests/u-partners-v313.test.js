@@ -31,12 +31,12 @@ function canvas(){
  })};
 }
 test("V313: nine real choices for every hero, defaults match all old U casts",()=>{
- assert.equal(heroes.length,10);
+ assert.equal(heroes.length, 11);
  assert.deepEqual(Object.keys(DEFAULT_U_PARTNERS).sort(),heroes.slice().sort());
  for(const hero of heroes){
   const options=optionsForUPartner(hero);
-  assert.equal(options.length,9);
-  assert.equal(new Set(options.map(o=>o.id)).size,9);
+  assert.equal(options.length,10);
+  assert.equal(new Set(options.map(o=>o.id)).size,10);
   assert.ok(options.every(o=>o.id!==hero&&o.lName.length>=4));
   assert.ok(options.every(o=>ROSTER.find(r=>r.id===o.id).abilities[2]===o.borrowedL));
   assert.equal(chooseUPartner(hero,hero),DEFAULT_U_PARTNERS[hero]);
@@ -79,7 +79,7 @@ test("V313: 90 authoritative U combinations borrow the selected real L without t
   assert.equal(g._familyDuet,null);
   samples.add(hero+"+"+buddy.id);
  }
- assert.equal(samples.size,90);
+ assert.equal(samples.size,110);
 });
 test("V313: five real evolutions for all 90 pairs and valid multiplayer-only visuals",()=>{
  let total=0;
@@ -102,7 +102,7 @@ test("V313: five real evolutions for all 90 pairs and valid multiplayer-only vis
    total++;
   }
  }
- assert.equal(total,450);
+ assert.equal(total, 550);
 });
 test("V313: borrowed L telegraphs each of the three beats and never authorizes damage twice",()=>{
  for(const hero of heroes)for(const buddy of optionsForUPartner(hero)){

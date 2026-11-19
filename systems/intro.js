@@ -1,3 +1,4 @@
+import {nacarWelcomeBeat,drawNacarWelcomeFX} from './intro-nacar-stage.js';
 import {mountAtlasWelcome} from './hoku-atlas.js';
 import {drawTheatreStage,openingCastSpot,openingHeroHeight} from './theatre-stage.js';
 import {drawFamilyWelcomeBackdrop} from "../worlds/ohana-environments.js";
@@ -116,7 +117,7 @@ export function playTitleIntro(options = {}) {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")player._introForceCanvas=true;
+    if(id==="nacar"||id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -139,7 +140,7 @@ export function playTitleIntro(options = {}) {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")subject._introForceCanvas=true;
+        if(id==="nacar"||id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -257,6 +258,7 @@ export function playTitleIntro(options = {}) {
       const greeting=((tf/60+ROSTER.findIndex(r=>r.id===id)*1.31)%14+14)%14;
       if(greeting>11.6&&greeting<12.8)p._poseOverride='victory';
     }
+    p._introNacar=opts.nacarWelcome||null;
     const actorTick=tf+ROSTER.findIndex(r=>r.id===id)*2;
     drawDummy(ctx, p, 0, 0, fit.scale, actorTick);
     ctx.restore();
@@ -504,6 +506,10 @@ export function playTitleIntro(options = {}) {
 
     // V353: Michi watches the family's mayhem and judges everyone with
     // five connected acts in her real kitten/cloud/moon/guardian anatomy.
+    const nacarSpot=openingCastSpot('nacar',W,H,direction),nacarBeat=nacarWelcomeBeat(loop,reduce),nacarHeight=openingHeroHeight('nacar',heroH,direction);
+    if(welcomeSpotlightAllows('nacar',direction))drawNacarWelcomeFX(ctx,nacarSpot.x,nacarSpot.foot,nacarHeight,t,nacarBeat,'back');
+    actor("nacar",nacarSpot.x,nacarSpot.foot,nacarHeight,tf,{facing:1,pose:'idle',nacarWelcome:nacarBeat});
+    if(welcomeSpotlightAllows('nacar',direction))drawNacarWelcomeFX(ctx,nacarSpot.x,nacarSpot.foot,nacarHeight,t,nacarBeat,'front');
     const catFace=loop>3.0&&loop<4.2?-1:1;
     const michiBeat=michiWelcomeBeat(loop,reduce);
     const michiHeight=openingHeroHeight("cat",heroH,direction)*.96;

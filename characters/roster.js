@@ -6,7 +6,7 @@ import {applyHeroIdentity} from './identity-v2.js';
 // w/h son la hitbox. No se han tocado.
 // ============================================================================
 
-const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi", "cuerno"];
+const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi", "cuerno", "nacar"];
 
 const ALIAS = {
   pikachu: "chispin",
@@ -143,19 +143,19 @@ export const ALL_ROSTER = [
     ],
   },
   {
-    id: "yomi", name: "Yomi", role: "IA", tag: "Ping, escáner y síntesis · la IA de la familia",
+    id: "yomi", name: "Yomi", role: "guardiana", tag: "Faroles · ofudas · guardiana de la familia",
     color: "#4ff0c8",
     speed: 4.4, jumpPower: 12.0, maxJumps: 2, health: 84, w: 26, h: 36,
     // Internal ids kept for saves, net and duets: ofuda=J Ping, sleeve=K Escáner, maw=L Síntesis.
     abilities: ["ofuda", "sleeve", "maw"],
     passive: { id: "hollow", name: "Salto recalculado", desc: "Cae más rápido para recolocarse. En el aire, pulsa salto para un microteletransporte de datos con un instante de invulnerabilidad." },
-    evoNames: ["Yomi Bit", "Yomi", "Yomi Red", "Yomi Oráculo", "Yomi Constelación"],
+    evoNames: ["Yomi · Lumbre", "Yomi", "Yomi · Guardiana", "Yomi · Custodia Lunar", "Yomi · Farol del Hogar"],
     forms: [
-      { name: "Yomi Bit", color: "#9ff7e0", speed: 4.4, jump: 12.0, jumps: 2, hp: 84, w: 26, h: 36 },
+      { name: "Yomi · Lumbre", color: "#9ff7e0", speed: 4.4, jump: 12.0, jumps: 2, hp: 84, w: 26, h: 36 },
       { name: "Yomi", color: "#4ff0c8", speed: 4.8, jump: 12.6, jumps: 2, hp: 104, w: 28, h: 40 },
-      { name: "Yomi Red", color: "#35d9c0", speed: 5.3, jump: 13.2, jumps: 2, hp: 126, w: 30, h: 42 },
-      { name: "Yomi Oráculo", color: "#8f9bff", speed: 5.8, jump: 13.8, jumps: 3, hp: 150, w: 32, h: 44 },
-      { name: "Yomi Constelación", color: "#ffd56b", speed: 6.6, jump: 14.8, jumps: 3, hp: 196, w: 36, h: 48, aura: true },
+      { name: "Yomi · Guardiana", color: "#35d9c0", speed: 5.3, jump: 13.2, jumps: 2, hp: 126, w: 30, h: 42 },
+      { name: "Yomi · Custodia Lunar", color: "#8f9bff", speed: 5.8, jump: 13.8, jumps: 3, hp: 150, w: 32, h: 44 },
+      { name: "Yomi · Farol del Hogar", color: "#ffd56b", speed: 6.6, jump: 14.8, jumps: 3, hp: 196, w: 36, h: 48, aura: true },
     ],
   },
   {
@@ -174,6 +174,13 @@ export const ALL_ROSTER = [
     ],
   },
 ];
+
+ALL_ROSTER.push({id:'nacar',name:'Nácar',role:'marea',tag:'Medusa · estrella de mar · refugio lunar',color:'#9de8e2',speed:4.3,jumpPower:12.4,maxJumps:2,health:86,w:24,h:28,abilities:['bubble','tideguard','tidestars'],passive:{id:'tidefloat',name:'Corriente amable',desc:'Dos saltos y planeo. Comparte el jardín de Michi sin añadir un sello obligatorio.'},evoNames:['Nácar · Gota de Luna','Nácar · Medusa de Nácar','Nácar · Estrella de Marea','Nácar · Medusa Aurora','Nácar · Corona del Océano'],forms:[
+ {name:'Nácar · Gota de Luna',color:'#bdeee8',speed:4.3,jump:12.4,jumps:2,hp:86,w:24,h:28,glide:true},
+ {name:'Nácar · Medusa de Nácar',color:'#a5e6ed',speed:4.8,jump:13,jumps:2,hp:105,w:28,h:32,glide:true},
+ {name:'Nácar · Estrella de Marea',color:'#9ce9d3',speed:5.4,jump:13.8,jumps:3,hp:130,w:32,h:32},
+ {name:'Nácar · Medusa Aurora',color:'#d6c2ee',speed:6,jump:14.5,jumps:3,hp:160,w:36,h:40,glide:true},
+ {name:'Nácar · Corona del Océano',color:'#b8f0dc',speed:6.8,jump:15.2,jumps:3,hp:200,w:40,h:40,glide:true,aura:true} ]});
 
 applyHeroIdentity(ALL_ROSTER);
 

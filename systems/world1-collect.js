@@ -1,3 +1,5 @@
+import {drawMichiMemory} from '../worlds/michi-adventure-art.js';
+import {MICHI_PAGES} from './michi-adventure.js';
 import {memoryBenefits,startMemoryCelebration,MEMORY_REWARDS} from './memory-rewards-v2.js';
 import {drawMemoryPickup,MEMORY_PICKUPS} from './memory-pickup-art.js';
 // OHANA V467 · MUNDO 1 · Coleccionables unificados (objetos + álbumes = UNO).
@@ -153,7 +155,7 @@ export function takeWorld1Item(g, id) {
   // The HUD counter updates for every item; reserve words for meaningful beats.
   g.fx?.emit?.(num(p?.x) + num(p?.w) / 2, num(p?.y), {color:th.color,count:g.reduceMotion?2:5,size:2,life:18,up:1});
   if (a.found.length === 1) g.nums?.add?.(num(p?.x), num(p?.y) - 20, "PRIMER RECUERDO · ÁLBUM 1/100", th.color, false);
-  if (pageDone(a, page)) { ui.toast = { t: 0, max: 150, text: `Página ${page + 1} completa · ${PAGE_TITLES[page]}`, color: th.color }; g.onWorld1Beat?.("album-page", hero, page); if (p) p.health = Math.min(num(p.maxHealth, p.health), num(p.health) + 10); }
+  if (pageDone(a, page)) { ui.toast = { t: 0, max: 150, text: `Página ${page + 1} completa · ${pageTitle(g,page)}`, color: th.color }; g.onWorld1Beat?.("album-page", hero, page); if (p) p.health = Math.min(num(p.maxHealth, p.health), num(p.health) + 10); }
   if (a.found.length === ALBUM_SIZE && !a.relic) { a.relic = true; ui.toast = { t: 0, max: 240, text: `¡Álbum completo! Reliquia: ${th.relic}`, color: "#fff1b5", big: true }; g.onWorld1Beat?.("album-relic", hero); startMemoryCelebration(g,hero); }
   if([25,50].includes(a.found.length)){ui.toast={t:0,max:180,text:a.found.length===25?'BRÚJULA · Los recuerdos aparecen en tu mapa':'IMÁN · Recoges recuerdos desde más lejos',color:th.color};g.onWorld1Beat?.('album-unlock',hero,a.found.length);}
   persist(g); g.save?.();
@@ -174,14 +176,16 @@ export function toggleWorld1Album(g, open) { const ui = (g.world1CollectUI ||= {
 export function world1AlbumKey(g, key) { const ui = g.world1CollectUI; if (!ui?.open) return false; if (key === "ArrowRight") ui.page = (ui.page + 1) % PAGE_SIZE; else if (key === "ArrowLeft") ui.page = (ui.page + PAGE_SIZE - 1) % PAGE_SIZE; else if (key === "Escape" || key === "b" || key === "B") ui.open = false; else return false; g.renderDirty = true; return true; }
 
 // One page of the real persistent collection, shared by the accessible panel.
+const pageTitle=(g,page)=>g.roomDef?.michiSanctuary?MICHI_PAGES[page]:PAGE_TITLES[page];
+
 export function world1AlbumView(g) {
   const hero = g.world1CollectHero || WORLD1_ORDER[0], th = WORLD1_THEMES[hero];
   const album = world1AlbumFor(g, hero), found = new Set(album.found);
   const page = Math.max(0, Math.min(9, Number(g.world1CollectUI?.page) || 0));
   return {hero, title:"Álbum de " + th.short, count:found.size, page,
-    heading:`Página ${page + 1}/10 · ${PAGE_TITLES[page]}`,
+    heading:`Página ${page + 1}/10 · ${pageTitle(g,page)}`,
     complete:pageDone(album,page), relic:album.relic ? th.relic : null,
-    cards:Array.from({length:PAGE_SIZE},(_,i)=>({id:page * PAGE_SIZE + i,found:found.has(page * PAGE_SIZE + i)}))};
+    cards:Array.from({length:PAGE_SIZE},(_,i)=>({id:page * PAGE_SIZE + i,found:found.has(page * PAGE_SIZE + i),story:g.roomDef?.michiSanctuary?.memories.find(m=>m.id===page*PAGE_SIZE+i)?.story,label:g.roomDef?.michiSanctuary?.memories.find(m=>m.id===page*PAGE_SIZE+i)?.caption}))};
 }
 export function syncWorld1Album(g, doc = globalThis.document) {
   const root = doc?.getElementById("world1-album");if(!root)return;
@@ -192,7 +196,7 @@ export function syncWorld1Album(g, doc = globalThis.document) {
   if(root.dataset.view === key)return;root.dataset.view = key;
   root.querySelector("h2").textContent = view.title;
   root.querySelector(".album-count").textContent = `${view.count}/100 recuerdos · colección opcional`;
-  root.querySelector('.album-purpose').textContent = `Busca ${MEMORY_PICKUPS[view.hero].plural}. Son recuerdos para tu álbum; los cristales dorados dan XP y los mecanismos de la sala completan su sello.`;
+  root.querySelector('.album-purpose').textContent = view.hero==='cat'?'Cien fragmentos forman diez escenas del hogar. Los faroles y la Polilla abren la salida; este álbum cuenta lo que Michi y su familia recuerdan.':`Busca ${MEMORY_PICKUPS[view.hero].plural}. Son recuerdos para tu álbum; los cristales dorados dan XP y los mecanismos de la sala completan su sello.`;
   root.querySelector(".album-page-title").textContent = view.heading + (view.complete ? " ✓" : "");
   root.querySelector(".album-reward").textContent = view.relic ? "Reliquia conseguida: " + view.relic + " · Firma permanente: " + MEMORY_REWARDS[view.hero][2] : "Cada página: +10 vida · 25: brújula en el mapa · 50: imán de recuerdos · 100: celebración propia y firma visual permanente.";
   let replay=root.querySelector('[data-memory-replay]');
@@ -201,8 +205,9 @@ export function syncWorld1Album(g, doc = globalThis.document) {
   const grid=root.querySelector("ol");
   grid.replaceChildren(...view.cards.map(card=>{
     const li=doc.createElement("li");li.className=card.found?"found":"pending";
-    li.textContent=card.found?"✦ " + (card.id+1):"?";
-    li.setAttribute("aria-label",MEMORY_PICKUPS[view.hero].name + " " + (card.id+1) + (card.found?" conseguido":" pendiente"));return li;
+    li.textContent=card.found?(card.label||"✦ " + (card.id+1)):"?";if(card.label)li.classList.add("story-fragment");
+    if(card.story)li.title=card.story;
+    li.setAttribute("aria-label",(card.story||MEMORY_PICKUPS[view.hero].name) + " " + (card.id+1) + (card.found?" conseguido":" pendiente"));return li;
   }));
 }
 
@@ -216,7 +221,7 @@ export function drawWorld1Collect(ctx, g, cam, t = 0) {
     if (have.has(it.id)) continue;
     const x = it.x - cx, y = it.y - cy + (g.reduceMotion?0:Math.sin(num(t) * 0.06 + it.id) * 3);
     if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
-    if(g.roomDef?.michiSanctuary){ctx.save();ctx.translate(x,y);ctx.rotate(g.reduceMotion?-.25:Math.sin(t*.025+it.id)*.12-.25);ctx.fillStyle=it.challenge?'#e7a394':'#e9dfbc';ctx.strokeStyle='#527578';ctx.beginPath();ctx.moveTo(-5,7);ctx.bezierCurveTo(-12,-2,-1,-13,8,-11);ctx.quadraticCurveTo(12,1,-5,7);ctx.fill();ctx.stroke();ctx.strokeStyle='#8bb3a4';ctx.beginPath();ctx.moveTo(-5,7);ctx.lineTo(5,-7);ctx.stroke();ctx.restore();continue;}
+    if(g.roomDef?.michiSanctuary){drawMichiMemory(ctx,x,y,it.page,t,g.reduceMotion);continue;}
     if(hero==='kilo'&&g.roomDef?.kiloEncounterVersion){
       // A little petal carries the tune; XP keeps its separate gold diamond.
       ctx.save();ctx.translate(x,y);ctx.rotate(g.reduceMotion?-.2:Math.sin(num(t)*.025+it.id)*.14-.2);
@@ -259,7 +264,7 @@ export function drawWorld1Album(ctx, g, W, H, t = 0) {
   ctx.fillText(`Álbum de ${th.short} · ${a.found.length}/100   (Mundo 1: ${tot.found}/${tot.total})`, W / 2, by + 27);
   for (let side = 0; side < 2; side++) {
     const page = (ui.page + side) % PAGE_SIZE, px = bx + side * bw / 2 + 24, pw = bw / 2 - 48, py = by + 74;
-    ctx.fillStyle = "#3a3160"; ctx.font = "bold 16px sans-serif"; ctx.fillText(`${page + 1} · ${PAGE_TITLES[page]}${pageDone(a, page) ? " ✓" : ""}`, px + pw / 2, py);
+    ctx.fillStyle = "#3a3160"; ctx.font = "bold 16px sans-serif"; ctx.fillText(`${page + 1} · ${pageTitle(g,page)}${pageDone(a, page) ? " ✓" : ""}`, px + pw / 2, py);
     const cw = pw / 5, ch = (bh - 130) / 2;
     for (let i = 0; i < PAGE_SIZE; i++) {
       const id = page * PAGE_SIZE + i, cx = px + (i % 5) * cw, cy = py + 24 + Math.floor(i / 5) * ch;
