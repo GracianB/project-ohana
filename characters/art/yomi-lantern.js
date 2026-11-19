@@ -234,8 +234,10 @@ export function yomiWelcomeAnatomy(pose={},form=0){
 function shrineAccessory(c,f,w,h,swing,glow,shadow,acting){
  const y=-h*.48, cord='#f3bf80', tassel=f===4?'#f49a90':'#bf5478';
  c.save();
- c.translate(w*.79,y);
- c.rotate(swing*.025+(acting?.front||0)*.88);
+ const release=acting?.release||0, load=acting?.load||0;
+ c.translate(w*.79+(acting?.slot===0?5*release:0),y-(acting?.slot===1?8*release:0));
+ const aim=acting?.slot===2?-.78*load+1.13*release:acting?.slot===0?.42*release:0;
+ c.rotate(swing*.025+(acting?.front||0)*.55+aim);
  if(f>=2){
   line(c,shadow,4);c.beginPath();c.moveTo(5,29);c.lineTo(5,-25-f*2);c.stroke();
   line(c,cord,1.45);c.beginPath();c.moveTo(5,28);c.lineTo(5,-25-f*2);c.stroke();
@@ -244,15 +246,25 @@ function shrineAccessory(c,f,w,h,swing,glow,shadow,acting){
  line(c,cord,1.7);c.beginPath();c.moveTo(-4,0);c.quadraticCurveTo(9,2,11,14);c.stroke();
  if(f>=1){
   c.fillStyle=shadow;c.beginPath();c.moveTo(5,14);c.lineTo(17,14);c.lineTo(19,23);c.lineTo(15,29);c.lineTo(7,29);c.lineTo(3,23);c.closePath();c.fill();
-  const flame=acting?.release||0;
-  ellipse(c,11,22,4.5+f*.36+flame*2,5+flame*2,glow);
-  ellipse(c,11+flame*1.5,21,1.9,3+flame*2,'#fff7cf');
+  ellipse(c,11,22,4.5+f*.36+release*2,5+release*2,glow);
+  ellipse(c,11+release*1.5,21,1.9,3+release*2,'#fff7cf');
  }
  const knot=f>=1?30:14;
  line(c,cord,2);c.beginPath();c.moveTo(11,knot-2);c.lineTo(11,knot+4);c.stroke();
  for(let i=-1;i<=1;i++){
   line(c,tassel,1.4);c.beginPath();c.moveTo(11+i*1.1,knot+2);
   c.quadraticCurveTo(11+i*1.5-swing*.1,knot+6,11+i*2.6-swing*.28,knot+10+f);c.stroke();
+ }
+ if(f>1&&release>.05){
+  c.globalAlpha=.75*release;
+  if(acting.slot===2){
+   c.fillStyle='#ff9b86';c.beginPath();c.moveTo(5,-32);c.quadraticCurveTo(19,-58,39,-38);
+   c.quadraticCurveTo(20,-47,7,-25);c.closePath();c.fill();
+   line(c,'#fff4cb',2);c.beginPath();c.moveTo(6,-28);c.quadraticCurveTo(19,-46,31,-39);c.stroke();
+  }else if(acting.slot===1){
+   line(c,glow,1.5);
+   c.beginPath();c.ellipse(11,21,10+12*release,5+7*release,-.25,0,TAU);c.stroke();
+  }
  }
  c.restore();
 }
@@ -476,10 +488,11 @@ function draw(ctx,pose,R){
     ctx.save();ctx.globalAlpha=.4*v;crescent(ctx,w+5,faceY-19,9+f,glow);ctx.restore();
   }
   if(f>=2&&run&&!reduced){
-    line(ctx,trim,2);
-    ctx.beginPath();ctx.moveTo(-w*.59,-h*.34);
-    ctx.quadraticCurveTo(-w-8,-h*.21,-w-15-swing*.58,-h*.29);
-    ctx.stroke();
+    const tail=-w-13-swing*.59, y=-h*.32;
+    ctx.fillStyle=f===3?'#b574aa':'#e98898';
+    ctx.beginPath();ctx.moveTo(-w*.56,y);ctx.quadraticCurveTo(-w-8,y+11,tail,y+2);
+    ctx.lineTo(tail+4,y+8);ctx.quadraticCurveTo(-w-9,y+13,-w*.56,y+4);ctx.closePath();ctx.fill();
+    line(ctx,glow,1.2);ctx.beginPath();ctx.moveTo(-w*.58,y+2);ctx.quadraticCurveTo(-w-9,y+11,tail+2,y+5);ctx.stroke();
   }
   shrineAccessory(ctx,f,w,h,swing,glow,shadow,acting);
   drawYomiRitual(ctx,p,f,trim,glow,faceY,w,t);

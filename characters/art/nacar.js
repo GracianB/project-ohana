@@ -214,8 +214,11 @@ function castLights(c,p,d,s,cy,t){
    c.beginPath();c.arc(d.rx*.78+5+i*6,cy-5-i*4+offset,2+i*1.2,0,TAU);c.stroke();
   }
  }else if(p.castSlot===1){
-  c.strokeStyle=s.rim;c.lineWidth=1.7;
-  c.beginPath();c.ellipse(0,cy+4,d.rx*(1.05+strength*.2),d.ry*.78,0,.12,Math.PI-.12);c.stroke();
+  for(let i=0;i<2;i++){
+   const k=(strength+i*.22)%1;
+   c.strokeStyle=i?s.light:s.rim;c.lineWidth=2-i*.8;
+   c.beginPath();c.ellipse(0,cy+4,d.rx*(1.02+k*.3),d.ry*(.66+k*.35),0,.1,Math.PI-.1);c.stroke();
+  }
  }else{
   for(let i=0;i<3;i++)drawSeaStar(c,(i-1)*d.rx*.56,cy+d.ry*.82+(i%2)*4,2.6+strength,0,s.light2);
  }
@@ -230,7 +233,9 @@ function draw(c,p={}){
  const cast=p.state==='attack'||p.state==='cast'||p.castSlot>=0&&p.cast>0.2;
  const neon=NEON[f];
  const hurt=p.state==='hurt',cheer=p.state==='victory';
+ const charge=p.state==='cast'?Math.sin(Math.PI*clamp(p.cast,0,1)):0;
  const contraction=reduced?0:Math.sin(t*s.beat+f)*(.052+stroke*.07);
+ const flare=p.castSlot===2?charge*.15:0;
  const welcome=reduced?0:clamp(p.nacarWelcome?.float,0,1);
  const cy=d.top+d.ry+2,hem=cy+d.ry*.55;
  c.save();
@@ -239,11 +244,11 @@ function draw(c,p={}){
  if(!reduced)wake(c,f,d,cy,t,vertical,speed);
  glow(c,0,cy+d.ry*.34,d.rx*1.5+10,neon[0],cast?.85:.52);
  if(f>=3)glow(c,0,cy+d.ry*.94,d.rx*1.2,neon[1],.63);
- ribbons(c,d,s,f,t,hem,reduced?0:vertical*(4+f*1.6)-speed*4,contraction);
+ ribbons(c,d,s,f,t,hem,reduced?0:vertical*(4+f*1.6)-speed*4-charge*(p.castSlot===0?7:0),contraction-flare);
  crest(c,f,d,s,t);
  castLights(c,p,d,s,cy,t);
  c.save();
- c.translate(0,cy);c.scale(1+contraction+(cast?.08:0),1-contraction);
+ c.translate(0,cy);c.scale(1+contraction+flare+(cast?.08:0),1-contraction-flare*.43);
  bellPath(c,f,d.rx,d.ry);
  c.fillStyle=glass(c,d,s,hurt);c.fill();
  c.strokeStyle=neon[1]+'45';c.lineWidth=7;c.stroke();
