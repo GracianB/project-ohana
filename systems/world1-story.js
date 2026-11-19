@@ -6,6 +6,7 @@ export const WORLD1_PREMISE = "El Eco robó la canción de cada héroe y la cosi
 
 // Cada sala: lo que dice su héroe al entrar y al despertar su sello.
 export const WORLD1_ROOM_STORY = Object.freeze({
+ nacar:{enter:'Nácar: «El océano se ha quedado sin voz. Pero las perlas todavía respiran».',seal:'Nácar: «Cinco voces y un hogar. La marea vuelve a escucharnos».'},
   kilo:    { enter: "Kilo: «El arroyo perdió su voz. Despierta la caracola, el bambú y el arpa del dosel. El hibisco me enseñará el remate antes del gran Tambor».",      seal: "Kilo: «¡Ahí está! ¡Cuatro notas y el Tambor en calma! La casa vuelve a sonar»." },
   stitcho: { enter: "Stitcho: «¡Mi nave! El Eco la ha descosido pieza a pieza».",                 seal: "Stitcho: «Cosida y brillando. Ningún experimento se queda atrás»." },
   chispin: { enter: "Chispín: «Sin mi chispa el trueno no tiene voz. Conectemos las antenas para que vuelva a cantar».",    seal: "Chispín: «¡PIKA-BUM! El cielo vuelve a reír»." },

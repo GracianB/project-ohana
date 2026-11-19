@@ -10,7 +10,7 @@ michi: "cat",
 
 const IDS = Object.freeze([
 "kilo", "stitcho", "chispin", "cat", "dragon",
-"dino", "frita", "pizza", "yomi", "cuerno", "nacar",
+"dino", "frita", "pizza", "yomi", "cuerno", "nacar", "ia",
 ]);
 
 export const EVOLUTION_STAGES = Object.freeze([
@@ -66,7 +66,7 @@ dragon:  Object.freeze({ motif: "flame",    silhouette: "wing",     span: 1.16, 
 dino:    Object.freeze({ motif: "crystal",  silhouette: "back",     span: 1.10, spin: 0.08, nodes: 8, accent: "#b8ef6b", profile: "crystal-spine" }),
 frita:   Object.freeze({ motif: "fries",    silhouette: "crest",    span: 1.04, spin: -0.20, nodes: 8, accent: "#fff1b3", profile: "crisp-crest" }),
 pizza:   Object.freeze({ motif: "crust",    silhouette: "ring",     span: 1.10, spin: 0.10, nodes: 7, accent: "#ffd84a", profile: "volcanic-ring" }),
-yomi:    Object.freeze({ motif: "signal",   silhouette: "none",     span: 1.04, spin: 0.00, nodes: 6, accent: "#4ff0c8", profile: "neural-constellation" }),
+yomi:    Object.freeze({ motif: "signal",   silhouette: "none",     span: 1.04, spin: 0.00, nodes: 6, accent: "#4ff0c8", profile: "neural-constellation" }), ia:Object.freeze({ motif: "circuit",   silhouette: "none",     span: 1.04, spin: 0.00, nodes: 6, accent: "#4ff0c8", profile: "neural-constellation" }),
 cuerno:  Object.freeze({ motif: "aurora",   silhouette: "antler",     span: 1.12, spin: 0.18, nodes: 8, accent: "#f2c1ff", profile: "aurora-mane" }),
 });
 export const EVOLUTION_CINEMA_PROFILES = Object.freeze({
@@ -79,7 +79,7 @@ dragon:  Object.freeze({ camera:"sweep",    bg:"#2a1007", accent:"#ff8a45", moti
 dino:    Object.freeze({ camera:"impact",   bg:"#10220d", accent:"#b8ef6b", motif:"shards",  pulse:"quake",   reveal:"impact",  speed:0.94 }),
 frita:   Object.freeze({ camera:"whip",     bg:"#24170b", accent:"#fff1b3", motif:"salt",    pulse:"crisp",   reveal:"fry",     speed:1.18 }),
 pizza:   Object.freeze({ camera:"roll",     bg:"#281007", accent:"#ffd84a", motif:"cheese",  pulse:"oven",    reveal:"volcano", speed:0.92 }),
-yomi:    Object.freeze({ camera:"pull",     bg:"#071526", accent:"#4ff0c8", motif:"signal",  pulse:"network", reveal:"constellation", speed:0.9 }),
+yomi:    Object.freeze({ camera:"pull",     bg:"#071526", accent:"#4ff0c8", motif:"signal",  pulse:"network", reveal:"constellation", speed:0.9 }), ia:Object.freeze({ camera:"pull",     bg:"#071526", accent:"#4ff0c8", motif:"circuit",  pulse:"network", reveal:"constellation", speed:0.9 }),
 cuerno:  Object.freeze({ camera:"rise",     bg:"#17102a", accent:"#f2c1ff", motif:"aurora",  pulse:"rainbow", reveal:"aurora",  speed:1.02 }),
 });
 
@@ -145,6 +145,11 @@ yomi: [
 "Cada pregunta enciende un nodo: Yomi Red ya piensa en voz alta.",
 "Tres pensamientos orbitan al Oráculo: escucha, recuerda y responde.",
 "Diez estrellas, una por cada miembro de la familia: Yomi Constelación no deja a nadie atrás.",
+], ia:[
+"Un píxel aprende su primera palabra: «¿hola?». La familia contesta.",
+"Cada pregunta enciende un nodo: IA Red ya piensa en voz alta.",
+"Tres pensamientos orbitan al Oráculo: escucha, recuerda y responde.",
+"Diez estrellas, una por cada miembro de la familia: IA Constelación no deja a nadie atrás.",
 ],
 cuerno: [
 // V75: tell the same biological story that the five live Canvas silhouettes show.
@@ -177,7 +182,7 @@ dragon:  Object.freeze({ bodyX:[0.86,0.94,1.00,1.08,1.15], bodyY:[0.92,1.03,1.12
 dino:    Object.freeze({ bodyX:[0.94,1.00,1.08,1.15,1.23], bodyY:[0.96,1.04,1.10,1.18,1.27], stance:[0.055,0.065,0.090,0.12,0.15], lift:[0.00,0.00,0.00,0.004,0.008], combat:[0.96,1.08,1.20,1.34,1.50] }),
 frita:   Object.freeze({ bodyX:[0.78,0.88,0.94,1.00,1.08], bodyY:[0.94,1.04,1.13,1.23,1.33], stance:[0.035,0.045,0.075,0.11,0.145], lift:[0.00,0.00,0.004,0.010,0.018], combat:[0.90,1.04,1.16,1.30,1.44] }),
 pizza:   Object.freeze({ bodyX:[0.98,1.04,1.10,1.20,1.27], bodyY:[0.94,1.00,1.06,1.12,1.18], stance:[-0.035,-0.025,0.00,0.025,0.045], lift:[0.00,0.00,0.004,0.008,0.014], combat:[0.88,0.98,1.08,1.20,1.34] }),
-yomi:    Object.freeze({ bodyX:[0.90,0.96,1.00,1.05,1.11], bodyY:[0.98,1.05,1.13,1.22,1.31], stance:[0.00,0.010,0.030,0.060,0.090], lift:[0.014,0.020,0.028,0.036,0.048], combat:[0.90,1.02,1.14,1.28,1.42] }),
+yomi:    Object.freeze({ bodyX:[0.90,0.96,1.00,1.05,1.11], bodyY:[0.98,1.05,1.13,1.22,1.31], stance:[0.00,0.010,0.030,0.060,0.090], lift:[0.014,0.020,0.028,0.036,0.048], combat:[0.90,1.02,1.14,1.28,1.42] }), ia:Object.freeze({ bodyX:[0.90,0.96,1.00,1.05,1.11], bodyY:[0.98,1.05,1.13,1.22,1.31], stance:[0.00,0.010,0.030,0.060,0.090], lift:[0.014,0.020,0.028,0.036,0.048], combat:[0.90,1.02,1.14,1.28,1.42] }),
 cuerno:  Object.freeze({ bodyX:[0.92,1.00,1.05,1.11,1.18], bodyY:[0.90,0.98,1.06,1.14,1.23], stance:[-0.020,-0.015,0.010,0.040,0.070], lift:[0.008,0.010,0.016,0.024,0.034], combat:[0.86,0.98,1.08,1.20,1.34] }),
 });
 
@@ -204,7 +209,7 @@ dragon:  Object.freeze({ kind: "flame", lean:  0.020, head: -0.040, swing: 0.92,
 dino:    Object.freeze({ kind: "shard", lean:  0.090, head: -0.050, swing: 0.78, float: -0.04, combat: 1.24 }),
 frita:   Object.freeze({ kind: "salt",  lean:  0.065, head: -0.022, swing: 1.12, float: 0.00, combat: 1.06 }),
 pizza:   Object.freeze({ kind: "cheese",lean: -0.055, head: 0.020, swing: 0.84, float: 0.06, combat: 1.02 }),
-yomi:    Object.freeze({ kind: "signal", lean:  0.012, head: 0.065, swing: 0.72, float: 0.22, combat: 1.12 }),
+yomi:    Object.freeze({ kind: "signal", lean:  0.012, head: 0.065, swing: 0.72, float: 0.22, combat: 1.12 }), ia:Object.freeze({ kind: "signal", lean:  0.012, head: 0.065, swing: 0.72, float: 0.22, combat: 1.12 }),
 cuerno:  Object.freeze({ kind: "horn",  lean: -0.030, head: -0.030, swing: 1.02, float: 0.14, combat: 0.98 }),
 });
 

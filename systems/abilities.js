@@ -100,7 +100,7 @@ dragon:  { name: "ALIENTO ASCENDENTE", color: "#ff8a3a" },
 dino:    { name: "MOCO + RODILLO", color: "#c8f04a" },
 frita:   { name: "SALSA TURBO", color: "#ffd36a" },
 pizza:   { name: "PEPPERONI ELÁSTICO", color: "#ff8a2a" },
-yomi:    { name: "OFUDA SOMBRA", color: "#ff2244" },
+yomi:    { name: "OFUDA SOMBRA", color: "#ff2244" }, ia:{ name: "OFUDA SOMBRA", color: "#ff2244" },
 cuerno:  { name: "BRILLO DE CARGA", color: "#fff6c8" },
 });
 
@@ -237,7 +237,7 @@ dragon:  { flight: true,  name: "Vuelo celestial", text: "Vuelo libre: WASD cont
 dino:    { titan: true,   name: "Modo coloso", text: "Armadura y pisotón reforzado durante unos segundos." },
 frita:   { turbo: true,   name: "Centella", text: "Velocidad extrema e inmunidad breve." },
 pizza:   { bounce: true,  name: "Rebote volcánico", text: "Escudo y rebotes potenciados durante unos segundos." },
-yomi:    { ghost: true,   name: "Paso del abismo", text: "Forma espectral: atraviesa peligros durante unos segundos." },
+yomi:    { ghost: true,   name: "Paso del abismo", text: "Forma espectral: atraviesa peligros durante unos segundos." }, ia:{ ghost: true,   name: "Paso del abismo", text: "Forma espectral: atraviesa peligros durante unos segundos." },
 cuerno:  { aurora: true,  name: "Manto aurora", text: "Escudo luminoso y salto mejorado durante unos segundos." },
 });
 
@@ -251,7 +251,7 @@ dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 18000, color: "#
 dino:    { id: "impact", name: "CORAZÓN DE COLOSO", key: "U", cd: 18000, color: "#d3f59c", special: "Modo coloso", ally: "frita" },
 frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 18000, color: "#ffd36a", special: "Centella", ally: "pizza" },
 pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 18000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
-yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 18000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" },
+yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 18000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" }, ia:{ id: "signal_guest", name: "RED DE LA FAMILIA", key: "U", cd: 18000, color: "#4ff0c8", special: "Ayuda de la familia", ally: "nacar" },
 cuerno:  { id: "aurora", name: "CORO DE AURORA", key: "U", cd: 18000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
 });
 
@@ -273,7 +273,7 @@ dragon:  { kind: "nova",    line: "EL CIELO TAMBIÉN LUCHA", text: "El vuelo abr
 dino:    { kind: "quake",   line: "EL MÁS GRANDE TAMBIÉN TIENE CORAZÓN", text: "Dino despierta al coloso: cinco actos, cometas fósiles y un último gran abrazo." },
 frita:   { kind: "crisp",   line: "TODO AL PUNTO", text: "Aceite, velocidad y una cocina absolutamente irresponsable." },
 pizza:   { kind: "volcano", line: "ABRID EL HORNO", text: "El escenario entero se convierte en una pizzería volcánica." },
-yomi:    { kind: "maw",     line: "OS RECUERDO A TODOS", text: "Yomi compila un hechizo de código: diez estrellas de la familia se enlazan y Cuerno cruza la constelación golpeando a todos los enemigos analizados." },
+yomi:    { kind: "maw",     line: "OS RECUERDO A TODOS", text: "Yomi compila un hechizo de código: diez estrellas de la familia se enlazan y Cuerno cruza la constelación golpeando a todos los enemigos analizados." }, ia:{ kind: "network",     line: "NINGUNA VOZ SE BORRA", text: "IA compila un hechizo de código: diez estrellas de la familia se enlazan y Cuerno cruza la constelación golpeando a todos los enemigos analizados." },
 cuerno:  { kind: "aurora",  line: "LOS SUEÑOS TAMBIÉN VUELAN", text: "Cuerno despierta siete colores. Los enemigos visibles se duermen entre estrellas, salvo el jefe." },
 });
 
@@ -845,7 +845,7 @@ if (pl.e) {
 export function updateAbilityFx(game) {
 const p = game.player;
 if (!p) return;
-if(p.id==="yomi")p._yomiKnowledge=(game.enemies||[]).filter(e=>e.hp>0&&(e._yomiMarkUntil||0)>(game.t||0)).length;
+if(["yomi","ia"].includes(p.id))p._yomiKnowledge=(game.enemies||[]).filter(e=>e.hp>0&&(e._yomiMarkUntil||0)>(game.t||0)).length;
 updateKiloDuet(game,hitEnemy);
 updateStitchoDuet(game,hitEnemy);
 updateMoments(game);

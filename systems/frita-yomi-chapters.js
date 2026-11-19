@@ -13,7 +13,7 @@ export function yomiNodeState(g,s){
 export function fryerAstralAbility(g,p,index){
  const w=g.world1;if(!w||index!==0)return;
  if(g.roomDef?.fritaChapter&&p.id==='frita'&&!p.grounded&&w.launchedGeyser!=null&&!w.fritaSteered){p.vx=Math.max(-9,Math.min(9,(p.vx||0)+(p.facing||1)*4));p.vy=Math.min(p.vy||0,-4);w.fritaSteered=true;w.fritaAirCorrections=(w.fritaAirCorrections||0)+1;g.nums?.add?.(p.x,p.y-25,'J · CORRECCIÓN DE SAL','#fff0b9',true);}
- if(g.roomDef?.yomiChapter&&p.id==='yomi')for(const s of w.stations)if(!s.done&&Math.abs(p.x+p.w/2-s.x)<230&&Math.abs(p.y+p.h-s.y)<160&&yomiNodeState(g,s)==='live'){
+ if(g.roomDef?.yomiChapter&&['yomi','ia'].includes(p.id))for(const s of w.stations)if(!s.done&&Math.abs(p.x+p.w/2-s.x)<230&&Math.abs(p.y+p.h-s.y)<160&&yomiNodeState(g,s)==='live'){
   w.yomiWindows||={};w.yomiWindows[s.id]=w.tick+75;w.yomiWindowExtensions=(w.yomiWindowExtensions||0)+1;g.nums?.add?.(s.x,s.y-145,'J · VENTANA AMPLIADA','#a3e7d6',true);
  }
 }

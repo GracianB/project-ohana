@@ -4,7 +4,7 @@ import {cleanRoomAlbums} from './room-album.js';
 // Save v3 (reads v2). Ids viejos se canonizan para no romper partidas.
 import {sanitizeUBonds} from "./u-partners.js";
 import {WORLD1_IDS,cleanWorld1Seals,cleanWorld1Stations} from "./world1-rooms.js";
-const SAVE_ROOMS=['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss',...WORLD1_IDS];
+const SAVE_ROOMS=['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss','w1-nacar',...WORLD1_IDS];
 export const ID_LEGACY = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin" };
 
 export function canonId(id) {
@@ -19,7 +19,7 @@ function cleanProgress(raw,arrays=false){
 // state but validate full personal collections separately, per room.
 function cleanSecrets(raw){
  const rooms=SAVE_ROOMS;
- const heroes=['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
+ const heroes=['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno','nacar','ia'];
  const out={};
  for(const id of rooms){
   const entries=raw?.[id];if(!Array.isArray(entries))continue;

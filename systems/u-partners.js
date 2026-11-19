@@ -5,7 +5,7 @@ import {ROSTER} from "../characters/roster.js";
 
 export const DEFAULT_U_PARTNERS=Object.freeze({
  nacar:"cat",kilo:"stitcho",stitcho:"chispin",chispin:"cat",cat:"dragon",dragon:"dino",
- dino:"frita",frita:"pizza",pizza:"yomi",yomi:"cuerno",cuerno:"kilo"
+ dino:"frita",frita:"pizza",pizza:"yomi",yomi:"cuerno", ia:"nacar",cuerno:"kilo"
 });
 export const U_EXP_THRESHOLDS=Object.freeze([0,35,100]);
 export const MAX_U_EXP=200;
@@ -18,7 +18,7 @@ const byId=new Map(ROSTER.map(r=>[r.id,r]));
 export function optionsForUPartner(hero){
  if(!byId.has(hero))return [];
  return ROSTER.filter(r=>r.id!==hero).map(r=>Object.freeze({
-  id:r.id,name:r.name,borrowedL:r.abilities[2],lName:U_L_NAMES[r.abilities[2]]||r.abilities[2]
+  id:r.id,name:r.name,borrowedL:r.abilities[2],lName:r.id==='ia'?'Síntesis de IA':U_L_NAMES[r.abilities[2]]||r.abilities[2]
  }));
 }
 export function chooseUPartner(hero,requested){

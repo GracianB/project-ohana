@@ -32,7 +32,7 @@ function mockCtx(){
  },set(o,k,v){o[k]=v;return true;}})};
 }
 test("V314: 90 different hero+ally recipes, ten heroic signatures and rank-scaled bonds",()=>{
- assert.equal(Object.keys(DUET_ORIGINS).length,11);
+ assert.equal(Object.keys(DUET_ORIGINS).length, 12);
  const combinations=new Set(),names=new Set();
  for(const hero of HEROES)for(const buddy of optionsForUPartner(hero)){
   for(let rank=1;rank<=3;rank++){
@@ -52,8 +52,8 @@ test("V314: 90 different hero+ally recipes, ten heroic signatures and rank-scale
   }
   names.add(duetChemistry(hero,buddy.id,1).name);
  }
- assert.equal(combinations.size, 330);
- assert.equal(names.size,110);
+ assert.equal(combinations.size, 396);
+ assert.equal(names.size,132);
  assert.equal(duetChemistry("kilo","kilo"),null);
  assert.equal(duetChemistry("intruder","cat"),null);
 });
@@ -88,7 +88,7 @@ test("V314: profile persistence across sessions, clamped JSON, and no inherited 
   assert.equal(readStoredUBonds(storage,hero)[partner],92);
  }
  const before=JSON.parse(memory.get(U_BONDS_STORAGE));
- assert.equal(Object.keys(before).length, 11);
+ assert.equal(Object.keys(before).length, 12);
  assert.equal(persistUBonds(storage,"kilo",{stitcho:5,other:99999,cat:Infinity}),true);
  assert.equal(readStoredUBonds(storage,"kilo").stitcho,92,"XP must be monotonic");
  assert.equal(readStoredUBonds(storage,"kilo").other,undefined);
@@ -148,7 +148,7 @@ test("V314: 90 selected duets x 5 forms x 3 levels have distinct visual co-signa
    frames++;
   }
  }
- assert.equal(frames,1650);
+ assert.equal(frames, 1980);
 });
 test("V314: hero-level perks apply only to actual L hits, never to replica, hitbox, or level 1",()=>{
  for(const hero of HEROES){

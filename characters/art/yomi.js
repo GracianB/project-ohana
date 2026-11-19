@@ -500,7 +500,7 @@ function handPose(side,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritua
  return [x,y,rot,open];
 }
 
-function draw(ctx,pose,R){
+export function drawArtificialIntelligence(ctx,pose,R){
   const p=pose||{},f=clamp(p.form|0,0,4),t=Number(p.t)||0,st=p.state||"idle";
   const col=PAL[f],glow=col[2],accent=col[3],F=YOMI_FORMS[f];
   const cast=st==="cast"?(p.castSlot|0):-1,atk=clamp(Number(p.atk)||0,0,1);

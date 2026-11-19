@@ -161,7 +161,7 @@ test("V316: Dragon keeps Dino's quake U and all nine selectable guests",()=>{
   assert.equal(FAMILY_DUET_LENGTH,120);
   assert.deepEqual(FAMILY_DUET_BEATS,[42,66,90]);
   const choices=optionsForUPartner("dragon");
-  assert.equal(choices.length, 10);
+  assert.equal(choices.length, 11);
   for(const choice of choices)for(let form=0;form<5;form++){
     const def=familyDuetDefinition({hero:"dragon",ally:choice.id});
     assert.equal(def.ally,choice.id);

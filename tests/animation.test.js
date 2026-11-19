@@ -17,7 +17,7 @@ const basePlayer = {
 
 test("los 10 personajes tienen perfiles cinéticos propios", () => {
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
-  assert.equal(Object.keys(MOTION_PROFILES).length, 11);
+  assert.equal(Object.keys(MOTION_PROFILES).length, 12);
   for (const id of ids) {
     const profile = motionProfile({ id });
     assert.equal(profile, MOTION_PROFILES[id]);
@@ -100,7 +100,7 @@ test("cambio de dirección produce un pulso visual de giro y frenada", () => {
 test("las 40 transiciones de evolución tienen mensaje y escalera narrativa", () => {
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
   assert.equal(EVOLUTION_STAGE_COPY.length, 5);
-  assert.equal(Object.keys(EVOLUTION_MESSAGES).length, 10);
+  assert.equal(Object.keys(EVOLUTION_MESSAGES).length, 11);
 
   for (const id of ids) {
     const lines = [];
@@ -119,7 +119,7 @@ test("las 40 transiciones de evolución tienen mensaje y escalera narrativa", ()
  
 test("las 50 formas tienen transformación corporal progresiva por personaje", () => {
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
-  assert.equal(Object.keys(EVOLUTION_FORM_PROFILES).length, 11);
+  assert.equal(Object.keys(EVOLUTION_FORM_PROFILES).length, 12);
 
   for (const id of ids) {
     const profile = EVOLUTION_FORM_PROFILES[id];
@@ -155,8 +155,8 @@ test("los 10 golpes básicos y las 30 habilidades tienen firmas visuales estable
 test("las 5 formas tienen identidad visual y cinética propia para los 10 personajes", () => {
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
   assert.equal(EVOLUTION_STAGES.length, 5);
-  assert.equal(EVOLUTION_SIGNATURES.length, 55);
-  assert.equal(new Set(EVOLUTION_SIGNATURES).size, 55);
+  assert.equal(EVOLUTION_SIGNATURES.length, 60);
+  assert.equal(new Set(EVOLUTION_SIGNATURES).size, 60);
 
   for (const id of ids) {
     const keys = [];
@@ -293,7 +293,7 @@ test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etap
   assert.equal(typeof drawEvolutionDesignFX, "function");
   assert.equal(typeof drawEvolutionSilhouetteFX, "function");
   assert.equal(typeof drawEvolutionCombatFX, "function");
-  assert.equal(Object.keys(EVOLUTION_FINAL_DESIGNS).length, 11);
+  assert.equal(Object.keys(EVOLUTION_FINAL_DESIGNS).length, 12);
   const ctx = makeEvolutionCinemaContext();
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
 

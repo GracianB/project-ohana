@@ -5,13 +5,13 @@ import {ROSTER} from "../characters/roster.js";
 import {WELCOME_CAST_ORDER,welcomeCastSpot,welcomeActorFit} from "../systems/intro-cast-fit.js";
 
 test("Opening optical V343: complete ten-hero cast, no aliases or duplicate positions",()=>{
-  assert.equal(WELCOME_CAST_ORDER.length,11);
-  assert.equal(new Set(WELCOME_CAST_ORDER).size,11);
+  assert.equal(WELCOME_CAST_ORDER.length, 12);
+  assert.equal(new Set(WELCOME_CAST_ORDER).size,12);
   assert.deepEqual(new Set(WELCOME_CAST_ORDER),new Set(ROSTER.map(hero=>hero.id)));
   for(const width of [320,390,560,759,760,1280,1654,1920]){
     const spots=WELCOME_CAST_ORDER.map(id=>welcomeCastSpot(id,width,720,90));
     assert.ok(spots.every(s=>s&&s.x>0&&s.x<width&&s.foot>0));
-    assert.equal(new Set(spots.map(s=>s.x+":"+s.foot)).size,11,"no two heroes overlap");
+    assert.equal(new Set(spots.map(s=>s.x+":"+s.foot)).size,12,"no two heroes overlap");
     for(const s of spots){
       assert.ok(s.x-s.slotWidth*.44>=0,"left silhouette safe");
       assert.ok(s.x+s.slotWidth*.44<=width,"right silhouette safe");
@@ -27,7 +27,7 @@ test("Opening optical V343: real-image dimensions normalize ten disparate art si
   // Stitcho/Chispin/Michi, small dinosaurs and narrow snack silhouettes.
   const raw=[
     [88,66,0],[98,78,12],[64,64,-8],[104,128,3],[116,130,-2],
-    [110,120,4],[38,68,0],[55,76,-6],[64,88,0],[66,170,3],[110,100,0]
+    [110,120,4],[38,68,0],[55,76,-6],[64,88,0],[66,170,3],[110,100,0],[64,66,0]
   ];
   assert.equal(raw.length,WELCOME_CAST_ORDER.length);
   const fitted=raw.map(([w,h,off])=>welcomeActorFit({width:w,height:h,centerOffsetX:off},104,165));

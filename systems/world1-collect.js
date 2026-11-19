@@ -21,7 +21,7 @@ import {drawMemoryPickup,MEMORY_PICKUPS} from './memory-pickup-art.js';
 //   HUD                     → W1C.drawWorld1CollectHud(ctx, g, W, H)
 //   tecla álbum (p.ej. "B") → W1C.toggleWorld1Album(g);  dibujo → W1C.drawWorld1Album(ctx, g, W, H, t)
 //   g.save() puede incluir W1C.world1CollectSnapshot(g).
-import { WORLD1_ORDER, WORLD1_THEMES, WORLD1_FLOOR, WORLD1_ROOMS } from "./world1-rooms.js";
+import { WORLD1_ROOM_HEROES as WORLD1_ORDER, WORLD1_THEMES, WORLD1_FLOOR, WORLD1_ROOMS } from "./world1-rooms.js";
 import { ROOM_RELICS, ALBUM_ROOMS } from "./room-album.js";
 
 export const W1_COLLECT_KEY = "ohana-w1-collect-v1";

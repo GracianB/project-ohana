@@ -30,7 +30,7 @@ stitch:  { freq: 0.95, bounce: 0.7,  sway: 1.0,  breath: 1.0,  land: 0.85, weigh
 dragon:  { freq: 0.65, bounce: 0.85, sway: 1.1,  breath: 1.45, land: 1.15, weight: 1.3,  snap: 0.85 },
 dino:    { freq: 0.62, bounce: 1.2,  sway: 1.3,  breath: 1.15, land: 1.7,  weight: 1.65, snap: 0.75 },
 frita:   { freq: 1.2,  bounce: 0.55, sway: 1.35, breath: 1.0,  land: 0.65, weight: 0.8,  snap: 1.35 },
-yomi:    { freq: 0.9,  bounce: 0.35, sway: 1.65, breath: 1.5,  land: 0.4,  weight: 0.55, snap: 1.6 },
+yomi:    { freq: 0.9,  bounce: 0.35, sway: 1.65, breath: 1.5,  land: 0.4,  weight: 0.55, snap: 1.6 }, ia:{ freq: 0.9,  bounce: 0.35, sway: 1.65, breath: 1.5,  land: 0.4,  weight: 0.55, snap: 1.6 },
 lilo:    { freq: 1.05, bounce: 0.9,  sway: 1.05, breath: 1.05, land: 0.9,  weight: 0.95, snap: 1.05 },
 };
 const NEUTRAL = { freq: 1, bounce: 1, sway: 1, breath: 1, land: 1, weight: 1, snap: 1 };
@@ -480,7 +480,7 @@ dragon:  { pace: 0.74, sway: 1.06, bounce: 1.18, weight: 1.22, attack: 1.04, imp
 dino:    { pace: 0.70, sway: 1.16, bounce: 1.28, weight: 1.46, attack: 0.94, impact: 1.46, jump: 0.96, cast: 1.02, dash: 0.76 },
 frita:   { pace: 1.10, sway: 1.30, bounce: 0.88, weight: 0.76, attack: 1.24, impact: 1.16, jump: 1.06, cast: 1.16, dash: 1.18 },
 pizza:   { pace: 0.86, sway: 1.24, bounce: 1.46, weight: 1.34, attack: 1.02, impact: 1.34, jump: 0.88, cast: 1.12, dash: 0.86 },
-yomi:    { pace: 0.92, sway: 1.62, bounce: 0.36, weight: 0.40, attack: 1.16, impact: 0.92, jump: 1.34, cast: 1.34, dash: 1.10 },
+yomi:    { pace: 0.92, sway: 1.62, bounce: 0.36, weight: 0.40, attack: 1.16, impact: 0.92, jump: 1.34, cast: 1.34, dash: 1.10 }, ia:{ pace: 0.92, sway: 1.62, bounce: 0.36, weight: 0.40, attack: 1.16, impact: 0.92, jump: 1.34, cast: 1.34, dash: 1.10 },
 cuerno:  { pace: 0.82, sway: 1.28, bounce: 1.34, weight: 1.06, attack: 1.12, impact: 1.20, jump: 1.02, cast: 1.08, dash: 0.90 },
 };
 

@@ -27,7 +27,8 @@ export function heroHeightTarget(id, form) {
   return (HERO_HEIGHT_TARGET[id] || CALIBRATED_HEIGHT)[f];
 }
 export const CANVAS_ANATOMY_HEIGHT = Object.freeze({
-  nacar: Object.freeze([49,70,52,96,79]),
+  nacar: Object.freeze([57,70,100,130,150]),
+  ia:Object.freeze([66,92,98,106,122]),
   dino: Object.freeze([124.6, 104.1, 114.5, 128.1, 133.7]),
   dragon: Object.freeze([90.8, 109.9, 134.5, 152.3, 169]),
   yomi: Object.freeze([66, 86, 92, 98, 116]),

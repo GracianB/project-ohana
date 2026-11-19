@@ -117,7 +117,7 @@ export function playTitleIntro(options = {}) {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="nacar"||id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")player._introForceCanvas=true;
+    if(id==="ia"||id==="nacar"||id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -140,7 +140,7 @@ export function playTitleIntro(options = {}) {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="nacar"||id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")subject._introForceCanvas=true;
+        if(id==="ia"||id==="nacar"||id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -648,6 +648,8 @@ export function playTitleIntro(options = {}) {
     // V348: Yomi remains fully readable THROUGH the entire 14-second loop.
     // The shadow is a local theatrical curtain, never eight seconds of absence.
     const yomiBeat=yomiWelcomeBeat(loop,reduce);
+    const iaSpot=openingCastSpot('ia',W,H,direction),iaHeight=openingHeroHeight('ia',heroH,direction);
+    actor("ia",iaSpot.x,iaSpot.foot,iaHeight,tf,{facing:-1,pose:'idle',yomiWelcome:yomiBeat});
     const yomiHeight=openingHeroHeight("yomi",heroH,direction)*1.03;
     if(welcomeSpotlightAllows("yomi",direction)) drawYomiWelcomeFX(ctx,yomi.x,yomi.foot,yomiHeight,t,yomiBeat,"back");
     actor("yomi",yomi.x,yomi.foot,yomiHeight,tf,{

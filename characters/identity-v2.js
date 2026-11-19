@@ -12,7 +12,7 @@ export const HERO_IDENTITY = Object.freeze({
   dino:    { title:'Coloso rompeguardias', strength:'El mayor aguante y golpe H', weakness:'El más lento; compromete cada ataque', melee:1.48, cooldown:1.24, speed:[4,4.3,4.8,5.1,6], hp:[140,180,225,285,360], jump:[11,11.6,12.2,12.6,14] },
   frita:   { title:'Especialista del aire', strength:'Impulso, derrape y corrección aérea', weakness:'Poca vida; depende del movimiento', melee:.9, cooldown:.85, speed:[5,5.7,6.5,7.4,8.5], hp:[70,88,108,136,172], jump:[11.4,12.1,12.8,13.6,15] },
   pizza:   { title:'Defensa elástica', strength:'Aguanta golpes, rebota y controla el suelo', weakness:'Carrera lenta, necesita anticipar', melee:1.2, cooldown:1.08, speed:[3.7,4.2,4.8,5.4,6.2], hp:[110,138,174,218,275], jump:[11.8,12.4,13.1,13.6,15.2] },
-  yomi:    { title:'Estratega de datos', strength:'Analiza, contiene y sintetiza', weakness:'Menos velocidad; exige leer ventanas', melee:.75, cooldown:.88, speed:[3.4,3.8,4.2,4.7,5.3], hp:[74,92,114,143,180], jump:[12,12.6,13.2,13.8,14.8] },
+  yomi:    { title:'Estratega de datos', strength:'Analiza, contiene y sintetiza', weakness:'Menos velocidad; exige leer ventanas', melee:.75, cooldown:.88, speed:[3.4,3.8,4.2,4.7,5.3], hp:[74,92,114,143,180], jump:[12,12.6,13.2,13.8,14.8] }, ia:{ title:'Estratega de datos', strength:'Analiza, contiene y sintetiza', weakness:'Menos velocidad; exige leer ventanas', melee:.75, cooldown:.88, speed:[3.4,3.8,4.2,4.7,5.3], hp:[74,92,114,143,180], jump:[12,12.6,13.2,13.8,14.8] },
 });
 export function applyHeroIdentity(roster) {
   for (const hero of roster) {

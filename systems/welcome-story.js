@@ -1,5 +1,6 @@
 import {CAMP_HEROES} from './family-camp-model.js';
 const DATA=[
+ ['ia','Una pregunta y una amiga','yomi','Cada luz tiene su propia voz.',[5.5,7.1]],
  ['nacar','Una voz del océano','cat','Hay sitio. Pero ese ovillo es mío.',[3.1,5.4]],
  ['kilo','Aloha: la isla sigue sus pasos','pizza','¡Mi queso está bailando!',[.12,2.1]],
  ['stitcho','El atajo imposible','chispin','La próxima cometa la sujeto yo.',[.18,3.1]],

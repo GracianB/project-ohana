@@ -1,3 +1,4 @@
+import {drawSeaStar} from '../characters/art/nacar.js';
 import {drawMichiPaw} from '../worlds/michi-adventure-art.js';
 // OHANA V462 · Michicornio L projectiles: one luminous shot per tentacle, launched
 // from the tentacle tips, with a TRANSPARENT wake instead of the old additive white
@@ -63,7 +64,7 @@ function rings(ctx,x,y,r,color){ // flat halo: three concentric low-alpha discs
 function star(ctx,r,inner,points=5){ctx.beginPath();for(let k=0;k<points*2;k++){const a=k*Math.PI/points-Math.PI/2,rr=k%2?r*inner:r;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}ctx.closePath();}
 
 export function drawMichiTailShot(ctx,f,cam,t){
- const x=f.x-cam.x,y=f.y-cam.y,kind=f.marine?([2,4].includes(f.form)?'pixie':'jelly'):MICHI_SHOT_KIND[f.form|0]||'paw',col=f.color||'#ffb6e4';
+ const x=f.x-cam.x,y=f.y-cam.y,kind=f.marine?'sea-star':MICHI_SHOT_KIND[f.form|0]||'paw',col=f.color||'#ffb6e4';
  const pts=(f.trail||[]).map(q=>({x:q.x-cam.x,y:q.y-cam.y}));
  ctx.save();ctx.lineJoin='round';
  if(f.delay>0){ // charging on the tentacle tip, before launch
@@ -73,6 +74,7 @@ export function drawMichiTailShot(ctx,f,cam,t){
  }
  wake(ctx,pts,x,y,kind==='comet'?9:kind==='jelly'?8:6.5,col);
  const ang=Math.atan2(f.vy||0,f.vx||1),age=f.age||0,pulse=.5+.5*Math.sin(age*.45+(f.idx||0));
+ if(f.marine){drawSeaStar(ctx,x,y,12,ang+age*.08,col);ctx.restore();return;}
  rings(ctx,x,y,kind==='jelly'?20:17,col);
  ctx.translate(x,y);ctx.rotate(ang);
  if(kind==='paw'){

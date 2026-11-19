@@ -41,7 +41,7 @@ test('V325 local launch geometry respects AABB edges and cannot mutate targets',
 test('V325 90 real U casts: Dragon and Pizza warn first, then locally hit all five forms and nine partners',()=>{
   for(const hero of ['dragon','pizza']){
     const choices=optionsForUPartner(hero);
-    assert.equal(choices.length,10,hero);
+    assert.equal(choices.length, 11,hero);
     for(let evo=0;evo<5;evo++)for(const choice of choices){
       clearAbilityFx();
       const radius=SUPREME_LAUNCH_RADII[hero];

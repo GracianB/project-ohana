@@ -25,7 +25,7 @@ test('Kilo requires four authored instruments and the real host guardian receipt
  assert.deepEqual(mergeAdventureProgress(null,p,{roomId,host:true}).seals,['kilo']);
 });
 test('the other nine chapters retain their authored discovery requirements and host-only seals',()=>{
- for(const r of Object.values(WORLD1_ROOMS).filter(r=>r.hero&&r.hero!=='kilo')){
+ for(const r of Object.values(WORLD1_ROOMS).filter(r=>r.hero&&r.hero!=='kilo'&&!r.optionalChapter)){
   assert.equal(r.expedition.nodes.length,3,r.hero);
   const id=r.id,p={roomId:id,stations:r.seal.stations.filter(s=>s.kind!=='oven').map(s=>s.id),secrets:r.expedition.nodes.map(n=>n.id),encounters:[id+'-guardian-v1'],sealed:true};
   assert.deepEqual(mergeAdventureProgress(null,p,{roomId:id}).seals,[],r.hero+' guest cannot seal');

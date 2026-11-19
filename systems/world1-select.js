@@ -20,7 +20,7 @@ import {cachedGradient} from './canvas-gradient-cache.js';
 //   frame   → drawWorld1Select(ctx, W, H, t, sel, { drawActor })   // drawActor(ctx, heroId, x, y, scale) opcional
 // También disponible como window.OhanaWorld1Select. Sin degradados por fotograma,
 // sin Math.random, geometría finita.
-import { WORLD1_ORDER, WORLD1_THEMES, WORLD1_SEALS, cleanWorld1Seals } from "./world1-rooms.js";
+import { WORLD1_ORDER, WORLD1_ROOM_HEROES, WORLD1_THEMES, WORLD1_SEALS, cleanWorld1Seals } from "./world1-rooms.js";
 import { findRoster } from "../characters/roster.js";
 
 export const WORLD1_TAGLINES = Object.freeze({
@@ -33,7 +33,7 @@ export const WORLD1_TAGLINES = Object.freeze({
   dino:    "Un pisotón y la tierra recuerda.",
   frita:   "Crujiente por fuera, valiente por dentro.",
   pizza:   "Reparto exprés de sonrisas con queso.",
-  yomi:    "La IA de la familia ya está despierta."
+  yomi:    "Los faroles de Yomi iluminan el regreso."
 });
 
 const num = (v, d = 0) => (Number.isFinite(v) ? v : d);
@@ -47,7 +47,7 @@ export function heroDisplayName(hero) {
 // Datos de cada carta (puros, sin DOM): para HUD, menú HTML o lienzo.
 export function world1SelectCards({ seals = [], counts = {},keepsakes=[] } = {}) {
   const done = new Set(cleanWorld1Seals(seals));
-  const cards = WORLD1_ORDER.map((hero, i) => {
+  const cards = WORLD1_ROOM_HEROES.map((hero, i) => {
     const th = WORLD1_THEMES[hero];
     const unlocked = true;
     return {
@@ -58,7 +58,7 @@ export function world1SelectCards({ seals = [], counts = {},keepsakes=[] } = {})
     };
   });
   const all = WORLD1_ORDER.every((h) => done.has(h));
-  cards.push({ hero: null, index: WORLD1_ORDER.length, room: "w1-final", name: "Corazón de Ohana", roomName: "La Quimera Ohana",
+  cards.push({ hero: null, index: WORLD1_ROOM_HEROES.length, room: "w1-final", name: "Corazón de Ohana", roomName: "La Quimera Ohana",
     color: "#ffd6f2", tint: "#ff7ad0", tagline: all ? (cleanKeepsakes(keepsakes).length===10?"Los recuerdos están a salvo. Ahora, Quimera.":"Diez guardianes evolucionados custodian lo que perdiste. Recupéralo antes de Quimera.") : "Despierta los diez sellos para abrirlo.",
     relic: "", seal: "Jefe final", sealed: false, unlocked: all, found: 0, final: true,keepsakes:cleanKeepsakes(keepsakes).length });
   return cards;
@@ -77,14 +77,14 @@ const COLS = 6;
 // A portal's geometry must not be guessed from an obsolete grid layout.
 export function world1SelectCardRects(sel,W,H){return layout(sel,W,H);}
 function layout(sel,W,H){
- const compact=W<600,cols=5,gap=compact?5:9,margin=compact?9:22;
+ const compact=W<600,cols=6,gap=compact?5:9,margin=compact?9:22;
  const finalH=compact?42:48,bottom=10;
  const h=Math.min(68,Math.max(35,(H*.36-finalH-24)/2));sel.columns=cols;
  // Anchor all eleven portals to the visible bottom edge, including short phones.
  const rowH=h+8,baseY=H-bottom-finalH-8-2*rowH;
  sel.rects=sel.cards.map((card,i)=>card.final
   ? {x:margin,y:H-bottom-finalH,w:W-margin*2,h:finalH}
-  : {x:margin+(i%cols)*((W-margin*2-gap*4)/5+gap),y:baseY+Math.floor(i/5)*rowH,w:(W-margin*2-gap*4)/5,h});
+  : {x:margin+(i%cols)*((W-margin*2-gap*(cols-1))/cols+gap),y:baseY+Math.floor(i/cols)*rowH,w:(W-margin*2-gap*(cols-1))/cols,h});
  return sel.rects;
 }
 
@@ -170,7 +170,7 @@ export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=fals
  ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#fff1ca';ctx.font=`600 ${compact?12:16}px Outfit,sans-serif`;ctx.fillText(`${String(cur.index+1).padStart(2,'0')} / ${cur.final?'EL CORAZÓN':'DIEZ HISTORIAS'}`,compact?16:28,compact?H*.135:112,W*.52);
  ctx.fillStyle='#e2ead8';ctx.font=`${compact?10:12}px Outfit,sans-serif`;ctx.fillText(cur.roomName,compact?16:28,compact?H*.185:140,W*.65);
  // Final mirror room card at the bottom. Locked until the ten seals are done.
- const frame=rects[10],finalCard=sel.cards[10],focusF=sel.index===10,hoverF=sel.hover===10;
+ const finalIndex=sel.cards.length-1,frame=rects[finalIndex],finalCard=sel.cards[finalIndex],focusF=sel.index===finalIndex,hoverF=sel.hover===finalIndex;
  if(frame&&finalCard){
   const locked=!finalCard.unlocked, seals=sel.cards.filter(c=>c.sealed).length;
   ctx.save();
@@ -191,7 +191,7 @@ export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=fals
   ctx.restore();
  }
  // Two low casting rails: large hit areas, names and real animated silhouettes.
- sel.cards.slice(0,10).forEach((card,i)=>{
+ sel.cards.slice(0,-1).forEach((card,i)=>{
   const r=rects[i],focus=i===sel.index,hover=i===sel.hover,x=r.x+r.w/2,y=r.y+r.h*.72;
   ctx.save();ctx.fillStyle=focus?'#e8d5a7':hover?'#324d60f2':'#102433e8';roundRect(ctx,r.x,r.y,r.w,r.h,compact?9:12);ctx.fill();ctx.strokeStyle=focus?'#fff0c7':hover?card.color:'#a7c4bb44';ctx.lineWidth=focus?2:1;ctx.stroke();
   ctx.globalAlpha=card.unlocked?1:.55;

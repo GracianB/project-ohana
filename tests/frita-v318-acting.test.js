@@ -126,7 +126,7 @@ test("V318 preserves all nine selectable partners and Pizza oven U choreography"
   assert.equal(FAMILY_DUET_LENGTH,120);
   assert.deepEqual(FAMILY_DUET_BEATS,[42,66,90]);
   const choices=optionsForUPartner("frita");
-  assert.equal(choices.length, 10);
+  assert.equal(choices.length, 11);
   for(const choice of choices) {
     for(const age of [0,25,42,66,90,115]){
       const result=familyDuetChoreography({hero:"frita",ally:choice.id,x:200,y:300,

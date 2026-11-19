@@ -5,8 +5,8 @@ import {createWorld1Select,world1SelectCardRects,world1SelectPointer,world1Selec
 test('V514 circular portal geometry drives real pointer hit tests at desktop size',()=>{
  const sel=createWorld1Select({start:'kilo'});
  const rects=world1SelectCardRects(sel,1120,620);
- assert.equal(rects.length,11);
- assert.equal(sel.cards.length,11);
+ assert.equal(rects.length, 12);
+ assert.equal(sel.cards.length,12);
  for(const hero of ['kilo','stitcho','dino','pizza','yomi']){
    const idx=sel.cards.findIndex(card=>card.hero===hero);
    const r=rects[idx];

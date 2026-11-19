@@ -3,15 +3,15 @@
 // measures its non-transparent silhouette. Physics and evolution are untouched.
 export const WELCOME_CAST_ORDER = Object.freeze([
   "dino", "dragon", "kilo", "stitcho", "chispin",
-  "cat", "frita", "pizza", "yomi", "cuerno", "nacar"
+  "cat", "frita", "pizza", "yomi", "cuerno", "nacar", "ia"
 ]);
 
 export function welcomeCastSpot(id, width, floor, heroHeight) {
   const index = WELCOME_CAST_ORDER.indexOf(id);
   if (index < 0 || ![width, floor, heroHeight].every(Number.isFinite) || width <= 0) return null;
   const compact = width < 760;
-  const desktop={nacar:[.31,2.5,0],dino:[.10,0,2],dragon:[.24,.8,1],kilo:[.43,.05,2],stitcho:[.35,1.45,0],chispin:[.57,.95,1],cat:[.68,1.8,0],frita:[.68,0,2],pizza:[.82,.7,1],yomi:[.91,1.8,0],cuerno:[.12,2,0]};
-  const mobile={nacar:[.32,3.9,0],dino:[.18,0,2],dragon:[.12,1.3,1],kilo:[.50,0,2],stitcho:[.37,1.3,1],chispin:[.62,1.3,1],cat:[.50,2.6,0],frita:[.82,0,2],pizza:[.87,1.3,1],yomi:[.82,2.6,0],cuerno:[.18,2.6,0]};
+  const desktop={ia:[.81,2.9,0],nacar:[.31,2.5,0],dino:[.10,0,2],dragon:[.24,.8,1],kilo:[.43,.05,2],stitcho:[.35,1.45,0],chispin:[.57,.95,1],cat:[.68,1.8,0],frita:[.68,0,2],pizza:[.82,.7,1],yomi:[.91,1.8,0],cuerno:[.12,2,0]};
+  const mobile={ia:[.70,3.9,0],nacar:[.32,3.9,0],dino:[.18,0,2],dragon:[.12,1.3,1],kilo:[.50,0,2],stitcho:[.37,1.3,1],chispin:[.62,1.3,1],cat:[.50,2.6,0],frita:[.82,0,2],pizza:[.87,1.3,1],yomi:[.82,2.6,0],cuerno:[.18,2.6,0]};
   const [x,lift,row]=(compact?mobile:desktop)[id];
   return Object.freeze({x:width*x,foot:floor-heroHeight*lift,slotWidth:width*(compact?.20:.13),column:index,row,compact});
 }

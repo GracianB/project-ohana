@@ -19,7 +19,7 @@ export const SIGNATURE = {
   dino:    { reach: 8,  dmg: 26, kb: 1.9,  kind: "fan",   dash: 10, iframe: 6,  heavy: true, ram: true },
   frita:   { reach: 12, dmg: 0,  kb: 1,    kind: "fan",   dash: 14, iframe: 8,  low: true },
   pizza:   { reach: 4,  dmg: 2,  kb: 1.25, kind: "wedge", dash: 13, iframe: 8,  hop: -1.4 },
-  yomi:    { reach: 10, dmg: 4,  kb: 1.15, kind: "fan",   dash: 12, iframe: 8 },
+  yomi:    { reach: 10, dmg: 4,  kb: 1.15, kind: "fan",   dash: 12, iframe: 8 }, ia:{ reach: 10, dmg: 4,  kb: 1.15, kind: "fan",   dash: 12, iframe: 8 },
   cuerno:  { reach: 6,  dmg: 0,  kb: 1.05, kind: "leaf",  dash: 14, iframe: 8,  hop: -2 },
 };
 
@@ -37,14 +37,14 @@ const HITS = {
   dino:    { name: "Mordisco", kind: "bite",  color: "#8ee07a" },
   frita:   { name: "Corte",    kind: "slice", color: "#f0b43a" },
   pizza:   { name: "Porcion",  kind: "wedge", color: "#ffb43a" },
-  yomi:    { name: "Palmada de datos", kind: "fang",  color: "#4ff0c8" },
+  yomi:    { name: "Palmada de datos", kind: "fang",  color: "#4ff0c8" }, ia:{ name: "Palmada de datos", kind: "fang",  color: "#4ff0c8" },
   cuerno:  { name: "Puya",     kind: "poke",  color: "#ffe9a8" },
 };
 
 export const DIFFICULTY = {
   kilo: 1, pizza: 1, cat: 1, cuerno: 1,
   chispin: 2, stitcho: 2, dragon: 2,
-  dino: 3, frita: 3, yomi: 3,
+  dino: 3, frita: 3, yomi: 3, ia:3,
 };
 
 export function difficulty(id) {

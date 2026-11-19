@@ -1422,12 +1422,12 @@ const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,i
 articulateStride(pose,p.id);
 if(michiRig){pose.michiPresence=p._michiPresence;pose.michiMotion={vx:(p.vx||0)*(p.facing||1),vy:p.vy||0,flight:p._michiWingMode||'ground',fuel:(p._michiWingFuel||0)/(p._michiWingMax||210)};}
 if(p.id==='kilo'){pose.kiloPresence=p._kiloPresence;if(p._kiloPresence?.attention>.1)pose.look={x:p._kiloPresence.lookX,y:p._kiloPresence.lookY};}
-if(p.id==="yomi")pose.yomiKnowledge=p._yomiKnowledge||0;
+if(["yomi","ia"].includes(p.id))pose.yomiKnowledge=p._yomiKnowledge||0;
 if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;
 if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDino;
 if(p.id==="frita"&&p._introForceCanvas&&p._introFrita)pose.fritaWelcome=p._introFrita;
 if(p.id==="pizza"&&p._introForceCanvas&&p._introPizza)pose.pizzaWelcome=p._introPizza;
-if(p.id==="yomi"&&p._introForceCanvas&&p._introYomi)pose.yomiWelcome=p._introYomi;
+if(["yomi","ia"].includes(p.id)&&p._introForceCanvas&&p._introYomi)pose.yomiWelcome=p._introYomi;
 if(p.id==="cuerno"&&p._introForceCanvas&&p._introCuerno)pose.cuernoWelcome=p._introCuerno;
 if(p.id==="kilo"&&p._introForceCanvas&&p._introKilo)pose.kiloWelcome=p._introKilo;
 if(p.id==="stitcho"&&p._introForceCanvas&&p._introStitcho)pose.stitchoWelcome=p._introStitcho;
@@ -1557,7 +1557,7 @@ if (burstK > 0.35) {
   if(p.id==="kilo"||michiRig)flashA=Math.min(.12,flashA);
 }
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; if (p.id === "frita") flashA = hurtFresh ? 0.3 : 0.18; if(michiRig)flashA=hurtFresh?.22:.12; }
-const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat","dragon","dino","nacar"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
+const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat","dragon","dino","nacar","ia"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
 drawKiloFlightTrail(ctx,p,H,t,options.reduceMotion===true);
 ctx.save();
 ctx.rotate(tilt * 0.5);

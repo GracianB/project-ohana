@@ -9,7 +9,8 @@ export const CAMP_HEROES = Object.freeze({
  pizza:{x:610,y:255,role:'Elasticidad y rebotes',route:'Respiraderos de horno y saltos con rebote',prop:'cheese',lines:['He traído algo para compartir.','¿Por qué el queso sigue pegado a mí?','Vale. Un abrazo también cuenta.']},
  yomi:{x:1070,y:520,role:'Ilusión y paso espectral',route:'Pasos huecos y mecanismos ocultos',prop:'lantern',lines:['Nadie me verá coger una galleta.','¿Por qué la galleta también es fantasma?','Era una galleta de mentira. Qué crueldad.']},
  cuerno:{x:565,y:520,role:'Magia y travesuras',route:'Puentes Aurora y plataformas encantadas',prop:'rainbow',lines:['He preparado una sorpresa elegante.','Prrrf. Era una sorpresa por detrás.','¡Pero huele a flores! Creo.']},
- nacar:{x:300,y:520,role:'Refugio y marea',route:'Corrientes, espuma y secretos del acuario',prop:'moon',lines:['Una estrella me ha traído hasta aquí.','¿Puedo quedarme con vosotros?','El océano también sabe abrazar.']}
+ nacar:{x:300,y:520,role:'Refugio y marea',route:'Corrientes, espuma y secretos del acuario',prop:'moon',lines:['Una estrella me ha traído hasta aquí.','¿Puedo quedarme con vosotros?','El océano también sabe abrazar.']},
+ ia:{x:1220,y:510,role:'Análisis y control',route:'Terminales y sincronización de señales',prop:'spark',lines:['¿Cómo aprende una familia a ser familia?','Guardé una copia de tu canción.','Pregunta resuelta. La respuesta era un abrazo.']}
 });
 export function campNearest(x,y,maxDistance=95){
  let best=null,distance=maxDistance;

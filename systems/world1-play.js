@@ -1,3 +1,5 @@
+import {enterNacarChapter,updateNacarChapter,nacarObjective} from './nacar-chapter.js';
+import {drawNacarChapter} from '../worlds/nacar-seabed.js';
 import {sanctuaryObjective} from './michi-sanctuary.js';
 import {drawKiloResonator} from './kilo-chapter-art-v606.js';
 import {drawStitchoPart,drawStitchoPartStation} from './stitcho-chapter-art-v607.js';
@@ -60,6 +62,7 @@ export function enterWorld1(g) {
   };
   kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);catGrowth(g);cuernoGrowth(g);dragonGrowth(g);dinoGrowth(g);nextChapterGrowth(g);enterKiloAirTrail(g);
   enterExpedition(g);
+  enterNacarChapter(g);
   return g.world1;
 }
 
@@ -133,6 +136,7 @@ export function world1NextObjective(g) {
   const w = g?.world1, p = g?.player, r = g?.roomDef;
   if(r?.fusionBoss)return world1FinalObjective(g);
   if (!w || !p || !r) return null;
+  const ocean=nacarObjective(g);if(ocean)return ocean;
   const sanctuary=sanctuaryObjective(g);if(sanctuary)return sanctuary;
   const expedition=expeditionObjective(g);if(expedition)return expedition;
   if(r?.growthChapter==='cuerno'){const co=cuernoObjective(g);if(co)return co;}
@@ -229,6 +233,7 @@ export function updateWorld1(g,hurt) {
   const w = g.world1, p = g.player, r = g.roomDef;
   if (!w || !p || p.dead || !r || r.id !== w.room) return;
   w.tick++;
+  if(updateNacarChapter(g))return;
   if (w.cinema && ++w.cinema.t >= w.cinema.max) w.cinema = null;
   if (w.flash > 0) w.flash--;
   for (const s of w.stations) if (s.glow > 0) s.glow--;
@@ -394,6 +399,7 @@ function drawEmblem(ctx, hero, x, y, s, color) {
 }
 
 export function drawWorld1(ctx, g, cam, t) {
+  if(drawNacarChapter(ctx,g,cam,t))return;
   if(!g.roomDef?.michiSanctuary)drawExpedition(ctx,g,cam,t);
   const w = g.world1, r = g.roomDef; if (!w || !r) return;
   const reduce = !!g.reduceMotion, col = WORLD1_THEMES[w.hero]?.color || "#ffd6f2";

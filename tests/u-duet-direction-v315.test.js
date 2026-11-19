@@ -48,7 +48,7 @@ function legacy(kind,s,beat,e){
 }
 test("V315 · Ten guest identities are authored and visibly distinguishable",()=>{
  assert.deepEqual(Object.keys(GUEST_ACTING).sort(),HEROES.slice().sort());
- assert.equal(new Set(Object.values(GUEST_ACTING).map(v=>v.style)).size,11);
+ assert.equal(new Set(Object.values(GUEST_ACTING).map(v=>v.style)).size,12);
  for(const [id,actor]of Object.entries(GUEST_ACTING)){
   assert.ok(Object.isFrozen(actor),id);
   assert.ok(actor.gesture.length>=3);
@@ -76,8 +76,8 @@ test("V315 · All 90 duets x 5 forms x 3 beats share exact warning and real dama
    }
   }
  }
- assert.equal(pairs, 110);
- assert.equal(areas,3300);
+ assert.equal(pairs, 132);
+ assert.equal(areas,3960);
  assert.ok(points>1e6);
 });
 test("V315 · Ten guests have independent enter/attack/farewell poses, all ranks and five forms",()=>{
@@ -101,8 +101,8 @@ test("V315 · Ten guests have independent enter/attack/farewell poses, all ranks
    checked++;
   }
  }
- assert.equal(poses.size,11);
- assert.equal(checked,18150);
+ assert.equal(poses.size,12);
+ assert.equal(checked,21780);
 });
 test("V315 · Reduced-motion warning contours do not animate with external time, and restore Canvas",()=>{
  let total=0;
@@ -123,7 +123,7 @@ test("V315 · Reduced-motion warning contours do not animate with external time,
   assert.equal(drawBorrowedLWarnings(mock().ctx,def.kind,{...s,age:10},{x:0,y:0}),false);
   total++;
  }
- assert.equal(total, 110);
+ assert.equal(total, 132);
 });
 test("V315 · Guest is actually rendered in-world, properly animated and network safe for all heroes",()=>{
  let scenes=0;
@@ -158,7 +158,7 @@ test("V315 · Guest is actually rendered in-world, properly animated and network
   advancePeerEffects(peer);
   assert.equal(peer.coopPeerEffects.familyDuet.age,44);
  }
- assert.equal(scenes,3300);
+ assert.equal(scenes, 3960);
 });
 test("V315 · Existing legacy hit timings, controls, and safety cancellations remain intact",()=>{
  for(const hero of HEROES)for(const buddy of optionsForUPartner(hero)){

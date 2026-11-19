@@ -97,7 +97,7 @@ test("V320 Cuerno rainbow borrowed L, 120-tick U, all nine choices preserved",()
  assert.equal(FAMILY_DUET_LENGTH,120);
  assert.deepEqual(FAMILY_DUET_BEATS,[42,66,90]);
  const options=optionsForUPartner("yomi");
- assert.equal(options.length, 10);
+ assert.equal(options.length, 11);
  for(const opt of options)for(const age of [0,25,42,66,90,118]){
   const frame=familyDuetChoreography({hero:"yomi",ally:opt.id,x:220,y:300,
     age,evo:4,facing:1,bondRank:3},true);
