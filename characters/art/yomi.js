@@ -350,21 +350,30 @@ function drawTorso(ctx,F,f,col,glow,accent,core,t,pulse,swing,reduced){
   line(ctx,glow,1.2);for(const dx of [-8,0,8]){ctx.beginPath();ctx.moveTo(dx*.6,hemT+3);ctx.lineTo(dx*1.5+swing*.1,hemB+2);ctx.stroke();}
   return;
  }
- // F4 constellation gown: indigo glass full of stars, gold rim.
- const top=F.hy+F.hh/2+2,bot=-9,hem=27+Math.abs(swing)*.3;
- ctx.fillStyle=INDIGO;ctx.beginPath();ctx.moveTo(-14,top);ctx.lineTo(14,top);
- ctx.quadraticCurveTo(13,top+26,hem*.7,bot-12);ctx.quadraticCurveTo(hem+swing*.2,bot-4,hem*.9+swing*.2,bot);
- ctx.quadraticCurveTo(0,bot+6,-hem*.9+swing*.2,bot);ctx.quadraticCurveTo(-hem+swing*.2,bot-4,-hem*.7,bot-12);
- ctx.quadraticCurveTo(-13,top+26,-14,top);ctx.closePath();ctx.fill();line(ctx,GOLD,2.6);ctx.stroke();
- for(let i=0;i<14;i++){
-  const v=hn(i+3),u=hn(i+77),yy=top+6+v*(bot-top-10),half=14+(yy-top)/(bot-top)*(hem-14)-4;
-  ctx.save();ctx.globalAlpha=.5+.45*((Math.sin(t*.05+i*2.1)+1)/2);
-  if(i%5===0)star4(ctx,(u*2-1)*half,yy,2.6,"#fff6d8");else ellipse(ctx,(u*2-1)*half,yy,.9,.9,"#e8e4ff");
+ // The final chassis is an observatory with four armored shutters around a star.
+ const top=F.hy+F.hh/2+2,bot=-11,mid=(top+bot)*.5;
+ const spread=8+Math.min(15,core*7), drift=swing*.15;
+ for(const side of [-1,1]){
+  ctx.save();ctx.scale(side,1);
+  ctx.fillStyle='#372965';ctx.beginPath();ctx.moveTo(12,top);
+  ctx.lineTo(20+spread*.78,top+10);ctx.lineTo(23+spread,mid);
+  ctx.lineTo(17+spread*.64,bot-7);ctx.lineTo(9,bot);
+  ctx.lineTo(13+spread*.42,mid);ctx.closePath();ctx.fill();line(ctx,accent,1.5);ctx.stroke();
+  line(ctx,glow,1.2);ctx.beginPath();ctx.moveTo(16,top+9);
+  ctx.lineTo(20+spread*.73,mid-2);ctx.lineTo(15+spread*.49,bot-8);ctx.stroke();
   ctx.restore();
  }
- // pearl chest piece with the core
- ctx.fillStyle=col[0];ctx.beginPath();ctx.moveTo(-14,top);ctx.lineTo(14,top);ctx.quadraticCurveTo(12,top+13,0,top+19);ctx.quadraticCurveTo(-12,top+13,-14,top);ctx.closePath();ctx.fill();line(ctx,LINE,2.2);ctx.stroke();
- drawCore(ctx,0,top+9,5.6+core,glow,accent,pulse);
+ ctx.fillStyle=INDIGO;ctx.beginPath();ctx.moveTo(-13,top);ctx.lineTo(13,top);
+ ctx.lineTo(17,mid);ctx.lineTo(11+drift,bot);ctx.lineTo(-11+drift,bot);
+ ctx.lineTo(-17,mid);ctx.closePath();ctx.fill();line(ctx,GOLD,2.1);ctx.stroke();
+ for(let i=0;i<7;i++){
+  const yy=top+7+hn(i+4)*(bot-top-12), xx=(hn(i+70)*2-1)*11;
+  ellipse(ctx,xx,yy,1.05,1.05,i%2?glow:'#fff6d8');
+ }
+ drawCore(ctx,0,mid,6.2+core,glow,accent,pulse);
+ star4(ctx,0,mid,4.2+core*.6,'#faffff');
+ line(ctx,accent,2);ctx.beginPath();ctx.moveTo(-6+drift,bot+4);ctx.lineTo(6+drift,bot+4);ctx.stroke();
+
 }
 
 function drawCore(ctx,x,y,r,glow,accent,pulse){
@@ -380,7 +389,7 @@ function wingNodes(side,spread,sweep){
  const base=[[14,-14],[30,-24],[42,-12],[36,4],[22,8]];
  return base.map(([x,y],i)=>[side*(x*sx-sweep*i*1.2),y*sy+sweep*i*.8]);
 }
-function drawRadiators(ctx,side,F,t,spread,sweep,reduced){
+function drawWing(ctx,side,F,t,spread,sweep,reduced){
  const rootX=side*8,rootY=F.hy+F.hh/2+6,nodes=wingNodes(side,spread,sweep);
  ctx.save();ctx.translate(rootX,rootY);ctx.globalAlpha=.94;
  // A network becomes a set of articulated solar panels, with family lights along the hinges.
@@ -436,7 +445,7 @@ function drawSatellites(ctx,F,t,front,reduced,glow,accent,cast,acting){
 
 function drawRingHalf(ctx,F,front,t,reduced,acting){
  const y=F.hy+F.hh/2+28;
- const r=34+(acting?.release||0)*5, ry=14;
+ const r=36+(acting?.release||0)*7, ry=14+2*(acting?.release||0);
  const phase=reduced?0:t*.018;
  ctx.save();ctx.translate(0,y);
  ctx.strokeStyle=front?'#e7c48d':'#637baf';ctx.lineWidth=front?1.45:2;
@@ -594,8 +603,8 @@ export function drawArtificialIntelligence(ctx,pose,R){
   else if(st==="idle"&&!reduced){const br=Math.sin(t*.05)*.014;ctx.scale(1+br,1-br);} // soft shell breathing
   else if(st==="victory"&&!reduced){const hop=Math.abs(Math.sin(t*.16));ctx.translate(0,-hop*3);ctx.scale(1-hop*.03,1+hop*.03);}
   // ── BACK LAYER ─────────────────────────────────────────────
-  if(f===2)drawRadiators(ctx,-1,F,T,spread,sweep,reduced);
-  if(f===2)drawRadiators(ctx,1,F,T,spread*.92,sweep,reduced);
+  if(f===2)drawWing(ctx,-1,F,T,spread,sweep,reduced);
+  if(f===2)drawWing(ctx,1,F,T,spread*.92,sweep,reduced);
   if(f===3)drawCape(ctx,F,T,glow,swing,run,reduced);
   if(f===3)drawSatellites(ctx,F,T,false,reduced,glow,accent,cast,acting);
   if(f===4)drawRingHalf(ctx,F,false,T,reduced,acting);

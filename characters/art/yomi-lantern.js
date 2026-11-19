@@ -235,7 +235,12 @@ function shrineAccessory(c,f,w,h,swing,glow,shadow,acting){
  const y=-h*.48, cord='#f3bf80', tassel=f===4?'#f49a90':'#bf5478';
  c.save();
  c.translate(w*.79,y);
- c.rotate(swing*.016+(acting?.front||0)*.6);
+ c.rotate(swing*.025+(acting?.front||0)*.88);
+ if(f>=2){
+  line(c,shadow,4);c.beginPath();c.moveTo(5,29);c.lineTo(5,-25-f*2);c.stroke();
+  line(c,cord,1.45);c.beginPath();c.moveTo(5,28);c.lineTo(5,-25-f*2);c.stroke();
+  ellipse(c,5,-25-f*2,2.8,2.8,glow);
+ }
  line(c,cord,1.7);c.beginPath();c.moveTo(-4,0);c.quadraticCurveTo(9,2,11,14);c.stroke();
  if(f>=1){
   c.fillStyle=shadow;c.beginPath();c.moveTo(5,14);c.lineTo(17,14);c.lineTo(19,23);c.lineTo(15,29);c.lineTo(7,29);c.lineTo(3,23);c.closePath();c.fill();
@@ -288,7 +293,7 @@ function draw(ctx,pose,R){
   let open=st==="attack"?atk:cast===2?acting.maw:st==="victory"?.3:.05;
   let swing=(reduced?0:Math.sin(t*(run?.26:.08))*(run?5:2.4))+(Number(p.sway)||0)*3;
   let hover=(st==="dead"?1:(reduced?0:Math.sin(t*.067)*2.1))-(flight?3:0)+(acting?.rise||0);
-  const w=20+f*2.9,h=55+f*4.2;
+  const w=[18,17,18,19,20][f],h=[53,65,74,83,92][f];
   // V348 · Yomi stays physically connected during the title performance.
   // No substitute silhouette or combat casts: head, lantern ribs, sleeves,
   // trailing ribbon and hearth all belong to this ORIGINAL five-form art.
@@ -305,7 +310,7 @@ function draw(ctx,pose,R){
   // Original five silhouette types remain recognizable. The lantern's rib
   // geometry, its attached sleeves and the mouth all share the same origin.
   hover+=life.rise;swing+=life.ribbon;open=clamp(open+life.open,0,1);
-  const shoulder=-h*.68,faceY=-h*.72+listen*.8+reveal*(-1.4)+bow*2.1+life.face;
+  const shoulder=-h*.53,faceY=-h*.73+listen*.8+reveal*(-1.4)+bow*2.1+life.face;
   const stageTilt=listen*(-.10)+gather*.16-reveal*(-.19)+startle*.22+bow*(-.13);
   ctx.save();ctx.translate(0,hover);ctx.rotate(
     (run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)
@@ -329,7 +334,7 @@ function draw(ctx,pose,R){
   }
   // The silhouette drops down into a split shrine coat as the forms mature.
   if(f>=1){
-    const flare=w*(.79+f*.095);
+    const flare=w*(.76+f*.06);
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-w*.55,shoulder);
     ctx.quadraticCurveTo(-flare,-26,-flare-swing*.42,-4);
     ctx.quadraticCurveTo(-w*.52,4,-4,-4);ctx.lineTo(0,-14);
@@ -365,7 +370,7 @@ function draw(ctx,pose,R){
     const welcomeSleeve=leading?(listen*.34+gather*.65+reveal*(-.75)+startle*.95+bow*.46+life.sleeveFront):
       (-listen*.19-gather*.40+reveal*.69-startle*.56+bow*.38+life.sleeveBack);
     ctx.rotate(side*((cast===1?.22:run?.22+(reduced?0:Math.sin(runPh+side*1.6)*.28):jumpS?.55:fallS?2.45:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve);
-    const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0)+gather*1.7+reveal*2.3;
+    const sleeveLen=17+f*2.5+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0)+gather*1.7+reveal*2.3;
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
     ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
     ctx.quadraticCurveTo(0,sleeveLen+5,11,sleeveLen);
@@ -394,13 +399,18 @@ function draw(ctx,pose,R){
   // Expressive OHANA face, never permanent horror teeth.
   const mood=hurt?"closed":angry?"angry":(welcome?.spark||0)>.47?"closed":startle>.23?"closed":
     reveal>.25||bow>.20||(welcome?.melody||0)>.45||(welcome?.dino||0)>.45?"happy":st==="victory"||cast===3?"happy":"normal";
-  const eyeSize=f===0?8:7.1+f*.18;
-  R.eye(ctx,-8,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
-  R.eye(ctx,9,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
+  const eyeSize=f===0?7.3:6.1+f*.13;
+  R.eye(ctx,-7.5,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
+  R.eye(ctx,8,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
   if(!hurt&&mood==='normal'&&f>0){
-    line(ctx,shadow,1.45);ctx.beginPath();
-    ctx.moveTo(-16,faceY-3);ctx.lineTo(-18,faceY-5);
-    ctx.moveTo(15,faceY-3);ctx.lineTo(18,faceY-5);ctx.stroke();
+    line(ctx,shadow,2.05);ctx.beginPath();
+    ctx.moveTo(-13,faceY-1);ctx.quadraticCurveTo(-10,faceY-5,-4,faceY-4);
+    ctx.moveTo(4,faceY-4);ctx.quadraticCurveTo(10,faceY-5,14,faceY-1);ctx.stroke();
+    for(const side of [-1,1]){
+      line(ctx,'#b75a73',.85);ctx.beginPath();
+      ctx.moveTo(side*11,faceY+5);ctx.lineTo(side*9,faceY+7);
+      ctx.moveTo(side*13,faceY+5);ctx.lineTo(side*11,faceY+7);ctx.stroke();
+    }
   }
   if(!angry){
     ellipse(ctx,-w*.49,faceY+9,3.5,2.1,"#ef9fa0");
@@ -464,6 +474,12 @@ function draw(ctx,pose,R){
   if(st==="victory"||((p.flourishN||0)%4===3&&p.flourish>0)){
     const v=st==="victory"?pulse:Math.sin(Math.PI*clamp(p.flourish,0,1));
     ctx.save();ctx.globalAlpha=.4*v;crescent(ctx,w+5,faceY-19,9+f,glow);ctx.restore();
+  }
+  if(f>=2&&run&&!reduced){
+    line(ctx,trim,2);
+    ctx.beginPath();ctx.moveTo(-w*.59,-h*.34);
+    ctx.quadraticCurveTo(-w-8,-h*.21,-w-15-swing*.58,-h*.29);
+    ctx.stroke();
   }
   shrineAccessory(ctx,f,w,h,swing,glow,shadow,acting);
   drawYomiRitual(ctx,p,f,trim,glow,faceY,w,t);

@@ -29,7 +29,7 @@ function glow(c,x,y,r,color,alpha){
  if(!c.createRadialGradient)return;
  c.save();c.globalAlpha=alpha;
  const light=c.createRadialGradient(x,y,0,x,y,r);
- light.addColorStop(0,color+'7f');light.addColorStop(.38,color+'32');light.addColorStop(1,color+'00');
+ light.addColorStop(0,color+'b8');light.addColorStop(.38,color+'49');light.addColorStop(1,color+'00');
  c.fillStyle=light;c.fillRect(x-r,y-r,r*2,r*2);c.restore();
 }
 
@@ -105,7 +105,13 @@ function ribbons(c,d,s,f,t,hem,drag,squeeze){
   if(i%3===0){
    c.strokeStyle=neon[i%2];c.lineWidth=1.65;c.stroke();
    const wave=.53+.47*Math.sin(t*.093-i*.63);
-   glow(c,tip,hem+length,7+f,neon[i%2],.44+.36*wave);
+   glow(c,tip,hem+length,8+f,neon[i%2],.54+.38*wave);
+   if(t>0){
+    const u=(t*.033+i*.09)%1, v=1-u;
+    const sparkX=v*v*v*start+3*v*v*u*(start+sway*.12)+3*v*u*u*(tip-sway*.44)+u*u*u*tip;
+    const sparkY=v*v*v*(hem-3)+3*v*v*u*(hem+length*.37)+3*v*u*u*(hem+length*.78)+u*u*u*(hem+length);
+    oval(c,sparkX,sparkY,1.25+f*.11,1.9,'#efffff');
+   }
    oval(c,tip,hem+length,1.55+f*.14,2.65,wave>.55?'#efffff':neon[i%2]);
   }
  }
@@ -150,9 +156,10 @@ function trim(c,d,s,f,t,cast){
  for(let i=0;i<4+f*2;i++){
   const u=2*i/(3+f*2)-1;
   const x=u*d.rx*.86;
-  const glow=.67+.28*Math.sin(i*.75-t*.073);
-  c.globalAlpha=cast?1:glow;
-  oval(c,x,d.ry*.47,1.5+f*.16,1.8+f*.14,i%3?s.rim:s.light2);
+  const lamp=.64+.35*Math.sin(i*.88-t*.074);
+  glow(c,x,d.ry*.47,5+f*.7,NEON[f][i%2],.57+lamp*.31);
+  c.globalAlpha=cast?1:lamp;
+  oval(c,x,d.ry*.47,1.5+f*.16,1.8+f*.14,i%3?'#eaffff':s.light2);
  }
  c.globalAlpha=.69;
  c.strokeStyle=s.light;
@@ -240,7 +247,7 @@ function draw(c,p={}){
  bellPath(c,f,d.rx,d.ry);
  c.fillStyle=glass(c,d,s,hurt);c.fill();
  c.strokeStyle=neon[1]+'45';c.lineWidth=7;c.stroke();
- c.strokeStyle=neon[0];c.lineWidth=1.7;c.stroke();
+ c.strokeStyle=neon[0];c.lineWidth=2.15;c.stroke();
  oval(c,0,d.ry*.35,d.rx*.85,d.ry*.24,s.dark+'b8');
  c.strokeStyle=neon[1];c.lineWidth=1.55;
  c.beginPath();c.ellipse(0,d.ry*.34,d.rx*.79,d.ry*.27,0,.1,Math.PI-.1);c.stroke();
