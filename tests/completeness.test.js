@@ -20,9 +20,9 @@ const { createBossBaitFeedback, beginBossBaitFeedback, resolveBossBaitFeedback, 
 const { createBossEncounterMemory, observeBossEncounter, encounterPreference, encounterSnapshot, encounterLabel } = await import('../systems/boss-encounter-memory.js');
 
 test('matriz completa: 10 personajes × 5 formas = 50 formas', () => {
-  assert.equal(ROSTER.length, 10);
+  assert.equal(ROSTER.length, 11);
   assert.ok(ROSTER.every((p) => p.forms.length === 5));
-  assert.equal(ROSTER.reduce((n, p) => n + p.forms.length, 0), 50);
+  assert.equal(ROSTER.reduce((n, p) => n + p.forms.length, 0), 55);
 });
 
 test('matriz de combate: 10 personajes × 5 formas × 3 habilidades = 150 combinaciones', () => {
@@ -34,8 +34,8 @@ test('matriz de combate: 10 personajes × 5 formas × 3 habilidades = 150 combin
       combos.push(p.id + '/' + form.name + '/' + ability);
     }
   }
-  assert.equal(combos.length, 150);
-  assert.equal(new Set(combos).size, 150);
+  assert.equal(combos.length, 165);
+  assert.equal(new Set(combos).size, 165);
 });
 
 test('todas las evoluciones 0→4 funcionan en los 10 personajes', () => {
@@ -394,8 +394,8 @@ test('matriz runtime: las 30 habilidades pueden castearse y actualizarse sin rom
     character.abilities.map((id) => ({ character: character.id, id }))
   );
 
-  assert.equal(abilityByCharacter.length, 30);
-  assert.equal(new Set(abilityByCharacter.map(({ id }) => id)).size, 30);
+  assert.equal(abilityByCharacter.length, 33);
+  assert.equal(new Set(abilityByCharacter.map(({ id }) => id)).size, 33);
 
   for (const { character, id } of abilityByCharacter) {
     clearAbilityFx();

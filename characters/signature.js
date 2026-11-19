@@ -10,6 +10,7 @@ function canon(id) {
 }
 
 export const SIGNATURE = {
+ nacar:{reach:12,dmg:0,kb:1.2,kind:'fan',dash:12,iframe:8},
   kilo:    { reach: 6,  dmg: -6, kb: 1.35, kind: "leaf",  dash: 12, iframe: 8,  hop: -1.4 },
   stitcho: { reach: 2,  dmg: 2,  kb: 1.05, kind: "claws", dash: 18, iframe: 12 },
   chispin: { reach: 8,  dmg: 2,  kb: 0.85, kind: "zap",   dash: 15, iframe: 8,  spark: true },
@@ -27,6 +28,7 @@ export function signature(id) {
 }
 
 const HITS = {
+ nacar:{name:'Marea',kind:'paw',color:'#9de8e2'},
   kilo:    { name: "Nota",     kind: "note",  color: "#ff9ab0" },
   stitcho: { name: "Zarpa",    kind: "claws", color: "#7eb6ff" },
   chispin: { name: "Chispín", kind: "spark", color: "#ffe14a" },

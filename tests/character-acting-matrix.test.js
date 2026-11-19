@@ -87,7 +87,7 @@ function pose(form,spec){
 
 test("OHANA · 10 heroes × 5 evolutions × 19 acting states render with finite geometry",()=>{
   globalThis.Path2D=PathMock;
-  assert.equal(ROSTER.length,10);
+  assert.equal(ROSTER.length, 11);
   let audited=0;
   const failures=[];
   for(const hero of ROSTER) {

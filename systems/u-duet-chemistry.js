@@ -6,6 +6,7 @@ import {DEFAULT_U_PARTNERS,chooseUPartner,uPartnerInfo} from "./u-partners.js";
 
 const TAU=Math.PI*2;
 const origin=Object.freeze({
+ nacar:{shape:'pearl',verb:'Marea',perk:'guard',line:'Un abrazo del océano'},
  kilo:{shape:"flower",verb:"Jardín",perk:"heart",line:"Luz que cuida"},
  stitcho:{shape:"stitch",verb:"Travesura",perk:"stagger",line:"Costuras del caos"},
  chispin:{shape:"bolt",verb:"Chispa",perk:"speed",line:"Energía contagiosa"},
@@ -24,7 +25,7 @@ export function duetChemistry(hero,ally,rank=1){
  const h=byId[hero],b=byId[ally],style=origin[hero];
  if(!h||!b||!style||hero===ally||chooseUPartner(hero,ally)!==ally)return null;
  const borrowed=uPartnerInfo(hero,ally);
- const seed=(h.index*11+b.index*7+1)%90;
+ const seed=h.index*ROSTER.length+b.index;
  const quality=boundedRank(rank);
  return Object.freeze({
   key:hero+":"+ally,

@@ -11,12 +11,13 @@ export function atlasSelection(hero,room,form,progress={}){
  // Chapters currently teach their owner's unique skills. Never silently swap a
  // confirmed fighter after the player enters the game.
  const owner=WORLD1_ORDER.find(id=>room==='w1-'+id);
- const id=final?def.id:owner||def.id;
- return {hero:id,room:final?'w1-final':'w1-'+id,form:Math.min(bound(form),atlasEarnedForm(id,progress)),allowed:!final||WORLD1_ORDER.every(id=>(progress.seals||[]).includes(id))};
+ const marineChapter=def.id==='nacar'&&room==='w1-cat';
+ const id=final||marineChapter?def.id:owner||def.id;
+ return {hero:id,room:final?'w1-final':id==='nacar'?'w1-cat':'w1-'+id,form:Math.min(bound(form),atlasEarnedForm(id,progress)),allowed:!final||WORLD1_ORDER.every(id=>(progress.seals||[]).includes(id))};
 }
 export function atlasProgress(storage,save,seals=[]){
- let earned={};try{const raw=JSON.parse(storage?.getItem('ohana-atlas-earned-v1')||'{}');for(const id of WORLD1_ORDER)earned[id]=bound(raw?.[id]);}catch{}
- for(const id of WORLD1_ORDER)earned[id]=atlasEarnedForm(id,{save,seals,earned});
+ let earned={};try{const raw=JSON.parse(storage?.getItem('ohana-atlas-earned-v1')||'{}');for(const {id} of ROSTER)earned[id]=bound(raw?.[id]);}catch{}
+ for(const {id} of ROSTER)earned[id]=atlasEarnedForm(id,{save,seals,earned});
  try{storage?.setItem('ohana-atlas-earned-v1',JSON.stringify(earned));}catch{}
  return {save,seals,earned};
 }

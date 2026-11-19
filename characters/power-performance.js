@@ -1,6 +1,7 @@
-export const POWER_PERFORMANCE_LENGTH=Object.freeze({kilo:72,stitcho:44,chispin:38,cat:52,dragon:78,dino:84,frita:42,pizza:58,yomi:68,cuerno:40});
+export const POWER_PERFORMANCE_LENGTH=Object.freeze({nacar:58,kilo:72,stitcho:44,chispin:38,cat:52,dragon:78,dino:84,frita:42,pizza:58,yomi:68,cuerno:40});
 const clamp=x=>Math.max(0,Math.min(1,x));
 const PERFORMANCES=Object.freeze({
+ nacar:{slot:2,lean:.18,lift:.16,release:'glide'},
  kilo:{slot:0,lean:-.24,lift:.04,release:'victory'},
  stitcho:{slot:0,lean:.32,lift:.06,release:'attack'},
  chispin:{slot:0,lean:-.34,lift:.12,release:'attack'},

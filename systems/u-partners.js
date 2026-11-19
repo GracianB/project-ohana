@@ -4,13 +4,13 @@
 import {ROSTER} from "../characters/roster.js";
 
 export const DEFAULT_U_PARTNERS=Object.freeze({
- kilo:"stitcho",stitcho:"chispin",chispin:"cat",cat:"dragon",dragon:"dino",
+ nacar:"cat",kilo:"stitcho",stitcho:"chispin",chispin:"cat",cat:"dragon",dragon:"dino",
  dino:"frita",frita:"pizza",pizza:"yomi",yomi:"cuerno",cuerno:"kilo"
 });
 export const U_EXP_THRESHOLDS=Object.freeze([0,35,100]);
 export const MAX_U_EXP=200;
 export const U_L_NAMES=Object.freeze({
- ohana:"Coro Ohana",caos:"Caos",storm:"Santuario del trueno",ninetails:"Nueve colas",
+ tidestars:"Estrellas de marea",ohana:"Coro Ohana",caos:"Caos",storm:"Santuario del trueno",ninetails:"Huellas de gatito",
  meteor:"Meteoritos",quake:"Terremoto",fryer:"Freidora",oven:"Horno",
  maw:"Síntesis",rainbow:"Arcoíris"
 });

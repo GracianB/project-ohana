@@ -7,9 +7,9 @@ import {FAMILY_ROSTER_V100,familyFinaleBeat} from "../systems/v100-family-choreo
 test("V100 finale recognizes all ten canonical heroes exactly once",()=>{
  const ids=ROSTER.map(c=>c.id).sort();
  assert.deepEqual(Object.keys(FAMILY_ROSTER_V100).sort(),ids);
- assert.equal(ids.length,10);
+ assert.equal(ids.length,11);
  const signatures=Object.values(FAMILY_ROSTER_V100).map(b=>[b.pose,b.offset,b.tempo,b.amp].join("/"));
- assert.equal(new Set(signatures).size,10);
+ assert.equal(new Set(signatures).size,11);
  assert.ok(Object.isFrozen(FAMILY_ROSTER_V100));
 });
 test("V100 each identity has an individual celebration, no random particles",()=>{

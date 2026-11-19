@@ -101,7 +101,7 @@ test("V321 Kilo's borrowed Ohana L, 120 ticks, rank3 and all alternative friends
  assert.equal(FAMILY_DUET_LENGTH,120);
  assert.deepEqual(FAMILY_DUET_BEATS,[42,66,90]);
  const opts=optionsForUPartner("cuerno");
- assert.equal(opts.length,9);
+ assert.equal(opts.length, 10);
  for(const option of opts)for(const age of [0,24,42,66,90,118]){
   const frame=familyDuetChoreography({hero:"cuerno",ally:option.id,x:200,y:250,
    age,evo:4,facing:1,bondRank:3},true);

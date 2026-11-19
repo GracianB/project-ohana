@@ -94,8 +94,8 @@ export function playEvolution(detail = {}) {
   const st = ensureStage();
   if (running) running.stop(true);
   const cineMod = EVO_CINE_BY_ID[detail.id || "kilo"];
-  if (!detail._classic && cineMod && typeof cineMod.drawEvoCine === "function" ) {
-    if (playCharacterCine(st, detail, cineMod)) return;
+  if (!detail._classic && (detail.id === "nacar" || cineMod && typeof cineMod.drawEvoCine === "function")) {
+    if (playCharacterCine(st, detail, cineMod || { EVO_CINE_DURATION: 4.5 })) return;
   }
 
   const id = detail.id || "kilo";

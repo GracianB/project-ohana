@@ -8,12 +8,12 @@ import { startServer } from "../tests/browser/server.mjs";
 
 const FRAME_W = 144, FRAME_H = 136, FRAMES = 8;
 const server = await startServer(0);
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, executablePath:process.env.CHROMIUM_BIN||undefined });
 try {
   const page = await browser.newPage();
   await page.route("**/__photobooth.html", (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>booth</title>" }));
   await page.goto(`http://127.0.0.1:${server.address().port}/__photobooth.html`);
-  const strips = await page.evaluate(async ({ FRAME_W, FRAME_H, FRAMES }) => {
+  const strips = await page.evaluate(async ({ FRAME_W, FRAME_H, FRAMES, focus }) => {
     const { ROSTER } = await import("/characters/roster.js");
     const { drawCharacter } = await import("/characters/draw.js");
     // Wait until the painted sprites have decoded so strips use the real art.
@@ -28,7 +28,7 @@ try {
     const plan = [["idle", 0], ["idle", 46], ["run", 8], ["run", 18], ["jump", 30], ["attack", 40], ["attack", 44], ["victory", 60]];
     const out = {};
     const TMP = 720, BASE = 2;
-    for (const definition of ROSTER) {
+    for (const definition of ROSTER.filter(h=>!focus.length||focus.includes(h.id))) {
       const frames = [];
       let minX = TMP, minY = TMP, maxX = 0, maxY = 0;
       plan.forEach(([pose, t], index) => {
@@ -75,7 +75,7 @@ try {
       out[definition.id] = canvas.toDataURL("image/webp", 0.8);
     }
     return out;
-  }, { FRAME_W, FRAME_H, FRAMES });
+  }, { FRAME_W, FRAME_H, FRAMES, focus:(process.env.PHOTO_HEROES||'').split(',').filter(Boolean) });
   await fs.mkdir("assets/photobooth", { recursive: true });
   let total = 0;
   for (const [id, url] of Object.entries(strips)) {

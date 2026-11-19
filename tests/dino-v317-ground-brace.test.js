@@ -157,7 +157,7 @@ test("Dino V317: Frita lends the fryer, and U keeps 120 ticks and nine selectabl
   assert.equal(FAMILY_DUET_LENGTH,120);
   assert.deepEqual(FAMILY_DUET_BEATS,[42,66,90]);
   const options=optionsForUPartner("dino");
-  assert.equal(options.length,9);
+  assert.equal(options.length, 10);
   for(const option of options)for(let form=0;form<5;form++)for(let rank=1;rank<=3;rank++){
     const s={hero:"dino",ally:option.id,x:500,y:320,evo:form,age:66,facing:1,bondRank:rank};
     const d=familyDuetDefinition(s),p=familyDuetChoreography(s,true);

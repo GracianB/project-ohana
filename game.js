@@ -1,3 +1,4 @@
+import {absorbMichiGardenHit} from './systems/michi-garden-life.js';
 import {drawQuimeraMinion,drawQuimeraStars,collectQuimeraStars} from './systems/quimera-pressure.js';
 import {updateQuimeraArena,interactQuimeraArena,quimeraArenaPrompt,drawQuimeraArena} from './systems/quimera-arena.js';
 import {updateKiloPresence} from './systems/kilo-presence.js';
@@ -1013,7 +1014,7 @@ if (!resume&&!onlineMode&&typeof globalThis.__ohanaStartForm === "number") {
   applyForm(game.player, { silent: true });
   paintFit(game.player);
   game._chosenStartForm = chosenForm;
-  game._startFormChoice={hero:def.id,room:"w1-"+def.id,baselineFloor:null,lastFloor:null};
+  game._startFormChoice={hero:def.id,room:def.id==='nacar'?'w1-cat':"w1-"+def.id,baselineFloor:null,lastFloor:null};
 }
 if(def.id==='kilo')game.player._kiloEntranceAt=t;
 else game.player._ohanaEntranceAt=t;
@@ -1530,6 +1531,7 @@ function hurtPlayer(amount, label) {
 const p = game.player;
 if (!p || p.dead || p.invuln > 0 || (p._armorT > 0) || p._abilMove === "dino-roll" || p._abilMove === "charge" || p._abilMove === "roll") return;
 if (game.boss?._fusionBoss && game.world1Boss) { amount = world1BossFilterDamage(game, amount); if (!(amount > 0)) return; }
+if(absorbMichiGardenHit(game,amount))return;
 const diffMul = readCombatDifficulty(game.roomId).damage;
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
 if (!(amount > 0)) return;
@@ -1910,7 +1912,7 @@ const right = axisX > 0;
 const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
 const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
 const drop = !!(keys["s"] || keys["arrowdown"]);
-if(game.roomDef?.michiSanctuary){if(drop&&!p._sanctuaryDown){p._sanctuaryDown=true;if(interactMichiSanctuary(game))return;}if(!drop)p._sanctuaryDown=false;}
+// Sanctuary travel is deliberate: E / Use. Down only descends or drops.
 const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
 if (p.dash > 0) p.dash--;
 if (p._dashGo > 0) p._dashGo--;
@@ -2131,7 +2133,7 @@ const r = room();
 if(quimeraArenaPrompt(game))setPrompt(quimeraArenaPrompt(game),true);
 else if (stitchoTrailPrompt(game))setPrompt(stitchoTrailPrompt(game),true);
 else if (chispinTrailPrompt(game))setPrompt(chispinTrailPrompt(game),true);
-else if(gardenInteractionPrompt(game)||sanctuaryInteractionPrompt(game))setPrompt(gardenInteractionPrompt(game)||sanctuaryInteractionPrompt(game),true);
+else if(sanctuaryInteractionPrompt(game))setPrompt(sanctuaryInteractionPrompt(game),true);
 else if (michiTrailPrompt(game))setPrompt(michiTrailPrompt(game),true);
 else if (grovePrompt(game))setPrompt(grovePrompt(game),true);
 else if (portals.prompt) setPrompt(portals.prompt, true);
@@ -4272,7 +4274,7 @@ combatTarget(){
 setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
 quimeraPressureState(){const q=game.boss?._fusion?.pressure;return q?{phase:q.phase,t:q.t,spawned:q.spawned,minions:q.minions.map(m=>({...m})),stars:q.stars.map(s=>({...s})),taken:[...(game._quimeraStarPocket?.taken||[])],health:game.player.health,maxHealth:game.player.maxHealth}:null;},
 quimeraArenaState(){const s=game.quimeraArena;return{shield:s?.shield||0,shieldSource:s?.shieldSource||null,pulse:s?.pulse||0,wind:s?.wind||0,cooldowns:{...s?.cooldowns},awakened:[...(s?.awakened||[])],platforms:game.platforms.filter(p=>p.quimeraStep).map(p=>({...p})),secrets:[...(game.secrets?.['w1-final']||[])]};},
-michiSanctuaryState(){return {guardianDefeated:!!game.clearedEncounters?.['w1-cat']?.includes('w1-cat-astral-v1'),zone:game.roomDef?.michiSanctuary?game.roomDef.michiSanctuary.zones.find(z=>game.player.x>=z.x&&game.player.x<z.x+z.w&&game.player.y+game.player.h>=z.y&&game.player.y+game.player.h<=z.y+z.h)?.id:null,album:game.world1Collect?.rooms?.cat,remaining:(game.world1CollectItems||[]).filter(m=>!game.world1Collect?.rooms?.cat?.found.includes(m.id)).map(m=>({...m}))};},
+michiSanctuaryState(){return {gardenSecrets:[...(game.secrets?.['w1-cat']||[])],guard:game._michiLampGuard||0,chime:game._michiChime||0,race:game._michiRace?{...game._michiRace}:null,guardianDefeated:!!game.clearedEncounters?.['w1-cat']?.includes('w1-cat-astral-v1'),zone:game.roomDef?.michiSanctuary?game.roomDef.michiSanctuary.zones.find(z=>game.player.x>=z.x&&game.player.x<z.x+z.w&&game.player.y+game.player.h>=z.y&&game.player.y+game.player.h<=z.y+z.h)?.id:null,album:game.world1Collect?.rooms?.cat,remaining:(game.world1CollectItems||[]).filter(m=>!game.world1Collect?.rooms?.cat?.found.includes(m.id)).map(m=>({...m}))};},
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  heroItems(){return (game.heroCollection?.items||[]).map(item=>({...item}));},

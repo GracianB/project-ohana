@@ -24,12 +24,12 @@ const activeCharacters = ROSTER.length;
 const formsPerCharacter = activeCharacters ? Math.min(...ROSTER.map((character) => character.forms.length)) : 0;
 const roomCount = Object.keys(ROOMS).length;
 
-if (activeCharacters !== 10) errors.push("se esperan 10 personajes activos");
+if (activeCharacters !== 11) errors.push("se esperan 11 personajes activos");
 if (formsPerCharacter !== 5 || ROSTER.some((character) => character.forms.length !== 5)) errors.push("cada personaje debe tener 5 formas");
 if (roomCount !== 10) errors.push("se esperan 10 salas");
 if (EVOLUTION_STAGES.length !== 5 || EVOLUTION_COMBAT_STAGES.length !== 5) errors.push("la evolución debe tener 5 etapas");
-if (EVOLUTION_SIGNATURES.length !== 50 || new Set(EVOLUTION_SIGNATURES).size !== 50) errors.push("se esperan 50 firmas de evolución únicas");
-if (Object.keys(EVOLUTION_FINAL_DESIGNS).length !== 10) errors.push("se esperan 10 diseños finales");
+if (EVOLUTION_SIGNATURES.length !== 55 || new Set(EVOLUTION_SIGNATURES).size !== 55) errors.push("se esperan 55 firmas de evolución únicas");
+if (Object.keys(EVOLUTION_FINAL_DESIGNS).length !== 11) errors.push("se esperan 11 diseños finales");
 
 const motifs = Object.values(EVOLUTION_FINAL_DESIGNS).map((design) => design.motif);
 if (new Set(motifs).size !== motifs.length) errors.push("los motivos finales no son únicos");

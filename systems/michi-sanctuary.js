@@ -1,5 +1,6 @@
+import {authorMichiAdventure,passageVisible,updateMichiAdventure} from './michi-adventure.js';
 import {authorMichiGarden} from './michi-garden-design.js';
-import {interactMichiGarden,updateMichiGarden} from './michi-garden-life.js';
+import {interactMichiGarden,updateMichiGarden,nearestGardenInteraction,gardenInteractionPrompt} from './michi-garden-life.js';
 // Michi's authored, branching chapter. Stable room/station/memory IDs preserve saves.
 export const MICHI_SANCTUARY_VERSION=654;
 export const SANCTUARY_PALETTE=Object.freeze({sky:'#102c38',deep:'#071e2a',stone:'#34525a',ivory:'#e9dfbc',teal:'#8dd7c6',coral:'#e7a394'});
@@ -29,17 +30,18 @@ export function authorMichiSanctuary(room){
  for(const m of memories)for(const wall of room.plats)if(wall[3]>24&&wall[1]<m.y&&wall[1]+wall[3]>m.y&&m.x>wall[0]-18&&m.x<wall[0]+wall[2]+18)m.x=wall[0]+wall[2]+27;
  room.michiSanctuary={version:648,zones,passages,memories,spawn:{x:4360,floor:1134}};
  room.hint='Devuelve la luz a cinco faroles. Las madrigueras del patio conectan las raíces, el laberinto, el jardín y la galería. Mira las señales de cada arco.';
- return authorMichiGarden(room);
+ return authorMichiAdventure(authorMichiGarden(room));
 }
 export const sanctuaryGuardianDefeated=g=>!!g.clearedEncounters?.['w1-cat']?.includes('w1-cat-astral-v1');
 export const isMichiSanctuary=g=>!!g?.roomDef?.michiSanctuary;
 export function sanctuaryZone(g){const p=g.player;if(!p)return null;return g.roomDef.michiSanctuary.zones.find(z=>p.x>=z.x&&p.x<z.x+z.w&&p.y+p.h>=z.y&&p.y+p.h<=z.y+z.h)||g.roomDef.michiSanctuary.zones[0];}
 export function passageReady(g,a){const n=g.world1?.stations?.filter(s=>s.done).length||0;if(n<a.need)return false;if(a.exit)return !!g.world1?.sealed&&(g.expedition?.done?.length||0)>=3;return true;}
-export function nearestSanctuaryPassage(g){if(!isMichiSanctuary(g)||!g.player)return null;const p=g.player;return g.roomDef.michiSanctuary.passages.find(a=>Math.abs(p.x+p.w/2-a.x)<65&&Math.abs(p.y+p.h-a.floor)<95)||null;}
-export function sanctuaryInteractionPrompt(g){const a=nearestSanctuaryPassage(g);if(!a||g._michiTransitCooldown>0)return null;return passageReady(g,a)?'E · '+a.label:a.exit?'Recupera el sello y los tres ecos':'Faroles pendientes · '+a.need;}
+export function nearestSanctuaryPassage(g){if(!isMichiSanctuary(g)||!g.player)return null;const p=g.player;return g.roomDef.michiSanctuary.passages.find(a=>!a.walkThrough&&passageVisible(g,a)&&Math.abs(p.x+p.w/2-a.x)<65&&Math.abs(p.y+p.h-a.floor)<95)||null;}
+export function sanctuaryInteractionPrompt(g){const a=nearestSanctuaryPassage(g),q=nearestGardenInteraction(g),cx=g.player?.x+g.player?.w/2;if(q&&(!a||Math.abs(cx-q.x)<Math.abs(cx-a.x)))return gardenInteractionPrompt(g);if(!a||g._michiTransitCooldown>0)return null;return passageReady(g,a)?'E · '+a.label:a.exit?'Recupera el sello y los tres ecos':'Faroles pendientes · '+a.need;}
 export function interactMichiSanctuary(g){
- if(interactMichiGarden(g))return true;
- const a=nearestSanctuaryPassage(g),p=g.player;if(!a||p.dead||g._michiTransitCooldown>0)return false;
+ const a=nearestSanctuaryPassage(g),p=g.player,q=nearestGardenInteraction(g);
+ if(q&&(!a||Math.abs(p.x+p.w/2-q.x)<Math.abs(p.x+p.w/2-a.x))&&interactMichiGarden(g))return true;
+ if(!a||p.dead||g._michiTransitCooldown>0)return false;
  if(!passageReady(g,a)){g.nums?.add?.(a.x,a.floor-100,a.exit?'RECUPERA LOS TRES ECOS DEL HOGAR':'FAROLES · '+(g.world1?.stations.filter(s=>s.done).length||0)+'/'+a.need,'#edd4ac');return true;}
  g._michiTransitCooldown=55;p.x=a.toX-p.w/2;p.y=a.toFloor-p.h-3;p.vx=0;p.vy=0;p.grounded=false;p.buffer=0;p._jumpPrev=false;g.resetInput?.();
  g.cam.x=Math.max(0,Math.min(g.worldW-(g.viewW||1280),p.x-(g.viewW||1280)/2));g.cam.y=Math.max(0,Math.min(g.worldH-(g.viewH||720),p.y-(g.viewH||720)*.65));g.fading=g.reduceMotion?3:12;
@@ -48,7 +50,7 @@ export function interactMichiSanctuary(g){
 }
 export function updateMichiSanctuary(g){
  if(!isMichiSanctuary(g)||!g.player||g.player.dead)return;
- updateMichiGarden(g);
+ updateMichiGarden(g);updateMichiAdventure(g);
  g._michiTransitCooldown=Math.max(0,(g._michiTransitCooldown||0)-1);
  if(sanctuaryGuardianDefeated(g)&&!g.world1?.sealed&&typeof g.playWorld1Cine==='function'){const seen='w1-cat-sanctuary-victory';g.secrets||={};const secrets=g.secrets['w1-cat']||=[];if(!secrets.includes(seen)){secrets.push(seen);g.playWorld1Cine?.('chapterBossVictory','cat');g.save?.();}}
  const p=g.player,done=g.world1?.stations?.every(s=>s.done);
@@ -59,11 +61,11 @@ export function sanctuaryObjective(g){
  if(!isMichiSanctuary(g)||!g.world1)return null;
  const current=sanctuaryZone(g),target=g.world1.stations.find(s=>!s.done);
  const echo=g.roomDef.expedition?.nodes?.find(n=>!g.expedition?.done.includes(n.id));
- let goal=target?{x:target.x,y:target.y,label:target.name,action:target.lesson}:g.world1.sealed?{x:g.roomDef.michiSanctuary.passages.find(a=>a.exit).x,y:1074,label:'La barca de Cuerno',action:'Regresa junto al guardián · ↓ / E para viajar al muelle'}:sanctuaryGuardianDefeated(g)?echo?{...echo,label:'Eco del hogar '+((g.expedition?.done.length||0)+1)+'/3',action:'Salta hacia el farol para escuchar a la familia'}:null:{x:8750,y:1134,label:'Polilla del Farol',action:'Observa el aviso. Ataca cuando abra el farol.'};
+ let goal=target?{x:target.x,y:target.y,label:target.name,action:target.lesson}:g.world1.sealed?{x:g.roomDef.michiSanctuary.passages.find(a=>a.exit).x,y:1074,label:'La barca de Cuerno',action:'Regresa junto al guardián · E / Usar para viajar al muelle'}:sanctuaryGuardianDefeated(g)?echo?{...echo,label:'Eco del hogar '+((g.expedition?.done.length||0)+1)+'/3',action:'Salta hacia el farol para escuchar a la familia'}:null:{x:8750,y:1134,label:'Polilla del Farol',action:'Observa el aviso. Ataca cuando abra el farol.'};
  if(!goal)return null;
  const zones=g.roomDef.michiSanctuary.zones,zone=zones.find(z=>goal.x>=z.x&&goal.x<z.x+z.w&&goal.y>=z.y&&goal.y<=z.y+z.h);
  if(!zone||zone.id===current.id)return goal;
  const zoneAt=(x,f)=>zones.find(z=>x>=z.x&&x<z.x+z.w&&f>=z.y&&f<=z.y+z.h),queue=[{id:current.id,first:null}],seen=new Set();
- while(queue.length){const q=queue.shift();if(seen.has(q.id))continue;seen.add(q.id);if(q.id===zone.id&&q.first)return{x:q.first.x,y:q.first.floor-60,label:q.first.label,action:'Entra en el arco con ↓ / E · '+goal.label};for(const a of g.roomDef.michiSanctuary.passages){if(!passageReady(g,a)||zoneAt(a.x,a.floor)?.id!==q.id)continue;const to=zoneAt(a.toX,a.toFloor);if(to)queue.push({id:to.id,first:q.first||a});}}
+ while(queue.length){const q=queue.shift();if(seen.has(q.id))continue;seen.add(q.id);if(q.id===zone.id&&q.first)return{x:q.first.x,y:q.first.floor-60,label:q.first.label,action:q.first.walkThrough?'Sigue el sendero · '+goal.label:'E / Usar · '+goal.label};for(const a of g.roomDef.michiSanctuary.passages){if(!passageVisible(g,a)||!passageReady(g,a)||zoneAt(a.x,a.floor)?.id!==q.id)continue;const to=zoneAt(a.toX,a.toFloor);if(to)queue.push({id:to.id,first:q.first||a});}}
  return goal;
 }

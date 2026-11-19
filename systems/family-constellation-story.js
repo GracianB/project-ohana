@@ -8,6 +8,7 @@ export const FAMILY_STARS=Object.freeze([
  {id:'frita',name:'Frita',color:'#ffe9a8',gift:'La alegría',line:'Si queda una patata, la partimos. Si no queda ninguna, nos reímos igual.'},
  {id:'pizza',name:'Pizza',color:'#ffd36a',gift:'Un sitio en la mesa',line:'He contado otra vez. Hay una porción para ti.'},
  {id:'yomi',name:'Yomi',color:'#8fe9ff',gift:'La conexión',line:'Diez señales distintas. Una certeza: nadie estaba solo.'},
- {id:'cuerno',name:'Cuerno',color:'#eccbff',gift:'La esperanza',line:'La aurora no borra la noche. Nos enseña lo que hemos cuidado dentro de ella.'}
+ {id:'cuerno',name:'Cuerno',color:'#eccbff',gift:'La esperanza',line:'La aurora no borra la noche. Nos enseña lo que hemos cuidado dentro de ella.'},
+ {id:'nacar',name:'Nácar',color:'#9de8e2',gift:'Una corriente amable',line:'El mar no termina aquí. Empieza un sitio junto a vosotros.'}
 ]);
-export function constellationProgress(lights=[]){const set=new Set(lights);const count=FAMILY_STARS.filter(s=>set.has(s.id)).length;return {count,complete:count===10,title:count===10?'La última luz eres tú.':'Cada voz enciende un lugar.'};}
+export function constellationProgress(lights=[]){const set=new Set(lights);const count=FAMILY_STARS.filter(s=>set.has(s.id)).length;return {count,complete:count===FAMILY_STARS.length,title:count===FAMILY_STARS.length?'La última luz eres tú.':'Cada voz enciende un lugar.'};}

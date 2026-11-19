@@ -1,3 +1,4 @@
+import lanternGuardian from './yomi-lantern.js';
 // YOMI · IA de OHANA. «Yomi» (読み) significa «lectura»: una inteligencia que
 // nació leyendo el mundo. Un rayo de Chispín cayó en la vieja radio-faro del
 // Santuario del Trueno y encendió una sola pregunta: «¿hola?». La familia
@@ -668,4 +669,4 @@ export function yomiCacheKey(pose={}){
  if(pose.reduceMotion||YOMI_MOTION_MEDIA?.matches)return "ai0:"+(pose.yomiKnowledge||0);
  return "ai"+Math.floor((Number(pose.t)||0)/2)+":"+(pose.yomiKnowledge||0);
 }
-export default {id:"yomi",draw,cacheKey:yomiCacheKey};
+export default {id:"yomi",draw:lanternGuardian.draw,cacheKey:lanternGuardian.cacheKey||yomiCacheKey};

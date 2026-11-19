@@ -33,11 +33,13 @@ export function drawSanctuaryBoss(c,e,cam,t,reduced){
 
 export function drawSanctuarySignals(c,e,cam){
  const b=e._astralCat;if(b.phase!=='warn')return;const x=e.x+e.w/2-cam.x,y=e.y+e.h*.5-cam.y,A=e._chapterArena;
- c.save();c.strokeStyle='#e7a394';c.fillStyle='#e7a394';c.lineWidth=2;c.setLineDash([7,5]);
- if(b.attack===0){const distance=b.tier===3?256:192;c.strokeRect(e.x-cam.x+(b.aim<0?-distance:0),A.floor-cam.y-e.h,e.w+distance,e.h);}
- else if(b.attack===1)for(const r of b.rays||sanctuaryFan(e,b)){c.beginPath();c.moveTo(x,y);c.lineTo(x+r.vx*55,y+r.vy*55);c.stroke();}
- else for(const col of b.columns||[-150,0,150].map(d=>clamp((b.targetX||e.x)+d,A.left+35,A.right-35))){c.beginPath();c.moveTo(col-cam.x,A.floor-340-cam.y);c.lineTo(col-cam.x,A.floor-cam.y);c.stroke();c.fillRect(col-cam.x-9,A.floor-4-cam.y,18,4);}
- c.setLineDash([]);c.restore();
+ c.save();c.fillStyle='#e7a394';
+ const mark=(xx,yy,rx,ry)=>{c.beginPath();c.ellipse(xx,yy,rx,ry,0,0,Math.PI*2);c.fill();};
+ const progress=1-Math.max(0,b.clock)/58;c.globalAlpha=.18+progress*.35;
+ if(b.attack===0){const distance=b.tier===3?256:192;for(let i=0;i<5;i++)mark(x+b.aim*distance*(i+.5)/5,A.floor-cam.y-4,16,5);}
+ else if(b.attack===1){for(const ray of b.rays||sanctuaryFan(e,b))mark(x+ray.vx*38,y+ray.vy*38,9,9);}
+ else for(const col of b.columns||[]){mark(col-cam.x,A.floor-cam.y-4,17,6);mark(col-cam.x,A.floor-340-cam.y,8,12);}
+ c.globalAlpha=1;for(let i=0;i<3;i++){c.fillStyle=progress>i/3?'#f1d6a7':'#637d83';mark(x-10+i*10,e.y-cam.y-16,2,3);}c.restore();
 }
 
 function sanctuaryFan(e,b){const a=Math.atan2(b.targetY-e.y-e.h*.5,b.targetX-e.x-e.w/2),n=b.tier===3?5:3;return Array.from({length:n},(_,i)=>({vx:Math.cos(a+(i-(n-1)/2)*.23)*5.8,vy:Math.sin(a+(i-(n-1)/2)*.23)*5.8}));}

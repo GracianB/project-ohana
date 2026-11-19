@@ -10,7 +10,7 @@ michi: "cat",
 
 const IDS = Object.freeze([
 "kilo", "stitcho", "chispin", "cat", "dragon",
-"dino", "frita", "pizza", "yomi", "cuerno",
+"dino", "frita", "pizza", "yomi", "cuerno", "nacar",
 ]);
 
 export const EVOLUTION_STAGES = Object.freeze([
@@ -57,6 +57,7 @@ Object.freeze({ id: 4, attack: 1.78, cast: 1.86, impact: 1.72, trail: 1.84, glow
 ]);
 
 export const EVOLUTION_FINAL_DESIGNS = Object.freeze({
+ nacar:Object.freeze({motif:'pearl',silhouette:'ring',span:1,spin:.12,nodes:5,accent:'#9de8e2',profile:'tide-crown'}),
 kilo:    Object.freeze({ motif: "petal",    silhouette: "crown",    span: 0.98, spin: 0.30, nodes: 7, accent: "#ffd36a", profile: "garden-crown" }),
 stitcho: Object.freeze({ motif: "seam",     silhouette: "cape",     span: 1.02, spin: -0.28, nodes: 6, accent: "#67ddff", profile: "nebula-cape" }),
 chispin: Object.freeze({ motif: "bolt",     silhouette: "mane",     span: 1.00, spin: 0.16, nodes: 8, accent: "#fff29a", profile: "storm-mane" }),
@@ -69,6 +70,7 @@ yomi:    Object.freeze({ motif: "signal",   silhouette: "none",     span: 1.04, 
 cuerno:  Object.freeze({ motif: "aurora",   silhouette: "antler",     span: 1.12, spin: 0.18, nodes: 8, accent: "#f2c1ff", profile: "aurora-mane" }),
 });
 export const EVOLUTION_CINEMA_PROFILES = Object.freeze({
+ nacar:Object.freeze({camera:'tide',bg:'#102c42',accent:'#9de8e2',motif:'pearls',pulse:'tide',reveal:'foam',speed:.96}),
 kilo:    Object.freeze({ camera:"orbit",   bg:"#2b160f", accent:"#ffd36a", motif:"petals",  pulse:"bloom",   reveal:"sunrise", speed:1.00 }),
 stitcho: Object.freeze({ camera:"spiral",  bg:"#100d2b", accent:"#8f7bff", motif:"seams",   pulse:"nebula",  reveal:"rift",    speed:1.12 }),
 chispin:Object.freeze({ camera:"snap",     bg:"#09132f", accent:"#ffe14a", motif:"bolts",   pulse:"storm",   reveal:"strike",  speed:1.22 }),
@@ -166,6 +168,7 @@ stage,
 }
 
 export const EVOLUTION_FORM_PROFILES = Object.freeze({
+ nacar:Object.freeze({bodyX:[.9,.98,1.06,1.1,1.18],bodyY:[.9,1,1.08,1.14,1.22],stance:[0,0,.02,.04,.06],lift:[0,.01,.01,.02,.03],combat:[.86,.96,1.08,1.2,1.34]}),
 kilo:    Object.freeze({ bodyX:[0.90,0.98,1.04,1.10,1.16], bodyY:[0.92,1.00,1.08,1.16,1.22], stance:[-0.015,0.00,0.035,0.060,0.085], lift:[0.00,0.00,0.006,0.010,0.016], combat:[0.86,0.98,1.08,1.18,1.30] }),
 stitcho: Object.freeze({ bodyX:[0.88,0.96,1.00,1.05,1.10], bodyY:[0.90,1.00,1.10,1.18,1.27], stance:[0.025,0.035,0.075,0.115,0.15], lift:[0.00,0.00,0.008,0.014,0.022], combat:[0.90,1.02,1.12,1.24,1.38] }),
 chispin:Object.freeze({ bodyX:[0.90,0.96,1.00,1.07,1.12], bodyY:[0.90,1.00,1.07,1.15,1.23], stance:[0.050,0.065,0.105,0.15,0.19], lift:[0.00,0.00,0.00,0.006,0.012], combat:[0.92,1.05,1.18,1.30,1.44] }),
@@ -192,6 +195,7 @@ combat: profile.combat[i],
 }
 
 const CHARACTER_STYLES = Object.freeze({
+ nacar:Object.freeze({kind:'pearl',lean:-.02,head:.03,swing:.88,float:.18,combat:.96}),
 kilo:    Object.freeze({ kind: "petal", lean: -0.030, head: 0.020, swing: 1.08, float: 0.08, combat: 0.92 }),
 stitcho: Object.freeze({ kind: "stitch", lean:  0.040, head: -0.018, swing: 1.15, float: 0.02, combat: 1.10 }),
 chispin: Object.freeze({ kind: "bolt",  lean:  0.075, head: -0.028, swing: 1.25, float: 0.00, combat: 1.18 }),

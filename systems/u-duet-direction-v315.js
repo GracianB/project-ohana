@@ -6,6 +6,7 @@ const TAU=Math.PI*2;
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,Number.isFinite(x)?x:0));
 const finite=x=>typeof x==="number"&&Number.isFinite(x)&&Math.abs(x)<=20000;
 export const GUEST_ACTING=Object.freeze({
+ nacar:Object.freeze({style:'tide-ripple',gesture:'float',height:36,travel:1.08}),
  kilo:Object.freeze({style:"petal-drift",gesture:"hop",height:22,travel:1.0}),
  stitcho:Object.freeze({style:"portal-dash",gesture:"dash",height:10,travel:1.20}),
  chispin:Object.freeze({style:"spark-hop",gesture:"spring",height:25,travel:1.18}),
@@ -90,6 +91,7 @@ export function guestPerformance(s,ally,reduced=false){
  let lateral=-travel;
  let altitude=identity.height,drift=0,gesture="idle",pose="idle",vx=0,vy=0;
  switch(ally){
+  case "nacar":altitude+=reduced?0:Math.sin(age*.12)*10;drift=6*impulse;gesture="float";pose=attack?"attack":"glide";break;
   case "kilo":
    altitude+=reduced?0:Math.sin(age*.17)*7;
    drift=2.5*impulse;gesture="hover";pose=attack?"attack":"idle";break;

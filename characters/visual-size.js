@@ -14,6 +14,7 @@ export const DRAGON_WING_ALLOWANCE = 1.30;
 export const HERO_HEIGHT_TARGET = Object.freeze({
   // The final cat intentionally condenses into a small floating ghost.
   cat: Object.freeze([55,70,42,120,80]),
+  nacar: Object.freeze([48,64,62,84,90]),
   dino: DINO_DRAGON_HEIGHT,
   dragon: Object.freeze(DINO_DRAGON_HEIGHT.map(h => Math.round(h * DRAGON_WING_ALLOWANCE))),
   // Pizza & Frita follow the same standard curve: same size per form, told
@@ -26,6 +27,7 @@ export function heroHeightTarget(id, form) {
   return (HERO_HEIGHT_TARGET[id] || CALIBRATED_HEIGHT)[f];
 }
 export const CANVAS_ANATOMY_HEIGHT = Object.freeze({
+  nacar: Object.freeze([49,70,52,96,79]),
   dino: Object.freeze([124.6, 104.1, 114.5, 128.1, 133.7]),
   dragon: Object.freeze([90.8, 109.9, 134.5, 152.3, 169]),
   yomi: Object.freeze([66, 86, 92, 98, 116]),

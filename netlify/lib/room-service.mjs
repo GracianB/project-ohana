@@ -1,6 +1,6 @@
 import {retryEpoch,startAdventureRetry,finishAdventureRetry} from '../../multiplayer/adventure-retry.js';
 import {mergeAdventureFinale} from '../../multiplayer/adventure-finale.js';
-import {findRoster} from '../../characters/roster.js';
+import {findRoster,ROSTER} from '../../characters/roster.js';
 import {adventureCamp,adventureRoleAllowed} from '../../multiplayer/adventure-roles.js';
 import {mergeAdventureProgress} from '../../multiplayer/adventure-progress.js';
 import {createVersus,advanceVersus,versusAction,setVersusInput,versusSnapshot} from './versus.mjs';
@@ -100,7 +100,7 @@ function finitePayloadNumber(value,fallback,min,max){
 }
 
 function validateCharacter(characterId) {
-  const allowed = new Set(["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi", "cuerno"]);
+  const allowed = new Set(ROSTER.map(hero=>hero.id));
   if (!allowed.has(characterId)) throw new RoomError("INVALID_CHARACTER", "Elige un personaje de OHANA.");
 }
 

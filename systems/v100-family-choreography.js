@@ -1,6 +1,7 @@
 // OHANA V100 · Ten distinct heroes, ten victory personalities.
 // Decorative pose choreography ONLY; no hitbox, damage, or simulation mutations.
 export const FAMILY_ROSTER_V100=Object.freeze({
+ nacar:Object.freeze({pose:'jump',offset:6.8,tempo:1.6,amp:2}),
  kilo:Object.freeze({pose:"victory",offset:.1,tempo:1.75,amp:2}),
  stitcho:Object.freeze({pose:"attack",offset:.7,tempo:2.35,amp:3}),
  chispin:Object.freeze({pose:"jump",offset:1.3,tempo:2.85,amp:7}),

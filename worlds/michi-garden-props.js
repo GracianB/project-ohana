@@ -62,7 +62,7 @@ export function drawMichiGarden(c,g,cam,t,W,H){
    for(let j=0;j<10;j++)leaf(c,x+j*b.w/10,y+12,12,j%2?.5:-.5,'#8ab096');
   }
  }
- for(const q of r.mechanisms){
+ for(const q of r.mechanisms.filter(q=>['bridge','bell','wind'].includes(q.kind))){
   const x=q.x-cx,y=q.floor-cy;if(x< -100||x>W+100||y< -80||y>H+160)continue;
   if(q.kind==='bridge'){
    line(c,'#8e9c8a',3,()=>{c.moveTo(x,y);c.lineTo(x,y-48);});

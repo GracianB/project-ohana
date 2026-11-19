@@ -69,7 +69,7 @@ export function mountHokuAtlas({select,onBegin,onContinue,onStory,onHome,documen
   portrait.replaceChildren(thumb);const c=thumb.getContext('2d');drawFamilyActor(c,id,75,110,1.42,73,{form:0},true);
   const label=doc.createElement('span');label.className='atlas-hero-label';label.textContent=ROSTER.find(r=>r.id===id).name;button.append(label);
  }
- const $=id=>host.querySelector('#'+id);let hero=menu.dataset.hero||'kilo',room='w1-'+hero,form=0,step=0,progress;
+ const $=id=>host.querySelector('#'+id);let hero=menu.dataset.hero||'kilo',room=hero==='nacar'?'w1-cat':'w1-'+hero,form=0,step=0,progress;
  const refresh=()=>{progress=atlasProgress(localStorage,saveStore.read(),readWorld1Seals());};refresh();
  const cards=()=>world1SelectCards({seals:progress.seals,keepsakes:readKeepsakes()});
  function drawDestinations(){
@@ -84,19 +84,19 @@ export function mountHokuAtlas({select,onBegin,onContinue,onStory,onHome,documen
   $('atlas-kicker').textContent=['LA FAMILIA','TU PRÓXIMA HISTORIA','LO QUE HAS CONSEGUIDO'][step];
   $('atlas-title').textContent=step===0?def.name:step===1?'Elige tu rumbo.':'Tu forma de jugar.';
   $('atlas-description').textContent=step===0?masteryOf(hero).desc:step===1?'Cada isla tiene su héroe y su propia manera de despertar.':'Selecciona una evolución conseguida. Las demás te esperan en la aventura.';
-  $('atlas-stage-index').textContent=String(ROSTER.indexOf(def)+1).padStart(2,'0')+' / 10';$('atlas-stage').setAttribute('aria-label',def.name+' · '+def.forms[form].name+' · personaje animado real');
+  $('atlas-stage-index').textContent=String(ROSTER.indexOf(def)+1).padStart(2,'0')+' / '+ROSTER.length;$('atlas-stage').setAttribute('aria-label',def.name+' · '+def.forms[form].name+' · personaje animado real');
   $('atlas-summary-hero').textContent=def.name+' · '+def.forms[form].name;$('atlas-summary-route').textContent=cards().find(c=>c.room===room)?.roomName||'';
   $('atlas-next').innerHTML=(step===0?'Elegir destino':step===1?'Elegir forma':'Entrar en '+(cards().find(c=>c.room===room)?.roomName||'su capítulo'))+' <span>→</span>';
   $('atlas-mastery').textContent=masteryOf(hero).name+' · '+masteryOf(hero).desc;$('atlas-form-name').textContent=def.forms[form].name;
   $('atlas-details').hidden=step===1;drawDestinations();drawForms();
  }
- function choose(id){if(!ROSTER.some(r=>r.id===id))return;hero=id;room='w1-'+hero;form=0;select?.(id);update();}
+ function choose(id){if(!ROSTER.some(r=>r.id===id))return;hero=id;room=hero==='nacar'?'w1-cat':'w1-'+hero;form=0;select?.(id);update();}
  const external=e=>{if(e.detail?.id&&e.detail.id!==hero)choose(e.detail.id);};addEventListener('ohana-title-hero',external);
  function move(next){step=Math.max(0,Math.min(2,next));$('atlas-feedback').textContent='';update();$('atlas-title').tabIndex=-1;$('atlas-title').focus({preventScroll:true});host.scrollIntoView({block:'start'});}
  for(const b of host.querySelectorAll('[data-atlas-step]'))b.onclick=()=>move(Number(b.dataset.atlasStep));
  $('atlas-next').onclick=()=>{if(step<2)return move(step+1);const selection=atlasSelection(hero,room,form,progress);if(!selection.allowed){$('atlas-feedback').textContent='Reúne los diez sellos antes de entrar en el Corazón.';return;}globalThis.__ohanaWorld1Start=selection.room;globalThis.__ohanaStartHero=selection.hero;globalThis.__ohanaStartForm=selection.form;select?.(selection.hero);onBegin?.();};
  host.querySelector('.atlas-back').onclick=()=>step?move(step-1):onHome?.();host.querySelector('.atlas-home').onclick=()=>onHome?.();
- $('atlas-destinations').onclick=e=>{const button=e.target.closest('[data-atlas-room]');if(!button)return;if(button.getAttribute('aria-disabled')==='true'){$('atlas-feedback').textContent='El Corazón se abre al recuperar los diez sellos.';return;}room=button.dataset.atlasRoom;const owner=cards().find(c=>c.room===room)?.hero;if(owner&&owner!==hero){hero=owner;form=0;select?.(hero);}update();};
+ $('atlas-destinations').onclick=e=>{const button=e.target.closest('[data-atlas-room]');if(!button)return;if(button.getAttribute('aria-disabled')==='true'){$('atlas-feedback').textContent='El Corazón se abre al recuperar los diez sellos.';return;}room=button.dataset.atlasRoom;const owner=cards().find(c=>c.room===room)?.hero;if(owner&&owner!==hero&&!(hero==='nacar'&&room==='w1-cat')){hero=owner;form=0;select?.(hero);}update();};
  $('atlas-forms').onclick=e=>{const b=e.target.closest('[data-atlas-form]');if(!b||b.disabled)return;form=Number(b.dataset.atlasForm);update();};
  for(const b of host.querySelectorAll('[data-atlas-dialog]'))b.onclick=()=>{const dialog=$('atlas-'+b.dataset.atlasDialog+'-dialog');dialog.showModal();};
  for(const b of host.querySelectorAll('.atlas-dialog-close'))b.onclick=()=>b.closest('dialog').close();

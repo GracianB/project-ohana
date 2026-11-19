@@ -18,7 +18,7 @@ test('README official showcase does not reuse old raster portraits, sprites or b
 
 test('each canonical hero opens the actual Canvas gallery with a valid id',()=>{
   const ids=ROSTER.map(hero=>hero.id);
-  assert.equal(ids.length,10);
+  assert.equal(ids.length, 11);
   for(const id of ids)assert.ok(
     readme.includes('gallery.html?id='+id),
     'Gallery entry absent from README: '+id

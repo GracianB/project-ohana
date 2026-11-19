@@ -168,3 +168,5 @@ body.playing.guardian-fight #notification-container{top:var(--guardian-notice-to
   text-overflow:ellipsis;white-space:nowrap;
  }
 }
+
+.world1-album-panel li.story-fragment{font-size:11px!important;line-height:1.35;padding:8px;overflow-wrap:anywhere;text-align:center}

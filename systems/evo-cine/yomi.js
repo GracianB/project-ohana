@@ -15,7 +15,7 @@ export const YOMI_FLASH_AT = 2.35;
 const TAU = Math.PI * 2, MINT = "#4ff0c8", CORAL = "#ff7f6e", GOLD = "#ffd56b", BG = "#071526";
 const FORM_NAMES = ROSTER.find(r => r.id === 'yomi').forms.map(f => f.name);
 const STARS = ["#eb554a","#5ad1ff","#ffe14a","#c9a8ff","#ff6a2a","#4cbf56","#f0b43a","#e0402a","#f2c1ff","#4ff0c8"];
-const LINES = ["¿hola?", "leyendo a la familia…", "compilando recuerdos…", "nadie se queda atrás"];
+const LINES = ["¿hola?", "escuchando a la familia…", "encendiendo recuerdos…", "nadie se queda atrás"];
 const cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, Number(v) || 0));
 const sm = v => { const k = cl(v); return k * k * (3 - 2 * k); };
 const hn = i => { const x = Math.sin(i * 127.1 + 3.3) * 43758.5453; return x - Math.floor(x); };

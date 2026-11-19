@@ -86,7 +86,7 @@ test("V319 Pizza + Yomi's maw remains 120 ticks with free choice of nine allies"
  assert.equal(FAMILY_DUET_LENGTH,120);
  assert.deepEqual(FAMILY_DUET_BEATS,[42,66,90]);
  const options=optionsForUPartner("pizza");
- assert.equal(options.length,9);
+ assert.equal(options.length, 10);
  for(const option of options)for(const age of [0,24,42,66,90,118]){
   const frame=familyDuetChoreography({hero:"pizza",ally:option.id,
    x:160,y:240,age,evo:4,facing:1,bondRank:3},true);

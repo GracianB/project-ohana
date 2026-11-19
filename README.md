@@ -1,3 +1,7 @@
+V800: **11 personajes · 5 formas por personaje · 10 salas del Mundo 1**. Nácar comparte el jardín de Michi; no añade un sello obligatorio.
+
+**ohana-800** · [Michi y el elenco final](docs/MICHI-V800.md) · [validación](docs/V800-VALIDATION.json) · [publicación](docs/V800-PUBLICATION.json).
+
 **ohana-700** · [37 iteraciones del eclipse](docs/QUIMERA-V700-STAGES.md) · [validación](docs/V700-VALIDATION.json) · [publicación](docs/V700-PUBLICATION.json).
 
 **ohana-663**: [anatomía de Quimera](docs/QUIMERA-V663.md) · [validación](docs/V663-VALIDATION.json) · [publicación](docs/V663-PUBLICATION.json).
@@ -250,3 +254,5 @@ El motor, los rigs, el progreso, el combate y la interfaz están versionados en 
 <sub>© 2026 Gracián Baena · Licencia MIT</sub>
 
 </div>
+
+| [**Nácar**](https://gracianb.github.io/project-ohana/gallery.html?id=nacar) | Medusa, estrella de mar y refugio lunar |
