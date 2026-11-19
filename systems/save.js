@@ -52,6 +52,13 @@ function finiteNumber(value) {
   return Number.isFinite(number) ? number : 0;
 }
 
+function cleanAquariumReturn(value,room,hero){
+ if(room!=='w1-nacar'||hero!=='nacar'||!value)return null;
+ const {evo,xp,hp}=value;
+ if(!Number.isInteger(evo)||evo<0||evo>4||!Number.isFinite(xp)||xp<0||!Number.isFinite(hp)||hp<=0)return null;
+ return {evo,xp,hp};
+}
+
 export function packSave(game, MagicMod) {
   const p = game && game.player;
   let magic = null;
@@ -67,6 +74,7 @@ export function packSave(game, MagicMod) {
     explored: cleanProgress(game.explored,true),
     secrets: cleanSecrets(game.secrets),
     roomId: game.roomId,
+    aquariumReturn: cleanAquariumReturn(game._aquariumMichi,game.roomId,p?.id),
     visited: game.visited || { hub: true },
     score: game.score || 0,
     kills: game.kills || 0,
@@ -142,6 +150,7 @@ export function unpackSave(raw, defId) {
     explored: cleanProgress(raw.explored,true),
     secrets: cleanSecrets(raw.secrets),
     roomId: typeof raw.roomId === "string" && raw.roomId ? raw.roomId : "hub",
+    aquariumReturn: cleanAquariumReturn(raw.aquariumReturn,raw.roomId,id),
     visited: vis,
     score: Math.max(0, finiteNumber(raw.score)),
     kills: Math.max(0, finiteNumber(raw.kills)),

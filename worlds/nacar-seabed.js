@@ -1,5 +1,5 @@
 import {drawOceanPassage} from './michi-adventure-art.js';
-import {pearlOpen} from '../systems/nacar-chapter.js';
+import {pearlOpen,nacarDiscovered,nacarDiscoveryAvailable,nacarBossPattern} from '../systems/nacar-chapter.js';
 import {drawSeaStar} from '../characters/art/nacar.js';
 const TAU=Math.PI*2,oval=(c,x,y,rx,ry,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();};
 export function drawNacarSeabed(c,g,cam,t,W,H){
@@ -16,9 +16,48 @@ export function drawNacarSeabed(c,g,cam,t,W,H){
  const wx=4550-cam.x,wy=1780-cam.y;if(wx> -900&&wx<W+900){c.fillStyle='#26394b';c.beginPath();c.moveTo(wx-650,wy-210);c.quadraticCurveTo(wx,wy+210,wx+650,wy-180);c.lineTo(wx+550,wy+20);c.lineTo(wx-550,wy+20);c.fill();for(let i=-4;i<=4;i++){c.strokeStyle='#486777';c.lineWidth=15;c.beginPath();c.moveTo(wx+i*110,wy+15);c.quadraticCurveTo(wx+i*140,wy-80,wx+i*135,wy-130-Math.abs(i)*16);c.stroke();}}
  c.restore();return true;
 }
+function drawDiscovery(c,g,d,cam,t){
+ const x=d.x-cam.x,y=d.y-cam.y,width=g.viewW||1600,height=g.viewH||900;
+ if(x< -140||x>width+140||y< -100||y>height+100)return;
+ const found=nacarDiscovered(g,d.id);
+ const active=nacarDiscoveryAvailable(g,d);
+ if(d.kind==='shortcut'){
+  if(active)drawOceanPassage(c,x,y+35,t,d.name.toUpperCase());
+  return;
+ }
+ const color=found?'#83b6b6':active?'#ffe3b1':'#597c92';
+ c.save();
+ c.translate(x,y);
+ oval(c,0,12,23,9,'#274956');
+ c.fillStyle=color;
+ if(d.id==='bell'){
+  c.beginPath();c.moveTo(-14,7);c.quadraticCurveTo(-9,2,-8,-11);
+  c.quadraticCurveTo(0,-22,8,-11);c.quadraticCurveTo(9,2,14,7);c.fill();
+  oval(c,0,11,3,4,color);
+ }else if(d.id==='log'){
+  c.fillRect(-12,-12,24,20);c.fillStyle='#6e6163';c.fillRect(-1,-12,2,20);
+  for(const i of [-6,0,6])c.fillRect(-8,i,6,1);
+ }else if(d.kind==='refuge'){
+  for(let i=-2;i<=2;i++)oval(c,i*6,-5-Math.cos(i)*7,4,10,color);
+  oval(c,0,-16,3,3,'#fbf4dc');
+ }else if(d.id==='conch'){
+  for(let i=0;i<6;i++)oval(c,10-i*4,3-i*2,4+i,3+i,color);
+  oval(c,-9,-7,5,6,'#687a82');
+ }else{
+  c.fillRect(-10,-17,20,22);oval(c,0,-7,4,8,'#fff4c8');
+ }
+ if(active&&!found)oval(c,0,-25+Math.sin(t*.04)*3,2,3,'#f7ebd1');
+ c.textAlign='center';
+ c.font='600 11px sans-serif';
+ c.fillStyle=color;
+ c.fillText(d.name.toUpperCase(),0,33);
+ c.restore();
+}
+
 export function drawNacarChapter(c,g,cam,t){if(!g.roomDef?.nacarChapter)return false;t=g.reduceMotion?0:t;c.save();
  for(const s of g.world1?.stations||[]){const x=s.x-cam.x,y=s.y-cam.y;if(x< -120||x>(g.viewW||1600)+120)continue;const open=pearlOpen(g.world1.tick,s);oval(c,x,y+12,30,15,'#376d7c');c.fillStyle=s.done?'#bceade':open?'#ead6bc':'#5d8097';c.beginPath();c.arc(x,y,18,Math.PI,0);c.quadraticCurveTo(x+13,y+15,x,y+12);c.quadraticCurveTo(x-13,y+15,x-18,y);c.fill();oval(c,x,y-2,7,8,s.done?'#fff5d0':open?'#edf9e4':'#7296a4');c.textAlign='center';c.font='600 12px sans-serif';c.fillStyle='#cbe7de';c.fillText(s.done?'ESCUCHADA':open?'E · ESCUCHAR':'RESPIRA…',x,y-35);}
  for(const v of g.roomDef.tides){const x=v.x-cam.x,y=v.y-cam.y,up=g._nacarCurrents?.[v.id];c.strokeStyle='#8bbdb4';c.lineWidth=4;c.beginPath();c.arc(x,y,19,0,TAU);c.stroke();for(let i=0;i<4;i++){const a=i*Math.PI/2+(up?-.5:.5);c.beginPath();c.moveTo(x,y);c.lineTo(x+Math.cos(a)*16,y+Math.sin(a)*16);c.stroke();}c.textAlign='center';c.font='12px sans-serif';c.fillStyle='#deead7';c.fillText('E · CORRIENTE '+(up?'↑':'↓'),x,y-34);const a=v.area;for(let i=0;i<12;i++){const xx=a.x+a.w*((i*37%100)/100)-cam.x,yy=a.y+((i*113+(up?-t:t)*1.7)%(a.h)+a.h)%a.h-cam.y;oval(c,xx,yy,2,4,'#b6efdc66');}}
+ if(!g.onlineAdventure)for(const discovery of g.roomDef.discoveries||[])drawDiscovery(c,g,discovery,cam,t);
  if(!g.onlineAdventure)for(const exit of g.roomDef.oceanExits||[]){
   const x=exit.x-cam.x;
   if(x>=-120&&x<=(g.viewW||1600)+120)drawOceanPassage(c,x,exit.y-cam.y+35,t,'REGRESO A MICHI');
@@ -27,14 +66,11 @@ export function drawNacarChapter(c,g,cam,t){if(!g.roomDef?.nacarChapter)return f
  c.restore();return true;}
 export function drawNacarBoss(c,e,cam,t,reduced){const b=e._nacarBoss;if(!b)return;const x=e.x+e.w/2-cam.x,y=e.y+e.h/2-cam.y,T=reduced?0:t;c.save();
  if(b.phase==='warn'){
-  const tx=b.tx-cam.x,ty=b.ty-cam.y,angle=Math.atan2(ty-y,tx-x);
-  if(b.attack===1){
-   for(let i=-1;i<=1;i++)for(let k=0;k<5;k++)oval(c,tx+i*150,ty-300+k*76,6,12,'#f1c1c266');
-  }else{
-   const count=b.attack===0?5+b.tier*2:6;
-   for(let i=0;i<count;i++){
-    const a=b.attack===0?angle+(i-(count-1)/2)*.18:i*TAU/count;
-    for(let k=1;k<=3;k++)oval(c,x+Math.cos(a)*k*59,y+Math.sin(a)*k*59,5,5,'#f1c1c288');
+  for(const shot of nacarBossPattern(e)){
+   const distance=b.attack===1?360:186;
+   for(let i=1;i<=5;i++){
+    const step=distance*i/5;
+    oval(c,shot.x-cam.x+Math.cos(shot.angle)*step,shot.y-cam.y+Math.sin(shot.angle)*step,4,5,'#f1c1c288');
    }
   }
  }

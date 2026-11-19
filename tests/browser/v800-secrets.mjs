@@ -15,6 +15,19 @@ try{await fs.mkdir(out,{recursive:true});const ctx=await browser.newContext({vie
  await p.evaluate(()=>window.__OHANA_E2E.setEvo(2));
  await place(2580,300);await use();assert.equal((await state()).hero,'nacar');assert.equal((await state()).roomId,'w1-nacar');
  for(let i=0;i<10&&(await state()).world1Cine;i++)await p.evaluate(()=>window.__OHANA_E2E.step(600));
+ const ocean=async(x,y)=>p.evaluate(({x,y})=>{const e=window.__OHANA_E2E,s=e.state();e.setPlayer(x-s.player.w/2,y-s.player.h/2);e.step(2);},{x,y});
+ for(const [x,y] of [[3900,1480],[5100,1240],[5700,710],[5410,375]]){await ocean(x,y);await use();}
+ const receipts=await p.evaluate(()=>JSON.parse(localStorage.getItem('ohana')).secrets['w1-nacar']);
+ assert.ok(receipts.includes('w1-nacar-discovery-lantern'));
+ assert.ok(receipts.includes('w1-nacar-discovery-conch'));
+ await p.reload();await p.waitForFunction(()=>window.__OHANA_E2E);
+ await p.evaluate(()=>window.__OHANA_E2E.manualClock());
+ await p.locator('.atlas-resume').click();
+ for(let i=0;i<10&&(await state()).world1Cine;i++)await p.evaluate(()=>window.__OHANA_E2E.step(600));
+ assert.equal((await state()).hero,'nacar');
+ await ocean(4070,1060);await use();assert.ok((await state()).player.x>7100);
+ await ocean(7300,1060);await use();assert.ok((await state()).player.x<4300);
+ await p.screenshot({path:out+'/wreck-route-mobile.png'});
  await place(220,1775+(await state()).player.h/2);await use();assert.equal((await state()).hero,'cat');assert.equal((await state()).evo,2);assert.equal((await w()).zone,'tide');
  await place(8410,1010);await use();assert.ok((await w()).guard>0);assert.equal((await state()).world1.done,0,'optional discoveries never grant a farol');assert.equal((await state()).runtimeFaults,0);assert.deepEqual(errors,[]);await fs.writeFile(out+'/secret-interactions.json',JSON.stringify({input:'native touch Use',placementFixture:true,world:await w(),errors},null,2));console.log('PASS touch chime order, root secret, wind secret, Nácar encounter, guardian refuge; no progression grants');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

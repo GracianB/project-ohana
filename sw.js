@@ -1,4 +1,4 @@
-const VERSION = "ohana-802";
+const VERSION = "ohana-803";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/intro-nacar-stage.js?v=" + VERSION,
@@ -531,9 +531,9 @@ const PRECACHE_REVISIONS = {
   "assets/photobooth/nacar.webp": "65987fb92f5e8f73e648bcd220c10d90e297a422",
   "assets/photobooth/ia.webp": "6b70c310b42925cbf0a135a5bfff3e64a9000bf9",
   "characters/art/ia.js": "8bb3eca84e2336edbdc7d4e14cf077fb119bdf9c",
-  "systems/nacar-chapter.js": "71dcf99469bf78bacdb5d5fc30f49f354e8330ae",
-  "systems/nacar-room.js": "42ded03f39ed9cde3b8c3b7d5d22c11d26cf9f0d",
-  "worlds/nacar-seabed.js": "37f0256d8c34043d3cc0cc624d226345b08f404f",
+  "systems/nacar-chapter.js": "0bbfe83d7c5d4124796205a0c9105fad675a24c1",
+  "systems/nacar-room.js": "99a0493aa57628a4b0b9306d0f0cd757669aadbc",
+  "worlds/nacar-seabed.js": "12e7ffe2d9af5e787acd7b22c197453f2fb2f6fe",
   "systems/michi-adventure.js": "1a78a910a2336e49990192260d48c149caf9159a",
   "worlds/michi-adventure-art.js": "1636aabb4493316763af546204ad067449d27e2f",
   "engine/foes/michi-sanctuary-fauna.js": "29f7d4f1e736410ca703e9198a242e1b46a86812",
@@ -793,7 +793,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "56644a3576d80c1d2662d9940cff462e8256858d",
-  "index.html": "c0f4110d0f4b1c591a452a385f482671d5b11136",
+  "index.html": "931a14d314a8f6340d54d867c18a01b4d89e932f",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
@@ -819,7 +819,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "eee304f8685921f18a2b4a93166e31f29327c0ba",
+  "game.js": "8bbfa22e61961ba6d7d254915fec40eec812e741",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "799e042fb74a31b80089c2a1b25764d6f882fd12",
   "characters/ten-action-acting.js": "fc777bd24389c06a4b0ee68d64ad6f1b8415e10f",
@@ -1011,7 +1011,7 @@ const PRECACHE_REVISIONS = {
   "systems/rain.js": "02c82578fd89f44120a607b21138c6ca62fe2be2",
   "systems/runtime-state.js": "7848eaa377179a12c6aa7af522aebbf80f173ebf",
   "systems/runtime.js": "3451fd3e34141e3098a6fb7f9e74cbd4ab948ea7",
-  "systems/save.js": "f0ba29a98accf6ba53a411c5fb475b4e640f75f7",
+  "systems/save.js": "bd561bc5ee7bbc838c624eee285d5e013e2c4238",
   "systems/surprises.js": "9ac680c25713258f8e828eb396bf7f659ce390da",
   "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
   "systems/title.js": "0316439f5f7b735b55fe0297b651620173c4fc68",

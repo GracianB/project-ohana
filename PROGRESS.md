@@ -1,3 +1,5 @@
+ohana-803 · Pecio de las Promesas y regreso guardado de Michi.
+
 ohana-802 · Paso entre el acuario de Michi y el fondo marino.
 
 ohana-801 · **12 personajes · 5 formas · 10 salas de campaña y un capítulo submarino adicional.**

@@ -971,6 +971,7 @@ return p;
 }
 function start(def) {
 game.loadRoom = loadRoom;
+game.showOceanDiscovery = (title, line) => showRoomMessage(title, line, {key:'ocean:'+title});
 game._cuernoIntroT = def?.id === "cuerno" && !reduceMotion ? 0 : null;
 game.lastAbilityId = null;
 game.lastAbilitySlot = null;game._signatureLink=null;
@@ -1128,6 +1129,7 @@ try {
   const u = saveStore.read(def.id);
   if (u) {
     game._startFormChoice=u.startFormChoice||null;
+    game._aquariumMichi=u.aquariumReturn||null;
     game.player.evo = u.evo;
     game.player.xp = u.xp;
     // V313 saves contained one U EXP value. Migrate it to the equipped
