@@ -303,10 +303,12 @@ export function drawAnemoneStatus(c,g,width){
  const b=enemy._nacarBoss,pressure=anemonePressure(enemy);
  const open=b.phase==='rest'&&enemy.damageWindowRemaining>0;
  if(!open&&!pressure&&b.phase!=='warn')return;
- const w=Math.min(254,width-28),x=(width-w)/2,y=105;
- const title=open?'NÚCLEO ABIERTO':pressure?'NADA POR EL PASILLO VERDE':NACAR_ATTACK_NAMES[b.attack].toUpperCase();
+ const w=Math.min(254,width-28),x=(width-w)/2,y=width<620?164:105;
+ const playerY=g.player.y+g.player.h/2;
+ const direction=pressure&&Math.abs(playerY-pressure.safeY)>pressure.halfHeight?(playerY>pressure.safeY?'↑ ':'↓ '):'';
+ const title=open?'NÚCLEO ABIERTO':pressure?direction+'PASILLO SEGURO':NACAR_ATTACK_NAMES[b.attack].toUpperCase();
  const color=open?'#dff6ba':pressure?'#bee8d4':'#ffd0c0';
- const duration=open?b.openTime:pressure?(b.phase==='warn'?65:81):65;
+ const duration=open?b.openTime:pressure?(b.phase==='warn'?pressure.warningTime:81):65;
  const ticks=open?b.clock:pressure?pressure.ticks:b.clock;
  c.save();
  c.fillStyle='#142b40ef';c.fillRect(x,y,w,32);

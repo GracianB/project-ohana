@@ -238,6 +238,7 @@ export function nacarBossPattern(enemy){
 
 export const ANEMONE_ARENA=Object.freeze({left:8790,right:10650,top:810,floor:1850});
 const PRESSURE_TIME=105;
+const PRESSURE_WARNING=132;
 const ATTACK_ORDERS=[[0,1,2],[3,1,0,2],[4,3,2,0,1]];
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
@@ -247,7 +248,7 @@ export function anemonePressure(enemy){
  const second=phase==='attack'&&clock<=99;
  const upper=(ty>1300)!==second;
  const safeY=upper?1140:1530;
- return {safeY,halfHeight:112,ticks:phase==='warn'?clock:clock>99?0:Math.max(0,clock-19),
+ return {safeY,halfHeight:112,warningTime:PRESSURE_WARNING,ticks:phase==='warn'?clock:clock>99?0:Math.max(0,clock-19),
   impact:phase==='attack'&&(clock===PRESSURE_TIME||clock===19),
   flash:phase==='attack'&&(clock>99||clock<=19)};
 }
@@ -318,7 +319,7 @@ export function updateNacarBoss(e,g,hurt){
   b.tier=tier;
   b.attack=order[b.turn%order.length];
   b.phase='warn';
-  b.clock=65;
+  b.clock=b.attack===4?PRESSURE_WARNING:65;
   b.tx=clamp(x,a.left+40,a.right-40);
   b.ty=clamp(y,a.top+35,a.floor-35);
   e.damageTakenScale=0;
