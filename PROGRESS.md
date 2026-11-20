@@ -1,3 +1,5 @@
+- **ohana-823** — Selector con escenario ilustrado, doce retratos, pasos claros y vista previa de la forma elegida. [Detalle](docs/V823-ATLAS.md)
+
 - **ohana-822** — Bienvenida ilustrada desde el embarcadero con accesos claros a Jugar, Continuar y Multijugador. [Detalle](docs/V822-WELCOME.md)
 
 - **ohana-821** — Pantalla inicial ilustrada de Isla Hoku con faroles, adaptación vertical y movimiento reducido. [Detalle](docs/V821-STARTUP.md)

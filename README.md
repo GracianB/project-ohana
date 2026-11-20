@@ -1,3 +1,5 @@
+ohana-823 · [Nuevo selector de personajes](docs/V823-ATLAS.md) · [Validación](docs/V823-VALIDATION.json) · [Publicación](docs/V823-PUBLICATION.json)
+
 ohana-822 · [Nueva bienvenida de Isla Hoku](docs/V822-WELCOME.md) · [Validación](docs/V822-VALIDATION.json) · [Publicación](docs/V822-PUBLICATION.json)
 
 ohana-821 · [Pantalla de carga de Isla Hoku](docs/V821-STARTUP.md) · [Validación](docs/V821-VALIDATION.json) · [Publicación](docs/V821-PUBLICATION.json)

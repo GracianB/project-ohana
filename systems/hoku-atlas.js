@@ -10,23 +10,13 @@ import {menuPaintAllowedInDocument} from './menu-visibility.js';
 const TAU=Math.PI*2;
 const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches||document.body.classList.contains('gentle-motion');
 const online=()=>ATLAS_MODES.map(m=>`<a class="atlas-mode" href="${m.href}"><span aria-hidden="true">${m.id==='versus'?'⚔':'✦'}</span><strong>${m.name}</strong><small>${m.text}</small><b aria-hidden="true">→</b></a>`).join('');
-function oval(c,x,y,rx,ry,col){c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();}
 export function drawAtlasSky(c,w,h,t=0,hero='kilo',form=0){
- const time=reduced()?0:t,col=ROSTER.find(r=>r.id===hero)?.color||'#8bd7d1';
- c.clearRect(0,0,w,h);const bg=c.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#091b2e');bg.addColorStop(.6,'#152c43');bg.addColorStop(1,'#254551');c.fillStyle=bg;c.fillRect(0,0,w,h);
- const glow=c.createRadialGradient(w*.64,h*.42,0,w*.64,h*.42,w*.55);glow.addColorStop(0,col+'30');glow.addColorStop(1,col+'00');c.fillStyle=glow;c.fillRect(0,0,w,h);
- for(let i=0;i<66;i++){const x=((i*149+31)%997)/997*w,y=((i*83+17)%593)/593*h*.77;oval(c,x,y,i%9?1:1.8,i%9?1:1.8,i%7?'#c8e3e570':'#f7dab5');}
- const cx=w*.52,cy=h*.48,r=Math.min(w*.39,h*.37);
- c.strokeStyle='#c4ac7742';c.lineWidth=1;
- for(let i=0;i<3;i++){c.beginPath();c.ellipse(cx,cy,r*(.7+i*.22),r*(.7+i*.22),-.22,0,TAU);c.stroke();}
- for(let i=0;i<10;i++){const a=-1.5+i*TAU/10+time*.0015;const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;oval(c,x,y,3,3,i%3?'#b9dcd6':'#f7d8a8');}
- // Floating strata, not mirror frames: silhouette, turf and a hanging root.
- const ix=cx,iy=h*.78,iw=Math.min(w*.31,h*.32);
- c.fillStyle='#101f32';c.beginPath();c.moveTo(ix-iw,iy);c.lineTo(ix-iw*.55,iy+42);c.lineTo(ix-iw*.18,iy+86);c.lineTo(ix+iw*.32,iy+54);c.lineTo(ix+iw,iy);c.closePath();c.fill();
- oval(c,ix,iy,iw,20,'#536d6c');oval(c,ix,iy-5,iw*.96,14,'#839b86');oval(c,ix,iy-5,iw*.68,9,'#a5b89b');
- for(const side of[-1,1]){const x=cx+side*iw*1.35,y=h*.62+side*20;oval(c,x,y,iw*.36,8,'#587975');c.fillStyle='#162b3c';c.beginPath();c.moveTo(x-iw*.35,y+2);c.lineTo(x+iw*.3,y+2);c.lineTo(x-side*iw*.08,y+28);c.closePath();c.fill();}
- const size=Math.min(h*.46,w*.48);
- drawFamilyActor(c,hero,cx,iy-8,size/60,time*60,{form,pose:'idle',performance:hero==='kilo'?'dance':undefined},reduced());
+ const quiet=reduced(),time=quiet?0:t,x=w*.5,y=h*.75;
+ c.clearRect(0,0,w,h);
+ c.fillStyle='#020e19a6';
+ c.beginPath();c.ellipse(x,y+3,Math.min(w*.18,h*.19),Math.min(h*.025,14),0,0,TAU);c.fill();
+ const size=Math.min(h*.58,w*.55,345);
+ drawFamilyActor(c,hero,x,y,size/60,time*60,{form,pose:'idle',performance:hero==='kilo'?'dance':undefined},quiet);
 }
 const pads=new WeakMap();
 function pollGamepad(root){
@@ -91,15 +81,17 @@ export function mountHokuAtlas({select,onBegin,onContinue,onStory,onHome,documen
  const menu=doc.getElementById('char-select');if(!menu||doc.getElementById('hoku-atlas'))return;
  doc.body.classList.add('hoku-atlas-on');menu.dataset.selectorMode='hoku-atlas';
  const host=doc.createElement('section');host.id='hoku-atlas';host.setAttribute('aria-label','Prepara tu aventura en el Atlas de Hoku');
- host.innerHTML=`<header class="atlas-header"><button type="button" class="atlas-home" aria-label="Volver a la portada">OHANA <span>ATLAS DE HOKU</span></button><nav aria-label="Opciones del Atlas"><button type="button" id="atlas-resume" hidden>↶ Continuar historia</button><button type="button" data-atlas-dialog="online">2 jugadores →</button><button type="button" data-atlas-action="album">Colección</button><button type="button" data-atlas-dialog="settings" aria-label="Ajustes">⚙</button></nav></header><nav class="atlas-steps" aria-label="Preparar aventura"><button type="button" data-atlas-step="0"><span>01</span> Personaje</button><button type="button" data-atlas-step="1"><span>02</span> Destino</button><button type="button" data-atlas-step="2"><span>03</span> Forma</button></nav><div class="atlas-main"><section class="atlas-stage-wrap"><canvas id="atlas-stage" role="img" aria-label="Tu héroe en una isla del Atlas"></canvas><div class="atlas-stage-caption"><span id="atlas-stage-index">01 / 10</span><span>UNA HISTORIA QUE EMPIEZA CONTIGO</span></div></section><section class="atlas-choice"><p class="atlas-eyebrow" id="atlas-kicker"></p><h2 id="atlas-title"></h2><p id="atlas-description"></p><div id="atlas-characters" class="atlas-panel"></div><div id="atlas-destinations" class="atlas-panel" hidden></div><div id="atlas-forms" class="atlas-panel" hidden></div><details id="atlas-details"><summary>Conocer a este héroe <span>+</span></summary><p id="atlas-mastery"></p><p id="atlas-form-name"></p></details><p id="atlas-feedback" role="status" aria-live="polite"></p></section></div><footer class="atlas-confirm"><button class="atlas-back" type="button">← Atrás</button><div class="atlas-summary"><strong id="atlas-summary-hero"></strong><span id="atlas-summary-route"></span></div><button type="button" class="atlas-primary" id="atlas-next">Elegir destino <span>→</span></button></footer><dialog class="atlas-dialog" id="atlas-online-dialog"><button type="button" class="atlas-dialog-close" aria-label="Cerrar multijugador">×</button><p class="atlas-eyebrow">MEJOR EN COMPAÑÍA</p><h2>Compartid la aventura.</h2>${online()}<p class="atlas-muted">El vestíbulo online permite crear sala, entrar con código y elegir héroes.</p></dialog><dialog class="atlas-dialog" id="atlas-settings-dialog"><button type="button" class="atlas-dialog-close" aria-label="Cerrar ajustes">×</button><p class="atlas-eyebrow">A TU MANERA</p><h2>Ajusta el viaje.</h2><p>Dificultad</p><div id="atlas-difficulty"></div><button type="button" class="atlas-setting" id="atlas-sound">Activar / desactivar sonido</button><button type="button" class="atlas-setting" id="atlas-memory" hidden>La constelación familiar</button><button type="button" class="atlas-setting" id="atlas-story">Ver la historia de Ohana</button></dialog>`;
+ host.innerHTML=`<header class="atlas-header"><button type="button" class="atlas-home" aria-label="Volver a la portada">OHANA <span>ATLAS DE HOKU</span></button><nav aria-label="Opciones del Atlas"><button type="button" id="atlas-resume" hidden>↶ Continuar historia</button><button type="button" data-atlas-dialog="online">2 jugadores →</button><button type="button" data-atlas-action="album">Colección</button><button type="button" data-atlas-dialog="settings" aria-label="Ajustes">⚙</button></nav></header><nav class="atlas-steps" aria-label="Preparar aventura"><button type="button" data-atlas-step="0"><span>01</span> Personaje</button><button type="button" data-atlas-step="1"><span>02</span> Destino</button><button type="button" data-atlas-step="2"><span>03</span> Forma</button></nav><div class="atlas-main"><section class="atlas-stage-wrap"><canvas id="atlas-stage" role="img" aria-label="Tu héroe en una isla del Atlas"></canvas><div class="atlas-stage-caption"><span id="atlas-stage-index">01 / 10</span><span id="atlas-stage-form"></span></div></section><section class="atlas-choice"><p class="atlas-eyebrow" id="atlas-kicker"></p><h2 id="atlas-title"></h2><p id="atlas-description"></p><p class="atlas-hero-profile" id="atlas-hero-profile"></p><div id="atlas-characters" class="atlas-panel"></div><div id="atlas-destinations" class="atlas-panel" hidden></div><div id="atlas-forms" class="atlas-panel" hidden></div><details id="atlas-details"><summary>Conocer a este héroe <span>+</span></summary><p id="atlas-mastery"></p><p id="atlas-form-name"></p></details><p id="atlas-feedback" role="status" aria-live="polite"></p></section></div><footer class="atlas-confirm"><button class="atlas-back" type="button">← Atrás</button><div class="atlas-summary"><strong id="atlas-summary-hero"></strong><span id="atlas-summary-route"></span></div><button type="button" class="atlas-primary" id="atlas-next">Elegir destino <span>→</span></button></footer><dialog class="atlas-dialog" id="atlas-online-dialog"><button type="button" class="atlas-dialog-close" aria-label="Cerrar multijugador">×</button><p class="atlas-eyebrow">MEJOR EN COMPAÑÍA</p><h2>Compartid la aventura.</h2>${online()}<p class="atlas-muted">El vestíbulo online permite crear sala, entrar con código y elegir héroes.</p></dialog><dialog class="atlas-dialog" id="atlas-settings-dialog"><button type="button" class="atlas-dialog-close" aria-label="Cerrar ajustes">×</button><p class="atlas-eyebrow">A TU MANERA</p><h2>Ajusta el viaje.</h2><p>Dificultad</p><div id="atlas-difficulty"></div><button type="button" class="atlas-setting" id="atlas-sound">Activar / desactivar sonido</button><button type="button" class="atlas-setting" id="atlas-memory" hidden>La constelación familiar</button><button type="button" class="atlas-setting" id="atlas-story">Ver la historia de Ohana</button></dialog>`;
  menu.append(host);
  // Reuse the ten real buttons and their native selection contract, not Canvas hit targets.
  const chars=doc.getElementById('chars');host.querySelector('#atlas-characters').append(chars);host.querySelector('#atlas-difficulty').append(doc.getElementById('difficulty'));
 
  for(const button of chars.querySelectorAll('.char-card')){
-  const id=button.dataset.id,portrait=button.querySelector('.portrait'),thumb=doc.createElement('canvas');thumb.width=150;thumb.height=120;
+  const id=button.dataset.id,def=ROSTER.find(r=>r.id===id),portrait=button.querySelector('.portrait'),thumb=doc.createElement('canvas');thumb.width=150;thumb.height=120;
   portrait.replaceChildren(thumb);const c=thumb.getContext('2d');drawFamilyActor(c,id,75,110,1.42,73,{form:0},true);
-  const label=doc.createElement('span');label.className='atlas-hero-label';label.textContent=ROSTER.find(r=>r.id===id).name;button.append(label);
+  const label=doc.createElement('span');label.className='atlas-hero-label';label.textContent=def.name;button.append(label);
+  button.style.setProperty('--hero-card-accent',def.color);
+  button.setAttribute('aria-label',def.name);
  }
  const $=id=>host.querySelector('#'+id);let hero=menu.dataset.hero||'kilo',room=hero==='ia'?'w1-yomi':'w1-'+hero,form=0,step=0,progress;
  const refresh=()=>{progress=atlasProgress(localStorage,saveStore.read(),readWorld1Seals());};refresh();
@@ -110,12 +102,18 @@ export function mountHokuAtlas({select,onBegin,onContinue,onStory,onHome,documen
  function drawForms(){const d=ROSTER.find(r=>r.id===hero),max=atlasEarnedForm(hero,progress);$('atlas-forms').innerHTML=d.forms.map((f,i)=>`<button type="button" data-atlas-form="${i}" class="atlas-form ${i===form?'is-selected':''}" aria-pressed="${i===form}" ${i>max?'disabled':''}><span>${i>max?'◇':String(i+1).padStart(2,'0')}</span><strong>${f.name}</strong><small>${i>max?'Consíguela durante su aventura':i===0?'Tu primera forma':'Conseguida'}</small></button>`).join('');}
  function update(){
   refresh();$('atlas-memory').hidden=!localStorage.getItem('ohana-family-memory-v500');
-  const saved=saveStore.read();$('atlas-resume').hidden=!(saved&&ROSTER.some(r=>r.id===canonId(saved.id)));const def=ROSTER.find(r=>r.id===hero);form=Math.min(form,atlasEarnedForm(hero,progress));host.dataset.hero=hero;host.dataset.final=String(room==='w1-final');host.dataset.world='1';host.dataset.form=String(form);host.dataset.step=String(step);host.style.setProperty('--atlas-accent',def.color);
+  const saved=saveStore.read();$('atlas-resume').hidden=!(saved&&ROSTER.some(r=>r.id===canonId(saved.id)));const def=ROSTER.find(r=>r.id===hero),earned=atlasEarnedForm(hero,progress);form=Math.min(form,earned);host.dataset.hero=hero;host.dataset.final=String(room==='w1-final');host.dataset.world='1';host.dataset.form=String(form);host.dataset.step=String(step);host.style.setProperty('--atlas-accent',def.color);
   for(const button of host.querySelectorAll('[data-atlas-step]')){const active=Number(button.dataset.atlasStep)===step;button.setAttribute('aria-current',active?'step':'false');button.classList.toggle('is-current',active);}
   $('atlas-characters').hidden=step!==0;$('atlas-destinations').hidden=step!==1;$('atlas-forms').hidden=step!==2;
-  $('atlas-kicker').textContent=['LA FAMILIA','TU PRÓXIMA HISTORIA','LO QUE HAS CONSEGUIDO'][step];
-  $('atlas-title').textContent=step===0?def.name:step===1?'Elige tu rumbo.':'Tu forma de jugar.';
+  $('atlas-kicker').textContent=['ELIGE PERSONAJE','DESTINO','EVOLUCIÓN'][step];
+  $('atlas-title').textContent=step===0?def.name:step===1?'Elige destino':'Elige forma';
   $('atlas-description').textContent=step===0?masteryOf(hero).desc:step===1?'Cada isla tiene su héroe y su propia manera de despertar.':'Selecciona una evolución conseguida. Las demás te esperan en la aventura.';
+  $('atlas-hero-profile').hidden=step!==0;
+  $('atlas-hero-profile').textContent=masteryOf(hero).name+' · '+(earned+1)+' de '+def.forms.length+' formas';
+  for(const button of chars.querySelectorAll('.char-card')){
+   button.setAttribute('aria-pressed',String(button.dataset.id===hero));
+  }
+  $('atlas-stage-form').textContent=def.forms[form].name;
   $('atlas-stage-index').textContent=String(ROSTER.indexOf(def)+1).padStart(2,'0')+' / '+ROSTER.length;$('atlas-stage').setAttribute('aria-label',def.name+' · '+def.forms[form].name+' · personaje animado real');
   $('atlas-summary-hero').textContent=def.name+' · '+def.forms[form].name;$('atlas-summary-route').textContent=cards().find(c=>c.room===room)?.roomName||'';
   $('atlas-next').innerHTML=(step===0?'Elegir destino':step===1?'Elegir forma':'Entrar en '+(cards().find(c=>c.room===room)?.roomName||'su capítulo'))+' <span>→</span>';
@@ -145,7 +143,12 @@ export function mountHokuAtlas({select,onBegin,onContinue,onStory,onHome,documen
   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key)){
    const group=e.target.closest('#chars-grid,#atlas-destinations,#atlas-forms,.atlas-steps');if(!group)return;
    const buttons=[...group.querySelectorAll('button:not([disabled])')],i=buttons.indexOf(e.target.closest('button'));if(i<0)return;
-   const n=e.key==='Home'?0:e.key==='End'?buttons.length-1:(i+(e.key==='ArrowLeft'||e.key==='ArrowUp'?-1:1)+buttons.length)%buttons.length;
+   const vertical=e.key==='ArrowUp'||e.key==='ArrowDown';
+   const stride=vertical&&group.id==='chars-grid'
+    ? doc.defaultView.getComputedStyle(group).gridTemplateColumns.trim().split(/\s+/).length
+    : 1;
+   const delta=e.key==='ArrowLeft'||e.key==='ArrowUp'?-stride:stride;
+   const n=e.key==='Home'?0:e.key==='End'?buttons.length-1:(i+delta+buttons.length)%buttons.length;
    e.preventDefault();e.stopImmediatePropagation();buttons[n].focus();if(group.id==='chars-grid')buttons[n].click();
   }
  },true);

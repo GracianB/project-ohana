@@ -201,3 +201,158 @@ body.hoku-atlas-on #char-select{scroll-padding-block:16px 150px!important}body.h
   .atlas-welcome-lead { margin: 9px 0 12px; }
   .atlas-welcome-minor { margin-block-start: 2px; }
 }
+
+/* The character stage is lit by the selected hero's own palette. */
+body.hoku-atlas-on #char-select {
+  background: #071522 !important;
+}
+body.hoku-atlas-on #char-select #hoku-atlas {
+  background: none;
+  --atlas-surface: #0d2030;
+  --atlas-line: #9fc5ce35;
+}
+#hoku-atlas .atlas-header { padding-block: 12px; }
+#hoku-atlas .atlas-header nav { gap: 8px; }
+#hoku-atlas .atlas-header nav button { padding-inline: 12px; }
+#hoku-atlas .atlas-steps {
+  width: fit-content;
+  max-width: 100%;
+  gap: 4px;
+  flex-wrap: nowrap;
+  margin-block: 13px 0;
+  padding: 4px;
+  border: 1px solid var(--atlas-line);
+  border-radius: 12px;
+  background: #091b29;
+}
+body.hoku-atlas-on #char-select #hoku-atlas .atlas-steps button {
+  min-height: 44px;
+  padding: 8px 17px;
+  border: 0;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+body.hoku-atlas-on #char-select #hoku-atlas .atlas-steps .is-current {
+  background: #253745;
+  color: #ffe4ad;
+}
+#hoku-atlas .atlas-steps button span { color: #f5cb86; }
+#hoku-atlas .atlas-main {
+  grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 48px);
+  min-height: 0;
+  padding-block: 12px 18px;
+}
+#hoku-atlas .atlas-stage-wrap {
+  min-height: 395px;
+  border: 1px solid var(--atlas-line);
+  border-radius: 20px;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 50% 46%, color-mix(in srgb, var(--atlas-accent) 24%, transparent), transparent 57%),
+    linear-gradient(0deg, #071522ee, transparent 25%),
+    url("assets/startup/hoku-showroom.webp") 50% 63% / cover,
+    #122939;
+}
+#hoku-atlas #atlas-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+}
+#hoku-atlas .atlas-stage-caption {
+  inset: auto 18px 16px;
+  pointer-events: none;
+  font: 600 12px/1.3 Outfit, sans-serif;
+  letter-spacing: .035em;
+  color: #f4e8d0;
+}
+#atlas-stage-index,
+#atlas-stage-form {
+  padding: 6px 9px;
+  border: 1px solid #d1dfe22e;
+  border-radius: 6px;
+  background: #091827de;
+}
+#hoku-atlas .atlas-choice { padding: 4px 0; }
+#hoku-atlas .atlas-choice .atlas-eyebrow { margin-bottom: 9px; }
+body.hoku-atlas-on #char-select #hoku-atlas .atlas-choice h2 {
+  margin-bottom: 9px;
+  color: #fff1d4;
+  font: 650 clamp(2rem, 5vw, 4.35rem)/.98 Georgia, serif;
+  letter-spacing: -.05em;
+}
+#hoku-atlas #atlas-description {
+  min-height: 0;
+  margin-bottom: 12px;
+}
+#atlas-hero-profile {
+  width: fit-content;
+  margin: 0 0 14px;
+  padding: 5px 9px;
+  border: 1px solid color-mix(in srgb, var(--atlas-accent) 42%, transparent);
+  border-radius: 6px;
+  color: #f8e4bf;
+  background: color-mix(in srgb, var(--atlas-accent) 13%, #0a1a27);
+  font: 500 .78rem/1.4 Outfit, sans-serif;
+}
+body.hoku-atlas-on #char-select #hoku-atlas #chars #chars-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+}
+body.hoku-atlas-on #char-select #hoku-atlas #chars #chars-grid .char-card {
+  height: 94px !important;
+  border-radius: 10px !important;
+  background: radial-gradient(ellipse at 50% 26%, color-mix(in srgb, var(--hero-card-accent) 18%, #132535), #0d2030 76%) !important;
+}
+body.hoku-atlas-on #char-select #hoku-atlas #chars #chars-grid .char-card:is(.selected,[aria-pressed=true]) {
+  border-color: var(--hero-card-accent) !important;
+  box-shadow: inset 0 -3px 0 var(--hero-card-accent) !important;
+  background: radial-gradient(ellipse at 50% 28%, color-mix(in srgb, var(--hero-card-accent) 35%, #132535), #132a3a 80%) !important;
+}
+body.hoku-atlas-on #char-select #hoku-atlas #chars #chars-grid .char-card:hover {
+  border-color: var(--hero-card-accent) !important;
+}
+#hoku-atlas .atlas-hero-label {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#hoku-atlas #atlas-details { margin-top: 12px; padding-top: 8px; }
+#hoku-atlas #atlas-feedback:empty { display: none; }
+#hoku-atlas .atlas-confirm {
+  min-height: 72px;
+  padding-block: 10px max(10px, env(safe-area-inset-bottom));
+  background: #0a1b29f7;
+}
+#hoku-atlas .atlas-destination,
+#hoku-atlas .atlas-form { text-wrap: pretty; }
+
+@media (max-width: 960px) {
+  body.hoku-atlas-on #char-select #hoku-atlas #chars #chars-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 640px) {
+  #hoku-atlas .atlas-header nav { gap: 3px; }
+  #hoku-atlas .atlas-steps {
+    width: 100%;
+    margin-block-start: 8px;
+  }
+  body.hoku-atlas-on #char-select #hoku-atlas .atlas-steps button {
+    flex: 1;
+    padding-inline: 4px;
+  }
+  #hoku-atlas .atlas-main { gap: 15px; padding-block: 8px 12px; }
+  #hoku-atlas .atlas-stage-wrap {
+    height: clamp(174px, 24svh, 230px);
+    min-height: 0;
+    border-radius: 14px;
+  }
+  #hoku-atlas .atlas-stage-caption { inset: auto 10px 9px; }
+  body.hoku-atlas-on #char-select #hoku-atlas #chars #chars-grid .char-card {
+    height: 73px !important;
+  }
+}
