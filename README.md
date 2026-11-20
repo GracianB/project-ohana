@@ -1,3 +1,5 @@
+[Validación de ohana-812](docs/V812-VALIDATION.json) · [Publicación](docs/V812-PUBLICATION.json)
+
 [Validación de ohana-811](docs/V811-VALIDATION.json) · [Publicación](docs/V811-PUBLICATION.json)
 
 [Validación de ohana-810](docs/V810-VALIDATION.json) · [Publicación](docs/V810-PUBLICATION.json)

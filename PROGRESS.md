@@ -1,3 +1,5 @@
+ohana-812 · Señales de ataque propias para los doce personajes, contacto confirmado y remates ligados a su alcance real.
+
 ohana-811 · Santuario de Yomi, corrientes visibles de Nácar y cuatro transiciones propias de IA.
 
 ohana-810 · Seda y joyería de Yomi, filamentos de Nácar y circuitos de IA que muestran los datos capturados.

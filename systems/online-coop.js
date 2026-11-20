@@ -1385,7 +1385,7 @@ class OnlineCoop {
         drawKiloAbilityEcho(ctx,peerFx.kiloFx,game.cam,t,{...this.remote,w:this.remote.w||24,h:this.remote.h||34});
       }
       for(const pr of peerFx.projectiles)drawProjectile(ctx,pr,game.cam,t);
-      for(const slash of peerFx.slashes)drawSlash(ctx,slash,game.cam);
+      for(const slash of peerFx.slashes)drawSlash(ctx,slash,game.cam,!!game.reduceMotion);
       for(const bolt of peerFx.bolts)drawBolt(ctx,bolt,game.cam,t);
     }
     if(this.hasFreshCombat(game)){

@@ -1,3 +1,4 @@
+import {attackImpact} from './combat-fx.js';
 import {drawSanctuaryYarn,drawSanctuaryPurr} from './michi-sanctuary-spells.js';
 import {HERO_IDENTITY} from '../characters/identity-v2.js';
 import {showBlockedHit} from './combat-feedback.js';
@@ -198,6 +199,10 @@ syncState(p);
 if(index===3)p._powerPerformance={index,start:Number(game.t)||0};
 p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo };
 sfx(id);
+const facing=p.facing||1;
+game.combatFx?.add(cx(p)+facing*(index===0?14:6),cy(p),def.color,{
+ hero:p.id,slot:index,dir:facing,seed:game.t,
+});
 game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
 
 if (index === 2 && !['chispin','kilo'].includes(p.id) && !(p.id === "stitcho" && id === "caos")) {
@@ -1123,6 +1128,7 @@ d=Math.max(0,before-e.hp);
 if(!d){showBlockedHit(g,e);return false;}
 if(!o.noCharge)chargeFinisher(g,Math.max(0,before-e.hp));
 g.onAbilityHit?.(e,d,o);
+attackImpact(g,e,{dir:Math.sign(o.kx||0),color:o.color,crit:o.crit||d>=40});
 e.flash = Math.max(e.flash || 0, 14);
 
 if (e.boss) {
@@ -3696,35 +3702,33 @@ for (const e of f.list) {
 }
 },
 wisp: drawWisp,
-breath(ctx, f, cam, t) {
-if (f.x == null) return;
-const x = f.x - cam.x, y = f.y - cam.y;
-const k = Math.min(1, f.life / 6, f.age / 3);
-ctx.globalCompositeOperation = "lighter";
-const n = 16;
-for (let i = n; i >= 0; i--) {
-  const u = i / n;
-  const px = x + f.f * u * f.len;
-  const py = y + Math.sin(t * 0.7 + i * 1.3) * u * 9;
-  const r = 5 + u * (18 + f.len * 0.08);
-  ctx.globalAlpha = (0.55 - u * 0.3) * k;
-  ctx.fillStyle = u < 0.25 ? "#fff3b0" : u < 0.55 ? "#ffb347" : u < 0.8 ? "#ff6a2a" : "#d8301a";
-  ctx.beginPath();
-  const jitter = 0.85 + 0.3 * deterministicUnit(f.age * 3.17 + i * 7.13 + f.len * 0.019);
-  ctx.arc(px, py, r * jitter, 0, TAU);
-  ctx.fill();
-}
- // The J attack has a visible little fireball at the cone's advancing tip.
- // It is presentation only: existing cone damage and cooldown are unchanged.
- const reach = Math.min(1, Math.max(.05, (f.age - 1) / 10));
- const bx = x + f.f * f.len * (.22 + .75 * reach);
- const by = y + Math.sin(t * .25) * 4;
- ctx.globalAlpha = .92 * k;
- ctx.fillStyle = "#ff6526";
- ctx.beginPath(); ctx.arc(bx, by, 11 + Math.min(5, f.len * .015), 0, TAU); ctx.fill();
- ctx.fillStyle = "#fff3ae";
- ctx.beginPath(); ctx.arc(bx - f.f * 3, by - 2, 6.5, 0, TAU); ctx.fill();
-ctx.globalCompositeOperation = "source-over";
+breath(ctx,f,cam,t,g){
+ if(!Number.isFinite(f.x+f.y+f.len))return;
+ const strength=Math.min(1,f.life/6,f.age/3);
+ const phase=g?.reduceMotion?0:t;
+ const len=f.len,base=16,edge=base+len*.42;
+ ctx.save();ctx.translate(f.x-cam.x,f.y-cam.y);ctx.scale(f.f||1,1);
+ // The outer lip follows the cone used for hit tests.
+ ctx.fillStyle='#e24526';ctx.globalAlpha=.42*strength;
+ ctx.beginPath();ctx.moveTo(0,-base);
+ ctx.quadraticCurveTo(len*.64,-(base+len*.27),len,-edge);
+ ctx.lineTo(len,edge);
+ ctx.quadraticCurveTo(len*.64,base+len*.27,0,base);ctx.closePath();ctx.fill();
+ for(let i=0;i<3;i++){
+  const tip=len*(.91-i*.18),width=(edge*.66-i*8);
+  const bend=Math.sin(phase*.47+i*1.8)*width*.23;
+  ctx.fillStyle=['#ff712d','#ffc75e','#fff3b3'][i];ctx.globalAlpha=(.56+i*.09)*strength;
+  ctx.beginPath();ctx.moveTo(0,-4-i);
+  ctx.bezierCurveTo(tip*.4,-width*.16,tip*.74,-width+bend,tip,bend);
+  ctx.bezierCurveTo(tip*.73,width+bend,tip*.42,width*.15,0,4+i);ctx.closePath();ctx.fill();
+ }
+ if(!g?.reduceMotion)for(let i=0;i<7;i++){
+  const u=(phase*.047+i*.17)%1,xx=len*(.31+u*.66);
+  const yy=(i%2?-1:1)*u*edge*.69;
+  ctx.fillStyle='#fff1aa';ctx.globalAlpha=(1-u)*strength*.86;
+  ctx.beginPath();ctx.arc(xx,yy,1.2+u*1.6,0,TAU);ctx.fill();
+ }
+ ctx.restore();
 },
 gust(ctx, f, cam, t) {
 const k = 1 - f.life / 24;
@@ -4005,7 +4009,8 @@ const h = hand(p);
 const x0 = h.x - cam.x, y0 = h.y - cam.y;
 let x1 = f.ax - cam.x, y1 = f.ay - cam.y;
 if (f.miss) { const k = 1 - f.life / 14; x1 = x0 + (x1 - x0) * Math.sin(k * Math.PI); y1 = y0 + (y1 - y0) * Math.sin(k * Math.PI); }
-const mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + 14 + Math.sin(t * 0.4) * 6;
+const phase=g?.reduceMotion?0:t;
+const mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + 14 + Math.sin(phase * 0.4) * 6;
 ctx.lineCap = "round";
 ctx.strokeStyle = "#c89a1a";
 ctx.lineWidth = 7;
@@ -4021,9 +4026,17 @@ for (let i = 1; i < 4; i++) {
   const u = i / 4;
   const bx = (1 - u) * (1 - u) * x0 + 2 * (1 - u) * u * mx + u * u * x1;
   const by = (1 - u) * (1 - u) * y0 + 2 * (1 - u) * u * my + u * u * y1;
-  ctx.beginPath(); ctx.ellipse(bx, by + 5 + ((t + i * 4) % 8) * 0.6, 2.2, 3.2, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(bx, by + 5 + ((phase + i * 4) % 8) * 0.6, 2.2, 3.2, 0, 0, TAU); ctx.fill();
 }
-ctx.beginPath(); ctx.arc(x1, y1, 6, 0, TAU); ctx.fill();
+ctx.beginPath();ctx.arc(x1,y1,6,0,TAU);ctx.fill();
+if(!f.miss){
+ ctx.strokeStyle='#fff0be';ctx.lineWidth=1.5;ctx.beginPath();
+ ctx.arc(x1,y1,10,0,TAU);ctx.stroke();
+ for(const side of [-1,1]){
+  ctx.beginPath();ctx.moveTo(x1+side*8,y1-4);ctx.lineTo(x1+side*13,y1);
+  ctx.lineTo(x1+side*8,y1+4);ctx.stroke();
+ }
+}
 },
 heat(ctx, f, cam, t) {
 const x = Number.isFinite(f.x) ? f.x - cam.x : -cam.x;
@@ -4144,20 +4157,33 @@ if(f.lantern){
  ctx.restore();return;
 }
 if(charging){
-  ctx.globalAlpha=.18+.3*k;ctx.strokeStyle="#4ff0c8";ctx.lineWidth=1.5;ctx.setLineDash?.([6,6]);
-  ctx.strokeRect(0,-f.half,f.len,f.half*2);ctx.setLineDash?.([]);
+  ctx.globalAlpha=.28+.3*k;ctx.strokeStyle="#4ff0c8";ctx.lineWidth=1.5;
+  const corners=[[-16,1],[f.len,-1]];
+  for(const [x,dir] of corners)for(const side of [-1,1]){
+   ctx.beginPath();ctx.moveTo(x,side*(f.half-9));ctx.lineTo(x,side*f.half);
+   ctx.lineTo(x+dir*18,side*f.half);ctx.stroke();
+  }
+  ctx.globalAlpha=.18+.28*k;ctx.setLineDash?.([5,7]);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(f.len*k,0);ctx.stroke();ctx.setLineDash?.([]);
   for(let i=0;i<6;i++){const a=i*TAU/6+(t||0)*.12,r=34*(1-k)+6;ctx.globalAlpha=.7;ctx.fillStyle=i%2?"#ff7f6e":"#4ff0c8";ctx.fillRect(18+Math.cos(a)*r-2,Math.sin(a)*r-2,4,4);}
   // magic: a vertical rune circle compiles at the muzzle
   ctx.globalAlpha=.3+.5*k;ctx.strokeStyle="#ffd56b";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(16,0,8,f.half+6,0,0,TAU);ctx.stroke();
   for(let i=0;i<4;i++)yomiRune(ctx,16,-f.half+i*(f.half*2/3),.55,i,"#ffd56b");
 } else {
-  const w=f.half*(.55+.45*k);
-  ctx.globalAlpha=.3*k;ctx.fillStyle="#4ff0c8";ctx.fillRect(0,-f.half,f.len,f.half*2);
-  ctx.globalAlpha=.85*k;ctx.fillRect(0,-w*.6,f.len,w*1.2);
-  ctx.globalAlpha=k;ctx.fillStyle="#eafffa";ctx.fillRect(0,-w*.18,f.len,w*.36);
-  ctx.globalAlpha=.8*k;ctx.fillStyle="#ff7f6e";
-  for(let i=0;i<7;i++){const xx=(i*53+(t||0)*9)%f.len;ctx.fillRect(xx,(i%2?-1:1)*w*.7-2,5,4);}
-  ctx.globalAlpha=.7*k;for(let i=0;i<4;i++)yomiRune(ctx,(i*79+(t||0)*6)%f.len,0,.7,i,"#0d1430");
+  const w=f.half*(.55+.45*k),len=f.len;
+  ctx.globalAlpha=.52*k;ctx.fillStyle='#70ffe5';ctx.beginPath();
+  ctx.moveTo(0,0);ctx.lineTo(len*.16,-w*.69);ctx.lineTo(len*.84,-w);
+  ctx.lineTo(len,0);ctx.lineTo(len*.84,w);ctx.lineTo(len*.16,w*.69);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle='#ecfffb';ctx.globalAlpha=.88*k;ctx.beginPath();
+  ctx.moveTo(0,0);ctx.lineTo(len*.24,-w*.19);ctx.lineTo(len*.9,-w*.31);
+  ctx.lineTo(len,0);ctx.lineTo(len*.9,w*.31);ctx.lineTo(len*.24,w*.19);
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#c2b5ff';ctx.lineWidth=1.35;ctx.globalAlpha=.8*k;
+  for(let i=1;i<=4;i++){
+   const x=len*i/5,bend=(i%2?1:-1)*w*.51;
+   ctx.beginPath();ctx.moveTo(x-len*.07,bend);ctx.lineTo(x,0);ctx.lineTo(x+len*.085,-bend);ctx.stroke();
+  }
 }
 ctx.restore();
 },
@@ -4518,9 +4544,9 @@ ctx.stroke();
 ctx.restore();
 }
 
-export function drawSlash(ctx, s, cam) {
+export function drawSlash(ctx, s, cam, reduceMotion=false) {
 const k = Math.max(0.001, s.life / s.max);
-const open = 1 - k;
+const open = reduceMotion?.54:1-k;
 const fade = k < 0.28 ? k / 0.28 : 1;
 const x = s.x - cam.x;
 const y = s.y - cam.y;
@@ -4533,7 +4559,31 @@ ctx.save();
 ctx.translate(x, y);
 ctx.scale(s.facing || 1, 1);
 
-if (kind === "claws") {
+if(kind==='tide'||kind==='lantern'||kind==='vector'){
+ const len=reach*(.44+.48*open);
+ ctx.globalAlpha=.78*fade;ctx.lineWidth=2.55;ctx.strokeStyle=col;
+ if(kind==='tide'){
+  ctx.beginPath();ctx.moveTo(0,9);
+  ctx.bezierCurveTo(len*.44,15,len*.42,-20,len*.8,-16);
+  ctx.quadraticCurveTo(len,-12,len,0);ctx.stroke();
+  for(let i=0;i<5;i++){
+   const x=len*(.52+i*.095),y=-7+(i%2?10:0);
+   ctx.beginPath();ctx.arc(x,y,2+i%3,0,TAU);ctx.stroke();
+  }
+ }else if(kind==='lantern'){
+  ctx.fillStyle='#ef8757';ctx.globalAlpha=.62*fade;
+  ctx.beginPath();ctx.moveTo(2,9);ctx.quadraticCurveTo(len*.52,-34,len,-7);
+  ctx.quadraticCurveTo(len*.49,-15,2,9);ctx.fill();
+  ctx.strokeStyle='#fff0bd';ctx.globalAlpha=.86*fade;
+  ctx.beginPath();ctx.moveTo(len*.21,4);ctx.quadraticCurveTo(len*.6,-23,len,-8);ctx.stroke();
+  drawLanternSeal(ctx,len*.69,-4,-.28,.55);
+ }else{
+  ctx.fillStyle='#91f9e5';ctx.globalAlpha=.44*fade;
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(len*.63,-16);ctx.lineTo(len,0);ctx.lineTo(len*.63,16);
+  ctx.closePath();ctx.fill();ctx.globalAlpha=.9*fade;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(len*.34,-7);ctx.lineTo(len*.71,0);ctx.lineTo(len*.34,7);ctx.stroke();
+ }
+}else if (kind === "claws") {
 for (let i = 0; i < 4; i++) {
   const rr = reach * (0.54 + i * 0.15);
   const clawCol = i === 3 ? "#b88aff" : i === 1 ? "#9ef8ff" : col;

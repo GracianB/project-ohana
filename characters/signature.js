@@ -28,7 +28,7 @@ export function signature(id) {
 }
 
 const HITS = {
- nacar:{name:'Marea',kind:'paw',color:'#9de8e2'},
+ nacar:{name:'Corte de espuma',kind:'tide',color:'#9de8e2'},
   kilo:    { name: "Nota",     kind: "note",  color: "#ff9ab0" },
   stitcho: { name: "Zarpa",    kind: "claws", color: "#7eb6ff" },
   chispin: { name: "Chispín", kind: "spark", color: "#ffe14a" },
@@ -37,7 +37,7 @@ const HITS = {
   dino:    { name: "Mordisco", kind: "bite",  color: "#8ee07a" },
   frita:   { name: "Corte",    kind: "slice", color: "#f0b43a" },
   pizza:   { name: "Porcion",  kind: "wedge", color: "#ffb43a" },
-  yomi:    { name: "Palmada de datos", kind: "fang",  color: "#4ff0c8" }, ia:{ name: "Palmada de datos", kind: "fang",  color: "#4ff0c8" },
+  yomi:    { name: "Barrido de farol", kind: "lantern", color: "#ffd394" }, ia:{ name: "Pulso corto", kind: "vector", color: "#4ff0c8" },
   cuerno:  { name: "Puya",     kind: "poke",  color: "#ffe9a8" },
 };
 

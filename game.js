@@ -174,7 +174,7 @@ import { Passives } from "./systems/passives.js";
 import { masteryOf, playerMasteryPlatforms, masterySnapshot } from "./systems/hero-mastery.js";
 import { HAZARD_TYPES, hazardContainsX, hazardTrigger, drawHazards } from "./systems/hazards.js";
 import { Magic } from "./systems/magic.js";
-import { CombatFX, combatTier } from "./systems/combat-fx.js";
+import { CombatFX, combatTier, attackImpact } from "./systems/combat-fx.js";
 import { damageFeedback,showBlockedHit } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { bossAttackCue } from "./systems/boss-v94-readability.js";
@@ -1366,19 +1366,8 @@ game.nums.add(
 );
 }
 
-game.combatFx?.add(
-e.x + e.w / 2,
-e.y + e.h / 2,
-crit ? "#ffe66a" : (p.color || "#fff"),
-{
-  tier: feedback.tier,
-  dir: face,
-  label: feedback.label,
-  seed: game.combo + (e.boss ? 11 : 0),
-}
-);
-
-punch(e.x, e.y, crit ? "#ffe66a" : p.color);
+attackImpact(game,e,{dir:face,color:crit?"#ffe66a":p.color,crit});
+punch(e.x, e.y, crit ? "#ffe66a" : p.color, face, false);
 earnKiloPetal(game, p._swing);
 const flow = registerCombatAction(game, "H", markAt(p.id, evo)?.name || "H");
 if (flow.label && flow.distinct >= 2) game._combatFlow = { ...game._combatFlow, label: flow.label };
@@ -1448,7 +1437,7 @@ const low = !!sig.low;
 const box = low
 ? { x: p.x - reach * 0.12, y: p.y + p.h * 0.42, w: p.w + reach, h: p.h * 0.7 }
 : { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
-const mouth = p.id === "dino" || p.id === "yomi";
+const mouth = p.id === "dino";
 const life = sig.heavy ? 20 : 16;
 const slash = {
 x: p.x + p.w / 2 + face * (low ? 8 : 18),
@@ -1724,14 +1713,14 @@ return;
 if (deepFall) dieVoid(p);
 }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
-function punch(x, y, color, dir = 1) {
+function punch(x, y, color, dir = 1, showMark = true) {
 game.shake = Math.min(18, game.shake + 6);
 addCombo(1);
 game.comboT = 480;
 addScore(10 * game.combo);
 const tier = combatTier(game.combo);
 const label = tier >= 4 ? "RÁFAGA" : tier === 3 ? "IMPACTO" : tier === 2 ? "COMBO" : "";
-game.combatFx?.add(x, y, color || "#fff", { tier, dir, label, seed: game.combo });
+if(showMark)game.combatFx?.add(x,y,color||"#fff",{tier,dir,label,seed:game.combo,hero:game.player?.id});
 game.fx.emit(x, y, { color, count: 10 + tier * 2, size: 3.2 + tier * 0.35, up: 1.2 + tier * 0.18 });
 game.fx.emit(x, y, { color: "#fff", count: 6 + tier * 2, size: 2, up: 1.8, speed: 4.4 + tier * 0.3, life: 16, star: true });
 if (tier >= 3) hitStop(tier === 4 ? 4 : 3);
@@ -3127,7 +3116,8 @@ if (pr.owner === "player") {
         pr.hit.add(e);
         if (pr.hit.size >= pr.pierce) pr.life = 0;
       } else pr.life = 0;
-      punch(e.x, e.y, pr.color); addPlayerXp(game.player, game.roomDef?.kiloEncounterVersion?1:3);
+      attackImpact(game,e,{x:pr.x+pr.w/2,y:pr.y+pr.h/2,dir:Math.sign(pr.vx),color:pr.color,crit:dmg>=40});
+      punch(e.x,e.y,pr.color,Math.sign(pr.vx),false); addPlayerXp(game.player, game.roomDef?.kiloEncounterVersion?1:3);
       game.nums.add(e.x, e.y, "" + dmg, "#ffe66a", dmg >= 40);
     }
   }
@@ -3439,7 +3429,7 @@ const peerCombatFresh=onlineCoop.hasFreshCombat(game);
 if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')for(const shot of game.coopFinalShots||[])if(shot.life>0)drawGauntletProjectile(ctx,shot,game.cam,t,game.reduceMotion||reduceMotion);
 for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t,game.reduceMotion||reduceMotion))drawProjectile(ctx, pr, game.cam, t);}
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
-for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
+for (const s of game.slashes || []) drawSlash(ctx,s,game.cam,game.reduceMotion||reduceMotion);
 onlineCoop.render(ctx, game, t);
 game.fx.render(ctx, game.cam, { width: viewportW, height: viewportH }); game.combatFx?.render(ctx, game.cam, game.reduceMotion || reduceMotion); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
 if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);

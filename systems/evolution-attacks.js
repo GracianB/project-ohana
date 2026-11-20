@@ -1,3 +1,4 @@
+import {drawHeroAttackGlyph} from './combat-fx.js';
 import {HERO_POWERS,beginHeroPower,updateHeroPowers,drawHeroPowers} from "./hero-combos.js";
 // World-space attacks. Rendering never applies damage; guests are not enemies.
 const TAU=Math.PI*2;
@@ -15,7 +16,7 @@ const THEMES={
  dino:['#c3ef91','fossil','Pisotón fósil','Estampida ancestral','quake','stampede'],
  frita:['#ffe6a1','salt','Abanico crujiente','Festival de freidoras','fan','fryer'],
  pizza:['#ffc774','slice','Porción boomerang','Rueda de porciones','return','orbit'],
- yomi:['#d5bcff','seal','Runa de código','Lluvia de respuestas','cross','spirits'], ia:['#d5bcff','seal','Runa de código','Lluvia de respuestas','cross','spirits'],
+ yomi:['#ffba80','seal','Paso de farol','Tres ecos de lumbre','cross','spirits'], ia:['#7ff9e5','prism','Runa de código','Lluvia de respuestas','cross','spirits'],
  cuerno:['#d7f9fa','prism','Lanza de aurora','Lluvia de constelaciones','lance','constellation']
 };
 const DESCRIPTIONS={
@@ -126,6 +127,7 @@ export function updateEvolutionAttacks(g,hit,heal){
  s.fields=s.fields.filter(f=>f.life>0);
  for(const b of s.shots){
   b.age++;b.life--;const ox=b.x,oy=b.y;
+  b.prevX=ox;b.prevY=oy;
   if(b.kind==='return'&&b.age>24){b.vx+=(c.x-b.x)*.015;b.vy+=(c.y-b.y)*.015;}
   if(['chain','stampede','fan','comet'].includes(b.kind)){
    const t=targets(g,b.x,b.y,480).find(v=>!b.hit.has(v));
@@ -221,6 +223,17 @@ function drawField(ctx,f,cam,t,reduced){
  ctx.setLineDash(impact?[]:[6,5]);ctx.beginPath();ctx.arc(x,y,f.r,0,TAU);ctx.stroke();ctx.setLineDash([]);
  if(f.mode==='pounce'){
   for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x-f.r*.65,y-28+i*18);ctx.quadraticCurveTo(x,y-45+i*18,x+f.r*.65,y-12+i*18);ctx.stroke();}
+ }else if(f.mode==='constellation'&&f.id==='nacar'){
+  const open=impact?(reduced?.7:impact):.34;
+  ctx.globalAlpha=.38+open*.38;ctx.lineWidth=1.4;
+  for(let i=0;i<8;i++){
+   const a=i*TAU/8,dx=Math.cos(a),dy=Math.sin(a);
+   drawHeroAttackGlyph(ctx,f.id,x+dx*f.r*.76,y+dy*f.r*.76,7+open*4);
+   if(impact){
+    ctx.beginPath();ctx.moveTo(x+dx*f.r*.32,y+dy*f.r*.32);
+    ctx.quadraticCurveTo(x+dx*f.r*.7-dy*12,y+dy*f.r*.7+dx*12,x+dx*f.r,y+dy*f.r);ctx.stroke();
+   }
+  }
  }else if(['thunder','constellation'].includes(f.mode)){
   for(let i=0;i<4;i++)glyph(ctx,f.id,x+Math.cos(i*TAU/4)*f.r*.7,y+Math.sin(i*TAU/4)*f.r*.7,7,reduced?0:t);
   if(impact){ctx.globalAlpha=impact;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,y-f.r-130);ctx.lineTo(x-12,y-70);ctx.lineTo(x+10,y-75);ctx.lineTo(x,y);ctx.stroke();}
@@ -247,15 +260,47 @@ function drawDrone(ctx,d,cam,t,reduced){
   for(let i=0;i<3;i++){ctx.fillStyle=i===(reduced?1:Math.floor(t/6)%3)?'#fff6ae':'#6267b6';ctx.beginPath();ctx.arc(x-10+i*10,y+1,2,0,TAU);ctx.fill();}
  }ctx.restore();
 }
+function drawShotWake(ctx,b,cam,t,reduced){
+ const x=b.x-cam.x,y=b.y-cam.y;
+ if(!reduced&&Number.isFinite(b.prevX+b.prevY)){
+  const dx=b.x-b.prevX,dy=b.y-b.prevY;
+  const travel=Math.hypot(dx,dy);
+  if(travel>.1&&travel<70){
+   ctx.save();ctx.globalAlpha=.44;ctx.strokeStyle=THEMES[b.id][0];ctx.lineWidth=Math.max(1,b.r*.32);
+   ctx.beginPath();ctx.moveTo(x-dx*1.8,y-dy*1.8);ctx.quadraticCurveTo(x-dx*.7,y-dy*.85,x,y);ctx.stroke();
+   ctx.restore();
+  }
+ }
+ glyph(ctx,b.id,x,y,b.r+3,reduced?0:t);
+}
+
+function drawPowerBeam(ctx,b,cam,t,reduced){
+ const x=b.x-cam.x,y=b.y-cam.y,tx=b.tx-cam.x,ty=b.ty-cam.y;
+ const dx=tx-x,dy=ty-y,len=Math.hypot(dx,dy)||1;
+ const charge=clamp(b.life/10,0,1),color=THEMES[b.id][0];
+ ctx.save();ctx.globalAlpha=charge*.64;ctx.strokeStyle=color;ctx.lineWidth=4;
+ ctx.beginPath();ctx.moveTo(x,y);
+ if(b.id==='chispin'&&!reduced){
+  for(let i=1;i<7;i++){
+   const u=i/7,wobble=(i%2?1:-1)*Math.min(12,len*.08);
+   ctx.lineTo(x+dx*u-dy/len*wobble,y+dy*u+dx/len*wobble);
+  }
+ }else if(b.id==='yomi')ctx.quadraticCurveTo((x+tx)*.5,(y+ty)*.5-24,tx,ty);
+ ctx.lineTo(tx,ty);ctx.stroke();
+ ctx.strokeStyle='#fff7e2';ctx.lineWidth=1.15;ctx.stroke();
+ ctx.globalAlpha=charge;glyph(ctx,b.id,tx,ty,10,reduced?0:t);
+ ctx.restore();
+}
+
 export function drawEvolutionAttacks(ctx,g,cam,t,drawActor,roster){
  const s=g._evolutionAttacks;if(!s||s.owner!==g.player||s.room!==g.roomId)return;
  drawHeroPowers(ctx,g,cam);
  ctx.save();
  for(const f of s.fields)if(f.age>=0)drawField(ctx,f,cam,t,!!g.reduceMotion);
  ctx.globalAlpha=1;
- for(const b of s.shots)glyph(ctx,b.id,b.x-cam.x,b.y-cam.y,b.r+3,g.reduceMotion?0:t);
+ for(const b of s.shots)drawShotWake(ctx,b,cam,t,!!g.reduceMotion);
  for(const d of s.drones)drawDrone(ctx,d,cam,t,!!g.reduceMotion);
- for(const b of s.beams){ctx.globalAlpha=b.life/10;ctx.strokeStyle=THEMES[b.id][0];ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(b.x-cam.x,b.y-cam.y);ctx.lineTo(b.tx-cam.x,b.ty-cam.y);ctx.stroke();glyph(ctx,b.id,b.tx-cam.x,b.ty-cam.y,10,t);}
+ for(const b of s.beams)drawPowerBeam(ctx,b,cam,t,!!g.reduceMotion);
  ctx.globalAlpha=1;const a=s.guest;
  if(a){const def=roster.find(r=>r.id===a.id),e=tier(g.player),f=def?.forms[e];if(f){
   const x=a.x-cam.x,y=a.y-cam.y;

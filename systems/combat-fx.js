@@ -9,6 +9,74 @@ export function combatTier(combo = 1, crit = false) {
   return 0;
 }
 
+// Each fighter leaves a different mark. The points are in unit coordinates.
+const MARKS = {
+  kilo: ['#ffd36a', [[-.8,.5],[-.35,.5],[-.35,-.8],[.58,-.95],[.58,-.58],[-.35,-.42]]],
+  stitcho: ['#72b8ff', [[-.75,-.46],[.55,-.46],[.85,0],[.55,.46],[-.75,.46],[-.9,0],[-.75,-.46]]],
+  chispin: ['#fff27a', [[-.4,-.9],[.34,-.26],[-.1,-.15],[.54,.78],[-.55,.23],[-.18,.09],[-.4,-.9]]],
+  cat: ['#f4a4ef', [[-.75,.48],[-.52,-.48],[-.3,.2],[-.03,-.7],[.18,.2],[.53,-.5],[.73,.48],[0,.74],[-.75,.48]]],
+  dragon: ['#ff8750', [[-.68,.53],[-.8,-.05],[-.45,.17],[-.12,-.88],[.21,-.32],[.62,-.56],[.77,.15],[.4,.68],[-.68,.53]]],
+  dino: ['#c8ee74', [[-.84,-.52],[-.36,-.65],[-.07,-.28],[.3,-.61],[.74,-.38],[.64,.42],[.12,.61],[-.12,.18],[-.46,.65],[-.84,.2],[-.84,-.52]]],
+  frita: ['#ffe2a1', [[-.64,.69],[-.81,-.24],[-.55,-.77],[-.18,-.35],[.13,-.82],[.47,-.36],[.77,-.58],[.61,.6],[-.64,.69]]],
+  pizza: ['#ff9e66', [[-.82,-.54],[.74,0],[-.82,.54],[-.68,.12],[-.66,-.12],[-.82,-.54]]],
+  yomi: ['#ffc186', [[-.43,-.82],[.37,-.78],[.49,.55],[0,.83],[-.54,.56],[-.43,-.82],[.25,-.32],[-.25,-.12],[.22,.18],[-.19,.41]]],
+  cuerno: ['#ede3ff', [[-.91,.41],[.86,-.33],[.18,.47],[-.34,.68],[-.91,.41]]],
+  nacar: ['#81ffde', [[-.88,.08],[-.68,-.52],[-.2,-.74],[.49,-.56],[.87,.08],[.68,.32],[.42,.27],[.2,.67],[0,.3],[-.27,.62],[-.45,.27],[-.88,.08]]],
+  ia: ['#76ffe1', [[-.83,-.5],[-.36,-.5],[-.13,-.1],[.42,-.1],[.78,-.56],[.78,.56],[.42,.22],[-.13,.22],[-.37,.62],[-.83,.62]]],
+};
+
+export function attackImpact(game, target, {x, y, dir, color, crit = false} = {}) {
+  const player=game.player;
+  if(!game.combatFx || !player || !target)return;
+  const centerX=target.x+target.w/2,centerY=target.y+target.h/2;
+  const horizontal=dir||Math.sign(centerX-player.x-player.w/2)||player.facing||1;
+  const contactX=Number.isFinite(x)?clamp(x,target.x,target.x+target.w):centerX-horizontal*target.w*.22;
+  const contactY=Number.isFinite(y)?clamp(y,target.y,target.y+target.h):centerY;
+  if(!Number.isFinite(contactX+contactY))return;
+  game.combatFx.add(contactX,contactY,color||player.color,{
+    hero:player.id,dir:horizontal,tier:combatTier(game.combo,crit),seed:game.combo,
+  });
+}
+
+function mark(ctx,points,x,y,size,dir,angle){
+  const cos=Math.cos(angle),sin=Math.sin(angle);
+  ctx.beginPath();
+  points.forEach(([px,py],i)=>{
+    const xx=x+dir*size*(px*cos-py*sin),yy=y+size*(px*sin+py*cos);
+    if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy);
+  });
+  ctx.stroke();
+}
+
+export function drawHeroAttackGlyph(ctx,hero,x,y,size,dir=1,angle=0){
+  if(!Object.hasOwn(MARKS,hero))return;
+  const [accent,points]=MARKS[hero];
+  ctx.strokeStyle=accent;
+  mark(ctx,points,x,y,size,dir,angle);
+}
+
+function drawAttackMark(ctx,item,x,y,progress,reduceMotion,data){
+  const [accent,points]=data;
+  const fade=1-progress,slot=item.slot;
+  const size=(slot<0?11:9+slot*1.45)+item.tier*1.1;
+  const ease=reduceMotion?0:easeOut(progress);
+  ctx.lineWidth=2;
+  ctx.strokeStyle=accent;ctx.globalAlpha=fade*.9;
+  mark(ctx,points,x,y,size*(.73+ease*.44),item.dir,0);
+  if(reduceMotion)return;
+  // Echoes follow the cast direction. Close contact stays tight, defensive
+  // powers expand sideways and the three late powers climb away from the hero.
+  const travel=(6+Math.max(0,slot)*3)*ease;
+  const offsetY=slot>=3?travel*.65:0;
+  const offsetX=slot===1?0:item.dir*travel;
+  ctx.strokeStyle=item.color;ctx.lineWidth=1.2;
+  ctx.globalAlpha=fade*.53;
+  mark(ctx,points,x+offsetX,y-offsetY,size*(.89+ease*.51),item.dir,ease*.25);
+  if(slot>=2 || item.tier>=2){
+    ctx.strokeStyle=accent;ctx.globalAlpha=fade*.32;
+    mark(ctx,points,x-offsetX*.48,y+offsetY*.35,size*(1+ease*.55),item.dir,-ease*.22);
+  }
+}
 export class CombatFX {
   constructor() {
     this.items = [];
@@ -16,10 +84,11 @@ export class CombatFX {
 
   add(x, y, color = "#ffffff", opts = {}) {
     const tier = clamp(Number(opts.tier) || 0, 0, 4);
-    const max = 14 + tier * 5;
+    const slot = Number.isInteger(opts.slot)?opts.slot:-1;
+    const max = slot>=0?12+slot*2:14+tier*5;
     this.items.push({
       x, y,
-      color,
+      color, slot, hero:opts.hero,
       tier,
       life: max,
       max,
@@ -63,6 +132,11 @@ export class CombatFX {
         ctx.strokeStyle = item.color;
         ctx.fillStyle = item.color;
         ctx.lineWidth = 2 + item.tier * .45;
+        const identity=Object.hasOwn(MARKS,item.hero)?MARKS[item.hero]:null;
+        if(identity){
+          drawAttackMark(ctx,item,x,y,progress,reduceMotion,identity);
+          continue;
+        }
         if (reduceMotion) {
           // A steady impact mark: no orbiting shards, scale pulses or flashes.
           ctx.beginPath();
