@@ -1,3 +1,5 @@
+ohana-816 · 96 trazos propios en los remates I y cuatro mejoras comunes de dibujado.
+
 ohana-815 · Doce siluetas dibujadas para los remates I.
 
 ohana-814 · Doce remates I con ritmos, recorridos y respuestas de impacto propios.

@@ -1,4 +1,4 @@
-import {drawReturningSlice} from './remate-art.js';
+import {drawReturningSlice,drawRemateDetail} from './remate-art.js';
 import {drawHeroAttackGlyph,drawAttackWindow} from './combat-fx.js';
 import {HERO_POWERS,beginHeroPower,updateHeroPowers,drawHeroPowers} from "./hero-combos.js";
 // World-space attacks. Rendering never applies damage; guests are not enemies.
@@ -130,6 +130,7 @@ export function updateEvolutionAttacks(g,hit,heal){
  for(const b of s.shots){
   b.age++;b.life--;const ox=b.x,oy=b.y;
   b.prevX=ox;b.prevY=oy;
+  if(b.contact&&b.age-b.contact.age>=10)b.contact=null;
   if(b.remate&&b.age>=19){
    if(!b.returning){b.returning=true;b.hit.clear();}
    const dx=c.x-b.x,dy=c.y-b.y,dist=Math.hypot(dx,dy)||1;
@@ -147,7 +148,9 @@ export function updateEvolutionAttacks(g,hit,heal){
   for(const t of targets(g,b.x,b.y,90)){
    if(b.hit.has(t))continue;const q=center(t),dx=b.x-ox,dy=b.y-oy,u=clamp(((q.x-ox)*dx+(q.y-oy)*dy)/(dx*dx+dy*dy||1),0,1);
    if(Math.hypot(q.x-ox-u*dx,q.y-oy-u*dy)>b.r+Math.max(t.w,t.h)*.5)continue;
-   b.hit.add(t);hit(g,t,b.damage,{color:THEMES[b.id][0],parts:5,hitstop:0,noCharge:!!b.noCharge});
+   b.hit.add(t);
+   const landed=hit(g,t,b.damage,{color:THEMES[b.id][0],parts:5,hitstop:0,noCharge:!!b.noCharge});
+   if(b.remate&&landed)b.contact={...q,age:b.age,face:Math.sign(dx)||1};
    if(b.kind==='comet')s.fields.push({id:b.id,x:b.x,y:b.y,age:0,life:25,r:80,damage:b.damage*.6,mode:'burst',next:1});
    if(!['lance','chain','return','stampede'].includes(b.kind)||b.hit.size>=4){b.life=0;break;}
   }
@@ -282,7 +285,16 @@ function drawShotWake(ctx,b,cam,t,reduced){
    ctx.restore();
   }
  }
- if(b.remate){drawReturningSlice(ctx,x,y,b,reduced);return;}
+ if(b.remate){
+  if(!reduced&&Number.isFinite(b.prevX+b.prevY)){
+   drawRemateDetail(ctx,'pizza',5,{x:b.prevX-cam.x,y:b.prevY-cam.y,r:24,face:Math.sign(b.vx)||1,alpha:.52});
+  }
+  if(b.contact)drawRemateDetail(ctx,'pizza',6,{
+   x:b.contact.x-cam.x,y:b.contact.y-cam.y,r:28,face:b.contact.face,alpha:1-(b.age-b.contact.age)/10,
+  });
+  drawReturningSlice(ctx,x,y,b,reduced);
+  return;
+ }
  glyph(ctx,b.id,x,y,b.r+3,reduced?0:t);
 }
 

@@ -1,4 +1,4 @@
-import {drawRemateSilhouette} from './remate-art.js';
+import {drawRemateSilhouette,drawRemateDetail} from './remate-art.js';
 import {drawHeroAttackGlyph,drawAttackWindow} from './combat-fx.js';
 const mid=e=>({x:e.x+e.w/2,y:e.y+e.h/2});
 const living=e=>e&&e.hp>0&&!e.dying&&!e.fell;
@@ -60,7 +60,7 @@ export function updateHeroPowers(g,s,hit,color){
   if(!landed)return false;
   m.hit.add(e);
   if(m.index===4||m.id==='kilo'){
-   m.impacts||=[];if(m.impacts.length<16)m.impacts.push({...mid(e),life:12});
+   m.impacts||=[];if(m.impacts.length<16)m.impacts.push({...mid(e),life:12,face:m.face});
   }
   if(m.id==='cat')e._lunarMarkUntil=(g.t||0)+360;
   if(m.id==='stitcho'&&m.index===4){
@@ -167,6 +167,8 @@ function drawKiloPower(ctx,g,cam,m,x,y,p){
    ctx.beginPath();
   }
  else{
+   if(m.age<7)drawRemateDetail(ctx,'kilo',0,{x:x+m.face*25,y,r:54,face:m.face,alpha:.8});
+   ctx.beginPath();
    const strike=m.age>=7&&m.age<=20,reach=strike?70:34,tx=x+m.face*25;
    ctx.globalAlpha=strike?.85:.5;ctx.strokeStyle=strike?'#ffe39a':'#e9a5bd';ctx.lineWidth=strike?4:2;
    ctx.ellipse(tx,y,reach*.65,reach,strike?m.face*.3:0,m.face>0?-1.4:1.74,m.face>0?1.4:4.54);
@@ -174,17 +176,19 @@ function drawKiloPower(ctx,g,cam,m,x,y,p){
     const u=i/4,xx=x-m.face*(18+u*50),yy=y+Math.sin(u*Math.PI)*12;
     ctx.fillStyle=i%2?'#ffd998':'#efb1bd';ctx.fillRect(xx,yy,4,2);
    }
+   ctx.stroke();
+   if(m.age>20)drawRemateDetail(ctx,'kilo',7,{x,y,r:45,face:m.face,alpha:.53*m.life/4});
    if(strike){
-    ctx.stroke();
     ctx.globalAlpha=g.reduceMotion?.64:.42+(20-m.age)*.032;ctx.lineWidth=2.3;
     drawRemateSilhouette(ctx,'kilo',{x:tx,y,r:70,face:m.face,reduced:!!g.reduceMotion});
     ctx.beginPath();
+    if(!g.reduceMotion)drawRemateDetail(ctx,'kilo',5,{x:m.start.x-cam.x,y:m.start.y-cam.y,r:55,face:m.face,alpha:.59});
    }
   }
- ctx.stroke();
  for(const impact of m.impacts||[]){
   ctx.globalAlpha=impact.life/12;ctx.strokeStyle='#fff0b1';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);
   ctx.quadraticCurveTo((x+impact.x-cam.x)/2,y-40,impact.x-cam.x,impact.y-cam.y);ctx.stroke();
+  if(m.index===4)drawRemateDetail(ctx,'kilo',6,{x:impact.x-cam.x,y:impact.y-cam.y,r:34,alpha:impact.life/12});
  }
 }
 
@@ -235,7 +239,7 @@ function drawRemateWake(ctx,m,cam){
 
 function drawBurstMotion(ctx,m,x,y,reduced,cam){
  const tuning=REMATES[m.id];if(!tuning)return;
- const [windup,active,,,lead,r]=tuning;
+ const [windup,active,life,,lead,r]=tuning;
  const cx=x+m.face*lead;
  if(m.age<windup){
   drawAttackWindow(ctx,{x:cx,y,radius:r,color:'#d7f7e9',remaining:windup-m.age,total:windup});
@@ -248,8 +252,13 @@ function drawBurstMotion(ctx,m,x,y,reduced,cam){
   drawRemateSilhouette(ctx,m.id,{x:q.x-cam.x,y:q.y-cam.y,r:q.r,face:m.face,reduced});
  }
  if(!reduced&&m.age<=active+4)drawRemateWake(ctx,m,cam);
+ if(m.age<=active&&m.contact&&m.age>=windup){
+  const trail=m.trace?.[0]||m.start;
+  if(!reduced)drawRemateDetail(ctx,m.id,5,{x:trail.x-cam.x,y:trail.y-cam.y,r:r*.82,face:m.face,alpha:.61});
+ }else if(m.age>active)drawRemateDetail(ctx,m.id,7,{x,y,r:r*.73,face:m.face,alpha:.55*m.life/(life-active)});
  for(const impact of m.impacts||[]){
   ctx.globalAlpha=impact.life/12;ctx.lineWidth=2;
+  drawRemateDetail(ctx,m.id,6,{x:impact.x-cam.x,y:impact.y-cam.y,r:36,face:impact.face||m.face,alpha:impact.life/12});
   if(!reduced&&impact.life>6){
    const size=7+(12-impact.life)*2;
    ctx.strokeStyle='#fff3cf';ctx.beginPath();
