@@ -287,10 +287,11 @@ function drawShotWake(ctx,b,cam,t,reduced){
  }
  if(b.remate){
   if(!reduced&&Number.isFinite(b.prevX+b.prevY)){
-   drawRemateDetail(ctx,'pizza',5,{x:b.prevX-cam.x,y:b.prevY-cam.y,r:24,face:Math.sign(b.vx)||1,alpha:.52});
+   drawRemateDetail(ctx,'pizza',5,{x:b.prevX-cam.x,y:b.prevY-cam.y,r:24,face:Math.sign(b.vx)||1,alpha:.52,progress:b.age/8});
   }
   if(b.contact)drawRemateDetail(ctx,'pizza',6,{
    x:b.contact.x-cam.x,y:b.contact.y-cam.y,r:28,face:b.contact.face,alpha:1-(b.age-b.contact.age)/10,
+   progress:(b.age-b.contact.age)/6,reduced,
   });
   drawReturningSlice(ctx,x,y,b,reduced);
   return;

@@ -1,3 +1,5 @@
+ohana-817 · [100 mejoras de animación de I](docs/V817-REMATES.md) · [Validación](docs/V817-VALIDATION.json) · [Publicación](docs/V817-PUBLICATION.json)
+
 ohana-816 · [Las 100 mejoras de los remates](docs/V816-REMATES.md) · [Validación](docs/V816-VALIDATION.json) · [Publicación](docs/V816-PUBLICATION.json)
 
 [Validación de ohana-815](docs/V815-VALIDATION.json) · [Publicación](docs/V815-PUBLICATION.json)

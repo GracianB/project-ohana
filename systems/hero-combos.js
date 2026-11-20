@@ -167,7 +167,7 @@ function drawKiloPower(ctx,g,cam,m,x,y,p){
    ctx.beginPath();
   }
  else{
-   if(m.age<7)drawRemateDetail(ctx,'kilo',0,{x:x+m.face*25,y,r:54,face:m.face,alpha:.8});
+   if(m.age<7)drawRemateDetail(ctx,'kilo',0,{x:x+m.face*25,y,r:54,face:m.face,alpha:.8,progress:m.age/7,reduced:g.reduceMotion});
    ctx.beginPath();
    const strike=m.age>=7&&m.age<=20,reach=strike?70:34,tx=x+m.face*25;
    ctx.globalAlpha=strike?.85:.5;ctx.strokeStyle=strike?'#ffe39a':'#e9a5bd';ctx.lineWidth=strike?4:2;
@@ -177,18 +177,18 @@ function drawKiloPower(ctx,g,cam,m,x,y,p){
     ctx.fillStyle=i%2?'#ffd998':'#efb1bd';ctx.fillRect(xx,yy,4,2);
    }
    ctx.stroke();
-   if(m.age>20)drawRemateDetail(ctx,'kilo',7,{x,y,r:45,face:m.face,alpha:.53*m.life/4});
+   if(m.age>20)drawRemateDetail(ctx,'kilo',7,{x,y,r:45,face:m.face,alpha:.53*m.life/4,progress:(m.age-20)/4,reduced:g.reduceMotion});
    if(strike){
     ctx.globalAlpha=g.reduceMotion?.64:.42+(20-m.age)*.032;ctx.lineWidth=2.3;
-    drawRemateSilhouette(ctx,'kilo',{x:tx,y,r:70,face:m.face,reduced:!!g.reduceMotion});
+    drawRemateSilhouette(ctx,'kilo',{x:tx,y,r:70,face:m.face,progress:(m.age-7)/9,reduced:!!g.reduceMotion});
     ctx.beginPath();
-    if(!g.reduceMotion)drawRemateDetail(ctx,'kilo',5,{x:m.start.x-cam.x,y:m.start.y-cam.y,r:55,face:m.face,alpha:.59});
+    if(!g.reduceMotion)drawRemateDetail(ctx,'kilo',5,{x:m.start.x-cam.x,y:m.start.y-cam.y,r:55,face:m.face,alpha:.59,progress:(m.age-7)/10});
    }
   }
  for(const impact of m.impacts||[]){
   ctx.globalAlpha=impact.life/12;ctx.strokeStyle='#fff0b1';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);
   ctx.quadraticCurveTo((x+impact.x-cam.x)/2,y-40,impact.x-cam.x,impact.y-cam.y);ctx.stroke();
-  if(m.index===4)drawRemateDetail(ctx,'kilo',6,{x:impact.x-cam.x,y:impact.y-cam.y,r:34,alpha:impact.life/12});
+  if(m.index===4)drawRemateDetail(ctx,'kilo',6,{x:impact.x-cam.x,y:impact.y-cam.y,r:34,face:impact.face||m.face,alpha:impact.life/12,progress:(12-impact.life)/7,reduced:g.reduceMotion});
  }
 }
 
@@ -249,16 +249,16 @@ function drawBurstMotion(ctx,m,x,y,reduced,cam){
   ctx.strokeStyle='#f5fff2';ctx.lineWidth=1.8;ctx.globalAlpha=.58;
   const a=m.face>0?-1.1:Math.PI-1.1;
   ctx.beginPath();ctx.arc(q.x-cam.x,q.y-cam.y,q.r,a,a+2.2);ctx.stroke();
-  drawRemateSilhouette(ctx,m.id,{x:q.x-cam.x,y:q.y-cam.y,r:q.r,face:m.face,reduced});
+  drawRemateSilhouette(ctx,m.id,{x:q.x-cam.x,y:q.y-cam.y,r:q.r,face:m.face,reduced,progress:(m.age-windup)/Math.max(1,(active-windup)*.7)});
  }
  if(!reduced&&m.age<=active+4)drawRemateWake(ctx,m,cam);
  if(m.age<=active&&m.contact&&m.age>=windup){
   const trail=m.trace?.[0]||m.start;
-  if(!reduced)drawRemateDetail(ctx,m.id,5,{x:trail.x-cam.x,y:trail.y-cam.y,r:r*.82,face:m.face,alpha:.61});
- }else if(m.age>active)drawRemateDetail(ctx,m.id,7,{x,y,r:r*.73,face:m.face,alpha:.55*m.life/(life-active)});
+  if(!reduced)drawRemateDetail(ctx,m.id,5,{x:trail.x-cam.x,y:trail.y-cam.y,r:r*.82,face:m.face,alpha:.61,progress:(m.age-windup)/Math.max(1,active-windup)});
+ }else if(m.age>active)drawRemateDetail(ctx,m.id,7,{x,y,r:r*.73,face:m.face,alpha:.55*m.life/(life-active),progress:(m.age-active)/(life-active),reduced});
  for(const impact of m.impacts||[]){
   ctx.globalAlpha=impact.life/12;ctx.lineWidth=2;
-  drawRemateDetail(ctx,m.id,6,{x:impact.x-cam.x,y:impact.y-cam.y,r:36,face:impact.face||m.face,alpha:impact.life/12});
+  drawRemateDetail(ctx,m.id,6,{x:impact.x-cam.x,y:impact.y-cam.y,r:36,face:impact.face||m.face,alpha:impact.life/12,progress:(12-impact.life)/7,reduced});
   if(!reduced&&impact.life>6){
    const size=7+(12-impact.life)*2;
    ctx.strokeStyle='#fff3cf';ctx.beginPath();
@@ -269,7 +269,7 @@ function drawBurstMotion(ctx,m,x,y,reduced,cam){
    ctx.stroke();
   }
   drawHeroAttackGlyph(ctx,m.id,impact.x-cam.x,impact.y-cam.y,
-   reduced?12:12+(12-impact.life)*1.18,m.face);
+   reduced?12:12+(12-impact.life)*1.18,impact.face||m.face);
  }
 }
 

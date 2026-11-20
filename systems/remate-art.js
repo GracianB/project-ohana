@@ -74,22 +74,55 @@ const details={
  ],
 };
 
-function ornament(ctx,points){
+// Origin offset and rotation for each of the eight strokes.
+// Local axes follow the direction of the attack, including left-facing moves.
+const entrances={
+ kilo:[[-8,10,-28],[-14,24,-26],[-10,-14,32],[-17,9,18],[-20,-19,38],[-11,13,-24],[0,14,-32],[-10,7,22]],
+ stitcho:[[-21,0,-10],[-22,20,31],[-17,-11,-26],[-19,15,32],[-26,-12,27],[-14,4,-16],[8,-7,44],[-20,2,-5]],
+ chispin:[[-25,9,-24],[-12,17,14],[-29,16,-13],[-20,13,25],[-34,27,-19],[-16,11,12],[9,-20,24],[-19,12,-14]],
+ cat:[[-6,16,-31],[-18,9,-18],[-26,12,10],[-31,6,19],[-36,23,29],[-8,16,-21],[-2,18,-22],[-13,9,15]],
+ dragon:[[-6,-17,34],[-15,-23,-30],[-22,-19,20],[-29,-23,-22],[-32,-28,-14],[-16,-15,35],[4,-22,-37],[-17,-13,-28]],
+ dino:[[-12,15,-8],[-10,24,-8],[-16,24,18],[-20,22,-12],[-24,31,11],[-18,21,-10],[3,25,13],[-19,25,12]],
+ frita:[[-10,18,-16],[-19,9,-9],[-21,11,7],[-10,23,44],[-29,19,-16],[-19,10,17],[0,19,40],[-23,8,9]],
+ pizza:[[-9,0,-23],[-9,3,12],[-12,-5,-21],[-8,8,61],[-20,0,-4],[-21,5,19],[11,0,-18],[-15,13,-34]],
+ yomi:[[-11,13,21],[-22,19,-17],[-27,12,12],[-13,-20,49],[-33,20,15],[-10,18,-27],[0,15,24],[-23,13,-15]],
+ ia:[[-19,0,16],[-24,10,-8],[-28,0,8],[-18,-9,12],[-35,0,5],[-16,0,-8],[12,0,45],[-22,10,7]],
+ cuerno:[[-5,14,24],[-24,11,-15],[-30,14,16],[-26,-9,-14],[-33,15,24],[-18,12,18],[0,-14,35],[-23,11,-16]],
+ nacar:[[-8,23,-17],[-21,25,-16],[-16,28,22],[-22,30,-36],[-24,34,18],[-9,16,-25],[0,25,-27],[-18,23,19]],
+};
+const layerDelay=[0,0,.08,.16,.24,0,0,0];
+const clamp=t=>Number.isFinite(t)?Math.min(1,Math.max(0,t)):0;
+
+function ornament(ctx,id,layer,progress,width){
+ const points=details[id][layer];
+ const delay=layerDelay[layer];
+ const phase=clamp((progress-delay)/(1-delay));
+ const eased=1-(1-phase)**3;
+ const [dx,dy,degrees]=entrances[id][layer];
+ ctx.save();
+ ctx.translate(dx*(1-eased)/100,dy*(1-eased)/100);
+ ctx.rotate(degrees*(1-eased)*Math.PI/180);
+ const segments=(points.length-2)/2;
+ const visible=segments*(.32+.68*eased);
  ctx.beginPath();
- for(let i=0;i<points.length;i+=2){
-  const x=points[i]/100,y=points[i+1]/100;
-  if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);
+ ctx.moveTo(points[0]/100,points[1]/100);
+ for(let segment=0;segment<Math.ceil(visible);segment++){
+  const i=segment*2,part=Math.min(1,visible-segment);
+  ctx.lineTo((points[i]+(points[i+2]-points[i])*part)/100,
+   (points[i+1]+(points[i+3]-points[i+1])*part)/100);
  }
- ctx.stroke();
+ const color=colors[id][1];
+ ctx.strokeStyle='#160f28';ctx.lineWidth=width*2.5;ctx.stroke();
+ ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
+ ctx.restore();
 }
 
-export function drawRemateDetail(ctx,id,layer,{x,y,r,face=1,alpha=1}){
- const points=details[id]?.[layer];
- if(!points||!(r>0)||!Number.isFinite(x+y+r+face)||alpha<=0)return;
+export function drawRemateDetail(ctx,id,layer,{x,y,r,face=1,alpha=1,progress=1,reduced=false}){
+ if(!details[id]?.[layer]||!(r>0)||!Number.isFinite(x+y+r+face+alpha)||alpha<=0)return;
  ctx.save();ctx.translate(x,y);ctx.scale(face*r,r);
  ctx.strokeStyle=colors[id][1];ctx.globalAlpha=alpha;
- ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=1.6/r;
- ornament(ctx,points);ctx.restore();
+ ctx.lineCap='round';ctx.lineJoin='round';
+ ornament(ctx,id,layer,reduced?1:progress,1.6/r);ctx.restore();
 }
 
 function drawSilhouette(c,id){
@@ -164,9 +197,9 @@ function drawSilhouette(c,id){
  }
 }
 
-export function drawRemateSilhouette(ctx,id,{x,y,r,face=1,progress=0,stage='active',reduced=false}){
+export function drawRemateSilhouette(ctx,id,{x,y,r,face=1,progress=1,stage='active',reduced=false}){
  const palette=colors[id];if(!palette||!(r>0)||!Number.isFinite(x+y+r+face))return;
- const k=Math.min(1,Math.max(0,progress));
+ const k=clamp(progress);
  const width=r*(reduced?1:stage==='windup'?.47+k*.22:1);
  const height=r*(id==='dino'?.83:1);
  ctx.save();
@@ -180,24 +213,24 @@ export function drawRemateSilhouette(ctx,id,{x,y,r,face=1,progress=0,stage='acti
  ctx.globalAlpha=stage==='windup'?.58:.93;ctx.stroke();
  ctx.strokeStyle=palette[1];ctx.lineWidth=1.5/r;
  if(stage==='windup'){
-  ctx.globalAlpha=.72;ornament(ctx,details[id][0]);
+  ctx.globalAlpha=.72;ornament(ctx,id,0,reduced?1:k,1.5/r);
  }else for(const layer of [1,2,3,4]){
   ctx.globalAlpha=layer===4?.94:.75;
-  ornament(ctx,details[id][layer]);
+  ornament(ctx,id,layer,reduced?1:k,1.5/r);
  }
  ctx.restore();
 }
 
 export function drawReturningSlice(ctx,x,y,b,reduced){
  ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(b.vy,b.vx));
- drawRemateSilhouette(ctx,'pizza',{x:0,y:0,r:21,reduced});
+ drawRemateSilhouette(ctx,'pizza',{x:0,y:0,r:21,reduced,progress:b.age/8});
  ctx.strokeStyle='#ffcf93';ctx.lineWidth=2.7;
  ctx.beginPath();ctx.moveTo(-12,-9);ctx.quadraticCurveTo(-17,0,-12,9);ctx.stroke();
  ctx.fillStyle='#cf6153';
  for(const [dx,dy] of [[-7,-4],[-5,5],[4,-1]]){
   ctx.beginPath();ctx.arc(dx,dy,2.15,0,TAU);ctx.fill();
  }
- drawRemateDetail(ctx,'pizza',b.returning?7:0,{x:0,y:0,r:21});
+ drawRemateDetail(ctx,'pizza',b.returning?7:0,{x:0,y:0,r:21,reduced,progress:b.returning?(b.age-19)/8:b.age/8});
  if(b.returning){
   ctx.strokeStyle='#fff3ca';ctx.lineWidth=1.5;
   ctx.beginPath();ctx.moveTo(-23,-7);ctx.lineTo(-17,0);ctx.lineTo(-23,7);ctx.stroke();

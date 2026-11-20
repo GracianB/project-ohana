@@ -1,3 +1,5 @@
+- **ohana-817** — 96 entradas de animación para I y cuatro mejoras comunes de legibilidad y accesibilidad. [Detalle](docs/V817-REMATES.md)
+
 ohana-816 · 96 trazos propios en los remates I y cuatro mejoras comunes de dibujado.
 
 ohana-815 · Doce siluetas dibujadas para los remates I.
