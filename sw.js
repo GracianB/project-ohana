@@ -1,4 +1,4 @@
-const VERSION = "ohana-814";
+const VERSION = "ohana-815";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./engine/foes/nacar-fauna.js?v=" + VERSION,
@@ -238,6 +238,7 @@ const PRECACHE = [
   "./systems/finisher.js?v=" + VERSION,
   "./systems/family-islands.js?v=" + VERSION,
   "./systems/hero-combos.js?v=" + VERSION,
+  "./systems/remate-art.js?v=" + VERSION,
   "./systems/campaign-enemies.js?v=" + VERSION,
   "./systems/jump-audit.js?v=" + VERSION,
   "./systems/nest-arena.js?v=" + VERSION,
@@ -757,7 +758,8 @@ const PRECACHE_REVISIONS = {
   "systems/local-map.js": "0c11c9f43973e981505ea26899588a6654f22f07",
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
   "systems/family-islands.js": "2cb7fa8e4cc3147c653a07c28614b14f5b30cb97",
-  "systems/hero-combos.js": "785c9649fea32d605b64c1d3e6f4d6baa86b1659",
+  "systems/hero-combos.js": "3000663de498e002bb9650f4e6cfd80ab5aaa1c9",
+  "systems/remate-art.js": "750efb8838efcadb82ae77ab2eee8a3a80a52b5b",
   "systems/campaign-enemies.js": "98048f0e0aee0ee08f6df9df935711455f860483",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
@@ -767,7 +769,7 @@ const PRECACHE_REVISIONS = {
   "systems/room-adventures.js": "d6d6ecc71fa637cea44185badadc53cf51358cd8",
   "systems/enemy-champions.js": "f72880201ac8b48c66707484e7e7f683f75f1c75",
   "characters/art/chispin-boss.js": "bbc51f322d783e84dbb9a5409262f73ace4dec7d",
-  "systems/evolution-attacks.js": "773c10ee9db996264fefebcb80a0cfa5ac64f1cb",
+  "systems/evolution-attacks.js": "a47751b801a22e4f29004e6a79605d0c272c779a",
   "systems/ohana-panorama.js": "656a7be154959ea303db6d089548897c2c5d919d",
   "systems/kilo-rhythm.js": "25bef17f62855a17721340f1cdb23a9aef943c4a",
   "characters/art/chispa-sprite.js": "93529865bdf7232a2e61a89d177877a25e6f35e6",
@@ -795,7 +797,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "56644a3576d80c1d2662d9940cff462e8256858d",
-  "index.html": "d1812224dc4ef5e264d52719db750e33ec3f7675",
+  "index.html": "1ddca80e5e175542acb1d5b92de1b48e5bf59733",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",

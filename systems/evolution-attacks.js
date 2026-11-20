@@ -1,3 +1,4 @@
+import {drawReturningSlice} from './remate-art.js';
 import {drawHeroAttackGlyph,drawAttackWindow} from './combat-fx.js';
 import {HERO_POWERS,beginHeroPower,updateHeroPowers,drawHeroPowers} from "./hero-combos.js";
 // World-space attacks. Rendering never applies damage; guests are not enemies.
@@ -281,21 +282,7 @@ function drawShotWake(ctx,b,cam,t,reduced){
    ctx.restore();
   }
  }
- if(b.remate){
-  ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(b.vy,b.vx));
-  ctx.fillStyle=b.returning?'#fff0b3':'#f59d68';ctx.strokeStyle='#853e2a';ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(16,0);ctx.quadraticCurveTo(-3,13,-12,9);
-  ctx.quadraticCurveTo(-14,0,-12,-9);ctx.quadraticCurveTo(-3,-13,16,0);ctx.fill();ctx.stroke();
-  ctx.fillStyle='#c84944';
-  for(const [dx,dy] of [[-6,-4],[-5,5],[3,0]]){
-   ctx.beginPath();ctx.arc(dx,dy,2.1,0,TAU);ctx.fill();
-  }
-  if(b.returning){
-   ctx.strokeStyle='#fffcec';ctx.lineWidth=1.4;
-   ctx.beginPath();ctx.moveTo(-18,-5);ctx.lineTo(-12,0);ctx.lineTo(-18,5);ctx.stroke();
-  }
-  ctx.restore();return;
- }
+ if(b.remate){drawReturningSlice(ctx,x,y,b,reduced);return;}
  glyph(ctx,b.id,x,y,b.r+3,reduced?0:t);
 }
 
