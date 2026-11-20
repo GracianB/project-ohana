@@ -1,3 +1,5 @@
+- **ohana-821** — Pantalla inicial ilustrada de Isla Hoku con faroles, adaptación vertical y movimiento reducido. [Detalle](docs/V821-STARTUP.md)
+
 - **ohana-820** — Diez tiempos con diez ajustes de animación para cada uno de los 60 ataques. [Detalle](docs/V820-ATTACKS.md)
 
 - **ohana-819** — 60 emblemas vectoriales, 60 perfiles interiores y cinco animaciones de lanzamiento. [Detalle](docs/V819-ATTACKS.md)

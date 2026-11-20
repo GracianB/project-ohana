@@ -1,4 +1,4 @@
-const VERSION = "ohana-820";
+const VERSION = "ohana-821";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./engine/foes/nacar-fauna.js?v=" + VERSION,
@@ -78,6 +78,7 @@ const PRECACHE = [
   "./systems/combat-coach.js?v=" + VERSION,
   "./systems/memory-pickup-art.js?v=" + VERSION,
   "./startup.css?v=" + VERSION,
+  "./assets/startup/lantern-island.webp",
   "./systems/cat-chapter-art-v609.js?v=" + VERSION,
   "./systems/cat-chapter.js?v=" + VERSION,
   "./systems/cat-encounters-v609.js?v=" + VERSION,
@@ -601,7 +602,8 @@ const PRECACHE_REVISIONS = {
   "systems/realm-signatures.js": "7b91d6b98c4738937c3c1cfe5ba525bc8a1b42e5",
   "systems/combat-coach.js": "532f2e7c614c726c98f236d08a5da8868043a469",
   "systems/memory-pickup-art.js": "f85aa423441c0efa82ee158246b2e64ea47cc216",
-  "startup.css": "546f7e36e6d84813d5498ed70e66ca8272f14db4",
+  "assets/startup/lantern-island.webp": "939a7729ceb3efdc6ebffb048488346bf7972a36",
+  "startup.css": "18a680ce4c694b527d9c673232f1995cab68fd3a",
   "systems/cat-chapter-art-v609.js": "ed3533278cc610e783375862a460455d5e496ff4",
   "systems/cat-chapter.js": "cd79f589ace62ec3a94aa7e8b6ac605f2c7f3538",
   "systems/cat-encounters-v609.js": "f9751ba094afc367e532d8e4873f0565f1e340a9",
@@ -797,7 +799,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "56644a3576d80c1d2662d9940cff462e8256858d",
-  "index.html": "50b74c130c005aa03306c6c693c4972a252b0004",
+  "index.html": "265a3663517e6d4315425a97df4f4165c3ac2488",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",

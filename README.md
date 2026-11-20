@@ -1,3 +1,5 @@
+ohana-821 · [Pantalla de carga de Isla Hoku](docs/V821-STARTUP.md) · [Validación](docs/V821-VALIDATION.json) · [Publicación](docs/V821-PUBLICATION.json)
+
 ohana-820 · [100 ajustes de animación por ataque](docs/V820-ATTACKS.md) · [Validación](docs/V820-VALIDATION.json) · [Publicación](docs/V820-PUBLICATION.json)
 
 ohana-819 · [Emblemas y animación del repertorio](docs/V819-ATTACKS.md) · [Validación](docs/V819-VALIDATION.json) · [Publicación](docs/V819-PUBLICATION.json)
