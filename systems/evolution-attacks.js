@@ -129,7 +129,12 @@ export function updateEvolutionAttacks(g,hit,heal){
  for(const b of s.shots){
   b.age++;b.life--;const ox=b.x,oy=b.y;
   b.prevX=ox;b.prevY=oy;
-  if(b.kind==='return'&&b.age>24){b.vx+=(c.x-b.x)*.015;b.vy+=(c.y-b.y)*.015;}
+  if(b.remate&&b.age>=19){
+   if(!b.returning){b.returning=true;b.hit.clear();}
+   const dx=c.x-b.x,dy=c.y-b.y,dist=Math.hypot(dx,dy)||1;
+   const speed=Math.min(17,dist);
+   b.vx=dx/dist*speed;b.vy=dy/dist*speed;
+  }else if(b.kind==='return'&&b.age>24){b.vx+=(c.x-b.x)*.015;b.vy+=(c.y-b.y)*.015;}
   if(['chain','stampede','fan','comet'].includes(b.kind)){
    const t=targets(g,b.x,b.y,480).find(v=>!b.hit.has(v));
    if(t){const q=center(t),a=Math.atan2(q.y-b.y,q.x-b.x);b.vx=b.vx*.91+Math.cos(a)*1.1;b.vy=b.vy*.91+Math.sin(a)*1.1;}
@@ -145,6 +150,7 @@ export function updateEvolutionAttacks(g,hit,heal){
    if(b.kind==='comet')s.fields.push({id:b.id,x:b.x,y:b.y,age:0,life:25,r:80,damage:b.damage*.6,mode:'burst',next:1});
    if(!['lance','chain','return','stampede'].includes(b.kind)||b.hit.size>=4){b.life=0;break;}
   }
+  if(b.returning&&Math.hypot(b.x-c.x,b.y-c.y)<8)b.life=0;
  }
  s.shots=s.shots.filter(b=>b.life>0);
  const a=s.guest;
@@ -274,6 +280,21 @@ function drawShotWake(ctx,b,cam,t,reduced){
    ctx.beginPath();ctx.moveTo(x-dx*1.8,y-dy*1.8);ctx.quadraticCurveTo(x-dx*.7,y-dy*.85,x,y);ctx.stroke();
    ctx.restore();
   }
+ }
+ if(b.remate){
+  ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(b.vy,b.vx));
+  ctx.fillStyle=b.returning?'#fff0b3':'#f59d68';ctx.strokeStyle='#853e2a';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(16,0);ctx.quadraticCurveTo(-3,13,-12,9);
+  ctx.quadraticCurveTo(-14,0,-12,-9);ctx.quadraticCurveTo(-3,-13,16,0);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#c84944';
+  for(const [dx,dy] of [[-6,-4],[-5,5],[3,0]]){
+   ctx.beginPath();ctx.arc(dx,dy,2.1,0,TAU);ctx.fill();
+  }
+  if(b.returning){
+   ctx.strokeStyle='#fffcec';ctx.lineWidth=1.4;
+   ctx.beginPath();ctx.moveTo(-18,-5);ctx.lineTo(-12,0);ctx.lineTo(-18,5);ctx.stroke();
+  }
+  ctx.restore();return;
  }
  glyph(ctx,b.id,x,y,b.r+3,reduced?0:t);
 }
