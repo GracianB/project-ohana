@@ -168,3 +168,42 @@ export class CombatFX {
     } finally {ctx.restore();}
   }
 }
+
+// A warning encodes time on a fixed boundary. Activation changes the line and
+// fill together so it can be read without relying on colour or animation.
+export function drawAttackWindow(ctx,{x,y,radius,halfWidth,color,remaining,total,active=false}) {
+  const width=halfWidth??radius;
+  if(!Number.isFinite(x+y+width)||width<=0)return;
+  const fraction=active?1:clamp(1-remaining/Math.max(1,total),0,1);
+  ctx.save();
+  ctx.strokeStyle=color;
+  ctx.globalAlpha=active?.82:.55;
+  ctx.lineWidth=active?2.4:1.2;
+  ctx.beginPath();
+  if(halfWidth!=null){ctx.moveTo(x-width,y);ctx.lineTo(x+width,y);}
+  else ctx.arc(x,y,width,0,Math.PI*2);
+  ctx.stroke();
+  if(active){
+    ctx.globalAlpha=.13;ctx.fillStyle=color;ctx.beginPath();
+    if(halfWidth!=null)ctx.rect(x-width,y-2,width*2,4);
+    else ctx.arc(x,y,width,0,Math.PI*2);
+    ctx.fill();
+  }else{
+    const ticks=8;
+    ctx.globalAlpha=.92;ctx.strokeStyle='#fff2cf';ctx.lineWidth=2;
+    ctx.beginPath();
+    for(let i=0;i<ticks;i++){
+      if(i+.5>=fraction*ticks)break;
+      if(halfWidth!=null){
+        const xx=x-width+(i+.5)*width*2/ticks;
+        ctx.moveTo(xx,y-7);ctx.lineTo(xx,y-2);
+      }else{
+        const a=i*Math.PI*2/ticks-Math.PI/2;
+        ctx.moveTo(x+Math.cos(a)*(width-5),y+Math.sin(a)*(width-5));
+        ctx.lineTo(x+Math.cos(a)*width,y+Math.sin(a)*width);
+      }
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}

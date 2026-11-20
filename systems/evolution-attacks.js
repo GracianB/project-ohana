@@ -1,4 +1,4 @@
-import {drawHeroAttackGlyph} from './combat-fx.js';
+import {drawHeroAttackGlyph,drawAttackWindow} from './combat-fx.js';
 import {HERO_POWERS,beginHeroPower,updateHeroPowers,drawHeroPowers} from "./hero-combos.js";
 // World-space attacks. Rendering never applies damage; guests are not enemies.
 const TAU=Math.PI*2;
@@ -120,6 +120,7 @@ export function updateEvolutionAttacks(g,hit,heal){
   if(f.age===f.next){
    for(const target of targets(g,f.x,f.y,f.r))hit(g,target,f.damage,{color:THEMES[f.id][0],kx:Math.sign(center(target).x-f.x)*4,ky:-3,hitstop:0,noCharge:!!f.noCharge});
    f.strikeAt=f.age;
+   f.windupFrom=f.age;
    if(['garden','eruption','fryer'].includes(f.mode))f.next+=30;
    g.fx?.emit?.(f.x,f.y,{color:THEMES[f.id][0],count:6,size:3,speed:2,life:16});
   }
@@ -218,9 +219,12 @@ export function drawPowerEmblem(ctx,id,x,y,r,t=0){if(THEMES[id])glyph(ctx,id,x,y
 function drawField(ctx,f,cam,t,reduced){
  const x=f.x-cam.x,y=f.y-cam.y,color=THEMES[f.id][0];
  const since=f.strikeAt==null?Infinity:f.age-f.strikeAt,impact=since<14?1-since/14:0;
+ const pending=f.age<f.next;
+ if(!pending&&!impact)return;
  ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;
- ctx.globalAlpha=.25+impact*.6;ctx.lineWidth=impact?3:1.5;
- ctx.setLineDash(impact?[]:[6,5]);ctx.beginPath();ctx.arc(x,y,f.r,0,TAU);ctx.stroke();ctx.setLineDash([]);
+ if(pending||impact)drawAttackWindow(ctx,{x,y,radius:f.r,color,remaining:f.next-f.age,total:f.next-(f.windupFrom||0),active:!!impact});
+ ctx.globalAlpha=pending?.25+Math.max(0,1-(f.next-f.age)/18)*.25:impact*.7;
+ ctx.lineWidth=impact?2.4:1.25;
  if(f.mode==='pounce'){
   for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x-f.r*.65,y-28+i*18);ctx.quadraticCurveTo(x,y-45+i*18,x+f.r*.65,y-12+i*18);ctx.stroke();}
  }else if(f.mode==='constellation'&&f.id==='nacar'){

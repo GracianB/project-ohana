@@ -1,4 +1,4 @@
-import {attackImpact} from './combat-fx.js';
+import {attackImpact,drawAttackWindow} from './combat-fx.js';
 import {drawSanctuaryYarn,drawSanctuaryPurr} from './michi-sanctuary-spells.js';
 import {HERO_IDENTITY} from '../characters/identity-v2.js';
 import {showBlockedHit} from './combat-feedback.js';
@@ -1081,6 +1081,21 @@ if (x >= pl.x && x <= pl.x + pl.w && y0 <= pl.y + 2 && y1 >= pl.y && (best === n
 }
 return best;
 }
+// Same discrete crossing and horizontal bounds as the meteor collision.
+export function meteorLanding(platforms,{x,y,vx,vy,r,life}){
+ if(!Number.isFinite(x+y+vx+vy+r+life)||vy<=0)return null;
+ const base=y+r*.5;
+ let landing=null;
+ for(const platform of platforms){
+  const frames=Math.max(1,Math.ceil((platform.y-base)/vy));
+  if(frames>life||frames>(landing?.frames??Infinity)||base+(frames-1)*vy>platform.y+2)continue;
+  const hitX=x+vx*frames;
+  if(hitX<platform.x||hitX>platform.x+platform.w)continue;
+  if(!landing||frames<landing.frames||platform.y<landing.y)landing={x:hitX,y:platform.y,frames};
+ }
+ return landing;
+}
+
 function solidAt(g, x, y) {
 for (const pl of g.platforms) if (x > pl.x && x < pl.x + pl.w && y > pl.y + 4 && y < pl.y + pl.h) return pl;
 return null;
@@ -2245,11 +2260,13 @@ shower(g, f, p) {
 if (f.next-- > 0) return true;
 f.next = 7;
 const cands = g.enemies.filter((e) => canHit(e) && inView(g, e));
-let tx;
-if (cands.length) { const e = cands[f.i % cands.length]; tx = cx(e) + (gameRand(g) - 0.5) * 30; }
-else tx = cx(p) + f.f * (80 + gameRand(g) * 420);
-const dir = f.f;
-add({ kind: "meteor", x: tx - dir * 150, y: (g.cam.y || 0) - 60, vx: dir * 3.2, vy: 10.5, r: 11 + gameRand(g) * 5, dmg: f.dmg, R: f.r, life: 160, rot: gameRand(g) * 6 });
+const target=cands.length?cands[f.i%cands.length]:null;
+const tx=target?cx(target)+(gameRand(g)-.5)*30:cx(p)+f.f*(80+gameRand(g)*420);
+const y=(g.cam.y||0)-60,vx=f.f*3.2,vy=10.5;
+const ty=target?cy(target):p.y+p.h;
+const frames=Math.max(1,Math.ceil((ty-y)/vy));
+add({kind:'meteor',x:tx-vx*frames,y,vx,vy,r:11+gameRand(g)*5,dmg:f.dmg,R:f.r,life:160,
+ rot:gameRand(g)*6,forecast:true});
 f.i++;
 return f.i < f.n;
 },
@@ -2258,6 +2275,10 @@ f.life--;
 f.rot += 0.12;
 const y0 = f.y;
 f.x += f.vx; f.y += f.vy;
+if(f.forecast&&(!f.forecastRead||f.age%6===0)){
+ f.landing=meteorLanding(g.platforms,f);
+ f.forecastRead=f.age||1;
+}
 let hitNow = false;
 const top = crossTop(g, f.x, y0 + f.r * 0.5, f.y + f.r * 0.5);
 if (top !== null) { f.y = top - f.r * 0.5; hitNow = true; }
@@ -3768,8 +3789,13 @@ for (let i = -3; i <= 3; i++) {
 }
 ctx.restore();
 },
-meteor(ctx, f, cam) {
-const x = f.x - cam.x, y = f.y - cam.y;
+meteor(ctx,f,cam,t,g){
+const x=f.x-cam.x,y=f.y-cam.y;
+if(f.landing){
+ const left=Math.max(0,f.landing.frames-Math.max(0,f.age-f.forecastRead));
+ if(left<=26)drawAttackWindow(ctx,{x:f.landing.x-cam.x,y:f.landing.y-cam.y,
+  halfWidth:f.R,color:'#ff9e64',remaining:left,total:26});
+}
 const len = 78;
 const d = Math.hypot(f.vx, f.vy) || 1;
 const gx = x - (f.vx / d) * len, gy = y - (f.vy / d) * len;
@@ -3800,7 +3826,7 @@ ctx.beginPath(); ctx.arc(x, y, f.r * 1.8, 0, TAU); ctx.fill();
 // Molten asteroid rock core with craggy basalt facets
 ctx.save();
 ctx.translate(x, y);
-ctx.rotate(f.rot);
+ctx.rotate(g?.reduceMotion?0:f.rot);
 ctx.globalAlpha = 1;
 ctx.fillStyle = f.dino ? "#35482a" : "#3d140a";
 ctx.beginPath();
@@ -3951,38 +3977,27 @@ for (let i = 0; i < 3; i++) {
   ctx.beginPath(); ctx.arc(bx, y - 6 - ph * 4, 1.5 + ph * 3, 0, TAU); ctx.stroke();
 }
 },
-geyser(ctx, f, cam, t) {
-const x = f.x - cam.x, y = f.y - cam.y;
-if (f.delay > 0) return;
-if (f.warn > 0) {
-  ctx.fillStyle = "rgba(90,60,10,.7)";
-  ctx.beginPath(); ctx.ellipse(x, y, 16 + (12 - f.warn), 4, 0, 0, TAU); ctx.fill();
-  ctx.fillStyle = "#ffd36a";
-  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(x - 8 + i * 8, y - 2 - ((t + i * 5) % 6), 2, 0, TAU); ctx.fill(); }
+geyser(ctx,f,cam,t,g){
+ const x=f.x-cam.x,y=f.y-cam.y,halfWidth=18;
+ if(f.delay>0||f.warn>0||f.up===24){
+  const remaining=f.delay+f.warn;
+  if(remaining<=24)drawAttackWindow(ctx,{x,y,halfWidth,color:'#ffd36a',remaining,total:24});
   return;
-}
-const h = f.h || 0;
-if (h < 2) return;
-const gr = ctx.createLinearGradient(0, y - h, 0, y);
-gr.addColorStop(0, "rgba(255,245,190,.95)");
-gr.addColorStop(0.4, "rgba(255,211,106,.9)");
-gr.addColorStop(1, "rgba(200,130,20,.9)");
-ctx.fillStyle = gr;
-ctx.beginPath();
-ctx.moveTo(x - 20, y);
-for (let i = 0; i <= 8; i++) { const u = i / 8; ctx.lineTo(x - 12 - Math.sin(t * 0.5 + u * 6) * 3 - (1 - u) * 6, y - u * h); }
-ctx.quadraticCurveTo(x, y - h - 16, x + 12, y - h);
-for (let i = 8; i >= 0; i--) { const u = i / 8; ctx.lineTo(x + 12 + Math.sin(t * 0.5 + u * 6 + 1) * 3 + (1 - u) * 6, y - u * h); }
-ctx.closePath();
-ctx.fill();
-ctx.fillStyle = "rgba(255,255,255,.55)";
-ctx.fillRect(x - 4, y - h + 6, 3, h - 10);
-glow(ctx, x, y - h, 30, "#fff0b0", 0.5);
-ctx.fillStyle = "#ffd36a";
-for (let i = 0; i < 5; i++) {
-  const a = -Math.PI / 2 + (i - 2) * 0.5;
-  ctx.beginPath(); ctx.arc(x + Math.cos(a) * 20, y - h + Math.sin(a) * 14 - ((t * 2 + i * 7) % 10), 3, 0, TAU); ctx.fill();
-}
+ }
+ const h=f.h||0;if(h<2)return;
+ const phase=g?.reduceMotion?0:t;
+ drawAttackWindow(ctx,{x,y,halfWidth,color:'#ffd36a',active:true});
+ ctx.save();ctx.translate(x,y);
+ ctx.fillStyle='#b46c32';ctx.globalAlpha=.6;
+ ctx.beginPath();ctx.moveTo(-18,0);ctx.quadraticCurveTo(-15,-h*.57,-12,-h*.92);
+ ctx.quadraticCurveTo(0,-h,12,-h*.92);ctx.quadraticCurveTo(15,-h*.57,18,0);ctx.closePath();ctx.fill();
+ for(let i=0;i<3;i++){
+  const offset=(i-1)*8,bend=Math.sin(phase*.43+i)*2.4;
+  ctx.strokeStyle=i===1?'#fff1bc':'#ffcd72';ctx.lineWidth=i===1?5:3;ctx.globalAlpha=.84;
+  ctx.beginPath();ctx.moveTo(offset,0);
+  ctx.bezierCurveTo(offset+bend*2,-h*.35,offset-bend,-h*.63,offset*.58,-h*(.89+i*.037));ctx.stroke();
+ }
+ ctx.restore();
 },
 disc(ctx, f, cam) {
 const x = f.x - cam.x, y = f.y - cam.y;
@@ -4268,23 +4283,25 @@ ctx.restore();
 },
 };
 
-export function drawProjectile(ctx, pr, cam, t) {
+export function drawProjectile(ctx, pr, cam, t, reduceMotion=false) {
 const x = pr.x - cam.x + pr.w / 2;
 const y = pr.y - cam.y + pr.h / 2;
 ctx.save();
-if ((pr.vx || pr.vy) && pr.shape !== "salt" && pr.shape !== "tideBubble") {
-ctx.globalAlpha = 0.45;
-ctx.strokeStyle = pr.color || "#fff";
-ctx.lineWidth = 3;
-ctx.beginPath();
-ctx.moveTo(x, y);
-ctx.lineTo(x - (pr.vx || 0) * 3.4, y - (pr.vy || 0) * 3.4);
-ctx.stroke();
-ctx.globalAlpha = 1;
+const dx=Number.isFinite(pr.prevX)?pr.x-pr.prevX:pr.vx||0;
+const dy=Number.isFinite(pr.prevY)?pr.y-pr.prevY:pr.vy||0;
+const distance=Math.hypot(dx,dy);
+if(!reduceMotion&&distance>.1&&distance<48&&pr.shape!=='salt'&&pr.shape!=='tideBubble'){
+ const len=Math.min(42,distance*2.65),ux=dx/distance,uy=dy/distance;
+ ctx.globalAlpha=.35;ctx.fillStyle=pr.color||'#fff';
+ ctx.beginPath();ctx.moveTo(x-ux*len,y-uy*len);
+ ctx.lineTo(x-uy*3.2,y+ux*3.2);ctx.lineTo(x+uy*3.2,y-ux*3.2);ctx.closePath();ctx.fill();
+ ctx.globalAlpha=.62;ctx.strokeStyle=pr.color||'#fff';ctx.lineWidth=1.35;
+ ctx.beginPath();ctx.moveTo(x-ux*len*.58,y-uy*len*.58);ctx.lineTo(x,y);ctx.stroke();
+ ctx.globalAlpha=1;
 }
 ctx.translate(x, y);
 const ang = Math.atan2(pr.vy || 0, pr.vx || 1);
-if (pr.spin) ctx.rotate(t * 0.22 + (pr.rot || 0));
+if (pr.spin) ctx.rotate((reduceMotion?0:t*.22)+(pr.rot||0));
 else ctx.rotate(ang);
 ctx.fillStyle = pr.color;
 ctx.strokeStyle = "#fff";

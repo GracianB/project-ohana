@@ -1,3 +1,5 @@
+ohana-813 · Avisos de impacto con cuenta atrás, meteoros dirigidos y estelas coherentes con la trayectoria.
+
 ohana-812 · Señales de ataque propias para los doce personajes, contacto confirmado y remates ligados a su alcance real.
 
 ohana-811 · Santuario de Yomi, corrientes visibles de Nácar y cuatro transiciones propias de IA.

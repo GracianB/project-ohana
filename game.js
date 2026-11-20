@@ -3087,6 +3087,7 @@ for (const pr of game.projectiles) {
 if (pr.intercepted) continue;
 if (pr.homing && game.enemies[0]) { pr.vx += Math.sign(game.enemies[0].x - pr.x) * 0.35; pr.vy += Math.sign(game.enemies[0].y - pr.y) * 0.35; }
 const previous = { x: pr.x, y: pr.y };
+pr.prevX=previous.x;pr.prevY=previous.y;
 pr.x += pr.vx; pr.y += pr.vy; pr.life--;
 if (hitsSolid(pr, game.platforms, previous)) {
   pr.life = 0;
@@ -3427,7 +3428,7 @@ Passives.draw(ctx, game, t);
 // touches performance.now() repeatedly, without changing synchronization.
 const peerCombatFresh=onlineCoop.hasFreshCombat(game);
 if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')for(const shot of game.coopFinalShots||[])if(shot.life>0)drawGauntletProjectile(ctx,shot,game.cam,t,game.reduceMotion||reduceMotion);
-for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t,game.reduceMotion||reduceMotion))drawProjectile(ctx, pr, game.cam, t);}
+for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t,game.reduceMotion||reduceMotion))drawProjectile(ctx,pr,game.cam,t,game.reduceMotion||reduceMotion);}
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx,s,game.cam,game.reduceMotion||reduceMotion);
 onlineCoop.render(ctx, game, t);
