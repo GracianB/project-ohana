@@ -366,7 +366,7 @@ function parseEmblem(pattern){
 }
 for(const id of Object.keys(crestEmblems))crestEmblems[id]=crestEmblems[id].map(parseEmblem);
 
-function drawAttackEmblem(ctx,id,profile,phase,shade,glint){
+function drawAttackEmblem(ctx,id,profile,phase,insetLight,shade,glint){
  const [outline,inset]=crestEmblems[id][profile];
  ctx.save();ctx.globalAlpha*=phase;
  ctx.beginPath();
@@ -376,7 +376,7 @@ function drawAttackEmblem(ctx,id,profile,phase,shade,glint){
  ctx.strokeStyle='#160f28';ctx.lineWidth=3.8;ctx.stroke();
  ctx.strokeStyle=glint;ctx.lineWidth=1.3;ctx.stroke();
  ctx.beginPath();traceEmblem(ctx,inset);
- ctx.lineWidth=1.55;ctx.stroke();
+ ctx.globalAlpha*=insetLight*.82;ctx.lineWidth=1.55;ctx.stroke();
  ctx.restore();
 }
 function traceEmblem(ctx,points){
@@ -385,12 +385,104 @@ function traceEmblem(ctx,points){
 }
 
 const castStages={
- 0:{profile:0,life:18,depth:8,reach:1,travel:19,drop:0},
+ 0:{profile:0,life:18,depth:8,reach:1,travel:19,drop:-4},
  1:{profile:1,life:26,depth:12,reach:.78,travel:6,drop:9},
- 2:{profile:2,life:32,depth:14,reach:.94,travel:10,drop:0},
+ 2:{profile:2,life:32,depth:14,reach:.94,travel:10,drop:-7},
  4:{profile:3,life:26,depth:13,reach:1,travel:24,drop:-10},
  5:{profile:4,life:46,depth:18,reach:1.12,travel:4,drop:-21},
 };
+
+// Ten beats, from ignition to the last visible echo. Each row controls:
+// reach, height, advance, lift, body, rim, crease, material, emblem, inset.
+// Scores are percentages of the locally authored attack geometry.
+const castScores={
+ 0:[
+  [44,77,9,5,46,72,50,27,36,37],
+  [64,88,16,9,65,86,56,52,68,51],
+  [85,96,29,14,81,96,62,68,89,76],
+  [99,100,41,20,87,100,76,86,100,92],
+  [107,98,55,26,83,96,84,97,98,100],
+  [113,94,69,30,74,88,88,89,90,95],
+  [117,89,79,28,63,78,79,76,81,82],
+  [120,83,88,24,49,66,64,58,68,72],
+  [122,77,94,19,35,51,48,39,53,54],
+  [124,70,100,13,18,33,32,23,30,36],
+ ],
+ 1:[
+  [60,51,3,10,53,65,44,38,48,41],
+  [72,60,6,21,67,82,59,56,63,57],
+  [85,72,11,36,79,92,73,72,82,69],
+  [97,84,17,46,88,100,84,90,94,83],
+  [105,91,25,58,95,97,93,98,100,93],
+  [109,89,34,65,90,94,100,91,93,100],
+  [108,84,43,74,78,84,91,86,83,92],
+  [104,76,55,82,63,77,79,73,72,83],
+  [96,68,66,90,43,65,60,55,55,67],
+  [86,59,79,100,22,44,41,33,33,47],
+ ],
+ 2:[
+  [41,81,3,6,39,72,36,33,29,49],
+  [53,93,8,14,49,83,52,48,45,61],
+  [69,103,15,27,67,92,66,67,62,77],
+  [86,111,25,39,80,96,81,79,82,91],
+  [103,115,39,53,90,100,92,93,96,97],
+  [114,110,53,64,85,97,100,100,100,100],
+  [119,103,65,76,76,92,95,91,91,92],
+  [122,96,76,85,60,83,81,78,79,79],
+  [124,88,88,93,45,65,64,59,62,63],
+  [125,81,100,100,25,46,44,40,39,45],
+ ],
+ 4:[
+  [47,68,2,4,42,65,37,30,31,32],
+  [61,81,7,10,58,79,49,43,45,48],
+  [77,93,15,19,71,90,63,61,68,67],
+  [92,104,27,33,84,97,81,76,86,83],
+  [104,113,44,49,93,100,96,94,99,96],
+  [111,116,61,66,96,99,100,100,100,100],
+  [115,113,75,79,85,92,93,92,94,92],
+  [119,107,86,89,70,82,76,77,81,81],
+  [122,100,94,95,52,68,58,60,66,64],
+  [124,93,100,100,29,48,40,39,41,45],
+ ],
+ 5:[
+  [40,57,3,2,34,58,29,31,24,29],
+  [52,70,7,8,47,69,40,43,37,43],
+  [67,84,14,18,60,82,52,57,52,56],
+  [83,98,22,34,74,91,69,72,74,72],
+  [97,111,34,52,87,98,83,89,92,89],
+  [107,119,48,70,97,100,96,98,100,98],
+  [114,123,61,82,100,99,100,100,98,100],
+  [119,122,74,91,88,92,93,90,89,92],
+  [123,116,86,97,69,80,77,71,72,76],
+  [126,108,100,100,40,58,54,49,50,58],
+ ],
+};
+
+const castMaterials={
+ // Petal, plasma, charge, claws, fire, fossil, oil, crust, paper, light, crystal, water.
+ kilo:   [104,93,86,80,103,108,97,117,107,102],
+ stitcho:[111,96,119,101,88,118,113,93,102,113],
+ chispin:[112,92,125,108,83,119,97,110,99,109],
+ cat:    [108,108,112,122,91,111,115,103,103,109],
+ dragon: [111,111,108,110,112,107,88,112,111,96],
+ dino:   [108,119,91,73,116,97,108,99,116,95],
+ frita:  [108,86,105,65,111,103,108,118,111,106],
+ pizza:  [103,91,121,88,110,108,92,116,114,97],
+ yomi:   [102,112,90,115,94,115,101,109,103,118],
+ ia:     [108,101,113,117,96,118,115,95,106,116],
+ cuerno: [113,94,108,114,91,120,111,112,103,115],
+ nacar:  [106,114,102,126,91,113,116,118,103,114],
+};
+
+const castTimelines=Object.fromEntries(Object.entries(castMaterials).map(([id,material])=>[
+ id,Object.freeze(Object.fromEntries(Object.entries(castScores).map(([slot,score])=>[
+  slot,Object.freeze(score.map(beat=>Object.freeze(beat.map((value,track)=>value*material[track]/10000)))),
+ ]))),
+]));
+
+export function attackCastTimeline(id,slot){
+ return Object.hasOwn(castTimelines,id)?castTimelines[id][slot]:undefined;
+}
 
 // Surface marks sit above the crease. They are reused along J/K/L/I/P's
 // individual curves so the material reads as part of the strike.
@@ -436,29 +528,38 @@ function drawCrestMark(ctx,id,x,y){
 export function drawAttackCrest(ctx,id,slot,{x,y,face=1,age,reduced=false}){
  const style=castStages[slot],points=castCrests[id]?.[style?.profile];
  if(!points||!Number.isFinite(x+y+age+face)||age<0||age>=style.life)return;
- const time=age/style.life,opening=reduced?1:Math.min(1,.48+time*3);
+ const time=age/style.life;
+ const beats=attackCastTimeline(id,slot);
+ const position=Math.min(9,time*10);
+ const beat=Math.floor(position),mix=position-beat;
+ const from=beats[beat],to=beats[Math.min(9,beat+1)];
+ const value=track=>from[track]+(to[track]-from[track])*mix;
+ const fade=Math.min(1,(1-time)*3);
  const [x0,y0,x1,y1,x2,y2,tipX,tipY]=points,depth=style.depth;
  const [shade,glint]=colors[id];
- ctx.save();ctx.translate(x,y);ctx.scale(face*opening*style.reach,reduced?1:.82+.18*opening);
- ctx.globalAlpha=(1-time)**1.2*.83;
- const envelope=reduced?1:Math.min(1,(age+3)/8);
+ ctx.save();ctx.translate(x,y);
+ ctx.scale(face*style.reach*(reduced?1:value(0)),reduced?1:value(1));
+ ctx.globalAlpha=value(4)*fade*.85;
+
  ctx.lineCap='round';ctx.lineJoin='round';
  ctx.beginPath();ctx.moveTo(x0,y0);ctx.bezierCurveTo(x1,y1,x2,y2,tipX,tipY);
  ctx.bezierCurveTo(x2,y2+depth,x1,y1+depth,x0,y0);ctx.closePath();
  ctx.fillStyle=shade;ctx.fill();
  ctx.strokeStyle='#160f28';ctx.lineWidth=3.6;ctx.stroke();
+ ctx.globalAlpha=value(5)*fade*.82;
  ctx.strokeStyle=glint;ctx.lineWidth=1.5;
  ctx.beginPath();ctx.moveTo(x0,y0);ctx.bezierCurveTo(x1,y1,x2,y2,tipX,tipY);ctx.stroke();
- ctx.save();ctx.globalAlpha*=.57;ctx.lineWidth=1;
+ ctx.save();ctx.globalAlpha=value(6)*fade*.71;ctx.lineWidth=1;
  ctx.beginPath();ctx.moveTo(x0+(x1-x0)*.7,y0+(y1-y0)*.3+depth*.35);
  ctx.quadraticCurveTo(x2,y2+depth*.66,tipX,tipY);ctx.stroke();
  const markX=(x0+3*x1+3*x2+tipX)/8;
  const markY=(y0+3*y1+3*y2+tipY)/8+depth*.2;
+ ctx.globalAlpha=value(7)*fade*.78;
  drawCrestMark(ctx,id,markX,markY);
  ctx.restore();
- const drift=reduced?0:time;
- ctx.translate(style.travel*drift,style.drop*drift);
- drawAttackEmblem(ctx,id,style.profile,envelope,shade,glint);
+ ctx.translate(style.travel*(reduced?0:value(2)),style.drop*(reduced?0:value(3)));
+ ctx.globalAlpha=fade;
+ drawAttackEmblem(ctx,id,style.profile,value(8)*.85,value(9),shade,glint);
  ctx.restore();
 }
 

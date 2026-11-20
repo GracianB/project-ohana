@@ -1,4 +1,4 @@
-const VERSION = "ohana-819";
+const VERSION = "ohana-820";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./engine/foes/nacar-fauna.js?v=" + VERSION,
@@ -759,7 +759,7 @@ const PRECACHE_REVISIONS = {
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
   "systems/family-islands.js": "2cb7fa8e4cc3147c653a07c28614b14f5b30cb97",
   "systems/hero-combos.js": "2ce7562ec26a0e33b813324e0f42c70ada437ddf",
-  "systems/remate-art.js": "c03c0b299e05c6b6b0689fbe32b7c4e1d04ebf23",
+  "systems/remate-art.js": "496aad35ac84504bf5b2f12cc91dd93421f87af4",
   "systems/campaign-enemies.js": "98048f0e0aee0ee08f6df9df935711455f860483",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
@@ -797,7 +797,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "56644a3576d80c1d2662d9940cff462e8256858d",
-  "index.html": "82a992e5a0ed3ede90426b8ca26450328e10ca6c",
+  "index.html": "50b74c130c005aa03306c6c693c4972a252b0004",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",

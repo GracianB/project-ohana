@@ -1,3 +1,5 @@
+ohana-820 · [100 ajustes de animación por ataque](docs/V820-ATTACKS.md) · [Validación](docs/V820-VALIDATION.json) · [Publicación](docs/V820-PUBLICATION.json)
+
 ohana-819 · [Emblemas y animación del repertorio](docs/V819-ATTACKS.md) · [Validación](docs/V819-VALIDATION.json) · [Publicación](docs/V819-PUBLICATION.json)
 
 ohana-818 · [Primer pase de J, K, L, I y P](docs/V818-ATTACKS.md) · [Validación](docs/V818-VALIDATION.json) · [Publicación](docs/V818-PUBLICATION.json)
