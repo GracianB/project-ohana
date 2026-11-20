@@ -1,3 +1,5 @@
+- **ohana-819** — 60 emblemas vectoriales, 60 perfiles interiores y cinco animaciones de lanzamiento. [Detalle](docs/V819-ATTACKS.md)
+
 - **ohana-818** — 60 siluetas de lanzamiento propias y lectura de acierto y fallo para I. [Detalle](docs/V818-ATTACKS.md)
 
 - **ohana-817** — 96 entradas de animación para I y cuatro mejoras comunes de legibilidad y accesibilidad. [Detalle](docs/V817-REMATES.md)

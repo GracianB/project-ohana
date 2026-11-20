@@ -96,7 +96,7 @@ export function startBattleCompanion(g,id,power=1){
 export function castEvolutionAttack(g,index){
  const p=g.player,d=THEMES[p.id],s=state(g),e=tier(p),c=center(p),face=p.facing||1;
  beginHeroPower(g,index,s);
- p._cast={slot:index,t:g.t,id:extraAbility(p.id,index).id,form:e,face};
+ p._cast={slot:index,t:g.t,id:extraAbility(p.id,index).id,form:e,face,x:c.x,y:c.y};
  p._powerPerformance={index,start:g.t};
  g.nums?.add?.(c.x,p.y-36,extraAbility(p.id,index).name,d[0],true);
 }

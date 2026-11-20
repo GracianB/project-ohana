@@ -198,7 +198,7 @@ game.lastAbilityId = id;
 game.lastAbilitySlot = index;
 syncState(p);
 if(index===3)p._powerPerformance={index,start:Number(game.t)||0};
-p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo, face: p.facing||1 };
+p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo, face: p.facing||1, x: cx(p), y: cy(p) };
 sfx(id);
 const facing=p.facing||1;
 game.combatFx?.add(cx(p)+facing*(index===0?14:6),cy(p),def.color,{
@@ -976,10 +976,13 @@ function drawCastSignature(ctx, p, cam, t, reduced) {
   return;
  }
  const face=cast.face||p.facing||1;
+ const follows=cast.slot===1||cast.slot===4;
+ const x=follows?cx(p):(cast.x??cx(p));
+ const y=follows?cy(p):(cast.y??cy(p));
  const lead=cast.slot===1?8:Math.max(14,p.w*.32);
  drawAttackCrest(ctx,p.id,cast.slot,{
-  x:p.x+p.w*.5+face*lead-cam.x,
-  y:p.y+p.h*(cast.slot===1?.87:.46)-cam.y,
+  x:x+face*lead-cam.x,
+  y:y+p.h*(cast.slot===1?.37:-.04)-cam.y,
   face,age:t-cast.t,reduced,
  });
 }
