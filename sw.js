@@ -1,4 +1,4 @@
-const VERSION = "ohana-821";
+const VERSION = "ohana-822";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./engine/foes/nacar-fauna.js?v=" + VERSION,
@@ -79,6 +79,7 @@ const PRECACHE = [
   "./systems/memory-pickup-art.js?v=" + VERSION,
   "./startup.css?v=" + VERSION,
   "./assets/startup/lantern-island.webp",
+  "./assets/startup/hoku-harbor.webp",
   "./systems/cat-chapter-art-v609.js?v=" + VERSION,
   "./systems/cat-chapter.js?v=" + VERSION,
   "./systems/cat-encounters-v609.js?v=" + VERSION,
@@ -577,9 +578,9 @@ const PRECACHE_REVISIONS = {
   "worlds/kilo-living-grove.js": "b51daa4bf9533a84f2fc2957715fde4d799b90ac",
   "systems/compact-hud.js": "d7b31fc6f5e2c5c67f27e2457e0483c388e1740d",
   "compact-play.css": "c926daf38945171ad3e814b39e34abd183a1f4cc",
-  "systems/hoku-atlas.js": "99dde671994971ad67384e19604d1e4c277dbe9b",
+  "systems/hoku-atlas.js": "6a7d728a792c3c6bc2464dd529db38cbcb7a305d",
   "systems/hoku-atlas-model.js": "43a9455fc619f88e4475e9dfc5710d4d804e748a",
-  "hoku-atlas.css": "08abbd1ef019f2fdd4d1b95c573da67bac32e58d",
+  "hoku-atlas.css": "0a90c0f7a5498a6d78df60d9aac33c9d4dd05ad0",
   "multiplayer/entry.js": "96a9506a1342f646eaa461dc1e627c141c90457b",
   "multiplayer/entry-route.js": "41d98a5b44ec9d397c4677de0c83f6017f373b5d",
   "final-ritual.css": "cb3fa260f55cd948ce875311f33f0adffcdfb16a",
@@ -602,6 +603,7 @@ const PRECACHE_REVISIONS = {
   "systems/realm-signatures.js": "7b91d6b98c4738937c3c1cfe5ba525bc8a1b42e5",
   "systems/combat-coach.js": "532f2e7c614c726c98f236d08a5da8868043a469",
   "systems/memory-pickup-art.js": "f85aa423441c0efa82ee158246b2e64ea47cc216",
+  "assets/startup/hoku-harbor.webp": "0f91a0fd680b7d8857d5c2e36460378e316e65d4",
   "assets/startup/lantern-island.webp": "939a7729ceb3efdc6ebffb048488346bf7972a36",
   "startup.css": "18a680ce4c694b527d9c673232f1995cab68fd3a",
   "systems/cat-chapter-art-v609.js": "ed3533278cc610e783375862a460455d5e496ff4",
@@ -799,7 +801,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "56644a3576d80c1d2662d9940cff462e8256858d",
-  "index.html": "265a3663517e6d4315425a97df4f4165c3ac2488",
+  "index.html": "9fa7ecafa2b688d03487a289656d76d4e44fa4e1",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",

@@ -1,3 +1,5 @@
+- **ohana-822** — Bienvenida ilustrada desde el embarcadero con accesos claros a Jugar, Continuar y Multijugador. [Detalle](docs/V822-WELCOME.md)
+
 - **ohana-821** — Pantalla inicial ilustrada de Isla Hoku con faroles, adaptación vertical y movimiento reducido. [Detalle](docs/V821-STARTUP.md)
 
 - **ohana-820** — Diez tiempos con diez ajustes de animación para cada uno de los 60 ataques. [Detalle](docs/V820-ATTACKS.md)

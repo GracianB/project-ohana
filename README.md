@@ -1,3 +1,5 @@
+ohana-822 · [Nueva bienvenida de Isla Hoku](docs/V822-WELCOME.md) · [Validación](docs/V822-VALIDATION.json) · [Publicación](docs/V822-PUBLICATION.json)
+
 ohana-821 · [Pantalla de carga de Isla Hoku](docs/V821-STARTUP.md) · [Validación](docs/V821-VALIDATION.json) · [Publicación](docs/V821-PUBLICATION.json)
 
 ohana-820 · [100 ajustes de animación por ataque](docs/V820-ATTACKS.md) · [Validación](docs/V820-VALIDATION.json) · [Publicación](docs/V820-PUBLICATION.json)

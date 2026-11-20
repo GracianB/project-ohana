@@ -11,23 +11,22 @@ const TAU=Math.PI*2;
 const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches||document.body.classList.contains('gentle-motion');
 const online=()=>ATLAS_MODES.map(m=>`<a class="atlas-mode" href="${m.href}"><span aria-hidden="true">${m.id==='versus'?'⚔':'✦'}</span><strong>${m.name}</strong><small>${m.text}</small><b aria-hidden="true">→</b></a>`).join('');
 function oval(c,x,y,rx,ry,col){c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();}
-export function drawAtlasSky(c,w,h,t=0,hero='kilo',form=0,welcome=false){
+export function drawAtlasSky(c,w,h,t=0,hero='kilo',form=0){
  const time=reduced()?0:t,col=ROSTER.find(r=>r.id===hero)?.color||'#8bd7d1';
  c.clearRect(0,0,w,h);const bg=c.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#091b2e');bg.addColorStop(.6,'#152c43');bg.addColorStop(1,'#254551');c.fillStyle=bg;c.fillRect(0,0,w,h);
  const glow=c.createRadialGradient(w*.64,h*.42,0,w*.64,h*.42,w*.55);glow.addColorStop(0,col+'30');glow.addColorStop(1,col+'00');c.fillStyle=glow;c.fillRect(0,0,w,h);
  for(let i=0;i<66;i++){const x=((i*149+31)%997)/997*w,y=((i*83+17)%593)/593*h*.77;oval(c,x,y,i%9?1:1.8,i%9?1:1.8,i%7?'#c8e3e570':'#f7dab5');}
- const small=welcome&&w<=650,cx=w*(small?.73:welcome?.63:.52),cy=small?(w<350?105:195):h*.48,r=small?Math.min(w*.3,110):Math.min(w*.39,h*.37);
+ const cx=w*.52,cy=h*.48,r=Math.min(w*.39,h*.37);
  c.strokeStyle='#c4ac7742';c.lineWidth=1;
  for(let i=0;i<3;i++){c.beginPath();c.ellipse(cx,cy,r*(.7+i*.22),r*(.7+i*.22),-.22,0,TAU);c.stroke();}
  for(let i=0;i<10;i++){const a=-1.5+i*TAU/10+time*.0015;const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;oval(c,x,y,3,3,i%3?'#b9dcd6':'#f7d8a8');}
  // Floating strata, not mirror frames: silhouette, turf and a hanging root.
- const ix=cx,iy=small?(w<350?145:245):h*.78,iw=Math.min(w*.31,h*.32);
+ const ix=cx,iy=h*.78,iw=Math.min(w*.31,h*.32);
  c.fillStyle='#101f32';c.beginPath();c.moveTo(ix-iw,iy);c.lineTo(ix-iw*.55,iy+42);c.lineTo(ix-iw*.18,iy+86);c.lineTo(ix+iw*.32,iy+54);c.lineTo(ix+iw,iy);c.closePath();c.fill();
  oval(c,ix,iy,iw,20,'#536d6c');oval(c,ix,iy-5,iw*.96,14,'#839b86');oval(c,ix,iy-5,iw*.68,9,'#a5b89b');
  for(const side of[-1,1]){const x=cx+side*iw*1.35,y=h*.62+side*20;oval(c,x,y,iw*.36,8,'#587975');c.fillStyle='#162b3c';c.beginPath();c.moveTo(x-iw*.35,y+2);c.lineTo(x+iw*.3,y+2);c.lineTo(x-side*iw*.08,y+28);c.closePath();c.fill();}
- const size=small?Math.min(130,w*.38):Math.min(h*.46,w*(welcome?.32:.48));
+ const size=Math.min(h*.46,w*.48);
  drawFamilyActor(c,hero,cx,iy-8,size/60,time*60,{form,pose:'idle',performance:hero==='kilo'?'dance':undefined},reduced());
- if(welcome&&w>650){drawFamilyActor(c,'stitcho',cx-iw*1.4,h*.62-6,Math.min(h*.19,100)/60,time*60,{form:0},reduced());drawFamilyActor(c,'chispin',cx+iw*1.35,h*.65-8,Math.min(h*.19,100)/60,time*60,{form:0},reduced());}
 }
 const pads=new WeakMap();
 function pollGamepad(root){
@@ -46,9 +45,42 @@ export function mountAtlasWelcome(el,finish){
  const saved=saveStore.read(),valid=saved&&ROSTER.some(r=>r.id===canonId(saved.id));
  el.className='show ready atlas-welcome';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Ohana · Atlas de Hoku');el.setAttribute('aria-hidden','false');
  document.body.classList.remove('intro-complete');document.body.classList.add('intro-playing');
- el.innerHTML=`<canvas class="atlas-welcome-sky" aria-hidden="true"></canvas><div class="atlas-welcome-copy"><a class="atlas-signature" href="https://gracianb.github.io/GracianB/" target="_blank" rel="noopener">GB <span>PLAY / OHANA</span></a><p class="atlas-eyebrow">DIEZ VOCES. UN MUNDO POR DESCUBRIR.</p><h1>OHA<span>NA</span><i>Un lugar al que volver.</i></h1><p class="atlas-welcome-lead">Elige tu héroe. Encuentra tu camino.<br>Que nadie se quede atrás.</p><div class="atlas-welcome-actions"><button class="atlas-primary oi-enter" type="button">Preparar aventura <span>→</span></button>${valid?'<button class="atlas-resume" type="button">Continuar tu historia <span>→</span></button>':''}<button class="atlas-online" type="button">2 jugadores <span>→</span></button></div><div class="atlas-welcome-minor"><button type="button" data-welcome="story">Ver la historia</button><button type="button" data-welcome="album">Colección</button><button type="button" data-welcome="settings">Ajustes</button></div><p class="atlas-edition">ISLA HOKU <span>✦</span> LA RUTA DE LOS DIEZ</p></div><dialog class="atlas-dialog atlas-modes"><button class="atlas-dialog-close" aria-label="Cerrar multijugador">×</button><p class="atlas-eyebrow">MEJOR EN COMPAÑÍA</p><h2>Dos formas de jugar juntos.</h2>${online()}<p class="atlas-muted">Crea una sala o entra con el código de tu amigo.</p></dialog>`;
- const stop=animate(el.querySelector('canvas'),(c,w,h,t)=>drawAtlasSky(c,w,h,t,'kilo',0,true),()=>el.isConnected&&el.classList.contains('show'));
- let done=false;const close=(action='play')=>{if(done)return;done=true;stop();removeEventListener('keydown',keys,true);finish();el.remove();dispatchEvent(new CustomEvent('ohana-atlas-open',{detail:{action}}));if(action==='resume')dispatchEvent(new Event('ohana-atlas-continue'));};
+ el.innerHTML=`
+  <img class="atlas-welcome-art" src="assets/startup/hoku-harbor.webp" alt="" decoding="async" draggable="false">
+  <div class="atlas-welcome-copy">
+   <div class="atlas-welcome-menu">
+    <p class="atlas-welcome-location">Isla Hoku</p>
+    <h1>OHANA</h1>
+    <p class="atlas-welcome-lead">Un lugar al que volver.</p>
+    <div class="atlas-welcome-actions">
+     <button class="atlas-primary oi-enter" type="button">Jugar <span aria-hidden="true">→</span></button>
+     ${valid?'<button class="atlas-resume" type="button">Continuar partida <span aria-hidden="true">→</span></button>':''}
+     <button class="atlas-online" type="button">Multijugador <span aria-hidden="true">→</span></button>
+    </div>
+    <nav class="atlas-welcome-minor" aria-label="Opciones de bienvenida">
+     <button type="button" data-welcome="story">Historia</button>
+     <button type="button" data-welcome="album">Colección</button>
+     <button type="button" data-welcome="settings">Ajustes</button>
+    </nav>
+   </div>
+  </div>
+  <dialog class="atlas-dialog atlas-modes">
+   <button class="atlas-dialog-close" type="button" aria-label="Cerrar multijugador">×</button>
+   <h2>Multijugador</h2>${online()}
+  </dialog>`;
+ const controller=setInterval(()=>{
+  if(!el.isConnected){clearInterval(controller);return;}
+  if(!document.hidden&&el.classList.contains('show'))pollGamepad(el);
+ },80);
+ let done=false;
+ const close=(action='play')=>{
+  if(done)return;
+  done=true;
+  clearInterval(controller);
+  removeEventListener('keydown',keys,true);
+  finish();el.remove();dispatchEvent(new CustomEvent('ohana-atlas-open',{detail:{action}}));
+  if(action==='resume')dispatchEvent(new Event('ohana-atlas-continue'));
+ };
  const keys=e=>{if(el.querySelector('dialog[open]'))return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close();}else if(e.key==='Enter'&&!e.target.closest('button,a')){e.preventDefault();e.stopImmediatePropagation();close();}else trap(el,e);};addEventListener('keydown',keys,true);
  el.querySelector('.oi-enter').onclick=()=>close();el.querySelector('.atlas-resume')?.addEventListener('click',()=>close('resume'));
  const modes=el.querySelector('dialog');el.querySelector('.atlas-online').onclick=()=>modes.showModal();el.querySelector('.atlas-dialog-close').onclick=()=>modes.close();
