@@ -147,10 +147,12 @@ function yomiAmbient(ctx, p, f, glow, shadow, t, h, w) {
       const phase = ((t * (running ? .061 : .038) + i * .25) % 1 + 1) % 1;
       const x = (running ? -24 - phase * 30 : (i - 1.5) * 11) - w * .2;
       const y = running ? -12 - i * 10 - phase * 8 : -12 + phase * 27;
-      ctx.globalAlpha = .36 * (1 - phase);
+      ctx.globalAlpha = .48 * (1 - phase);
       ctx.fillStyle = i % 2 ? glow : "#fff5db";
       ctx.beginPath();
-      ctx.ellipse(x, y, 2 + (f >= 3 ? .6 : 0), 3 - phase, .25, 0, TAU);
+      if(running&&i%2===0&&f>0){
+        ctx.moveTo(x-2,y-4);ctx.lineTo(x+3,y-3);ctx.lineTo(x+2,y+3);ctx.lineTo(x-3,y+2);ctx.closePath();
+      }else ctx.ellipse(x,y,2+(f>=3?.6:0),3-phase,.25,0,TAU);
       ctx.fill();
     }
   }
@@ -258,13 +260,13 @@ export function yomiWelcomeAnatomy(pose={},form=0){
 }
 
 // A shrine keeper's clothing sits on the body. Only the lantern and charms swing free.
-function shrineAccessory(c,f,w,h,swing,glow,shadow,acting){
- const y=-h*.48, cord='#f3bf80', tassel=f===4?'#f49a90':'#bf5478';
+function shrineAccessory(c,f,grip,swing,glow,shadow,acting){
+ const cord='#f3bf80', tassel=f===4?'#f49a90':'#bf5478';
  c.save();
  const release=acting?.release||0, load=acting?.load||0;
- c.translate(w*.79+(acting?.slot===0?5*release:0),y-(acting?.slot===1?8*release:0));
+ c.translate(grip.x,grip.y);
  const aim=acting?.slot===2?-.78*load+1.13*release:acting?.slot===0?.42*release:0;
- c.rotate(swing*.025+(acting?.front||0)*.55+aim);
+ c.rotate(swing*.017+grip.angle*.19+aim);c.translate(-5,-5);
  if(f>=2){
   line(c,shadow,4);c.beginPath();c.moveTo(5,29);c.lineTo(5,-25-f*2);c.stroke();
   line(c,cord,1.45);c.beginPath();c.moveTo(5,28);c.lineTo(5,-25-f*2);c.stroke();
@@ -291,6 +293,8 @@ function shrineAccessory(c,f,w,h,swing,glow,shadow,acting){
   }
   c.restore();
  }
+ ellipse(c,5,5,3.65,3.1,'#ffe4c8');
+ ellipse(c,6,4,1.1,1.1,'#fff5dd');
  const knot=[14,30,32,34,37][f];
  line(c,cord,2);c.beginPath();c.moveTo(11,knot-2);c.lineTo(11,knot+4);c.stroke();
  for(let i=-1;i<=1;i++){
@@ -429,16 +433,22 @@ function draw(ctx,pose,R){
   else{const ls=run&&!reduced?Math.sin(runPh)*5:0,ly=jumpS?-5:fallS?3:0;
    ellipse(ctx,-7-ls,ly-(run?Math.max(0,Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);
    ellipse(ctx,8+ls,(jumpS?-3:ly)-(run?Math.max(0,-Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);}
-  // Two animated open sleeves. K's suction visibly pulls them forward.
-  for(const side of [-1,1]){
-    if(f===0)break;
-    ctx.save();ctx.translate(side*(w*.77),shoulder+6);
+  // The lamp is anchored to the rotating leading cuff in every pose.
+  let grip=null;
+  for(const side of f===0?[]:[-1,1]){
+    const x=side*w*.77,y=shoulder+6;
+    ctx.save();ctx.translate(x,y);
     // K rings a bell from both sleeves; L winds the leading sleeve back for the bite.
     const leading=side===1,windup=acting?(leading?acting.front:acting.back):0;
     const welcomeSleeve=leading?(listen*.34+gather*.65+reveal*(-.75)+startle*.95+bow*.46+life.sleeveFront):
       (-listen*.19-gather*.40+reveal*.69-startle*.56+bow*.38+life.sleeveBack);
-    ctx.rotate(side*((cast===1?.22:run?.22+(reduced?0:Math.sin(runPh+side*1.6)*.28):jumpS?.55:fallS?2.45:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve);
+    const angle=side*((cast===1?.22:run?.22+(reduced?0:Math.sin(runPh+side*1.6)*.28):jumpS?.55:fallS?2.45:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve;
+    ctx.rotate(angle);
     const sleeveLen=17+f*2.5+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0)+gather*1.7+reveal*2.3;
+    if(leading){
+      const reach=sleeveLen-4;
+      grip={x:x-Math.sin(angle)*reach,y:y+Math.cos(angle)*reach,angle};
+    }
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
     ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
     ctx.quadraticCurveTo(0,sleeveLen+5,11,sleeveLen);
@@ -478,8 +488,9 @@ function draw(ctx,pose,R){
   const mood=hurt?"closed":angry?"angry":(welcome?.spark||0)>.47?"closed":startle>.23?"closed":
     reveal>.25||bow>.20||(welcome?.melody||0)>.45||(welcome?.dino||0)>.45?"happy":st==="victory"||cast===3?"happy":"normal";
   const eyeSize=f===0?7.3:6.1+f*.13;
-  R.eye(ctx,-7.5,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
-  R.eye(ctx,8,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
+  const iris=['#a55c3d','#8a4263','#4d717f','#725399','#ae506a'][f];
+  R.eye(ctx,-7.5,faceY,eyeSize,p,{iris,mood});
+  R.eye(ctx,8,faceY,eyeSize*.92,p,{iris,mood});
   if(!hurt&&mood==='normal'&&f>0){
     line(ctx,shadow,2.05);ctx.beginPath();
     ctx.moveTo(-13,faceY-1);ctx.quadraticCurveTo(-10,faceY-5,-4,faceY-4);
@@ -515,13 +526,12 @@ function draw(ctx,pose,R){
     ctx.save();ctx.globalAlpha=.60;line(ctx,"#ffe0ac",2);
     ctx.beginPath();ctx.arc(0,faceY-17,18,-2.8,-.3);ctx.stroke();ctx.restore();
   }
-  // Lumbre carries its own flame. Yomi carries it in the hand lantern.
   if(f===0){
-  ellipse(ctx,0,-25,7+f*.5+reveal*2.2+life.flame*1.5,9+f*.3+reveal*2.7+life.flame*1.8,glow);
-  ctx.fillStyle=f>=3?"#fff4d0":"#ffedaa";ctx.beginPath();
-  const flameLean=swing*.39+(acting?.release||0)*6, flameHeight=8+f+(acting?.load||0)*7+(acting?.release||0)*5;
-  ctx.moveTo(flameLean,-25-flameHeight);ctx.quadraticCurveTo(-9,-24,0,-18);
-  ctx.quadraticCurveTo(9,-24,flameLean,-25-flameHeight);ctx.fill();
+    const lean=swing*.27+(acting?.release||0)*4;
+    const flame=5+pulse*1.2+reveal*1.8+life.flame*1.3+(acting?.release||0)*2.2;
+    ellipse(ctx,0,-20,5.7,3.5,glow);
+    ctx.fillStyle='#fff3c7';ctx.beginPath();ctx.moveTo(lean,-18-flame);
+    ctx.quadraticCurveTo(-5,-20,0,-17);ctx.quadraticCurveTo(6,-18,lean,-18-flame);ctx.fill();
   }
   // J throws a horizontal paper seal; the hand no longer points skyward.
   if(cast===0) {
@@ -560,7 +570,7 @@ function draw(ctx,pose,R){
     ctx.lineTo(tail+4,y+8);ctx.quadraticCurveTo(-w-9,y+13,-w*.56,y+4);ctx.closePath();ctx.fill();
     line(ctx,glow,1.2);ctx.beginPath();ctx.moveTo(-w*.58,y+2);ctx.quadraticCurveTo(-w-9,y+11,tail+2,y+5);ctx.stroke();
   }
-  if(f>0)shrineAccessory(ctx,f,w,h,swing,glow,shadow,acting);
+  if(grip)shrineAccessory(ctx,f,grip,swing,glow,shadow,acting);
   drawYomiRitual(ctx,p,f,trim,glow,faceY,w,t);
   ctx.restore();
 }

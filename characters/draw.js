@@ -54,7 +54,7 @@ const ABILITY_ACCENTS = { ukulele:"#ffb347", hula:"#ff5ad5", ohana:"#ffd36a", pl
 const CHARACTER_ACCENTS = {
 kilo: "#ffd36a", stitcho: "#67ddff", chispin: "#fff29a", cat: "#ffb8e8",
 dragon: "#ff8a45", dino: "#b8ef6b", frita: "#fff1b3", pizza: "#ffd84a",
-yomi: "#4ff0c8", cuerno: "#ffd98a",
+yomi: "#ffcb89", cuerno: "#ffd98a",
 };
 
 function accentFor(p) {
@@ -1010,6 +1010,12 @@ ctx.restore();
 
 function drawCharacterMotionFX(ctx, p, H, pose, t, reduceMotion=false) {
 const color = accentFor(p);
+if(p.id==='yomi'||p.id==='nacar'||p.id==='ia'){
+  // These rigs already draw their own cloth, lantern and luminous wakes.
+  drawMasteryMotionFX(ctx,p,H,t);
+  if(!reduceMotion)drawLandingImpact(ctx,H,color,pose);
+  return;
+}
 const prof = motionProfile(p);
 drawSignatureFX(ctx, p, H, pose, t);
 drawAbilitySignatureFX(ctx, p, H, pose, t);
@@ -1409,6 +1415,7 @@ export function drawCharacter(ctx, p, cam, t, options={}) {
 const evo = Math.max(0, Math.min(4, Math.round(Number(p.evo) || 0)));
 // All five Michi forms own their anatomical poses and attached magic.
 const michiRig=p.id==="cat";
+const ownAura=p.id==="yomi"||p.id==="nacar"||p.id==="ia";
 const facing = p.facing || 1;
 const footX = p.x + p.w / 2 - cam.x;
 const footY = p.y + p.h - cam.y;
@@ -1432,7 +1439,11 @@ if(p.id==="cuerno"&&p._introForceCanvas&&p._introCuerno)pose.cuernoWelcome=p._in
 if(p.id==="kilo"&&p._introForceCanvas&&p._introKilo)pose.kiloWelcome=p._introKilo;
 if(p.id==="stitcho"&&p._introForceCanvas&&p._introStitcho)pose.stitchoWelcome=p._introStitcho;
 if(p.id==="chispin"&&p._introForceCanvas&&p._introChispin)pose.chispinWelcome=p._introChispin;
-if(p.id==="nacar"&&p._introForceCanvas&&p._introNacar)pose.nacarWelcome=p._introNacar;
+if(p.id==="nacar"){
+ pose.nacarStroke=p._nacarStroke||0;
+ pose.nacarCurrent=p._nacarCurrent||0;
+ if(p._introForceCanvas&&p._introNacar)pose.nacarWelcome=p._introNacar;
+}
 if(p.id==="cat"&&p._introForceCanvas&&p._introMichi)pose.michiWelcome=p._introMichi;
 if(p.id==='cat'&&!pose.reduceMotion)pose.michicornioFrame=Math.floor(t/2);
 if(p.id==='cat')pose.michiSeed=Number.isFinite(p.michiSeed)?p.michiSeed:0;
@@ -1540,8 +1551,8 @@ drawShadow(ctx, 0, 2 + (air ? 3 : 0), H * (michiRig&&evo===4?.21:.3) * airK * sx
 ctx.scale(facing, 1);
 ctx.translate(recoilX + lunge, -formLift-(pose.powerLift||0)*H);
 
-if (!michiRig && p.id!=="chispin" && evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
-if(!michiRig&&p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, false);
+if (!michiRig && p.id!=="chispin" && !ownAura && evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
+if(!michiRig&&p.id!=="chispin"&&!ownAura)drawFlavor(ctx, p.id, H, t, evo, false);
 // Kilo's pale solar orbit belongs behind the body; the active L hoop keeps its own split depth.
 if(p.id==='kilo')drawEvolutionSignatureFX(ctx,p,H,pose,t);
 if (moving&&!michiRig) drawDust(ctx, H, t, speed);
@@ -1587,8 +1598,8 @@ drawHulaDepth(ctx,p,H,t,true,options.reduceMotion===true);
 ctx.restore();
 
 drawMichiAura(ctx,p,H,t,options.reduceMotion===true);
-if(!michiRig&&p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, true);
-if(!michiRig&&p.id!=="chispin"&&p.id!=="kilo")drawEvolutionSignatureFX(ctx, p, H, pose, t);
+if(!michiRig&&p.id!=="chispin"&&!ownAura)drawFlavor(ctx, p.id, H, t, evo, true);
+if(!michiRig&&p.id!=="chispin"&&p.id!=="kilo"&&!ownAura)drawEvolutionSignatureFX(ctx, p, H, pose, t);
 if(!michiRig)drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);
 if (burstK > 0) {
 if(michiRig){

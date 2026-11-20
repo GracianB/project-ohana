@@ -20,10 +20,10 @@ const SKINS=[
  {dark:'#2d456b',body:'#697ab2',light:'#c6d4fc',rim:'#b4f5e4',light2:'#ffe1a2',beat:.061},
 ];
 
-const NEON=[
+export const NACAR_NEON=Object.freeze([
  ['#ffdc45','#fff69c'],['#30cbff','#6afff7'],['#a5ff49','#36ffe2'],
  ['#ff51db','#aa78ff'],['#3affe4','#a579ff'],
-];
+].map(Object.freeze));
 
 function glow(c,x,y,r,color,alpha){
  if(!c.createRadialGradient)return;
@@ -33,17 +33,17 @@ function glow(c,x,y,r,color,alpha){
  c.fillStyle=light;c.fillRect(x-r,y-r,r*2,r*2);c.restore();
 }
 
-function wake(c,f,d,cy,t,vertical,speed){
- const power=Math.min(1,Math.abs(vertical)+speed);
+function wake(c,f,d,cy,t,vertical,speed,current,stroke){
+ const power=Math.min(1,Math.abs(vertical)+speed+Math.abs(current)*.3);
  if(power<.21)return;
- const dy=-vertical*17,dx=-speed*17;
+ const dy=-vertical*18-current*9,dx=-speed*17;
  c.save();
  for(let i=0;i<6;i++){
-  const k=(t*.038+i/6)%1;
+  const k=(t*(stroke?.052:.031)+i/6)%1;
   const x=dx*(1+k*2.4)+(i%2?1:-1)*(.39+k*.33)*d.rx;
   const y=cy+d.ry*(.56+k*.86)+dy*(.25+k*1.7);
   c.globalAlpha=(1-k)*power*.78;
-  c.strokeStyle=NEON[f][i%2];c.lineWidth=1.25;
+  c.strokeStyle=NACAR_NEON[f][i%2];c.lineWidth=i%2?1.15:1.55;
   c.beginPath();c.ellipse(x,y,2.1+k*2.5,2+k*3.6,-.35,0,TAU);c.stroke();
  }
  c.restore();
@@ -94,8 +94,8 @@ function filamentPoint(u,x0,y0,x1,y1,x2,y2,x3,y3){
  return [a*x0+b*x1+c*x2+d*x3,a*y0+b*y1+c*y2+d*y3];
 }
 
-function ribbons(c,d,s,f,t,hem,drag,squeeze){
- const neon=NEON[f];
+function ribbons(c,d,s,f,t,hem,drag,squeeze,current){
+ const neon=NACAR_NEON[f];
  const spread=[.62,.90,1.28,1.13,.94][f];
  const tempo=[.081,.063,.051,.046,.037][f];
  const undulation=[3,6,4,10,8][f];
@@ -104,10 +104,11 @@ function ribbons(c,d,s,f,t,hem,drag,squeeze){
   const k=2*i/(d.tendrils-1)-1;
   const start=k*d.rx*.8;
   const taper=f===2?.72+Math.abs(k)*.28:f===4?.73+.29*Math.pow(Math.cos(k*1.25),2):.69+.29*Math.cos(k*1.6);
-  const length=d.length*taper*(1-squeeze*.18);
+  const length=d.length*taper*(1-squeeze*.23+current*.084);
   const sway=Math.sin(t*tempo+i*.82)*undulation+drag;
   const tip=start*spread+sway;
-  const controlA=start+sway*.12+(f===3?k*11:0), controlB=tip-sway*.44+(f>=3?-k*13:0);
+  const controlA=start+sway*.12+(f===3?k*11:0);
+  const controlB=tip-sway*.44+(f>=3?-k*13:0)+current*k*9;
   c.beginPath();c.moveTo(start,hem-3);
   c.bezierCurveTo(controlA,hem+length*.37,controlB,hem+length*.78,tip,hem+length);
   c.strokeStyle=i%3===0?neon[i%2]+'4b':s.body+'a0';c.lineWidth=i%3===0?6:1.2;c.stroke();
@@ -187,7 +188,7 @@ function trim(c,d,s,f,t,cast){
   const u=2*i/(3+f*2)-1;
   const x=u*d.rx*.86;
   const lamp=.64+.35*Math.sin(i*.88-t*.074);
-  glow(c,x,d.ry*.47,5+f*.7,NEON[f][i%2],.57+lamp*.31);
+  glow(c,x,d.ry*.47,5+f*.7,NACAR_NEON[f][i%2],.57+lamp*.31);
   c.globalAlpha=cast?1:lamp;
   oval(c,x,d.ry*.47,1.5+f*.16,1.8+f*.14,i%3?'#eaffff':s.light2);
  }
@@ -262,20 +263,22 @@ function draw(c,p={}){
  const vertical=clamp(p.vy,-1,1),speed=clamp(p.speed,0,1.4);
  const stroke=Math.max(Math.abs(vertical),speed);
  const cast=p.state==='attack'||p.state==='cast'||p.castSlot>=0&&p.cast>0.2;
- const neon=NEON[f];
+ const neon=NACAR_NEON[f];
  const hurt=p.state==='hurt',cheer=p.state==='victory';
+ const propulsion=clamp(p.nacarStroke,-1,1),current=reduced?0:clamp(p.nacarCurrent,-1.5,1.5);
  const charge=p.state==='cast'?Math.sin(Math.PI*clamp(p.cast,0,1)):0;
- const contraction=reduced?0:Math.sin(t*s.beat+f)*(.052+stroke*.07);
+ const wave=.5+.5*Math.sin(t*s.beat*(propulsion?1.3:1)+f);
+ const contraction=reduced?0:(wave*2-1)*(.048+stroke*.07+Math.abs(propulsion)*.036);
  const flare=p.castSlot===2?charge*.15:0;
  const welcome=reduced?0:clamp(p.nacarWelcome?.float,0,1);
  const cy=d.top+d.ry+2,hem=cy+d.ry*.55;
  c.save();
  c.translate(0,reduced?0:Math.sin(t*.027+f)*2.1-welcome*4);
  c.rotate(reduced?0:vertical*(f===2?.2:.13)+speed*.075+Math.sin(t*.024)*.028);
- if(!reduced)wake(c,f,d,cy,t,vertical,speed);
+ if(!reduced)wake(c,f,d,cy,t,vertical,speed,current,propulsion);
  glow(c,0,cy+d.ry*.34,d.rx*1.5+10,neon[0],cast?.85:.52);
  if(f>=3)glow(c,0,cy+d.ry*.94,d.rx*1.2,neon[1],.63);
- ribbons(c,d,s,f,t,hem,reduced?0:vertical*(4+f*1.6)-speed*4-charge*(p.castSlot===0?7:0),contraction-flare);
+ ribbons(c,d,s,f,t,hem,reduced?0:vertical*(4+f*1.6)-speed*4-charge*(p.castSlot===0?7:0),contraction-flare,current);
  crest(c,f,d,s,t);
  castLights(c,p,d,s,cy,t);
  c.save();
@@ -298,4 +301,5 @@ function draw(c,p={}){
  c.restore();c.restore();
 }
 
-export default {id:'nacar',draw,cacheKey:p=>'jelly:'+Math.floor((p.reduceMotion?0:p.t||0)/2)};
+export default {id:'nacar',draw,cacheKey:p=>p.reduceMotion?'jelly:still':
+ 'jelly:'+Math.floor((p.t||0)/2)+':'+(p.nacarStroke||0)+':'+Math.round((p.nacarCurrent||0)*8)};

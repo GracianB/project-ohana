@@ -1,4 +1,4 @@
-import {drawSeaStar} from '../characters/art/nacar.js';
+import {drawSeaStar,NACAR_NEON} from '../characters/art/nacar.js';
 import {drawMichiPaw} from '../worlds/michi-adventure-art.js';
 // OHANA V462 · Michicornio L projectiles: one luminous shot per tentacle, launched
 // from the tentacle tips, with a TRANSPARENT wake instead of the old additive white
@@ -27,7 +27,7 @@ export function michiShotAnchors(p,form){
  }
  return out;
 }
-const TIDE_STAR_COLORS=Object.freeze(['#aef3e3','#eed0e9','#ffe0a7','#cff5f6']);
+
 
 export function nacarStarVolley(p,form){
  const counts=[4,5,6,8,9];
@@ -46,7 +46,8 @@ export function nacarStarVolley(p,form){
    ang:dir>0?angle:Math.PI-angle,
   };
  });
- return {anchors,colors:TIDE_STAR_COLORS};
+ const [first,second]=NACAR_NEON[form];
+ return {anchors,colors:[first,second,'#fff3c3','#f0ffff']};
 }
 
 export function michiShotPalette(seed){

@@ -155,7 +155,7 @@ export function yomiMood(pose={}){
  return "normal";
 }
 
-function drawEyes(ctx,mood,x0,y0,s,glow,accent,blink,lookX,lookY,t){
+function drawEyes(ctx,mood,x0,y0,s,glow,accent,blink,lookX,lookY,t,bit){
  const gap=7.2*s,ex=x0+lookX*1.6*s+1.2*s,ey=y0+lookY*1.4*s;
  for(const side of [-1,1]){
   const x=ex+side*gap,y=ey;
@@ -172,9 +172,12 @@ function drawEyes(ctx,mood,x0,y0,s,glow,accent,blink,lookX,lookY,t){
   if(mood==="scan"){ctx.fillStyle=glow;ctx.fillRect(x-3.4*s,y-.9*s,6.8*s,1.8*s);continue;}
   const up=mood==="think"?-2.2*s:mood==="read"?1.8*s:0,shift=mood==="think"?1.6*s:0;
   const big=mood==="wow"?1.22:1;
-  const ry=Math.max(.5*s,4.2*s*big*(1-clamp(blink,0,1)*.88));
-  ctx.fillStyle=glow;ctx.beginPath();ctx.ellipse(x+shift,y+up,2.6*s*big,ry,0,0,TAU);ctx.fill();
-  if(ry>2*s)ellipse(ctx,x+shift-.9*s,y+up-ry*.45,.8*s,1*s,"#eafffa");
+  const ry=Math.max(.5*s,(bit?5:4.2)*s*big*(1-clamp(blink,0,1)*.88));
+  ellipse(ctx,x+shift,y+up,(bit?3.18:2.6)*s*big,ry,glow);
+  if(ry>2*s){
+   ellipse(ctx,x+shift-.9*s,y+up-ry*.45,bit?1.05*s:.8*s,1*s,"#eafffa");
+   if(bit)ellipse(ctx,x+shift+1.24*s,y+up+ry*.4,.65*s,.65*s,'#d5fff1');
+  }
  }
  // Mouth: a tiny waveform when scanning/talking, a smile otherwise.
  const my=y0+7.4*s;
@@ -314,9 +317,9 @@ function drawHead(ctx,F,f,col,glow,accent,mood,blink,look,t,pulse,faceY,sway,dro
  // scanline cursor drifting down the screen (stops in reduced motion; t=0)
  ctx.save();ctx.globalAlpha=.16;ctx.fillStyle=glow;ctx.fillRect(vx+2,vy+((t*.35)%vh),vw-4,1.2);ctx.restore();
  const s=f===0?1.17:f===4?1.05:1;
- drawEyes(ctx,mood,0,F.hy+faceY-1,s,glow,accent,blink,look.x,look.y,t);
+ drawEyes(ctx,mood,0,F.hy+faceY-1,s,glow,accent,blink,look.x,look.y,t,f===0);
  if(f===0&&mood!=='off'&&mood!=='glitch'){
-  for(const side of [-1,1])ellipse(ctx,side*11.2,F.hy+faceY+4,2.6,1.3,'#ff9d976e');
+  for(const side of [-1,1])ellipse(ctx,side*11.35,F.hy+faceY+4,2.6,1.45,'#ff9d97a8');
  }
  ctx.restore();
  drawAntenna(ctx,F,f,y,sway,col,glow,accent,pulse,droop);
@@ -409,28 +412,38 @@ function drawWing(ctx,side,F,t,spread,sweep,reduced,known){
  ctx.restore();
 }
 
-function drawEcho(ctx,F,t,reduced,acting){
+function drawEcho(ctx,F,t,reduced,acting,known){
  const gain=acting?.release||0;
  for(const side of [-1,1]){
   const origin=side*F.hw*.48, y=F.hy+1;
   ellipse(ctx,origin,y,5,7,'#58445e');ellipse(ctx,origin,y,3.3,4.8,'#ffe7a9');
+  const a=side===1?0:Math.PI;
   for(let i=0;i<3;i++){
-   const phase=reduced?.65:(t*.027+i*.22)%1;
-   ctx.save();ctx.globalAlpha=.25+phase*.48;
-   line(ctx,i===0?'#fff1af':'#eca185',1.8);
-   const a=side===1?0:Math.PI;
-   ctx.beginPath();ctx.arc(origin,y,8+i*5+gain*4,a-.65,a+.65);ctx.stroke();ctx.restore();
+   const phase=reduced?.48:(t*.028+i*.28+(side===1?0:.32))%1;
+   const radius=7+i*4+phase*3+gain*4;
+   ctx.save();ctx.globalAlpha=(1-phase)*.56+.18;
+   line(ctx,i===0?'#fff1af':'#eca185',1.7);
+   ctx.beginPath();ctx.arc(origin,y,radius,a-.65,a+.65);ctx.stroke();
+   if(known&&i===2){
+    const angle=a+(side===1?-1:1)*.48;
+    ellipse(ctx,origin+Math.cos(angle)*radius,y+Math.sin(angle)*radius,1.8,1.8,'#91ffe1');
+   }
+   ctx.restore();
   }
  }
 }
 
 function drawOracle(ctx,hand,t,reduced,acting,known){
  const x=hand[0]+3, y=hand[1]-19+(reduced?0:Math.sin(t*.061)*2);
+ const relay=acting?.slot===2?(acting.load+acting.release)*.5:0;
  const r=13+3*(acting?.release||0),spin=reduced?0:t*.039;
  ellipse(ctx,x,y,r+3,r+3,'#28204b');
  ellipse(ctx,x,y,r,r,'#6955a2');
  ellipse(ctx,x-2,y-3,r*.7,r*.67,'#927cda');
  line(ctx,'#f4c9ff',1.2);ctx.beginPath();ctx.ellipse(x,y,r,r*.43,-.33,0,TAU);ctx.stroke();
+ ctx.save();ctx.translate(x,y);ctx.rotate(-.18+Math.sin(spin)*.21);
+ ctx.globalAlpha=.55;line(ctx,'#d7efff',.85);
+ ctx.beginPath();ctx.ellipse(0,0,r*.33,r*.90,0,0,TAU);ctx.stroke();ctx.restore();
  line(ctx,'#baeefa',1.15);ctx.beginPath();
  for(let i=0;i<5;i++){
   const a=spin+i*TAU/5;
@@ -442,6 +455,15 @@ function drawOracle(ctx,hand,t,reduced,acting,known){
  for(let i=0;i<Math.min(known,4);i++){
   const a=spin*2+i*TAU/4;
   ellipse(ctx,x+Math.cos(a)*r*.77,y+Math.sin(a)*r*.77,1.55,1.55,'#fff6e5');
+ }
+ if(relay>.04){
+  ctx.save();ctx.globalAlpha=.72*relay;line(ctx,'#f5d2ff',1.2);
+  for(const side of [-1,1]){
+   const lean=side*(r+5+relay*8);
+   ctx.beginPath();ctx.moveTo(x+lean,y-r*.54);ctx.lineTo(x+lean+side*3,y);
+   ctx.lineTo(x+lean,y+r*.54);ctx.stroke();
+  }
+  ctx.restore();
  }
  ellipse(ctx,x-r*.36,y-r*.43,2,1.35,'#fff9fb');
 }
@@ -482,7 +504,7 @@ function drawSatellites(ctx,F,t,front,reduced,glow,accent,cast,acting){
 
 function drawRingHalf(ctx,F,front,t,reduced,acting,known){
  const y=F.hy+F.hh/2+28;
- const r=31+(acting?.release||0)*6, ry=13+2*(acting?.release||0);
+ const r=29+(acting?.release||0)*5, ry=12+2*(acting?.release||0);
  const phase=reduced?0:t*.018;
  ctx.save();ctx.translate(0,y);
  ctx.strokeStyle=front?'#e7c48d':'#637baf';ctx.lineWidth=front?1.45:2;
@@ -637,16 +659,20 @@ export function drawArtificialIntelligence(ctx,pose,R){
   yomiAmbient(ctx,p,f,glow,accent,t,F);
   // floor glow: Yomi hovers but keeps a readable ground anchor.
   ctx.save();ctx.globalAlpha=dead?.2:.26;ellipse(ctx,0,0,F.hw*.42,3.2,glow);ctx.restore();
-  if(!dead)drawYomiMagic(ctx,p,f,F,glow,accent,T,cast,acting,reduced,st);
+  if(!dead)drawIAMagic(ctx,f,F,glow,accent,T,cast,acting,reduced,st);
   ctx.translate(0,hover);
-  if(f===4)ctx.scale(.79,.81);
+  if(f===4)ctx.scale(.76,.78);
   ctx.rotate((run?(reduced?.1:.1+.03*Math.sin(runPh*2)):flight?-.04:0)+(acting?.tilt||0)+stageTilt+life.tilt+(dead?.34:0));
   if(life.active)ctx.scale(life.expandX,life.expandY);
   if(jumpS)ctx.scale(.93,1.07);else if(fallS)ctx.scale(1.05,.96);
-  else if(st==="idle"&&!reduced){const br=Math.sin(t*.05)*.014;ctx.scale(1+br,1-br);} // soft shell breathing
+  else if(st==="idle"&&!reduced){
+   const breath=Math.sin(t*.05)*(f===0?.025:.014);
+   const chirp=f===0?Math.pow(Math.max(0,Math.sin(t*.12)),5)*2.3:0;
+   ctx.translate(0,-chirp);ctx.scale(1+breath,1-breath);
+  }
   else if(st==="victory"&&!reduced){const hop=Math.abs(Math.sin(t*.16));ctx.translate(0,-hop*3);ctx.scale(1-hop*.03,1+hop*.03);}
   // ── BACK LAYER ─────────────────────────────────────────────
-  if(f===1)drawEcho(ctx,F,T,reduced,acting);
+  if(f===1)drawEcho(ctx,F,T,reduced,acting,known);
   if(f===2)drawWing(ctx,-1,F,T,spread,sweep,reduced,known);
   if(f===2)drawWing(ctx,1,F,T,spread*.92,sweep,reduced,known);
   if(f===3)drawCape(ctx,F,T,glow,swing,run,reduced);
@@ -703,38 +729,24 @@ export function drawYomiRune(ctx,x,y,s,i,color,width=1.4){
  }
  ctx.stroke();ctx.restore();
 }
-function hashNoise(i){const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v);}
-// Ground rune circle while casting + idle floating glyphs and data sparks.
-function drawYomiMagic(ctx,p,f,F,glow,accent,T,cast,acting,reduced,st){
- const strength=cast>=0?.55+.45*Math.max(acting?.release||0,acting?.maw||0,acting?.aurora||0):0;
- if(strength>0){
-  const col=cast===0?accent:cast===2?"#ffd56b":glow,R=F.hw*(.62+.08*f)+(cast===3?14:0),spin=reduced?0:T*.035;
-  ctx.save();ctx.globalAlpha=.5*strength;ctx.strokeStyle=col;ctx.lineWidth=1.6;
-  ctx.beginPath();ctx.ellipse(0,0,R,R*.26,0,0,TAU);ctx.stroke();
-  ctx.globalAlpha=.3*strength;ctx.beginPath();ctx.ellipse(0,0,R*.72,R*.19,0,0,TAU);ctx.stroke();
-  const n=6+f*2;
-  for(let i=0;i<n;i++){const a=i*TAU/n+spin;ctx.globalAlpha=.75*strength;
-   drawYomiRune(ctx,Math.cos(a)*R*.86,Math.sin(a)*R*.22,.55,i,cast===3?YOMI_FAMILY_STARS[i%10]:col,1.3);}
-  if(cast===3){ // U: the network spell lifts above the head as a constellation.
-   ctx.globalAlpha=.55*strength;ctx.strokeStyle=glow;ctx.lineWidth=1;ctx.beginPath();
-   for(let i=0;i<5;i++){const a=i*TAU/5-Math.PI/2+spin*.5,px=Math.cos(a)*F.hw*.55,py=F.top-14+Math.sin(a)*10;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
-   ctx.closePath();ctx.stroke();
-   for(let i=0;i<5;i++){const a=i*TAU/5-Math.PI/2+spin*.5;ctx.fillStyle=YOMI_FAMILY_STARS[(i*2)%10];ctx.fillRect(Math.cos(a)*F.hw*.55-2,F.top-16+Math.sin(a)*10,4,4);}
+// A small diagnostic ring is separate from the projection carried by the body.
+function drawIAMagic(ctx,f,F,glow,accent,t,cast,acting,reduced,st){
+ if(acting){
+  const strength=.55+.45*acting.release;
+  const col=cast===0?accent:cast===2?'#ffd56b':glow;
+  const radius=F.hw*(f===4?.63:.65+f*.035);
+  ctx.save();ctx.globalAlpha=.58*strength;line(ctx,col,1.4);
+  ctx.beginPath();ctx.ellipse(0,0,radius,radius*.24,0,0,TAU);ctx.stroke();
+  for(let i=0;i<(f===0?3:6);i++){
+   const a=i*TAU/(f===0?3:6)+(reduced?0:t*.027);
+   const x=Math.cos(a)*radius,y=Math.sin(a)*radius*.24;
+   ellipse(ctx,x,y,1.65,1.65,cast===3?YOMI_FAMILY_STARS[i]:col);
   }
   ctx.restore();
- }
- if(st==="idle"||st==="victory"){
-  // Idle flourish: 2-3 glyphs drifting up from the hands + orbiting data sparks.
-  ctx.save();
-  const g=2+(f>2?1:0);
-  for(let i=0;i<g;i++){
-   const ph=reduced?(i+.5)/g:((T*.006+i/g)%1),x=(hashNoise(i+f*7)-.5)*F.hw*1.1,y=F.hy+8-ph*(F.hy-F.top+26);
-   ctx.globalAlpha=.55*Math.sin(ph*Math.PI);drawYomiRune(ctx,x,y,.5,i+f,i%2?accent:glow,1.2);
-  }
-  const sp=3+f;
-  for(let i=0;i<sp;i++){const a=i*TAU/sp+(reduced?0:T*.04),r=F.hw*.58+4;
-   ctx.globalAlpha=.6;ctx.fillStyle=i%3===0?accent:glow;ctx.fillRect(Math.cos(a)*r-1.3,F.hy+Math.sin(a)*r*.32-1.3,2.6,2.6);}
-  ctx.restore();
+ }else if(st==='idle'&&f===0&&!reduced){
+  const rise=(t*.025)%1;
+  ctx.save();ctx.globalAlpha=.52*Math.sin(rise*Math.PI);
+  star4(ctx,18+rise*4,F.hy-13-rise*15,2.4,accent);ctx.restore();
  }
 }
 

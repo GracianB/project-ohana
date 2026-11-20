@@ -1999,6 +1999,7 @@ if (p._jumpHeld && p.vy < -4) p.vy *= 0.55;
 p._jumpHeld = false;
 }
 if(swimming)swimNacar(game,p,jump,drop);
+else if(p._nacarStroke||p._nacarCurrent){p._nacarStroke=0;p._nacarCurrent=0;}
 if (!swimming && p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
 if (p.gliding > 0) { p.gliding--; if(!swimming)p.vy = Math.min(p.vy, 1.3); }
 {

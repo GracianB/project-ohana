@@ -79,7 +79,7 @@ dragon:  Object.freeze({ camera:"sweep",    bg:"#2a1007", accent:"#ff8a45", moti
 dino:    Object.freeze({ camera:"impact",   bg:"#10220d", accent:"#b8ef6b", motif:"shards",  pulse:"quake",   reveal:"impact",  speed:0.94 }),
 frita:   Object.freeze({ camera:"whip",     bg:"#24170b", accent:"#fff1b3", motif:"salt",    pulse:"crisp",   reveal:"fry",     speed:1.18 }),
 pizza:   Object.freeze({ camera:"roll",     bg:"#281007", accent:"#ffd84a", motif:"cheese",  pulse:"oven",    reveal:"volcano", speed:0.92 }),
-yomi:    Object.freeze({ camera:"pull",     bg:"#071526", accent:"#4ff0c8", motif:"signal",  pulse:"network", reveal:"constellation", speed:0.9 }), ia:Object.freeze({ camera:"pull",     bg:"#071526", accent:"#4ff0c8", motif:"circuit",  pulse:"network", reveal:"constellation", speed:0.9 }),
+yomi:    Object.freeze({ camera:"pull",     bg:"#211833", accent:"#ffd491", motif:"signal",  pulse:"network", reveal:"constellation", speed:0.9 }), ia:Object.freeze({ camera:"pull",     bg:"#071526", accent:"#4ff0c8", motif:"circuit",  pulse:"network", reveal:"constellation", speed:0.9 }),
 cuerno:  Object.freeze({ camera:"rise",     bg:"#17102a", accent:"#f2c1ff", motif:"aurora",  pulse:"rainbow", reveal:"aurora",  speed:1.02 }),
 });
 
@@ -140,16 +140,22 @@ pizza: [
 "El picante le da coraje; su fuego nunca quema a los amigos.",
 "Pizza Volcánica descubre un fuego capaz de proteger a toda la familia.",
 ],
+nacar: [
+"El primer pulso de Gota de Luna prende sus filamentos de luz.",
+"Brújula despliega sus puntas verdes y encuentra el rumbo entre corrientes.",
+"Aurora abre sus cintas y dibuja su recorrido en el agua oscura.",
+"En la fosa, la Reina Abisal enciende cada perla cuando agita la campana.",
+],
 yomi: [
-"Un píxel aprende su primera palabra: «¿hola?». La familia contesta.",
-"Cada pregunta enciende un nodo: Yomi Red ya piensa en voz alta.",
-"Tres pensamientos orbitan al Oráculo: escucha, recuerda y responde.",
-"Diez estrellas, una por cada miembro de la familia: Yomi Constelación no deja a nadie atrás.",
+"Lumbre abre sus ojos de papel. La llama del santuario toma forma humana.",
+"Yomi cose al abrigo los caminos que ha recorrido y cuelga el farol de una vara.",
+"Cuando cae la noche, Custodia Lunar alumbra el umbral con seda y sellos.",
+"Farol del Hogar borda una luz por quienes aún buscan el camino de vuelta.",
 ], ia:[
-"Un píxel aprende su primera palabra: «¿hola?». La familia contesta.",
-"Cada pregunta enciende un nodo: IA Red ya piensa en voz alta.",
-"Tres pensamientos orbitan al Oráculo: escucha, recuerda y responde.",
-"Diez estrellas, una por cada miembro de la familia: IA Constelación no deja a nadie atrás.",
+"Bit escucha su propia señal volver. Eco aprende a responder.",
+"Red enlaza sus nodos: ahora la respuesta puede viajar por más de un camino.",
+"Oráculo reúne las señales en una lente y busca un patrón entre ellas.",
+"Constelación guarda diez luces en una sola órbita. Cada voz conserva su color.",
 ],
 cuerno: [
 // V75: tell the same biological story that the five live Canvas silhouettes show.

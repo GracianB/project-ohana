@@ -1,3 +1,5 @@
+ohana-811 · Santuario de Yomi, corrientes visibles de Nácar y cuatro transiciones propias de IA.
+
 ohana-810 · Seda y joyería de Yomi, filamentos de Nácar y circuitos de IA que muestran los datos capturados.
 
 ohana-809 · Faroles y vestuario de Yomi, tentáculos de Nácar y cinco lecturas claras para IA.

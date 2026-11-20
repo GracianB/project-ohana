@@ -201,13 +201,19 @@ export function swimNacar(g,p,up,down){
  if(!nacarChapter(g)||p.dead)return;
  const form=Math.min(4,Math.max(0,p.evo|0));
  const profile=NACAR_SWIM_PROFILES[form];
- const target=up===down?0:up?-profile.up:profile.down;
+ const stroke=up===down?0:up?-1:1;
+ const target=stroke<0?-profile.up:stroke>0?profile.down:0;
+ let current=0;
  p.vy=((Number.isFinite(p.vy)?p.vy:0)*(1-profile.steer))+target*profile.steer;
  for(const {id,area} of g.roomDef.tides){
   if(p.x+p.w>area.x&&p.x<area.x+area.w&&p.y+p.h>area.y&&p.y<area.y+area.h){
-   p.vy+=(g._nacarCurrents?.[id]?-1:1)*profile.tide;
+   const push=(g._nacarCurrents?.[id]?-1:1)*profile.tide;
+   p.vy+=push;
+   current+=push;
   }
  }
+ p._nacarStroke=stroke;
+ p._nacarCurrent=current;
  p.vy=Math.max(-9,Math.min(9,p.vy));
  if(Math.abs(p.vy)<.045)p.vy=0;
  p.buffer=0;

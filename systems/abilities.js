@@ -36,6 +36,7 @@ import { CUERNO_FANTASY, startCuernoFantasyTrail,
  drawCuernoFantasyStatus, drawCuernoGallopRibbons,
  drawCuernoSevenHornCrest } from "./cuerno-fantasy.js";
 import { drawCharacter } from "../characters/draw.js";
+import { NACAR_NEON } from "../characters/art/nacar.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./mutations.js";
@@ -2022,14 +2023,15 @@ burst(g, f, p) {
 if (f.next-- > 0) return true;
 const h = hand(p);
 const k = f.i - (f.n - 1) / 2;
+const ink=f.marine?NACAR_NEON[f.form||0][f.i%2]:f.i%2?"#9ef0ff":"#5ad1ff";
 pushRuntime(g.projectiles, {
   x:h.x-9,y:h.y-5+k*3,vx:(f.marine?12+(f.form||0)*.5:14)*p.facing,
   vy:f.marine?k*.42-.48:k*.35,
   w:f.marine?17:20,h:f.marine?17:10,life:f.marine?46:42,dmg:9,
-  color:f.marine?(f.i%2?'#f7ddbf':'#a3f1da'):(f.i%2?"#9ef0ff":"#5ad1ff"),
+  color:ink,
   shape:f.marine?'tideBubble':"bolt",owner:"player",trail:!f.marine,
 }, MAX_RUNTIME_PROJECTILES);
-g.fx.emit(h.x, h.y, { color: "#9ef0ff", count: 4, size: 2.5, angle: p.facing > 0 ? 0 : Math.PI, spread: 0.8, speed: 3, star: true });
+g.fx.emit(h.x, h.y, { color: f.marine?ink:"#9ef0ff", count: 4, size: 2.5, angle: p.facing > 0 ? 0 : Math.PI, spread: 0.8, speed: 3, star: true });
 p.vx -= p.facing * (f.marine?.22:.8);
 f.i++;
 f.next = f.gap;
@@ -3600,14 +3602,19 @@ if(f.marine||p?.id==='nacar'){
  const progress=1-f.life/(f.max||72);
  const radius=Math.min(f.R,36+progress*f.R);
  ctx.save();
- ctx.strokeStyle='#b1f1dd';ctx.lineWidth=2.5;
- ctx.globalAlpha=.76*(1-progress*.62);
+ const [rim,foam]=NACAR_NEON[Math.max(0,Math.min(4,f.evo|0))];
+ ctx.strokeStyle=foam;ctx.lineWidth=1.2;
+ ctx.globalAlpha=.52*(1-progress*.62);
  ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.stroke();
- const phase=g?.reduceMotion?0:(f.age||0)*.016;
- for(let i=0;i<10;i++){
-  const angle=phase+i*TAU/10,rr=radius*(i%2?.82:.96);
-  const bx=x+Math.cos(angle)*rr,by=y+Math.sin(angle)*rr;
-  ctx.beginPath();ctx.ellipse(bx,by,3+i%3,5+i%4,angle,0,TAU);ctx.stroke();
+ const phase=g?.reduceMotion?0:progress*.54;
+ ctx.globalAlpha=.62*(1-progress*.8);
+ for(let i=0;i<12;i++){
+  const a=phase+i*TAU/12;
+  ctx.strokeStyle=rim;ctx.lineWidth=2.65;
+  ctx.beginPath();ctx.arc(x,y,radius,a,a+.18);ctx.stroke();
+  const rr=radius*(i%2?.93:.98),bx=x+Math.cos(a)*rr,by=y+Math.sin(a)*rr;
+  ctx.strokeStyle=i%2?foam:rim;ctx.lineWidth=1.45;
+  ctx.beginPath();ctx.ellipse(bx,by,2.5+i%3,4+i%4,a,0,TAU);ctx.stroke();
  }
  ctx.restore();return;
 }

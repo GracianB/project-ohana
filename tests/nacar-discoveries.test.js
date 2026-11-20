@@ -83,6 +83,26 @@ test('neutral swimming settles and Compass drifts less than Aurora',()=>{
  assert.ok(p.vy<0&&p.vy>=-9);
 });
 
+test('rendering sees the same current that pushes Nácar, including reversals',()=>{
+ const {g}=setup(),p=g.player,{id,area}=g.roomDef.tides[0];
+ Object.assign(p,{x:area.x+10,y:area.y+10,evo:3,vy:0});
+ swimNacar(g,p,false,false);
+ const push=p.vy;
+ assert.ok(push>0);
+ assert.equal(p._nacarCurrent,push);
+ assert.equal(p._nacarStroke,0);
+ p.vy=0;
+ g._nacarCurrents={[id]:true};
+ swimNacar(g,p,false,true);
+ assert.equal(p._nacarStroke,1);
+ assert.equal(p._nacarCurrent,-push);
+ assert.ok(p.vy<5.8*.26);
+ Object.assign(p,{x:0,y:300,vy:0});
+ swimNacar(g,p,true,false);
+ assert.equal(p._nacarCurrent,0);
+ assert.equal(p._nacarStroke,-1);
+});
+
 test('the late-stage sweep leaves two adjacent lanes clear',()=>{
  const e={x:9500,y:1430,w:130,h:135,_nacarBoss:{attack:3,tier:3,tx:9200,ty:1405}};
  const shots=nacarBossPattern(e);
