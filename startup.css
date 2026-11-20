@@ -1,13 +1,121 @@
-/* The welcome still draws its own Canvas scene once the family is ready. */
-#startup-screen{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 35%,#254e57 0,#102937 46%,#091923 100%);color:#f8efd8;text-align:center;}
-#startup-screen .startup-content{max-width:28rem;display:grid;justify-items:center;gap:20px;}
-#startup-screen .startup-brand{font:700 clamp(48px,14vw,86px)/1 Fredoka,system-ui,sans-serif;letter-spacing:.08em;color:#ffe5a9;text-shadow:0 5px 0 #132832,0 14px 40px #0004;}
-#startup-screen .startup-family{display:flex;align-items:center;justify-content:center;gap:10px;height:32px;}
-#startup-screen .startup-family i{display:block;width:12px;height:12px;border-radius:50%;background:var(--voice);box-shadow:0 0 18px color-mix(in srgb,var(--voice) 45%,transparent);animation:ohana-gather 1.4s ease-in-out infinite;animation-delay:calc(var(--order)*.09s);}
-#startup-screen [role=status]{font:500 16px/1.6 Outfit,system-ui,sans-serif;margin:0;max-width:30ch;min-height:3.2em;}
-#startup-screen button{border:1px solid #e6d5aa;border-radius:12px;background:#f2dcad;color:#17333c;padding:14px 22px;min-height:48px;font:700 16px Outfit,system-ui,sans-serif;cursor:pointer;}
-#startup-screen button[hidden]{display:none!important;}
-#startup-screen button:focus-visible{outline:3px solid #b1f6e8;outline-offset:5px;}
-#startup-screen[data-state=error] .startup-family i{animation:none;opacity:.65;}
-@keyframes ohana-gather{0%,65%,100%{transform:translateY(0) scale(.8);opacity:.5;}30%{transform:translateY(-12px) scale(1.1);opacity:1;}}
-@media(prefers-reduced-motion:reduce){#startup-screen .startup-family i{animation:none;}}
+/* This scene is independent of the game and welcome modules. */
+#startup-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  isolation: isolate;
+  display: grid;
+  place-items: center start;
+  box-sizing: border-box;
+  padding: max(24px, env(safe-area-inset-top)) max(7vw, env(safe-area-inset-right))
+           max(24px, env(safe-area-inset-bottom)) max(7vw, env(safe-area-inset-left));
+  overflow: auto;
+  background: radial-gradient(ellipse at 73% 53%, #21474c, #071624 70%);
+  color: #ffedca;
+}
+#startup-screen .startup-island,
+#startup-screen::before {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+#startup-screen .startup-island {
+  z-index: -2;
+  object-fit: cover;
+  object-position: 70% 57%;
+}
+#startup-screen::before {
+  content: "";
+  z-index: -1;
+  background:
+    linear-gradient(90deg, #071624f5 0%, #071624d9 23%, #07162488 43%, transparent 72%),
+    linear-gradient(0deg, #071624a0, transparent 23%);
+}
+#startup-screen .startup-content {
+  display: grid;
+  justify-items: start;
+  align-content: center;
+  width: min(100%, 35rem);
+  min-height: 12rem;
+}
+#startup-screen .startup-brand {
+  display: block;
+  font: 600 clamp(4rem, 10.9vw, 10rem)/.94 Georgia, 'Times New Roman', serif;
+  letter-spacing: -.045em;
+  margin-inline-start: -.048em;
+  color: #fff1ce;
+  text-shadow: 0 3px 0 #64482c, 0 9px 28px #020a10d9;
+}
+#startup-screen .startup-progress {
+  position: relative;
+  width: min(15rem, 68vw);
+  height: 2px;
+  margin-block: clamp(22px, 5vh, 44px) 16px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #e6c48c3f;
+}
+#startup-screen .startup-progress span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 46%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #d99b4a00, #e7ac60 65%, #fff4d7);
+  animation: ohana-lantern-path 2.6s ease-in-out infinite;
+}
+#startup-screen [role="status"] {
+  max-width: 34ch;
+  margin: 0;
+  color: #efdfc6;
+  font: 500 clamp(.94rem, 1.45vw, 1.17rem)/1.55 Outfit, system-ui, sans-serif;
+  text-wrap: pretty;
+}
+#startup-screen button {
+  min-height: 48px;
+  margin-block-start: 18px;
+  border: 1px solid #f3c783;
+  border-radius: 6px;
+  padding: 10px 20px;
+  background: #edc184;
+  color: #20190f;
+  font: 700 1rem/1.3 Outfit, system-ui, sans-serif;
+  cursor: pointer;
+}
+#startup-screen button:hover { background: #ffdc9e; }
+#startup-screen button[hidden] { display: none !important; }
+#startup-screen button:focus-visible { outline: 3px solid #fdf0d8; outline-offset: 4px; }
+#startup-screen noscript { margin-block-start: 1rem; }
+#startup-screen[data-state="error"] .startup-progress span {
+  animation: none;
+  transform: translateX(110%);
+  opacity: .45;
+}
+
+@keyframes ohana-lantern-path {
+  from { transform: translateX(-105%); }
+  to { transform: translateX(225%); }
+}
+@media (max-width: 680px) and (orientation: portrait) {
+  #startup-screen {
+    place-items: end center;
+    padding: 24px max(20px, env(safe-area-inset-right))
+             max(9vh, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+    text-align: center;
+  }
+  #startup-screen .startup-island { object-position: 79% 40%; }
+  #startup-screen::before {
+    background: linear-gradient(0deg, #071624 4%, #071624f5 21%, #0716248a 43%, transparent 68%);
+  }
+  #startup-screen .startup-content { justify-items: center; }
+  #startup-screen .startup-brand { font-size: clamp(3.3rem, 18vw, 7rem); margin-inline-start: 0; }
+  #startup-screen .startup-progress { margin-block: 28px 14px; }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  #startup-screen .startup-brand { font-size: clamp(3rem, 15vh, 5rem); }
+  #startup-screen .startup-progress { margin-block: 16px 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #startup-screen .startup-progress span { animation: none; transform: translateX(59%); }
+}

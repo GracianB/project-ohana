@@ -11,3 +11,11 @@ export function updatePlayerLocomotion(p,{axisX=0,pressedLeft=false,pressedRight
  return p._sprinting?Math.min(Math.abs(p.speed)*1.4,12):Math.abs(p.speed);
 }
 export function resetPlayerLocomotion(p){if(p){p._locomotion=null;p._sprinting=false;}}
+
+
+// Overrides follow the shared ground/air and reverse input rules.
+export const HERO_STEERING = Object.freeze({
+ nacar:Object.freeze({airAccel:.34,reverseAirAccel:.39,airBrake:.965}),
+ yomi:Object.freeze({groundAccel:.57,reverseGroundAccel:.69,groundBrake:.54}),
+ ia:Object.freeze({airAccel:.49,reverseAirAccel:.64,airBrake:.73,groundBrake:.6}),
+});

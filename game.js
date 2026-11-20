@@ -1,5 +1,5 @@
 import {nacarPrompt,interactNacar,swimNacar,createNacarBoss,updateNacarBoss} from './systems/nacar-chapter.js';
-import {drawNacarSeabed,drawNacarBoss} from './worlds/nacar-seabed.js';
+import {drawNacarSeabed,drawNacarBoss,drawNacarTerrain,drawAnemoneStatus} from './worlds/nacar-seabed.js';
 import {absorbMichiGardenHit} from './systems/michi-garden-life.js';
 import {drawQuimeraMinion,drawQuimeraStars,collectQuimeraStars} from './systems/quimera-pressure.js';
 import {updateQuimeraArena,interactQuimeraArena,quimeraArenaPrompt,drawQuimeraArena} from './systems/quimera-arena.js';
@@ -47,7 +47,7 @@ import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianBody,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight,stopKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
-import {updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
+import {HERO_STEERING,updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
@@ -174,7 +174,7 @@ import { Passives } from "./systems/passives.js";
 import { masteryOf, playerMasteryPlatforms, masterySnapshot } from "./systems/hero-mastery.js";
 import { HAZARD_TYPES, hazardContainsX, hazardTrigger, drawHazards } from "./systems/hazards.js";
 import { Magic } from "./systems/magic.js";
-import { CombatFX, combatTier } from "./systems/combat-fx.js";
+import { CombatFX, combatTier, attackImpact } from "./systems/combat-fx.js";
 import { damageFeedback,showBlockedHit } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { bossAttackCue } from "./systems/boss-v94-readability.js";
@@ -971,6 +971,7 @@ return p;
 }
 function start(def) {
 game.loadRoom = loadRoom;
+game.showOceanDiscovery = (title, line) => showRoomMessage(title, line, {key:'ocean:'+title});
 game._cuernoIntroT = def?.id === "cuerno" && !reduceMotion ? 0 : null;
 game.lastAbilityId = null;
 game.lastAbilitySlot = null;game._signatureLink=null;
@@ -1020,7 +1021,7 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
-game._chosenStartForm=null;game._startFormChoice=null;game._aquariumMichi=null;
+game._chosenStartForm=null;game._startFormChoice=null;game._aquariumMichi=null;game.nacarTimes={};
 if (!resume&&!onlineMode&&typeof globalThis.__ohanaStartForm === "number") {
   const chosenForm = Math.max(0, Math.min(4, globalThis.__ohanaStartForm));
   game.player.evo = chosenForm;
@@ -1128,6 +1129,8 @@ try {
   const u = saveStore.read(def.id);
   if (u) {
     game._startFormChoice=u.startFormChoice||null;
+    game._aquariumMichi=u.aquariumReturn||null;
+    game.nacarTimes=u.nacarTimes||{};
     game.player.evo = u.evo;
     game.player.xp = u.xp;
     // V313 saves contained one U EXP value. Migrate it to the equipped
@@ -1363,19 +1366,8 @@ game.nums.add(
 );
 }
 
-game.combatFx?.add(
-e.x + e.w / 2,
-e.y + e.h / 2,
-crit ? "#ffe66a" : (p.color || "#fff"),
-{
-  tier: feedback.tier,
-  dir: face,
-  label: feedback.label,
-  seed: game.combo + (e.boss ? 11 : 0),
-}
-);
-
-punch(e.x, e.y, crit ? "#ffe66a" : p.color);
+attackImpact(game,e,{dir:face,color:crit?"#ffe66a":p.color,crit});
+punch(e.x, e.y, crit ? "#ffe66a" : p.color, face, false);
 earnKiloPetal(game, p._swing);
 const flow = registerCombatAction(game, "H", markAt(p.id, evo)?.name || "H");
 if (flow.label && flow.distinct >= 2) game._combatFlow = { ...game._combatFlow, label: flow.label };
@@ -1445,7 +1437,7 @@ const low = !!sig.low;
 const box = low
 ? { x: p.x - reach * 0.12, y: p.y + p.h * 0.42, w: p.w + reach, h: p.h * 0.7 }
 : { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
-const mouth = p.id === "dino" || p.id === "yomi";
+const mouth = p.id === "dino";
 const life = sig.heavy ? 20 : 16;
 const slash = {
 x: p.x + p.w / 2 + face * (low ? 8 : 18),
@@ -1721,14 +1713,14 @@ return;
 if (deepFall) dieVoid(p);
 }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
-function punch(x, y, color, dir = 1) {
+function punch(x, y, color, dir = 1, showMark = true) {
 game.shake = Math.min(18, game.shake + 6);
 addCombo(1);
 game.comboT = 480;
 addScore(10 * game.combo);
 const tier = combatTier(game.combo);
 const label = tier >= 4 ? "RÁFAGA" : tier === 3 ? "IMPACTO" : tier === 2 ? "COMBO" : "";
-game.combatFx?.add(x, y, color || "#fff", { tier, dir, label, seed: game.combo });
+if(showMark)game.combatFx?.add(x,y,color||"#fff",{tier,dir,label,seed:game.combo,hero:game.player?.id});
 game.fx.emit(x, y, { color, count: 10 + tier * 2, size: 3.2 + tier * 0.35, up: 1.2 + tier * 0.18 });
 game.fx.emit(x, y, { color: "#fff", count: 6 + tier * 2, size: 2, up: 1.8, speed: 4.4 + tier * 0.3, life: 16, star: true });
 if (tier >= 3) hitStop(tier === 4 ? 4 : 3);
@@ -1926,7 +1918,9 @@ const right = axisX > 0;
 const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
 const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
 const drop = !!(keys["s"] || keys["arrowdown"]);
+const swimming=!!game.roomDef?.nacarChapter;
 // Sanctuary travel is deliberate: E / Use. Down only descends or drops.
+const steering=HERO_STEERING[p.id];
 const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
 if (p.dash > 0) p.dash--;
 if (p._dashGo > 0) p._dashGo--;
@@ -1954,14 +1948,16 @@ if (oppose) {
 } else if (axisX !== 0) {
 const target = axisX * moveSpeed;
 const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
-const accel = p.grounded
-  ? (reversing ? CONTROL_FEEL.reverseGroundAccel : CONTROL_FEEL.groundAccel)
-  : (reversing ? CONTROL_FEEL.reverseAirAccel : CONTROL_FEEL.airAccel);
+const accelKey = p.grounded
+  ? (reversing ? 'reverseGroundAccel' : 'groundAccel')
+  : (reversing ? 'reverseAirAccel' : 'airAccel');
+const accel = steering?.[accelKey] ?? CONTROL_FEEL[accelKey];
 p.vx += (target - p.vx) * accel;
 if (Math.abs(target - p.vx) < 0.06) p.vx = target;
 p.facing = axisX;
 } else {
-p.vx *= p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake;
+const brakeKey = p.grounded ? 'groundBrake' : 'airBrake';
+p.vx *= steering?.[brakeKey] ?? CONTROL_FEEL[brakeKey];
 if (Math.abs(p.vx) < 0.04) p.vx = 0;
 }
 if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
@@ -1979,7 +1975,7 @@ for (const plat of game.platforms) {
 }
 }
 const canJump = p.jumps < p.maxJumps || p.coyote > 0 || p.wall;
-if (p.buffer > 0 && canJump) {
+if (!swimming && p.buffer > 0 && canJump) {
 const cuernoAirJump = !(p.coyote > 0 || p.wall);
 p.vy = -p.jumpPower; p.jumps = p.coyote > 0 || p.wall ? 1 : p.jumps + 1;
 if (p.id === "cuerno" && cuernoAirJump && p.jumps === 2 && cuernoFormMods((Number(p.evo) || 0) + 1)?.unlock?.rainbowJump) cuernoDoubleJump(game.cuernoFx, p);
@@ -1987,13 +1983,14 @@ if (p.wall) p.vx = 8 * p.wall;
 p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; beep("jump");
 game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: p.color || "#fff", count: 10, size: 2.6, up: 1.4, speed: 2.2, life: 14 });
 }
-if (!jump) {
+if (!swimming && !jump) {
 if (p._jumpHeld && p.vy < -4) p.vy *= 0.55;
 p._jumpHeld = false;
 }
-if(game.roomDef?.nacarChapter)swimNacar(game,p,jump,!!(keys['s']||keys['arrowdown']));
-if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
-if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
+if(swimming)swimNacar(game,p,jump,drop);
+else if(p._nacarStroke||p._nacarCurrent){p._nacarStroke=0;p._nacarCurrent=0;}
+if (!swimming && p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
+if (p.gliding > 0) { p.gliding--; if(!swimming)p.vy = Math.min(p.vy, 1.3); }
 {
 const holdGlide = !!(p.glide && !p.grounded && p.vy > 1 && jump);
 const glideActive = holdGlide || (p.gliding > 0);
@@ -2013,7 +2010,7 @@ if (glideActive && (p.evo >= 4 || p.glide) && (t % 5 === 0)) {
   });
 }
 }
-if (p.wall) p.vy = Math.min(p.vy, 2.2);
+if (!swimming && p.wall) p.vy = Math.min(p.vy, 2.2);
 stepChispinCloud(p,{jump,left,right});
 const inputState = { axisX, left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jumpPressed, t };
 p._jumpPrev = !!jump;
@@ -2027,7 +2024,7 @@ updateKiloPresence(game);
 const wasGrounded = !!p.grounded;
 const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
 const incoming = p.vy;
-p.vy = Math.min(14, p.vy + (kiloFlight||michiFlight||game.roomDef?.nacarChapter?0:p._dashGo > 0 ? 0.14 : 0.5));
+p.vy = Math.min(14, p.vy + (kiloFlight||michiFlight||swimming?0:p._dashGo > 0 ? 0.14 : 0.5));
 p.grounded = false;
 const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 8));
 let wall = 0;
@@ -2446,7 +2443,7 @@ if (e.boss) {
   continue;
 }
 
-if(updateNacarBoss(e,game))continue;
+if(updateNacarBoss(e,game,hurtPlayer))continue;
 if(updateGauntletGuardian(e,game,hurtPlayer))continue;
 if(updateStitchoBoss(e,game,hurtPlayer))continue;
 if(updateChispinBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
@@ -3087,8 +3084,10 @@ return false;
 }
 function updateProjectiles() {
 for (const pr of game.projectiles) {
+if (pr.intercepted) continue;
 if (pr.homing && game.enemies[0]) { pr.vx += Math.sign(game.enemies[0].x - pr.x) * 0.35; pr.vy += Math.sign(game.enemies[0].y - pr.y) * 0.35; }
 const previous = { x: pr.x, y: pr.y };
+pr.prevX=previous.x;pr.prevY=previous.y;
 pr.x += pr.vx; pr.y += pr.vy; pr.life--;
 if (hitsSolid(pr, game.platforms, previous)) {
   pr.life = 0;
@@ -3118,7 +3117,8 @@ if (pr.owner === "player") {
         pr.hit.add(e);
         if (pr.hit.size >= pr.pierce) pr.life = 0;
       } else pr.life = 0;
-      punch(e.x, e.y, pr.color); addPlayerXp(game.player, game.roomDef?.kiloEncounterVersion?1:3);
+      attackImpact(game,e,{x:pr.x+pr.w/2,y:pr.y+pr.h/2,dir:Math.sign(pr.vx),color:pr.color,crit:dmg>=40});
+      punch(e.x,e.y,pr.color,Math.sign(pr.vx),false); addPlayerXp(game.player, game.roomDef?.kiloEncounterVersion?1:3);
       game.nums.add(e.x, e.y, "" + dmg, "#ffe66a", dmg >= 40);
     }
   }
@@ -3336,7 +3336,8 @@ if(!game.roomDef?.world1)drawIslandLandmarks(ctx,game,game.cam,t);
 drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,game,game.cam,t);
 const realmTerrain={frita:{id:'frita-market',groundTop:'#e5cfa5',ground:'#9c8492',edge:'#f7e8c4'},yomi:{id:'yomi-observatory',groundTop:'#d7e6de',ground:'#8ca7af',edge:'#e8f4eb'},pizza:{id:'pizza-harbor',groundTop:'#eacba5',ground:'#b09179',edge:'#fff0cd'},dino:{id:'fossil-valley',groundTop:'#d9deb9',ground:'#90a48a',edge:'#eff1ce'},cat:{id:'lunar-garden',groundTop:'#e4d5e4',ground:'#a598ab',edge:'#f3e6e5'},cuerno:{id:'prism-grove',groundTop:'#cbdca9',ground:'#93a684',edge:'#edf1cb'},dragon:{id:'ember-forge',groundTop:'#e4c4a4',ground:'#9c8070',edge:'#f5dbb3'}}[game.roomDef?.hero];
 const heroTerrain=game.roomDef?.fusionBoss?{...world,id:'quimera-sanctum',groundTop:'#465568',ground:'#10172a',edge:'#9aadb4',platOutline:'#14263e'}:realmTerrain?{...world,...realmTerrain}:game.roomDef?.hero==='stitcho'?{...world,id:'dock',groundTop:'#e2c6a0',ground:'#a78f77',edge:'#efe0b9',platOutline:'#466577'}:game.roomDef?.hero==='chispin'?{...world,id:'sanctuary',groundTop:'#f1e5ca',ground:'#a3b8bf',edge:'#fff3d8',platOutline:'#5a788e'}:world;
-if(!game.roomDef?.michiSanctuary)game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
+if(game.roomDef?.nacarChapter)game.terrainStats=drawNacarTerrain(ctx,game.platforms,game.cam,camW(),camH());
+else if(!game.roomDef?.michiSanctuary)game.terrainStats=drawTerrain(ctx, game.platforms, {...heroTerrain,chapterHero:game.roomDef?.composition?game.roomDef.hero:null}, game.cam, t,{width:camW(),height:camH()});
 if(game.roomDef?.kiloChapter&&!game.roomDef?.composition){ctx.save();ctx.strokeStyle='#273329';ctx.lineWidth=2;for(const pl of game.platforms){if(pl.h>24||!visibleForRender(pl,game.cam,viewportW,viewportH))continue;const px=pl.x-game.cam.x,py=pl.y-game.cam.y;ctx.fillStyle='#e0c67f';ctx.fillRect(px,py,pl.w,5);ctx.strokeRect(px,py,pl.w,pl.h);}ctx.restore();}
 if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
 }
@@ -3427,9 +3428,9 @@ Passives.draw(ctx, game, t);
 // touches performance.now() repeatedly, without changing synchronization.
 const peerCombatFresh=onlineCoop.hasFreshCombat(game);
 if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')for(const shot of game.coopFinalShots||[])if(shot.life>0)drawGauntletProjectile(ctx,shot,game.cam,t,game.reduceMotion||reduceMotion);
-for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t,game.reduceMotion||reduceMotion))drawProjectile(ctx, pr, game.cam, t);}
+for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t,game.reduceMotion||reduceMotion))drawProjectile(ctx,pr,game.cam,t,game.reduceMotion||reduceMotion);}
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
-for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
+for (const s of game.slashes || []) drawSlash(ctx,s,game.cam,game.reduceMotion||reduceMotion);
 onlineCoop.render(ctx, game, t);
 game.fx.render(ctx, game.cam, { width: viewportW, height: viewportH }); game.combatFx?.render(ctx, game.cam, game.reduceMotion || reduceMotion); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
 if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);
@@ -3581,6 +3582,7 @@ if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
 }
 drawMinimap();
 drawWorld1Overlay(ctx,game,viewW,viewH);
+drawAnemoneStatus(ctx,game,viewW);
 drawAdventureGuide(ctx,game,viewW,viewH,Magic.status());
 if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH,{badge:false});}
 if(game.boss?._fusionBoss&&!game.world1Boss&&!world1CineActive(game))drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
@@ -3654,10 +3656,16 @@ drawHudPortrait(cv,p,t,{reduceMotion:game.reduceMotion||reduceMotion});
 
 function updateHUD() {
 const p = game.player; if (!p) return;
-const jumpHint=p.id==='cat'&&p.evo===1?'saltar · mantener: aletear':p.id==='cat'&&p.evo===4?'mantener: volar':'saltar';
+const ocean=!!game.roomDef?.nacarChapter;
+const jumpHint=ocean?'mantener: ascender':p.id==='cat'&&p.evo===1?'saltar · mantener: aletear':p.id==='cat'&&p.evo===4?'mantener: volar':'saltar';
 if(game._jumpHint!==jumpHint){
  game._jumpHint=jumpHint;const caption=document.getElementById('jump-control-caption');if(caption)caption.textContent=jumpHint;
- const touchJump=document.querySelector('.touch-btn.jump');if(touchJump){const label=jumpHint==='saltar'?'Saltar':p.evo===1?'Saltar; mantener para aletear':'Mantener para volar; soltar para planear';touchJump.setAttribute('aria-label',label);touchJump.title=label;}
+ const touchJump=document.querySelector('.touch-btn.jump');if(touchJump){const label=ocean?'Mantener para ascender':jumpHint==='saltar'?'Saltar':p.evo===1?'Saltar; mantener para aletear':'Mantener para volar; soltar para planear';touchJump.setAttribute('aria-label',label);touchJump.title=label;}
+ const touchDown=document.querySelector('#touch [data-k=s]');
+ if(touchDown){
+  const label=ocean?'Mantener para sumergirse':'Bajar';
+  touchDown.setAttribute('aria-label',label);touchDown.title=label;
+ }
 }
 
 const goal = world1NextObjective(game);

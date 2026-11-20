@@ -1384,15 +1384,15 @@ class OnlineCoop {
         if(peerFx.kiloDuet)drawKiloDuet(ctx,peerFx.kiloDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
         drawKiloAbilityEcho(ctx,peerFx.kiloFx,game.cam,t,{...this.remote,w:this.remote.w||24,h:this.remote.h||34});
       }
-      for(const pr of peerFx.projectiles)drawProjectile(ctx,pr,game.cam,t);
-      for(const slash of peerFx.slashes)drawSlash(ctx,slash,game.cam);
+      for(const pr of peerFx.projectiles)drawProjectile(ctx,pr,game.cam,t,!!game.reduceMotion);
+      for(const slash of peerFx.slashes)drawSlash(ctx,slash,game.cam,!!game.reduceMotion);
       for(const bolt of peerFx.bolts)drawBolt(ctx,bolt,game.cam,t);
     }
     if(this.hasFreshCombat(game)){
       for(const pr of game.onlineAdventure&&game.roomId==='w1-final'?[]:game.coopRemoteEnemyBullets||[]){
         const vx=pr.x-(game.cam?.x||0),vy=pr.y-(game.cam?.y||0);
         if(vx>-200&&vx<(game.viewW||1280)+200&&vy>-200&&vy<(game.viewH||720)+200)
-          drawProjectile(ctx,pr,game.cam,t);
+          drawProjectile(ctx,pr,game.cam,t,!!game.reduceMotion);
       }
     }
     drawDuoAltars(ctx,game,this.remote?{...this.remote,worldRoomId:this.remoteWorld}:null,this.snapshot,t,!!game.reduceMotion);

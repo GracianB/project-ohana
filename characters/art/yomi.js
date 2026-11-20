@@ -8,19 +8,19 @@ import lanternGuardian from './yomi-lantern.js';
 // F1 Yomi: cabeza-pantalla, cuerpo flotante y manos sin brazos.
 // F2 Yomi Red: alas neuronales que se iluminan al pensar, auriculares de escucha.
 // F3 Yomi Oráculo: placas flotantes, capa de código y tres pensamientos en órbita.
-// F4 Yomi Constelación: cuerpo de cielo nocturno, anillo planetario y alas con
+// F4 Yomi Constelación: cuerpo de cielo nocturno y anillo planetario con
 //    diez estrellas, una por cada miembro de la familia.
 // Todo es Canvas 2D vectorial, determinista (ruido hash, sin azar) y sin gradientes.
 // Paleta por forma: [carcasa, sombra, brillo, acento].
 const PAL=[
-  ["#f4f7ff","#c6d0ec","#4ff0c8","#ff7f6e"],
-  ["#f2f6ff","#c2cdea","#4ff0c8","#ff7f6e"],
-  ["#eef3ff","#bccaea","#53f2d2","#ff8b74"],
-  ["#eef0ff","#b7bfe6","#62f4dc","#ffb35c"],
-  ["#fff8ea","#d9c7a4","#7ef7e4","#ffd56b"]
+  ["#cde5f3","#61829b","#6fffe1","#ffd06b"],
+  ["#f2d9a7","#8e645a","#8affdf","#ffab63"],
+  ["#c6cbff","#6575ac","#a0e2ff","#edbaff"],
+  ["#bda2e6","#694c9c","#f9b9ed","#ffe188"],
+  ["#ede3bf","#967658","#b6fff2","#ffd56b"]
 ];
 const INK="#121a36",LINE="#2a3160",SCREEN="#0d1430",INDIGO="#2a2468",GOLD="#ffd56b";
-// Diez estrellas en las alas de Constelación: la familia completa.
+// Diez estrellas en la órbita de Constelación: la familia completa.
 export const YOMI_FAMILY_STARS=Object.freeze([
   "#eb554a","#5ad1ff","#ffe14a","#c9a8ff","#ff6a2a",
   "#4cbf56","#f0b43a","#e0402a","#f2c1ff","#4ff0c8"
@@ -155,7 +155,7 @@ export function yomiMood(pose={}){
  return "normal";
 }
 
-function drawEyes(ctx,mood,x0,y0,s,glow,accent,blink,lookX,lookY,t){
+function drawEyes(ctx,mood,x0,y0,s,glow,accent,blink,lookX,lookY,t,bit){
  const gap=7.2*s,ex=x0+lookX*1.6*s+1.2*s,ey=y0+lookY*1.4*s;
  for(const side of [-1,1]){
   const x=ex+side*gap,y=ey;
@@ -172,9 +172,12 @@ function drawEyes(ctx,mood,x0,y0,s,glow,accent,blink,lookX,lookY,t){
   if(mood==="scan"){ctx.fillStyle=glow;ctx.fillRect(x-3.4*s,y-.9*s,6.8*s,1.8*s);continue;}
   const up=mood==="think"?-2.2*s:mood==="read"?1.8*s:0,shift=mood==="think"?1.6*s:0;
   const big=mood==="wow"?1.22:1;
-  const ry=Math.max(.5*s,4.2*s*big*(1-clamp(blink,0,1)*.88));
-  ctx.fillStyle=glow;ctx.beginPath();ctx.ellipse(x+shift,y+up,2.6*s*big,ry,0,0,TAU);ctx.fill();
-  if(ry>2*s)ellipse(ctx,x+shift-.9*s,y+up-ry*.45,.8*s,1*s,"#eafffa");
+  const ry=Math.max(.5*s,(bit?5:4.2)*s*big*(1-clamp(blink,0,1)*.88));
+  ellipse(ctx,x+shift,y+up,(bit?3.18:2.6)*s*big,ry,glow);
+  if(ry>2*s){
+   ellipse(ctx,x+shift-.9*s,y+up-ry*.45,bit?1.05*s:.8*s,1*s,"#eafffa");
+   if(bit)ellipse(ctx,x+shift+1.24*s,y+up+ry*.4,.65*s,.65*s,'#d5fff1');
+  }
  }
  // Mouth: a tiny waveform when scanning/talking, a smile otherwise.
  const my=y0+7.4*s;
@@ -234,6 +237,39 @@ function drawAntenna(ctx,F,f,headTop,sway,col,glow,accent,pulse,droop){
  for(const [a,r] of [[-1.9,4.2],[-Math.PI/2,6],[-1.24,4.2]]){star4(ctx,hx+Math.cos(a)*19,hy+Math.sin(a)*5.2-(r>5?6:2),r,r>5?"#fff6d8":GOLD);}
 }
 
+function visorContour(ctx,f,x,y,w,h){
+ ctx.beginPath();
+ switch(f){
+  case 0:
+   ctx.moveTo(x+w*.24,y);ctx.lineTo(x+w*.76,y);
+   ctx.quadraticCurveTo(x+w,y+h*.08,x+w,y+h*.5);
+   ctx.quadraticCurveTo(x+w,y+h*.92,x+w*.76,y+h);
+   ctx.lineTo(x+w*.24,y+h);ctx.quadraticCurveTo(x,y+h*.92,x,y+h*.5);
+   ctx.quadraticCurveTo(x,y+h*.08,x+w*.24,y);
+   break;
+  case 1:
+   ctx.moveTo(x+w*.15,y);ctx.lineTo(x+w*.85,y);ctx.lineTo(x+w,y+h*.28);
+   ctx.lineTo(x+w*.89,y+h*.83);ctx.lineTo(x+w*.68,y+h);ctx.lineTo(x+w*.32,y+h);
+   ctx.lineTo(x+w*.11,y+h*.83);ctx.lineTo(x,y+h*.28);
+   break;
+  case 2:
+   ctx.moveTo(x+w*.5,y);ctx.lineTo(x+w*.92,y+h*.22);ctx.lineTo(x+w,y+h*.65);
+   ctx.lineTo(x+w*.73,y+h);ctx.lineTo(x+w*.27,y+h);ctx.lineTo(x,y+h*.65);ctx.lineTo(x+w*.08,y+h*.22);
+   break;
+  case 3:
+   ctx.moveTo(x+w*.13,y+h*.09);ctx.lineTo(x+w*.87,y+h*.09);ctx.lineTo(x+w,y+h*.35);
+   ctx.lineTo(x+w*.9,y+h*.71);ctx.lineTo(x+w*.5,y+h);ctx.lineTo(x+w*.1,y+h*.71);ctx.lineTo(x,y+h*.35);
+   break;
+  case 4:
+   ctx.moveTo(x+w*.5,y);ctx.bezierCurveTo(x+w*.8,y,x+w,y+h*.18,x+w,y+h*.45);
+   ctx.bezierCurveTo(x+w,y+h*.74,x+w*.71,y+h*.88,x+w*.5,y+h);
+   ctx.bezierCurveTo(x+w*.29,y+h*.88,x,y+h*.74,x,y+h*.45);
+   ctx.bezierCurveTo(x,y+h*.18,x+w*.2,y,x+w*.5,y);
+   break;
+ }
+ ctx.closePath();
+}
+
 function drawHead(ctx,F,f,col,glow,accent,mood,blink,look,t,pulse,faceY,sway,droop,cast,acting){
  const hw=F.hw,hh=F.hh,x=-hw/2,y=F.hy-hh/2+faceY;
  // Listening pods (F1+) — Yomi always listens before it answers.
@@ -245,35 +281,47 @@ function drawHead(ctx,F,f,col,glow,accent,mood,blink,look,t,pulse,faceY,sway,dro
    if(f===2){line(ctx,glow,1.3);ctx.beginPath();ctx.moveTo(px+side*pr*.7,py-pr*.6);ctx.lineTo(px+side*(pr+4),py-pr*1.8);ctx.stroke();ellipse(ctx,px+side*(pr+4),py-pr*1.8,1.6,1.6,glow);}
   }
  }
- // Folded listening petals frame the visor: a paper spirit, not a stock TV.
+ // Gimbals open under load. Each side stays attached to the shell by its axle.
  for(const side of [-1,1]){
-  const spread=f===0?8:f===4?12:9,shift=f===0?3:0;
-  ctx.fillStyle=f>=3?'#f6e9c6':'#d5eee4';ctx.strokeStyle=LINE;ctx.lineWidth=1.3;
-  ctx.beginPath();ctx.moveTo(side*hw*.37,y+hh*.18);
-  ctx.quadraticCurveTo(side*(hw*.55+spread),y-5-shift,side*(hw*.47+spread),y+hh*.7);
-  ctx.lineTo(side*hw*.38,y+hh*.82);ctx.closePath();ctx.fill();ctx.stroke();
-  line(ctx,glow,.8);ctx.beginPath();ctx.moveTo(side*hw*.4,y+hh*.26);ctx.lineTo(side*(hw*.47+spread-2),y+hh*.12);ctx.stroke();
+  const extension=(acting?.release||0)*(f<2?3:7);
+  ctx.save();ctx.translate(side*(hw*.47+extension),y+hh*.42);
+  ctx.rotate(side*(f<2?.12:.29));
+  rrect(ctx,-5,-9,10,f===0?14:20,2.6);ctx.fillStyle=col[1];ctx.fill();line(ctx,LINE,1.5);ctx.stroke();
+  ctx.fillStyle=glow;ctx.fillRect(side*2-1,-4,2,6);
+  ctx.restore();
  }
- // Shell
- ctx.fillStyle=col[0];rrect(ctx,x,y,hw,hh,f===0?12:13);ctx.fill();line(ctx,LINE,3);ctx.stroke();
+ ctx.fillStyle=col[0];
+ visorContour(ctx,f,x,y,hw,hh);ctx.fill();line(ctx,LINE,2);ctx.stroke();
+ ctx.save();ctx.clip();
+ ctx.fillStyle='#eaf8ff';ctx.globalAlpha=.57;ctx.beginPath();
+ ctx.moveTo(x,y);ctx.lineTo(x+hw,y);ctx.lineTo(x+hw*.83,y+hh*.21);
+ ctx.lineTo(x+hw*.31,y+hh*.32);ctx.lineTo(x,y+hh*.58);ctx.fill();
+ ctx.fillStyle=col[1];ctx.globalAlpha=.76;ctx.beginPath();
+ ctx.moveTo(x+hw,y+hh*.19);ctx.lineTo(x+hw,y+hh);ctx.lineTo(x+hw*.55,y+hh);ctx.fill();
+ ctx.restore();
  // back-side shade band
  ctx.save();ctx.globalAlpha=.55;ctx.fillStyle=col[1];ctx.beginPath();
  ctx.moveTo(x+4,y+hh-3);ctx.quadraticCurveTo(x+hw*.5,y+hh+1,x+hw-4,y+hh-3);ctx.lineTo(x+hw-6,y+hh-6);ctx.quadraticCurveTo(x+hw*.5,y+hh-3,x+6,y+hh-6);ctx.closePath();ctx.fill();ctx.restore();
  // Visor screen
  const vx=x+4.5,vy=y+4.5,vw=hw-9,vh=hh-9.5;
- ctx.fillStyle=f===4?INDIGO:SCREEN;rrect(ctx,vx,vy,vw,vh,f===0?8:9);ctx.fill();
+ ctx.fillStyle=f===4?INDIGO:SCREEN;visorContour(ctx,f,vx,vy,vw,vh);ctx.fill();
  line(ctx,"#3a4a8a",1.2);ctx.stroke();
  if(f===4){
   // F4's face is a pocket of night sky.
   for(let i=0;i<9;i++){const sx=vx+3+hn(i)*(vw-6),sy=vy+2+hn(i+30)*(vh-4);ctx.save();ctx.globalAlpha=.45+.4*((Math.sin(t*.06+i*1.7)+1)/2);ellipse(ctx,sx,sy,.7,.7,"#fff6d8");ctx.restore();}
  }
- // gloss (flat, not a gradient)
+ // Reflection and cursor stay within the visor.
+ ctx.save();visorContour(ctx,f,vx,vy,vw,vh);ctx.clip();
  ctx.save();ctx.globalAlpha=.22;ctx.fillStyle="#ffffff";ctx.beginPath();
  ctx.moveTo(vx+3,vy+vh*.62);ctx.lineTo(vx+vw*.38,vy+1.5);ctx.lineTo(vx+vw*.52,vy+1.5);ctx.lineTo(vx+vw*.18,vy+vh*.75);ctx.closePath();ctx.fill();ctx.restore();
  // scanline cursor drifting down the screen (stops in reduced motion; t=0)
  ctx.save();ctx.globalAlpha=.16;ctx.fillStyle=glow;ctx.fillRect(vx+2,vy+((t*.35)%vh),vw-4,1.2);ctx.restore();
- const s=f===0?1.08:f===4?1.05:1;
- drawEyes(ctx,mood,0,F.hy+faceY-1,s,glow,accent,blink,look.x,look.y,t);
+ const s=f===0?1.17:f===4?1.05:1;
+ drawEyes(ctx,mood,0,F.hy+faceY-1,s,glow,accent,blink,look.x,look.y,t,f===0);
+ if(f===0&&mood!=='off'&&mood!=='glitch'){
+  for(const side of [-1,1])ellipse(ctx,side*11.35,F.hy+faceY+4,2.6,1.45,'#ff9d97a8');
+ }
+ ctx.restore();
  drawAntenna(ctx,F,f,y,sway,col,glow,accent,pulse,droop);
 }
 
@@ -308,21 +356,30 @@ function drawTorso(ctx,F,f,col,glow,accent,core,t,pulse,swing,reduced){
   line(ctx,glow,1.2);for(const dx of [-8,0,8]){ctx.beginPath();ctx.moveTo(dx*.6,hemT+3);ctx.lineTo(dx*1.5+swing*.1,hemB+2);ctx.stroke();}
   return;
  }
- // F4 constellation gown: indigo glass full of stars, gold rim.
- const top=F.hy+F.hh/2+2,bot=-9,hem=27+Math.abs(swing)*.3;
- ctx.fillStyle=INDIGO;ctx.beginPath();ctx.moveTo(-14,top);ctx.lineTo(14,top);
- ctx.quadraticCurveTo(13,top+26,hem*.7,bot-12);ctx.quadraticCurveTo(hem+swing*.2,bot-4,hem*.9+swing*.2,bot);
- ctx.quadraticCurveTo(0,bot+6,-hem*.9+swing*.2,bot);ctx.quadraticCurveTo(-hem+swing*.2,bot-4,-hem*.7,bot-12);
- ctx.quadraticCurveTo(-13,top+26,-14,top);ctx.closePath();ctx.fill();line(ctx,GOLD,2.6);ctx.stroke();
- for(let i=0;i<14;i++){
-  const v=hn(i+3),u=hn(i+77),yy=top+6+v*(bot-top-10),half=14+(yy-top)/(bot-top)*(hem-14)-4;
-  ctx.save();ctx.globalAlpha=.5+.45*((Math.sin(t*.05+i*2.1)+1)/2);
-  if(i%5===0)star4(ctx,(u*2-1)*half,yy,2.6,"#fff6d8");else ellipse(ctx,(u*2-1)*half,yy,.9,.9,"#e8e4ff");
+ // The final chassis is an observatory with four armored shutters around a star.
+ const top=F.hy+F.hh/2+2,bot=-11,mid=(top+bot)*.5;
+ const spread=8+Math.min(15,core*7), drift=swing*.15;
+ for(const side of [-1,1]){
+  ctx.save();ctx.scale(side,1);
+  ctx.fillStyle='#372965';ctx.beginPath();ctx.moveTo(12,top);
+  ctx.lineTo(20+spread*.78,top+10);ctx.lineTo(23+spread,mid);
+  ctx.lineTo(17+spread*.64,bot-7);ctx.lineTo(9,bot);
+  ctx.lineTo(13+spread*.42,mid);ctx.closePath();ctx.fill();line(ctx,accent,1.5);ctx.stroke();
+  line(ctx,glow,1.2);ctx.beginPath();ctx.moveTo(16,top+9);
+  ctx.lineTo(20+spread*.73,mid-2);ctx.lineTo(15+spread*.49,bot-8);ctx.stroke();
   ctx.restore();
  }
- // pearl chest piece with the core
- ctx.fillStyle=col[0];ctx.beginPath();ctx.moveTo(-14,top);ctx.lineTo(14,top);ctx.quadraticCurveTo(12,top+13,0,top+19);ctx.quadraticCurveTo(-12,top+13,-14,top);ctx.closePath();ctx.fill();line(ctx,LINE,2.2);ctx.stroke();
- drawCore(ctx,0,top+9,5.6+core,glow,accent,pulse);
+ ctx.fillStyle=INDIGO;ctx.beginPath();ctx.moveTo(-13,top);ctx.lineTo(13,top);
+ ctx.lineTo(17,mid);ctx.lineTo(11+drift,bot);ctx.lineTo(-11+drift,bot);
+ ctx.lineTo(-17,mid);ctx.closePath();ctx.fill();line(ctx,GOLD,2.1);ctx.stroke();
+ for(let i=0;i<7;i++){
+  const yy=top+7+hn(i+4)*(bot-top-12), xx=(hn(i+70)*2-1)*11;
+  ellipse(ctx,xx,yy,1.05,1.05,i%2?glow:'#fff6d8');
+ }
+ drawCore(ctx,0,mid,6.2+core,glow,accent,pulse);
+ star4(ctx,0,mid,4.2+core*.6,'#faffff');
+ line(ctx,accent,2);ctx.beginPath();ctx.moveTo(-6+drift,bot+4);ctx.lineTo(6+drift,bot+4);ctx.stroke();
+
 }
 
 function drawCore(ctx,x,y,r,glow,accent,pulse){
@@ -332,30 +389,83 @@ function drawCore(ctx,x,y,r,glow,accent,pulse){
  ellipse(ctx,x-r*.2,y-r*.3,r*.22,r*.3,"#eafffa");
 }
 
-function wingNodes(side,f,spread,sweep){
- // Neural (F2) or constellation (F4) wing: root at the shoulder.
- const big=f===4,sx=(big?1.5:1)*spread,sy=big?1.25:1;
- const base=big?[[20,-24],[42,-38],[64,-28],[58,-6],[36,4]]:[[14,-14],[30,-24],[42,-12],[36,4],[22,8]];
- return base.map(([x,y],i)=>[side*(x*sx-sweep*i*1.2),y*sy+sweep*i*.8]);
-}
-function drawWing(ctx,side,F,f,glow,accent,t,spread,sweep,front,reduced){
- const rootX=side*8,rootY=F.hy+F.hh/2+(f===4?10:6),nodes=wingNodes(side,f,spread,sweep);
- ctx.save();ctx.translate(rootX,rootY);ctx.globalAlpha=front?1:.94;
- // A network becomes a wing of folded memory pages. Each feather has a
- // shoulder, hinge and tip; the ten family colours are structural seams.
- for(let i=nodes.length-1;i>=0;i--){
-  const [nx,ny]=nodes[i],flap=reduced?0:Math.sin(t*.08+i*.65)*3,
-   x=nx+side*(f===4?8:4),y=ny+flap,rootY=i*2-3;
-  const color=f===4?YOMI_FAMILY_STARS[(side>0?5:0)+i]:i%2?'#c4eee0':'#edf3db';
-  ctx.fillStyle=f===4?(i%2?'#eee9ce':'#c4e3db'):'#d6eee6';ctx.strokeStyle=LINE;ctx.lineWidth=1.4;
-  ctx.beginPath();ctx.moveTo(side*3,rootY);ctx.quadraticCurveTo(x*.45,y-12,x+side*14,y-6);
-  ctx.lineTo(x,y+7);ctx.quadraticCurveTo(x*.6,y+12,side*7,rootY+6);ctx.closePath();ctx.fill();ctx.stroke();
-  ctx.fillStyle=f===4?'#52659b':'#8abfc2';ctx.globalAlpha*=.65;ctx.beginPath();ctx.moveTo(side*3,rootY);ctx.lineTo(x+side*14,y-6);ctx.lineTo(x,y+7);ctx.closePath();ctx.fill();ctx.globalAlpha=front?1:.94;
-  line(ctx,color,1.5);ctx.beginPath();ctx.moveTo(side*6,rootY+1);ctx.lineTo(x+side*9,y-4);ctx.stroke();
-  const lit=reduced?.7:.55+Math.sin(t*.035+i*.8)*.25;
-  star4(ctx,x,y,3.2+lit,color);ellipse(ctx,x,y,1,1,'#fff9df');
+function drawWing(ctx,side,F,t,spread,sweep,reduced,known){
+ // Red's connected circuit folds behind the chassis as it moves.
+ const nodes=[[3,1],[13,-16],[29,-22],[44,-10],[35,8],[17,11]];
+ const edges=[[0,1],[0,5],[1,2],[1,5],[2,3],[2,5],[3,4],[3,5],[4,5]];
+ const points=nodes.map(([x,y],i)=>[side*(x*spread-i*sweep*.55),y+(reduced?0:Math.sin(t*.065-i*.77)*2)]);
+ ctx.save();ctx.translate(side*7,F.hy+F.hh/2+12);
+ ctx.fillStyle='#344a7685';ctx.beginPath();
+ for(const [x,y] of points)ctx.lineTo(x,y);
+ ctx.closePath();ctx.fill();
+ for(const [a,b] of edges){
+  const [x,y]=points[a],[xx,yy]=points[b];
+  line(ctx,'#192750',4);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(xx,yy);ctx.stroke();
+  const active=a<known;
+  line(ctx,active?'#a2fff0':'#77daf2',active?1.85:1.25);ctx.stroke();
+  const k=reduced?.5:(t*(.035+known*.006)+a*.14+b*.08)%1;
+  ellipse(ctx,x+(xx-x)*k,y+(yy-y)*k,active?1.8:1.35,active?1.8:1.35,'#f2fff4');
+ }
+ for(const [x,y] of points){
+  ellipse(ctx,x,y,3.7,3.7,'#172042');ellipse(ctx,x,y,2.4,2.4,'#c2f7ff');
  }
  ctx.restore();
+}
+
+function drawEcho(ctx,F,t,reduced,acting,known){
+ const gain=acting?.release||0;
+ for(const side of [-1,1]){
+  const origin=side*F.hw*.48, y=F.hy+1;
+  ellipse(ctx,origin,y,5,7,'#58445e');ellipse(ctx,origin,y,3.3,4.8,'#ffe7a9');
+  const a=side===1?0:Math.PI;
+  for(let i=0;i<3;i++){
+   const phase=reduced?.48:(t*.028+i*.28+(side===1?0:.32))%1;
+   const radius=7+i*4+phase*3+gain*4;
+   ctx.save();ctx.globalAlpha=(1-phase)*.56+.18;
+   line(ctx,i===0?'#fff1af':'#eca185',1.7);
+   ctx.beginPath();ctx.arc(origin,y,radius,a-.65,a+.65);ctx.stroke();
+   if(known&&i===2){
+    const angle=a+(side===1?-1:1)*.48;
+    ellipse(ctx,origin+Math.cos(angle)*radius,y+Math.sin(angle)*radius,1.8,1.8,'#91ffe1');
+   }
+   ctx.restore();
+  }
+ }
+}
+
+function drawOracle(ctx,hand,t,reduced,acting,known){
+ const x=hand[0]+3, y=hand[1]-19+(reduced?0:Math.sin(t*.061)*2);
+ const relay=acting?.slot===2?(acting.load+acting.release)*.5:0;
+ const r=13+3*(acting?.release||0),spin=reduced?0:t*.039;
+ ellipse(ctx,x,y,r+3,r+3,'#28204b');
+ ellipse(ctx,x,y,r,r,'#6955a2');
+ ellipse(ctx,x-2,y-3,r*.7,r*.67,'#927cda');
+ line(ctx,'#f4c9ff',1.2);ctx.beginPath();ctx.ellipse(x,y,r,r*.43,-.33,0,TAU);ctx.stroke();
+ ctx.save();ctx.translate(x,y);ctx.rotate(-.18+Math.sin(spin)*.21);
+ ctx.globalAlpha=.55;line(ctx,'#d7efff',.85);
+ ctx.beginPath();ctx.ellipse(0,0,r*.33,r*.90,0,0,TAU);ctx.stroke();ctx.restore();
+ line(ctx,'#baeefa',1.15);ctx.beginPath();
+ for(let i=0;i<5;i++){
+  const a=spin+i*TAU/5;
+  ctx.lineTo(x+Math.cos(a)*r*.62,y+Math.sin(a)*r*.62);
+ }
+ ctx.closePath();ctx.stroke();
+ const omen=known===0?'#faffed':YOMI_FAMILY_STARS[Math.min(9,known-1)];
+ star4(ctx,x,y,r*.53,omen);
+ for(let i=0;i<Math.min(known,4);i++){
+  const a=spin*2+i*TAU/4;
+  ellipse(ctx,x+Math.cos(a)*r*.77,y+Math.sin(a)*r*.77,1.55,1.55,'#fff6e5');
+ }
+ if(relay>.04){
+  ctx.save();ctx.globalAlpha=.72*relay;line(ctx,'#f5d2ff',1.2);
+  for(const side of [-1,1]){
+   const lean=side*(r+5+relay*8);
+   ctx.beginPath();ctx.moveTo(x+lean,y-r*.54);ctx.lineTo(x+lean+side*3,y);
+   ctx.lineTo(x+lean,y+r*.54);ctx.stroke();
+  }
+  ctx.restore();
+ }
+ ellipse(ctx,x-r*.36,y-r*.43,2,1.35,'#fff9fb');
 }
 
 function drawCape(ctx,F,t,glow,swing,run,reduced){
@@ -392,21 +502,24 @@ function drawSatellites(ctx,F,t,front,reduced,glow,accent,cast,acting){
  }
 }
 
-function drawRingHalf(ctx,F,front,t,glow,reduced){
- // Ten folded memory birds, one family colour each. They circle behind
- // and in front of the gown, with wing hinges rather than particle dots.
- const y=F.hy+F.hh/2+30;
- ctx.save();
+function drawRingHalf(ctx,F,front,t,reduced,acting,known){
+ const y=F.hy+F.hh/2+28;
+ const r=29+(acting?.release||0)*5, ry=12+2*(acting?.release||0);
+ const phase=reduced?0:t*.018;
+ ctx.save();ctx.translate(0,y);
+ ctx.strokeStyle=front?'#e7c48d':'#637baf';ctx.lineWidth=front?1.45:2;
+ ctx.beginPath();ctx.ellipse(0,0,r,ry,0,front?0:Math.PI,front?Math.PI:TAU);ctx.stroke();
  for(let i=0;i<10;i++){
-  const a=(reduced?0:t*.008)+i*TAU/10,depth=Math.sin(a);
+  const a=phase+i*TAU/10,depth=Math.sin(a);
   if((depth>=0)!==front)continue;
-  const x=Math.cos(a)*52,yy=y+depth*12,flap=reduced?.4:Math.sin(t*.09+i*.9)*.6;
-  ctx.save();ctx.translate(x,yy);ctx.scale(.85+depth*.1,.85+depth*.1);
-  ctx.fillStyle=YOMI_FAMILY_STARS[i];ctx.strokeStyle=LINE;ctx.lineWidth=.9;
-  for(const side of [-1,1]){
-   ctx.beginPath();ctx.moveTo(0,1);ctx.lineTo(side*10,-6-flap*5);ctx.lineTo(side*6,3);ctx.lineTo(0,4);ctx.closePath();ctx.fill();ctx.stroke();
+  const x=Math.cos(a)*r,yy=depth*ry;
+  const powered=i<known||acting?.slot===3;
+  ellipse(ctx,x,yy,powered?6.5:3.9,powered?5.9:3.6,powered?'#315e79':'#17243a');
+  star4(ctx,x,yy,3.3+(front?.9:0)+(powered?1.1:0),YOMI_FAMILY_STARS[i]);
+  if(front||powered)ellipse(ctx,x,yy,powered?1.6:1.15,1.15,'#fff9dc');
+  if(powered&&front){
+   line(ctx,'#abfbe2',.85);ctx.beginPath();ctx.moveTo(x*.35,yy*.35);ctx.lineTo(x*.88,yy*.88);ctx.stroke();
   }
-  ctx.fillStyle='#fff8df';ctx.beginPath();ctx.moveTo(0,-2);ctx.lineTo(3,2);ctx.lineTo(0,7);ctx.lineTo(-2,2);ctx.closePath();ctx.fill();ctx.restore();
  }
  ctx.restore();
 }
@@ -436,8 +549,17 @@ function drawThruster(ctx,F,f,glow,t,st,reduced,jumpS,run){
  const fl=reduced?1:.85+.15*Math.sin(t*.9);
  ctx.save();ctx.globalAlpha=.55;ctx.fillStyle=glow;ctx.beginPath();
  const w=f>=3?7:5,len=(bottom<-12?6:4)*k*fl+2;
- ctx.moveTo(-w,bottom+1);ctx.quadraticCurveTo(0,bottom+len*1.8,w,bottom+1);ctx.closePath();ctx.fill();
- ctx.globalAlpha=.9;ctx.fillStyle="#eafffa";ctx.beginPath();ctx.moveTo(-w*.45,bottom+1);ctx.quadraticCurveTo(0,bottom+len,w*.45,bottom+1);ctx.closePath();ctx.fill();
+ const skew=run?-len*.95:jumpS?-len*.3:0;
+ if(!reduced&&(run||jumpS)){
+  for(let i=0;i<3;i++){
+   const drift=(t*.14+i*.33)%1;
+   ctx.globalAlpha=(1-drift)*.58;
+   ctx.fillRect(skew*(1+drift)+i*2-2,bottom+len*(.9+drift*1.1),2.4,2.4);
+  }
+  ctx.globalAlpha=.55;
+ }
+ ctx.moveTo(-w,bottom+1);ctx.quadraticCurveTo(skew,bottom+len*1.8,w,bottom+1);ctx.closePath();ctx.fill();
+ ctx.globalAlpha=.9;ctx.fillStyle="#eafffa";ctx.beginPath();ctx.moveTo(-w*.45,bottom+1);ctx.quadraticCurveTo(skew*.66,bottom+len,w*.45,bottom+1);ctx.closePath();ctx.fill();
  ctx.restore();
 }
 
@@ -527,7 +649,8 @@ export function drawArtificialIntelligence(ctx,pose,R){
   const autoBlink=reduced||st!=="idle"?0:((t%223)<5?1:0);
   const blink=clamp(Number(p.blink)||autoBlink,0,1);
   const look={x:clamp(Number(p.look?.x)||0,-1,1)*.6,y:clamp(Number(p.look?.y)||0,-1,1)};
-  const core=reveal*2.2+life.flame*1.5+(acting?.maw||0)*2+(acting?.aurora||0)*1.5;
+  const known=clamp(Number(p.yomiKnowledge)||0,0,10);
+  const core=known*.14+reveal*2.2+life.flame*1.5+(acting?.maw||0)*2+(acting?.aurora||0)*1.5;
   const droop=dead?1:0;
   // wing spread: flying, scanning and the U embrace open the network.
   const spread=1+(flight?.12:0)+(st==="glide"?.18:0)+(cast===1?.16*(acting?.release||0):0)+(cast===3?.2*(acting?.aurora||0):0)+reveal*.12-(dead?.25:0);
@@ -536,19 +659,25 @@ export function drawArtificialIntelligence(ctx,pose,R){
   yomiAmbient(ctx,p,f,glow,accent,t,F);
   // floor glow: Yomi hovers but keeps a readable ground anchor.
   ctx.save();ctx.globalAlpha=dead?.2:.26;ellipse(ctx,0,0,F.hw*.42,3.2,glow);ctx.restore();
-  if(!dead)drawYomiMagic(ctx,p,f,F,glow,accent,T,cast,acting,reduced,st);
+  if(!dead)drawIAMagic(ctx,f,F,glow,accent,T,cast,acting,reduced,st);
   ctx.translate(0,hover);
+  if(f===4)ctx.scale(.76,.78);
   ctx.rotate((run?(reduced?.1:.1+.03*Math.sin(runPh*2)):flight?-.04:0)+(acting?.tilt||0)+stageTilt+life.tilt+(dead?.34:0));
   if(life.active)ctx.scale(life.expandX,life.expandY);
   if(jumpS)ctx.scale(.93,1.07);else if(fallS)ctx.scale(1.05,.96);
-  else if(st==="idle"&&!reduced){const br=Math.sin(t*.05)*.014;ctx.scale(1+br,1-br);} // soft shell breathing
+  else if(st==="idle"&&!reduced){
+   const breath=Math.sin(t*.05)*(f===0?.025:.014);
+   const chirp=f===0?Math.pow(Math.max(0,Math.sin(t*.12)),5)*2.3:0;
+   ctx.translate(0,-chirp);ctx.scale(1+breath,1-breath);
+  }
   else if(st==="victory"&&!reduced){const hop=Math.abs(Math.sin(t*.16));ctx.translate(0,-hop*3);ctx.scale(1-hop*.03,1+hop*.03);}
   // ── BACK LAYER ─────────────────────────────────────────────
-  if(f===2||f===4)drawWing(ctx,-1,F,f,glow,accent,T,spread,sweep,false,reduced);
-  if(f===2||f===4)drawWing(ctx,1,F,f,glow,accent,T,spread*.92,sweep,false,reduced);
+  if(f===1)drawEcho(ctx,F,T,reduced,acting,known);
+  if(f===2)drawWing(ctx,-1,F,T,spread,sweep,reduced,known);
+  if(f===2)drawWing(ctx,1,F,T,spread*.92,sweep,reduced,known);
   if(f===3)drawCape(ctx,F,T,glow,swing,run,reduced);
   if(f===3)drawSatellites(ctx,F,T,false,reduced,glow,accent,cast,acting);
-  if(f===4)drawRingHalf(ctx,F,false,T,glow,reduced);
+  if(f===4)drawRingHalf(ctx,F,false,T,reduced,acting,known);
   const back=handPose(-1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run,p.hurt||.5);
   ctx.save();ctx.globalAlpha=.92;drawHand(ctx,back[0],back[1],F.hr*.94,back[2],[col[1]],glow,back[3]);ctx.restore();
   drawThruster(ctx,F,f,glow,T,st,reduced,jumpS,run);
@@ -556,15 +685,16 @@ export function drawArtificialIntelligence(ctx,pose,R){
   drawTorso(ctx,F,f,col,glow,accent,core,T,pulse,swing,reduced);
   drawHead(ctx,F,f,col,glow,accent,mood,blink,look,T,pulse,faceY,swing,droop,cast,acting);
   // Memory cells show real analysed enemies; L consumes them in combat.
-  if(f>=1){const known=Math.max(0,Math.min(6,Number(p.yomiKnowledge)||0)),yy=F.hy+F.hh/2+7;
+  if(f>=1){const yy=F.hy+F.hh/2+7;
    for(let i=0;i<6;i++){ctx.fillStyle=i<known?glow:'#527985';ctx.beginPath();ctx.moveTo((i-2.5)*4,yy-1.7);ctx.lineTo((i-2.5)*4+1.7,yy);ctx.lineTo((i-2.5)*4,yy+1.7);ctx.lineTo((i-2.5)*4-1.7,yy);ctx.fill();}
   }
   // ── FRONT LAYER ────────────────────────────────────────────
-  if(f===4)drawRingHalf(ctx,F,true,T,glow,reduced);
+  if(f===4)drawRingHalf(ctx,F,true,T,reduced,acting,known);
   if(f===3)drawSatellites(ctx,F,T,true,reduced,glow,accent,cast,acting);
   const front=handPose(1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run,p.hurt||.5);
   drawCastBody(ctx,p,F,f,cast,acting,front,back,glow,accent,T);
   drawHand(ctx,front[0],front[1],F.hr,front[2],col,glow,front[3]);
+  if(f===3&&!dead)drawOracle(ctx,front,T,reduced,acting,known);
   if(st==="attack"){
    // Basic attack: a "byte" burst at the punching hand.
    const hit=clamp((atk-.38)/.25,0,1)*(1-clamp((atk-.7)/.3,0,1));
@@ -599,38 +729,24 @@ export function drawYomiRune(ctx,x,y,s,i,color,width=1.4){
  }
  ctx.stroke();ctx.restore();
 }
-function hashNoise(i){const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v);}
-// Ground rune circle while casting + idle floating glyphs and data sparks.
-function drawYomiMagic(ctx,p,f,F,glow,accent,T,cast,acting,reduced,st){
- const strength=cast>=0?.55+.45*Math.max(acting?.release||0,acting?.maw||0,acting?.aurora||0):0;
- if(strength>0){
-  const col=cast===0?accent:cast===2?"#ffd56b":glow,R=F.hw*(.62+.08*f)+(cast===3?14:0),spin=reduced?0:T*.035;
-  ctx.save();ctx.globalAlpha=.5*strength;ctx.strokeStyle=col;ctx.lineWidth=1.6;
-  ctx.beginPath();ctx.ellipse(0,0,R,R*.26,0,0,TAU);ctx.stroke();
-  ctx.globalAlpha=.3*strength;ctx.beginPath();ctx.ellipse(0,0,R*.72,R*.19,0,0,TAU);ctx.stroke();
-  const n=6+f*2;
-  for(let i=0;i<n;i++){const a=i*TAU/n+spin;ctx.globalAlpha=.75*strength;
-   drawYomiRune(ctx,Math.cos(a)*R*.86,Math.sin(a)*R*.22,.55,i,cast===3?YOMI_FAMILY_STARS[i%10]:col,1.3);}
-  if(cast===3){ // U: the network spell lifts above the head as a constellation.
-   ctx.globalAlpha=.55*strength;ctx.strokeStyle=glow;ctx.lineWidth=1;ctx.beginPath();
-   for(let i=0;i<5;i++){const a=i*TAU/5-Math.PI/2+spin*.5,px=Math.cos(a)*F.hw*.55,py=F.top-14+Math.sin(a)*10;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
-   ctx.closePath();ctx.stroke();
-   for(let i=0;i<5;i++){const a=i*TAU/5-Math.PI/2+spin*.5;ctx.fillStyle=YOMI_FAMILY_STARS[(i*2)%10];ctx.fillRect(Math.cos(a)*F.hw*.55-2,F.top-16+Math.sin(a)*10,4,4);}
+// A small diagnostic ring is separate from the projection carried by the body.
+function drawIAMagic(ctx,f,F,glow,accent,t,cast,acting,reduced,st){
+ if(acting){
+  const strength=.55+.45*acting.release;
+  const col=cast===0?accent:cast===2?'#ffd56b':glow;
+  const radius=F.hw*(f===4?.63:.65+f*.035);
+  ctx.save();ctx.globalAlpha=.58*strength;line(ctx,col,1.4);
+  ctx.beginPath();ctx.ellipse(0,0,radius,radius*.24,0,0,TAU);ctx.stroke();
+  for(let i=0;i<(f===0?3:6);i++){
+   const a=i*TAU/(f===0?3:6)+(reduced?0:t*.027);
+   const x=Math.cos(a)*radius,y=Math.sin(a)*radius*.24;
+   ellipse(ctx,x,y,1.65,1.65,cast===3?YOMI_FAMILY_STARS[i]:col);
   }
   ctx.restore();
- }
- if(st==="idle"||st==="victory"){
-  // Idle flourish: 2-3 glyphs drifting up from the hands + orbiting data sparks.
-  ctx.save();
-  const g=2+(f>2?1:0);
-  for(let i=0;i<g;i++){
-   const ph=reduced?(i+.5)/g:((T*.006+i/g)%1),x=(hashNoise(i+f*7)-.5)*F.hw*1.1,y=F.hy+8-ph*(F.hy-F.top+26);
-   ctx.globalAlpha=.55*Math.sin(ph*Math.PI);drawYomiRune(ctx,x,y,.5,i+f,i%2?accent:glow,1.2);
-  }
-  const sp=3+f;
-  for(let i=0;i<sp;i++){const a=i*TAU/sp+(reduced?0:T*.04),r=F.hw*.58+4;
-   ctx.globalAlpha=.6;ctx.fillStyle=i%3===0?accent:glow;ctx.fillRect(Math.cos(a)*r-1.3,F.hy+Math.sin(a)*r*.32-1.3,2.6,2.6);}
-  ctx.restore();
+ }else if(st==='idle'&&f===0&&!reduced){
+  const rise=(t*.025)%1;
+  ctx.save();ctx.globalAlpha=.52*Math.sin(rise*Math.PI);
+  star4(ctx,18+rise*4,F.hy-13-rise*15,2.4,accent);ctx.restore();
  }
 }
 
@@ -654,7 +770,13 @@ function drawCastBody(ctx,p,F,f,cast,acting,front,back,glow,accent,t){
   ctx.save();ctx.globalAlpha=.3+.5*load;ellipse(ctx,px,py,r*2.2,r*2.2,glow);ctx.restore();
   ctx.fillStyle="#eafffa";ctx.beginPath();ctx.moveTo(px,py-r);ctx.lineTo(px+r*.8,py);ctx.lineTo(px,py+r);ctx.lineTo(px-r*.8,py);ctx.closePath();ctx.fill();
   line(ctx,glow,1.4);ctx.stroke();
-  if(release>.05){ctx.save();ctx.globalAlpha=.75*release;ctx.fillStyle=glow;ctx.fillRect(px+r,py-2-release*3,26+release*20,4+release*6);ctx.fillStyle="#ffffff";ctx.fillRect(px+r,py-1,26+release*20,2);ctx.restore();}
+  if(release>.05){
+   const reach=24+release*19;
+   ctx.save();ctx.globalAlpha=.75*release;ctx.fillStyle=glow;
+   ctx.beginPath();ctx.moveTo(px+r,py);ctx.lineTo(px+reach*.48,py-4-release*4);
+   ctx.lineTo(px+reach,py);ctx.lineTo(px+reach*.48,py+4+release*4);ctx.closePath();ctx.fill();
+   line(ctx,'#fff8e4',1.6);ctx.beginPath();ctx.moveTo(px+r,py);ctx.lineTo(px+reach*.94,py);ctx.stroke();ctx.restore();
+  }
  }else if(cast===3){
   // U: Yomi opens its arms; a family link ring blooms around the core.
   const k=acting.aurora;ctx.save();ctx.globalAlpha=.6*k;line(ctx,accent,2);

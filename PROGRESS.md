@@ -1,3 +1,45 @@
+- **ohana-823** — Selector con escenario ilustrado, doce retratos, pasos claros y vista previa de la forma elegida. [Detalle](docs/V823-ATLAS.md)
+
+- **ohana-822** — Bienvenida ilustrada desde el embarcadero con accesos claros a Jugar, Continuar y Multijugador. [Detalle](docs/V822-WELCOME.md)
+
+- **ohana-821** — Pantalla inicial ilustrada de Isla Hoku con faroles, adaptación vertical y movimiento reducido. [Detalle](docs/V821-STARTUP.md)
+
+- **ohana-820** — Diez tiempos con diez ajustes de animación para cada uno de los 60 ataques. [Detalle](docs/V820-ATTACKS.md)
+
+- **ohana-819** — 60 emblemas vectoriales, 60 perfiles interiores y cinco animaciones de lanzamiento. [Detalle](docs/V819-ATTACKS.md)
+
+- **ohana-818** — 60 siluetas de lanzamiento propias y lectura de acierto y fallo para I. [Detalle](docs/V818-ATTACKS.md)
+
+- **ohana-817** — 96 entradas de animación para I y cuatro mejoras comunes de legibilidad y accesibilidad. [Detalle](docs/V817-REMATES.md)
+
+ohana-816 · 96 trazos propios en los remates I y cuatro mejoras comunes de dibujado.
+
+ohana-815 · Doce siluetas dibujadas para los remates I.
+
+ohana-814 · Doce remates I con ritmos, recorridos y respuestas de impacto propios.
+
+ohana-813 · Avisos de impacto con cuenta atrás, meteoros dirigidos y estelas coherentes con la trayectoria.
+
+ohana-812 · Señales de ataque propias para los doce personajes, contacto confirmado y remates ligados a su alcance real.
+
+ohana-811 · Santuario de Yomi, corrientes visibles de Nácar y cuatro transiciones propias de IA.
+
+ohana-810 · Seda y joyería de Yomi, filamentos de Nácar y circuitos de IA que muestran los datos capturados.
+
+ohana-809 · Faroles y vestuario de Yomi, tentáculos de Nácar y cinco lecturas claras para IA.
+
+ohana-808 · El farol, los tentáculos y la órbita reaccionan a los poderes de cada personaje.
+
+ohana-807 · Yomi guardiana del santuario, Nácar bioluminiscente y Constelación compacta. Los tres ganan velocidad y control propio.
+
+ohana-806 · Quince formas de Nácar, Yomi e IA, escenas de evolución y defensa con la ola de Nácar.
+
+ohana-805 · Doble presión, corrientes de la arena y avisos de la Anémona.
+
+ohana-804 · Tres rutas de natación, gruta bioluminiscente y combate submarino.
+
+ohana-803 · Pecio de las Promesas y regreso guardado de Michi.
+
 ohana-802 · Paso entre el acuario de Michi y el fondo marino.
 
 ohana-801 · **12 personajes · 5 formas · 10 salas de campaña y un capítulo submarino adicional.**

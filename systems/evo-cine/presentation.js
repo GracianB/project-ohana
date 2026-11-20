@@ -1,6 +1,7 @@
 import {ABILITY_DEFS} from '../ability-catalog.js';
 import {extraAbility,drawPowerEmblem} from '../evolution-attacks.js';
 import {drawCharacter} from '../../characters/draw.js';
+import {NACAR_NEON} from '../../characters/art/nacar.js';
 import {ROSTER} from '../../characters/roster.js';
 import {CALIBRATED_HEIGHT} from '../../characters/visual-size.js';
 import {EVOLUTION_CINEMA_PROFILES,evolutionMessage} from '../../characters/evolution.js';
@@ -18,12 +19,12 @@ import * as yomiCine from './yomi.js';
 // stage director. Text/unlock overlay below stays shared and readable.
 // V463: Kilo, Stitcho, Chispín y Cuerno también tienen su metamorfosis propia (family-own.js).
 export const OWN_EVOLUTION_CINE=Object.freeze({dino:dinoCine,dragon:dragonCine,pizza:pizzaCine,frita:fritaCine,yomi:yomiCine,...FAMILY_OWN_CINE});
-// Yomi IA (V464): su metamorfosis de cuatro actos (pregunta · lectura · compilación · despertar).
+// La guardiana Yomi tiene su propio rito. IA toma forma en el escenario digital.
 
 const clamp=x=>Math.max(0,Math.min(1,x));
 const ease=x=>{const k=clamp(x);return k*k*(3-2*k);};
 const TAU=Math.PI*2;
-const POSES={kilo:'victory',stitcho:'attack',chispin:'attack',cat:'victory',dragon:'glide',dino:'attack',frita:'jump',pizza:'jump',yomi:'attack',cuerno:'victory'};
+const POSES={kilo:'victory',stitcho:'attack',chispin:'attack',cat:'victory',dragon:'glide',dino:'attack',frita:'jump',pizza:'jump',yomi:'attack',cuerno:'victory',nacar:'glide',ia:'victory'};
 
 export function evolutionPresentation(id,evo,width,height,time,reduced=false){
  const def=ROSTER.find(r=>r.id===id)||ROSTER[0];
@@ -100,6 +101,131 @@ function drawUnlockCard(ctx,def,s,width,height,alpha){
  ctx.restore();
 }
 
+const NACAR_REVEAL_WATER=[
+ ['#113c55','#176f74'],
+ ['#122d47','#177187'],
+ ['#143c47','#426e63'],
+ ['#2e285e','#74538d'],
+ ['#151d40','#344b77'],
+];
+
+function drawNacarRevealWater(c,w,h,s,reduced){
+ const t=reduced?0:s.t;
+ c.save();
+ for(let i=0;i<6;i++){
+  const x=w*(.1+i*.159)+Math.sin(t*.95+i)*w*.035;
+  c.fillStyle=i%2?'#baf5e813':'#f4d4ed0e';
+  c.beginPath();c.moveTo(x-12,0);c.lineTo(x+22,0);
+  c.lineTo(x+w*.27,h);c.lineTo(x+w*.13,h);c.fill();
+ }
+ for(let i=0;i<16;i++){
+  const phase=((i*.17+(reduced?0:t*.22))%1);
+  const x=w*(.1+(i*137%83)/100)+Math.sin(phase*TAU)*w*.017;
+  c.strokeStyle=i%3?'#c0f2df50':'#ffe2b87a';c.lineWidth=1.2;
+  c.beginPath();c.arc(x,h*(.79-phase*.51),2+i%5,0,TAU);c.stroke();
+ }
+ const [ink,highlight]=NACAR_NEON[s.reveal<.5?s.form-1:s.form];
+ const base=Math.min(w,h);
+ // The shore edge, reef branches, aurora weeds and abyssal spires follow the reveal's depth.
+ for(const side of [-1,1]){
+  for(let i=0;i<5;i++){
+   const x=w*.5+side*w*(.27+i*.046),y=h*.93+i*base*.017;
+   const len=(.12+((i*3)%5)*.031+s.form*.013)*base;
+   const lean=side*(i*.03+.02)*base+Math.sin(t*.85+i)*base*.014;
+   c.strokeStyle=i%2?ink:highlight;c.globalAlpha=.12+i*.012;c.lineWidth=Math.max(1.5,base*(.006+i*.001));
+   c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+lean*.2,y-len*.52,x+lean,y-len);c.stroke();
+   if(s.form>=2)for(let j=0;j<3;j++){
+    const sy=y-len*(.36+j*.17),sx=x+lean*(.25+j*.21),sign=j%2?side:-side;
+    c.lineWidth=Math.max(1.2,base*.004);
+    c.beginPath();c.moveTo(sx,sy);c.quadraticCurveTo(sx+sign*base*.037,sy-base*.012,sx+sign*base*.052,sy-base*.05);c.stroke();
+   }
+  }
+ }
+ c.globalAlpha=.14+s.reveal*.13;
+ for(let i=0;i<3;i++){
+  const spread=reduced?(i+1)*.35:((t*.42+i*.32)%1);
+  c.strokeStyle=i%2?highlight:ink;c.lineWidth=1.5;
+  c.beginPath();c.ellipse(s.cx,s.foot-s.target*.18+spread*s.target*.35,
+   s.target*(.48+spread*.65),s.target*(.11+spread*.14),0,0,TAU);c.stroke();
+ }
+
+ c.restore();
+}
+
+function drawNacarRevealSpark(c,x,y,r,form,phase){
+ const [ink,light]=NACAR_NEON[form];
+ c.strokeStyle=light;c.lineWidth=1.1;
+ if(form<3){
+  c.beginPath();c.arc(x,y,r*.55,0,TAU);c.stroke();
+  c.fillStyle=ink;c.beginPath();c.arc(x-r*.18,y-r*.18,r*.13,0,TAU);c.fill();
+  return;
+ }
+ c.save();c.translate(x,y);c.rotate(phase);
+ c.fillStyle=ink;c.beginPath();
+ for(let i=0;i<8;i++){
+  const a=i*TAU/8,reach=r*(i%2?.29:.84);
+  c.lineTo(Math.cos(a)*reach,Math.sin(a)*reach);
+ }
+ c.closePath();c.fill();c.restore();
+}
+
+const IA_CINE_NODES=[[0,-.78],[.72,-.48],[.95,.12],[.57,.68],[-.57,.68],[-.95,.12],[-.72,-.48]];
+const IA_LINKS=[[0,1],[0,6],[1,2],[1,3],[2,3],[3,4],[4,5],[4,6],[5,6]];
+const IA_STARS=['#fda68d','#8bd7fd','#ffe291','#d4b4ff','#ffae76','#9ae2a8','#fcd29a','#fb9391','#f1bce5','#76ffe0'];
+
+function drawIAReveal(c,w,h,s,reduced){
+ const t=reduced?0:s.t;
+ const scale=Math.min(w,h)*.35, cy=s.foot-s.target*.54;
+ const live=reduced?1:ease(s.t/1.65);
+ c.save();c.translate(w*.5,cy);
+ c.lineWidth=1.3;
+ if(s.form===1){
+  // Eco: a pulse leaves either side and returns across the same receiver.
+  for(const side of [-1,1])for(let i=0;i<4;i++){
+   const phase=reduced?(i+1)/5:(t*.48+i*.25)%1;
+   const r=(.21+phase*.68)*scale,a=side===1?0:Math.PI;
+   c.strokeStyle=i%2?'#ec9c7e':'#ffd787';c.globalAlpha=(1-phase)*.58;
+   c.beginPath();c.arc(side*scale*.56,0,r,a-.64,a+.64);c.stroke();
+  }
+ }else if(s.form===2){
+  const points=IA_CINE_NODES.map(([x,y])=>[x*scale,y*scale*.58]);
+  for(const [a,b] of IA_LINKS){
+   const [x,y]=points[a],[xx,yy]=points[b],phase=reduced?.52:(t*.39+a*.12+b*.08)%1;
+   c.strokeStyle='#9ffaff';c.globalAlpha=live*.53;
+   c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();
+   c.fillStyle='#ddffed';c.fillRect(x+(xx-x)*phase-2,y+(yy-y)*phase-2,4,4);
+  }
+  for(const [x,y] of points){
+   c.globalAlpha=live*.83;c.fillStyle='#b4fff1';
+   c.beginPath();c.arc(x,y,3.4,0,TAU);c.fill();
+  }
+ }else if(s.form===3){
+  // Oráculo: a lens opens with a visible iris and an off-axis sightline.
+  c.strokeStyle='#e2b3fc';c.globalAlpha=live*.52;c.beginPath();c.ellipse(0,0,scale,scale*.52,-.17,0,TAU);c.stroke();
+  c.save();c.rotate(-.24+Math.sin(t*.9)*.27);
+  c.strokeStyle='#acf1fd';c.beginPath();c.ellipse(0,0,scale*.37,scale*.66,0,0,TAU);c.stroke();
+  for(let i=0;i<12;i++){
+   const a=i*TAU/12;
+   c.beginPath();c.moveTo(Math.cos(a)*scale*.78,Math.sin(a)*scale*.54);
+   c.lineTo(Math.cos(a)*scale*.85,Math.sin(a)*scale*.59);c.stroke();
+  }
+  c.restore();
+ }else{
+  const points=IA_STARS.map((_,i)=>{
+   const a=t*.09+(i+.5)*TAU/10;
+   const r=scale*(i%2?.88:.98);
+   return [Math.cos(a)*r,Math.sin(a)*r*.53];
+  });
+  c.strokeStyle='#dcbd9a';c.globalAlpha=live*.43;
+  c.beginPath();for(const [x,y] of points)c.lineTo(x,y);c.closePath();c.stroke();
+  points.forEach(([x,y],i)=>{
+   c.globalAlpha=live*.88;c.fillStyle=IA_STARS[i];
+   c.beginPath();c.moveTo(x-5,y);c.lineTo(x,y-5);c.lineTo(x+5,y);c.lineTo(x,y+5);c.closePath();c.fill();
+  });
+ }
+ c.restore();
+}
+
 export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=false){
  const s=evolutionPresentation(id,evo,width,height,reduced?3.5:time,reduced),def=ROSTER.find(r=>r.id===s.id);
  const profile=EVOLUTION_CINEMA_PROFILES[s.id];
@@ -121,9 +247,12 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
  }
  ctx.save();
  try{
-  const bg=cachedGradient(ctx,`evolution-stage:${s.id}:${height}`,()=>{
-   const g=ctx.createLinearGradient(0,0,0,height);g.addColorStop(0,profile.bg);g.addColorStop(.65,'#16373d');g.addColorStop(1,'#091d28');return g;
+  const ocean=s.id==='nacar'?NACAR_REVEAL_WATER[s.form]:null;
+  const bg=cachedGradient(ctx,`evolution-stage:${s.id}:${ocean?s.form:0}:${height}`,()=>{
+   const g=ctx.createLinearGradient(0,0,0,height);g.addColorStop(0,ocean?.[0]||profile.bg);g.addColorStop(.65,ocean?.[1]||(s.id==='ia'?'#26264f':'#16373d'));g.addColorStop(1,'#091d28');return g;
   });ctx.fillStyle=bg;ctx.fillRect(0,0,width,height);
+  if(ocean)drawNacarRevealWater(ctx,width,height,s,reduced);
+  if(s.id==='ia')drawIAReveal(ctx,width,height,s,reduced);
   // Three quiet scenic planes leave the silhouette and text unobstructed.
   for(let layer=0;layer<3;layer++){
    ctx.fillStyle=['#7dbaab0b','#a7d8bd0b','#071d2944'][layer];ctx.beginPath();ctx.moveTo(0,height);
@@ -134,18 +263,21 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
   ctx.save();ctx.translate(s.cx,s.foot-s.target*.45);ctx.globalAlpha=.08+s.reveal*.12;ctx.fillStyle=s.accent;
   for(let i=0;i<12;i++){const a=i*TAU/12+(reduced?0:s.t*.08);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*width,Math.sin(a)*height);ctx.lineTo(Math.cos(a+.07)*width,Math.sin(a+.07)*height);ctx.fill();}ctx.restore();
   ctx.globalAlpha=.12+s.reveal*.13;
-  motif(ctx,s.id,s.cx,s.foot-s.target*.5,s.target*.77,reduced?0:s.t,s.accent,reduced);
+  if(s.id!=='ia')motif(ctx,s.id,s.cx,s.foot-s.target*.5,s.target*.77,reduced?0:s.t,s.accent,reduced);
   ctx.globalAlpha=1;
   ctx.fillStyle='#06192366';ctx.beginPath();ctx.ellipse(s.cx,s.foot+8,s.target*.44,s.target*.055,0,0,TAU);ctx.fill();
   const oldHeight=s.target*CALIBRATED_HEIGHT[s.form-1]/CALIBRATED_HEIGHT[s.form];
   actor(ctx,def,s.form-1,s.cx,s.foot-s.lift,oldHeight,s.oldAlpha,s.pose,s.t,reduced);
   actor(ctx,def,s.form,s.cx,s.foot-s.lift,s.target,s.newAlpha,s.pose,s.t,reduced);
-  if(s.t>2.2&&s.reveal>.8){
+  if(s.id!=='ia'&&s.t>2.2&&s.reveal>.8){
    const age=s.t-2.2,reach=Math.min(width*.32,s.target*.85),strength=Math.sin(Math.PI*Math.min(1,age/1.8));
    ctx.save();ctx.globalAlpha=.7*strength;
    for(let side=-1;side<=1;side+=2)for(let i=0;i<3+s.form;i++){
     const phase=(age*.65+i*.16)%1,px=s.cx+side*(s.target*.3+phase*reach),py=s.foot-s.target*.4-Math.sin(phase*Math.PI)*s.target*.15;
-    if(reduced)drawPowerEmblem(ctx,s.id,s.cx+side*(s.target*.6+i*9),s.foot-s.target*.4,5,0);
+    if(ocean){
+     const xx=reduced?s.cx+side*(s.target*.6+i*9):px;
+     drawNacarRevealSpark(ctx,xx,reduced?s.foot-s.target*.4:py,6+s.form,s.form,reduced?0:phase);
+    }else if(reduced)drawPowerEmblem(ctx,s.id,s.cx+side*(s.target*.6+i*9),s.foot-s.target*.4,5,0);
     else drawPowerEmblem(ctx,s.id,px,py,6+s.form,age*60+i*5);
    }ctx.restore();
   }

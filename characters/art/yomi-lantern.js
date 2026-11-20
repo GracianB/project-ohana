@@ -9,6 +9,76 @@ const PAL=[
 const TAU=Math.PI*2,clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 function line(ctx,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap="round";ctx.lineJoin="round";}
 function ellipse(ctx,x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,TAU);ctx.fill();}
+function paperShade(ctx,x,y,rim,light,trim,shadow){
+ if(!ctx.createRadialGradient)return light;
+ const shade=ctx.createRadialGradient(x,y,2,0,-34,rim);
+ shade.addColorStop(0,'#fff9df');
+ shade.addColorStop(.48,light);
+ shade.addColorStop(.84,trim);
+ shade.addColorStop(1,shadow);
+ return shade;
+}
+
+function lanternShell(ctx,w,h){
+ ctx.beginPath();ctx.moveTo(-w*.53,-h+4);ctx.lineTo(w*.53,-h+4);
+ ctx.bezierCurveTo(w*1.23,-h*.83,w*1.23,-h*.42,w*.54,-15);
+ ctx.quadraticCurveTo(0,-11,-w*.54,-15);
+ ctx.bezierCurveTo(-w*1.23,-h*.42,-w*1.23,-h*.83,-w*.53,-h+4);
+ ctx.closePath();
+}
+
+function shrineRobe(c,f,w,faceY,trim,glow,shadow,swing){
+ const silk=['','#f79991','#91d9d0','#cba1ea','#ffda94'][f];
+ const colors=['','#a53951','#374c74','#382556','#731d42'];
+ const shoulders=faceY+10, waist=faceY+29, hem=-5;
+ c.fillStyle=colors[f];c.beginPath();c.moveTo(-w*.52,shoulders);
+ c.quadraticCurveTo(-w*.64,waist,-w*(.75+f*.065)-swing*.18,hem-3);
+ c.quadraticCurveTo(-w*.46,-1,0,hem);
+ c.quadraticCurveTo(w*.46,-1,w*(.76+f*.065)-swing*.12,hem-3);
+ c.quadraticCurveTo(w*.61,waist,w*.52,shoulders);
+ c.closePath();c.fill();line(c,shadow,1.8);c.stroke();
+ // Each fabric has a separate lining, embroidered hem and layered collar.
+ c.fillStyle=['','#e27c80','#6ebebc','#9877cb','#d77287'][f];
+ c.beginPath();c.moveTo(-w*.39,waist+4);c.lineTo(-w*.66-swing*.11,hem-3);
+ c.quadraticCurveTo(-w*.29,hem+2,0,hem);c.lineTo(w*.25,waist+8);c.closePath();c.fill();
+ line(c,'#fff0c2',1.2);c.beginPath();c.moveTo(-w*.73,hem-8);
+ c.quadraticCurveTo(0,hem-3,w*.74,hem-8);c.stroke();
+ line(c,f===3?'#dfacd1':'#ffead1',f===4?4:3);
+ c.beginPath();c.moveTo(-w*.47,shoulders+2);c.lineTo(w*.22,waist-2);
+ c.moveTo(w*.46,shoulders+2);c.lineTo(-w*.27,waist+1);c.stroke();
+ c.fillStyle=f===3?'#bd7bb3':'#d4a36d';c.beginPath();c.moveTo(-w*.59,waist);
+ c.quadraticCurveTo(0,waist+3,w*.59,waist);c.lineTo(w*.65,waist+7);
+ c.quadraticCurveTo(0,waist+10,-w*.64,waist+7);c.closePath();c.fill();
+ if(f>1){
+  ellipse(c,0,waist+4,3.4,3.4,shadow);
+  ellipse(c,0,waist+3,2,2,glow);
+ }
+ // Split panels follow the sway of the legs and are edged with silk thread.
+ if(f>=2){
+  for(const side of [-1,1]){
+   const x=side*w*.26,fall=side*w*.46-swing*.19,top=waist+6,bottom=hem+1;
+   c.fillStyle=f===4?'#94355a':f===3?'#69458b':'#567c9d';
+   c.beginPath();c.moveTo(x,top);c.quadraticCurveTo(x+side*2,(top+bottom)*.5,fall,bottom);
+   c.lineTo(fall+side*6,bottom-4);c.quadraticCurveTo(x+side*6,(top+bottom)*.5,x+side*5,top);c.closePath();c.fill();
+   line(c,silk,1.25);c.stroke();
+  }
+ }
+ if(f>=3){
+  const bx=w*.28,by=waist+6;
+  line(c,'#ffd590',1.2);
+  c.beginPath();c.moveTo(-bx,by);c.bezierCurveTo(-bx-6,by-8,bx+6,by+10,bx,by);
+  c.bezierCurveTo(bx+7,by-9,-bx-6,by+11,-bx,by);c.stroke();
+  for(const side of [-1,1])ellipse(c,side*bx,by,1.8,1.8,'#fff3c3');
+ }
+ for(let i=0;i<f;i++){
+  const x=(i-(f-1)/2)*w*.33-swing*.14,y=hem-7+(i%2)*2;
+  line(c,f>=3?'#ffcf8f':glow,1.25);c.beginPath();
+  if(f===2){c.moveTo(x-4,y);c.quadraticCurveTo(x,y-6,x+4,y);c.moveTo(x-4,y+3);c.quadraticCurveTo(x,y-3,x+4,y+3);}
+  else{c.moveTo(x-3,y+2);c.quadraticCurveTo(x-4,y-4,x,y-4);c.quadraticCurveTo(x+5,y-4,x+3,y+2);c.lineTo(x-3,y+2);}
+  c.stroke();if(f===4)ellipse(c,x,y-1,1.2,1.2,'#fff4c8');
+ }
+}
+
 function crescent(ctx,x,y,r,color){
   line(ctx,color,1.6);ctx.beginPath();ctx.arc(x,y,r,-2.66,-.47);ctx.stroke();
 }
@@ -77,10 +147,12 @@ function yomiAmbient(ctx, p, f, glow, shadow, t, h, w) {
       const phase = ((t * (running ? .061 : .038) + i * .25) % 1 + 1) % 1;
       const x = (running ? -24 - phase * 30 : (i - 1.5) * 11) - w * .2;
       const y = running ? -12 - i * 10 - phase * 8 : -12 + phase * 27;
-      ctx.globalAlpha = .36 * (1 - phase);
+      ctx.globalAlpha = .48 * (1 - phase);
       ctx.fillStyle = i % 2 ? glow : "#fff5db";
       ctx.beginPath();
-      ctx.ellipse(x, y, 2 + (f >= 3 ? .6 : 0), 3 - phase, .25, 0, TAU);
+      if(running&&i%2===0&&f>0){
+        ctx.moveTo(x-2,y-4);ctx.lineTo(x+3,y-3);ctx.lineTo(x+2,y+3);ctx.lineTo(x-3,y+2);ctx.closePath();
+      }else ctx.ellipse(x,y,2+(f>=3?.6:0),3-phase,.25,0,TAU);
       ctx.fill();
     }
   }
@@ -187,6 +259,100 @@ export function yomiWelcomeAnatomy(pose={},form=0){
  });
 }
 
+// A shrine keeper's clothing sits on the body. Only the lantern and charms swing free.
+function shrineAccessory(c,f,grip,swing,glow,shadow,acting){
+ const cord='#f3bf80', tassel=f===4?'#f49a90':'#bf5478';
+ c.save();
+ const release=acting?.release||0, load=acting?.load||0;
+ c.translate(grip.x,grip.y);
+ const aim=acting?.slot===2?-.78*load+1.13*release:acting?.slot===0?.42*release:0;
+ c.rotate(swing*.017+grip.angle*.19+aim);c.translate(-5,-5);
+ if(f>=2){
+  line(c,shadow,4);c.beginPath();c.moveTo(5,29);c.lineTo(5,-25-f*2);c.stroke();
+  line(c,cord,1.45);c.beginPath();c.moveTo(5,28);c.lineTo(5,-25-f*2);c.stroke();
+  ellipse(c,5,-25-f*2,2.8,2.8,glow);
+ }
+ line(c,cord,1.7);c.beginPath();c.moveTo(-4,0);c.quadraticCurveTo(9,2,11,14);c.stroke();
+ if(f>=1){
+  c.save();c.translate(11,14);
+  const scale=[1,1,1.13,1.27,1.45][f];
+  c.scale(scale,scale);c.translate(-11,-14);
+  c.fillStyle=shadow;c.beginPath();c.moveTo(5,14);c.lineTo(17,14);c.lineTo(19,23);c.lineTo(15,29);c.lineTo(7,29);c.lineTo(3,23);c.closePath();c.fill();
+  ellipse(c,11,22,4.5+f*.36+release*2,5+release*2,glow);
+  ellipse(c,11+release*1.5,21,1.9,3+release*2,'#fff7cf');
+  line(c,'#fac48a',1.05);c.beginPath();c.moveTo(6,16);c.lineTo(16,16);
+  c.moveTo(4,23);c.lineTo(18,23);c.moveTo(7,28);c.lineTo(15,28);c.stroke();
+  if(f>=3){
+   line(c,'#fff2b7',1.3);c.beginPath();c.moveTo(7,16);c.lineTo(11,13);c.lineTo(16,16);
+   c.moveTo(7,27);c.lineTo(6,19);c.moveTo(15,27);c.lineTo(16,19);c.stroke();
+  }
+  if(f===4){
+   c.fillStyle='#ffc67c';c.beginPath();c.moveTo(3,20);c.lineTo(0,23);c.lineTo(5,25);
+   c.moveTo(19,20);c.lineTo(22,23);c.lineTo(17,25);c.fill();
+   ellipse(c,11,26,2.8,1.7,'#fff5cf');
+  }
+  c.restore();
+ }
+ ellipse(c,5,5,3.65,3.1,'#ffe4c8');
+ ellipse(c,6,4,1.1,1.1,'#fff5dd');
+ const knot=[14,30,32,34,37][f];
+ line(c,cord,2);c.beginPath();c.moveTo(11,knot-2);c.lineTo(11,knot+4);c.stroke();
+ for(let i=-1;i<=1;i++){
+  line(c,tassel,1.4);c.beginPath();c.moveTo(11+i*1.1,knot+2);
+  c.quadraticCurveTo(11+i*1.5-swing*.1,knot+6,11+i*2.6-swing*.28,knot+10+f);c.stroke();
+ }
+ if(f>1&&release>.05){
+  c.globalAlpha=.75*release;
+  if(acting.slot===2){
+   c.fillStyle='#ff9b86';c.beginPath();c.moveTo(5,-32);c.quadraticCurveTo(19,-58,39,-38);
+   c.quadraticCurveTo(20,-47,7,-25);c.closePath();c.fill();
+   line(c,'#fff4cb',2);c.beginPath();c.moveTo(6,-28);c.quadraticCurveTo(19,-46,31,-39);c.stroke();
+  }else if(acting.slot===1){
+   line(c,glow,1.5);
+   c.beginPath();c.ellipse(11,21,10+12*release,5+7*release,-.25,0,TAU);c.stroke();
+  }
+ }
+ c.restore();
+}
+
+function shrineHair(c,f,w,h,faceY,swing,glow){
+ if(f===0)return;
+ const y=-h+4, shade=['','#ece7f9','#e5f4fc','#dcd9f9','#fff3eb'][f];
+ const extension=[0,8,14,20,24][f];
+ c.fillStyle=shade;c.beginPath();c.moveTo(-w*.92,faceY+8);
+ c.quadraticCurveTo(-w*1.14,y-11,-w*.37,y-12);
+ c.quadraticCurveTo(w*.42,y-17,w*.96,y+6);
+ c.quadraticCurveTo(w*1.13,faceY+3,w*.79,faceY+extension);
+ c.quadraticCurveTo(w*.64+swing*.1,faceY+7,w*.65,y+8);
+ c.quadraticCurveTo(w*.47,y+11,w*.31,faceY-6);
+ c.quadraticCurveTo(w*.18,y+13,w*.06,y+10);
+ c.quadraticCurveTo(-w*.18,faceY-3,-w*.51,y+8);
+ c.quadraticCurveTo(-w*.66,faceY+12,-w*.89+swing*.12,faceY+extension);
+ c.closePath();c.fill();line(c,'#554b75',1.7);c.stroke();
+ c.fillStyle=f===3?'#a59bce':'#b5bfdb';c.beginPath();
+ c.moveTo(-w*.79,y+9);c.quadraticCurveTo(-w*.65,y+16,-w*.82+swing*.12,faceY+extension-3);
+ c.quadraticCurveTo(-w*1.0,faceY+2,-w*.79,y+9);c.fill();
+ line(c,'#fffdf6',2.55);
+ c.beginPath();c.moveTo(-w*.66,y+1);c.quadraticCurveTo(-w*.28,y-13,w*.48,y-7);c.stroke();
+ line(c,f===3?'#ab9ec9':'#b3b9d2',1.1);
+ c.beginPath();c.moveTo(w*.18,y-7);c.quadraticCurveTo(w*.12,y+4,-w*.29,faceY-7);
+ c.moveTo(w*.38,y-5);c.quadraticCurveTo(w*.46,y+8,w*.36,faceY-9);
+ c.moveTo(-w*.69,y+8);c.quadraticCurveTo(-w*.73,faceY-5,-w*.63+swing*.1,faceY+extension-5);c.stroke();
+ const pinX=w*.65;
+ for(let i=0;i<f;i++){
+  ellipse(c,pinX-i*2.8,y+3-i*2,1.8,1.6,glow);
+ }
+ if(f===4){
+  line(c,'#c7a579',1.15);
+  c.beginPath();c.moveTo(pinX+2,y+8);c.quadraticCurveTo(pinX+8,y+18,pinX+3,y+23);c.stroke();
+  for(let j=0;j<3;j++)ellipse(c,pinX+5-j*.6,y+15+j*4,1.35,1.55,'#fff2c7');
+ }
+ if(f>=3){
+  c.fillStyle='#ffd297';c.beginPath();c.moveTo(pinX+4,y+3);c.lineTo(pinX+10,y+8);
+  c.lineTo(pinX+4,y+15);c.lineTo(pinX,y+8);c.closePath();c.fill();
+ }
+}
+
 function draw(ctx,pose,R){
   const p=pose||{},f=clamp(p.form|0,0,4),t=Number(p.t)||0,st=p.state||"idle";
   const col=PAL[f],paper=col[0],trim=col[1],glow=col[2],shadow=col[3];
@@ -197,7 +363,7 @@ function draw(ctx,pose,R){
   let open=st==="attack"?atk:cast===2?acting.maw:st==="victory"?.3:.05;
   let swing=(reduced?0:Math.sin(t*(run?.26:.08))*(run?5:2.4))+(Number(p.sway)||0)*3;
   let hover=(st==="dead"?1:(reduced?0:Math.sin(t*.067)*2.1))-(flight?3:0)+(acting?.rise||0);
-  const w=20+f*2.9,h=55+f*4.2;
+  const w=[18,17,18,19,20][f],h=[53,65,74,83,92][f];
   // V348 · Yomi stays physically connected during the title performance.
   // No substitute silhouette or combat casts: head, lantern ribs, sleeves,
   // trailing ribbon and hearth all belong to this ORIGINAL five-form art.
@@ -214,7 +380,7 @@ function draw(ctx,pose,R){
   // Original five silhouette types remain recognizable. The lantern's rib
   // geometry, its attached sleeves and the mouth all share the same origin.
   hover+=life.rise;swing+=life.ribbon;open=clamp(open+life.open,0,1);
-  const shoulder=-h*.68,faceY=-h*.72+listen*.8+reveal*(-1.4)+bow*2.1+life.face;
+  const shoulder=-h*.53,faceY=-h*.73+listen*.8+reveal*(-1.4)+bow*2.1+life.face;
   const stageTilt=listen*(-.10)+gather*.16-reveal*(-.19)+startle*.22+bow*(-.13);
   ctx.save();ctx.translate(0,hover);ctx.rotate(
     (run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)
@@ -226,55 +392,28 @@ function draw(ctx,pose,R){
   if(jumpS)ctx.scale(.9,1.1);else if(fallS)ctx.scale(1.06,.95);
   yomiAmbient(ctx,p,f,glow,shadow,t,h,w);
   // Ribbon tail follows the lantern, not a detached sprite or a duplicated hero.
-  ctx.fillStyle=shadow;ctx.globalAlpha=.78;ctx.beginPath();ctx.moveTo(-11,-18);
+  ctx.fillStyle=trim;ctx.globalAlpha=.88;ctx.beginPath();ctx.moveTo(-11,-19);
   ctx.quadraticCurveTo(-29-swing-gather*3,-9,-22-swing,-1);
   ctx.quadraticCurveTo(-14-swing,7,-8,2);ctx.quadraticCurveTo(-6,-11,-11,-18);ctx.fill();
   ctx.globalAlpha=1;
+  line(ctx,glow,1.4);
+  ctx.beginPath();ctx.moveTo(-12,-16);ctx.quadraticCurveTo(-24-swing,-6,-14-swing,1);ctx.stroke();
   if(f===4){
     ctx.save();ctx.globalAlpha=.32+.15*pulse;
     crescent(ctx,0,faceY-4,36+2*pulse,"#ffd988");ctx.restore();
   }
-  // Each form changes its silhouette, not just a scale factor or decoration.
-  // F0: squat glowing seed. F1: tall wanderer. F2: winged ward.
-  // F3: angular night knight. F4: double-crescent moon guardian.
-  if(f===0){
-    ctx.fillStyle="#e8b17f";
+  // The silhouette drops down into a split shrine coat as the forms mature.
+  if(f>=1){
+    const flare=w*(.76+f*.06);
+    ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-w*.55,shoulder);
+    ctx.quadraticCurveTo(-flare,-26,-flare-swing*.42,-4);
+    ctx.quadraticCurveTo(-w*.52,4,-4,-4);ctx.lineTo(0,-14);
+    ctx.lineTo(6,-3);ctx.quadraticCurveTo(w*.58,2,flare-swing*.27,-8);
+    ctx.quadraticCurveTo(flare,-32,w*.62,shoulder);ctx.closePath();ctx.fill();
+    line(ctx,trim,2);ctx.stroke();
     for(const side of [-1,1]){
-      ctx.beginPath();ctx.ellipse(side*19,-31,10,17,side*.32,0,TAU);ctx.fill();
-      line(ctx,"#533b56",2.4);ctx.stroke();
-    }
-  }else if(f===1){
-    ctx.fillStyle=trim;
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*15,-44);
-      ctx.quadraticCurveTo(side*33,-34,side*33,-5);
-      ctx.quadraticCurveTo(side*21,-11,side*14,-15);ctx.closePath();ctx.fill();
-      line(ctx,"#52344e",2);ctx.stroke();
-    }
-  }else if(f===2){
-    ctx.fillStyle="#c9808a";
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*14,-58);
-      ctx.quadraticCurveTo(side*43,-65,side*51,-45);
-      ctx.lineTo(side*34,-32);ctx.lineTo(side*21,-40);
-      ctx.closePath();ctx.fill();line(ctx,"#563851",3);ctx.stroke();
-    }
-  }else if(f===3){
-    ctx.fillStyle="#753656";
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*14,-58);
-      ctx.lineTo(side*55,-75);ctx.lineTo(side*41,-40);
-      ctx.lineTo(side*56,-5);ctx.quadraticCurveTo(side*31,-16,side*19,-31);
-      ctx.closePath();ctx.fill();line(ctx,"#f4a0a4",2.5);ctx.stroke();
-    }
-  }else{
-    ctx.fillStyle="#563450";
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*16,-65);
-      ctx.quadraticCurveTo(side*54,-96,side*70,-82);
-      ctx.lineTo(side*51,-44);ctx.quadraticCurveTo(side*75,-18,side*61,1);
-      ctx.lineTo(side*23,-21);ctx.closePath();ctx.fill();
-      line(ctx,"#ffdaa4",3);ctx.stroke();
+      line(ctx,glow,1.35);ctx.beginPath();ctx.moveTo(side*w*.69,-24);
+      ctx.quadraticCurveTo(side*w*.79,-16,side*flare*.83-swing*.23,-7);ctx.stroke();
     }
   }
   // The growing cape makes five recognizable stages, from baby to moon guardian.
@@ -289,101 +428,85 @@ function draw(ctx,pose,R){
     ctx.beginPath();ctx.moveTo(-w*.78,-17);ctx.quadraticCurveTo(0,-7,w*.78,-17);ctx.stroke();ctx.restore();
   }
   // Actual foot silhouette: Yomi hovers but retains a clear readable ground anchor.
-  if(!run&&!jumpS&&!fallS){ellipse(ctx,-7,0,7,3,shadow);ellipse(ctx,8,0,7,3,shadow);}
+  if(f===0){ellipse(ctx,0,0,8,1.7,shadow);}
+  else if(!run&&!jumpS&&!fallS){ellipse(ctx,-7,0,7,3,shadow);ellipse(ctx,8,0,7,3,shadow);}
   else{const ls=run&&!reduced?Math.sin(runPh)*5:0,ly=jumpS?-5:fallS?3:0;
    ellipse(ctx,-7-ls,ly-(run?Math.max(0,Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);
    ellipse(ctx,8+ls,(jumpS?-3:ly)-(run?Math.max(0,-Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);}
-  // Two animated open sleeves. K's suction visibly pulls them forward.
-  for(const side of [-1,1]){
-    ctx.save();ctx.translate(side*(w*.77),shoulder+6);
+  // The lamp is anchored to the rotating leading cuff in every pose.
+  let grip=null;
+  for(const side of f===0?[]:[-1,1]){
+    const x=side*w*.77,y=shoulder+6;
+    ctx.save();ctx.translate(x,y);
     // K rings a bell from both sleeves; L winds the leading sleeve back for the bite.
     const leading=side===1,windup=acting?(leading?acting.front:acting.back):0;
     const welcomeSleeve=leading?(listen*.34+gather*.65+reveal*(-.75)+startle*.95+bow*.46+life.sleeveFront):
       (-listen*.19-gather*.40+reveal*.69-startle*.56+bow*.38+life.sleeveBack);
-    ctx.rotate(side*((cast===1?.22:run?.22+(reduced?0:Math.sin(runPh+side*1.6)*.28):jumpS?.55:fallS?2.45:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve);
-    const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0)+gather*1.7+reveal*2.3;
+    const angle=side*((cast===1?.22:run?.22+(reduced?0:Math.sin(runPh+side*1.6)*.28):jumpS?.55:fallS?2.45:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve;
+    ctx.rotate(angle);
+    const sleeveLen=17+f*2.5+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0)+gather*1.7+reveal*2.3;
+    if(leading){
+      const reach=sleeveLen-4;
+      grip={x:x-Math.sin(angle)*reach,y:y+Math.cos(angle)*reach,angle};
+    }
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
     ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
     ctx.quadraticCurveTo(0,sleeveLen+5,11,sleeveLen);
     ctx.quadraticCurveTo(13,sleeveLen*.48,7,0);ctx.closePath();ctx.fill();
     line(ctx,trim,2);ctx.stroke();
     line(ctx,glow,1.7);ctx.beginPath();ctx.moveTo(-9,sleeveLen-3);ctx.quadraticCurveTo(0,sleeveLen,10,sleeveLen-3);ctx.stroke();
+    if(f>=2){
+      line(ctx,f===4?'#ffdc96':trim,1.1);
+      ctx.beginPath();ctx.moveTo(-8,sleeveLen-8);ctx.quadraticCurveTo(0,sleeveLen-5,8,sleeveLen-8);ctx.stroke();
+      for(let i=-1;i<=1;i++)ellipse(ctx,i*4,sleeveLen-9-i*i,1,1,glow);
+    }
     ctx.restore();
   }
-  // Lantern-shaped body: hand-painted gold rim, paper ribs and inner flame.
-  ctx.fillStyle=paper;ctx.beginPath();
-  ctx.moveTo(-w*.77,-h+8);ctx.quadraticCurveTo(-w-2,-h*.52,-w*.82,-19);
-  ctx.quadraticCurveTo(-w*.55,-9,0,-8);
-  ctx.quadraticCurveTo(w*.55,-9,w*.82,-19);
-  ctx.quadraticCurveTo(w+2,-h*.52,w*.77,-h+8);
-  ctx.quadraticCurveTo(0,-h-6,-w*.77,-h+8);ctx.closePath();ctx.fill();
-  line(ctx,"#35233c",3.2);ctx.stroke();
-  ctx.save();ctx.globalAlpha=.13+.07*pulse;
-  ellipse(ctx,0,-h*.41,w*.69,h*.30,glow);ctx.restore();
-  line(ctx,trim,1.45);
-  for(const i of [-1,1]){
-    ctx.beginPath();ctx.moveTo(i*w*.57,-h+11);
-    ctx.quadraticCurveTo(i*w*.82,-h*.5,i*w*.52,-17);ctx.stroke();
-  }
-  line(ctx,trim,3);ctx.beginPath();ctx.moveTo(-w*.67,-h+5);
-  ctx.quadraticCurveTo(0,-h+1,w*.67,-h+5);ctx.stroke();
-  // Evolutions get different head architecture and proportions.
   if(f===0){
-    ellipse(ctx,-9,-h+4,10,9,"#ffe2b2");
-    ellipse(ctx,10,-h+4,10,9,"#ffe2b2");
-  }
-  if(f===2){
-    ctx.fillStyle="#ad637e";
-    ctx.beginPath();ctx.moveTo(-w*.86,-h+9);
-    ctx.lineTo(-w*.45,-h-13);ctx.lineTo(0,-h-7);
-    ctx.lineTo(w*.45,-h-13);ctx.lineTo(w*.86,-h+9);
-    ctx.closePath();ctx.fill();line(ctx,"#5d3b59",2.5);ctx.stroke();
-  }
-  if(f===3){
-    ctx.fillStyle="#552f53";
-    ctx.beginPath();ctx.moveTo(-w-7,-h+17);
-    ctx.quadraticCurveTo(-w-9,-h-15,0,-h-22);
-    ctx.quadraticCurveTo(w+9,-h-15,w+7,-h+17);
-    ctx.lineTo(w*.58,-h+7);ctx.quadraticCurveTo(0,-h-7,-w*.58,-h+7);
-    ctx.closePath();ctx.fill();line(ctx,"#d98291",2.5);ctx.stroke();
-  }
-  if(f===4){
+    lanternShell(ctx,w,h);
+    ctx.fillStyle=paperShade(ctx,4,-h*.49,h*.73,paper,trim,shadow);
+    ctx.fill();line(ctx,shadow,2);ctx.stroke();
     for(const side of [-1,1]){
-      ctx.save();ctx.translate(side*w*.54,-h-9);
-      ctx.scale(side,1);ctx.fillStyle="#ffd19a";ctx.beginPath();
-      ctx.moveTo(-5,8);ctx.quadraticCurveTo(-23,-9,-15,-31);
-      ctx.quadraticCurveTo(1,-25,8,-5);ctx.closePath();ctx.fill();
-      line(ctx,"#703754",2.5);ctx.stroke();ctx.restore();
+      line(ctx,trim,1.1);ctx.beginPath();ctx.moveTo(side*10,-h+11);
+      ctx.quadraticCurveTo(side*17,-h*.49,side*10,-13);ctx.stroke();
     }
-  }
-  // Cap and top-knot: each evolution gets a clearer signature silhouette.
-  ellipse(ctx,0,-h-2,w*.71,4.8,shadow);
-  ellipse(ctx,0,-h-5,w*.42,3.3,glow);
-  if(f>=1){
-    line(ctx,trim,2.1);ctx.beginPath();ctx.moveTo(0,-h-7);
-    ctx.quadraticCurveTo(swing*.2,-h-15,0,-h-19);ctx.stroke();
-    ellipse(ctx,0,-h-20,3.3+f*.3,3.3+f*.3,glow);
-  }
-  if(f>=2){
-    for(const side of [-1,1]){
-      ctx.save();ctx.translate(side*(w*.53),-h-5);
-      ctx.rotate(side*.22);ctx.fillStyle=trim;ctx.beginPath();
-      ctx.moveTo(-5,0);ctx.quadraticCurveTo(-9,-11,-2,-17-f*2);
-      ctx.quadraticCurveTo(7,-12,6,0);ctx.closePath();ctx.fill();ctx.restore();
-    }
+    line(ctx,shadow,3.2);ctx.beginPath();ctx.arc(0,-h-1,7,-Math.PI,0);ctx.stroke();
+    ellipse(ctx,0,-h+2,w*.72,4.4,shadow);
+    ellipse(ctx,0,-h+1,w*.59,1.8,'#ffd891');
+    ellipse(ctx,0,-15,w*.65,3.9,shadow);
+    ellipse(ctx,0,-16,w*.54,1.6,'#ffcb7c');
+    line(ctx,trim,1.6);ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(0,-6);ctx.stroke();
+    ellipse(ctx,0,-5,2.2,3.4,glow);
+  }else{
+    shrineRobe(ctx,f,w,faceY,trim,glow,shadow,swing);
+    const skin=f>=3?'#ffe1c9':'#ffe6cb';
+    ellipse(ctx,1,faceY+2,w*.79,17,shadow);
+    ellipse(ctx,1,faceY+1,w*.75,15.4,skin);
+    shrineHair(ctx,f,w,h,faceY,swing,glow);
   }
   // Expressive OHANA face, never permanent horror teeth.
   const mood=hurt?"closed":angry?"angry":(welcome?.spark||0)>.47?"closed":startle>.23?"closed":
     reveal>.25||bow>.20||(welcome?.melody||0)>.45||(welcome?.dino||0)>.45?"happy":st==="victory"||cast===3?"happy":"normal";
-  const eyeSize=f===0?7.3:6+f*.15; // V370: Farol baby reads cuter
-  R.eye(ctx,-8,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
-  R.eye(ctx,9,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
+  const eyeSize=f===0?7.3:6.1+f*.13;
+  const iris=['#a55c3d','#8a4263','#4d717f','#725399','#ae506a'][f];
+  R.eye(ctx,-7.5,faceY,eyeSize,p,{iris,mood});
+  R.eye(ctx,8,faceY,eyeSize*.92,p,{iris,mood});
+  if(!hurt&&mood==='normal'&&f>0){
+    line(ctx,shadow,2.05);ctx.beginPath();
+    ctx.moveTo(-13,faceY-1);ctx.quadraticCurveTo(-10,faceY-5,-4,faceY-4);
+    ctx.moveTo(4,faceY-4);ctx.quadraticCurveTo(10,faceY-5,14,faceY-1);ctx.stroke();
+    for(const side of [-1,1]){
+      line(ctx,'#b75a73',.85);ctx.beginPath();
+      ctx.moveTo(side*11,faceY+5);ctx.lineTo(side*9,faceY+7);
+      ctx.moveTo(side*13,faceY+5);ctx.lineTo(side*11,faceY+7);ctx.stroke();
+    }
+  }
   if(!angry){
     ellipse(ctx,-w*.49,faceY+9,3.5,2.1,"#ef9fa0");
     ellipse(ctx,w*.49,faceY+9,3.5,2.1,"#ef9fa0");
   }
   ctx.fillStyle=angry?"#592943":"#94536b";ctx.beginPath();
-  ctx.ellipse(1,faceY+13,angry?6+open*8:4.8+open*2.8,angry?4+open*7:2.4+open*3.9,0,0,TAU);ctx.fill();
+  ctx.ellipse(1,faceY+(f===0?13:10),angry?4+open*5:2.5+open*2.8,angry?2+open*4:1.2+open*3,0,0,TAU);ctx.fill();
   // The L bite grows from Yomi's expression, not an unrelated monster sprite.
   if(cast===2){
     const snap=acting?.release||0;
@@ -394,16 +517,6 @@ function draw(ctx,pose,R){
     }
     ctx.restore();
   }
-  if(angry&&f>=3){
-    ctx.fillStyle="#fff4d8";for(let i=-1;i<=1;i++){
-      ctx.beginPath();ctx.moveTo(i*6,faceY+8);ctx.lineTo(i*6+2,faceY+12+open*5);
-      ctx.lineTo(i*6+4,faceY+8);ctx.fill();
-    }
-  }
-  if(f>=3){
-    line(ctx,trim,1.8);ctx.beginPath();ctx.moveTo(w*.26,faceY-18);
-    ctx.lineTo(w*.08,faceY-11);ctx.lineTo(w*.31,faceY-5);ctx.stroke();
-  }
   // Four different emotions make the guardian readable at first glance.
   if(st==="idle"&&f<=1){
     ctx.save();ctx.globalAlpha=.4+.2*pulse;line(ctx,glow,1);
@@ -413,11 +526,13 @@ function draw(ctx,pose,R){
     ctx.save();ctx.globalAlpha=.60;line(ctx,"#ffe0ac",2);
     ctx.beginPath();ctx.arc(0,faceY-17,18,-2.8,-.3);ctx.stroke();ctx.restore();
   }
-  // Warm lantern heart stays visible on every stage.
-  ellipse(ctx,0,-25,7+f*.5+reveal*2.2+life.flame*1.5,9+f*.3+reveal*2.7+life.flame*1.8,glow);
-  ctx.fillStyle=f>=3?"#fff4d0":"#ffedaa";ctx.beginPath();
-  ctx.moveTo(0,-34);ctx.quadraticCurveTo(-7,-23,0,-18);
-  ctx.quadraticCurveTo(9,-24,0,-34);ctx.fill();
+  if(f===0){
+    const lean=swing*.27+(acting?.release||0)*4;
+    const flame=5+pulse*1.2+reveal*1.8+life.flame*1.3+(acting?.release||0)*2.2;
+    ellipse(ctx,0,-20,5.7,3.5,glow);
+    ctx.fillStyle='#fff3c7';ctx.beginPath();ctx.moveTo(lean,-18-flame);
+    ctx.quadraticCurveTo(-5,-20,0,-17);ctx.quadraticCurveTo(6,-18,lean,-18-flame);ctx.fill();
+  }
   // J throws a horizontal paper seal; the hand no longer points skyward.
   if(cast===0) {
     const k=clamp(Number(p.cast)||0,0,1);
@@ -448,6 +563,14 @@ function draw(ctx,pose,R){
     const v=st==="victory"?pulse:Math.sin(Math.PI*clamp(p.flourish,0,1));
     ctx.save();ctx.globalAlpha=.4*v;crescent(ctx,w+5,faceY-19,9+f,glow);ctx.restore();
   }
+  if(f>=2&&run&&!reduced){
+    const tail=-w-13-swing*.59, y=-h*.32;
+    ctx.fillStyle=f===3?'#b574aa':'#e98898';
+    ctx.beginPath();ctx.moveTo(-w*.56,y);ctx.quadraticCurveTo(-w-8,y+11,tail,y+2);
+    ctx.lineTo(tail+4,y+8);ctx.quadraticCurveTo(-w-9,y+13,-w*.56,y+4);ctx.closePath();ctx.fill();
+    line(ctx,glow,1.2);ctx.beginPath();ctx.moveTo(-w*.58,y+2);ctx.quadraticCurveTo(-w-9,y+11,tail+2,y+5);ctx.stroke();
+  }
+  if(grip)shrineAccessory(ctx,f,grip,swing,glow,shadow,acting);
   drawYomiRitual(ctx,p,f,trim,glow,faceY,w,t);
   ctx.restore();
 }

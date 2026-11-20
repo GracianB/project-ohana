@@ -9,7 +9,7 @@ const ART={cat,chispin,pizza,yomi};
 const HEIGHT={cat:REBEL_ART_HEIGHT,chispin:[80,94,105,114,125],pizza:[102,107,129,135,134],yomi:[66,86,92,98,116]};
 export function drawEvolutionActor(ctx,id,x,y,s,form,t,options={}){
  const f=Math.max(0,Math.min(4,(form|0)-1));
- const motion=id==='cat'&&!options.reducedMotion;
+ const motion=(id==='cat'||id==='yomi')&&!options.reducedMotion;
  const state=motion?(options.state||'victory'):'idle';
  const clock=motion?(Number.isFinite(t)?t*60:0):0;
  ctx.save();ctx.translate(x,y);

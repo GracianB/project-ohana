@@ -1,3 +1,45 @@
+ohana-823 · [Nuevo selector de personajes](docs/V823-ATLAS.md) · [Validación](docs/V823-VALIDATION.json) · [Publicación](docs/V823-PUBLICATION.json)
+
+ohana-822 · [Nueva bienvenida de Isla Hoku](docs/V822-WELCOME.md) · [Validación](docs/V822-VALIDATION.json) · [Publicación](docs/V822-PUBLICATION.json)
+
+ohana-821 · [Pantalla de carga de Isla Hoku](docs/V821-STARTUP.md) · [Validación](docs/V821-VALIDATION.json) · [Publicación](docs/V821-PUBLICATION.json)
+
+ohana-820 · [100 ajustes de animación por ataque](docs/V820-ATTACKS.md) · [Validación](docs/V820-VALIDATION.json) · [Publicación](docs/V820-PUBLICATION.json)
+
+ohana-819 · [Emblemas y animación del repertorio](docs/V819-ATTACKS.md) · [Validación](docs/V819-VALIDATION.json) · [Publicación](docs/V819-PUBLICATION.json)
+
+ohana-818 · [Primer pase de J, K, L, I y P](docs/V818-ATTACKS.md) · [Validación](docs/V818-VALIDATION.json) · [Publicación](docs/V818-PUBLICATION.json)
+
+ohana-817 · [100 mejoras de animación de I](docs/V817-REMATES.md) · [Validación](docs/V817-VALIDATION.json) · [Publicación](docs/V817-PUBLICATION.json)
+
+ohana-816 · [Las 100 mejoras de los remates](docs/V816-REMATES.md) · [Validación](docs/V816-VALIDATION.json) · [Publicación](docs/V816-PUBLICATION.json)
+
+[Validación de ohana-815](docs/V815-VALIDATION.json) · [Publicación](docs/V815-PUBLICATION.json)
+
+[Validación de ohana-814](docs/V814-VALIDATION.json) · [Publicación](docs/V814-PUBLICATION.json)
+
+[Validación de ohana-813](docs/V813-VALIDATION.json) · [Publicación](docs/V813-PUBLICATION.json)
+
+[Validación de ohana-812](docs/V812-VALIDATION.json) · [Publicación](docs/V812-PUBLICATION.json)
+
+[Validación de ohana-811](docs/V811-VALIDATION.json) · [Publicación](docs/V811-PUBLICATION.json)
+
+[Validación de ohana-810](docs/V810-VALIDATION.json) · [Publicación](docs/V810-PUBLICATION.json)
+
+[Validación de ohana-809](docs/V809-VALIDATION.json) · [Publicación](docs/V809-PUBLICATION.json)
+
+[Validación de ohana-808](docs/V808-VALIDATION.json) · [Publicación](docs/V808-PUBLICATION.json)
+
+[Validación de ohana-807](docs/V807-VALIDATION.json) · [Publicación](docs/V807-PUBLICATION.json)
+
+[Validación de ohana-806](docs/V806-VALIDATION.json) · [Publicación](docs/V806-PUBLICATION.json)
+
+[Validación de ohana-805](docs/V805-VALIDATION.json) · [Publicación](docs/V805-PUBLICATION.json)
+
+[Validación de ohana-804](docs/V804-VALIDATION.json) · [Publicación](docs/V804-PUBLICATION.json)
+
+[Validación de ohana-803](docs/V803-VALIDATION.json) · [Publicación](docs/V803-PUBLICATION.json)
+
 [Validación de ohana-802](docs/V802-VALIDATION.json) · [Publicación](docs/V802-PUBLICATION.json)
 
 [Validación de ohana-801](docs/V801-VALIDATION.json) · [Publicación](docs/V801-PUBLICATION.json)

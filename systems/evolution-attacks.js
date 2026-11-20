@@ -1,3 +1,5 @@
+import {drawReturningSlice,drawRemateDetail} from './remate-art.js';
+import {drawHeroAttackGlyph,drawAttackWindow} from './combat-fx.js';
 import {HERO_POWERS,beginHeroPower,updateHeroPowers,drawHeroPowers} from "./hero-combos.js";
 // World-space attacks. Rendering never applies damage; guests are not enemies.
 const TAU=Math.PI*2;
@@ -15,7 +17,7 @@ const THEMES={
  dino:['#c3ef91','fossil','Pisotón fósil','Estampida ancestral','quake','stampede'],
  frita:['#ffe6a1','salt','Abanico crujiente','Festival de freidoras','fan','fryer'],
  pizza:['#ffc774','slice','Porción boomerang','Rueda de porciones','return','orbit'],
- yomi:['#d5bcff','seal','Runa de código','Lluvia de respuestas','cross','spirits'], ia:['#d5bcff','seal','Runa de código','Lluvia de respuestas','cross','spirits'],
+ yomi:['#ffba80','seal','Paso de farol','Tres ecos de lumbre','cross','spirits'], ia:['#7ff9e5','prism','Runa de código','Lluvia de respuestas','cross','spirits'],
  cuerno:['#d7f9fa','prism','Lanza de aurora','Lluvia de constelaciones','lance','constellation']
 };
 const DESCRIPTIONS={
@@ -35,7 +37,18 @@ export function extraAbility(id,index){
  return {id:`${id}_${index===4?'ascend':'finale'}`,key:index===4?'I':'P',name:HERO_POWERS[id][index===4?0:1],color:d[0],cd:index===4?3600:7200,
   desc:HERO_POWERS[id][index===4?2:3]};
 }
-export function powerAbility(p,index,defs,supreme){return index===3?supreme:index>3?extraAbility(p.id,index):defs[p.abilities?.[index]];}
+const LANTERN_POWERS={
+ ofuda:{name:'Sello viajero',color:'#ffd18e',desc:'El sello rebota de un enemigo a otro y los prepara para L.'},
+ sleeve:{name:'Campanada',color:'#ffdda1',desc:'La onda sella enemigos y desvanece los disparos que toca.'},
+ maw:{name:'Fuego del umbral',color:'#ffb575',desc:'El fuego consume los sellos al acertar y cura a Yomi. En solitario puede pasar un sello a un enemigo cercano.'}
+};
+
+export function powerAbility(p,index,defs,supreme){
+ if(index===3)return supreme;
+ if(index>3)return extraAbility(p.id,index);
+ const id=p.abilities?.[index],base=defs[id],lantern=LANTERN_POWERS[id];
+ return base&&p.id==='yomi'&&lantern?{...base,...lantern}:base;
+}
 function state(g){
  if(!g._evolutionAttacks||g._evolutionAttacks.owner!==g.player||g._evolutionAttacks.room!==g.roomId)
   g._evolutionAttacks={owner:g.player,room:g.roomId,age:0,shots:[],fields:[],drones:[],beams:[],guest:null};
@@ -83,7 +96,7 @@ export function startBattleCompanion(g,id,power=1){
 export function castEvolutionAttack(g,index){
  const p=g.player,d=THEMES[p.id],s=state(g),e=tier(p),c=center(p),face=p.facing||1;
  beginHeroPower(g,index,s);
- p._cast={slot:index,t:g.t,id:extraAbility(p.id,index).id,form:e};
+ p._cast={slot:index,t:g.t,id:extraAbility(p.id,index).id,form:e,face,x:c.x,y:c.y};
  p._powerPerformance={index,start:g.t};
  g.nums?.add?.(c.x,p.y-36,extraAbility(p.id,index).name,d[0],true);
 }
@@ -108,6 +121,7 @@ export function updateEvolutionAttacks(g,hit,heal){
   if(f.age===f.next){
    for(const target of targets(g,f.x,f.y,f.r))hit(g,target,f.damage,{color:THEMES[f.id][0],kx:Math.sign(center(target).x-f.x)*4,ky:-3,hitstop:0,noCharge:!!f.noCharge});
    f.strikeAt=f.age;
+   f.windupFrom=f.age;
    if(['garden','eruption','fryer'].includes(f.mode))f.next+=30;
    g.fx?.emit?.(f.x,f.y,{color:THEMES[f.id][0],count:6,size:3,speed:2,life:16});
   }
@@ -115,7 +129,14 @@ export function updateEvolutionAttacks(g,hit,heal){
  s.fields=s.fields.filter(f=>f.life>0);
  for(const b of s.shots){
   b.age++;b.life--;const ox=b.x,oy=b.y;
-  if(b.kind==='return'&&b.age>24){b.vx+=(c.x-b.x)*.015;b.vy+=(c.y-b.y)*.015;}
+  b.prevX=ox;b.prevY=oy;
+  if(b.contact&&b.age-b.contact.age>=10)b.contact=null;
+  if(b.remate&&b.age>=19){
+   if(!b.returning){b.returning=true;b.hit.clear();}
+   const dx=c.x-b.x,dy=c.y-b.y,dist=Math.hypot(dx,dy)||1;
+   const speed=Math.min(17,dist);
+   b.vx=dx/dist*speed;b.vy=dy/dist*speed;
+  }else if(b.kind==='return'&&b.age>24){b.vx+=(c.x-b.x)*.015;b.vy+=(c.y-b.y)*.015;}
   if(['chain','stampede','fan','comet'].includes(b.kind)){
    const t=targets(g,b.x,b.y,480).find(v=>!b.hit.has(v));
    if(t){const q=center(t),a=Math.atan2(q.y-b.y,q.x-b.x);b.vx=b.vx*.91+Math.cos(a)*1.1;b.vy=b.vy*.91+Math.sin(a)*1.1;}
@@ -127,10 +148,16 @@ export function updateEvolutionAttacks(g,hit,heal){
   for(const t of targets(g,b.x,b.y,90)){
    if(b.hit.has(t))continue;const q=center(t),dx=b.x-ox,dy=b.y-oy,u=clamp(((q.x-ox)*dx+(q.y-oy)*dy)/(dx*dx+dy*dy||1),0,1);
    if(Math.hypot(q.x-ox-u*dx,q.y-oy-u*dy)>b.r+Math.max(t.w,t.h)*.5)continue;
-   b.hit.add(t);hit(g,t,b.damage,{color:THEMES[b.id][0],parts:5,hitstop:0,noCharge:!!b.noCharge});
+   b.hit.add(t);
+   const landed=hit(g,t,b.damage,{color:THEMES[b.id][0],parts:5,hitstop:0,noCharge:!!b.noCharge});
+   if(b.remate&&landed){
+    b.connected=true;
+    b.contact={...q,age:b.age,face:Math.sign(dx)||1};
+   }
    if(b.kind==='comet')s.fields.push({id:b.id,x:b.x,y:b.y,age:0,life:25,r:80,damage:b.damage*.6,mode:'burst',next:1});
    if(!['lance','chain','return','stampede'].includes(b.kind)||b.hit.size>=4){b.life=0;break;}
   }
+  if(b.returning&&Math.hypot(b.x-c.x,b.y-c.y)<8)b.life=0;
  }
  s.shots=s.shots.filter(b=>b.life>0);
  const a=s.guest;
@@ -205,11 +232,25 @@ export function drawPowerEmblem(ctx,id,x,y,r,t=0){if(THEMES[id])glyph(ctx,id,x,y
 function drawField(ctx,f,cam,t,reduced){
  const x=f.x-cam.x,y=f.y-cam.y,color=THEMES[f.id][0];
  const since=f.strikeAt==null?Infinity:f.age-f.strikeAt,impact=since<14?1-since/14:0;
+ const pending=f.age<f.next;
+ if(!pending&&!impact)return;
  ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;
- ctx.globalAlpha=.25+impact*.6;ctx.lineWidth=impact?3:1.5;
- ctx.setLineDash(impact?[]:[6,5]);ctx.beginPath();ctx.arc(x,y,f.r,0,TAU);ctx.stroke();ctx.setLineDash([]);
+ if(pending||impact)drawAttackWindow(ctx,{x,y,radius:f.r,color,remaining:f.next-f.age,total:f.next-(f.windupFrom||0),active:!!impact});
+ ctx.globalAlpha=pending?.25+Math.max(0,1-(f.next-f.age)/18)*.25:impact*.7;
+ ctx.lineWidth=impact?2.4:1.25;
  if(f.mode==='pounce'){
   for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x-f.r*.65,y-28+i*18);ctx.quadraticCurveTo(x,y-45+i*18,x+f.r*.65,y-12+i*18);ctx.stroke();}
+ }else if(f.mode==='constellation'&&f.id==='nacar'){
+  const open=impact?(reduced?.7:impact):.34;
+  ctx.globalAlpha=.38+open*.38;ctx.lineWidth=1.4;
+  for(let i=0;i<8;i++){
+   const a=i*TAU/8,dx=Math.cos(a),dy=Math.sin(a);
+   drawHeroAttackGlyph(ctx,f.id,x+dx*f.r*.76,y+dy*f.r*.76,7+open*4);
+   if(impact){
+    ctx.beginPath();ctx.moveTo(x+dx*f.r*.32,y+dy*f.r*.32);
+    ctx.quadraticCurveTo(x+dx*f.r*.7-dy*12,y+dy*f.r*.7+dx*12,x+dx*f.r,y+dy*f.r);ctx.stroke();
+   }
+  }
  }else if(['thunder','constellation'].includes(f.mode)){
   for(let i=0;i<4;i++)glyph(ctx,f.id,x+Math.cos(i*TAU/4)*f.r*.7,y+Math.sin(i*TAU/4)*f.r*.7,7,reduced?0:t);
   if(impact){ctx.globalAlpha=impact;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,y-f.r-130);ctx.lineTo(x-12,y-70);ctx.lineTo(x+10,y-75);ctx.lineTo(x,y);ctx.stroke();}
@@ -236,15 +277,58 @@ function drawDrone(ctx,d,cam,t,reduced){
   for(let i=0;i<3;i++){ctx.fillStyle=i===(reduced?1:Math.floor(t/6)%3)?'#fff6ae':'#6267b6';ctx.beginPath();ctx.arc(x-10+i*10,y+1,2,0,TAU);ctx.fill();}
  }ctx.restore();
 }
+function drawShotWake(ctx,b,cam,t,reduced){
+ const x=b.x-cam.x,y=b.y-cam.y;
+ if(!reduced&&Number.isFinite(b.prevX+b.prevY)){
+  const dx=b.x-b.prevX,dy=b.y-b.prevY;
+  const travel=Math.hypot(dx,dy);
+  if(travel>.1&&travel<70){
+   ctx.save();ctx.globalAlpha=.44;ctx.strokeStyle=THEMES[b.id][0];ctx.lineWidth=Math.max(1,b.r*.32);
+   ctx.beginPath();ctx.moveTo(x-dx*1.8,y-dy*1.8);ctx.quadraticCurveTo(x-dx*.7,y-dy*.85,x,y);ctx.stroke();
+   ctx.restore();
+  }
+ }
+ if(b.remate){
+  if(!reduced&&Number.isFinite(b.prevX+b.prevY)){
+   drawRemateDetail(ctx,'pizza',5,{x:b.prevX-cam.x,y:b.prevY-cam.y,r:24,face:Math.sign(b.vx)||1,alpha:.52,progress:b.age/8});
+  }
+  if(b.contact)drawRemateDetail(ctx,'pizza',6,{
+   x:b.contact.x-cam.x,y:b.contact.y-cam.y,r:28,face:b.contact.face,alpha:1-(b.age-b.contact.age)/10,
+   progress:(b.age-b.contact.age)/6,reduced,
+  });
+  drawReturningSlice(ctx,x,y,b,reduced);
+  return;
+ }
+ glyph(ctx,b.id,x,y,b.r+3,reduced?0:t);
+}
+
+function drawPowerBeam(ctx,b,cam,t,reduced){
+ const x=b.x-cam.x,y=b.y-cam.y,tx=b.tx-cam.x,ty=b.ty-cam.y;
+ const dx=tx-x,dy=ty-y,len=Math.hypot(dx,dy)||1;
+ const charge=clamp(b.life/10,0,1),color=THEMES[b.id][0];
+ ctx.save();ctx.globalAlpha=charge*.64;ctx.strokeStyle=color;ctx.lineWidth=4;
+ ctx.beginPath();ctx.moveTo(x,y);
+ if(b.id==='chispin'&&!reduced){
+  for(let i=1;i<7;i++){
+   const u=i/7,wobble=(i%2?1:-1)*Math.min(12,len*.08);
+   ctx.lineTo(x+dx*u-dy/len*wobble,y+dy*u+dx/len*wobble);
+  }
+ }else if(b.id==='yomi')ctx.quadraticCurveTo((x+tx)*.5,(y+ty)*.5-24,tx,ty);
+ ctx.lineTo(tx,ty);ctx.stroke();
+ ctx.strokeStyle='#fff7e2';ctx.lineWidth=1.15;ctx.stroke();
+ ctx.globalAlpha=charge;glyph(ctx,b.id,tx,ty,10,reduced?0:t);
+ ctx.restore();
+}
+
 export function drawEvolutionAttacks(ctx,g,cam,t,drawActor,roster){
  const s=g._evolutionAttacks;if(!s||s.owner!==g.player||s.room!==g.roomId)return;
  drawHeroPowers(ctx,g,cam);
  ctx.save();
  for(const f of s.fields)if(f.age>=0)drawField(ctx,f,cam,t,!!g.reduceMotion);
  ctx.globalAlpha=1;
- for(const b of s.shots)glyph(ctx,b.id,b.x-cam.x,b.y-cam.y,b.r+3,g.reduceMotion?0:t);
+ for(const b of s.shots)drawShotWake(ctx,b,cam,t,!!g.reduceMotion);
  for(const d of s.drones)drawDrone(ctx,d,cam,t,!!g.reduceMotion);
- for(const b of s.beams){ctx.globalAlpha=b.life/10;ctx.strokeStyle=THEMES[b.id][0];ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(b.x-cam.x,b.y-cam.y);ctx.lineTo(b.tx-cam.x,b.ty-cam.y);ctx.stroke();glyph(ctx,b.id,b.tx-cam.x,b.ty-cam.y,10,t);}
+ for(const b of s.beams)drawPowerBeam(ctx,b,cam,t,!!g.reduceMotion);
  ctx.globalAlpha=1;const a=s.guest;
  if(a){const def=roster.find(r=>r.id===a.id),e=tier(g.player),f=def?.forms[e];if(f){
   const x=a.x-cam.x,y=a.y-cam.y;

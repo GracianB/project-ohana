@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { ROSTER } from "../characters/roster.js";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
 import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, EVOLUTION_STAGE_COPY, EVOLUTION_MESSAGES, EVOLUTION_FORM_PROFILES, evolutionKey, evolutionProfile, evolutionMessage, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "../characters/evolution.js";
@@ -97,10 +98,10 @@ test("cambio de dirección produce un pulso visual de giro y frenada", () => {
   assert.ok(brake.brake > 0);
 });
 
-test("las 40 transiciones de evolución tienen mensaje y escalera narrativa", () => {
-  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno","nacar"];
+test("todos los personajes activos tienen cuatro mensajes de evolución propios", () => {
+  const ids = ROSTER.map(({id})=>id);
   assert.equal(EVOLUTION_STAGE_COPY.length, 5);
-  assert.equal(Object.keys(EVOLUTION_MESSAGES).length, 11);
+  assert.deepEqual(Object.keys(EVOLUTION_MESSAGES).sort(), ids.slice().sort());
 
   for (const id of ids) {
     const lines = [];

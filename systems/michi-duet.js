@@ -88,7 +88,7 @@ export function drawMichiDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
 export function readMichiEffects(list){
  if(!Array.isArray(list)||list.length>12)return null;const out=[];
  for(const f of list){if(!f||!['yarn','purr','wisp'].includes(f.kind)||!Number.isFinite(f.life)||f.life<=0||f.life>240)return null;const v={kind:f.kind,life:f.life};
- if(f.kind==='purr'){if(!Number.isFinite(f.R)||f.R<0||f.R>650)return null;v.R=f.R;v.max=72;}
+ if(f.kind==='purr'){if(!Number.isFinite(f.R)||f.R<0||f.R>650)return null;v.R=f.R;v.max=72;v.marine=f.marine===true;}
  else{if(![f.x,f.y,f.vx,f.vy].every(finite)||Math.abs(f.vx)>60||Math.abs(f.vy)>60)return null;for(const k of ['x','y','vx','vy'])v[k]=f[k];v.rot=clamp(Number(f.rot)||0,-20000,20000);v.r=clamp(Number(f.r)||10,1,24);v.idx=clamp(Math.floor(Number(f.idx)||0),0,8);v.tail=f.tail===true;v.marine=f.marine===true;v.form=clamp(Math.floor(Number(f.form)||0),0,4);v.age=clamp(Number(f.age)||0,0,240);v.delay=clamp(Number(f.delay)||0,0,30);v.delay0=clamp(Number(f.delay0)||0,0,30);v.color=/^#[0-9a-f]{6}$/i.test(f.color)?f.color:'#ffb6e4';v.trail=Array.isArray(f.trail)?f.trail.slice(-4).map(b=>({x:b.x,y:b.y})):[];if(v.trail.some(b=>![b.x,b.y].every(finite)))return null;}out.push(v);
  }return out;
 }

@@ -1,4 +1,4 @@
-import {drawSeaStar} from '../characters/art/nacar.js';
+import {drawSeaStar,NACAR_NEON} from '../characters/art/nacar.js';
 import {drawMichiPaw} from '../worlds/michi-adventure-art.js';
 // OHANA V462 · Michicornio L projectiles: one luminous shot per tentacle, launched
 // from the tentacle tips, with a TRANSPARENT wake instead of the old additive white
@@ -27,6 +27,29 @@ export function michiShotAnchors(p,form){
  }
  return out;
 }
+
+
+export function nacarStarVolley(p,form){
+ const counts=[4,5,6,8,9];
+ const amount=counts[form];
+ const dir=p.facing<0?-1:1;
+ const center=p.x+p.w/2,foot=p.y+p.h;
+ const span=[16,24,23,32,39][form];
+ const rise=[13,15,20,24,27][form];
+ const anchors=Array.from({length:amount},(_,i)=>{
+  const fraction=i/(amount-1);
+  const angle=-1.1+fraction*1.9;
+  const curve=Math.sin(fraction*Math.PI);
+  return {
+   x:center+dir*(fraction-.5)*2*span,
+   y:foot-rise*(.62+curve*.38),
+   ang:dir>0?angle:Math.PI-angle,
+  };
+ });
+ const [first,second]=NACAR_NEON[form];
+ return {anchors,colors:[first,second,'#fff3c3','#f0ffff']};
+}
+
 export function michiShotPalette(seed){
  const pal=michiGenome(seed||0).palette;
  return [pal.glow,pal.gonad,pal.glow2,pal.bead];
@@ -74,7 +97,14 @@ export function drawMichiTailShot(ctx,f,cam,t){
  }
  wake(ctx,pts,x,y,kind==='comet'?9:kind==='jelly'?8:6.5,col);
  const ang=Math.atan2(f.vy||0,f.vx||1),age=f.age||0,pulse=.5+.5*Math.sin(age*.45+(f.idx||0));
- if(f.marine){drawSeaStar(ctx,x,y,12,ang+age*.08,col);ctx.restore();return;}
+ if(f.marine){
+  ctx.globalAlpha=1;
+  drawSeaStar(ctx,x,y,8+(f.form||0)*.8,ang+age*.065,col);
+  ctx.globalAlpha=.62;
+  ctx.fillStyle='#f2fff1';
+  ctx.beginPath();ctx.arc(x-2,y-2,2,0,TAU);ctx.fill();
+  ctx.restore();return;
+ }
  rings(ctx,x,y,kind==='jelly'?20:17,col);
  ctx.translate(x,y);ctx.rotate(ang);
  if(kind==='paw'){
