@@ -74,7 +74,7 @@ export function updateHeroPowers(g,s,hit,color){
   return true;
  };
  const pulse=(m,x,y,r,damage)=>{
-  m.contact={x,y,r,age:m.age};
+  m.contact={x,y,r,age:m.age,face:m.face};
   if(m.index===5&&(m.id==='dino'||m.id==='cat'&&m.age>=85))m.visualBeat=m.age;
   for(const e of close(g,x,y,r))strike(m,e,damage);
  };
@@ -177,7 +177,7 @@ function drawKiloPower(ctx,g,cam,m,x,y,p){
     ctx.fillStyle=i%2?'#ffd998':'#efb1bd';ctx.fillRect(xx,yy,4,2);
    }
    ctx.stroke();
-   if(m.age>20)drawRemateDetail(ctx,'kilo',7,{x,y,r:45,face:m.face,alpha:.53*m.life/4,progress:(m.age-20)/4,reduced:g.reduceMotion});
+   if(m.age>20)drawRemateDetail(ctx,'kilo',7,{x,y,r:45,face:m.face,alpha:(m.hit.size?.62:.28)*m.life/4,progress:(m.age-20)/4,reduced:g.reduceMotion});
    if(strike){
     ctx.globalAlpha=g.reduceMotion?.64:.42+(20-m.age)*.032;ctx.lineWidth=2.3;
     drawRemateSilhouette(ctx,'kilo',{x:tx,y,r:70,face:m.face,progress:(m.age-7)/9,reduced:!!g.reduceMotion});
@@ -247,15 +247,15 @@ function drawBurstMotion(ctx,m,x,y,reduced,cam){
  }else if(m.contact&&m.age<=active){
   const q=m.contact;
   ctx.strokeStyle='#f5fff2';ctx.lineWidth=1.8;ctx.globalAlpha=.58;
-  const a=m.face>0?-1.1:Math.PI-1.1;
+  const a=q.face>0?-1.1:Math.PI-1.1;
   ctx.beginPath();ctx.arc(q.x-cam.x,q.y-cam.y,q.r,a,a+2.2);ctx.stroke();
-  drawRemateSilhouette(ctx,m.id,{x:q.x-cam.x,y:q.y-cam.y,r:q.r,face:m.face,reduced,progress:(m.age-windup)/Math.max(1,(active-windup)*.7)});
+  drawRemateSilhouette(ctx,m.id,{x:q.x-cam.x,y:q.y-cam.y,r:q.r,face:q.face||m.face,reduced,progress:(m.age-windup)/Math.max(1,(active-windup)*.7)});
  }
  if(!reduced&&m.age<=active+4)drawRemateWake(ctx,m,cam);
  if(m.age<=active&&m.contact&&m.age>=windup){
   const trail=m.trace?.[0]||m.start;
   if(!reduced)drawRemateDetail(ctx,m.id,5,{x:trail.x-cam.x,y:trail.y-cam.y,r:r*.82,face:m.face,alpha:.61,progress:(m.age-windup)/Math.max(1,active-windup)});
- }else if(m.age>active)drawRemateDetail(ctx,m.id,7,{x,y,r:r*.73,face:m.face,alpha:.55*m.life/(life-active),progress:(m.age-active)/(life-active),reduced});
+ }else if(m.age>active)drawRemateDetail(ctx,m.id,7,{x,y,r:r*.73,face:m.face,alpha:(m.hit.size?.65:.29)*m.life/(life-active),progress:(m.age-active)/(life-active),reduced});
  for(const impact of m.impacts||[]){
   ctx.globalAlpha=impact.life/12;ctx.lineWidth=2;
   drawRemateDetail(ctx,m.id,6,{x:impact.x-cam.x,y:impact.y-cam.y,r:36,face:impact.face||m.face,alpha:impact.life/12,progress:(12-impact.life)/7,reduced});

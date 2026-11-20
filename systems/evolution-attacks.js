@@ -96,7 +96,7 @@ export function startBattleCompanion(g,id,power=1){
 export function castEvolutionAttack(g,index){
  const p=g.player,d=THEMES[p.id],s=state(g),e=tier(p),c=center(p),face=p.facing||1;
  beginHeroPower(g,index,s);
- p._cast={slot:index,t:g.t,id:extraAbility(p.id,index).id,form:e};
+ p._cast={slot:index,t:g.t,id:extraAbility(p.id,index).id,form:e,face};
  p._powerPerformance={index,start:g.t};
  g.nums?.add?.(c.x,p.y-36,extraAbility(p.id,index).name,d[0],true);
 }
@@ -150,7 +150,10 @@ export function updateEvolutionAttacks(g,hit,heal){
    if(Math.hypot(q.x-ox-u*dx,q.y-oy-u*dy)>b.r+Math.max(t.w,t.h)*.5)continue;
    b.hit.add(t);
    const landed=hit(g,t,b.damage,{color:THEMES[b.id][0],parts:5,hitstop:0,noCharge:!!b.noCharge});
-   if(b.remate&&landed)b.contact={...q,age:b.age,face:Math.sign(dx)||1};
+   if(b.remate&&landed){
+    b.connected=true;
+    b.contact={...q,age:b.age,face:Math.sign(dx)||1};
+   }
    if(b.kind==='comet')s.fields.push({id:b.id,x:b.x,y:b.y,age:0,life:25,r:80,damage:b.damage*.6,mode:'burst',next:1});
    if(!['lance','chain','return','stampede'].includes(b.kind)||b.hit.size>=4){b.life=0;break;}
   }

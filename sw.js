@@ -1,4 +1,4 @@
-const VERSION = "ohana-817";
+const VERSION = "ohana-818";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./engine/foes/nacar-fauna.js?v=" + VERSION,
@@ -758,8 +758,8 @@ const PRECACHE_REVISIONS = {
   "systems/local-map.js": "0c11c9f43973e981505ea26899588a6654f22f07",
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
   "systems/family-islands.js": "2cb7fa8e4cc3147c653a07c28614b14f5b30cb97",
-  "systems/hero-combos.js": "e397f15327745f3cd20bfcc5813fe19bc000089d",
-  "systems/remate-art.js": "09dcbf502fe1ceee2f88eee5c675705218b872d7",
+  "systems/hero-combos.js": "2ce7562ec26a0e33b813324e0f42c70ada437ddf",
+  "systems/remate-art.js": "9a6da394a3d8c6e798adf84e1e6fdb6ae7ff86f9",
   "systems/campaign-enemies.js": "98048f0e0aee0ee08f6df9df935711455f860483",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
@@ -769,7 +769,7 @@ const PRECACHE_REVISIONS = {
   "systems/room-adventures.js": "d6d6ecc71fa637cea44185badadc53cf51358cd8",
   "systems/enemy-champions.js": "f72880201ac8b48c66707484e7e7f683f75f1c75",
   "characters/art/chispin-boss.js": "bbc51f322d783e84dbb9a5409262f73ace4dec7d",
-  "systems/evolution-attacks.js": "0066dce68fd5a07a39e56af918e69f9f799a175b",
+  "systems/evolution-attacks.js": "e8a2087d14fd41a04268881094a22088ab836a76",
   "systems/ohana-panorama.js": "656a7be154959ea303db6d089548897c2c5d919d",
   "systems/kilo-rhythm.js": "25bef17f62855a17721340f1cdb23a9aef943c4a",
   "characters/art/chispa-sprite.js": "93529865bdf7232a2e61a89d177877a25e6f35e6",
@@ -797,7 +797,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "ccf06814e5665398d3b608f0ec27724ba3209e3c",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "56644a3576d80c1d2662d9940cff462e8256858d",
-  "index.html": "3c709d82ffdf5048bad33688e0d57d669384cc29",
+  "index.html": "c4a36b2a2c01c3a591aaae81c1e862cece8b539e",
   "multiplayer.html": "9eef7accd8db08805d75f96dac777a1f508a2661",
   "multiplayer.css": "f42e0d36ae703d189fe41d5addba8fd1cca1d18d",
   "multiplayer.js": "a74b9e2ba3a3023e5ca715491afed74311963f9c",
@@ -888,7 +888,7 @@ const PRECACHE_REVISIONS = {
   "engine/music.js": "378371c4d659151a2abffbebe86b1cc3635933cc",
   "engine/particles.js": "f9846627187b481a8716480f388539b7257560e8",
   "systems/atrium-interact.js": "866c92d53da9dd65c4b4181552d5b5f556847ab1",
-  "systems/abilities.js": "32eef34471c6fab8e35da62a4455457567c071d0",
+  "systems/abilities.js": "cf96e29138cb2bfc513726e4863bf107ef21cc1f",
   "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "ecf3e92b4c34fceeecea315cb609da403128b0f8",
   "systems/u-partners.js": "c779247588981d47fa6f8c36c810fa75c8c3428a",

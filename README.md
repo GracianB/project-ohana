@@ -1,3 +1,5 @@
+ohana-818 · [Primer pase de J, K, L, I y P](docs/V818-ATTACKS.md) · [Validación](docs/V818-VALIDATION.json) · [Publicación](docs/V818-PUBLICATION.json)
+
 ohana-817 · [100 mejoras de animación de I](docs/V817-REMATES.md) · [Validación](docs/V817-VALIDATION.json) · [Publicación](docs/V817-PUBLICATION.json)
 
 ohana-816 · [Las 100 mejoras de los remates](docs/V816-REMATES.md) · [Validación](docs/V816-VALIDATION.json) · [Publicación](docs/V816-PUBLICATION.json)

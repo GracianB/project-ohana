@@ -113,7 +113,7 @@ function ornament(ctx,id,layer,progress,width){
  }
  const color=colors[id][1];
  ctx.strokeStyle='#160f28';ctx.lineWidth=width*2.5;ctx.stroke();
- ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
+ ctx.strokeStyle=layer===6?'#fff7df':color;ctx.lineWidth=width*(layer===6?1.4:1);ctx.stroke();
  ctx.restore();
 }
 
@@ -221,6 +221,131 @@ export function drawRemateSilhouette(ctx,id,{x,y,r,face=1,progress=1,stage='acti
  ctx.restore();
 }
 
+// J, K, L, I and P profiles, in attack-local coordinates. Each entry is
+// the crest of a filled ribbon; the low edge folds back to its origin.
+const castCrests={
+ kilo:[
+  [0,3,19,-23,37,1,64,-16], [0,0,20,14,42,10,62,-4], [0,12,27,-28,54,-35,77,4],
+  [0,15,22,-25,55,-36,71,-11], [0,11,23,-17,54,-40,81,-23],
+ ],
+ stitcho:[
+  [0,-5,14,3,40,10,75,-7], [0,9,19,-26,30,-18,58,-39], [0,16,24,30,63,27,81,-8],
+  [0,19,15,-3,50,-29,82,-14], [0,4,19,-36,64,-48,98,-21],
+ ],
+ chispin:[
+  [0,4,27,9,35,-29,77,-22], [0,7,15,-18,19,-44,49,-37], [0,2,21,-35,58,3,64,-40],
+  [0,21,42,-4,57,-1,93,-39], [0,13,31,-9,62,-52,103,-57],
+ ],
+ cat:[
+  [0,6,20,26,37,-32,67,-40], [0,7,27,12,29,-21,49,-28], [0,18,24,-5,37,-41,65,-32],
+  [0,26,43,19,67,-24,84,-51], [0,18,40,-5,63,-56,89,-35],
+ ],
+ dragon:[
+  [0,-4,13,-19,47,3,83,-20], [0,11,27,33,47,19,63,-4], [0,8,26,-16,59,24,104,10],
+  [0,-19,24,-19,43,20,83,33], [0,-2,23,-22,65,-58,112,-42],
+ ],
+ dino:[
+  [0,3,19,-7,35,-21,68,-9], [0,12,17,24,51,29,57,16], [0,21,28,20,43,-21,79,12],
+  [0,22,16,5,52,24,78,-27], [0,29,25,-18,67,-14,95,-44],
+ ],
+ frita:[
+  [0,5,18,-17,49,26,67,-1], [0,8,18,23,42,22,59,6], [0,16,20,-26,57,-9,70,-37],
+  [0,16,22,24,59,19,84,-12], [0,27,37,8,65,-39,92,-19],
+ ],
+ pizza:[
+  [0,-8,19,-25,42,8,70,0], [0,2,17,31,39,23,56,-4], [0,5,31,-35,67,-26,83,2],
+  [0,-11,17,-18,42,-9,70,1], [0,5,18,-28,76,-35,92,-7],
+ ],
+ yomi:[
+  [0,1,16,-24,49,0,72,-16], [0,10,19,12,30,-24,60,-17], [0,20,26,-13,39,-31,75,-22],
+  [0,17,19,-15,50,-8,79,-28], [0,27,28,-14,56,-53,91,-35],
+ ],
+ ia:[
+  [0,2,28,2,38,-26,70,-26], [0,10,17,10,26,-17,56,-19], [0,14,28,-36,50,-6,81,-23],
+  [0,1,19,-30,63,-19,82,0], [0,29,30,-7,58,-8,105,-31],
+ ],
+ cuerno:[
+  [0,11,17,8,36,-17,74,-21], [0,13,20,18,41,7,65,-8], [0,9,24,15,65,-21,101,-24],
+  [0,14,22,11,53,-11,88,-27], [0,25,20,-9,48,-36,95,-51],
+ ],
+ nacar:[
+  [0,11,21,-25,48,-3,69,-27], [0,16,18,22,32,0,56,-29], [0,19,18,-11,58,-26,78,-18],
+  [0,25,31,26,44,-35,77,-38], [0,21,20,-39,59,-52,96,-57],
+ ],
+};
+const castStages={
+ 0:{profile:0,life:18,depth:8,reach:1},
+ 1:{profile:1,life:26,depth:12,reach:.78},
+ 2:{profile:2,life:32,depth:14,reach:.94},
+ 4:{profile:3,life:26,depth:13,reach:1},
+ 5:{profile:4,life:46,depth:18,reach:1.12},
+};
+
+// Surface marks sit above the crease. They are reused along J/K/L/I/P's
+// individual curves so the material reads as part of the strike.
+function drawCrestMark(ctx,id,x,y){
+ ctx.beginPath();
+ switch(id){
+  case 'kilo':
+   ctx.moveTo(x-4,y+1);ctx.quadraticCurveTo(x,y-6,x+5,y-2);
+   ctx.quadraticCurveTo(x+5,y+1,x-4,y+1);ctx.closePath();break;
+  case 'stitcho':
+   ctx.moveTo(x-5,y+1);ctx.lineTo(x-3,y-3);ctx.lineTo(x+5,y-3);ctx.lineTo(x+2,y+1);ctx.closePath();break;
+  case 'chispin':
+   ctx.moveTo(x-4,y+1);ctx.lineTo(x+1,y-5);ctx.lineTo(x,y-1);ctx.lineTo(x+5,y-4);break;
+  case 'cat':
+   for(const gap of [-3,0,3]){
+    ctx.moveTo(x+gap-2,y+1);ctx.quadraticCurveTo(x+gap,y-1,x+gap+2,y-5);
+   }
+   break;
+  case 'dragon':
+   ctx.moveTo(x-5,y-2);ctx.quadraticCurveTo(x,y-7,x+5,y-2);
+   ctx.quadraticCurveTo(x,y+4,x-5,y-2);ctx.closePath();break;
+  case 'dino':
+   ctx.moveTo(x-5,y);ctx.lineTo(x+1,y-6);ctx.lineTo(x+5,y-3);ctx.lineTo(x+2,y+2);ctx.closePath();break;
+  case 'frita':
+   ctx.moveTo(x-4,y);ctx.quadraticCurveTo(x+1,y-6,x+5,y-4);
+   ctx.quadraticCurveTo(x+4,y+2,x-4,y);ctx.closePath();break;
+  case 'pizza':
+   ctx.arc(x,y-2,2.5,0,TAU);break;
+  case 'yomi':
+   ctx.moveTo(x-5,y-1);ctx.lineTo(x-2,y-5);ctx.lineTo(x+5,y-3);ctx.lineTo(x+2,y+1);ctx.closePath();break;
+  case 'ia':
+   ctx.moveTo(x-6,y-1);ctx.lineTo(x-2,y-1);ctx.lineTo(x+1,y-4);ctx.lineTo(x+5,y-4);break;
+  case 'cuerno':
+   ctx.moveTo(x,y-6);ctx.lineTo(x+1,y-3);ctx.lineTo(x+5,y-2);ctx.lineTo(x+1,y-1);
+   ctx.lineTo(x,y+2);ctx.lineTo(x-1,y-1);ctx.lineTo(x-5,y-2);ctx.lineTo(x-1,y-3);ctx.closePath();break;
+  case 'nacar':
+   ctx.arc(x-1,y-1,2.7,0,TAU);
+   ctx.moveTo(x+6,y-4);ctx.arc(x+4.5,y-4,1.5,0,TAU);break;
+ }
+ ctx.stroke();
+}
+
+export function drawAttackCrest(ctx,id,slot,{x,y,face=1,age,reduced=false}){
+ const style=castStages[slot],points=castCrests[id]?.[style?.profile];
+ if(!points||!Number.isFinite(x+y+age+face)||age<0||age>=style.life)return;
+ const time=age/style.life,opening=reduced?1:Math.min(1,.48+time*3);
+ const [x0,y0,x1,y1,x2,y2,tipX,tipY]=points,depth=style.depth;
+ const [shade,glint]=colors[id];
+ ctx.save();ctx.translate(x,y);ctx.scale(face*opening*style.reach,reduced?1:.82+.18*opening);
+ ctx.globalAlpha=(1-time)**1.2*.83;
+ ctx.lineCap='round';ctx.lineJoin='round';
+ ctx.beginPath();ctx.moveTo(x0,y0);ctx.bezierCurveTo(x1,y1,x2,y2,tipX,tipY);
+ ctx.bezierCurveTo(x2,y2+depth,x1,y1+depth,x0,y0);ctx.closePath();
+ ctx.fillStyle=shade;ctx.fill();
+ ctx.strokeStyle='#160f28';ctx.lineWidth=3.6;ctx.stroke();
+ ctx.strokeStyle=glint;ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.moveTo(x0,y0);ctx.bezierCurveTo(x1,y1,x2,y2,tipX,tipY);ctx.stroke();
+ ctx.globalAlpha*=.63;ctx.lineWidth=1;
+ ctx.beginPath();ctx.moveTo(x0+(x1-x0)*.7,y0+(y1-y0)*.3+depth*.35);
+ ctx.quadraticCurveTo(x2,y2+depth*.66,tipX,tipY);ctx.stroke();
+ const markX=(x0+3*x1+3*x2+tipX)/8;
+ const markY=(y0+3*y1+3*y2+tipY)/8+depth*.2;
+ drawCrestMark(ctx,id,markX,markY);
+ ctx.restore();
+}
+
 export function drawReturningSlice(ctx,x,y,b,reduced){
  ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(b.vy,b.vx));
  drawRemateSilhouette(ctx,'pizza',{x:0,y:0,r:21,reduced,progress:b.age/8});
@@ -230,7 +355,7 @@ export function drawReturningSlice(ctx,x,y,b,reduced){
  for(const [dx,dy] of [[-7,-4],[-5,5],[4,-1]]){
   ctx.beginPath();ctx.arc(dx,dy,2.15,0,TAU);ctx.fill();
  }
- drawRemateDetail(ctx,'pizza',b.returning?7:0,{x:0,y:0,r:21,reduced,progress:b.returning?(b.age-19)/8:b.age/8});
+ drawRemateDetail(ctx,'pizza',b.returning?7:0,{x:0,y:0,r:21,reduced,alpha:b.returning&&!b.connected?.42:1,progress:b.returning?(b.age-19)/8:b.age/8});
  if(b.returning){
   ctx.strokeStyle='#fff3ca';ctx.lineWidth=1.5;
   ctx.beginPath();ctx.moveTo(-23,-7);ctx.lineTo(-17,0);ctx.lineTo(-23,7);ctx.stroke();

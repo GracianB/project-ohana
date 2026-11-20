@@ -1,3 +1,4 @@
+import {drawAttackCrest} from './remate-art.js';
 import {attackImpact,drawAttackWindow} from './combat-fx.js';
 import {drawSanctuaryYarn,drawSanctuaryPurr} from './michi-sanctuary-spells.js';
 import {HERO_IDENTITY} from '../characters/identity-v2.js';
@@ -197,7 +198,7 @@ game.lastAbilityId = id;
 game.lastAbilitySlot = index;
 syncState(p);
 if(index===3)p._powerPerformance={index,start:Number(game.t)||0};
-p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo };
+p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo, face: p.facing||1 };
 sfx(id);
 const facing=p.facing||1;
 game.combatFx?.add(cx(p)+facing*(index===0?14:6),cy(p),def.color,{
@@ -963,11 +964,27 @@ if (p.id === "dino") {
 }
 if (S.gallop > 0 && p.id==="cuerno")drawCuernoGallopRibbons(ctx,p,cam,t,S.gallop);
 if (p.id==="cuerno")drawCuernoFantasyStatus(ctx,game.enemies,cam,game.t||t,!!game.reduceMotion);
-drawCastSignature(ctx, p, cam, t);
+drawCastSignature(ctx, p, cam, t, !!game.reduceMotion);
 drawEvolutionAttacks(ctx,game,cam,t,drawCharacter,ROSTER);
 }
 
-function drawCastSignature(ctx, p, cam, t) {
+function drawCastSignature(ctx, p, cam, t, reduced) {
+ const cast=p._cast;
+ if(!cast)return;
+ if(cast.slot===3){
+  drawLegacySupremeSignature(ctx,p,cam,t);
+  return;
+ }
+ const face=cast.face||p.facing||1;
+ const lead=cast.slot===1?8:Math.max(14,p.w*.32);
+ drawAttackCrest(ctx,p.id,cast.slot,{
+  x:p.x+p.w*.5+face*lead-cam.x,
+  y:p.y+p.h*(cast.slot===1?.87:.46)-cam.y,
+  face,age:t-cast.t,reduced,
+ });
+}
+
+function drawLegacySupremeSignature(ctx, p, cam, t) {
 const cast = p._cast;
 if (!cast || t - cast.t > 28) return;
 if(p.id==='kilo'&&cast.slot===1)return; // K is identified by petals and the foot trail, never a body-covering circle.
