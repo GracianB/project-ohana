@@ -1,0 +1,25 @@
+name: MIRAI Aurora isolated quality
+on:
+  pull_request:
+    paths:
+      - 'experiments/mirai-renacer/**'
+      - '.github/workflows/mirai-aurora.yml'
+  push:
+    paths:
+      - 'experiments/mirai-renacer/**'
+      - '.github/workflows/mirai-aurora.yml'
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Engine JavaScript syntax
+        run: node --check experiments/mirai-renacer/codigo/mirai_reborn.js
+      - name: Isolated engine contracts
+        run: node --test experiments/mirai-renacer/tests/contract.test.mjs

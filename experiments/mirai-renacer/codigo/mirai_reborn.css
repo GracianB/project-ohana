@@ -96,3 +96,17 @@
  #reborn-shell .rb-dock-inner{padding:3px}
  #reborn-shell .rb-intro-content{margin-bottom:22px}
 }
+
+/* MIRAI XXIV · additional focus and aurora chapter clarity */
+#reborn-shell .rb-quest{border-color:rgba(179,240,255,.3)}
+#reborn-shell .rb-action:focus-visible,#reborn-shell .rb-btn:focus-visible,#reborn-shell .rb-option:focus-visible{outline:3px solid #bbffef;outline-offset:4px}
+#reborn-shell .rb-intro-action:focus-visible{outline:3px solid #e4d5ff;outline-offset:5px}
+#reborn-shell .rb-note{max-width:min(92vw,420px)}
+@media (prefers-reduced-motion:reduce){#reborn-shell *,#reborn-shell *::before,#reborn-shell *::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
+
+#reborn-shell .rb-finale{text-align:center;padding:12px 10px 22px;color:#d5e8f4}
+#reborn-shell .rb-final-seal{font-size:62px;line-height:1.4;color:#d7fff2;text-shadow:0 0 23px #93fff5}
+#reborn-shell .rb-final-score{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:9px;margin-top:19px}
+#reborn-shell .rb-final-score>div{padding:12px 5px;border:1px solid #8fbebd45;border-radius:14px;background:#14263a9a}
+#reborn-shell .rb-final-score strong{display:block;font-size:22px;color:#d1fff7}
+#reborn-shell .rb-final-score small{display:block;font-size:11px;color:#afc6d3;margin-top:6px}
