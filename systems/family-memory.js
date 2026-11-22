@@ -1,10 +1,12 @@
 import {WORLD1_ORDER} from './world1-rooms.js';
+import {FAMILY_STARS} from './family-constellation-story.js';
+const LIGHT_IDS=new Set(FAMILY_STARS.map(s=>s.id));
 import {createSaveStore,canonId} from './save.js';
 export const FAMILY_MEMORY_KEY='ohana-family-memory-v500';
 export function readFamilyMemory(storage){
  try {const s=storage??globalThis.localStorage;const raw=JSON.parse(s?.getItem(FAMILY_MEMORY_KEY)||'null');
  if(raw?.v!==1||raw.world!==1||!WORLD1_ORDER.includes(raw.hero))return null;
- return {v:1,world:1,hero:raw.hero,lights:[...new Set((Array.isArray(raw.lights)?raw.lights:[]).filter(id=>WORLD1_ORDER.includes(id)))]};
+ return {v:1,world:1,hero:raw.hero,lights:[...new Set((Array.isArray(raw.lights)?raw.lights:[]).filter(id=>LIGHT_IDS.has(id)))]};
  } catch{return null;}
 }
 export function rememberFamilyVictory(detail,storage){
@@ -15,7 +17,7 @@ export function rememberFamilyVictory(detail,storage){
  return record;
 }
 export function rememberFamilyLight(id,memory,storage){
- if(!memory||!WORLD1_ORDER.includes(id))return memory;
+ if(!memory||!LIGHT_IDS.has(id))return memory;
  const record={...memory,lights:[...new Set([...(memory.lights||[]),id])]};
  try{(storage??globalThis.localStorage)?.setItem(FAMILY_MEMORY_KEY,JSON.stringify(record));}catch{}
  return record;
