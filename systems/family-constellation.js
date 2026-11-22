@@ -29,7 +29,7 @@ export function installFamilyConstellation(){
   layer.querySelector('.constellation-gift').textContent=star.gift;
   layer.querySelector('.constellation-voice').textContent=star.line;
   for(const b of nav.querySelectorAll('button')){b.setAttribute('aria-pressed',String(b.dataset.constellationHero===star.id));b.dataset.lit=String(memory.lights.includes(b.dataset.constellationHero));}
-  const progress=constellationProgress(memory.lights);status.textContent=`${progress.count} / 10 voces recuperadas`;
+  const progress=constellationProgress(memory.lights);status.textContent=`${progress.count} / ${FAMILY_STARS.length} voces recuperadas`;
   layer.classList.toggle('all-lit',progress.complete);
   layer.querySelector('.constellation-last-title').textContent=progress.title;
   layer.querySelector('.constellation-last-copy').textContent=progress.complete?'No eras una voz fuera de esta historia. Fuiste quien las reunió. Este lugar también es tuyo.':'Escucha a cada héroe para reunir su luz. Puedes irte y volver cuando quieras.';
@@ -37,8 +37,8 @@ export function installFamilyConstellation(){
  }
  for(const [i,star] of FAMILY_STARS.entries()){
   const b=document.createElement('button');b.type='button';b.dataset.constellationHero=star.id;
-  b.style.setProperty('--x',String(50+38*Math.cos(-Math.PI/2+i*Math.PI/5))+'%');
-  b.style.setProperty('--y',String(50+38*Math.sin(-Math.PI/2+i*Math.PI/5))+'%');
+  b.style.setProperty('--x',String(50+38*Math.cos(-Math.PI/2+i*2*Math.PI/FAMILY_STARS.length))+'%');
+  b.style.setProperty('--y',String(50+38*Math.sin(-Math.PI/2+i*2*Math.PI/FAMILY_STARS.length))+'%');
   b.style.setProperty('--light',star.color);b.textContent=star.name;b.setAttribute('aria-label','Escuchar a '+star.name);
   b.onclick=()=>choose(star);nav.appendChild(b);
  }

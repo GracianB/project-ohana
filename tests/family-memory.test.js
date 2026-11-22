@@ -47,3 +47,12 @@ test('V500 migration ignores stale or invalid temporary saves',()=>{
  s.setItem('ohana',JSON.stringify({...base,revision:10,world1Won:true,id:'stitch'}));
  assert.equal(migrateFamilyMemory(s).hero,'stitcho','legacy Stitch win can unlock');
 });
+
+test('IA and Nácar light memories persist without granting World 1 victories',()=>{
+ const s=store();let m=rememberFamilyVictory({world:1,id:'kilo'},s);
+ m=rememberFamilyLight('ia',m,s);m=rememberFamilyLight('nacar',m,s);
+ m=rememberFamilyLight('unknown',m,s);m=rememberFamilyLight('ia',m,s);
+ assert.deepEqual(readFamilyMemory(s).lights,['ia','nacar']);
+ assert.equal(rememberFamilyVictory({world:1,id:'nacar'},s),null,'new stars do not bypass campaign victory rules');
+ assert.equal(readFamilyMemory(s).hero,'kilo');
+});

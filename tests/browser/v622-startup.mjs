@@ -26,7 +26,7 @@ try{
   await page.waitForFunction(()=>document.documentElement.dataset.ohanaBoot==='ready');
   assert.equal(await page.locator('#startup-screen').count(),0);
   assert.equal(await page.locator('#char-select').getAttribute('inert'),null);
-  assert.equal(await page.locator('#chars-grid .char-card canvas').count(),10);
+  assert.equal(await page.locator('#chars-grid .char-card canvas').count(),12);
   await page.locator('#ohana-intro.ready .oi-enter').click();
   await page.locator('.char-card[data-id="kilo"]').click();for(let step=0;step<3;step++)await page.locator('#atlas-next').click();
   // The start animation calls the campaign asynchronously. Wait for its
@@ -83,7 +83,7 @@ try{
   await early.keyboard.press('Enter');
   assert.equal(await early.evaluate(()=>document.body.classList.contains('intro-complete')),true,'one early Enter must reach selection');
   assert.equal(await early.evaluate(()=>document.body.classList.contains('playing')),false,'the same Enter cannot also start a game');
-  assert.equal(await early.locator('#chars-grid .char-card').count(),10);
+  assert.equal(await early.locator('#chars-grid .char-card').count(),12);
   report.push({scenario:'Enter before the first animation frame',singleInputReachesSelection:true,doesNotStartGame:true});
   await quick.close();await fs.writeFile('test-results/v622/startup.json',JSON.stringify(report,null,2));
   console.log('PASS V622 native slow/failed startup, mobile retry and earned-save preservation');
