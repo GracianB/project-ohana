@@ -7,7 +7,7 @@ export const FAMILY_STARS=Object.freeze([
  {id:'dino',name:'Dino',color:'#b8ef6b',gift:'La memoria',line:'La tierra recuerda cada paso. También los pequeños.'},
  {id:'frita',name:'Frita',color:'#ffe9a8',gift:'La alegría',line:'Si queda una patata, la partimos. Si no queda ninguna, nos reímos igual.'},
  {id:'pizza',name:'Pizza',color:'#ffd36a',gift:'Un sitio en la mesa',line:'He contado otra vez. Hay una porción para ti.'},
- {id:'yomi',name:'Yomi',color:'#8fe9ff',gift:'La conexión',line:'Diez señales distintas. Una certeza: nadie estaba solo.'},
+ {id:'yomi',name:'Yomi',color:'#8fe9ff',gift:'La conexión',line:'Doce señales distintas. Una certeza: nadie estaba solo.'},
  {id:'cuerno',name:'Cuerno',color:'#eccbff',gift:'La esperanza',line:'La aurora no borra la noche. Nos enseña lo que hemos cuidado dentro de ella.'},
  {id:'ia',name:'IA',color:'#4ff0c8',gift:'La pregunta compartida',line:'No soy un reemplazo. Soy una voz nueva junto a Yomi.'},
  {id:'nacar',name:'Nácar',color:'#9de8e2',gift:'Una corriente amable',line:'El mar no termina aquí. Empieza un sitio junto a vosotros.'}
