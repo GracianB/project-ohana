@@ -1,0 +1,98 @@
+/* MIRAI REBIRTH · original interactive action-RPG shell; independent from legacy employment data */
+#reborn-shell{position:fixed;inset:0;z-index:2147483000;display:none;background:#060d1a;color:#f4efff;font-family:'Segoe UI',Inter,system-ui,sans-serif;isolation:isolate;overflow:hidden;user-select:none;-webkit-user-select:none}
+#reborn-shell.on{display:block}#reborn-shell *{box-sizing:border-box}#reborn-shell button{font:inherit;cursor:pointer}#reborn-shell button:focus-visible{outline:3px solid #9ff8e9;outline-offset:4px}
+#reborn-canvas{width:100%;height:100%;display:block;touch-action:none;background:#0d2430}
+#reborn-shell .rb-top{pointer-events:none;position:absolute;inset:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;padding:19px 21px;gap:18px}
+#reborn-shell .rb-left,#reborn-shell .rb-right{display:flex;flex-direction:column;gap:10px;pointer-events:none}#reborn-shell .rb-right{align-items:flex-end}
+#reborn-shell .rb-card{pointer-events:auto;background:linear-gradient(145deg,rgba(12,23,40,.92),rgba(23,27,49,.87));border:1px solid rgba(181,233,234,.22);box-shadow:0 14px 38px #0007,inset 0 1px 0 #ffffff19;backdrop-filter:blur(22px);border-radius:19px}
+#reborn-shell .rb-profile{display:flex;align-items:center;gap:12px;padding:10px 16px 11px 10px;min-width:270px}
+#reborn-shell .rb-portrait{width:62px;height:62px;border-radius:16px;object-fit:cover;object-position:50% 23%;border:2px solid #a9f7dd;background:linear-gradient(135deg,#f4c1e9,#133b45)}
+#reborn-shell .rb-person-info{flex:1;min-width:140px}#reborn-shell .rb-person-info strong{display:block;font-size:15px;letter-spacing:.08em;font-weight:900}#reborn-shell .rb-person-info small{display:block;font-size:10px;letter-spacing:.15em;color:#b6a4ef;margin:3px 0 8px}
+#reborn-shell .rb-meter{height:6px;background:#091221;border-radius:20px;overflow:hidden;margin:5px 0;position:relative}#reborn-shell .rb-meter span{display:block;height:100%;width:100%;border-radius:20px;transition:width .16s}#rb-hp{background:linear-gradient(90deg,#f474a1,#ffd08d)}#rb-mp{background:linear-gradient(90deg,#49b7df,#9eecff)}#rb-re{background:linear-gradient(90deg,#e6b0fb,#ffe4ab)}
+#reborn-shell .rb-area{padding:11px 15px;max-width:310px;text-align:left}#reborn-shell .rb-kicker{font-size:10px;letter-spacing:.22em;color:#8febda;font-weight:800;text-transform:uppercase}#reborn-shell .rb-area h2{font-size:18px;margin:3px 0 0;font-weight:800;letter-spacing:.02em}#reborn-shell .rb-area p{font-size:11px;color:#b8c8d5;margin:3px 0 0}
+#reborn-shell .rb-quest{max-width:310px;min-width:240px;padding:13px 15px}#reborn-shell .rb-quest label{display:block;color:#e8c7f7;font-weight:800;font-size:11px;letter-spacing:.1em;margin-bottom:5px}#reborn-shell .rb-quest strong{display:block;font-size:14px;line-height:1.4}#reborn-shell .rb-quest small{color:#a5c8cc;font-size:11px;display:block;margin:5px 0 0;line-height:1.5}
+#reborn-shell .rb-minimap{width:160px;height:106px;position:relative;overflow:hidden;padding:4px}#rb-minimap-canvas{width:100%;height:100%;border-radius:13px}#reborn-shell .rb-tools{display:flex;gap:8px;pointer-events:auto}
+#reborn-shell .rb-btn{border:1px solid #b4f3f43a;background:#111b30dc;color:#eaf5ff;border-radius:11px;padding:9px 13px;font-size:12px;font-weight:750;box-shadow:0 8px 18px #0004;transition:transform .13s,background .13s}#reborn-shell .rb-btn:hover{background:#234b59;transform:translateY(-2px)}#reborn-shell .rb-btn.primary{background:linear-gradient(110deg,#9eecd8,#80b8f3);color:#0d2432;border-color:#d9fff2}
+#reborn-shell .rb-dock{pointer-events:none;position:absolute;inset:auto 0 21px;display:flex;flex-direction:column;align-items:center;gap:8px}
+#reborn-shell .rb-dock-inner{display:flex;gap:8px;padding:10px;border:1px solid #a0e9d750;border-radius:21px;background:#071527db;backdrop-filter:blur(20px);box-shadow:0 12px 45px #0009}
+#reborn-shell .rb-action{position:relative;min-width:61px;width:63px;height:61px;border:1px solid #c7e7ff3c;border-radius:14px;color:#f4f6ff;background:linear-gradient(145deg,#27384e,#172335);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;overflow:hidden;pointer-events:auto;box-shadow:inset 0 1px 0 #ffffff20}
+#reborn-shell .rb-action b{font-size:22px;line-height:1}#reborn-shell .rb-action small{font-size:9px;opacity:.85;letter-spacing:.06em}#reborn-shell .rb-action .key{position:absolute;right:4px;top:2px;font-size:8px;color:#c5ffd9;background:#0005;padding:0 4px;border-radius:3px}
+#reborn-shell .rb-action:active{transform:scale(.95)}#reborn-shell .rb-action:hover{background:#425a70}#reborn-shell .rb-action[disabled]{filter:grayscale(.65);opacity:.55}#reborn-shell .rb-action.accent{background:linear-gradient(145deg,#64438c,#293c72);border-color:#e2c0fa77}
+#reborn-shell .rb-prompt{padding:8px 15px;border-radius:40px;background:#0b1b2de3;border:1px solid #9ce6e580;font-size:13px;font-weight:700;text-align:center;box-shadow:0 7px 22px #0008}
+#reborn-shell .rb-note{position:absolute;top:32%;left:50%;transform:translate(-50%,-50%);background:#091423ea;color:#f2f9ff;border:1px solid #9af7dd78;border-radius:14px;padding:15px 22px;max-width:min(420px,86vw);text-align:center;z-index:3;box-shadow:0 12px 60px #0009;pointer-events:none;opacity:0;transition:opacity .2s}#reborn-shell .rb-note.on{opacity:1}#reborn-shell .rb-note strong{display:block;color:#b6f8ed;font-size:18px}#reborn-shell .rb-note small{font-size:12px;color:#d0d0e2}
+#reborn-shell .rb-modal-back{position:absolute;inset:0;display:none;place-items:center;background:radial-gradient(ellipse,#0f1c3abc,#03070fe8);z-index:12;backdrop-filter:blur(9px);padding:20px}#reborn-shell .rb-modal-back.on{display:grid}
+#reborn-shell .rb-modal{width:min(690px,100%);max-height:min(82vh,720px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #a0ebdb63;border-radius:26px;background:linear-gradient(140deg,#10243c 0%,#1a1a37 60%,#1c3142);box-shadow:0 25px 80px #000b,inset 0 1px 0 #fff3}
+#reborn-shell .rb-modal-header{padding:23px 25px 15px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid #ffffff19;gap:20px}#reborn-shell .rb-modal h3{font-size:25px;letter-spacing:.02em;margin:4px 0}#reborn-shell .rb-modal .subtitle{font-size:12px;color:#b3d3dd}#reborn-shell .rb-modal-body{overflow:auto;padding:18px 24px 23px}#reborn-shell .rb-modal-body p{color:#c5d8e5;line-height:1.55}#reborn-shell .rb-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}#reborn-shell .rb-option{border:1px solid #aadeda45;background:#24364c9c;color:#e8effc;padding:13px;text-align:left;border-radius:15px;cursor:pointer}#reborn-shell .rb-option:hover,#reborn-shell .rb-option:focus-visible{background:#326472;border-color:#a0f9e2}#reborn-shell .rb-option strong{display:block;font-size:15px}#reborn-shell .rb-option small{display:block;color:#b4d0dd;margin-top:5px;font-size:11px;line-height:1.5}#reborn-shell .rb-option[disabled]{opacity:.42;cursor:not-allowed}
+#reborn-shell .rb-panel{margin:10px 0;border:1px solid #cde2ff2e;border-radius:14px;padding:13px;background:#081a30a3}
+#reborn-shell .rb-chapter{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #ffffff2b;border-radius:13px;padding:12px 14px;margin:8px 0;background:#17284085}#reborn-shell .rb-chapter span{font-size:12px;color:#b6cfda}
+#reborn-shell .rb-close{border:0;color:white;background:#ffffff13;border-radius:10px;padding:7px 11px;font-size:17px}
+#reborn-shell .rb-chat{position:absolute;bottom:116px;left:50%;transform:translateX(-50%);z-index:5;width:min(690px,92vw);padding:16px 20px;background:linear-gradient(135deg,#112842fa,#1a1b35f5);border:1px solid #9defdf88;border-radius:19px;box-shadow:0 15px 40px #000a;display:none}
+#reborn-shell .rb-chat.on{display:block}#reborn-shell .rb-chat strong{font-size:15px;color:#b6ffed;letter-spacing:.03em}#reborn-shell .rb-chat p{font-size:13px;line-height:1.6;margin:7px 0 10px}#reborn-shell .rb-chat .rb-btn{margin-right:8px}
+#reborn-shell .rb-touch{pointer-events:none;display:none;position:absolute;inset:auto 12px 93px;justify-content:space-between;align-items:flex-end}#reborn-shell .rb-stick{position:relative;width:130px;height:130px;border:1px solid #b5f6f354;border-radius:50%;background:#06112680;pointer-events:auto;touch-action:none;display:grid;place-items:center}#reborn-shell .rb-knob{width:48px;height:48px;border:1px solid #c4f8e8a3;border-radius:50%;background:#8aecdf65;box-shadow:0 0 14px #59dace6e}
+#reborn-shell .rb-touch-actions{pointer-events:auto;display:flex;gap:8px;align-items:end}#reborn-shell .rb-touch-actions button{width:57px;height:57px;border-radius:50%;background:#17283be8;border:1px solid #e3f7fc72;color:white;font-size:21px;font-weight:bold;box-shadow:0 7px 18px #0008}
+#reborn-shell .rb-touch-actions button.main{width:72px;height:72px;background:#375276e8}
+#reborn-shell .rb-boss{pointer-events:none;position:absolute;top:105px;left:50%;transform:translateX(-50%);min-width:min(540px,75vw);display:none;text-align:center;background:#130d26b5;border:1px solid #f6a7bf66;padding:8px 15px 12px;border-radius:15px;backdrop-filter:blur(12px)}#reborn-shell .rb-boss.on{display:block}#reborn-shell .rb-boss strong{font-size:11px;letter-spacing:.2em;color:#ffc2d4}#reborn-shell .rb-boss .rb-meter{height:8px;margin-top:8px}#reborn-shell .rb-boss .rb-meter span{background:linear-gradient(90deg,#a02a6b,#ef7e9b,#f8d0f8)}
+#reborn-shell .rb-damage{position:absolute;pointer-events:none;z-index:7;font-size:22px;color:white;text-shadow:0 2px 8px #000;font-weight:900}
+#reborn-shell .rb-version{pointer-events:none;position:absolute;left:20px;bottom:10px;font-size:10px;letter-spacing:.12em;color:#9cb8c7c0}
+#reborn-shell .rb-settings-line{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #ffffff1d;gap:12px}#reborn-shell .rb-settings-line input{accent-color:#91e8dc;transform:scale(1.25)}
+#reborn-shell .rb-lore{display:flex;gap:13px;align-items:center}#reborn-shell .rb-lore img{width:110px;height:110px;object-fit:contain}
+#reborn-start,#reborn-quick-map{border:1px solid #aaf9e7!important;background:linear-gradient(110deg,#abf6e4,#b6c8ff)!important;color:#0b2738!important;border-radius:13px!important;padding:12px 20px!important;box-shadow:0 0 22px #87eddc5a!important;font-weight:900!important;letter-spacing:.035em!important}
+@media(max-width:750px){#reborn-shell .rb-top{padding:9px 9px}#reborn-shell .rb-profile{min-width:0;width:175px;padding:7px;gap:7px}#reborn-shell .rb-portrait{width:42px;height:44px;border-radius:10px}#reborn-shell .rb-person-info{min-width:0}#reborn-shell .rb-person-info strong{font-size:11px}#reborn-shell .rb-person-info small{font-size:8px;margin:1px 0 4px}#reborn-shell .rb-person-info .rb-meter{margin:3px 0;height:4px}#reborn-shell .rb-quest{display:none}#reborn-shell .rb-area{max-width:168px;padding:8px 10px}#reborn-shell .rb-area h2{font-size:12px}#reborn-shell .rb-area p{display:none}#reborn-shell .rb-kicker{font-size:8px}#reborn-shell .rb-minimap{width:94px;height:68px}#reborn-shell .rb-tools{gap:4px}#reborn-shell .rb-tools .rb-btn{font-size:10px;padding:6px 7px}#reborn-shell .rb-boss{top:91px;min-width:80%;padding:6px 9px}#reborn-shell .rb-dock{bottom:8px}#reborn-shell .rb-dock-inner{padding:5px;gap:3px;border-radius:14px}#reborn-shell .rb-action{width:44px;min-width:44px;height:46px;border-radius:10px}#reborn-shell .rb-action b{font-size:17px}#reborn-shell .rb-action small{font-size:8px}#reborn-shell .rb-action .key{display:none}#reborn-shell .rb-prompt{font-size:10px;padding:5px 11px}#reborn-shell .rb-touch{display:flex;bottom:72px}#reborn-shell .rb-stick{width:96px;height:96px}#reborn-shell .rb-knob{width:38px;height:38px}#reborn-shell .rb-touch-actions{gap:5px}#reborn-shell .rb-touch-actions button{width:44px;height:44px}#reborn-shell .rb-touch-actions button.main{width:58px;height:58px}#reborn-shell .rb-version{display:none}#reborn-shell .rb-modal{max-height:88vh}#reborn-shell .rb-modal-body{padding:12px 15px}#reborn-shell .rb-modal-header{padding:13px 16px}#reborn-shell .rb-modal h3{font-size:21px}#reborn-shell .rb-chat{bottom:67px}#reborn-shell .rb-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){#reborn-shell *{transition:none!important;animation:none!important}}
+/* Cinematic front screen: genuine HTML controls above an artwork without embedded UI */
+#reborn-shell .rb-intro{position:absolute;inset:0;z-index:20;display:flex;align-items:center;overflow:hidden;background-position:center;background-size:cover;transition:opacity .55s,visibility .55s}
+#reborn-shell .rb-intro.leave{opacity:0;visibility:hidden;pointer-events:none}
+#reborn-shell .rb-intro::after{content:"";pointer-events:none;position:absolute;inset:0;background:linear-gradient(90deg,#030816ed 0%,#071127bf 38%,#08162a32 68%,#060f220d 100%),linear-gradient(0deg,#0512217e,transparent 55%)}
+#reborn-shell .rb-intro-content{position:relative;z-index:1;margin-left:clamp(22px,8vw,136px);max-width:min(690px,63vw);text-shadow:0 4px 30px #0009}
+#reborn-shell .rb-intro-eyebrow{font-size:12px;letter-spacing:.35em;font-weight:800;color:#c0fdf2;display:block;margin-bottom:23px}
+#reborn-shell .rb-intro-logo{font-size:clamp(65px,11vw,156px);letter-spacing:.09em;line-height:.85;font-weight:950;color:#f2f9ff;margin:0;filter:drop-shadow(0 10px 25px #000b)}
+#reborn-shell .rb-intro-logo span{display:block;font-size:.19em;font-weight:650;letter-spacing:.32em;color:#b7fbe6;margin-top:20px}
+#reborn-shell .rb-intro-text{font-size:clamp(14px,1.45vw,20px);line-height:1.6;color:#e4f6ffb8;max-width:470px;margin:30px 0 28px}
+#reborn-shell .rb-intro-actions{display:flex;gap:12px;flex-wrap:wrap}
+#reborn-shell .rb-intro-action{min-width:180px;padding:16px 22px;border-radius:13px;border:1px solid #99f9ed59;color:white;background:#132941dd;backdrop-filter:blur(14px);font-weight:900;box-shadow:0 15px 40px #0009;letter-spacing:.06em}
+#reborn-shell .rb-intro-action.primary{background:linear-gradient(115deg,#b4f6e6,#bca5f0);color:#0a2331;border:1px solid #e5ffff}
+#reborn-shell .rb-intro-action:hover{transform:translateY(-3px);box-shadow:0 16px 45px #3be3dd42}
+#reborn-shell .rb-intro-footer{position:absolute;z-index:1;bottom:34px;left:clamp(22px,8vw,136px);font-size:11px;letter-spacing:.12em;color:#def9ffaf}
+@media(max-width:700px){#reborn-shell .rb-intro{background-position:67% center;align-items:flex-end}#reborn-shell .rb-intro::after{background:linear-gradient(0deg,#040d20fc 0%,#061124e4 26%,#050f224c 70%,#03091823 100%)}#reborn-shell .rb-intro-content{margin:0 22px 115px;max-width:calc(100% - 44px)}#reborn-shell .rb-intro-logo{font-size:clamp(54px,18vw,90px)}#reborn-shell .rb-intro-logo span{font-size:.21em;letter-spacing:.2em;margin-top:16px}#reborn-shell .rb-intro-text{font-size:14px;margin:18px 0 20px;max-width:325px}#reborn-shell .rb-intro-action{padding:13px;min-width:0;flex:1;font-size:12px}#reborn-shell .rb-intro-eyebrow{font-size:10px;margin-bottom:13px}#reborn-shell .rb-intro-footer{bottom:19px;left:22px;right:22px;font-size:9px}}
+
+/* RENACER EXTENDIDO · editorial anime atmosphere and focus hierarchy */
+#reborn-shell .rb-top{padding:clamp(10px,1.25vw,22px);gap:14px}
+#reborn-shell .rb-card{background:linear-gradient(152deg,rgba(8,19,32,.92),rgba(20,23,48,.83));border-color:rgba(199,235,248,.27);box-shadow:0 16px 48px #03071490,inset 0 1px #ffffff26}
+#reborn-shell .rb-profile{border-left:3px solid #92f5e0}
+#reborn-shell .rb-quest{border-right:3px solid #d9b8f3}
+#reborn-shell .rb-area h2{letter-spacing:-.012em}
+#reborn-shell .rb-dock-inner{background:linear-gradient(165deg,#061624f0,#13253cec);border-color:#94d6d76b;box-shadow:0 18px 65px #020b1dbb,inset 0 1px #ffffff29}
+#reborn-shell .rb-action{transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;touch-action:manipulation}
+#reborn-shell .rb-action:hover:not(:disabled),#reborn-shell .rb-action:focus-visible{transform:translateY(-3px);box-shadow:0 5px 22px #6be8d733,inset 0 1px #fff5;border-color:#bdfdef}
+#reborn-shell .rb-action.accent{background:linear-gradient(140deg,#503e87,#243c68);border-color:#cba9fbbb}
+#reborn-shell .rb-prompt{background:#0a1a2bdb;backdrop-filter:blur(10px);color:#ecfaff;border-color:#c8e6f27b;max-width:min(95vw,830px)}
+#reborn-shell .rb-note{background:linear-gradient(140deg,#0d2739f0,#1c1b3ef0);border-color:#c9ebf2ab;box-shadow:0 22px 70px #04071bcc}
+#reborn-shell .rb-intro-content{padding:28px 12px 28px 0}
+#reborn-shell .rb-intro-logo{color:#f9faff;letter-spacing:.075em;text-wrap:balance}
+#reborn-shell .rb-intro-logo span{color:#b3f5ec}
+#reborn-shell .rb-intro-action{transition:transform .18s,box-shadow .18s;touch-action:manipulation}
+#reborn-shell .rb-modal{background:linear-gradient(150deg,#0e2238 0%,#161d36 57%,#193446);box-shadow:0 30px 100px #000c,inset 0 1px #fff3}
+#reborn-shell .rb-option{transition:background .12s,border-color .12s;min-height:66px}
+#reborn-shell .rb-option:focus-visible,#reborn-shell .rb-close:focus-visible{outline:3px solid #c4fff4;outline-offset:2px}
+#reborn-shell .rb-touch-actions button:active,#reborn-shell .rb-btn:active{transform:scale(.96)}
+@media(max-width:750px){#reborn-shell .rb-top{padding:8px}#reborn-shell .rb-profile{width:min(48vw,188px)}#reborn-shell .rb-area{max-width:48vw}#reborn-shell .rb-minimap{width:88px;height:64px}#reborn-shell .rb-prompt{max-width:90vw;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}#reborn-shell .rb-intro-content{padding:0}#reborn-shell .rb-dock-inner{gap:3px}#reborn-shell .rb-dock{bottom:6px}}
+@media(prefers-reduced-motion:reduce){#reborn-shell .rb-action,#reborn-shell .rb-intro-action{transition:none!important}}
+/* Separate the mobile two-thumb layer from the ability dock. Never overlap controls. */
+@media(max-width:750px){
+ #reborn-shell .rb-touch{bottom:105px;left:14px;right:14px}
+ #reborn-shell .rb-touch-actions{gap:7px}
+ #reborn-shell .rb-prompt{display:none}
+ #reborn-shell .rb-dock{bottom:7px}
+ #reborn-shell .rb-dock-inner{padding:5px 6px}
+ #reborn-shell .rb-action{min-width:42px;width:42px;height:49px}
+ #reborn-shell .rb-touch-actions button{border-color:#c6e8ed88;backdrop-filter:blur(10px)}
+}
+@media(max-height:490px) and (orientation:landscape){
+ #reborn-shell .rb-touch{display:none}
+ #reborn-shell .rb-top{padding:5px}
+ #reborn-shell .rb-area{display:none}
+ #reborn-shell .rb-minimap{display:none}
+ #reborn-shell .rb-dock{bottom:3px}
+ #reborn-shell .rb-dock-inner{padding:3px}
+ #reborn-shell .rb-intro-content{margin-bottom:22px}
+}
